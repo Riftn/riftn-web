@@ -1,0 +1,710 @@
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react-swc";
+import path from "path";
+import { mcpPlugin } from "@lovable.dev/mcp-js/stacks/supabase/vite";
+import { execSync, execFileSync } from "child_process";
+import { writeFileSync } from "fs";
+
+/**
+ * Serve /war-game/* with `Access-Control-Allow-Origin: *` in dev and preview.
+ *
+ * Production gets this from public/_headers, which Cloudflare applies but which
+ * Vite's own servers ignore entirely. Without it the game is broken locally in
+ * a way that looks nothing like a CORS problem: it runs in a sandboxed iframe
+ * with no allow-same-origin, so the frame has an opaque origin, and its
+ * `<script type="module">` entry is fetched in CORS mode with `Origin: null`.
+ * No matching header comes back, the browser drops the script with no error,
+ * and all anyone sees is a black canvas.
+ *
+ * Keeping dev and production in step here matters more than usual, because the
+ * failure is completely silent and cost several rounds of misdiagnosis.
+ */
+function warGameCorsPlugin() {
+  const cors = (req: any, res: any, next: any) => {
+    if (req.url && req.url.startsWith("/war-game/")) {
+      res.setHeader("Access-Control-Allow-Origin", "*");
+    }
+    next();
+  };
+  return {
+    name: "war-game-cors",
+    configureServer(server: any) {
+      server.middlewares.use(cors);
+    },
+    configurePreviewServer(server: any) {
+      server.middlewares.use(cors);
+    },
+  };
+}
+
+function blogManifestPlugin() {
+  return {
+    name: 'blog-manifest',
+    buildStart() {
+      try {
+        execSync('node scripts/generate-blog-manifest.mjs', { stdio: 'inherit' });
+      } catch (e) {
+        console.warn('[blog-manifest] generation failed', e);
+      }
+      // The crawler copy of the standalone /guides/ pages, rendered from the
+      // React components so the two cannot drift (see the script's header).
+      try {
+        execSync('node scripts/generate-guide-content.mjs', { stdio: 'inherit' });
+      } catch (e) {
+        console.warn('[guide-content] generation failed', e);
+      }
+      // The blog generator replaces guide and docs sitemap rows. Restore the
+      // translated variants and reciprocal links before Vite copies public/.
+      execSync('node scripts/build-seo-i18n.mjs', { stdio: 'inherit' });
+    },
+  };
+}
+
+const GITHUB_REPO = 'https://github.com/Riftn/riftn-web';
+
+/** `git ...` as a plain string, or '' if git isn't there / this isn't a checkout. */
+function git(args: string[]): string {
+  try {
+    // execFileSync, not execSync: no shell means no `%s` mangling in the
+    // --format arguments on Windows, where cmd.exe owns the percent sign.
+    return execFileSync('git', args, { stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim();
+  } catch {
+    return '';
+  }
+}
+
+/**
+ * Identity of the build, as shown by the "new version available" toast.
+ *
+ * GitHub writes a merge commit's SUBJECT as "Merge pull request #N from
+ * owner/branch" and puts the PR *title* in the body — so the readable sentence
+ * and the PR number live in different places, and the subject alone would
+ * surface branch names to users. Squash merges do the opposite and put both in
+ * the subject as "title (#N)". Both shapes are handled; anything else (a direct
+ * commit) keeps its subject and links to the commit instead of a PR.
+ *
+ * Everything here degrades rather than throws. With no sha the toast disables
+ * itself (see lib/version-check), which is the right failure: silence beats a
+ * refresh prompt that can never be satisfied.
+ */
+function resolveBuildVersion() {
+  // Cloudflare Workers Builds exports the sha; git covers local builds and any
+  // CI that doesn't. The message always needs git — if only the env var is
+  // available the toast still works, just without its one-line summary.
+  const sha =
+    process.env.WORKERS_CI_COMMIT_SHA ||
+    process.env.CF_PAGES_COMMIT_SHA ||
+    git(['rev-parse', 'HEAD']);
+  const subject = git(['log', '-1', '--format=%s']);
+  const body = git(['log', '-1', '--format=%b']);
+
+  const merge = subject.match(/^Merge pull request #(\d+)/);
+  const squash = subject.match(/\(#(\d+)\)\s*$/);
+  const pr = (merge && merge[1]) || (squash && squash[1]) || '';
+
+  // Merge commits: first line of the body is the PR title. Fall back to the
+  // subject if a merge was made with an empty body.
+  const headline = merge ? body.split('\n')[0].trim() || subject : subject;
+
+  // The headline is whatever the commit/PR title happened to be, unfiltered —
+  // and tooling that commits straight to main has shipped generic editor
+  // titles before. Those are internal, not for
+  // an end user's toast, so a match blanks the note rather than surfacing it;
+  // NewVersionToast already falls back to its generic copy when note is ''.
+  const clean = !/lovable/i.test(headline);
+
+  return {
+    id: sha.slice(0, 8),
+    // One line in a toast — long commit subjects get clipped rather than
+    // pushing the Refresh button off a phone screen.
+    note: clean ? (headline.length > 140 ? `${headline.slice(0, 139)}…` : headline) : '',
+    url: pr ? `${GITHUB_REPO}/pull/${pr}` : sha ? `${GITHUB_REPO}/commit/${sha}` : '',
+  };
+}
+
+/**
+ * Publishes the build identity two ways so a running tab can tell it has gone
+ * stale: compiled into the bundle as `__BUILD_ID__`, and written to
+ * dist/version.json for the client to poll.
+ *
+ * Only the ID is compiled in. The summary and link belong to whatever build is
+ * live NOW, not to the one the user happens to be running, so they are read
+ * from the fetched manifest instead.
+ */
+function buildVersionPlugin() {
+  const version = resolveBuildVersion();
+  return {
+    name: 'build-version',
+    config() {
+      if (!version.id) {
+        console.warn('[build-version] no commit sha resolved — the update toast stays off for this build');
+      }
+      return { define: { __BUILD_ID__: JSON.stringify(version.id) } };
+    },
+    // writeBundle, not emitFile: dist/ is already on disk here, and this keeps
+    // the plugin off Rollup's typed context (see scripts/check-entry-bundle.mjs
+    // for the same post-build-on-disk approach).
+    writeBundle(options: { dir?: string }) {
+      const outDir = options.dir || path.resolve(__dirname, 'dist');
+      writeFileSync(path.join(outDir, 'version.json'), JSON.stringify(version));
+      console.log(`[build-version] ${version.id || '(none)'} — ${version.note || '(no message)'}`);
+    },
+  };
+}
+
+
+/**
+ * Every route's first paint waits on the WalletProviders chunk (it wraps the
+ * whole tree), but its download only starts after the entry bundle has
+ * downloaded AND executed (the module-eval dynamic-import kick in App.tsx).
+ * Inject modulepreload links for the wallet chunk graph into index.html so the
+ * browser fetches it in parallel with the entry instead of serialized after
+ * it. modulepreload fetches at script priority by default — fetchpriority=low
+ * is set explicitly so the wallet graph yields bandwidth to the entry bundle
+ * and LCP media on slow connections.
+ */
+function preloadWalletChunkPlugin() {
+  return {
+    name: 'preload-wallet-chunk',
+    apply: 'build' as const,
+    transformIndexHtml: {
+      order: 'post' as const,
+      handler(html: string, ctx: { bundle?: Record<string, any> }) {
+        const bundle = ctx.bundle;
+        if (!bundle) return html;
+        const seen = new Set<string>();
+        const collect = (fileName: string) => {
+          if (seen.has(fileName)) return;
+          seen.add(fileName);
+          const chunk = bundle[fileName];
+          if (chunk && chunk.type === 'chunk') {
+            for (const imp of chunk.imports as string[]) collect(imp);
+          }
+        };
+        for (const [fileName, chunk] of Object.entries(bundle)) {
+          if (
+            (chunk as any).type === 'chunk' &&
+            (chunk as any).facadeModuleId?.replace(/\\/g, '/').endsWith('components/app/WalletProviders.tsx')
+          ) {
+            collect(fileName);
+          }
+        }
+        if (seen.size === 0) {
+          console.warn('[preload-wallet-chunk] WalletProviders chunk not found — no links injected');
+          return html;
+        }
+
+        // One part of this graph is worth fetching ahead for nobody: RainbowKit’s
+        // connect-modal UI. `WalletButton.Custom` in LoginModal is RainbowKit’s only
+        // consumer in the whole of src — there is no useConnectModal, ConnectButton
+        // or useAccountModal anywhere — so the modal itself never opens, yet Rollup
+        // merges its shared UI into whichever chunk the graph reaches first. That is
+        // the en_US locale entry, which builds at 266 KB against 37-65 KB for every
+        // other locale. The difference is the modal. Dropping the link costs one
+        // fetch on the first sign-in and saves every visitor 266 KB of boot
+        // bandwidth.
+        //
+        // Matched on the emitted filename, which is the one part of this observable
+        // from outside the build: RainbowKit names its locale chunks after the
+        // locale, and only the trailing hash moves on an upgrade
+        // (en_US-Y4ZOVFV4-<vite hash>). Nothing in src builds to a chunk named for
+        // a locale, so the pattern is ours alone.
+        //
+        // #413 matched on chunk.modules instead — every module in the chunk having
+        // come from RainbowKit — and skipped nothing at all on the real build, which
+        // is only visible in a Cloudflare build log nobody here can read. A rule
+        // that can be checked against the deployed HTML is worth more than a
+        // tidier one that cannot.
+        const LOCALE_CHUNK = /^assets\/[a-z]{2}_[A-Za-z0-9]{2,4}-/;
+        const RAINBOWKIT_UI_MIN_BYTES = 100 * 1024;
+        const isRainbowKitUiChunk = (fileName: string) => {
+          if (!LOCALE_CHUNK.test(fileName)) return false;
+          const chunk = bundle[fileName];
+          if (!chunk || chunk.type !== 'chunk') return false;
+          // Size floor so a genuinely small locale chunk keeps its prefetch — it is
+          // the merged modal UI that makes this one 266 KB, not the strings.
+          return (chunk.code?.length ?? 0) >= RAINBOWKIT_UI_MIN_BYTES;
+        };
+
+        const skipped = [...seen].filter(isRainbowKitUiChunk);
+        for (const f of skipped) seen.delete(f);
+        if (skipped.length === 0) {
+          // Not fatal — the day the barrel import in lib/wagmi.ts stops dragging the
+          // modal in, this correctly matches nothing. Worth saying out loud either
+          // way, so a silent return of the 266 KB is visible in the build log.
+          console.warn('[preload-wallet-chunk] no RainbowKit UI chunk matched — check whether the connect-modal UI is being prefetched again');
+        }
+        // Shared dependencies already have Vite's normal-priority preload.
+        // The entry gets its preload from startEntryAfterFirstPaintPlugin.
+        // Keep those hints and add only the wallet graph's missing files.
+        const alreadyRequested = new Set<string>();
+        for (const tag of html.matchAll(/<(?:link|script)\b[^>]*>/g)) {
+          if (!/\brel="modulepreload"|\btype="module"/.test(tag[0])) continue;
+          const asset = tag[0].match(/\b(?:href|src)="\/([^"]+)"/);
+          if (asset) alreadyRequested.add(asset[1]);
+        }
+        const duplicates = [...seen].filter(f => alreadyRequested.has(f));
+        for (const f of duplicates) seen.delete(f);
+
+        // data-prefetch-only: tells scripts/check-entry-bundle.mjs these are
+        // fetch-ahead hints, NOT eagerly-executed modules — the wallet code
+        // still only runs when the React.lazy boundary resolves.
+        const links = [...seen]
+          .map((f) => `<link rel="modulepreload" data-prefetch-only fetchpriority="low" crossorigin href="/${f}">`)
+          .join('\n    ');
+        console.log(
+          `[preload-wallet-chunk] injected ${seen.size} modulepreload links` +
+            `, kept ${duplicates.length} existing startup hints` +
+            (skipped.length ? `, skipped ${skipped.length} RainbowKit UI chunk(s): ${skipped.join(', ')}` : ''),
+        );
+        return html.replace('</head>', `  ${links}\n  </head>`);
+      },
+    },
+  };
+}
+
+/**
+ * A post link needs three sets of code before its post is on screen: the app,
+ * the post page, and for a live the player and its chat. Each used to be asked
+ * for only once the one before it had arrived and run, so they came down one
+ * after another: the post page ~0.8 s after the app, the player after that.
+ *
+ * This hands the first inline script of index.html the file lists, so on a
+ * post link it can ask for the post page at once, and for the player the
+ * moment the post's own answer says it is a live. The lists replace the
+ * "__POST_LINK_CODE__" marker in that script:
+ *
+ *   r  the post page and everything it imports
+ *   l  the live player and live chat, less what the post page already has
+ *
+ * Nothing here is executed early, and nothing is fetched that the page would
+ * not fetch anyway a moment later.
+ */
+function postLinkCodePlugin() {
+  const MARKER = '"__POST_LINK_CODE__"';
+  const CHAT_MARKER = '"__CHAT_LINK_CODE__"';
+  const APP_LAYOUT_MARKER = '"__APP_LAYOUT_CODE__"';
+  return {
+    name: 'post-link-code',
+    apply: 'build' as const,
+    transformIndexHtml: {
+      order: 'post' as const,
+      handler(html: string, ctx: { bundle?: Record<string, any> }) {
+        const bundle = ctx.bundle;
+        if (!bundle) return html;
+        if (!html.includes(MARKER)) {
+          console.warn('[post-link-code] marker not found in index.html: post links load their code in turn again');
+          return html;
+        }
+
+        // The chunk a source file was built into. A file other code imports
+        // statically too (the live player is one) has no chunk named for it
+        // as an entry, so fall back to whichever chunk holds the module.
+        const chunkOf = (suffix: string): string | undefined => {
+          let holder: string | undefined;
+          for (const [fileName, chunk] of Object.entries(bundle)) {
+            if (chunk.type !== 'chunk') continue;
+            const facade = chunk.facadeModuleId?.replace(/\\/g, '/');
+            if (facade?.endsWith(suffix)) return fileName;
+            if (!holder && (chunk.moduleIds as string[] | undefined)?.some((id) => id.replace(/\\/g, '/').endsWith(suffix))) {
+              holder = fileName;
+            }
+          }
+          return holder;
+        };
+        /** A chunk, what it imports, and the stylesheets those carry. */
+        const closure = (roots: Array<string | undefined>, skip: Set<string>): string[] => {
+          const seen = new Set<string>();
+          const out: string[] = [];
+          const visit = (fileName: string) => {
+            if (seen.has(fileName)) return;
+            seen.add(fileName);
+            const chunk = bundle[fileName];
+            if (!chunk || chunk.type !== 'chunk') return;
+            if (!skip.has(fileName)) out.push(fileName);
+            for (const css of chunk.viteMetadata?.importedCss ?? []) {
+              if (!seen.has(css) && !skip.has(css)) out.push(css);
+              seen.add(css);
+            }
+            for (const imp of chunk.imports as string[]) visit(imp);
+          };
+          for (const root of roots) if (root) visit(root);
+          return out;
+        };
+
+        // What index.html already asks for: the app's own chunks and
+        // stylesheet, and the wallet closure.
+        const linked = new Set<string>();
+        for (const tag of html.matchAll(/<(?:link|script)\b[^>]*>/g)) {
+          const asset = tag[0].match(/\b(?:href|src)="\/(assets\/[^"]+)"/);
+          if (asset) linked.add(asset[1]);
+        }
+
+        const postPage = chunkOf('pages/app/SinglePostPage.tsx');
+        const player = chunkOf('components/app/cards/LiveStreamCard.tsx');
+        const chat = chunkOf('components/app/cards/LivePostChat.tsx');
+        const fullScreenChat = chunkOf('pages/app/FullScreenChatPage.tsx');
+        const appLayout = chunkOf('components/app/AppLayout.tsx');
+        html = html.replace(CHAT_MARKER, () => JSON.stringify(closure([fullScreenChat], linked)))
+          .replace(APP_LAYOUT_MARKER, () => JSON.stringify(closure([appLayout], linked)));
+        if (!postPage || !player || !chat) {
+          console.warn(
+            `[post-link-code] chunk not found (post page ${postPage}, player ${player}, chat ${chat}): ` +
+              'post links load their code in turn again',
+          );
+          return html;
+        }
+        const route = closure([postPage], linked);
+        const live = closure([player, chat], new Set([...linked, ...route]));
+
+        const kb = (files: string[]) =>
+          Math.round(
+            files.reduce((sum, f) => {
+              const item = bundle[f];
+              return sum + (item?.code?.length ?? item?.source?.length ?? 0);
+            }, 0) / 1024,
+          );
+        console.log(
+          `[post-link-code] post page ${route.length} files ${kb(route)} KB, ` +
+            `live player and chat ${live.length} files ${kb(live)} KB`,
+        );
+        return html.replace(MARKER, () => JSON.stringify({ r: route, l: live }));
+      },
+    },
+  };
+}
+
+/**
+ * Prerender the signed-out welcome panel into index.html.
+ *
+ * The panel is the home page's LCP element and used to be painted only once the
+ * entry chunk had downloaded and run. scripts/build-home-intro-html.mjs renders
+ * the real component (home-intro/HomeIntroPanel.tsx) to static HTML; it goes
+ * into the boot skeleton's slot so the plate is on screen from the first HTML
+ * paint, and React's first render replaces it with identical DOM. The inline
+ * boot script hides it (data-home-intro="off") under the same conditions
+ * HomeIntro itself would not render: off the root route, signed in, dismissed.
+ *
+ * Fails soft: any error keeps the grey skeleton card and warns, so a broken
+ * prerender degrades the first paint rather than the build. If the panel is
+ * missing from a deploy, look for this warning in the build log.
+ */
+function prerenderHomeIntroPlugin() {
+  const slot = '<div class="bskel-card" data-home-intro-slot></div>';
+  return {
+    name: 'prerender-home-intro',
+    apply: 'build' as const,
+    transformIndexHtml: {
+      order: 'pre' as const,
+      handler(html: string) {
+        if (!html.includes(slot)) {
+          console.warn('[prerender-home-intro] slot not found in index.html — panel not prerendered');
+          return html;
+        }
+        try {
+          const markup = execFileSync(process.execPath, ['scripts/build-home-intro-html.mjs'], {
+            encoding: 'utf8',
+            stdio: ['ignore', 'pipe', 'inherit'],
+            maxBuffer: 8 * 1024 * 1024,
+          });
+          if (!markup.includes('dehub-intro')) throw new Error('no panel markup in output');
+          console.log(`[prerender-home-intro] injected ${(markup.length / 1024).toFixed(1)} KB of welcome-panel HTML`);
+          // The trailing marker lets index.html keep the panel unpainted until
+          // the parser has reached its end (see [data-intro-done] there).
+          return html.replace(slot, () => `<!--home-intro-start--><div data-prerendered-intro>${markup}<i data-intro-done hidden></i></div><!--home-intro-end-->`);
+        } catch (e) {
+          console.warn('[prerender-home-intro] failed — keeping the skeleton card', e);
+          return html;
+        }
+      },
+    },
+  };
+}
+
+/**
+ * First paint from the HTML alone.
+ *
+ * The main stylesheet (~130 KB compressed) was render-blocking, so the boot
+ * skeleton and the prerendered welcome card, both already in index.html,
+ * waited on it. The rules those two need (scripts/critical-css.mjs, ~11 KB
+ * compressed) are inlined in its place and the full sheet loads after the
+ * first frame: that frame is drawn from the document itself.
+ * (PSI's test machine also draws nothing for ~2.4 s on any page with a
+ * blocking external stylesheet, ours or anyone's, and paints at once without.)
+ *
+ * Only for the look the inlined rules were picked for: a new visitor, System
+ * theme, dark tone, default settings. Anything else (a saved theme, dimmed
+ * lights, line separators, an OBS overlay) keeps the blocking stylesheet,
+ * written by the same inline script, so nobody ever sees a restyle.
+ *
+ * window.__mainCss() starts the full sheet and resolves when it has applied.
+ * The entry starter below calls it once the first frame is on screen and
+ * waits for it, so the app never renders against partial CSS. It is not even
+ * requested before that frame: Lighthouse bills to FCP and LCP whatever
+ * finished downloading before the paint, and on its test machine the first
+ * frame comes late enough that a preloaded sheet always had.
+ */
+function inlineCriticalCssPlugin() {
+  return {
+    name: 'inline-critical-css',
+    apply: 'build' as const,
+    transformIndexHtml: {
+      order: 'post' as const,
+      async handler(html: string, ctx: { bundle?: Record<string, { type: string; fileName: string; source?: string | Uint8Array }> }) {
+        const tag = /<link rel="stylesheet" crossorigin href="(\/assets\/index-[^"]+\.css)">/;
+        const m = html.match(tag);
+        const asset = m && ctx.bundle?.[m[1].slice(1)];
+        if (!m || !asset || asset.type !== 'asset' || asset.source == null) {
+          console.warn('[inline-critical-css] main stylesheet not found; leaving it render-blocking');
+          return html;
+        }
+        try {
+          // @ts-expect-error plain .mjs build script, no types
+          const { extractCriticalCss } = await import('./scripts/critical-css.mjs');
+          const css = typeof asset.source === 'string' ? asset.source : Buffer.from(asset.source).toString('utf8');
+          const critical: string = await extractCriticalCss(html, css);
+          if (critical.includes('</style')) throw new Error('critical CSS contains a closing style tag');
+          const href = m[1];
+          const loader = [
+            `<style data-critical>${critical}</style>`,
+            '<script>(function(){var d=document,s=d.documentElement.dataset,h=' + JSON.stringify(href) + ',p;',
+            'if(s.theme==="system"&&s.systemTone==="dark"&&s.shortsEnabled==="true"&&s.sidebarCollapsed==="false"&&s.dimLights==="false"&&!("feedSep" in s)&&!("chatOwnBubble" in s)&&!("obsOverlay" in s)){',
+            'window.__mainCss=function(){if(p)return p;var l=d.createElement("link"),c=d.querySelector("style[data-critical]");l.rel="stylesheet";l.crossOrigin="";l.href=h;l.setAttribute("data-main-css","");',
+            'p=new Promise(function(r){l.onload=l.onerror=r;});if(c)c.insertAdjacentElement("afterend",l);else d.head.appendChild(l);return p;};}',
+            `else{d.write('<link rel="stylesheet" crossorigin href="'+h+'">');}})();</script>`,
+            `<noscript><link rel="stylesheet" crossorigin href="${href}"></noscript>`,
+          ].join('');
+          console.log(`[inline-critical-css] ${Math.round(css.length / 1024)} KB stylesheet, ${Math.round(critical.length / 1024)} KB inlined for the first frame`);
+          return html.replace(tag, () => loader);
+        } catch (e) {
+          console.warn('[inline-critical-css] failed; leaving the stylesheet render-blocking', e);
+          return html;
+        }
+      },
+    },
+  };
+}
+
+/**
+ * Let the first frame paint before the entry chunk runs.
+ *
+ * Vite emits `<script type="module" src=entry>`. A module script is deferred,
+ * so it runs the moment parsing ends — and this document parses in a few ms.
+ * On a fast connection the entry (≈530 KB compressed) is often in hand before
+ * the render-blocking stylesheet has resolved, so the browser's first chance to
+ * paint arrives with the entry already queued: it evaluates the bundle and
+ * React's first render BEFORE painting anything, including the welcome panel
+ * that index.html now carries prerendered precisely so it can paint first.
+ * Lighthouse (which models from an unthrottled trace) then reports a first
+ * paint of 6 s on a phone with the panel sitting in the HTML the whole time.
+ *
+ * This swaps the tag for an inline starter that fetches and import()s the
+ * entry only once the first frame is on screen (the browser's own first-paint
+ * entry; where that is not reported, the frame after the first one).
+ *
+ * Nothing of the app is even downloaded before that paint. An early
+ * modulepreload looked free, but on a one or two core phone (and on PSI's
+ * test machine) compiling 2.3 MB off the main thread starved the compositor:
+ * the main thread sat idle for 600 ms with no frame, then the entry ran and
+ * the frame waited on it again (first paint 2.4 s for a card that is in the
+ * HTML). Lighthouse also bills every script that finished before the LCP
+ * paint to LCP, so the early download alone put its simulated LCP near 11 s.
+ * A background tab never gets a frame, so a 4 s timer and a visibility
+ * listener start it there. The user-timing marks entry-start:paint|frame|timer
+ * and first-raf show which path ran in a Lighthouse report.
+ * import() of the same module twice is one evaluation, so both paths are safe.
+ *
+ * scripts/check-entry-bundle.mjs finds the entry through the data-entry link.
+ */
+function startEntryAfterFirstPaintPlugin() {
+  return {
+    name: 'start-entry-after-first-paint',
+    apply: 'build' as const,
+    transformIndexHtml: {
+      order: 'post' as const,
+      handler(html: string) {
+        const tag = /<script type="module" crossorigin src="(\/assets\/index-[^"]+\.js)"><\/script>/;
+        const m = html.match(tag);
+        if (!m) {
+          console.warn('[start-entry-after-first-paint] entry <script> not found — leaving index.html as Vite wrote it');
+          return html;
+        }
+        const entry = m[1];
+        // Every modulepreload (the entry's vendor chunks and the low-priority
+        // wallet set) moves into an inert <template>: nothing in it is fetched
+        // or compiled until the starter copies it into <head>. The tags keep
+        // their exact text, so the build checks that read them still do.
+        const preloads: string[] = [];
+        let out = html.replace(/[ \t]*<link\b[^>]*\brel="modulepreload"[^>]*>\n?/g, (tag) => { preloads.push(tag.trim()); return ''; });
+        const starter = [
+          `<template id="boot-preloads"><link rel="modulepreload" data-entry crossorigin href="${entry}">${preloads.join('')}</template>`,
+          '<script>(function(){var s=0,d=document,e=' + JSON.stringify(entry) + ';',
+          'function mark(n){try{performance.mark(n);}catch(x){}}',
+          'mark("boot-vis:"+d.visibilityState);',
+          'function add(q){var t=d.getElementById("boot-preloads");if(!t||!t.content)return;var l=t.content.querySelectorAll(q);for(var i=0;i<l.length;i++)d.head.appendChild(l[i].cloneNode(true));}',
+          'function go(r){if(s)return;s=1;mark("entry-start:"+r);add("link:not([data-prefetch-only])");if(window.__preloadRouteCode)window.__preloadRouteCode();',
+          'var c=window.__mainCss;function run(){import(e).then(function(){setTimeout(function(){add("link[data-prefetch-only]");},1500);},function(){});}',
+          'if(c)c().then(run);else run();}',
+          'function afterPaint(){var p=0,sup=0;function f(r){if(p)return;p=1;setTimeout(function(){go(r);},0);}',
+          'try{sup=PerformanceObserver.supportedEntryTypes.indexOf("paint")>=0;if(sup)new PerformanceObserver(function(l,o){o.disconnect();f("paint");}).observe({type:"paint",buffered:true});}catch(x){sup=0;}',
+          'requestAnimationFrame(function(){mark("first-raf");if(sup)setTimeout(function(){f("frame");},1000);else requestAnimationFrame(function(){f("frame");});});}',
+          'if(d.visibilityState==="hidden"){d.addEventListener("visibilitychange",function v(){if(d.visibilityState==="visible"){d.removeEventListener("visibilitychange",v);afterPaint();}});}',
+          'else{afterPaint();}',
+          'setTimeout(function(){go("timer");},4000);})();</script>',
+        ].join('');
+        console.log(`[start-entry-after-first-paint] ${entry} now starts after the first frame`);
+        return out.replace(tag, starter);
+      },
+    },
+  };
+}
+
+// https://vitejs.dev/config/
+export default defineConfig(({ mode }) => ({
+  server: {
+    host: "::",
+    // 8080 stays the default so nothing about the normal `npm run dev` changes.
+    // Honouring PORT lets a second checkout run alongside the first instead of
+    // failing on a busy port.
+    port: Number(process.env.PORT) || 8080,
+    headers: {
+      "Cross-Origin-Opener-Policy": "same-origin-allow-popups",
+      "Cross-Origin-Embedder-Policy": "unsafe-none",
+    },
+  },
+  preview: {
+    headers: {
+      "Cross-Origin-Opener-Policy": "same-origin-allow-popups",
+      "Cross-Origin-Embedder-Policy": "unsafe-none",
+    },
+  },
+  plugins: [
+    react(),
+    blogManifestPlugin(),
+    buildVersionPlugin(),
+    preloadWalletChunkPlugin(),
+    postLinkCodePlugin(),
+    prerenderHomeIntroPlugin(),
+    inlineCriticalCssPlugin(),
+    startEntryAfterFirstPaintPlugin(),
+    warGameCorsPlugin(),
+    mcpPlugin(),
+  ].filter(Boolean),
+
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
+    },
+    dedupe: [
+      "@web3auth/modal",
+      "@web3auth/no-modal",
+      "@web3auth/account-abstraction-provider",
+      "@toruslabs/base-controllers",
+      "@toruslabs/ethereum-controllers",
+      "permissionless",
+      "viem",
+      "@wagmi/core",
+      "@wagmi/connectors",
+      "@metamask/sdk",
+      "@rainbow-me/rainbowkit",
+    ],
+  },
+  define: {
+    global: 'globalThis',
+  },
+  // Emit JSON modules as JSON.parse("...") rather than object literals. The
+  // eager en.json is ~316KB and a string parses far faster than the same
+  // object as JS. Only default imports of JSON work under this setting.
+  json: {
+    stringify: true,
+  },
+  // Strip console.log/debug from production output (289 call sites, several in
+  // per-message/per-scroll hot paths like dm-socket + AuthProvider). `pure`
+  // drops only the listed calls — console.warn/error survive for diagnostics.
+  esbuild: mode === 'development' ? undefined : {
+    pure: ['console.log', 'console.debug'],
+  },
+  build: {
+    target: ['es2020', 'safari14'],
+    // Gzip-size reporting over this many chunks exhausted the build heap.
+    reportCompressedSize: false,
+    // Several WebP icons in src/assets/icons are under the 4 KB default and
+    // would be inlined as data: URIs. BrandIcon and WarHudIcon pick the themed
+    // replacement by matching the file name in the URL, which a data: URI no
+    // longer carries, so keep them as files. The small badge stills stay files
+    // too: a screen fetches only its own density. Everything else keeps the default.
+    assetsInlineLimit: (filePath: string) =>
+      /[\\/]src[\\/]assets[\\/](icons|badges[\\/]small)[\\/][^\\/]+\.webp$/.test(filePath) ? false : undefined,
+    chunkSizeWarningLimit: 1500,
+    rollupOptions: {
+      output: {
+        // Vite 8 bundles with Rolldown, which (unlike Rollup under Vite 5) does
+        // not fold modules shared between the entry and lazy routes back into
+        // the entry. Left on its own it split the boot path into ~280 chunks,
+        // 200 of them under 5 KB, every one a modulepreload the phone fetches
+        // and evaluates before first paint: first paint went 4.7-5.7 s ->
+        // 6.8-7.0 s on Lighthouse's phone profile after the upgrade (#1901).
+        // The 'boot' group gathers everything on the initial (static) path that
+        // no vendor group claims into one chunk. Lazy-only modules carry no
+        // $initial tag, so routes, the wallet stack and theme extras stay split.
+        codeSplitting: {
+          groups: [
+            { name: vendorChunkName, debugName: 'vendor', priority: 10 },
+            { name: 'boot', tags: ['$initial'], priority: 1 },
+          ],
+        },
+      },
+    },
+  },
+}));
+
+// Named vendor chunks (was output.manualChunks, which Rolldown ignores once
+// codeSplitting is set).
+function vendorChunkName(id: string): string | null {
+  // Shared icon modules otherwise create a separate request per icon.
+  // Keep the used Lucide exports together; tree shaking still drops
+  // unused icons before this chunk is emitted.
+  if (id.includes('/node_modules/lucide-react/')) {
+    return 'vendor-icons';
+  }
+  // Three.js — only used by lazy theme backgrounds / landing hero.
+  // Match ONLY the npm package: a broader '/three/' also catches
+  // src/lib/three/*, whose shared imports (e.g. lib/theme-color.ts)
+  // Rollup then hoists INTO vendor-three — making the entry chunk
+  // statically depend on it and download three.js at boot.
+  if (id.includes('node_modules/three/') || id.includes('/three@')) {
+    return 'vendor-three';
+  }
+  // NOTE: wagmi / viem / rainbowkit / web3auth are NOT manually chunked here.
+  // They have deep internal circular deps that Rollup cannot safely reorder when
+  // forced into a named chunk — results in TDZ "Cannot access before initialization".
+  // WalletProviders React.lazy() already moves them into an async chunk naturally.
+  // Framer Motion — animation library
+  if (id.includes('framer-motion')) {
+    return 'vendor-animation';
+  }
+  // Radix UI is deliberately NOT grouped: one named chunk made every
+  // primitive (menus, dialogs, sliders used by one lazy page) an eager
+  // boot download. Left alone, Rollup keeps each with its importers.
+  // React core. Anchored on /node_modules/<pkg>/ on purpose: a bare
+  // '/react/' also matched @xyflow/react, zustand/react, valtio/react
+  // and @lit/react, so the whole React Flow canvas (plus its d3-zoom,
+  // d3-drag and d3-interpolate) shipped inside the eagerly preloaded
+  // React chunk for every visitor, and Lighthouse traced d3's transform
+  // parser forcing layout at boot. The chunk is meant to be React, the
+  // DOM renderer, the scheduler and the router — nothing else.
+  if (
+    id.includes('/node_modules/react/') ||
+    id.includes('/node_modules/react-dom/') ||
+    id.includes('/node_modules/scheduler/') ||
+    id.includes('/node_modules/react-router/') ||
+    id.includes('/node_modules/react-router-dom/')
+  ) {
+    return 'vendor-react';
+  }
+  // Supabase client
+  if (id.includes('@supabase/')) {
+    return 'vendor-supabase';
+  }
+  return null;
+}

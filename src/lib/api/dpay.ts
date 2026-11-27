@@ -1,0 +1,910 @@
+/**
+ * Riftn Payment (DPay) API Integration
+ * =====================================
+ * Handles fiat onramp, token purchases, and payment processing.
+ */
+
+import { rejectCardPayment } from './card-payment';
+import { DHB_SALES_PAUSED, DHB_SALES_PAUSED_MESSAGE } from '@/lib/dhb-sales';
+import { getAuthToken } from './dehub';
+import { API_ORIGIN } from '@/lib/api/api-origin';
+
+const DEHUB_API_BASE = API_ORIGIN;
+
+// Types
+export interface DPayToken {
+  symbol: string;
+  name: string;
+  logoUrl?: string;
+  chainId?: number;
+  address?: string;
+  decimals?: number;
+  balance?: number;
+}
+
+export interface DPayPrice {
+  price: number;
+  change24h?: number;
+  currency: string;
+}
+
+export interface DPayTransaction {
+  id: string;
+  type: 'buy' | 'sell' | 'transfer';
+  amount: number;
+  tokenReceived?: number;
+  approxTokensToReceive?: string;
+  tokenSymbol: string;
+  status: 'pending' | 'completed' | 'failed' | 'expired';
+  failureReason?: string;
+  createdAt: string;
+  txHash?: string;
+  chainId?: number;
+  receiverAddress?: string;
+  currency?: string;
+}
+
+/** Post-purchase polling: status by session ID (GET /dpay/tnxs?sid=...) */
+export interface DPaySessionStatus {
+  status_stripe?: 'pending' | 'succeeded' | 'failed' | 'canceled' | 'expired';
+  tokenSendStatus?: 'pending' | 'sent' | 'sending' | 'queued' | 'failed' | 'not_sent';
+  tokenSendTxnHash?: string;
+  _empty?: boolean;
+  [key: string]: unknown;
+}
+
+function isExpiredStripeSession(tx: { status_stripe?: string; stripe_hooks?: unknown }): boolean {
+  return tx.status_stripe === 'expired' || (
+    tx.status_stripe === 'failed' && Array.isArray(tx.stripe_hooks) &&
+    tx.stripe_hooks.some((hook: unknown) =>
+      !!hook && typeof hook === 'object' && 'checkout.session.expired' in hook
+    )
+  );
+}
+
+export interface OnrampSessionRequest {
+  amount: number;
+  currency: string;
+  tokenSymbol: string;
+  walletAddress: string;
+  chainId?: number;
+}
+
+export interface OnrampSessionResponse {
+  sessionId: string;
+  url?: string;
+  expiresAt?: string;
+}
+
+/**
+ * Get DHB token price
+ */
+export async function getDPayPrice(): Promise<DPayPrice> {
+  console.log('[DPay API] Fetching price...');
+  
+  try {
+    const response = await fetch(`${DEHUB_API_BASE}/api/dpay/price`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch price: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log('[DPay API] Price response:', data);
+    
+    // Handle various response formats
+    if (data?.result) {
+      return {
+        price: data.result.price || data.result,
+        change24h: data.result.change24h,
+        currency: data.result.currency || 'USD',
+      };
+    }
+    
+    if (typeof data?.price === 'number') {
+      return {
+        price: data.price,
+        change24h: data.change24h,
+        currency: data.currency || 'USD',
+      };
+    }
+
+    // If response is just a number
+    if (typeof data === 'number') {
+      return { price: data, currency: 'USD' };
+    }
+
+    return { price: 0, currency: 'USD' };
+  } catch (error) {
+    console.error('[DPay API] Error fetching price:', error);
+    throw error;
+  }
+}
+
+/**
+ * Get price for a specific chain
+ */
+export async function getDPayPriceByChain(chainId: number): Promise<DPayPrice> {
+  console.log('[DPay API] Fetching price for chain:', chainId);
+  
+  try {
+    const response = await fetch(`${DEHUB_API_BASE}/api/dpay/price/${chainId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch price: ${response.status}`);
+    }
+
+    const data = await response.json();
+    
+    if (data?.result) {
+      return {
+        price: data.result.price || data.result,
+        change24h: data.result.change24h,
+        currency: data.result.currency || 'USD',
+      };
+    }
+
+    return { price: data?.price || 0, currency: 'USD' };
+  } catch (error) {
+    console.error('[DPay API] Error fetching chain price:', error);
+    throw error;
+  }
+}
+
+/**
+ * Get available tokens for purchase
+ */
+export async function getAvailableTokens(): Promise<DPayToken[]> {
+  console.log('[DPay API] Fetching available tokens...');
+
+  try {
+    const response = await fetch(`${DEHUB_API_BASE}/api/dpay/available/tokens`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch tokens: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log('[DPay API] Tokens response:', data);
+
+    // New shape: { balance: { [chainId]: { [symbol]: amount } } }
+    if (data && typeof data === 'object' && 'balance' in data) {
+      const tokens: DPayToken[] = [];
+      const balance = data.balance as Record<string, Record<string, number>>;
+      for (const [chainId, symbols] of Object.entries(balance)) {
+        for (const [symbol, amount] of Object.entries(symbols)) {
+          tokens.push({
+            symbol,
+            name: symbol,
+            chainId: Number(chainId),
+            decimals: 18,
+            balance: amount,
+          });
+        }
+      }
+      return tokens.length > 0 ? tokens : [{ symbol: 'DHB', name: 'Riftn Token', decimals: 18 }];
+    }
+
+    // Handle legacy response formats
+    const tokens = data?.result || data?.tokens || data || [];
+
+    if (Array.isArray(tokens)) {
+      return tokens.map((t: any) => ({
+        symbol: t.symbol || t.ticker || 'UNKNOWN',
+        name: t.name || t.symbol || 'Unknown Token',
+        logoUrl: t.logoUrl || t.logo || t.image,
+        chainId: t.chainId,
+        address: t.address || t.tokenAddress,
+        decimals: t.decimals || 18,
+      }));
+    }
+
+    // Default to DHB if API returns nothing useful
+    return [{
+      symbol: 'DHB',
+      name: 'Riftn Token',
+      decimals: 18,
+    }];
+  } catch (error) {
+    console.error('[DPay API] Error fetching tokens:', error);
+    // Return default token on error
+    return [{
+      symbol: 'DHB',
+      name: 'Riftn Token',
+      decimals: 18,
+    }];
+  }
+}
+
+/**
+ * Get available token supply for a specific token.
+ * Call this before createCheckoutSession to prevent 406 "exceeds available supply" errors.
+ * Uses /api/dpay/available/tokens?token=<symbol> which returns { balance: {...} }.
+ *
+ * Pass `chainId` whenever the buyer has picked one. The gateway checks supply
+ * per chain, so summing every chain's float — which is what the nested branch
+ * below does without it — waves through a purchase the checkout then 406s.
+ */
+export async function getTokenAvailableSupply(tokenSymbol: string, chainId?: number): Promise<number> {
+  if (DHB_SALES_PAUSED) return 0;
+  console.log('[DPay API] Checking available supply for:', tokenSymbol, chainId ?? '(all chains)');
+  try {
+    const response = await fetch(
+      `${DEHUB_API_BASE}/api/dpay/available/tokens?token=${encodeURIComponent(tokenSymbol)}`,
+      { method: 'GET', headers: { 'Content-Type': 'application/json' } }
+    );
+
+    if (!response.ok) {
+      // Don't block purchase on supply fetch failure — let the checkout API decide
+      return Infinity;
+    }
+
+    const data = await response.json();
+    console.log('[DPay API] Supply response:', data);
+
+    const balance = data?.balance ?? data?.result ?? data;
+
+    // { balance: 12345 }
+    if (typeof balance === 'number') return balance;
+
+    // { balance: { available: 12345 } }
+    if (typeof balance?.available === 'number') return balance.available;
+
+    // { balance: { total: 12345 } }
+    if (typeof balance?.total === 'number') return balance.total;
+
+    // { balance: { DHB: 12345 } } or { balance: { dhb: 12345 } }
+    const bySymbol = balance?.[tokenSymbol] ?? balance?.[tokenSymbol.toUpperCase()] ?? balance?.[tokenSymbol.toLowerCase()];
+    if (typeof bySymbol === 'number') return bySymbol;
+    if (typeof bySymbol?.available === 'number') return bySymbol.available;
+
+    // Nested chain structure: { balance: { "8453": { "DHB": 12345 }, "56": { "DHB": 500 } } }
+    if (typeof balance === 'object' && balance !== null) {
+      // A chain was named: answer for that chain only, and treat a chain the
+      // gateway does not list as empty rather than falling through to the
+      // cross-chain total.
+      if (chainId !== undefined) {
+        const forChain = (balance as Record<string, unknown>)[String(chainId)];
+        if (typeof forChain === 'object' && forChain !== null) {
+          const sym = (forChain as Record<string, number>)[tokenSymbol]
+            ?? (forChain as Record<string, number>)[tokenSymbol.toUpperCase()];
+          return typeof sym === 'number' ? sym : 0;
+        }
+        return 0;
+      }
+
+      let totalSupply = 0;
+      let found = false;
+      for (const chainValues of Object.values(balance)) {
+        if (typeof chainValues === 'object' && chainValues !== null) {
+          const sym = (chainValues as Record<string, number>)[tokenSymbol] 
+            ?? (chainValues as Record<string, number>)[tokenSymbol.toUpperCase()];
+          if (typeof sym === 'number') {
+            totalSupply += sym;
+            found = true;
+          }
+        }
+      }
+      if (found) return totalSupply;
+    }
+
+    return Infinity;
+  } catch {
+    return Infinity; // On network error, don't block — let the checkout API decide
+  }
+}
+
+/**
+ * The signed-in buyer's staking-badge discount on the gateway.
+ *
+ * Served rather than derived. The badge balance the UI renders from is
+ * deliberately optimistic — `useSelfBadge` takes the higher of the server's
+ * figure and a live wallet read, so it can promote a tier the gateway has
+ * not seen yet — and quoting a discount the checkout would not honour is
+ * worse than quoting none. A failure here means list price, never a blocked
+ * purchase.
+ */
+export async function getBadgeDiscount(): Promise<{ tier: string | null; rate: number; badgeBalance: number }> {
+  const none = { tier: null, rate: 0, badgeBalance: 0 };
+  const token = getAuthToken();
+  if (!token) return none;
+
+  try {
+    const response = await fetch(`${DEHUB_API_BASE}/api/dpay/discount`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    });
+    if (!response.ok) return none;
+
+    const data = await response.json();
+    const rate = Number(data?.rate);
+    if (!Number.isFinite(rate) || rate <= 0) return none;
+
+    return {
+      tier: typeof data?.tier === 'string' ? data.tier : null,
+      rate: Math.min(rate, 0.3),
+      badgeBalance: Number(data?.badgeBalance) || 0,
+    };
+  } catch {
+    return none;
+  }
+}
+
+/**
+ * The gateway refuses a checkout when its own gas float on the buying chain
+ * sits at or below `minGas`. It answers 406 "low gas" from middleware that
+ * runs before auth, so the buyer sees a failure with no explanation after
+ * they have already committed to buying — which is why this is checked here
+ * before a card option is offered at all.
+ *
+ * These mirror `minGas` in dehub-stream-backend `src/dehub-pay/constants.ts`
+ * and have to move with it. They are per-chain because a delivery does not
+ * cost the same on each: a DHB transfer on Base is about 0.0000004 ETH, so
+ * the flat 0.01 both sides used to carry was ~25,000 deliveries of headroom
+ * and disabled card sales for weeks.
+ */
+const GATEWAY_MIN_GAS_BY_CHAIN: Record<number, number> = {
+  8453: 0.0005, // Base
+  56: 0.01, // BSC
+  97: 0.01, // BSC testnet
+};
+
+/** Floor for a chain the map doesn't name — the backend's own default. */
+export const GATEWAY_MIN_GAS = 0.01;
+
+export function gatewayMinGas(chainId: number): number {
+  return GATEWAY_MIN_GAS_BY_CHAIN[chainId] ?? GATEWAY_MIN_GAS;
+}
+
+/**
+ * Native gas the fiat gateway holds, keyed by chain id. Unauthenticated, one
+ * call, and the only honest way to know whether a card purchase can complete
+ * — the buy page's own quote says nothing about it.
+ */
+export async function getGatewayGasByChain(): Promise<Record<string, number>> {
+  try {
+    const response = await fetch(`${DEHUB_API_BASE}/api/dpay/available/gas`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+    });
+    if (!response.ok) return {};
+    const data = await response.json();
+    const balance = data?.balance ?? data?.result?.balance ?? {};
+    if (typeof balance !== 'object' || balance === null) return {};
+    const out: Record<string, number> = {};
+    for (const [chain, value] of Object.entries(balance)) {
+      if (typeof value === 'number') out[chain] = value;
+    }
+    return out;
+  } catch {
+    return {};
+  }
+}
+
+export interface GatewayReadiness {
+  ok: boolean;
+  /** Why a card purchase cannot complete right now. */
+  reason?: 'low_gas' | 'no_supply';
+  /** DHB the gateway can still deliver on this chain. */
+  supply: number;
+  /** Native gas the gateway holds on this chain. */
+  gas: number;
+}
+
+/**
+ * Whether the fiat gateway can deliver `tokens` DHB on `chainId` right now.
+ *
+ * Checked before a card option is offered rather than after it fails: an
+ * unfunded gateway 406s every checkout, and an advertiser who has already
+ * clicked "pay by card" deserves to be sent down the route that works instead
+ * of into a Stripe tab that ends in an error.
+ */
+export async function checkGatewayCanDeliver(chainId: number, tokens: number): Promise<GatewayReadiness> {
+  const [gasByChain, supply] = await Promise.all([
+    getGatewayGasByChain(),
+    getTokenAvailableSupply('DHB', chainId),
+  ]);
+  const gas = gasByChain[String(chainId)] ?? 0;
+  if (gas <= gatewayMinGas(chainId)) return { ok: false, reason: 'low_gas', supply, gas };
+  if (supply < tokens) return { ok: false, reason: 'no_supply', supply, gas };
+  return { ok: true, supply, gas };
+}
+
+/**
+ * Get available gas tokens
+ */
+export async function getAvailableGasTokens(): Promise<DPayToken[]> {
+  console.log('[DPay API] Fetching available gas tokens...');
+  
+  try {
+    const response = await fetch(`${DEHUB_API_BASE}/api/dpay/available/gas`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch gas tokens: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const tokens = data?.result || data?.tokens || data || [];
+    
+    if (Array.isArray(tokens)) {
+      return tokens.map((t: any) => ({
+        symbol: t.symbol || t.ticker,
+        name: t.name || t.symbol,
+        logoUrl: t.logoUrl || t.logo,
+        chainId: t.chainId,
+        address: t.address,
+        decimals: t.decimals || 18,
+      }));
+    }
+
+    return [];
+  } catch (error) {
+    console.error('[DPay API] Error fetching gas tokens:', error);
+    return [];
+  }
+}
+
+/**
+ * Poll transaction status by session ID (post-purchase flow)
+ * Call every 3s after redirect from Stripe until tokenSendStatus === 'sent' or 'failed'
+ */
+export async function getDPaySessionStatus(sessionId: string): Promise<DPaySessionStatus> {
+  const token = getAuthToken();
+  if (!token) {
+    throw new Error('Authentication required');
+  }
+  const response = await fetch(`${DEHUB_API_BASE}/api/dpay/tnxs?sid=${encodeURIComponent(sessionId)}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+  if (!response.ok) {
+    throw new Error(`Failed to fetch session status: ${response.status}`);
+  }
+  const data = await response.json();
+  console.log('[DPay API] Raw session status response:', JSON.stringify(data));
+  
+  // The API answers `{ tnxs: [...] }`; older builds used a result wrapper or a
+  // bare array. Missing the `tnxs` wrapper left every purchase "confirming"
+  // forever, because no status field was ever found on the wrapper object.
+  let result = data?.tnxs ?? data?.result ?? data;
+  if (Array.isArray(result)) {
+    // Empty array means no record yet. Prefer the row for this exact session.
+    if (result.length === 0) {
+      return { status_stripe: 'pending' as const, tokenSendStatus: 'pending' as const, _empty: true };
+    }
+    result = result.find((r: { sessionId?: string }) => r?.sessionId === sessionId) ?? result[0];
+  }
+
+  // If result is empty/null object, return explicit pending
+  if (!result || (typeof result === 'object' && Object.keys(result).length === 0)) {
+    return { status_stripe: 'pending' as const, tokenSendStatus: 'pending' as const, _empty: true };
+  }
+  
+  return {
+    ...result,
+    status_stripe: isExpiredStripeSession(result)
+      ? 'expired'
+      : result.status_stripe ?? result.statusStripe ?? result.stripe_status ?? result.status,
+    tokenSendStatus: result.tokenSendStatus ?? result.token_send_status ?? result.sendStatus,
+    tokenSendTxnHash: result.tokenSendTxnHash ?? result.token_send_txn_hash ?? result.txHash,
+  };
+}
+
+/**
+ * Get user's dpay transaction history
+ */
+export async function getDPayTransactions(): Promise<DPayTransaction[]> {
+  console.log('[DPay API] Fetching transactions...');
+
+  const token = getAuthToken();
+  if (!token) {
+    throw new Error('Authentication required');
+  }
+
+  try {
+    const response = await fetch(`${DEHUB_API_BASE}/api/dpay/tnxs?limit=100`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch transactions: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const transactions = data?.tnxs || data?.result || data?.transactions || data || [];
+    
+    if (Array.isArray(transactions)) {
+      return transactions
+        .filter((tx: any) => {
+          const status = tx.status_stripe || tx.status || '';
+          return status === 'complete' || status === 'completed';
+        })
+        .map((tx: any) => ({
+          id: tx._id || tx.id,
+          type: (tx.type === 'buy_token' || tx.type === 'buy') ? 'buy' : (tx.type || 'buy'),
+          amount: tx.amount,
+          tokenReceived: tx.tokenReceived ? parseFloat(tx.tokenReceived) : undefined,
+          tokenSymbol: tx.tokenSymbol || tx.symbol || 'DHB',
+          status: 'completed' as const,
+          createdAt: tx.createdAt || tx.created_at,
+          txHash: tx.tokenSendTxnHash || tx.txHash || tx.hash,
+          chainId: tx.chainId || tx.chain_id,
+          receiverAddress: tx.receiverAddress || tx.receiver_address,
+        }));
+    }
+
+    return [];
+  } catch (error) {
+    console.error('[DPay API] Error fetching transactions:', error);
+    throw error;
+  }
+}
+
+/**
+ * Get platform purchase history with pagination (public, no auth required)
+ */
+export async function getAllDPayTransactions(params: { page?: number; limit?: number } = {}): Promise<{ transactions: DPayTransaction[]; hasMore: boolean; page: number }> {
+  const page = params.page || 1;
+  const limit = params.limit || 10;
+  console.log(`[DPay API] Fetching transactions page=${page} limit=${limit}...`);
+
+  try {
+    const url = new URL(`${DEHUB_API_BASE}/api/dpay/tnxs`);
+    url.searchParams.set('page', String(page));
+    url.searchParams.set('limit', String(limit));
+
+    const response = await fetch(url.toString(), {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch transactions: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const raw = data?.tnxs || data?.result || data?.transactions || data || [];
+    
+    if (Array.isArray(raw)) {
+      const transactions = raw
+        .map((tx: any) => {
+          const stripeStatus = tx.status_stripe || tx.status || '';
+          const isComplete = stripeStatus === 'complete' || stripeStatus === 'completed';
+          const expired = stripeStatus === 'expired' || isExpiredStripeSession(tx);
+          const isFailed = stripeStatus === 'failed' && !expired;
+          // Extract failure reason from stripe_hooks
+          let failureReason: string | undefined;
+          if (isFailed) {
+            if (Array.isArray(tx.stripe_hooks) && tx.stripe_hooks.length > 0) {
+              const hookKey = Object.keys(tx.stripe_hooks[0])[0] || '';
+              failureReason = hookKey.replace('checkout.session.', '').replace(/[._]/g, ' ');
+            } else if (tx.tokenSendStatus === 'cancelled') {
+              failureReason = 'cancelled';
+            } else {
+              failureReason = stripeStatus;
+            }
+          }
+          return {
+            id: tx._id || tx.id,
+            type: (tx.type === 'buy_token' || tx.type === 'buy') ? 'buy' : (tx.type || 'buy'),
+            amount: tx.amount,
+            tokenReceived: tx.tokenReceived ? parseFloat(tx.tokenReceived) : undefined,
+            approxTokensToReceive: tx.approxTokensToReceive ? String(tx.approxTokensToReceive) : undefined,
+            tokenSymbol: tx.tokenSymbol || tx.symbol || 'DHB',
+            status: isComplete ? 'completed' as const : expired ? 'expired' as const : isFailed ? 'failed' as const : 'pending' as const,
+            failureReason,
+            createdAt: tx.createdAt || tx.created_at,
+            txHash: tx.tokenSendTxnHash || tx.txHash || tx.hash,
+            chainId: tx.chainId || tx.chain_id,
+            from: tx.from || tx.sender,
+            receiverAddress: tx.receiverAddress || tx.receiver_address,
+            currency: tx.currency || 'usd',
+          };
+        });
+      const total = data?.total ?? raw.length;
+      return { transactions, hasMore: page * limit < total, page };
+    }
+
+    return { transactions: [], hasMore: false, page };
+  } catch (error) {
+    console.error('[DPay API] Error fetching transactions:', error);
+    throw error;
+  }
+}
+
+/**
+ * Get total volume/stats
+ */
+export async function getDPayTotal(): Promise<{ totalVolume: number; totalTransactions: number }> {
+  console.log('[DPay API] Fetching totals...');
+  
+  try {
+    const response = await fetch(`${DEHUB_API_BASE}/api/dpay/total`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch totals: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const result = data?.result || data;
+    
+    return {
+      totalVolume: result?.totalVolume || result?.volume || 0,
+      totalTransactions: result?.totalTransactions || result?.count || 0,
+    };
+  } catch (error) {
+    console.error('[DPay API] Error fetching totals:', error);
+    return { totalVolume: 0, totalTransactions: 0 };
+  }
+}
+
+/**
+ * Create an onramp session for fiat-to-crypto purchase
+ */
+export async function createOnrampSession(request: OnrampSessionRequest): Promise<OnrampSessionResponse> {
+  console.log('[DPay API] Creating onramp session...', request);
+
+  const token = getAuthToken();
+  if (!token) {
+    throw new Error('Authentication required');
+  }
+
+  const response = await fetch(`${DEHUB_API_BASE}/api/dpay/create-onramp-session`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      source_amount: request.amount,
+      source_currency: request.currency.toLowerCase(),
+      destination_currency: request.tokenSymbol.toUpperCase(),
+      destination_wallet_address: request.walletAddress,
+      chain_id: request.chainId ?? 8453,
+    }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+
+    // 500 from the backend means the onramp provider is currently unavailable.
+    // Surface a clear message so the user knows to try the Card/Bank method.
+    if (response.status >= 500) {
+      throw new Error('Onramp service is temporarily unavailable. Please use Card / Bank payment instead.');
+    }
+
+    throw new Error(errorData.message || errorData.error || `Failed to create onramp session: ${response.status}`);
+  }
+
+  const data = await response.json();
+  console.log('[DPay API] Onramp session response:', data);
+
+  const result = data?.result || data;
+
+  return {
+    sessionId: result.sessionId || result.id,
+    url: result.url || result.redirectUrl || result.checkoutUrl,
+    expiresAt: result.expiresAt,
+  };
+}
+
+/**
+ * Reject new card purchases through the existing checkout error flow.
+ */
+export async function createCheckoutSession(_request: {
+  amount: number;
+  currency?: string;
+  tokenSymbol: string;
+  walletAddress: string;
+  chainId?: number;
+  tokensToReceive: number;
+  /** Deep link or URL after payment. e.g. "dehub://dpay-result" for mobile */
+  redirect?: string;
+  embedded?: boolean;
+}): Promise<{ checkoutUrl: string; sessionId: string; clientSecret?: string }> {
+  return rejectCardPayment();
+}
+
+/* ────────────────────────────────────────────────────────────────────────
+ * Crypto rail
+ *
+ * The gateway sells DHB at the fixed peg for crypto the same way it does for
+ * a card: the buyer sends an origin asset to a per-purchase deposit address,
+ * NEAR Intents settles it to USDC, and the treasury delivers DHB.
+ *
+ * This is not a DEX swap. The wallet used to buy through the 1% DHB/WETH
+ * pool on Base, which is the entire market and prices well above the peg —
+ * 1,000 DHB cost 0.00101 ETH there against 0.00043 ETH here on the same day.
+ * ──────────────────────────────────────────────────────────────────────── */
+
+export interface CryptoPayableAsset {
+  assetId: string;
+  symbol: string;
+  blockchain: string;
+  decimals: number;
+  price?: number;
+  contractAddress?: string;
+}
+
+export interface CryptoQuote {
+  originAsset: string;
+  tokensToReceive: number;
+  /** Origin amount in smallest units. */
+  amountIn: string;
+  amountInFormatted: string;
+  amountInUsd: string;
+  timeEstimateSeconds: number;
+  pegUsd: number;
+}
+
+export interface CryptoIntent extends CryptoQuote {
+  id: string;
+  depositAddress: string;
+  /** Set only on memo chains (Stellar, TON) — never on Base. */
+  depositMemo?: string;
+  expiresAt: number;
+}
+
+export interface CryptoIntentStatus {
+  id: string;
+  depositAddress: string;
+  /** 1Click settlement state, e.g. PENDING_DEPOSIT, PROCESSING, SUCCESS. */
+  settlement: string;
+  settledUsd?: number;
+  settlementTxHash?: string;
+  tokensToReceive?: string;
+  tokenReceived?: string;
+  tokenSendStatus?: string;
+  tokenSendTxnHash?: string;
+  expiresAt?: number;
+}
+
+/** What the gateway accepts as payment. Unauthenticated. */
+export async function getCryptoPayableAssets(): Promise<CryptoPayableAsset[]> {
+  const response = await fetch(`${DEHUB_API_BASE}/api/dpay/crypto/tokens`);
+  if (!response.ok) throw new Error('Crypto payment options are temporarily unavailable.');
+  const data = await response.json();
+  return data?.tokens ?? [];
+}
+
+/**
+ * Price a purchase without committing to it. Unauthenticated, so the drawer
+ * can quote before sign-in. No deposit address is allocated.
+ */
+export async function getCryptoQuote(params: {
+  originAsset: string;
+  tokensToReceive: number;
+  refundTo?: string;
+}): Promise<CryptoQuote> {
+  const response = await fetch(`${DEHUB_API_BASE}/api/dpay/crypto/quote`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(params),
+  });
+  const data = await response.json().catch(() => ({}));
+  // Per-route minimums surface here ("Amount is too low for bridge, try at
+  // least ...") and the buyer needs to read them, so pass the message through.
+  if (!response.ok) throw new Error(data?.message || 'Could not price this purchase.');
+  return data;
+}
+
+/** Commit: allocate the deposit address. Nothing is owed until funds are sent. */
+export async function createCryptoIntent(params: {
+  originAsset: string;
+  tokensToReceive: number;
+  receiverAddress: string;
+  refundTo: string;
+  termsAndServicesAccepted: boolean;
+}): Promise<CryptoIntent> {
+  if (DHB_SALES_PAUSED) throw new Error(DHB_SALES_PAUSED_MESSAGE);
+  const token = getAuthToken();
+  if (!token) throw new Error('Authentication required');
+  const response = await fetch(`${DEHUB_API_BASE}/api/dpay/crypto/intent`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    body: JSON.stringify(params),
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data?.message || 'Could not open this purchase.');
+  return data;
+}
+
+/** Settlement state, then delivery state. */
+export async function getCryptoIntentStatus(id: string): Promise<CryptoIntentStatus> {
+  const token = getAuthToken();
+  if (!token) throw new Error('Authentication required');
+  const response = await fetch(`${DEHUB_API_BASE}/api/dpay/crypto/intent/${encodeURIComponent(id)}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!response.ok) throw new Error(`Failed to fetch purchase status: ${response.status}`);
+  return response.json();
+}
+
+/* ────────────────────────────────────────────────────────────────────────
+ * Direct Base ETH rail
+ *
+ * ETH already on Base has nothing to bridge, so it goes straight to the
+ * gateway wallet and settles by transaction hash — no 1Click hop, no fee on
+ * that hop, and no settlement wait. Every other asset still uses the
+ * intents rail above.
+ * ──────────────────────────────────────────────────────────────────────── */
+
+export interface DirectQuote extends CryptoQuote {
+  depositAddress: string;
+  ethUsd: number;
+}
+
+export async function getDirectQuote(params: { tokensToReceive: number; address?: string }): Promise<DirectQuote> {
+  const response = await fetch(`${DEHUB_API_BASE}/api/dpay/crypto/direct/quote`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(params),
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data?.message || 'Could not price this purchase.');
+  return data;
+}
+
+export async function createDirectIntent(params: {
+  tokensToReceive: number;
+  receiverAddress: string;
+  termsAndServicesAccepted: boolean;
+}): Promise<CryptoIntent> {
+  if (DHB_SALES_PAUSED) throw new Error(DHB_SALES_PAUSED_MESSAGE);
+  const token = getAuthToken();
+  if (!token) throw new Error('Authentication required');
+  const response = await fetch(`${DEHUB_API_BASE}/api/dpay/crypto/direct/intent`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    body: JSON.stringify(params),
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data?.message || 'Could not open this purchase.');
+  return data;
+}
+
+/** Hand the gateway the hash; it verifies the transfer on chain and settles. */
+export async function confirmDirectDeposit(params: { id: string; txHash: string }): Promise<CryptoIntentStatus> {
+  const token = getAuthToken();
+  if (!token) throw new Error('Authentication required');
+  const response = await fetch(`${DEHUB_API_BASE}/api/dpay/crypto/direct/confirm`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    body: JSON.stringify(params),
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data?.message || 'Could not confirm this purchase.');
+  return data;
+}

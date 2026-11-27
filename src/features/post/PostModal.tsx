@@ -1,0 +1,728 @@
+import { useTranslation as _useCopy } from 'react-i18next';
+import { useAccountDraftKey, useDraftState } from '@/hooks/use-draft-state';
+import { lazy, Suspense, useEffect, useState, useCallback, useRef } from 'react';
+import { postTextLimit } from '@/lib/post-text-limit';
+import { Drawer, DrawerContent, DrawerTitle } from '@/components/ui/drawer';
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
+import { usePostForm } from './hooks/usePostForm';
+import { usePostSound, type AttachedSound } from './hooks/usePostSound';
+import { buildSoundtrackTag } from '@/lib/soundtrack';
+import type { PollData, LiveStreamHandoff } from './types';
+import { PostContentArea } from './components/PostContentArea';
+import { PostDictationButton } from './components/PostDictationButton';
+import { TranslatedDraftNote } from './components/TranslatedDraftNote';
+import { PostAccessToggles } from './components/PostAccessToggles';
+import { PostActionBar } from './components/PostActionBar';
+import { ArticleComposer } from './components/ArticleComposer';
+import { ComicPagesEditor } from './components/ComicPagesEditor';
+import { ComicBorderPicker } from './components/ComicBorderPicker';
+import { getComicImageLimitForBadge } from '@/lib/post-image-allowance';
+import { useAuth } from '@/contexts/AuthContext';
+import { CrossPostPicker } from './components/CrossPostPicker';
+import { CameraCaptureModal } from './components/CameraCaptureModal';
+import { SoundPicker } from './components/SoundPicker';
+import { soundMix, withSoundMix } from '@/lib/sound-window';
+import { cn } from '@/lib/utils';
+import { useKeyboardSafeSheet } from '@/hooks/use-keyboard-open';
+import { afterNextFrame, useSheetFlickClose } from '@/hooks/use-sheet-flick-close';
+import { BannedAccountNotice } from '@/components/app/BannedAccountNotice';
+import { useBannedAccount } from '@/hooks/use-banned-account';
+import { QuotedPostEmbed } from '@/components/app/cards/QuotedPostEmbed';
+import type { DeHubNFT } from '@/lib/api/dehub/types';
+import { toast } from 'sonner';
+import { PhotoTagger } from '@/components/app/photo-tags/PhotoTagger';
+
+const PostPreviewSheet = lazy(() => import('./components/PostPreviewSheet').then((m) => ({ default: m.PostPreviewSheet })));
+
+/** Closing with more words than this saves the post to Drafts. */
+const AUTO_DRAFT_MIN_WORDS = 3;
+const stripTags = (html: string) => html.replace(/<[^>]*>/g, ' ');
+const countWords = (value: string) => value.split(/\s+/).filter(Boolean).length;
+
+const CreatePlanModal = lazy(() =>
+  import('@/components/app/subscriptions/CreatePlanModal').then((module) => ({
+    default: module.CreatePlanModal,
+  })),
+);
+const ScheduledLivestreams = lazy(() => import('./components/ScheduledLivestreams'));
+const PaintingStudio = lazy(() => import('./components/PaintingStudio'));
+const FreeImagesSheet = lazy(() => import('./components/FreeImagesSheet'));
+
+interface PostModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  initialFiles?: FileList | null;
+  onFilesProcessed?: () => void;
+  initialText?: string;
+  initialCategory?: string;
+  /** A post's song to start with, from tapping the song on that post. */
+  initialSound?: AttachedSound | null;
+  initialPoll?: PollData | null;
+  /** Open on the Livestream tab instead of Post. */
+  initialLiveMode?: 'video';
+  /**
+   * Quote this post. Same composer — media, poll, rating, mint — minus what a
+   * quote cannot be: a livestream, stage, article, scheduled or paywalled post.
+   */
+  quotedPost?: DeHubNFT | null;
+  /** Called with the new post's token id as soon as it exists. */
+  onPosted?: (tokenId: string) => void;
+}
+
+function PostModalForAccount({ isOpen, onClose, initialFiles, onFilesProcessed, initialText, initialCategory, initialSound, initialPoll, initialLiveMode, draftScope, quotedPost, onPosted }: PostModalProps & { draftScope: string }) {
+  const { t: _copy } = _useCopy();
+  const isQuoting = !!quotedPost;
+  const { style: keyboardStyle, keyboardOpen } = useKeyboardSafeSheet(isOpen);
+  const { isBanned } = useBannedAccount();
+  // Where a live post goes once its mint has provisioned the stream. Held here
+  // rather than in the action bar so it survives the bar's own re-renders, and
+  // cleared on close so reopening the composer never reopens a dead broadcast.
+  const [liveStream, setLiveStream] = useState<LiveStreamHandoff | null>(null);
+  const [articleMode, setArticleMode] = useDraftState(draftScope + ':articleMode', false);
+  const [articleBody, setArticleBody] = useDraftState(draftScope + ':articleBody', '');
+  const [articleImage, setArticleImage] = useState<File | null>(null);
+  const articleCoverEdited = useRef(false);
+  const finishPost = () => { setArticleBody.complete(articleBody, ''); setArticleBody.clear(); setArticleMode(false); setArticleMode.clear(); setArticleImage(null); onClose(); };
+  const { user: authUser } = useAuth();
+  const { state, actions, computed, refs } = usePostForm(finishPost, setLiveStream, draftScope, quotedPost, onPosted, isOpen);
+  const { attachedSound, selectSound, clearSound } = usePostSound();
+  const [categoryDrawerOpen, setCategoryDrawerOpen] = useState(false);
+  const [taggerOpen, setTaggerOpen] = useState(false);
+  const [paintingOpen, setPaintingOpen] = useState(false);
+  const [freeImagesTarget, setFreeImagesTarget] = useState<'post' | 'article-cover' | null>(null);
+  const articleFreeImagesButton = useRef<HTMLButtonElement | null>(null);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [soundPickerOpen, setSoundPickerOpen] = useState(false);
+  const [planDrawerOpen, setPlanDrawerOpen] = useState(false);
+  const [mediaFullscreenOpen, setMediaFullscreenOpen] = useState(false);
+  const [articleImagePreview, setArticleImagePreview] = useState('');
+  const changeArticleCover = (file: File | null) => {
+    articleCoverEdited.current = true;
+    setArticleImage(file);
+  };
+  const saveArticleDraft = (replaceId?: string) => {
+    const done = () => { actions.resetForm(); finishPost(); };
+    draftImageData(articleImage)
+      .then(imageData => actions.saveDraft({ body: articleBody, title: state.titleText, imageData, socialData: imageData }, replaceId))
+      .catch(() => actions.saveDraft({ body: articleBody, title: state.titleText }, replaceId))
+      .finally(done);
+  };
+  // The draft this composer was filled from, so closing it again updates that
+  // draft rather than stacking a copy beside it.
+  const openedDraftRef = useRef<{ id: string; text: string; body: string } | null>(null);
+  const draftImageData = async (file: File | null): Promise<string | undefined> => {
+    if (!file) return undefined;
+    const bitmap = await createImageBitmap(file);
+    const scale = Math.min(1, 1200 / bitmap.width, 1200 / bitmap.height);
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+    canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+    canvas.getContext('2d')?.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+    bitmap.close();
+    return canvas.toDataURL('image/jpeg', 0.78);
+  };
+  const restoreDraftImage = async (data: string | undefined, name: string, setter: (file: File | null) => void) => {
+    if (!data?.startsWith('data:image/jpeg;base64,')) { setter(null); return; }
+    const blob = await (await fetch(data)).blob();
+    setter(new File([blob], name, { type: 'image/jpeg' }));
+  };
+
+  useEffect(() => {
+    if (!articleImage) { setArticleImagePreview(''); return; }
+    const url = URL.createObjectURL(articleImage);
+    setArticleImagePreview(url);
+    return () => URL.revokeObjectURL(url);
+  }, [articleImage]);
+
+  const handleTogglePoll = useCallback(() => {
+    if (state.poll) {
+      actions.setPoll(null);
+    } else {
+      actions.setPoll({
+        question: '',
+        options: [
+          { id: '1', text: '' },
+          { id: '2', text: '' },
+        ],
+        duration: 24,
+        isMultipleChoice: false,
+      });
+    }
+  }, [state.poll, actions.setPoll]);
+
+
+  // Opened from a post's song: start with that song attached.
+  useEffect(() => {
+    if (isOpen && initialSound) selectSound(initialSound);
+  }, [isOpen, initialSound, selectSound]);
+
+  // When opening from share (initialText provided), reset form first for a fresh start
+  useEffect(() => {
+    if (isOpen && initialText) {
+      if (!state.text) actions.setText(initialText);
+    }
+  }, [isOpen, initialText]);
+
+  // Opened from the Live feed's + button: land on Livestream, not Post. The
+  // modal stays mounted between opens, so a later open from anywhere else
+  // hands back the Post tab instead of inheriting Livestream.
+  const liveModeFromOpenerRef = useRef(false);
+  useEffect(() => {
+    if (!isOpen) return;
+    if (initialLiveMode) {
+      setArticleMode(false);
+      actions.setLiveMode(initialLiveMode);
+      liveModeFromOpenerRef.current = true;
+    } else if (liveModeFromOpenerRef.current) {
+      actions.setLiveMode(null);
+      liveModeFromOpenerRef.current = false;
+    }
+  }, [isOpen, initialLiveMode, setArticleMode]);
+
+  // Set initial category when modal opens
+  useEffect(() => {
+    if (isOpen && initialCategory) {
+      actions.setSelectedCategory.initialize(initialCategory);
+    }
+  }, [isOpen, initialCategory]);
+
+  // Pre-initialize poll when opened with initialPoll
+  useEffect(() => {
+    if (isOpen && initialPoll) {
+      actions.setPoll.initialize(initialPoll);
+    }
+  }, [isOpen, initialPoll]);
+
+  // Process initial files when modal opens with pending files
+  useEffect(() => {
+    if (isOpen && initialFiles && initialFiles.length > 0) {
+      actions.handleFileDrop(initialFiles);
+      onFilesProcessed?.();
+    }
+  }, [isOpen, initialFiles, actions.handleFileDrop, onFilesProcessed]);
+
+  const handleClose = () => {
+    // A finished broadcast must not be able to reopen itself the next time the
+    // composer is opened.
+    setLiveStream(null);
+    setPlanDrawerOpen(false);
+    setFreeImagesTarget(null);
+    onClose();
+  };
+
+  // Closing a post that was being written keeps it: anything over three words
+  // goes into Drafts and the composer opens empty next time. Quotes and live
+  // setups are left as they were — a quote loses its target outside this
+  // composer, and a broadcast has already published its post.
+  const closeKeepingDraft = () => {
+    const opened = openedDraftRef.current;
+    openedDraftRef.current = null;
+    const words = countWords(articleMode ? `${state.titleText} ${stripTags(articleBody)}` : `${state.titleText} ${state.text}`);
+    // Attached photos, video and audio (and their alt text) cannot go into a
+    // draft, so a post carrying them stays in the composer as it was.
+    const hasMedia = computed.hasImage || computed.hasVideo || computed.hasAudio;
+    if (isQuoting || liveStream || state.liveMode !== null || state.isPosting || hasMedia || words <= AUTO_DRAFT_MIN_WORDS) {
+      handleClose();
+      return;
+    }
+    const unchanged = opened && opened.text === state.text && opened.body === (articleMode ? articleBody : '')
+      && (!articleMode || !articleCoverEdited.current);
+    if (!unchanged) {
+      if (articleMode) saveArticleDraft(opened?.id);
+      else actions.saveDraft(undefined, opened?.id);
+      toast.success(_copy('drafts.saved', { defaultValue: 'Draft saved' }));
+    }
+    if (!articleMode || unchanged) {
+      actions.resetForm();
+      if (articleMode) finishPost();
+    }
+    handleClose();
+  };
+
+  const comicMode = !articleMode && state.liveMode === null && state.postLayout === 'comic';
+  const comicLimit = getComicImageLimitForBadge(authUser?.badgeBalance, authUser?.username, authUser?.badgeLock);
+
+  const selectPostMode = () => {
+    setArticleMode(false);
+    actions.setLiveMode(null);
+    // Comic is a post option now (the ... menu), so Post keeps it on.
+    if (!comicMode) actions.setShowTitle(false);
+  };
+
+  // A comic is a photo post shown as collector cards: a title, then pages
+  // with a caption and alt text each. Paywalls keep the normal carousel, so
+  // they are switched off here.
+  const selectComicMode = () => {
+    setArticleMode(false);
+    actions.setLiveMode(null);
+    actions.setShowTitle(true);
+    actions.setPostLayout('comic');
+    actions.setIsPPV(false);
+    actions.setIsTokenGated(false);
+  };
+
+  const exitComicMode = () => {
+    actions.setPostLayout(null);
+    actions.setShowTitle(false);
+  };
+
+  const selectLiveMode = (mode: 'video' | 'townhall') => {
+    setArticleMode(false);
+    actions.setPostLayout(null);
+    actions.setLiveMode(mode);
+  };
+
+  const selectArticleMode = () => {
+    actions.setPostLayout(null);
+    setArticleMode(true);
+    actions.setShowTitle(true);
+    actions.setLiveMode(null);
+    actions.setIsPPV(false);
+    actions.setIsTokenGated(false);
+    actions.setIsSubscribersOnly(false);
+  };
+
+  // A banned account can read every post on Riftn and write none of them.
+  // The API refuses the mint either way; showing the composer first would
+  // only mean losing whatever was typed into it.
+  const modalContent = isBanned ? (
+    <div className="px-4 py-8">
+      <BannedAccountNotice />
+    </div>
+  ) : (
+    <>
+      {!isQuoting && (
+      <div className="flex items-center justify-center gap-3 px-4 pt-4 pb-1 text-xs font-medium">
+        <button type="button" aria-pressed={!articleMode && state.liveMode === null} onClick={selectPostMode} className={cn('transition-colors', !articleMode && state.liveMode === null ? 'text-white' : 'text-white/55 hover:text-white')}>{_copy("copy.a5554622c655", { defaultValue: "Post" })}</button>
+        <span className="text-white/25" aria-hidden="true">|</span>
+        <button type="button" aria-pressed={state.liveMode === 'video'} onClick={() => selectLiveMode('video')} className={cn('transition-colors', state.liveMode === 'video' ? 'text-white' : 'text-white/55 hover:text-white')}>{_copy("copy.9d4e6fe6676d", { defaultValue: "Livestream" })}</button>
+        <span className="text-white/25" aria-hidden="true">|</span>
+        <button type="button" aria-pressed={state.liveMode === 'townhall'} onClick={() => selectLiveMode('townhall')} className={cn('transition-colors', state.liveMode === 'townhall' ? 'text-white' : 'text-white/55 hover:text-white')}>{_copy("copy.3a17aa4e4abb", { defaultValue: "Stages" })}</button>
+        <span className="text-white/25" aria-hidden="true">|</span>
+        <button type="button" aria-pressed={articleMode} onClick={selectArticleMode} className={cn('transition-colors', articleMode ? 'text-white' : 'text-white/55 hover:text-white')}>{_copy("copy.29d94922512b", { defaultValue: "Article" })}</button>
+      </div>
+      )}
+
+      {articleMode ? (
+        <ArticleComposer
+          title={state.titleText}
+          setTitle={actions.setTitleText}
+          summary={state.text}
+          setSummary={actions.setText}
+          body={articleBody}
+          setBody={setArticleBody}
+          coverPreview={articleImagePreview}
+          onCoverChange={changeArticleCover}
+          onOpenFreeImages={event => {
+            articleFreeImagesButton.current = event.currentTarget;
+            setFreeImagesTarget('article-cover');
+          }}
+          onSaveDraft={() => saveArticleDraft()}
+          onPublish={() => actions.handlePost({ articleBody: articleBody.trim(), articleImage: articleImage || undefined, socialImage: articleImage || undefined })}
+          formReady={computed.canPost && !computed.hasVideo && !computed.hasImage && !computed.hasAudio}
+          isPosting={state.isPosting}
+          uploadProgress={state.uploadProgress ?? 0}
+          mintAwaitingWallet={!!state.mintAwaitingWallet}
+          onAbandonMint={actions.abandonMint}
+        />
+      ) : (
+      <>
+      {isOpen && state.liveMode === 'video' && <Suspense fallback={null}><ScheduledLivestreams onStart={setLiveStream} /></Suspense>}
+      <PostContentArea
+        text={state.text}
+        maxChars={postTextLimit(computed.postQuota)}
+        dictation={isOpen && authUser && !state.isPosting && !state.isRecording && !state.isCameraModalOpen && !state.liveMode && (
+          <>
+          {state.translatedDraft && (
+            <TranslatedDraftNote from={state.translatedDraft.from} onUndo={actions.undoTranslateDraft} />
+          )}
+          <PostDictationButton
+            key={JSON.stringify([draftScope, openedDraftRef.current?.id])}
+            setText={actions.setText}
+            maxChars={postTextLimit(computed.postQuota)}
+            atLimit={state.text.length >= postTextLimit(computed.postQuota)}
+          />
+          </>
+        )}
+        setText={actions.setText}
+        editorRef={refs.editorRef}
+        media={state.media}
+        onRemoveMedia={actions.removeMedia}
+        onMoveMedia={actions.moveMedia}
+        onAddAudio={actions.addAudioToMedia}
+        onRemoveAudio={actions.removeAudioFromMedia}
+        onToggleMusicVideo={actions.toggleMusicVideo}
+        onAddThumbnail={actions.addThumbnailToMedia}
+        onRemoveThumbnail={actions.removeThumbnailFromMedia}
+        onApplyFilter={actions.applyFilterToMedia}
+        onClearFilter={actions.clearFilterFromMedia}
+        onApplyCrop={actions.applyCropToMedia}
+        onClearCrop={actions.clearCropFromMedia}
+        onApplyTrim={actions.applyTrimToMedia}
+        onReplaceVideo={actions.replaceVideoFile}
+        onUpdateMedia={actions.updateMediaItem}
+        onReplaceImage={actions.replaceImageFile}
+        onSetMediaDescription={actions.setMediaDescription}
+        contentWarning={state.contentWarning}
+        onContentWarningChange={actions.setContentWarning}
+        hideAssetCards={state.hideAssetCards}
+        onHideAssetCardsChange={actions.setHideAssetCards}
+        hiddenLinkPreviews={state.hiddenLinkPreviews}
+        onHiddenLinkPreviewsChange={actions.setHiddenLinkPreviews}
+        liveMode={state.liveMode}
+        canPost={computed.canPost}
+        destinations={computed.destinations}
+        hasVideo={computed.hasVideo}
+        hasImage={computed.hasImage}
+        hasAudio={computed.hasAudio}
+        onFileDrop={actions.handleFileDrop}
+        scheduledDate={state.scheduledDate}
+        onSchedule={actions.setScheduledDate}
+        dripCount={!isQuoting && !comicMode && state.liveMode === null && !computed.hasVideo && !computed.hasAudio ? state.media.filter(m => m.type === 'image').length : 0}
+        dripGap={state.dripGap}
+        onDripChange={actions.setDripGap}
+        drafts={state.drafts}
+        onSaveDraft={() => {
+          // The draft is the copy of record from here on, so the composer is
+          // emptied and closed behind it. It used to stay open holding the same
+          // content — and because the composer is mounted behind a one-way
+          // latch, that content was still sitting there on the next open,
+          // one Post away from being published or saved twice.
+          actions.saveDraft();
+          actions.resetForm();
+          handleClose();
+        }}
+        onLoadDraft={draft => {
+          const opened = { id: draft.id, text: draft.text, body: draft.articleBody || '' };
+          openedDraftRef.current = opened;
+          articleCoverEdited.current = false;
+          actions.loadDraft(draft);
+          if (draft.articleBody) {
+            setArticleMode(true);
+            setArticleBody(draft.articleBody);
+            actions.setTitleText(draft.articleTitle || '');
+            actions.setShowTitle(true);
+            void restoreDraftImage(draft.socialImageData || draft.articleImageData, 'article-share-image.jpg', (file) => {
+              if (openedDraftRef.current === opened && !articleCoverEdited.current) setArticleImage(file);
+            });
+          } else {
+            // Loading a plain draft while the article editor is open used to
+            // leave the article's body and cover sitting under the new text.
+            setArticleMode(false);
+            setArticleBody.complete(articleBody, '');
+            setArticleImage(null);
+          }
+        }}
+        onDeleteDraft={actions.deleteDraft}
+        canSaveDraft={computed.hasContent}
+        isRecording={state.isRecording}
+        recordingTime={state.recordingTime}
+        onStopRecording={actions.stopRecording}
+        showTitle={state.showTitle}
+        titleText={state.titleText}
+        setTitleText={actions.setTitleText}
+        onOpenCategories={() => setCategoryDrawerOpen(true)}
+        poll={state.poll}
+        onPollChange={actions.setPoll}
+        quiz={state.quiz}
+        onQuizChange={actions.setQuiz}
+        onMediaFullscreenChange={setMediaFullscreenOpen}
+        draftVideo={state.draftVideo}
+        hideScheduleAndDrafts={isQuoting}
+        mediaSlot={comicMode ? (
+          <div className="space-y-3">
+            <ComicPagesEditor
+              media={state.media}
+              limit={comicLimit}
+              onAddPages={actions.addComicPages}
+              onRemove={actions.removeMedia}
+              onMove={actions.moveMedia}
+              onCaption={actions.setMediaCaption}
+              onAlt={actions.setMediaDescription}
+            />
+            <ComicBorderPicker
+              value={state.comicBorder}
+              onChange={actions.setComicBorder}
+              cover={state.media.find(m => m.type === 'image')?.preview}
+              title={state.titleText}
+            />
+          </div>
+        ) : undefined}
+      />
+      {quotedPost && (
+        // Shown as it will appear under the quote. Not a link from here —
+        // tapping it mid-compose would navigate away from the draft.
+        <div className="px-4 pb-3 pointer-events-none">
+          <QuotedPostEmbed quotedPost={quotedPost} />
+        </div>
+      )}
+      <PostAccessToggles
+        // While typing, the options shrink so the post itself (title and
+        // every line) has room to show and scroll.
+        compact={keyboardOpen}
+        draftScope={draftScope}
+        isSubscribersOnly={state.isSubscribersOnly}
+        setIsSubscribersOnly={actions.setIsSubscribersOnly}
+        isPPV={state.isPPV}
+        setIsPPV={actions.setIsPPV}
+        ppvAmount={state.ppvAmount}
+        setPpvAmount={actions.setPpvAmount}
+        canConfigurePpvPreview={state.canConfigurePpvPreview}
+        ppvPreviewSeconds={state.ppvPreviewSeconds}
+        setPpvPreviewSeconds={actions.setPpvPreviewSeconds}
+        ppvCurrency={state.ppvCurrency}
+        setPpvCurrency={actions.setPpvCurrency}
+        isWatch2Earn={state.isWatch2Earn}
+        setIsWatch2Earn={actions.setIsWatch2Earn}
+        w2eViews={state.w2eViews}
+        setW2eViews={actions.setW2eViews}
+        w2eComments={state.w2eComments}
+        setW2eComments={actions.setW2eComments}
+        w2eTotal={state.w2eTotal}
+        setW2eTotal={actions.setW2eTotal}
+        w2eCurrency={state.w2eCurrency}
+        setW2eCurrency={actions.setW2eCurrency}
+        isTokenGated={state.isTokenGated}
+        setIsTokenGated={actions.setIsTokenGated}
+        tokenContract={state.tokenContract}
+        setTokenContract={actions.setTokenContract}
+        tokenSymbol={state.tokenSymbol}
+        setTokenSymbol={actions.setTokenSymbol}
+        tokenAmount={state.tokenAmount}
+        setTokenAmount={actions.setTokenAmount}
+        postChainId={state.chainId}
+        selectedCategory={state.selectedCategory}
+        setSelectedCategory={actions.setSelectedCategory}
+        markCategorySaved={actions.markCategorySaved}
+        showTitle={state.showTitle}
+        setShowTitle={actions.setShowTitlePref}
+        isMature={state.isMature}
+        setIsMature={actions.setIsMature}
+        quotePolicy={state.quotePolicy}
+        setQuotePolicy={actions.setQuotePolicy}
+        replyPolicy={state.replyPolicy}
+        setReplyPolicy={actions.setReplyPolicy}
+        stitchPolicy={state.stitchPolicy}
+        setStitchPolicy={state.media.some(m => m.type === 'video') ? actions.setStitchPolicy : undefined}
+        visibility={state.visibility}
+        // A quote and a livestream are always public.
+        setVisibility={isQuoting || state.liveMode ? undefined : actions.setVisibility}
+        isForKids={state.isForKids}
+        setIsForKids={actions.setIsForKids}
+        shopLinks={state.shopLinks}
+        setShopLinks={actions.setShopLinks}
+        shopListingIds={state.shopListingIds}
+        setShopListingIds={actions.setShopListingIds}
+        hasVideoOrAudio={computed.hasVideo || computed.hasAudio}
+        categoryDrawerOpen={categoryDrawerOpen}
+        setCategoryDrawerOpen={setCategoryDrawerOpen}
+        shouldMint={state.shouldMint}
+        setShouldMint={actions.setShouldMint}
+        mintFeeLabel={computed.mintFeeLabel}
+        mintRequired={computed.mintRequired}
+        onCreatePlan={() => setPlanDrawerOpen(true)}
+        quoteMode={isQuoting}
+      />
+
+      <PostActionBar
+        extraTool={!state.liveMode && !isQuoting && state.visibility === 'public' ? <CrossPostPicker /> : undefined}
+        hideLive={isQuoting}
+        imageInputRef={refs.imageInputRef}
+        videoInputRef={refs.videoInputRef}
+        audioInputRef={refs.audioInputRef}
+        onImageSelect={actions.handleImageSelect}
+        onVideoSelect={actions.handleVideoSelect}
+        onAudioSelect={actions.handleAudioSelect}
+        onStartRecording={actions.startRecording}
+        liveMode={state.liveMode}
+        liveStream={liveStream}
+        setLiveMode={actions.setLiveMode}
+        onInsertFormatting={actions.insertFormatting}
+        onInsertEmoji={actions.insertEmoji}
+        onInsertGif={actions.insertGif}
+        onCameraCapture={actions.openCameraCapture}
+        onEnhanceWithAI={actions.handleEnhanceWithAI}
+        onTranslate={actions.handleTranslateDraft}
+        onPost={() => {
+          const soundtrackTag = attachedSound ? buildSoundtrackTag(attachedSound) : undefined;
+          actions.handlePost({ ...(soundtrackTag ? { soundtrackTag } : {}) });
+        }}
+        // Photos, a video or plain text: what the feed card can show as it will post.
+        onPreview={articleMode || computed.hasAudio || state.poll ? undefined : () => setPreviewOpen(true)}
+        canPost={computed.canPost}
+        isEnhancing={state.isEnhancing}
+        isPosting={state.isPosting}
+        uploadProgress={state.uploadProgress}
+        mintAwaitingWallet={state.mintAwaitingWallet}
+        onAbandonMint={actions.abandonMint}
+        
+        hasText={!!state.text.trim()}
+        hasImage={computed.hasImage}
+        hasVideo={computed.hasVideo}
+        isScheduled={!!state.scheduledDate}
+        onOpenCategories={() => setCategoryDrawerOpen(true)}
+        onOpenSoundPicker={() => setSoundPickerOpen(true)}
+        attachedSound={attachedSound}
+        onClearSound={clearSound}
+        onSoundMixChange={(mix) => { if (attachedSound) selectSound({ ...attachedSound, url: withSoundMix(attachedSound.url, mix) }); }}
+        onCloseModal={closeKeepingDraft}
+        onTogglePoll={handleTogglePoll}
+        hasPoll={!!state.poll}
+        onToggleQuiz={isQuoting ? undefined : () => actions.setQuiz(state.quiz ? null : { topic: '', questions: [], pointsPerQuestion: 10 })}
+        hasQuiz={!!state.quiz}
+        onTagPeople={computed.hasImage && !comicMode ? () => setTaggerOpen(true) : undefined}
+        tagCount={state.photoTags.length}
+        onToggleComic={isQuoting ? undefined : () => (comicMode ? exitComicMode() : selectComicMode())}
+        isComic={comicMode}
+        onOpenPainting={isQuoting ? undefined : () => setPaintingOpen(true)}
+        onOpenFreeImages={() => setFreeImagesTarget('post')}
+        onToggleContentWarning={() => actions.setContentWarning(state.contentWarning === null ? '' : null)}
+        hasContentWarning={state.contentWarning !== null}
+      />
+      {paintingOpen && (
+        <Suspense fallback={null}>
+          <PaintingStudio
+            onClose={() => setPaintingOpen(false)}
+            onDone={(file) => {
+              setPaintingOpen(false);
+              actions.addImageFiles([file]);
+            }}
+          />
+        </Suspense>
+      )}
+      {taggerOpen && (
+        <PhotoTagger
+          open={taggerOpen}
+          onOpenChange={setTaggerOpen}
+          images={state.media.filter((m) => m.type === 'image').map((m) => m.preview)}
+          value={state.photoTags}
+          onDone={(tags) => actions.setPhotoTags(tags)}
+        />
+      )}
+      {previewOpen && (
+      <Suspense fallback={null}>
+      <PostPreviewSheet
+        open={previewOpen}
+        onOpenChange={setPreviewOpen}
+        text={state.text}
+        title={state.titleText}
+        media={state.media}
+      />
+      </Suspense>
+      )}
+      </>
+      )}
+      {isOpen && freeImagesTarget && (
+        <Suspense fallback={null}>
+          <FreeImagesSheet
+            open
+            onOpenChange={open => {
+              if (open) return;
+              setFreeImagesTarget(null);
+              if (freeImagesTarget === 'article-cover') afterNextFrame(() => articleFreeImagesButton.current?.focus());
+            }}
+            initialQuery={freeImagesTarget === 'post' ? state.text : undefined}
+            forArticleCover={freeImagesTarget === 'article-cover'}
+            onPick={(file, credit) => {
+              if (freeImagesTarget === 'article-cover') {
+                changeArticleCover(file);
+                return;
+              }
+              actions.addImageFiles([file]);
+              if (credit && !state.text.includes(credit)) actions.setText(state.text ? `${state.text}\n\n${credit}` : credit);
+            }}
+          />
+        </Suspense>
+      )}
+    </>
+  );
+
+  const canDismiss = () => !state.isCameraModalOpen && !mediaFullscreenOpen && !freeImagesTarget;
+  const closePendingRef = useRef(false);
+  const handleDrawerChange = (open: boolean) => {
+    if (!open && !canDismiss()) return;
+    if (open || closePendingRef.current) return;
+    // A frame late, so a swipe's slide-out is already running on the
+    // compositor before the close re-renders the page around it.
+    closePendingRef.current = true;
+    afterNextFrame(() => {
+      closePendingRef.current = false;
+      closeKeepingDraft();
+    });
+  };
+  // A pull that is still moving down when let go closes in one motion.
+  const flick = useSheetFlickClose(() => handleDrawerChange(false), canDismiss);
+
+  // Use Drawer/Sheet on ALL devices (mobile, tablet, desktop)
+  return (
+    <>
+      <Drawer
+        open={isOpen}
+        onOpenChange={handleDrawerChange}
+        repositionInputs={false}
+        dismissible={!mediaFullscreenOpen && !freeImagesTarget}
+        onRelease={flick.onRelease}
+        // Slide away from wherever the finger let go, instead of vanishing.
+        animatedExit
+      >
+        <DrawerContent
+          glass
+          hideHandle
+          data-post-modal
+          onPointerDown={flick.onPointerDown}
+          onPointerMove={flick.onPointerMove}
+          style={keyboardStyle ?? undefined}
+          // The composer opens over the feed it posts into, so on desktop it
+          // takes that column rather than the whole viewport — see `column` in
+          // ui/drawer.
+          column
+          className={cn(
+            "max-h-[90dvh]",
+            // The article writer is its own page, so it takes the full sheet.
+            articleMode && "h-[92dvh] max-h-[92dvh] flex flex-col",
+            state.isCameraModalOpen && "invisible pointer-events-none"
+          )}
+        >
+          <VisuallyHidden>
+            <DrawerTitle>{isQuoting ? _copy("copy.6570c039b004", { defaultValue: "Quote post" }) : _copy("copy.2530702b87b0", { defaultValue: "Create a post" })}</DrawerTitle>
+          </VisuallyHidden>
+          {modalContent}
+        </DrawerContent>
+      </Drawer>
+
+      <CameraCaptureModal
+        isOpen={state.isCameraModalOpen}
+        onClose={actions.closeCameraCapture}
+        onVideoRecorded={actions.handleCameraVideoRecorded}
+        onPhotoCaptured={actions.handleCameraPhotoCaptured}
+      />
+
+      <SoundPicker
+        isOpen={soundPickerOpen}
+        onClose={() => setSoundPickerOpen(false)}
+        // A new song keeps the levels the poster already set.
+        onSelect={(sound) => selectSound(attachedSound ? { ...sound, url: withSoundMix(sound.url, soundMix(attachedSound.url)) } : sound)}
+        currentSound={attachedSound}
+        clipSeconds={state.media.find(m => m.type === 'video')?.duration}
+      />
+
+      {planDrawerOpen && (
+        <Suspense fallback={null}>
+          <CreatePlanModal
+            open={planDrawerOpen}
+            onOpenChange={setPlanDrawerOpen}
+            onCreated={() => actions.setIsSubscribersOnly(true)}
+          />
+        </Suspense>
+      )}
+    </>
+  );
+}
+
+export function PostModal(props: PostModalProps) {
+  const draftScope = props.quotedPost
+    ? `post:quote:${props.quotedPost.tokenId}`
+    : props.initialText ? `post:share:${props.initialText}` : 'post:new';
+  const accountKey = useAccountDraftKey(draftScope);
+  return <PostModalForAccount key={accountKey ?? 'guest'} {...props} draftScope={draftScope} />;
+}

@@ -1,0 +1,48 @@
+{
+  "webcredentials": { "apps": ["J8BTYL3PDK.io.dehub.mobile", "FU4BL8RC2L.io.dehub.mobile"] },
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["J8BTYL3PDK.io.dehub.mobile", "FU4BL8RC2L.io.dehub.mobile"],
+        "components": [
+          { "/": "/app", "comment": "App home" },
+          { "/": "/app/*", "comment": "Posts, communities, events, messages, notifications, leaderboard" },
+          { "/": "/newpost/*", "comment": "Off-chain post slug" },
+          { "/": "/stage/*", "comment": "Stage invite by uuid" },
+          { "/": "/stages", "comment": "Stages hub" },
+          { "/": "/stages/*", "comment": "Stage invite by short id" },
+          { "/": "/packs", "comment": "Emoji, sticker and GIF packs hub" },
+          { "/": "/packs/*", "comment": "One pack by slug" },
+          { "/": "/creators", "comment": "Creator application" },
+          { "/": "/raffle", "comment": "Prize draws" },
+          { "/": "/cinema", "comment": "Cinema search" },
+          { "/": "/cinema/*", "comment": "One film or series" },
+          { "/": "/creator/flow", "comment": "Your Creator Flows" },
+          { "/": "/creator/flow/*", "comment": "One shared Creator Flow" },
+          { "/": "/builder", "comment": "App builder" },
+          { "/": "/builder/*", "comment": "One shared app preview" },
+          { "/": "/launchpad", "comment": "Launchpad" },
+          { "/": "/launchpad/*", "comment": "One coin, or create a coin" },
+          { "/": "/bridge", "comment": "Bridge" },
+          { "/": "/depin", "comment": "DePin network" },
+          { "/": "/agents", "comment": "AI agents" },
+          { "/": "/arcade/kings-gambit/online", "comment": "King's Gambit online lobby" },
+          { "/": "/apps", "comment": "Mini app store" },
+          { "/": "/apps/*", "comment": "One mini app" },
+          { "/": "/connect", "comment": "Connect AI" },
+          { "/": "/connect/*", "comment": "One assistant guide" },
+          { "/": "/premium", "comment": "Premium" },
+          { "/": "/pricing", "comment": "AI plans" },
+          { "/": "/work/history", "comment": "Bounty history" },
+          { "/": "/work/disputes", "comment": "Bounty disputes" },
+          { "/": "/post/*", "comment": "One post" },
+          { "/": "/posts/*", "comment": "One post, short form, and its author thread" },
+          { "/": "/bounty/*", "comment": "One bounty" },
+          { "/": "/communities/*", "comment": "One community, or a community invite" },
+          { "/": "/events/*", "comment": "One event" },
+          { "/": "/r/*", "comment": "Invite link" }
+        ]
+      }
+    ]
+  }
+}

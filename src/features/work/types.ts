@@ -1,0 +1,119 @@
+/** A bounty failure message already put into the reader's language. */
+export class WorkCopyError extends Error {}
+
+export type WorkJobType = 'shill' | 'clipping' | 'contract';
+export type WorkCurrency = 'DHB' | 'USDC';
+export type WorkPlatform = 'x' | 'youtube' | 'instagram' | 'tiktok' | 'facebook' | 'reddit' | 'other';
+export type WorkJobStatus = 'draft' | 'open' | 'in_progress' | 'completed' | 'disputed' | 'cancelled' | 'expired';
+export type WorkAppStatus = 'pending' | 'awarded' | 'rejected' | 'withdrawn';
+export type WorkSubmissionStatus = 'pending' | 'approved' | 'rejected' | 'paid';
+export type WorkDisputeStatus = 'open' | 'resolved_worker' | 'resolved_poster' | 'resolved_split';
+export type WorkReviewRole = 'poster' | 'worker';
+
+export interface WorkJob {
+  id: string;
+  /** Public URL number — the canonical share form is /bounty/<job_number>. */
+  job_number: number;
+  onchain_job_id: number | null;
+  poster_address: string;
+  job_type: WorkJobType;
+  title: string;
+  description: string;
+  cover_image_url: string | null;
+  tags: string[];
+  platform: WorkPlatform | null;
+  target_url: string | null;
+  currency: WorkCurrency;
+  price_per_unit: number;
+  max_units: number;
+  units_approved: number;
+  total_budget: number;
+  funded_amount: number;
+  released_amount: number;
+  deadline: string | null;
+  awarded_worker_address: string | null;
+  status: WorkJobStatus;
+  fund_tx_hash: string | null;
+  funding_state?: string;
+  pending_fund_tx_hash?: string | null;
+  refunded_amount?: number;
+  boost_expires_at: string | null;
+  view_count: number;
+  application_count: number;
+  submission_count: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface WorkApplication {
+  id: string;
+  job_id: string;
+  applicant_address: string;
+  cover_letter: string;
+  proposed_amount: number | null;
+  status: WorkAppStatus;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface WorkApplicationComment {
+  id: string;
+  job_id: string;
+  application_id: string;
+  author_address: string;
+  body: string;
+  created_at: string;
+}
+
+export interface WorkSubmission {
+  id: string;
+  job_id: string;
+  worker_address: string;
+  proof_url: string;
+  proof_text: string;
+  platform: WorkPlatform | null;
+  view_count_cached: number;
+  last_polled_at: string | null;
+  approval_status: WorkSubmissionStatus;
+  payout_amount: number;
+  gross_amount: number;
+  approved_units: number;
+  payout_state: 'unpaid' | 'signing' | 'broadcast' | 'confirmed';
+  payout_chain_id: number | null;
+  view_evidence_url: string | null;
+  payout_tx_hash: string | null;
+  rejection_reason: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface WorkReview {
+  id: string;
+  job_id: string;
+  reviewer_address: string;
+  reviewee_address: string;
+  reviewer_role: WorkReviewRole;
+  rating: number;
+  comment: string;
+  created_at: string;
+}
+
+export interface WorkDispute {
+  id: string;
+  job_id: string;
+  opened_by_address: string;
+  reason: string;
+  evidence_url: string | null;
+  status: WorkDisputeStatus;
+  /** Singular, and `resolution_tx_hash` below — these are the real column
+   *  names. The type said `resolution_notes` / `resolve_tx_hash` for months and
+   *  nothing caught it, because the table is reached through an `as any` cast. */
+  resolution_note: string | null;
+  resolution_tx_hash: string | null;
+  resolved_by_address: string | null;
+  resolved_at: string | null;
+  worker_amount: number | null;
+  poster_refund: number | null;
+  created_at: string;
+  updated_at: string;
+}

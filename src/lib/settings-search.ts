@@ -1,0 +1,324 @@
+/**
+ * Settings search
+ * ===============
+ * Powers the search box at the top of the Settings page. A hit does three
+ * things: switches to the tab the setting lives in, scrolls that setting clear
+ * of the sticky header, and flashes it so the reader can see which control
+ * they were sent to. Before this, selecting a hit only switched tab and left
+ * you scanning a long page for the row you had just searched for.
+ *
+ * The index is static rather than a live DOM scan because only the open tab is
+ * mounted — there is nothing to scan in the other nine. Every entry's `anchor`
+ * must match a `data-setting-anchor` in SettingsPage (or in a section
+ * component it renders); an entry whose anchor is missing degrades to a plain
+ * tab switch rather than breaking.
+ *
+ * Matching runs against three strings so search works the same in every
+ * language:
+ *   - `labelKey` — what the row actually renders, so a reader searching in
+ *     their own language matches. Every key here is already used by the page,
+ *     with the English label as its fallback; a row without a named key uses
+ *     the shared `copy.*` key for its English label.
+ *   - `label` — the English text, always matched too, so English terms keep
+ *     working for readers on a translated UI.
+ *   - `keywords` — what people type instead of the label ("dark mode" for
+ *     Theme, "2fa" for Two-Factor, "banner" for Cover Image).
+ */
+
+import type { TFunction } from 'i18next';
+
+import { getDocumentScrollTop, scrollDocumentTo, scrollDocumentToSmooth } from '@/lib/document-scroll';
+
+export interface SettingsSearchEntry {
+  /** Tab the setting lives in — one of SettingsPage's `tabs` values. */
+  tab: string;
+  /** Matches a `data-setting-anchor` attribute on the row or section. */
+  anchor: string;
+  /** English label, and the fallback for `labelKey`. */
+  label: string;
+  /** i18n key the row renders with, if it has one. */
+  labelKey?: string;
+  /** Extra English terms people search for instead of the label. */
+  keywords?: string;
+}
+
+export const SETTINGS_SEARCH_INDEX: SettingsSearchEntry[] = [
+  // Profile
+  { tab: 'profile', anchor: 'cover-image', label: 'Cover Image', labelKey: 'copy.f94183029020', keywords: 'banner header photo' },
+  { tab: 'profile', anchor: 'profile-picture', label: 'Profile Picture', labelKey: 'settings.profilePicture', keywords: 'avatar photo pfp' },
+  { tab: 'profile', anchor: 'display-name', label: 'Display Name', labelKey: 'settings.displayName', keywords: 'nickname rename' },
+  { tab: 'profile', anchor: 'username', label: 'Username', labelKey: 'settings.username', keywords: 'handle rename @' },
+  { tab: 'profile', anchor: 'bio', label: 'Bio', labelKey: 'settings.bio', keywords: 'about description' },
+  { tab: 'profile', anchor: 'profile-song', label: 'Profile song', labelKey: 'profileSong.title', keywords: 'music song audio track tune anthem play on my profile myspace autoplay' },
+  { tab: 'profile', anchor: 'badge-museum', label: 'Badge Museum', labelKey: 'badgeMuseum.title', keywords: 'badges milestones museum medals trophies achievements show on my profile hide view my badges progress' },
+  { tab: 'profile', anchor: 'social-links', label: 'Social Links', labelKey: 'settings.socialLinks', keywords: 'twitter x instagram tiktok youtube discord telegram facebook github verified followers follower count total reach audience' },
+  { tab: 'profile', anchor: 'profile-fields', label: 'Profile fields', labelKey: 'profileFields.title', keywords: 'website pronouns links verify rel me metadata fields' },
+  { tab: 'profile', anchor: 'fediverse', label: 'Fediverse', labelKey: 'fediverse.title', keywords: 'mastodon activitypub federation handle follow decentralised' },
+  { tab: 'profile', anchor: 'connected-apps', label: 'Connected apps', labelKey: 'mastodonApps.connectedTitle', keywords: 'mastodon ivory tusky elk ice cubes apps sign in signed in oauth revoke remove access' },
+  { tab: 'profile', anchor: 'sign-in', label: 'Sign-in', labelKey: 'settings.signIn', keywords: 'email login password recovery' },
+  { tab: 'profile', anchor: 'ens', label: 'ENS', labelKey: 'settings.ensSection', keywords: 'ens domain eth name verified handle' },
+  { tab: 'profile', anchor: 'stream-key', label: 'Stream key', labelKey: 'settings.streamKey.section', keywords: 'obs encoder rtmp stream key ingest server xbox twitch aircast go live broadcast' },
+  { tab: 'profile', anchor: 'twitch-mirror', label: 'Twitch mirroring', labelKey: 'twitchMirror.title', keywords: 'twitch mirror relay console xbox ps5 playstation aircast automatic stream broadcast' },
+  { tab: 'profile', anchor: 'badge-delegation', label: 'Badge delegation', labelKey: 'settings.badgeDelegation', keywords: 'badge lend borrow tier delegate' },
+  { tab: 'profile', anchor: 'profiles', label: 'Profiles', labelKey: 'settings.profiles', keywords: 'accounts switch add account multiple' },
+  { tab: 'profile', anchor: 'creator', label: 'Creator', labelKey: 'commandCentre.creator', keywords: 'creator studio create image video song music 3d generate' },
+  { tab: 'profile', anchor: 'connect-ai', label: 'Connect AI', labelKey: 'nav.connectAi', keywords: 'mcp ai assistant chatgpt claude cursor connector api key token agents bot automation' },
+
+  // Appearance
+  { tab: 'appearance', anchor: 'theme', label: 'Theme', labelKey: 'settings.theme', keywords: 'dark light mode skin cosmic jungle osaka winter island hacker horror minimal appearance' },
+  { tab: 'appearance', anchor: 'theme-color', label: 'Theme Color', labelKey: 'settings.themeColor', keywords: 'hue colour accent brand rainbow' },
+  { tab: 'appearance', anchor: 'dim-lights', label: 'Dim Lights', labelKey: 'settings.dimLights', keywords: 'brightness blue light night filter' },
+  { tab: 'appearance', anchor: 'jungle-mood', label: 'Time of day', labelKey: 'jungleMood.title', keywords: 'jungle day evening night dusk dark light mode sun moon' },
+  { tab: 'appearance', anchor: 'language', label: 'Language', labelKey: 'settings.language', keywords: 'translate locale english' },
+  { tab: 'appearance', anchor: 'feed-layout', label: 'Feed Layout', labelKey: 'settings.feedLayout', keywords: 'compact comfortable sidebar density' },
+  { tab: 'appearance', anchor: 'menu-layout', label: 'Menu layout', labelKey: 'settings.menuLayout', keywords: 'menu tabs sections folders groups categories buttons icons grid organise' },
+  { tab: 'appearance', anchor: 'default-feed', label: 'Default feed', labelKey: 'settings.defaultFeed', keywords: 'home shorts videos images music audio live open start tab' },
+  { tab: 'appearance', anchor: 'feed-toggles', label: 'Reset feed toggles', labelKey: 'settings.feedToggles', keywords: 'filters sort default remember clear' },
+  { tab: 'appearance', anchor: 'chat-own-bubble', label: 'Bubbles for my messages in Public Chat', labelKey: 'settings.chatOwnBubble', keywords: 'chat bubble own messages mine general public global colour highlight box card' },
+  { tab: 'appearance', anchor: 'messages-pills', label: 'Pill tabs in Messages', labelKey: 'settings.messagesPills', keywords: 'messages inbox chat list tabs pills chips filled black white round unread badge count redesign clean' },
+  { tab: 'appearance', anchor: 'feed-separator', label: 'Bento cards', labelKey: 'settings.feedSeparatorBento', keywords: 'bento cards line divider separator borders spacing posts feed chat messages inbox plain list' },
+  { tab: 'appearance', anchor: 'post-landing', label: 'After you post', labelKey: 'settings.postLanding', keywords: 'animation post ghost morph pill drop motion' },
+  { tab: 'appearance', anchor: 'chat-text-size', label: 'Chat text size', labelKey: 'settings.chatTextSize', keywords: 'font size bigger larger text zoom accessibility vision read chat messages small' },
+  { tab: 'appearance', anchor: 'login-look', label: 'Sign-in screen', labelKey: 'settings.loginLook.title', keywords: 'login sign in screen logo animation look tube tv vhs led wall hologram neon glow 3d flat plain retro scan lines slogan' },
+  { tab: 'appearance', anchor: 'arrival-look', label: 'After you sign in', labelKey: 'settings.arrivalLook.title', keywords: 'after sign in login welcome animation rift trace tune in tv static deck cards glass drop arrival loading profile photo' },
+  { tab: 'appearance', anchor: 'chat-delete-choice', label: 'When you delete a message', labelKey: 'settings.chatDeleteChoice', keywords: 'delete message chat dm remove for me everyone both remember choice ask' },
+  { tab: 'appearance', anchor: 'chat-reaction-style', label: 'Reactions in chat', labelKey: 'settings.chatReactionStyle', keywords: 'reaction emoji animation motion fly pop burst off chat dm live moving animate' },
+  { tab: 'appearance', anchor: 'default-profile-tab', label: 'Default profile tab', labelKey: 'settings.defaultProfileTab', keywords: 'landing tab visitors' },
+  { tab: 'appearance', anchor: 'default-profile-view', label: 'Profile posts layout', labelKey: 'settings.defaultProfileView', keywords: 'grid list view layout profile posts tiles visitors' },
+  { tab: 'appearance', anchor: 'reader-profile-view', label: 'Open other profiles as', labelKey: 'settings.readerProfileView', keywords: 'grid list view layout other profiles open everyone' },
+  { tab: 'appearance', anchor: 'autoplay', label: 'Auto-play', labelKey: 'settings.autoPlay', keywords: 'autoplay video play automatically' },
+  { tab: 'appearance', anchor: 'autoplay-muted', label: 'Start autoplay muted', labelKey: 'settings.autoPlayMuted', keywords: 'autoplay mute muted sound audio silent quiet volume' },
+  { tab: 'appearance', anchor: 'data-saver', label: 'Data Saver', labelKey: 'settings.dataSaver', keywords: 'bandwidth quality mobile data' },
+  { tab: 'appearance', anchor: 'show-animations', label: 'Show Animations', labelKey: 'settings.showAnimations', keywords: 'motion reduce effects' },
+  { tab: 'appearance', anchor: 'shorts', label: 'Shorts', labelKey: 'settings.shortsEnabled', keywords: 'shorts tab hide short videos' },
+  { tab: 'appearance', anchor: 'left-handed', label: 'Left-handed mode', labelKey: 'settings.leftHanded', keywords: 'left hand lefty reactions like thumb mirror' },
+
+  // Notifications
+  { tab: 'notifications', anchor: 'email-notifications', label: 'Email Notifications', labelKey: 'settings.emailNotifications', keywords: 'email inbox' },
+  { tab: 'notifications', anchor: 'browser-notifications', label: 'Browser Notifications', labelKey: 'settings.browserNotifications', keywords: 'push desktop permission alerts' },
+  { tab: 'notifications', anchor: 'notify-show-count', label: 'Show the number on the bell', labelKey: 'settings.notificationShowCount', keywords: 'badge count unread number bell red dot' },
+  { tab: 'notifications', anchor: 'messages-show-count', label: 'Show the number on Messages', labelKey: 'settings.messagesShowCount', keywords: 'badge count unread number messages chat envelope red dot dms' },
+  { tab: 'notifications', anchor: 'notification-filters', label: 'Filter notifications', labelKey: 'notificationFilters.title', keywords: 'filter strangers new accounts spam followers people you follow mute' },
+  { tab: 'notifications', anchor: 'notify-likes', label: 'Likes', labelKey: 'settings.likes', keywords: 'reactions hearts' },
+  { tab: 'notifications', anchor: 'notify-liked-request-completion', label: 'Notify me when a liked request is completed.', labelKey: 'settings.notifyLikedRequestCompletion', keywords: 'build feature shipped request alert' },
+  { tab: 'notifications', anchor: 'notify-comments', label: 'Comments', labelKey: 'settings.comments' },
+  { tab: 'notifications', anchor: 'private-message-push-only', label: 'Private messages: push only', labelKey: 'settings.privateMessagePushOnly', keywords: 'direct message dm alerts inbox history' },
+  { tab: 'notifications', anchor: 'notify-new-followers', label: 'New Followers', labelKey: 'settings.newFollowers', keywords: 'follows' },
+  { tab: 'notifications', anchor: 'notify-comment-replies', label: 'Comment Replies', labelKey: 'copy.68be60ea70c8', keywords: 'replies' },
+  { tab: 'notifications', anchor: 'notify-mentions', label: 'Mentions', labelKey: 'copy.6f32e692ede0', keywords: 'tagged @' },
+  { tab: 'notifications', anchor: 'notify-tips', label: 'Tips Received', labelKey: 'copy.b9c1fb1d8de8', keywords: 'tips dhb earnings' },
+  { tab: 'notifications', anchor: 'notify-subscribers', label: 'New Subscribers', labelKey: 'copy.a0ce07fbc726', keywords: 'subscriptions plan' },
+  { tab: 'notifications', anchor: 'notify-ppv', label: 'PPV Purchases', labelKey: 'copy.dbc6e9280cb5', keywords: 'pay per view purchases sales' },
+  { tab: 'notifications', anchor: 'notify-livestream', label: 'Livestream Start', labelKey: 'copy.36389cced6a5', keywords: 'live stream going live' },
+  { tab: 'notifications', anchor: 'notify-milestones', label: 'Milestones', labelKey: 'copy.39c33dc2375f', keywords: 'achievements' },
+  { tab: 'notifications', anchor: 'notify-account-alerts', label: 'Account Alerts', labelKey: 'copy.1d3358ba19cc', keywords: 'security login alerts' },
+  { tab: 'notifications', anchor: 'notify-announcements', label: 'Announcements', labelKey: 'copy.fe02680f2479', keywords: 'platform updates news' },
+  { tab: 'notifications', anchor: 'public-chat-alerts', label: 'Public chat', labelKey: 'settings.publicChatAlerts', keywords: 'chat room global alerts rate limit per hour raid spam' },
+  { tab: 'notifications', anchor: 'buy-bot', label: 'Buy Bot Alerts', labelKey: 'copy.62bdeec861d8', keywords: 'chat bot purchases hide' },
+  { tab: 'notifications', anchor: 'quiet-hours', label: 'Quiet Hours', labelKey: 'settings.quietHours', keywords: 'silence mute schedule night' },
+
+  // Privacy
+  { tab: 'privacy', anchor: 'private-account', label: 'Private Account', labelKey: 'settings.privateAccount', keywords: 'private lock approve followers requests' },
+  { tab: 'privacy', anchor: 'private-balance', label: 'Hide badge and balance', labelKey: 'copy.e3043f1c05b3' },
+  { tab: 'privacy', anchor: 'show-online', label: "Show when I'm online", labelKey: 'settings.showOnline', keywords: 'online status presence green dot active messages' },
+  { tab: 'privacy', anchor: 'show-last-seen', label: 'Show when I was last seen', labelKey: 'settings.showLastSeen', keywords: 'last seen active ago online status privacy son görülme son görünme görülme ultima vez visto vu dernière connexion laatst gezien آخر ظهور' },
+  { tab: 'privacy', anchor: 'show-likes', label: 'Show my likes to everyone', labelKey: 'settings.showLikes', keywords: 'likes liked posts thumbs up hearts profile tab public private hide' },
+  { tab: 'privacy', anchor: 'show-followers-list', label: 'Show who follows me', labelKey: 'settings.showFollowersList', keywords: 'followers list hide private who follows' },
+  { tab: 'privacy', anchor: 'show-following-list', label: 'Show who I follow', labelKey: 'settings.showFollowingList', keywords: 'following list hide private who i follow' },
+  { tab: 'privacy', anchor: 'show-dislikes', label: 'Show my dislikes to everyone', labelKey: 'settings.showDislikes', keywords: 'dislikes thumbs down disliked posts profile tab public private' },
+  { tab: 'privacy', anchor: 'new-member', label: 'Show me as a new member', labelKey: 'settings.showAsNewMember', keywords: 'new member badge welcome' },
+  { tab: 'privacy', anchor: 'follow-visibility', label: 'Show my follower numbers', labelKey: 'settings.showFollowCounts', keywords: 'followers following hide counts numbers visibility' },
+  { tab: 'privacy', anchor: 'default-post-visibility', label: 'Default Post Visibility', labelKey: 'settings.defaultPostVisibility', keywords: 'public private posts' },
+  { tab: 'privacy', anchor: 'ai-scraping', label: 'Allow AI training', labelKey: 'settings.aiScraping.label', keywords: 'ai scraping training llm crawler bot noai' },
+  { tab: 'privacy', anchor: 'two-factor', label: 'Two-Factor Auth', labelKey: 'settings.twoFactorAuth', keywords: '2fa mfa authenticator security' },
+  { tab: 'privacy', anchor: 'wallet-unlock', label: 'Wallet unlock prompt', labelKey: 'settings.walletUnlockInterval', keywords: 'password timeout lock wallet' },
+  { tab: 'privacy', anchor: 'biometric-unlock', label: 'Biometric unlock', labelKey: 'copy.18e709a14cb1', keywords: 'fingerprint face id passkey' },
+  { tab: 'privacy', anchor: 'wallet-recovery', label: 'Back up wallet', labelKey: 'copy.ef9ec257e675', keywords: 'backup recovery 12 words seed phrase mnemonic private key export' },
+  { tab: 'privacy', anchor: 'reset-wallet', label: 'Reset wallet', labelKey: 'resetWallet.title', keywords: 'reset replace change new wallet lost stolen hacked compromised safepal metamask move account' },
+  { tab: 'privacy', anchor: 'active-sessions', label: 'Active sessions', labelKey: 'settings.activeSessions', keywords: 'devices logged in sign out revoke' },
+  { tab: 'privacy', anchor: 'your-data', label: 'Your Data', labelKey: 'settings.yourData', keywords: 'export download import gdpr' },
+  { tab: 'privacy', anchor: 'blocked-users', label: 'Blocked Users', labelKey: 'copy.34e1447eb1e2', keywords: 'block unblock mute' },
+  { tab: 'privacy', anchor: 'allow-reactions', label: 'Allow reactions', labelKey: 'reactions.allow', keywords: 'react reaction remix live video creator duet stitch' },
+  { tab: 'privacy', anchor: 'muted-words', label: 'Muted words', labelKey: 'keywordFilters.title', keywords: 'filter keyword word phrase hide spoiler mute' },
+  { tab: 'privacy', anchor: 'geo-blocking', label: 'Geo-blocking', labelKey: 'settings.geoBlocking', keywords: 'country region restrict' },
+
+  // Content
+  { tab: 'content', anchor: 'posting-chain', label: 'Posting chain', labelKey: 'settings.postingChain', keywords: 'post mint blockchain network base bnb ethereum solana database' },
+  { tab: 'content', anchor: 'mature-content', label: 'Show Mature Content', labelKey: 'settings.matureContent', keywords: 'nsfw adult sensitive explicit filter' },
+  { tab: 'content', anchor: 'show-stories', label: 'Show Stories on Home', labelKey: 'settings.showStories', keywords: 'moments stories hide shelf hikaye hikâyeler' },
+  { tab: 'content', anchor: 'hide-watched', label: 'Hide watched videos', labelKey: 'settings.hideWatched', keywords: 'seen history feed' },
+  { tab: 'content', anchor: 'skip-segments', label: 'Skip sponsors and intros', labelKey: 'settings.skipSegments', keywords: 'sponsorblock ads intro' },
+  { tab: 'content', anchor: 'video-glitch', label: 'Glitch effect while videos load', labelKey: 'settings.videoGlitch', keywords: 'static noise scanlines animation loading' },
+  { tab: 'content', anchor: 'channel-speed', label: 'Playback speed per channel', labelKey: 'settings.channelSpeed', keywords: 'speed playback rate' },
+  { tab: 'content', anchor: 'feed-video-shape', label: 'Video size in your feed', labelKey: 'settings.feedVideoShape', keywords: 'tall vertical portrait long square widescreen wide shorter smaller bento card height' },
+  { tab: 'content', anchor: 'ad-load', label: 'Ads in your feed', labelKey: 'settings.adLoad', keywords: 'advertising frequency sponsored' },
+
+  // Messages
+  { tab: 'messages', anchor: 'allow-dms', label: 'Allow direct messages', labelKey: 'settings.allowDirectMessages', keywords: 'dm who can message inbox' },
+  { tab: 'messages', anchor: 'message-fee', label: 'Message fee', labelKey: 'settings.messageFee', keywords: 'paid dm price dhb' },
+  { tab: 'messages', anchor: 'free-dm-access', label: 'Free DM Access List', labelKey: 'settings.freeAccessList', keywords: 'free list bypass fee add remove username' },
+  { tab: 'messages', anchor: 'do-not-disturb', label: 'Do not disturb', labelKey: 'settings.doNotDisturb', keywords: 'dnd mute silence' },
+  { tab: 'messages', anchor: 'smart-replies', label: 'Suggested replies', labelKey: 'settings.smartReplies', keywords: 'ai smart reply drafts orb suggestions' },
+  { tab: 'messages', anchor: 'e2e-encryption', label: 'End-to-End Encryption', labelKey: 'settings.e2eEncryption', keywords: 'encrypted secure' },
+
+  // Assets
+  { tab: 'assets', anchor: 'wallet-address', label: 'Wallet Address', labelKey: 'copy.f94ea474351a', keywords: 'address copy 0x' },
+  { tab: 'assets', anchor: 'dhb-balance', label: 'Token Balance', labelKey: 'settings.tokenBalance', keywords: 'dhb tokens coins balance' },
+  { tab: 'assets', anchor: 'wallet', label: 'Wallet', labelKey: 'copy.d1c9a01d57e9', keywords: 'wallet send receive' },
+  { tab: 'assets', anchor: 'gas-fees', label: 'Gas Fees', labelKey: 'copy.70f5f804b634', keywords: 'gas sponsored transaction fees' },
+  { tab: 'assets', anchor: 'tip-network', label: 'Tip network', labelKey: 'copy.39ea78d27b31', keywords: 'tipping chain base bnb network' },
+  { tab: 'assets', anchor: 'fractions', label: 'Fractions', labelKey: 'settings.fractionsOwn', keywords: 'shares owned' },
+  { tab: 'assets', anchor: 'owned-usernames', label: 'Owned Usernames', labelKey: 'settings.usernamesOwn', keywords: 'handles marketplace' },
+  { tab: 'assets', anchor: 'offers-made', label: 'Offers Made', labelKey: 'settings.offersMade', keywords: 'bids offers' },
+  { tab: 'multipost', anchor: 'multipost', label: 'Multi-posting', labelKey: 'multiPost.title', keywords: 'cross post crosspost share x twitter youtube facebook instagram tiktok linkedin threads pinterest reddit schedule credits' },
+
+  // Skills & characters
+  { tab: 'skills', anchor: 'skills', label: 'Skills', labelKey: 'settings.skills', keywords: 'ai skills library' },
+  { tab: 'characters', anchor: 'characters', label: 'Characters', labelKey: 'settings.characters', keywords: 'ai characters personas' },
+
+  // Support
+  { tab: 'support', anchor: 'report-bug', label: 'Report a Bug', labelKey: 'settings.reportBug', keywords: 'bug issue feedback support help' },
+  { tab: 'support', anchor: 'terms', label: 'Terms of Service', labelKey: 'settings.termsOfService', keywords: 'terms legal' },
+  { tab: 'support', anchor: 'privacy-policy', label: 'Privacy Policy', labelKey: 'settings.privacyPolicy', keywords: 'privacy legal' },
+  { tab: 'support', anchor: 'deactivate-account', label: 'Deactivate account', labelKey: 'accountDeactivation.title', keywords: 'deactivate disable pause hide break account' },
+  { tab: 'support', anchor: 'delete-account', label: 'Delete account', labelKey: 'accountDeletion.title', keywords: 'delete close remove account gdpr' },
+];
+
+export interface SettingsSearchHit extends SettingsSearchEntry {
+  /** The label as the reader sees it, in their language. */
+  displayLabel: string;
+}
+
+/**
+ * Rank matches so the closest label wins: a label that starts with the query
+ * beats one that merely contains it, and both beat a keyword-only hit. Without
+ * this, "the" surfaced "Theme" behind four unrelated rows and looked broken.
+ */
+export function searchSettings(query: string, t: TFunction, limit = 8): SettingsSearchHit[] {
+  const trimmed = query.trim().toLowerCase();
+  if (!trimmed) return [];
+  const terms = trimmed.split(/\s+/).filter(Boolean);
+
+  const scored: { hit: SettingsSearchHit; score: number; order: number }[] = [];
+
+  SETTINGS_SEARCH_INDEX.forEach((entry, order) => {
+    const displayLabel = entry.labelKey ? t(entry.labelKey, entry.label) : entry.label;
+    const labels = [displayLabel.toLowerCase(), entry.label.toLowerCase()];
+    const haystack = `${labels.join(' ')} ${(entry.keywords ?? '').toLowerCase()}`;
+
+    // Every word typed has to land somewhere, so "message fee" doesn't match
+    // every row with "message" in it.
+    if (!terms.every((term) => haystack.includes(term))) return;
+
+    let score = 4; // keyword-only hit
+    for (const label of labels) {
+      if (label === trimmed) score = Math.min(score, 0);
+      else if (label.startsWith(trimmed)) score = Math.min(score, 1);
+      else if (new RegExp(`\\b${escapeRegExp(trimmed)}`).test(label)) score = Math.min(score, 2);
+      else if (label.includes(trimmed)) score = Math.min(score, 3);
+    }
+
+    scored.push({ hit: { ...entry, displayLabel }, score, order });
+  });
+
+  return scored
+    .sort((a, b) => a.score - b.score || a.order - b.order)
+    .slice(0, limit)
+    .map((s) => s.hit);
+}
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+/* ------------------------------------------------------------------------ */
+/* Reveal                                                                    */
+/* ------------------------------------------------------------------------ */
+
+const FLASH_CLASS = 'settings-reveal-flash';
+/** How long the flash runs — must match the animation in index.css. */
+const FLASH_MS = 2200;
+/**
+ * How long to keep looking for the anchor. A tab that has to fetch before it
+ * renders (Profile blocks on the profile query) can take a second or two, and
+ * a search hit that silently did nothing is the bug this whole file fixes.
+ */
+const WAIT_MS = 6000;
+
+let revealToken = 0;
+let flashTimer: ReturnType<typeof setTimeout> | null = null;
+let flashed: HTMLElement | null = null;
+
+/**
+ * Bottom edge of the sticky settings header, in viewport coordinates.
+ * Pages stay mounted in the page cache, so a hidden page's header (e.g. the
+ * home feed's, 0px tall) can come first in the document; only a header that
+ * is actually on screen counts, or the setting lands under the visible one.
+ */
+function stickyHeaderBottom(): number {
+  let bottom = 0;
+  for (const header of Array.from(document.querySelectorAll<HTMLElement>('[data-feed-nav-outer]'))) {
+    const style = getComputedStyle(header);
+    if (style.position !== 'sticky' && style.position !== 'fixed') continue;
+    const rect = header.getBoundingClientRect();
+    if (rect.height === 0) continue;
+    bottom = Math.max(bottom, rect.bottom);
+  }
+  return bottom;
+}
+
+function scrollAnchorIntoView(el: HTMLElement, smooth: boolean): void {
+  const gap = stickyHeaderBottom() + 16;
+  const delta = el.getBoundingClientRect().top - gap;
+  if (Math.abs(delta) < 4) return;
+  const top = Math.max(0, getDocumentScrollTop() + delta);
+  if (smooth) scrollDocumentToSmooth(top);
+  else scrollDocumentTo(top);
+}
+
+/**
+ * Switch focus to one setting: scroll it clear of the sticky header and flash
+ * it once. Safe to call before the tab holding it has mounted — it polls for
+ * the anchor and gives up quietly if it never appears.
+ */
+export function revealSettingAnchor(anchor: string): void {
+  if (typeof document === 'undefined') return;
+  const token = ++revealToken;
+  const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
+  const selector = `[data-setting-anchor="${anchor.replace(/"/g, '\\"')}"]`;
+  const deadline = Date.now() + WAIT_MS;
+
+  const attempt = () => {
+    if (token !== revealToken) return;
+    const el = document.querySelector<HTMLElement>(selector);
+    if (!el) {
+      if (Date.now() < deadline) requestAnimationFrame(attempt);
+      return;
+    }
+
+    scrollAnchorIntoView(el, !reducedMotion);
+    // Tab content settles for a frame or two after mount (avatars, drawers,
+    // the swallow clip re-measuring), which can leave the first scroll short.
+    requestAnimationFrame(() => {
+      if (token === revealToken) scrollAnchorIntoView(el, !reducedMotion);
+    });
+    setTimeout(() => {
+      if (token === revealToken) scrollAnchorIntoView(el, !reducedMotion);
+    }, 350);
+
+    if (flashed) flashed.classList.remove(FLASH_CLASS);
+    if (flashTimer) clearTimeout(flashTimer);
+    // Restart the animation even when the same row is picked twice in a row.
+    el.classList.remove(FLASH_CLASS);
+    void el.offsetWidth;
+    el.classList.add(FLASH_CLASS);
+    flashed = el;
+    flashTimer = setTimeout(() => {
+      el.classList.remove(FLASH_CLASS);
+      if (flashed === el) flashed = null;
+      flashTimer = null;
+    }, FLASH_MS);
+  };
+
+  requestAnimationFrame(attempt);
+}

@@ -1,0 +1,141 @@
+import { createClient } from 'jsr:@supabase/supabase-js@2';
+import { corsHeaders } from '../_shared/cors.ts';
+import { maintenanceGate } from '../_shared/maintenance-auth.ts';
+
+const supabase = createClient(
+  Deno.env.get('SUPABASE_URL')!,
+  Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+);
+
+const BUCKET = 'ai-media-uploads';
+
+function b64ToBytes(b64: string): Uint8Array {
+  const bin = atob(b64);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return bytes;
+}
+
+Deno.serve(async (req) => {
+  if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
+  const denied = await maintenanceGate(req, async token => {
+    const { data, error } = await supabase.rpc('verify_maintenance_token', { p_action: 'migrate-ai-images-to-storage', p_token: token });
+    if (error) throw error;
+    return data === true;
+  });
+  if (denied) return denied;
+
+  const url = new URL(req.url);
+  const batch = Math.min(50, Math.max(1, Number(url.searchParams.get('batch') ?? 20)));
+
+  // Fetch a batch of rows whose image_url is a data URL (avoid big payloads: only id)
+  const { data: rows, error } = await supabase
+    .from('ai_messages')
+    .select('id, image_url')
+    .like('image_url', 'data:%')
+    .limit(batch);
+
+  if (error) {
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+
+  let migrated = 0;
+  const errors: Array<{ id: string; error: string }> = [];
+
+  for (const row of rows ?? []) {
+    try {
+      const dataUrl: string = row.image_url;
+      const match = /^data:(image\/[a-zA-Z0-9+.-]+);base64,(.*)$/.exec(dataUrl);
+      if (!match) throw new Error('not a data url');
+      const mime = match[1];
+      const b64 = match[2];
+      const bytes = b64ToBytes(b64);
+      const ext = mime.split('/')[1]?.split('+')[0] ?? 'png';
+      const path = `assistant/${row.id}.${ext}`;
+
+      const up = await supabase.storage.from(BUCKET).upload(path, bytes, {
+        contentType: mime,
+        upsert: true,
+      });
+      if (up.error) throw up.error;
+
+      const { data: pub } = supabase.storage.from(BUCKET).getPublicUrl(path);
+      const publicUrl = pub.publicUrl;
+
+      const upd = await supabase
+        .from('ai_messages')
+        .update({ image_url: publicUrl })
+        .eq('id', row.id);
+      if (upd.error) throw upd.error;
+
+      migrated++;
+    } catch (e) {
+      errors.push({ id: row.id, error: (e as Error).message });
+    }
+  }
+
+  let migratedAttached = 0;
+
+  const { data: attachedRows, error: attachedError } = await supabase
+    .from('ai_messages')
+    .select('id, attached_image')
+    .like('attached_image', 'data:%')
+    .limit(batch);
+
+  if (attachedError) {
+    return new Response(JSON.stringify({ error: attachedError.message }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+
+  for (const row of attachedRows ?? []) {
+    try {
+      const dataUrl: string = row.attached_image;
+      const match = /^data:(image\/[a-zA-Z0-9+.-]+);base64,(.*)$/.exec(dataUrl);
+      if (!match) throw new Error('not a data url');
+      const mime = match[1];
+      const b64 = match[2];
+      const bytes = b64ToBytes(b64);
+      const ext = mime.split('/')[1]?.split('+')[0] ?? 'png';
+      const path = `user/${row.id}.${ext}`;
+
+      const up = await supabase.storage.from(BUCKET).upload(path, bytes, {
+        contentType: mime,
+        upsert: true,
+      });
+      if (up.error) throw up.error;
+
+      const { data: pub } = supabase.storage.from(BUCKET).getPublicUrl(path);
+      const publicUrl = pub.publicUrl;
+
+      const upd = await supabase
+        .from('ai_messages')
+        .update({ attached_image: publicUrl })
+        .eq('id', row.id);
+      if (upd.error) throw upd.error;
+
+      migratedAttached++;
+    } catch (e) {
+      errors.push({ id: row.id, error: (e as Error).message });
+    }
+  }
+
+  const { count: remaining } = await supabase
+    .from('ai_messages')
+    .select('id', { count: 'exact', head: true })
+    .like('image_url', 'data:%');
+
+  const { count: remainingAttached } = await supabase
+    .from('ai_messages')
+    .select('id', { count: 'exact', head: true })
+    .like('attached_image', 'data:%');
+
+  return new Response(
+    JSON.stringify({ migrated, migratedAttached, errors, remaining, remainingAttached }),
+    { headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+  );
+});

@@ -1,0 +1,847 @@
+import { tokenLabel } from '@/lib/token-label';
+import { useTranslation as _useCopy } from 'react-i18next';
+import { useSurfaceDraft } from '@/hooks/use-surface-draft';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { DhbCoin } from '@/components/app/DhbAmount';
+import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { CreditCard, Loader2, AlertCircle, Zap, CheckCircle2, XCircle, TrendingUp, Activity, Package } from "lucide-react";
+import Wallet from "@/components/ui/cut-icons/wallet";
+import Check from "@/components/ui/cut-icons/check";
+
+import Search from "@/components/ui/cut-icons/search";
+import Send from "@/components/ui/cut-icons/send";
+
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { useAuth } from '@/contexts/AuthContext';
+import { useAppTheme } from '@/contexts/ThemeContext';
+import { cn } from '@/lib/utils';
+import { AuthGate } from '@/components/app/AuthGate';
+import { BadgeIcon } from '@/components/app/BadgeIcon';
+import { toast } from 'sonner';
+import { motion } from 'framer-motion';
+import { ShimmerHoverEffect } from '@/components/ui/shimmer-hover-effect';
+import { AppState } from '@/components/app/AppState';
+import { PageBody, PageIsland } from '@/components/app/page-kit/PageKit';
+import { useQuery, useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import {
+  getDPayPrice,
+  getDPayPriceByChain,
+  getAvailableTokens,
+  getAvailableGasTokens,
+  getTokenAvailableSupply,
+  createCheckoutSession,
+  getDPaySessionStatus,
+  getDPayTransactions,
+  getAllDPayTransactions,
+  getDPayTotal,
+  getBadgeDiscount,
+  type DPayToken,
+  type DPayTransaction,
+} from '@/lib/api/dpay';
+import dehubCoin from '@/assets/dehub-coin.png';
+import { LiquidGlassBubble } from '@/components/ui/liquid-glass-bubble';
+import { SEOHead } from '@/components/SEOHead';
+import { format } from 'date-fns';
+import { invalidateSelfBadgeBalance } from '@/hooks/use-self-badge-balance';
+import { NearIntentBuy } from '@/components/app/NearIntentBuy';
+import { isBuyRoute } from '@/lib/buy-route';
+import { DHB_SALES_PAUSED } from '@/lib/dhb-sales';
+import { TokenComingSoonPage } from '@/components/app/token-launch/TokenComingSoonPage';
+import { useGlobalDropZone } from '@/hooks/use-global-drop-zone';
+
+import { formatCount } from '@/lib/format-count';
+const PRESET_AMOUNTS = [0.5, 10, 25, 50, 100, 500];
+const MIN_DHB_PURCHASE_USD = 0.5;
+
+// BNB is off the gateway entirely — its float sits at zero, so buying there
+// only 406s. Base is the only chain with real supply and gas, so it's the
+// only one offered here rather than a picker with a dead option in it.
+const BASE_CHAIN_ID = 8453;
+
+type PaymentMethod = 'card' | 'crypto';
+
+// Stripe session and delivery states as the dpay backend actually writes them.
+// A delivery that has not been attempted is `not_sent`, never `pending` — the
+// old guard checked for `pending`, matched nothing, and fell through to
+// telling the buyer their payment had been received when it had not.
+const PAID_STRIPE = ['succeeded', 'complete', 'paid'];
+const DEAD_STRIPE = ['failed', 'canceled', 'cancelled', 'expired'];
+const DELIVERED = ['sent', 'completed', 'success'];
+const NOT_STARTED = ['', 'not_sent', 'pending', 'queued'];
+
+/**
+ * Buy Tokens while sales are closed: the token is launching soon, and anyone
+ * (signed in or not) can ask to be emailed when it does. The checkout below
+ * comes back when DHB_SALES_PAUSED is switched off.
+ */
+export default function BuyCoinsPage() {
+  if (DHB_SALES_PAUSED) return <TokenComingSoonPage path="/buy" />;
+  return <BuyCoinsCheckout />;
+}
+
+function BuyCoinsCheckout() {
+  const { t: _copy } = _useCopy();
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const queryClient = useQueryClient();
+  const { isAuthenticated, walletAddress } = useAuth();
+  const { theme, themeChoice } = useAppTheme();
+  const isLightTheme = (theme === 'light' || themeChoice === 'system-light');
+  const [selectedAmount, setSelectedAmount] = useState<number>(50);
+  const [customAmount, setCustomAmount] = useSurfaceDraft("pages/app/BuyCoinsPage.tsx:customAmount", '');
+  const [selectedToken] = useState<DPayToken | null>(null);
+  const selectedChainId = BASE_CHAIN_ID;
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(() => {
+    try { return localStorage.getItem('dehub.buy.method') === 'crypto' ? 'crypto' : 'card'; }
+    catch { return 'card'; }
+  });
+  useEffect(() => { try { localStorage.setItem('dehub.buy.method', paymentMethod); } catch { /* Storage may be disabled. */ } }, [paymentMethod]);
+
+  // Post-purchase state
+  const [purchaseStatus, setPurchaseStatus] = useState<'idle' | 'polling' | 'success' | 'failed' | 'expired'>('idle');
+  const [purchaseSessionId, setPurchaseSessionId] = useState<string | null>(null);
+  // The amount the gateway holds for this session, read off the session row
+  // while polling. Stripe sends the buyer back here as a fresh document, so by
+  // the time the purchase completes the amount picker is on its default again
+  // and the on-page estimate no longer describes what was bought.
+  const [purchasedTokens, setPurchasedTokens] = useState<number | null>(null);
+  const [txSearch, setTxSearch] = useSurfaceDraft("pages/app/BuyCoinsPage.tsx:txSearch", '');
+  const { openPostModal } = useGlobalDropZone();
+  const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Fetch available tokens
+  const { data: tokens, isLoading: tokensLoading } = useQuery({
+    queryKey: ['dpay', 'tokens'],
+    queryFn: getAvailableTokens,
+    enabled: isAuthenticated,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  // Fetch gas tokens
+  const { data: gasTokens } = useQuery({
+    queryKey: ['dpay', 'gasTokens'],
+    queryFn: getAvailableGasTokens,
+    enabled: isAuthenticated,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  // Fetch paginated platform purchase history (public)
+  const {
+    data: purchasePages,
+    isLoading: historyLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
+    queryKey: ['dpay', 'all-transactions'],
+    queryFn: ({ pageParam = 1 }) => getAllDPayTransactions({ page: pageParam, limit: 20 }),
+    getNextPageParam: (lastPage) => lastPage.hasMore ? lastPage.page + 1 : undefined,
+    initialPageParam: 1,
+    staleTime: 60_000,
+  });
+
+  const purchaseHistory = useMemo(
+    () => purchasePages?.pages.flatMap(p => p.transactions) ?? [],
+    [purchasePages]
+  );
+
+  const purchaseListRef = useRef<HTMLDivElement>(null);
+
+  // Fetch platform-wide stats
+  const { data: platformStats } = useQuery({
+    queryKey: ['dpay', 'total'],
+    queryFn: getDPayTotal,
+    enabled: isAuthenticated,
+    staleTime: 5 * 60_000,
+  });
+
+  // This page never unmounts (PersistentPageCache) — only poll supply/price
+  // while it's the active route.
+  const isBuyRouteActive = isBuyRoute(useLocation().pathname);
+
+  // Pre-fetch token supply so we can validate before checkout (prevents 406).
+  // Scoped to the selected chain — the gateway holds a separate float on each.
+  const { data: availableSupply } = useQuery({
+    queryKey: ['dpay', 'supply', 'DHB', selectedChainId],
+    queryFn: () => getTokenAvailableSupply('DHB', selectedChainId),
+    enabled: isAuthenticated,
+    staleTime: 2 * 60 * 1000,
+    refetchInterval: isBuyRouteActive ? 5 * 60 * 1000 : false,
+  });
+
+  // The buyer's staking-badge discount, resolved server-side so the quote
+  // here and the price the sale settles at are the same number.
+  const { data: badgeDiscount } = useQuery({
+    queryKey: ['dpay', 'badge-discount'],
+    queryFn: getBadgeDiscount,
+    enabled: isAuthenticated,
+    staleTime: 60 * 1000,
+  });
+  const discountRate = badgeDiscount?.rate ?? 0;
+
+  // Fetch chain-specific price
+  const { data: chainPriceData, isLoading: priceLoading } = useQuery({
+    queryKey: ['dpay', 'price', selectedChainId],
+    queryFn: () => getDPayPriceByChain(selectedChainId),
+    enabled: isAuthenticated,
+    staleTime: 2 * 60 * 1000,
+    refetchInterval: isBuyRouteActive ? 2 * 60 * 1000 : false,
+  });
+
+  // Fallback to general price if chain price fails
+  const { data: generalPriceData } = useQuery({
+    queryKey: ['dpay', 'price'],
+    queryFn: getDPayPrice,
+    enabled: isAuthenticated && !chainPriceData,
+    staleTime: 30 * 1000,
+  });
+
+
+  // Invalidate wallet balances helper
+  const refreshWalletBalances = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: ['wallet-tokens'] });
+    // Buying is the usual way someone crosses a badge threshold — draw the
+    // new tier now rather than on the next poll.
+    invalidateSelfBadgeBalance(queryClient);
+  }, [queryClient]);
+
+  // Poll for session status after Stripe checkout
+  const [pollingMessage, setPollingMessage] = useState(() => t('buyCoins.statusAwaitingPayment'));
+
+
+  const startPolling = useCallback((sessionId: string) => {
+    setPurchaseSessionId(sessionId);
+    setPurchasedTokens(null);
+    setPurchaseStatus('polling');
+    setPollingMessage(t('buyCoins.statusAwaitingPayment'));
+
+    // Clear any existing polling. A second checkout must not leave the first
+    // session's interval running — it would keep writing over this one's state.
+    if (pollingRef.current) clearInterval(pollingRef.current);
+
+    let attempts = 0;
+    // Stripe sessions expire after 30 minutes, and delivery can queue behind
+    // other transfers. Poll for the life of the session rather than giving up
+    // after three minutes with the spinner still on screen.
+    const maxAttempts = 1200; // 30 minutes at 1.5s intervals
+    let stripeConfirmed = false;
+
+    const stop = () => {
+      if (pollingRef.current) {
+        clearInterval(pollingRef.current);
+        pollingRef.current = null;
+      }
+    };
+
+    pollingRef.current = setInterval(async () => {
+      attempts++;
+      if (attempts > maxAttempts) {
+        stop();
+        setPurchaseStatus(stripeConfirmed ? 'success' : 'idle');
+        toast.info(
+          stripeConfirmed
+            ? t('buyCoins.statusStillArriving')
+            : t('buyCoins.statusNotPaid'),
+          { id: 'buy-status' },
+        );
+        refreshWalletBalances();
+        return;
+      }
+
+      try {
+        const status = await getDPaySessionStatus(sessionId);
+
+        // Captured on every poll, not just the delivered one, so the
+        // "still arriving" outcome below can still name the amount.
+        const tokensOnRow = Number(status.tokenReceived ?? status.approxTokensToReceive);
+        if (Number.isFinite(tokensOnRow) && tokensOnRow > 0) setPurchasedTokens(tokensOnRow);
+
+        const isEmpty = !!(status as { _empty?: boolean })?._empty;
+        const sendStatus = (status.tokenSendStatus || '').toLowerCase();
+        const stripeStatus = (status.status_stripe || '').toLowerCase();
+
+        const paid = PAID_STRIPE.includes(stripeStatus);
+        const dead = DEAD_STRIPE.includes(stripeStatus);
+        const delivered = DELIVERED.includes(sendStatus);
+        const deliveryStarted = !NOT_STARTED.includes(sendStatus);
+
+        // Terminal: the tokens are on chain.
+        if (delivered) {
+          stop();
+          setPurchaseStatus('success');
+          toast.success(t('buyCoins.statusDelivered') + ' 🎉', { id: 'buy-status' });
+          refreshWalletBalances();
+          return;
+        }
+
+        // Terminal: the payment was declined, cancelled or left to expire, or
+        // the payment landed and the transfer itself failed.
+        if (dead || sendStatus === 'failed' || sendStatus === 'cancelled') {
+          stop();
+          setPurchaseStatus(stripeStatus === 'expired' && !paid ? 'expired' : 'failed');
+          toast.error(
+            paid
+              ? t('buyCoins.statusDeliveryFailed')
+              : t('buyCoins.statusNotPaid'),
+            { id: 'buy-status' },
+          );
+          return;
+        }
+
+        // Not terminal. Say only what is actually true: until Stripe reports the
+        // session paid, no payment has been received, whatever row exists.
+        if (!paid) {
+          setPollingMessage(
+            isEmpty || attempts < 20
+              ? t('buyCoins.statusAwaitingPayment')
+              : t('buyCoins.statusConfirming'),
+          );
+          return;
+        }
+
+        if (!stripeConfirmed) {
+          stripeConfirmed = true;
+          toast.success(t('buyCoins.statusPaidToast'), { id: 'buy-status' });
+          refreshWalletBalances();
+        }
+        setPollingMessage(
+          deliveryStarted
+            ? t('buyCoins.statusPaidSending')
+            : t('buyCoins.statusPaidQueued'),
+        );
+      } catch (err) {
+        console.warn('[Buy] Polling error:', err);
+      }
+    }, 1500);
+  }, [refreshWalletBalances, t]);
+
+  // Cleanup polling on unmount
+  useEffect(() => {
+    return () => {
+      if (pollingRef.current) clearInterval(pollingRef.current);
+    };
+  }, []);
+
+  // Handle return from Stripe (via URL params)
+  useEffect(() => {
+    const paymentStatus = searchParams.get('payment');
+    const sessionId = searchParams.get('session_id');
+
+    if (paymentStatus === 'success' && sessionId) {
+      // Clear URL params
+      setSearchParams({}, { replace: true });
+      startPolling(sessionId);
+    } else if (paymentStatus === 'cancel') {
+      setSearchParams({}, { replace: true });
+      toast.info(_copy("copy.2dced6f368ad", { defaultValue: "Payment cancelled." }));
+    }
+  }, [searchParams, setSearchParams, startPolling]);
+
+  // Create checkout session mutation
+  const checkoutMutation = useMutation({
+    mutationFn: createCheckoutSession,
+    onSuccess: (data) => {
+      if (data.checkoutUrl) {
+        // Start polling immediately — user will complete in the new tab
+        if (data.sessionId) {
+          startPolling(data.sessionId);
+        }
+        window.open(data.checkoutUrl, '_blank');
+        toast.success(t('buyCoins.redirecting'));
+      } else if (data.sessionId) {
+        toast.success(t('buyCoins.sessionCreated'));
+      }
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || t('buyCoins.failedPurchase'));
+    },
+  });
+
+
+  const symbol = selectedToken?.symbol || 'DHB';
+  const displaySymbol = tokenLabel(symbol);
+  const priceData = chainPriceData || generalPriceData;
+  const effectiveAmount = customAmount ? Number(customAmount) : selectedAmount;
+  const rawPrice = priceData?.price || 0;
+  // Peg DHB price at $0.001 for fiat gateway
+  const listPrice = symbol === 'DHB' ? 0.001 : rawPrice;
+  // Badge holders buy below list, so the quote has to be struck at their
+  // price — the gateway prices the delivery the same way.
+  const tokenPrice = listPrice * (1 - discountRate);
+  const estimatedTokens = tokenPrice > 0 ? effectiveAmount / tokenPrice : 0;
+  const tokensWithoutDiscount = listPrice > 0 ? effectiveAmount / listPrice : 0;
+  const bonusTokens = estimatedTokens - tokensWithoutDiscount;
+  const isPending = checkoutMutation.isPending;
+  // The quote is the fallback for a session whose row was never seen.
+  const shareAmount = purchasedTokens ?? Math.floor(estimatedTokens);
+  const canShare = symbol === 'DHB' && shareAmount > 0;
+
+  const handleShareToFeed = () => {
+    // Pre-filled, not published: the composer still asks for the mint.
+    openPostModal(t('buyCoins.sharePostTemplate', {
+      amount: new Intl.NumberFormat(undefined, { maximumFractionDigits: 0 }).format(shareAmount),
+    }));
+  };
+
+  const handlePurchase = () => {
+    if (DHB_SALES_PAUSED) return;
+    if (!walletAddress) {
+      toast.error(t('buyCoins.walletNotConnected'));
+      return;
+    }
+    if (effectiveAmount < MIN_DHB_PURCHASE_USD) {
+      toast.error(t('buyCoins.minDhbPurchase'));
+      return;
+    }
+
+    const tokensToReceive = Math.floor(estimatedTokens);
+
+    {
+      // Pre-check available supply to avoid 406 from the checkout API
+      const supply = availableSupply ?? Infinity;
+      if (tokensToReceive > supply) {
+        toast.error(
+          _copy("copy.43b2600ae3fb", { defaultValue: "Only {{value1}} {{value2}} available. Please reduce your purchase amount.", value1: supply.toLocaleString(), value2: symbol })
+        );
+        return;
+      }
+
+      const webRedirect = `${window.location.origin}/app/buy?payment=success&session_id=__SESSION_ID__`;
+      checkoutMutation.mutate({
+        amount: effectiveAmount,
+        tokenSymbol: symbol,
+        walletAddress,
+        chainId: selectedChainId,
+        tokensToReceive,
+        redirect: webRedirect,
+      });
+    }
+  };
+
+  if (!isAuthenticated) {
+    return <AuthGate description={t('buyCoins.loginDescription')} />;
+  }
+
+  return (
+    <div className="min-h-screen">
+      <SEOHead title={_copy("copy.f130c6f67cb8", { defaultValue: "Buy: Purchase Tokens on Riftn" })} description={_copy("copy.dd108c142387", { defaultValue: "Buy tokens directly on Riftn with your credit card. Fast checkout, multiple chains supported, and tokens delivered to your wallet." })} url="https://riftn.com/buy" jsonLd={{ '@context': 'https://schema.org', '@type': 'WebPage', name: 'Buy Tokens on Riftn', url: 'https://riftn.com/buy', description: _copy("copy.307346d9e44b", { defaultValue: "Purchase tokens with credit card on Riftn." }), isPartOf: { '@type': 'WebSite', name: 'Riftn', url: 'https://riftn.com' } }} />
+      <h1 className="sr-only">{_copy("copy.b4681470578d", { defaultValue: "Riftn Buy Tokens — Decentralised Social Media, Censorship Resistant & Freedom of Speech" })}</h1>
+      <PageIsland back onBack={() => navigate(-1)} icon="buy" title={t('buyCoins.title')} />
+
+      <PageBody className="max-w-lg mx-auto">
+
+        {/* Amount Selection */}
+        <div data-page-bento data-kit-section className="bg-zinc-900 p-4 space-y-4">
+          <label className="text-sm text-zinc-400 block">{t('buyCoins.amountUsd')}</label>
+          
+          <div className="grid grid-cols-3 gap-2">
+            {PRESET_AMOUNTS.map((amount) => {
+              const isActive = selectedAmount === amount;
+              return (
+                <button
+                  key={amount}
+                  onClick={() => {
+                    setSelectedAmount(amount);
+                    setCustomAmount(String(amount));
+                  }}
+                  className={`relative py-3 rounded-xl font-medium transition-colors ${
+                    isActive ? 'text-white' : 'bg-zinc-800 text-white hover:bg-zinc-700'
+                  }`}
+                >
+                  {isActive && (
+                    <motion.div
+                      layoutId="buy-amount-toggle"
+                      className={cn(
+                        "absolute inset-0 rounded-xl bg-gradient-to-br from-white/20 via-white/10 to-white/5 backdrop-blur-xl border border-white/30",
+                        isLightTheme
+                          ? "shadow-[0_2px_8px_rgba(0,0,0,0.1),inset_0_1px_0_rgba(255,255,255,0.2),inset_0_-1px_0_rgba(255,255,255,0.05)]"
+                          : "shadow-[0_4px_16px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.4),inset_0_-1px_0_rgba(255,255,255,0.1)]"
+                      )}
+                      transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                    />
+                  )}
+                  <span className="relative z-[2]">${amount < 1 ? amount.toFixed(2) : amount}</span>
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="relative">
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 font-medium">$</span>
+            <Input
+              type="number"
+              placeholder={t('buyCoins.customAmount')}
+              value={customAmount}
+              onChange={(e) => {
+                setCustomAmount(e.target.value);
+                if (e.target.value) setSelectedAmount(0);
+              }}
+              className="pl-8 bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500 rounded-xl"
+            />
+          </div>
+
+          {effectiveAmount < MIN_DHB_PURCHASE_USD && effectiveAmount > 0 && (
+            <p className="text-amber-400 text-sm flex items-center gap-2">
+              <AlertCircle className="w-4 h-4" />
+              {t('buyCoins.minDhbPurchase')}
+            </p>
+          )}
+          {!DHB_SALES_PAUSED && paymentMethod === 'card' &&
+            availableSupply !== undefined &&
+            availableSupply !== Infinity &&
+            Math.floor(estimatedTokens) > availableSupply && (
+            <p className="text-red-400 text-sm flex items-center gap-2">
+              <AlertCircle className="w-4 h-4" />
+              {t('buyCoins.supplyWarning', { supply: availableSupply!.toLocaleString(), symbol: displaySymbol })}
+            </p>
+          )}
+        </div>
+
+        {/* Price Summary */}
+        <div data-page-bento data-kit-section className="bg-zinc-900 p-4 space-y-3">
+          <div>
+            <div className="flex items-center justify-between">
+              <span className="text-zinc-400">{t('buyCoins.youReceive')}</span>
+              <div className="flex items-center gap-2">
+                {priceLoading ? (
+                  <Loader2 className="w-4 h-4 animate-spin text-zinc-400" />
+                ) : (
+                  <>
+                    <img src={dehubCoin} alt={t('buyCoins.tokensUnit')} className="w-5 h-5" />
+                    <span className="text-white font-semibold text-lg">
+                      {estimatedTokens.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                    </span>
+                  </>
+                )}
+              </div>
+            </div>
+            {tokenPrice > 0 && (
+              <p className="text-xs text-zinc-500 mt-1 text-right">
+                1 {selectedToken?.symbol && selectedToken.symbol !== 'DHB' ? selectedToken.symbol : <DhbCoin label={t('buyCoins.tokensUnit')} />} ≈ ${tokenPrice.toFixed(5)}
+                {priceData?.change24h != null && (
+                  <span className={priceData.change24h >= 0 ? 'text-emerald-400 ml-2' : 'text-red-400 ml-2'}>
+                    {priceData.change24h >= 0 ? '+' : ''}{priceData.change24h.toFixed(2)}%
+                  </span>
+                )}
+              </p>
+            )}
+            {/* The figure above is priced off the full amount. Delivery is
+                computed from what Stripe actually settles — the card fee comes
+                off first — and 0.5% is held back as the ETH sent alongside so
+                the buyer can move their tokens. Roughly 4% between the two,
+                which reads as being short-changed unless it is stated. */}
+            {paymentMethod === 'card' && estimatedTokens > 0 && (
+              <p className="text-xs text-zinc-500 mt-1 text-right">
+                {t('buyCoins.feeNote')}
+              </p>
+            )}
+          </div>
+
+          {/* Badge holder discount */}
+          {discountRate > 0 && (
+            <div className="flex items-center justify-between border-t border-white/5 pt-3">
+              <span className="text-zinc-400 flex items-center gap-2">
+                <BadgeIcon badgeBalance={badgeDiscount?.badgeBalance} className="w-5 h-5" />
+                {t('buyCoins.badgeDiscount', {
+                  tier: badgeDiscount?.tier ?? '',
+                  percent: Math.round(discountRate * 100),
+                })}
+              </span>
+              <span className="text-emerald-400 font-semibold">
+                +{bonusTokens.toLocaleString(undefined, { maximumFractionDigits: 0 })} <DhbCoin label={t('buyCoins.tokensUnit')} />
+              </span>
+            </div>
+          )}
+
+          {/* Available Supply */}
+          {(DHB_SALES_PAUSED || (availableSupply !== undefined && availableSupply !== Infinity && availableSupply > 0)) && (
+            <div>
+              <div className="flex items-center justify-between">
+                <span className="text-zinc-400">{_copy("copy.4010422b82f8", { defaultValue: "Available to buy now" })}</span>
+                <div className="flex items-center gap-2">
+                  <img src={dehubCoin} alt={t('buyCoins.tokensUnit')} className="w-5 h-5" />
+                  <span className="text-white font-semibold">
+                    {DHB_SALES_PAUSED ? '0' : Math.floor(availableSupply!).toLocaleString()}
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Gas token info */}
+          {gasTokens && gasTokens.length > 0 && (
+            <div>
+              <p className="text-xs text-zinc-500 flex items-center gap-1">
+                <Zap className="w-3 h-3" />{_copy("copy.88cc8f98bfe9", { defaultValue: "Gas: " })}{gasTokens.map(g => g.symbol).join(', ')}{_copy("copy.9720e3be5c2d", { defaultValue: " available on Base" })}</p>
+            </div>
+          )}
+        </div>
+
+        {/* Payment Methods */}
+        <div data-page-bento data-kit-section className="bg-zinc-900 p-4 space-y-3">
+          <label className="text-sm text-zinc-400 block">{t('buyCoins.paymentMethod')}</label>
+          
+          <button
+            onClick={() => setPaymentMethod('card')}
+            className={`w-full flex items-center gap-3 p-3 rounded-xl transition-colors ${
+              paymentMethod === 'card'
+                ? 'bg-white/10 border border-white/20'
+                : 'bg-zinc-800 hover:bg-zinc-700 border border-transparent'
+            }`}
+          >
+            <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center">
+              <CreditCard className="w-5 h-5 text-white" />
+            </div>
+            <div className="flex-1 text-left">
+              <p className="text-white font-medium">{t('buyCoins.cardBank')}</p>
+              <p className="text-xs text-zinc-400">{_copy("copy.0e633747fd23", { defaultValue: "Visa, Mastercard, Apple Pay, Google Pay" })}</p>
+            </div>
+            {paymentMethod === 'card' && <Check className="w-5 h-5 text-white" />}
+          </button>
+          <button
+            onClick={() => setPaymentMethod('crypto')}
+            className={`w-full flex items-center gap-3 p-3 rounded-xl transition-colors ${paymentMethod === 'crypto' ? 'bg-white/10 border border-white/20' : 'bg-zinc-800 hover:bg-zinc-700 border border-transparent'}`}
+          >
+            <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center"><Wallet className="w-5 h-5 text-white" /></div>
+            <div className="flex-1 text-left"><p className="text-white font-medium">{t('nearBuy.title')}</p><p className="text-xs text-zinc-400">{t('nearBuy.description')}</p></div>
+            {paymentMethod === 'crypto' && <Check className="w-5 h-5 text-white" />}
+          </button>
+
+        </div>
+
+        {paymentMethod === 'crypto' && !DHB_SALES_PAUSED && <NearIntentBuy tokensToReceive={estimatedTokens} />}
+
+        {/* Buy Button */}
+        {(paymentMethod === 'card' || DHB_SALES_PAUSED) && <div className="relative group">
+          <Button
+            onClick={handlePurchase}
+            disabled={
+              DHB_SALES_PAUSED ||
+              effectiveAmount < MIN_DHB_PURCHASE_USD ||
+              isPending ||
+              (paymentMethod === 'card' && estimatedTokens <= 0) ||
+              (paymentMethod === 'card' &&
+                availableSupply !== undefined &&
+                availableSupply !== Infinity &&
+                Math.floor(estimatedTokens) > availableSupply)
+            }
+            variant="glass"
+            className="w-full py-6 text-lg font-semibold rounded-xl disabled:opacity-50 overflow-hidden"
+          >
+            {isPending ? (
+              <Loader2 className="w-5 h-5 animate-spin mr-2" />
+            ) : (
+              <Wallet className="w-5 h-5 mr-2" />
+            )}
+            {DHB_SALES_PAUSED ? t('stores.soldOutButton') : isPending ? t('buyCoins.processing') : t('buyCoins.buy', { symbol: displaySymbol })}
+            <ShimmerHoverEffect />
+          </Button>
+        </div>}
+
+        {/* Purchase Status Overlay */}
+        {purchaseStatus !== 'idle' && (
+          <div data-kit-section className="rounded-xl border border-white/[0.12] bg-white/[0.03] backdrop-blur-[24px] p-6 text-center flex flex-col items-center justify-center min-h-[180px]">
+            {purchaseStatus === 'polling' && (
+              <div className="flex flex-col items-center justify-center gap-3 animate-fade-in">
+                <Loader2 className="w-10 h-10 animate-spin text-white" />
+                <h3 className="text-white font-semibold text-lg">{_copy("copy.6f2ab309aba5", { defaultValue: "Processing Purchase" })}</h3>
+                <p className="text-sm text-white/60">
+                  {pollingMessage}
+                </p>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="mt-1 text-white/40 hover:text-white/70 text-xs"
+                  onClick={() => {
+                    if (pollingRef.current) { clearInterval(pollingRef.current); pollingRef.current = null; }
+                    setPurchaseStatus('idle');
+                    refreshWalletBalances();
+                  }}
+                >{_copy("copy.d4cceadc6ec2", { defaultValue: "Dismiss — check wallet manually" })}</Button>
+              </div>
+            )}
+            {purchaseStatus === 'success' && (
+              <>
+                <CheckCircle2 className="w-10 h-10 text-emerald-400 mx-auto" />
+                <h3 className="text-white font-semibold text-lg">{t('buyCoins.success.title')}</h3>
+                <p className="text-sm text-zinc-400">
+                  {t('buyCoins.success.subtitle')}
+                </p>
+                {canShare && (
+                  <Button
+                    className="mt-2 bg-white text-black hover:bg-white/90 border-0"
+                    onClick={handleShareToFeed}
+                  >
+                    <Send className="w-4 h-4 mr-2" />
+                    {t('buyCoins.shareToFeed')}
+                  </Button>
+                )}
+                <Button
+                  variant="glass"
+                  className="mt-2"
+                  onClick={() => {
+                    setPurchaseStatus('idle');
+                    navigate('/app/wallet');
+                  }}
+                >
+                  {t('buyCoins.success.viewWallet')}
+                </Button>
+              </>
+            )}
+            {purchaseStatus === 'failed' && (
+              <>
+                <XCircle className="w-10 h-10 text-red-400 mx-auto" />
+                <h3 className="text-white font-semibold text-lg">{_copy("copy.e46464aa55f4", { defaultValue: "Purchase Failed" })}</h3>
+                <p className="text-sm text-zinc-400">{_copy("copy.cb1ac99de8c5", { defaultValue: "Something went wrong. Please try again or contact support." })}</p>
+                <Button
+                  variant="glass"
+                  className="mt-2"
+                  onClick={() => setPurchaseStatus('idle')}
+                >{_copy("copy.df0fe9e00d35", { defaultValue: "Try Again" })}</Button>
+              </>
+            )}
+            {purchaseStatus === 'expired' && (
+              <>
+                <XCircle className="w-10 h-10 text-amber-400 mx-auto" />
+                <h3 className="text-white font-semibold text-lg">{_copy("copy.f61de761d956", { defaultValue: "Checkout Expired" })}</h3>
+                <p className="text-sm text-zinc-400">{_copy("copy.02eeddf22117", { defaultValue: "No payment was completed. Start a new checkout when you are ready." })}</p>
+                <Button variant="glass" className="mt-2" onClick={() => setPurchaseStatus('idle')}>{_copy("copy.df0fe9e00d35", { defaultValue: "Try Again" })}</Button>
+              </>
+            )}
+          </div>
+        )}
+
+        {/* Platform Stats Banner */}
+        {platformStats && (platformStats.totalVolume > 0 || platformStats.totalTransactions > 0) && (
+          <div data-page-bento data-kit-section className="bg-zinc-900 p-4 flex items-center justify-around border border-zinc-800">
+            <div className="text-center">
+              <div className="flex items-center justify-center gap-1.5 mb-1">
+                <TrendingUp className="w-4 h-4 text-emerald-400" />
+                <span className="text-xs text-zinc-400">{_copy("copy.f92db8fc0164", { defaultValue: "Total Volume" })}</span>
+              </div>
+              <span className="text-white font-semibold">
+                ${platformStats.totalVolume.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+              </span>
+            </div>
+            <div className="w-px h-10 bg-zinc-800" />
+            <div className="text-center">
+              <div className="flex items-center justify-center gap-1.5 mb-1">
+                <Activity className="w-4 h-4 text-white" />
+                <span className="text-xs text-zinc-400">{_copy("copy.3e5136fd4b11", { defaultValue: "Transactions" })}</span>
+              </div>
+              <span className="text-white font-semibold">
+                {formatCount(platformStats.totalTransactions)}
+              </span>
+            </div>
+          </div>
+        )}
+
+
+        {/* Purchase History */}
+        <div data-page-bento data-kit-section className="bg-zinc-900 p-4 border border-zinc-800">
+          <h3 className="text-white font-semibold mb-3 text-center">{_copy("copy.6c8c242860dc", { defaultValue: "Purchase History" })}</h3>
+          
+          {/* Search */}
+          <div className="relative mb-3">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+            <Input
+              type="text"
+              placeholder={_copy("copy.df4e1d945ceb", { defaultValue: "Search wallet address..." })}
+              value={txSearch}
+              onChange={(e) => setTxSearch(e.target.value)}
+              className="pl-9 bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500 rounded-xl h-9 text-sm"
+            />
+          </div>
+
+          {historyLoading ? (
+            <div className="flex items-center justify-center py-6">
+              <Loader2 className="w-5 h-5 animate-spin text-zinc-400" />
+            </div>
+          ) : purchaseHistory.length === 0 ? (
+            <AppState icon="command" title={_copy("copy.1daf8129262e", { defaultValue: "No purchases yet" })} description={_copy("copy.750bc5e25631", { defaultValue: "Completed coin purchases will appear here." })} size="section" />
+          ) : (() => {
+            const isSearching = txSearch.trim().length > 0;
+            const filtered = isSearching
+              ? purchaseHistory.filter(tx =>
+                  tx.receiverAddress?.toLowerCase().includes(txSearch.trim().toLowerCase())
+                )
+              : purchaseHistory.filter(tx => tx.status === 'completed');
+            return filtered.length === 0 ? (
+              <AppState icon="search" title={_copy("copy.aef28cd815ed", { defaultValue: "No matching transactions" })} description={_copy("copy.d9be081cbe4e", { defaultValue: "Try a different wallet address." })} kind="search-empty" size="compact" />
+            ) : (
+                <div
+                  ref={purchaseListRef}
+                  className="space-y-0 max-h-[600px] overflow-y-auto overflow-x-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden px-4 -mx-4"
+                onScroll={(e) => {
+                  const el = e.currentTarget;
+                  if (el.scrollTop + el.clientHeight >= el.scrollHeight - 100 && hasNextPage && !isFetchingNextPage) {
+                    fetchNextPage();
+                  }
+                }}
+              >
+                {filtered.map((tx) => {
+                  const dateStr = tx.createdAt ? format(new Date(tx.createdAt), 'dd MMM yyyy') : '';
+                  const shortAddr = tx.receiverAddress
+                    ? `${tx.receiverAddress.slice(0, 6)}...${tx.receiverAddress.slice(-4)}`
+                    : null;
+                  const isClickable = tx.status === 'completed' && tx.txHash;
+                  const explorerUrl = tx.txHash ? `https://basescan.org/tx/${tx.txHash}` : null;
+                  const rowClass = `flex items-center py-2.5 first:pt-0 last:pb-0 ${isClickable ? "hover:bg-white/5 px-4 -mx-4 cursor-pointer transition-colors" : ''}`;
+                  const content = (
+                    <div className="min-w-0 flex-1">
+                      <div className="text-sm text-zinc-300">
+                        {tx.status === 'completed' ? '✅' : tx.status === 'failed' ? '❌' : tx.status === 'expired' ? '⌛' : '⏳'}{' '}
+                        ${tx.amount} — {tx.approxTokensToReceive ? <>~{Number(tx.approxTokensToReceive).toLocaleString()} <DhbCoin label={t('buyCoins.tokensUnit')} /></> : tokenLabel(tx.tokenSymbol)}
+                        {tx.status === 'failed' && (tx as any).failureReason && (
+                          <span className="text-xs text-red-400/70 ml-1 capitalize whitespace-nowrap">({(tx as any).failureReason})</span>
+                        )}
+                      </div>
+                      <div className="flex items-center justify-between">
+                        {shortAddr && (
+                          <span className="text-xs text-zinc-500 font-mono">{shortAddr}</span>
+                        )}
+                        <span className="text-zinc-500 text-xs whitespace-nowrap ml-auto">{dateStr}</span>
+                      </div>
+                    </div>
+                  );
+                  return isClickable ? (
+                    <a key={tx.id} href={explorerUrl!} target="_blank" rel="noopener noreferrer" className={rowClass}>
+                      {content}
+                    </a>
+                  ) : (
+                    <div key={tx.id} className={rowClass}>
+                      {content}
+                    </div>
+                  );
+                })}
+                {isFetchingNextPage && (
+                  <div className="flex items-center justify-center py-3">
+                    <Loader2 className="w-4 h-4 animate-spin text-zinc-400" />
+                  </div>
+                )}
+                {hasNextPage && !isFetchingNextPage && (
+                  <button
+                    type="button"
+                    onClick={() => fetchNextPage()}
+                    className="w-full text-center text-xs text-zinc-500 hover:text-zinc-300 py-3 transition-colors"
+                  >
+                    {t('common.loadMore')}
+                  </button>
+                )}
+              </div>
+            );
+          })()}
+        </div>
+
+        {/* Disclaimer */}
+        <p className="text-xs text-zinc-500 text-center px-4">
+          {t('buyCoins.disclaimer')}
+        </p>
+      </PageBody>
+
+    </div>
+  );
+}

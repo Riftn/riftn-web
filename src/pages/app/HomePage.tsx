@@ -1,0 +1,1439 @@
+import { FeedSwallowMotion } from '@/components/app/feeds/FeedSwallowMotion';
+import { useTranslation as _useCopy } from 'react-i18next';
+import { useTabLongPress } from '@/hooks/use-tab-long-press';
+import { setFeedRefresh } from '@/lib/feed-refresh';
+/**
+ * Home Page
+ * =========
+ * Main feed page with tab-based navigation between content types.
+ * Features swipe gestures for mobile navigation and pull-to-refresh.
+ * Prefetches all feed tabs in background for instant switching.
+ * 
+ * @module pages/app/HomePage
+ */
+
+import { useState, useContext, useEffect, useLayoutEffect, useRef, useCallback, useMemo, useDeferredValue, memo, lazy, Suspense } from 'react';
+import { CachedPageActiveContext } from '@/contexts/CachedPageActiveContext';
+import { useSidebarCollapse } from '@/contexts/SidebarCollapseContext';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useTabIndicator } from '@/hooks/use-tab-indicator';
+import { useDragTabIndicator } from '@/hooks/use-drag-tab-indicator';
+import { GlassIndicator, glideOnTabClick } from '@/components/app/feeds/GlassIndicator';
+import { useSearchParams, useNavigationType, useLocation, useNavigate, useMatch } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
+import Settings2 from "@/components/ui/cut-icons/settings";
+import ArrowLeft from "@/components/ui/cut-icons/back";
+
+import { FEED_TAB_ICON_SCALE, feedTabIconTransform, feedTabsFor } from '@/constants/app.constants';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { useShortsEnabled } from '@/contexts/ShortsEnabledContext';
+import { useAppTheme } from '@/contexts/ThemeContext';
+import { FeedFilterAnchor } from '@/components/app/navigation/FeedFilterAnchor';
+import { FeedPillGlow } from '@/components/app/navigation/FeedPillGlow';
+import { setFeedTabsOpen } from '@/lib/feed-tabs-reveal';
+import { cn } from '@/lib/utils';
+import { usePullToRefresh } from '@/hooks/use-pull-to-refresh';
+import { useScrollDirection } from '@/hooks/use-scroll-direction';
+import { useAnyOverlayOpen } from '@/lib/overlay-open';
+import { getDocumentScrollTop, scrollDocumentTo, scrollDocumentToSmooth, SCROLL_TOP_FIRST_PX } from '@/lib/document-scroll';
+import { setImagesFeedScrollView, IMAGES_BACK_TO_COLLAGE_EVENT } from '@/lib/images-feed-mode';
+import { setTabSwitchTime } from '@/lib/gesture-state';
+import { getLiteMode } from '@/hooks/use-connection-quality';
+import { clearPrefetchState } from '@/hooks/use-feed-prefetch';
+import { refreshFeedQueries } from '@/lib/feed-refresh-queries';
+import { useFeedSwallowClip } from '@/hooks/use-feed-swallow-clip';
+import { useSystemFeedHeaderMotion } from '@/hooks/use-system-feed-header-motion';
+import { clearPersistedFeedFilters } from '@/hooks/use-persisted-feed-filter';
+import { readFeedToggles } from '@/lib/feed-defaults';
+import { SORT_OPTIONS } from '@/lib/feed-utils';
+import { SEOHead } from '@/components/SEOHead';
+import { useTranslation } from 'react-i18next';
+import { HUB_ROUTE_META } from '@/lib/seo/route-meta';
+import { HomeIntro } from '@/components/app/HomeIntro';
+import { useGlobalFeedNav } from '@/contexts/GlobalFeedNavContext';
+import { preloadRoute } from '@/lib/route-preload';
+import { warmPostPage } from '@/lib/preload-post-page';
+
+
+// Feed components. HomeFeed is the tab every visit opens on, so it stays a
+// static import; the other seven are lazy chunks. This page is on every
+// visitor's boot path (PersistentPageCache imports it statically), and the
+// feeds barrel used to put all eight tabs' code in the entry bundle for a
+// visitor who may never leave the first one. Tabs stay instant in practice:
+// the chunks are warmed two seconds after the home feed, alongside the data
+// prefetch below, so a tap after that finds them in cache. Direct file
+// imports, not the barrel — the barrel would drag the other seven back in.
+import { HomeFeed } from '@/components/app/feeds/HomeFeed';
+import { FeedBodySkeleton } from '@/components/app/PageSkeletons';
+import { closeCommentsSplit } from '@/lib/comments-split';
+import { FeedSearchBar } from '@/components/app/navigation/FeedSearchBar';
+import { FeedSearchLens, useFeedSearchLens } from '@/components/app/navigation/FeedSearchLens';
+import { activeFeedSearchQuery, closeFeedSearch, getFeedSearchState, isFeedSearchTab, openFeedSearch, useFeedSearch } from '@/lib/feed-search';
+
+const loadVideosFeed = () => import('@/components/app/feeds/VideosFeed').then(m => ({ default: m.VideosFeed }));
+const loadImagesFeed = () => import('@/components/app/feeds/ImagesFeed').then(m => ({ default: m.ImagesFeed }));
+const loadShortsFeed = () => import('@/components/app/feeds/ShortsFeed').then(m => ({ default: m.ShortsFeed }));
+const loadLiveFeed   = () => import('@/components/app/feeds/LiveFeed').then(m => ({ default: m.LiveFeed }));
+const loadTextFeed   = () => import('@/components/app/feeds/TextFeed').then(m => ({ default: m.TextFeed }));
+const loadMusicFeed  = () => import('@/components/app/feeds/MusicFeed').then(m => ({ default: m.MusicFeed }));
+const loadPPVFeed    = () => import('@/components/app/feeds/PPVFeed').then(m => ({ default: m.PPVFeed }));
+const loadW2EFeed    = () => import('@/components/app/feeds/W2EFeed').then(m => ({ default: m.W2EFeed }));
+
+const feedLoaders: Record<string, () => Promise<unknown>> = {
+  videos: loadVideosFeed, images: loadImagesFeed, shorts: loadShortsFeed, text: loadTextFeed,
+  live: loadLiveFeed, music: loadMusicFeed, ppv: loadPPVFeed, w2e: loadW2EFeed,
+};
+let warmingFeed: Promise<unknown> | undefined;
+function warmFeedOnIntent(tab: string, ready: boolean) {
+  if (!ready || getLiteMode() || document.visibilityState !== 'visible' || warmingFeed) return;
+  warmingFeed = feedLoaders[tab]?.().catch(() => {}).finally(() => { warmingFeed = undefined; });
+}
+
+// Memoized wrappers — prevent feed re-renders during drag tab switches.
+// React.memo skips re-render when props are unchanged, so heavy feeds
+// (infinite scroll lists, media cards, etc.) stay frozen during drag.
+const MemoHomeFeed    = memo(HomeFeed);
+// Search results (and their music shelves) only show once someone types, so
+// they load then rather than at startup.
+const FeedSearchResults = lazy(() => import('@/components/app/feeds/FeedSearchResults').then((m) => ({ default: m.FeedSearchResults })));
+const MemoVideosFeed  = memo(lazy(loadVideosFeed));
+const MemoTextFeed    = memo(lazy(loadTextFeed));
+const MemoImagesFeed  = memo(lazy(loadImagesFeed));
+const MemoShortsFeed  = memo(lazy(loadShortsFeed));
+const MemoLiveFeed    = memo(lazy(loadLiveFeed));
+const MemoMusicFeed   = memo(lazy(loadMusicFeed));
+const MemoPPVFeed     = memo(lazy(loadPPVFeed));
+const MemoW2EFeed     = memo(lazy(loadW2EFeed));
+
+// ============================================================================
+// CONSTANTS
+// ============================================================================
+
+/** Minimum swipe distance to trigger tab change */
+const SWIPE_THRESHOLD = 50;
+const PULL_THRESHOLD = 92;
+/** Minimum trackpad delta to trigger tab change */
+const TRACKPAD_THRESHOLD = 60;
+/** Lock duration after gesture trigger - covers trackpad inertia */
+const GESTURE_LOCK_DURATION = 300;
+
+// ============================================================================
+// MAIN COMPONENT
+// ============================================================================
+
+// Session storage key for persisting tab state across navigation
+const HOME_STATE_STORAGE_KEY = 'home-feed-state';
+
+// Clean, indexable URLs that open the home feed on a specific tab (SEO
+// sitelink targets). The mapping is bidirectional: landing on the URL selects
+// the tab, and selecting the tab reflects the URL. Every other tab shares the
+// canonical /app URL.
+const FEED_ROUTE_TO_TAB: Record<string, string> = { '/videos': 'videos', '/images': 'images', '/shorts': 'shorts' };
+const TAB_TO_FEED_ROUTE: Record<string, string> = { videos: '/videos', images: '/images', shorts: '/shorts' };
+const tabFromPathname = (pathname: string): string | null => FEED_ROUTE_TO_TAB[pathname] ?? null;
+const feedRouteForTab = (tab: string): string => TAB_TO_FEED_ROUTE[tab] ?? '/app';
+
+export default function HomePage() {
+  const { t: _copy } = _useCopy();
+  const pageActive = useContext(CachedPageActiveContext);
+  const { t } = useTranslation();
+  const queryClient = useQueryClient();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { isCollapsed } = useSidebarCollapse();
+  const { theme, themeChoice } = useAppTheme();
+  const isLightTheme = (theme === 'light' || themeChoice === 'system-light');
+  // Immersive theme on phones: the tab pill rests hidden and the island capsule
+  // (FeedIslandCapsule) opens it.
+  const islandTopBar = theme === 'immersive';
+  const navVisible = useScrollDirection();
+  // While any overlay (share/options drawers, dialogs — bottom sheets on
+  // mobile — side sheets, story viewer, …) is open, the tab bar must get out
+  // of the way: it sits at z-110 (above every overlay scrim: drawer z-100,
+  // dialog/sheet z-50), which otherwise leaves it floating crisp above the
+  // sheet's dimmed backdrop. Mobile slides it away; desktop drops it below
+  // z-50 so every scrim dims it with the rest of the page.
+  const anyOverlayOpen = useAnyOverlayOpen();
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 1024);
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 1024);
+    window.addEventListener('resize', check, { passive: true });
+    return () => window.removeEventListener('resize', check);
+  }, []);
+
+  // The two pages a feed tap opens, profile and post, load their code while
+  // the feed sits idle, so the first tap shows the page at once instead of
+  // waiting on a chunk download after the click.
+  //
+  // Reserve this broad warm-up for desktop pointer movement. On touch screens
+  // the first scroll should stay responsive; a press on a card can warm just
+  // its destination.
+  const [pointerSeen, setPointerSeen] = useState(false);
+  useEffect(() => {
+    if (pointerSeen || !window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+    const onMove = (event: MouseEvent) => { if (event.isTrusted) setPointerSeen(true); };
+    window.addEventListener('mousemove', onMove, { passive: true });
+    return () => window.removeEventListener('mousemove', onMove);
+  }, [pointerSeen]);
+  useEffect(() => {
+    if (!pointerSeen) return;
+    const warm = () => { preloadRoute('/app/profile'); warmPostPage(); };
+    const idle = (window as Window & { requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number }).requestIdleCallback;
+    if (idle) {
+      const id = idle(warm, { timeout: 4000 });
+      return () => window.cancelIdleCallback?.(id);
+    }
+    const timer = window.setTimeout(warm, 2500);
+    return () => window.clearTimeout(timer);
+  }, [pointerSeen]);
+
+  // Detect back navigation for tab-change scroll logic
+  // Note: Actual scroll position restoration is handled by AppLayout
+  const navigationType = useNavigationType();
+  const isBackNavigation = navigationType === 'POP';
+  
+  // Extract pinned post ID from URL params (one-time view)
+  const pinnedPostId = searchParams.get('post') || undefined;
+  
+  // Clear the post param from URL after initial render (so refresh shows normal feed)
+  useEffect(() => {
+    if (pinnedPostId) {
+      // Use replace to avoid adding to browser history
+      setSearchParams({}, { replace: true });
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  
+  // Initialize tab state. A clean feed URL (/videos, /shorts) wins so a direct
+  // hit / Google sitelink click lands on the right tab immediately (no flash of
+  // the home feed); otherwise restore the last tab from sessionStorage for back
+  // navigation.
+  const getInitialTab = () => {
+    if (typeof window !== 'undefined') {
+      const fromUrl = tabFromPathname(window.location.pathname);
+      if (fromUrl) return fromUrl;
+      try {
+        const saved = sessionStorage.getItem(HOME_STATE_STORAGE_KEY);
+        if (saved) {
+          const { tab } = JSON.parse(saved);
+          if (tab) return tab;
+        }
+      } catch {
+        // Ignore parse errors
+      }
+    }
+    return 'home';
+  };
+  
+  // Tab state - initialized from sessionStorage for back navigation
+  const [activeTab, setActiveTab] = useState(getInitialTab);
+  const { shortsEnabled } = useShortsEnabled();
+  const isPhoneWidth = useIsMobile();
+  const feedTabs = useMemo(() => feedTabsFor(isPhoneWidth, shortsEnabled), [isPhoneWidth, shortsEnabled]);
+
+  // Phones have no Videos tab (wide videos live in Shorts), wider screens no
+  // Text tab: a tab restored from the other layout lands on its stand-in.
+  useEffect(() => {
+    if (isPhoneWidth && activeTab === 'videos' && tabFromPathname(location.pathname) !== 'videos') setActiveTab('shorts');
+    else if (!isPhoneWidth && activeTab === 'text') setActiveTab('home');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isPhoneWidth, activeTab]);
+
+  // If Shorts gets disabled while active, fall back to Home
+  useEffect(() => {
+    if (!shortsEnabled && activeTab === 'shorts') {
+      setActiveTab('home');
+    }
+  }, [shortsEnabled, activeTab]);
+  const homeIsDraggingRef = useRef(false);
+  const homeFiltersRef = useRef<HTMLDivElement>(null);
+  const homeChipsRef = useRef<HTMLDivElement>(null);
+  const globalFeedNav = useGlobalFeedNav();
+  const { layerRef: homeTabLayerRef, setRef: setHomeTabRef, rect: homeTabRect, onScroll: onHomeTabScroll } = useTabIndicator(activeTab, isCollapsed, homeIsDraggingRef, 5);
+
+  // Deferred tab value: tab indicator moves instantly, content swap is deferred
+  // so heavy feeds (e.g. Videos) don't block the tab animation
+  const deferredTab = useDeferredValue(activeTab);
+  // Tapping the lit tab again turns the pill into a search for that feed.
+  const feedSearch = useFeedSearch();
+  const searchOpen = feedSearch.open && isFeedSearchTab(activeTab);
+  // Colour themes search through a lens that drops out of the bar; the tab
+  // row stays up under it (System and Minimal melt the bar instead).
+  const searchLens = useFeedSearchLens();
+  const meltOpen = searchOpen && !searchLens;
+  const searchQuery = activeFeedSearchQuery(feedSearch);
+  useEffect(() => {
+    if (feedSearch.open && !isFeedSearchTab(activeTab)) closeFeedSearch();
+  }, [feedSearch.open, activeTab]);
+  useEffect(() => closeFeedSearch, []);
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  // Lazy mount: only mount a feed on its first visit, then keep it alive.
+  // Prevents all 8 feeds from firing queries simultaneously on page load.
+  const [visitedTabs, setVisitedTabs] = useState<Set<string>>(() => new Set([getInitialTab()]));
+  // Use deferredTab so lazy-mount doesn't block the tab indicator animation
+  useEffect(() => {
+    setVisitedTabs(prev => {
+      if (prev.has(deferredTab)) return prev;
+      const next = new Set(prev);
+      next.add(deferredTab);
+      return next;
+    });
+  }, [deferredTab]);
+  
+  // Mount the selected feed or its fallback in the same render that hides
+  // the outgoing feed. The effect above retains it for later visits.
+  const shouldMountFeed = (tab: string) => deferredTab === tab || visitedTabs.has(tab);
+
+  // Listen for tab changes from GlobalFeedNav (collapsed mode)
+  useEffect(() => {
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === HOME_STATE_STORAGE_KEY && e.newValue) {
+        try {
+          const { tab } = JSON.parse(e.newValue);
+          if (tab && tab !== activeTab) {
+            setActiveTab(tab);
+          }
+        } catch { /* ignore */ }
+      }
+    };
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
+  }, [activeTab]);
+  
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  // Detect if a post overlay is currently active on top of the persistent home
+  const location = useLocation();
+  const navigate = useNavigate();
+  const postOverlayMatch = useMatch('/app/post/:postId');
+  const videoOverlayMatch = useMatch('/app/video/:tokenId');
+  const isPostOverlayActive = !!(postOverlayMatch || videoOverlayMatch) &&
+    !!(location.state as any)?.fromFeed;
+
+  const handleOverlayBack = useCallback(() => {
+    // An open comments sheet on the post closes first.
+    if (closeCommentsSplit()) return;
+    if (window.history.length > 1) navigate(-1);
+    else navigate('/app');
+  }, [navigate]);
+
+  // URL → tab: a clean feed URL (/videos, /shorts) selects its tab. Fires on
+  // deep-link load and on client-side navigation into these routes.
+  useEffect(() => {
+    const tab = tabFromPathname(location.pathname);
+    if (tab && tab !== activeTab) setActiveTab(tab);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.pathname]);
+
+  // Tab → URL: reflect the active tab in the address bar so the clean URLs are
+  // shareable and bookmarkable. Skipped on the first render so a restored
+  // sessionStorage tab doesn't rewrite /app on load. The inequality guards keep
+  // this loop-free against the URL→tab effect above. Only manages the home-feed
+  // routes — never rewrites post/profile paths that mount this component under
+  // an overlay.
+  const didSyncUrlRef = useRef(false);
+  useEffect(() => {
+    if (!didSyncUrlRef.current) { didSyncUrlRef.current = true; return; }
+    const onFeedRoute = location.pathname === '/app' || tabFromPathname(location.pathname) !== null;
+    if (!onFeedRoute) return;
+    const desired = feedRouteForTab(activeTab);
+    if (window.location.pathname !== desired) navigate(desired, { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab]);
+
+  // Filter states for each feed type
+  const [showHomeFilters, setShowHomeFilters] = useState(false);
+  const [showShortsFilters, setShowShortsFilters] = useState(false);
+  const [showImagesCollage, setShowImagesCollage] = useState(true); // Default to collage
+  const [showImagesFilters, setShowImagesFilters] = useState(false);
+  const [selectedImageId, setSelectedImageId] = useState<string | null>(null);
+
+  // An image post opened on its own (phone post page, shared link) lands in the
+  // Images tab's scroll view on that picture. The nav pill's back slot already
+  // returns to the grid from there, so nothing new is needed for the way back.
+  const pinnedImageId = searchParams.get('image') || undefined;
+  // Opened from another feed (a photo tapped on Home), Back returns to that
+  // feed at the same spot, not to the Images grid the picture lives in. The
+  // open is its own history entry, so the phone's Back and the pill's back
+  // arrow both land there.
+  const imageReturnRef = useRef<{ tab: string; scroll: number } | null>(null);
+  const restoreTabScrollRef = useRef<number | null>(null);
+  useEffect(() => {
+    if (!pinnedImageId) return;
+    const fromInApp = location.key !== 'default';
+    imageReturnRef.current = fromInApp && activeTab !== 'images'
+      ? { tab: activeTab, scroll: getDocumentScrollTop() }
+      : null;
+    setActiveTab('images');
+    setSelectedImageId(pinnedImageId);
+    setShowImagesCollage(false);
+    setSearchParams({}, { replace: true, state: imageReturnRef.current ? { imageView: true } : undefined });
+  }, [pinnedImageId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Back popped the image entry: put the original feed back where it was.
+  useEffect(() => {
+    const origin = imageReturnRef.current;
+    // The open itself (?image=) is not the way back either: it runs in the same
+    // commit that recorded the origin, before the URL is swapped for imageView.
+    if (!origin || pinnedImageId || (location.state as { imageView?: boolean } | null)?.imageView) return;
+    // Leaving Home for another page is not the way back.
+    if (location.pathname !== '/app' && tabFromPathname(location.pathname) === null) return;
+    imageReturnRef.current = null;
+    restoreTabScrollRef.current = origin.scroll;
+    setSelectedImageId(null);
+    setShowImagesCollage(true);
+    setActiveTab(origin.tab);
+  }, [location.key]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Same for a video on a phone: it opens in the Shorts viewer on that video.
+  // ShortsFeed clears the id once it has opened, so it does not reopen later.
+  const pinnedShortId = searchParams.get('short') || undefined;
+  const [startShortId, setStartShortId] = useState<string | undefined>(undefined);
+  useEffect(() => {
+    if (!pinnedShortId) return;
+    setActiveTab('shorts');
+    setStartShortId(pinnedShortId);
+    setSearchParams({}, { replace: true });
+  }, [pinnedShortId]); // eslint-disable-line react-hooks/exhaustive-deps
+  const [showVideosFilters, setShowVideosFilters] = useState(false);
+  const [showMusicFilters, setShowMusicFilters] = useState(false);
+  const [showLiveFilters, setShowLiveFilters] = useState(false);
+  // Reactively detect active filters by reading sessionStorage when filters change
+  const [hasActiveFilters, setHasActiveFilters] = useState(false);
+
+  const checkActiveFilters = useCallback(() => {
+    try {
+      const stored = sessionStorage.getItem('feed-filter-states');
+      // No choice this session: the feed is on the saved default toggles.
+      const home = (stored ? JSON.parse(stored)?.home : null) || readFeedToggles().home || {};
+      const sort = home.sort;
+      const sortValue = typeof sort === 'string' ? sort : sort?.value;
+      const category = home.category;
+      const postType = home.postType;
+      const cf = home.contentFilters;
+      const active = 
+        (sortValue && sortValue !== 'latest') ||
+        (category && category !== 'all') ||
+        (postType && postType !== 'all') ||
+        (Array.isArray(cf) ? cf.length > 0 : cf && (cf.ppv || cf.w2e || cf.locked));
+      setHasActiveFilters(!!active);
+    } catch { setHasActiveFilters(false); }
+  }, []);
+
+  useEffect(() => {
+    checkActiveFilters();
+    window.addEventListener('feed-filters-changed', checkActiveFilters);
+    return () => window.removeEventListener('feed-filters-changed', checkActiveFilters);
+  }, [checkActiveFilters]);
+
+  // Save tab state to sessionStorage whenever it changes and notify GlobalFeedNav
+
+
+  useEffect(() => {
+    // Skip during drag — avoid synchronous I/O and global event dispatch
+    // on every boundary crossing. Will save when drag ends (isDragging becomes false).
+    if (homeIsDraggingRef.current) return;
+    try {
+      sessionStorage.setItem(HOME_STATE_STORAGE_KEY, JSON.stringify({ tab: activeTab }));
+      // Dispatch custom event so GlobalFeedNav updates its indicator
+      window.dispatchEvent(new CustomEvent('home-tab-changed'));
+    } catch {
+      // Ignore storage errors
+    }
+  }, [activeTab]);
+
+  /**
+   * Reset all filter states.
+   */
+  const resetFilters = useCallback(() => {
+    setShowHomeFilters(false);
+    setShowShortsFilters(false);
+    setShowImagesCollage(true);
+    setShowImagesFilters(false);
+    setSelectedImageId(null);
+    setShowVideosFilters(false);
+    setShowMusicFilters(false);
+    setShowLiveFilters(false);
+  }, []);
+
+  // Match the capsule dropdown's outside-tap and Escape dismissal.
+  useEffect(() => {
+    if (theme !== 'system' || !showHomeFilters) return;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setShowHomeFilters(false);
+        const target = isCollapsed ? globalFeedNav?.filtersPortalElement : homeFiltersRef.current;
+        target?.closest('[data-home-filter-anchor]')?.querySelector<HTMLButtonElement>('button')?.focus();
+      }
+    };
+    const closeOutside = (event: PointerEvent) => {
+      if (!(event.target instanceof Element) || event.target.closest('[data-home-filter-anchor]')) return;
+      setShowHomeFilters(false);
+    };
+    window.addEventListener('keydown', closeOnEscape);
+    document.addEventListener('pointerdown', closeOutside, true);
+    return () => {
+      window.removeEventListener('keydown', closeOnEscape);
+      document.removeEventListener('pointerdown', closeOutside, true);
+    };
+  }, [theme, showHomeFilters, isCollapsed, globalFeedNav?.filtersPortalElement]);
+
+  /**
+   * Auto-close any open filter panel when the user scrolls down.
+   * Keeps the sticky tab bar clean while browsing feed content.
+   */
+  useEffect(() => {
+    const hasOpenFilters = showHomeFilters || showShortsFilters || showImagesFilters || showVideosFilters || showMusicFilters || showLiveFilters;
+    if (!hasOpenFilters) return;
+
+    const getY = () =>
+      window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
+    let lastY = getY();
+    let accumulatedDown = 0;
+    const SCROLL_CLOSE_THRESHOLD = 24; // px
+    let rafId: number | null = null;
+
+    // Grace period after the panel opens. The panel mounts at the top of the
+    // feed, so when opened while scrolled down, its height animation grows
+    // the page above the viewport and the browser's scroll anchoring bumps
+    // scrollTop DOWN by the panel height — which this listener used to read
+    // as a user scroll-down and instantly close the panel (the "filters
+    // won't open unless I'm at the top" bug). Ignore deltas while the
+    // entrance animation + open-triggered scroll-to-top settle.
+    const OPEN_GRACE_MS = 700;
+    const openedAt = Date.now();
+
+    const onScroll = () => {
+      if (rafId) return;
+      rafId = requestAnimationFrame(() => {
+        const y = getY();
+        const diff = y - lastY;
+        lastY = y;
+
+        if (Date.now() - openedAt < OPEN_GRACE_MS) {
+          accumulatedDown = 0;
+          rafId = null;
+          return;
+        }
+
+        if (diff > 0) {
+          accumulatedDown += diff;
+          if (accumulatedDown > SCROLL_CLOSE_THRESHOLD) {
+            resetFilters();
+          }
+        } else {
+          accumulatedDown = 0;
+        }
+        rafId = null;
+      });
+    };
+
+    const targets: EventTarget[] = [
+      window,
+      document,
+      document.documentElement,
+      document.body,
+    ];
+    const appRoot = document.getElementById('app-root');
+    if (appRoot) targets.push(appRoot);
+
+    targets.forEach(t => t.addEventListener('scroll', onScroll, { passive: true }));
+    return () => {
+      targets.forEach(t => t.removeEventListener('scroll', onScroll));
+      if (rafId) cancelAnimationFrame(rafId);
+    };
+  }, [showHomeFilters, showShortsFilters, showImagesFilters, showVideosFilters, showMusicFilters, showLiveFilters, resetFilters]);
+
+  // Mobile touch gesture refs
+
+  const touchStartX = useRef<number | null>(null);
+  const touchEndX = useRef<number | null>(null);
+  const touchStartY = useRef<number | null>(null);
+  const touchEndY = useRef<number | null>(null);
+  const touchGestureTriggered = useRef(false);
+  const touchInsideNoSwipe = useRef(false);
+  
+  // Trackpad gesture - simple lock approach
+  const gestureTriggered = useRef(false);
+  const gestureLockTimeout = useRef<NodeJS.Timeout | null>(null);
+  
+  // Feed container ref for pull-to-refresh constraint
+  const feedContainerRef = useRef<HTMLDivElement>(null);
+  const swallowContentRef = useRef<HTMLDivElement>(null);
+  
+  // Debounce guard for home-refresh events to prevent rapid succession
+  const lastRefreshTime = useRef<number>(0);
+  const REFRESH_DEBOUNCE_MS = 1000;
+
+  // --------------------------------------------------------------------------
+  // REFRESH HANDLER
+  // --------------------------------------------------------------------------
+
+  const triggerRefresh = useCallback(() => {
+    if (isRefreshing) return;
+    
+    // Debounce rapid refresh calls (e.g., multiple home-refresh events)
+    const now = Date.now();
+    if (now - lastRefreshTime.current < REFRESH_DEBOUNCE_MS) return;
+    lastRefreshTime.current = now;
+    
+    setIsRefreshing(true);
+
+    // Re-ask for every list the feed tabs draw from, so views, reactions and
+    // comments come back current — the pinned post and Music included.
+    refreshFeedQueries(queryClient);
+    
+    // Clear prefetch state so feeds will be re-fetched
+    clearPrefetchState();
+
+    
+    // Clear persisted filter states so filters reset to defaults
+    clearPersistedFeedFilters();
+    
+    // Scroll to top
+    document.documentElement.scrollTo({ top: 0, behavior: 'smooth' });
+    document.body.scrollTo({ top: 0, behavior: 'smooth' });
+    scrollDocumentToSmooth();
+    
+    // Update feed refresh inputs without remounting cards during the return.
+    setTimeout(() => {
+      setRefreshKey(prev => prev + 1);
+      setTimeout(() => {
+        setIsRefreshing(false);
+      }, 300);
+    }, 800);
+  }, [isRefreshing, queryClient]);
+  
+
+
+  // --------------------------------------------------------------------------
+  // GLASS-NAV THEMES: SWALLOW CONTENT AT THE NAV PILL'S TOP EDGE
+  // --------------------------------------------------------------------------
+
+  // Clip the feed at the visible nav pill's top edge under the glass themes.
+  // Two variants match: this page's pill and the collapsed GlobalFeedNav's.
+  // Not on Immersive phones: the pill only drops in on demand under the capsule,
+  // and posts run under it to the top of the screen.
+  useFeedSwallowClip(swallowContentRef, '[data-feed-nav]', [], { allThemes: true, off: islandTopBar && isMobile });
+
+  // --------------------------------------------------------------------------
+  // PULL-TO-REFRESH HOOK
+  // --------------------------------------------------------------------------
+
+  const pullMotionRef = useRef<HTMLDivElement>(null);
+  const pullStateRef = useRef({ distance: 0, pulling: false });
+  const refreshingRef = useRef(isRefreshing);
+  refreshingRef.current = isRefreshing;
+  const publishPullMotion = useCallback((distance: number, pulling: boolean) => {
+    pullStateRef.current = { distance, pulling };
+    setFeedRefresh({ refreshing: refreshingRef.current, progress: Math.min(distance / PULL_THRESHOLD, 1), distance, pulling });
+  }, []);
+  const { handlers: pullHandlers } = usePullToRefresh({
+    enabled: isMobile,
+    pullThreshold: PULL_THRESHOLD,
+    onRefresh: triggerRefresh,
+    isRefreshing,
+    containerRef: feedContainerRef,
+    motionRef: pullMotionRef,
+    onMotion: publishPullMotion,
+  });
+
+  useLayoutEffect(() => {
+    publishPullMotion(pullStateRef.current.distance, pullStateRef.current.pulling);
+  }, [isRefreshing, publishPullMotion]);
+  useEffect(() => () => setFeedRefresh({ refreshing: false, progress: 0 }), []);
+
+  // --------------------------------------------------------------------------
+  // EVENT HANDLERS
+  // --------------------------------------------------------------------------
+
+  /**
+   * Handle tab click - toggle filters on same tab, switch on different tab.
+   */
+  const [enableHomeTransition, setEnableHomeTransition] = useState(false);
+
+  // Island mode keeps the tab pill out of sight; the capsule's dropdown picks
+  // the feed. The pill only comes down to hold an open filter panel.
+  const islandFiltersOpen = ({ home: showHomeFilters, live: showLiveFilters, shorts: showShortsFilters, images: showImagesFilters, videos: showVideosFilters, music: showMusicFilters } as Record<string, boolean>)[activeTab] ?? false;
+
+  const homeNavRef = useRef<HTMLDivElement>(null);
+  const hideHomeNav = isMobile && (anyOverlayOpen || ((islandTopBar ? !islandFiltersOpen : !navVisible) && !isPostOverlayActive && !(showHomeFilters && deferredTab === 'home')));
+  const linkedSystemHeader = theme === 'system' && isMobile;
+  useSystemFeedHeaderMotion(homeNavRef, linkedSystemHeader && pageActive, hideHomeNav);
+
+  const handleTabClick = useCallback((tabValue: string) => {
+    // Island mode: picking a feed closes the capsule's dropdown.
+    if (document.documentElement.dataset.theme === 'immersive') setTimeout(() => setFeedTabsOpen(false), 350);
+    // If a post overlay is currently covering the feed, tapping any tab should
+    // dismiss the overlay and take the user back to the feed on that tab —
+    // otherwise the tab change happens underneath the overlay and looks broken.
+    if (isPostOverlayActive) {
+      if (glideOnTabClick()) {
+        setEnableHomeTransition(true);
+        setTimeout(() => setEnableHomeTransition(false), 450);
+      }
+      setActiveTab(tabValue);
+      resetFilters();
+      navigate('/app', { replace: false });
+      return;
+    }
+    if (tabValue === activeTab) {
+      // Same tab clicked. With the search up (the lens leaves the tab
+      // tappable) it closes. Scrolled down, the first tap only glides the
+      // feed back to the top; at the top, a searchable feed opens its search.
+      if (isFeedSearchTab(tabValue) && getFeedSearchState().open) {
+        closeFeedSearch();
+        return;
+      }
+      const scrolledDown = getDocumentScrollTop() > SCROLL_TOP_FIRST_PX;
+      scrollDocumentToSmooth();
+      if (!scrolledDown && isFeedSearchTab(tabValue)) openFeedSearch();
+    } else {
+      if (glideOnTabClick()) {
+        setEnableHomeTransition(true);
+        // Auto-reset after animation completes to prevent stale transitions on page nav
+        setTimeout(() => setEnableHomeTransition(false), 450);
+      }
+      setActiveTab(tabValue);
+      resetFilters();
+    }
+  }, [activeTab, resetFilters, isPostOverlayActive, navigate]);
+
+  /**
+   * Listen for home refresh events from navigation.
+   */
+  useEffect(() => {
+    const handleHomeRefresh = () => {
+      setActiveTab('home');
+      resetFilters();
+      triggerRefresh();
+    };
+
+    const handleCategoryFilter = () => {
+      // Switch to the home tab, and nothing else. This used to call
+      // triggerRefresh(), which clears the persisted feed filters and then
+      // remounts the feed 800ms later on a bumped refreshKey — throwing away
+      // the category the tap had just set. The feed invalidates its own
+      // queries and scrolls to the top when it takes the category, so there is
+      // nothing left here to refresh.
+      setActiveTab('home');
+    };
+
+    const handleSwitchTab = (e: Event) => {
+      const tab = (e as CustomEvent).detail;
+      if (tab) setActiveTab(tab);
+    };
+
+    const handleTabReclick = (e: Event) => {
+      const tab = (e as CustomEvent).detail;
+      if (!tab) return;
+      const openOnly = e.type === 'home-tab-long-press';
+      // Toggle filters for the active tab. The panel renders at the top of
+      // the feed, so when OPENING while scrolled down, also scroll to top —
+      // otherwise the panel mounts far above the viewport and the click
+      // looks like it did nothing. (Scrolling up never trips the
+      // auto-close-on-scroll-down effect: upward deltas reset it.)
+      const toggleFilters = (setter: React.Dispatch<React.SetStateAction<boolean>>) => {
+        setter(prev => {
+          const next = openOnly || !prev;
+          if (next) {
+            requestAnimationFrame(() => {
+              document.documentElement.scrollTo({ top: 0, behavior: 'smooth' });
+              document.body.scrollTo({ top: 0, behavior: 'smooth' });
+              scrollDocumentToSmooth();
+            });
+          }
+          return next;
+        });
+      };
+      if (tab === 'home') toggleFilters(setShowHomeFilters);
+      else if (tab === 'live') toggleFilters(setShowLiveFilters);
+      else if (tab === 'shorts') toggleFilters(setShowShortsFilters);
+      else if (tab === 'images') toggleFilters(setShowImagesFilters);
+      else if (tab === 'videos') toggleFilters(setShowVideosFilters);
+      else if (tab === 'music') toggleFilters(setShowMusicFilters);
+    };
+
+    window.addEventListener('home-refresh', handleHomeRefresh);
+    window.addEventListener('category-filter-changed', handleCategoryFilter);
+    window.addEventListener('switch-home-tab', handleSwitchTab);
+    const handleIslandSelect = (e: Event) => { const tab = (e as CustomEvent).detail; if (tab) handleTabClick(tab); };
+    window.addEventListener('home-feed-select', handleIslandSelect);
+    window.addEventListener('home-tab-reclick', handleTabReclick);
+    window.addEventListener('home-tab-long-press', handleTabReclick);
+    return () => {
+      window.removeEventListener('home-refresh', handleHomeRefresh);
+      window.removeEventListener('category-filter-changed', handleCategoryFilter);
+      window.removeEventListener('switch-home-tab', handleSwitchTab);
+      window.removeEventListener('home-feed-select', handleIslandSelect);
+      window.removeEventListener('home-tab-reclick', handleTabReclick);
+      window.removeEventListener('home-tab-long-press', handleTabReclick);
+    };
+  }, [triggerRefresh, handleTabClick]);
+
+  /**
+   * Handle when user selects an image from collage view.
+   * Switches to feed view starting from that image.
+   *
+   * Memoised so the tap does not re-render every mounted feed on its way to
+   * the images tab (the feeds are memo()'d on their props).
+   */
+  const imagesGridScrollRef = useRef(0);
+  const restoreGridScrollRef = useRef(false);
+
+  const handleImageSelected = useCallback((postId: string | null) => {
+    if (postId) {
+      // Where the user was in the grid when they tapped. The feed takes over
+      // the page scroll from here, so this is the only chance to read it.
+      imagesGridScrollRef.current = getDocumentScrollTop();
+      setShowImagesCollage(false);
+    }
+    setSelectedImageId(postId);
+  }, []);
+
+  /**
+   * Handle returning from feed view back to collage view.
+   */
+  const handleBackToCollage = useCallback(() => {
+    if (imageReturnRef.current) {
+      navigate(-1);
+      return;
+    }
+    restoreGridScrollRef.current = true;
+    setSelectedImageId(null);
+    setShowImagesCollage(true);
+  }, []);
+
+  // Put the grid back exactly where it was left. It only regains its height
+  // once it is displayed again, so the scroll has to land a frame after the
+  // commit that reveals it — setting it inline would clamp against a page that
+  // is still as short as the (now hidden) scroll view left it.
+  //
+  // Twice, a frame apart: the grid's rows are aspect-square so its height is
+  // known without waiting on images, but the first write still lands while the
+  // browser is settling the height change and can come back clamped.
+  useEffect(() => {
+    if (!showImagesCollage || !restoreGridScrollRef.current) return;
+    restoreGridScrollRef.current = false;
+    const top = imagesGridScrollRef.current;
+    if (top <= 0) return;
+    let second = 0;
+    const first = requestAnimationFrame(() => {
+      scrollDocumentTo(top);
+      second = requestAnimationFrame(() => scrollDocumentTo(top));
+    });
+    return () => {
+      cancelAnimationFrame(first);
+      cancelAnimationFrame(second);
+    };
+  }, [showImagesCollage]);
+
+  // The images tab's scroll view has no exit of its own — the nav pill's left
+  // slot becomes its back arrow, mirroring the post overlay. Publish the mode
+  // so the collapsed-desktop GlobalFeedNav can render the same arrow, and
+  // accept its back request (it can't call this handler directly).
+  const isImagesScrollView = activeTab === 'images' && !showImagesCollage;
+
+  useEffect(() => {
+    setImagesFeedScrollView(isImagesScrollView);
+    return () => setImagesFeedScrollView(false);
+  }, [isImagesScrollView]);
+
+  useEffect(() => {
+    window.addEventListener(IMAGES_BACK_TO_COLLAGE_EVENT, handleBackToCollage);
+    return () => window.removeEventListener(IMAGES_BACK_TO_COLLAGE_EVENT, handleBackToCollage);
+  }, [handleBackToCollage]);
+
+  // Both cases turn the settings slot into a back arrow. A post overlay wins:
+  // it sits on top of the images feed, so back must close it first.
+  const showNavBack = isPostOverlayActive || isImagesScrollView;
+  const handleNavBack = isPostOverlayActive ? handleOverlayBack : handleBackToCollage;
+
+  /**
+   * Reset scroll only after the displayed feed changes, before the browser paints.
+   * activeTab can lead deferredTab; resetting on it flashes the outgoing feed at the top.
+   */
+  const prevTabRef = useRef<string | null>(null);
+  const hasInitializedRef = useRef(false);
+  
+  useLayoutEffect(() => {
+    // A deferred tab can settle after navigation while Home remains cached.
+    // Leave the active page's scroll alone and apply the change on return.
+    if (!pageActive) return;
+
+    // Skip scroll-to-top if:
+    // 1. First mount AND we're returning via back navigation (browser back button)
+    // 2. Tab hasn't actually changed
+    if (!hasInitializedRef.current) {
+      hasInitializedRef.current = true;
+      prevTabRef.current = deferredTab;
+      
+      // On back navigation, don't scroll to top - let scroll restoration handle it
+      if (isBackNavigation) {
+        return;
+      }
+    }
+    
+    if (prevTabRef.current === deferredTab) {
+      return;
+    }
+    
+    prevTabRef.current = deferredTab;
+
+    // Coming back from a photo opened on this feed: its old spot, not the top.
+    const restoreTop = restoreTabScrollRef.current;
+    if (restoreTop !== null) {
+      restoreTabScrollRef.current = null;
+      scrollDocumentTo(restoreTop);
+      requestAnimationFrame(() => scrollDocumentTo(restoreTop));
+      return;
+    }
+
+    // Skip scroll-to-top during drag — scrolling mid-drag causes layout reflow
+    // which is the biggest source of lag on the home page.
+    if (homeIsDraggingRef.current) return;
+
+    window.scrollTo(0, 0);
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+
+    // Also reset any scrollable containers
+    const mainContent = document.querySelector('main');
+    if (mainContent) {
+      mainContent.scrollTop = 0;
+    }
+  }, [deferredTab, isBackNavigation, pageActive]);
+
+  // --------------------------------------------------------------------------
+  // SWIPE GESTURE HANDLERS
+  // --------------------------------------------------------------------------
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    // Carousels own sideways swipes; a downward pull still belongs to the feed.
+    pullHandlers.onTouchStart(e);
+    touchStartX.current = null;
+    touchStartY.current = null;
+    touchEndX.current = null;
+    touchEndY.current = null;
+    const target = e.target as HTMLElement;
+    touchInsideNoSwipe.current = !!target.closest('[data-no-swipe], input[type="range"], [role="slider"]');
+    if (touchInsideNoSwipe.current || e.touches.length !== 1) return;
+
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+    touchEndX.current = null;
+    touchEndY.current = null;
+    touchGestureTriggered.current = false;
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    pullHandlers.onTouchMove(e);
+    if (touchInsideNoSwipe.current || touchStartX.current === null || e.touches.length !== 1) return;
+
+    touchEndX.current = e.touches[0].clientX;
+    touchEndY.current = e.touches[0].clientY;
+  };
+
+  const handleTouchEnd = () => {
+    pullHandlers.onTouchEnd();
+    if (touchInsideNoSwipe.current) {
+      touchInsideNoSwipe.current = false;
+      return;
+    }
+
+    // Already triggered this gesture? Reset and exit
+    if (touchGestureTriggered.current) {
+      touchStartX.current = null;
+      touchEndX.current = null;
+      touchStartY.current = null;
+      touchEndY.current = null;
+      return;
+    }
+    
+    // Handle horizontal swipe for tab switching
+    if (touchStartX.current === null || touchEndX.current === null || 
+        touchStartY.current === null || touchEndY.current === null) {
+      touchStartX.current = null;
+      touchEndX.current = null;
+      touchStartY.current = null;
+      touchEndY.current = null;
+      return;
+    }
+    
+    const deltaX = touchStartX.current - touchEndX.current;
+    const deltaY = Math.abs(touchStartY.current - touchEndY.current);
+    const absDeltaX = Math.abs(deltaX);
+    
+    // Only switch tabs if horizontal movement clearly dominates vertical
+    const isHorizontalSwipe = absDeltaX > SWIPE_THRESHOLD && absDeltaX > deltaY * 1.5;
+    
+    if (isHorizontalSwipe) {
+      const isLeftSwipe = deltaX > 0;
+      const isRightSwipe = deltaX < 0;
+      
+      const tabValues = feedTabs.map(tab => tab.value);
+      const currentIndex = tabValues.indexOf(activeTab);
+      
+      // Mark gesture as triggered - one swipe = one action
+      touchGestureTriggered.current = true;
+      
+      if (isLeftSwipe && currentIndex < tabValues.length - 1) {
+        setActiveTab(tabValues[currentIndex + 1]);
+        setTabSwitchTime(); // Mark tab switch for carousel cooldown
+        resetFilters();
+      } else if (isRightSwipe && currentIndex > 0) {
+        setActiveTab(tabValues[currentIndex - 1]);
+        setTabSwitchTime(); // Mark tab switch for carousel cooldown
+        resetFilters();
+      }
+    }
+    
+    touchStartX.current = null;
+    touchEndX.current = null;
+    touchStartY.current = null;
+    touchEndY.current = null;
+  };
+
+  // --------------------------------------------------------------------------
+  // TRACKPAD SWIPE HANDLER (Two-finger horizontal swipe on laptop)
+  // --------------------------------------------------------------------------
+
+  const handleWheel = useCallback((e: React.WheelEvent) => {
+    // LOCKED? Ignore all wheel events until lock expires (covers inertia)
+    if (gestureTriggered.current) return;
+    
+    // Skip if wheel originated inside a no-swipe zone (filter panel)
+    const target = e.target as HTMLElement;
+    if (target.closest('[data-no-swipe]')) return;
+    
+    const absDeltaX = Math.abs(e.deltaX);
+    const absDeltaY = Math.abs(e.deltaY);
+    
+    // Ignore vertical scrolling
+    if (absDeltaY > absDeltaX) return;
+    
+    // Single event threshold check - no accumulation
+    if (absDeltaX > TRACKPAD_THRESHOLD) {
+      const tabValues = feedTabs.map(tab => tab.value);
+      const currentIndex = tabValues.indexOf(activeTab);
+      
+      if (e.deltaX > 0 && currentIndex < tabValues.length - 1) {
+        setActiveTab(tabValues[currentIndex + 1]);
+        setTabSwitchTime(); // Mark tab switch for carousel cooldown
+        resetFilters();
+        gestureTriggered.current = true;
+      } else if (e.deltaX < 0 && currentIndex > 0) {
+        setActiveTab(tabValues[currentIndex - 1]);
+        setTabSwitchTime(); // Mark tab switch for carousel cooldown
+        resetFilters();
+        gestureTriggered.current = true;
+      }
+      
+      // Keep locked for full inertia duration
+      if (gestureTriggered.current) {
+        if (gestureLockTimeout.current) clearTimeout(gestureLockTimeout.current);
+        gestureLockTimeout.current = setTimeout(() => {
+          gestureTriggered.current = false;
+        }, GESTURE_LOCK_DURATION);
+      }
+    }
+  }, [activeTab, resetFilters]);
+
+  // --------------------------------------------------------------------------
+  // DRAG-TO-SWIPE for tab indicator (must be after handleTabClick & enableHomeTransition)
+  // --------------------------------------------------------------------------
+
+  const homeLongPress = useTabLongPress(activeTab, () => {
+    window.dispatchEvent(new CustomEvent('home-tab-long-press', { detail: activeTab }));
+  }, !isPostOverlayActive);
+  const homeTabButtonPositions = useRef<Partial<Record<string, HTMLElement | null>>>({});
+
+  const homeTabTappedRef = useRef(false);
+  const { isDragging: isHomeDragging, indicatorRef: homeIndicatorRef, handleDragStart: handleHomeDragStart, handleDragMove: handleHomeDragMove, handleDragEnd: handleHomeDragEnd } = useDragTabIndicator({
+    tabRect: homeTabRect,
+    tabLayerRef: homeTabLayerRef,
+    tabButtonPositions: homeTabButtonPositions,
+    tabValues: feedTabs.map(t => t.value),
+    activeTab,
+    onTabChange: (tab) => {
+      setActiveTab(tab);
+      resetFilters();
+    },
+    isDraggingRef: homeIsDraggingRef,
+    indicatorFixedHeightPx: 35,
+    shrinkWidthByPercent: 5,
+    onTap: () => {
+      homeTabTappedRef.current = true;
+      if (!homeLongPress.fired.current) handleTabClick(activeTab);
+    },
+    onDragEnd: () => {
+      // Trigger spring transition after drag ends
+      setEnableHomeTransition(true);
+      setTimeout(() => setEnableHomeTransition(false), 450);
+      // Now safe to persist tab + notify GlobalFeedNav
+      try {
+        sessionStorage.setItem(HOME_STATE_STORAGE_KEY, JSON.stringify({ tab: activeTab }));
+        window.dispatchEvent(new CustomEvent('home-tab-changed'));
+      } catch { /* ignore */ }
+      // Scroll to top for the final settled tab. `window.scrollTo` alone does
+      // nothing in this app — body is the scrolling element — so dragging
+      // between tabs kept the outgoing tab's offset while tapping one (which
+      // goes through the helper) did not. A plain tap already did its own
+      // (smooth) scroll in handleTabClick, so it is not jumped here.
+      if (homeTabTappedRef.current) homeTabTappedRef.current = false;
+      else scrollDocumentTo(0);
+    },
+  });
+
+
+  // --------------------------------------------------------------------------
+  // RENDER FEED BASED ON ACTIVE TAB
+  // --------------------------------------------------------------------------
+
+  // Feeds are rendered persistently below using CSS display toggle
+
+  // --------------------------------------------------------------------------
+  // RENDER
+  // --------------------------------------------------------------------------
+
+  return (
+    <div data-classic-feed-layout={theme === 'system' ? '' : undefined}>
+      {/* One cached instance serves /, /app, /videos and /shorts — meta must
+          follow the URL (not tab state: a sessionStorage-restored tab on "/"
+          would otherwise declare /videos canonical for the root) or three
+          sitemap URLs share one identity and the root canonicalizes away from
+          itself. Titles match the worker's bot HTML for the same URLs so the
+          two UA variants never diverge. */}
+      {/* Keys and URLs are HUB_ROUTE_META's (lib/seo/route-meta); the H1 is
+          per URL too, the worker's heading for it, so /videos and /shorts no
+          longer read as the home page. */}
+      {tabFromPathname(location.pathname) === 'videos' ? (
+        <>
+          <SEOHead title={t('videos.seoTitle')} description={t('videos.seoDescription')} url={HUB_ROUTE_META.videos.url} jsonLd={{ '@context': 'https://schema.org', '@type': 'CollectionPage', name: 'Riftn Video Feed', url: HUB_ROUTE_META.videos.url, description: t('videos.seoDescription'), isPartOf: { '@type': 'WebSite', name: 'Riftn', url: 'https://riftn.com' } }} />
+          <h1 className="sr-only">{t('videos.heading')}</h1>
+        </>
+      ) : tabFromPathname(location.pathname) === 'shorts' ? (
+        <>
+          <SEOHead title={t('shorts.seoTitle')} description={t('shorts.seoDescription')} url={HUB_ROUTE_META.shorts.url} jsonLd={{ '@context': 'https://schema.org', '@type': 'CollectionPage', name: 'Riftn Shorts', url: HUB_ROUTE_META.shorts.url, description: t('shorts.seoDescription'), isPartOf: { '@type': 'WebSite', name: 'Riftn', url: 'https://riftn.com' } }} />
+          <h1 className="sr-only">{t('shorts.heading')}</h1>
+        </>
+      ) : (
+        <>
+          <SEOHead title={t('home.seoTitle')} description={t('home.seoDescription')} url={HUB_ROUTE_META.home.url} jsonLd={{ '@context': 'https://schema.org', '@type': 'CollectionPage', name: 'Riftn Home Feed', url: HUB_ROUTE_META.home.url, description: t('home.seoDescription'), isPartOf: { '@type': 'WebSite', name: 'Riftn', url: 'https://riftn.com' } }} />
+          <h1 className="sr-only">{t('home.seoTitle')}</h1>
+        </>
+      )}
+      {/* Tab Navigation */}
+      <div
+        ref={homeNavRef}
+        data-feed-nav-outer
+        data-home-tabs
+        className={cn("sticky top-11 lg:top-0 bg-black px-2 sm:px-3 pt-1 pb-3 sm:pt-1 sm:pb-3 lg:px-3 lg:pt-2 lg:mt-0 transition-transform duration-300 ease-in-out", anyOverlayOpen ? "z-[40]" : "z-[110]", isCollapsed && "lg:pl-2 lg:pr-0", isCollapsed && "lg:hidden")}
+        style={{
+          transform: linkedSystemHeader ? 'translateY(var(--system-feed-header-offset, 0px))' : hideHomeNav ? 'translateY(calc(-100% - 3rem))' : 'translateY(0)',
+          willChange: 'transform',
+          // Island mode: the pill drops in under the capsule rather than at the very top.
+          // Fixed, not sticky, so it takes no room in the page: posts run to
+          // the very top of the screen with no band above the first one.
+          ...(islandTopBar && isMobile && !isPostOverlayActive ? { position: 'fixed', left: 0, right: 0, top: 'calc(env(safe-area-inset-top, 0px) + 3rem)' } : null),
+        }}
+      >
+        <FeedFilterAnchor behindNav={theme === 'system'}>
+        <div data-feed-nav className="flex flex-col bg-zinc-900 overflow-visible rounded-xl relative" style={theme === 'system' ? { zIndex: 10 } : undefined}>
+          <span data-nav-glass-backdrop aria-hidden="true" />
+
+          <div ref={homeTabLayerRef} className="relative overflow-visible">
+            <div data-feed-search-tabs data-hidden={searchOpen ? '' : undefined} className="absolute inset-0 pointer-events-none">
+            <GlassIndicator ref={homeIndicatorRef} rect={homeTabRect} borderRadius="0.75rem" layoutKey={`home-${isCollapsed}-${activeTab}`} enableTransition={!isHomeDragging && enableHomeTransition} fixedHeightPx={35} variant="nav" />
+            {/* Drag handle overlay */}
+            </div>
+            {homeTabRect.ready && !meltOpen && (
+              <div
+                className="absolute z-30 cursor-grab active:cursor-grabbing"
+                style={{
+                  transform: `translate(${homeTabRect.x}px, ${homeTabRect.y}px)`,
+                  width: homeTabRect.width,
+                  height: homeTabRect.height,
+                }}
+                data-no-quick-actions
+                onPointerDown={(event) => { homeLongPress.begin(event); handleHomeDragStart(event); }}
+                onPointerMove={(event) => { homeLongPress.move(event); if (!homeLongPress.fired.current) handleHomeDragMove(event); }}
+                onPointerUp={() => { homeLongPress.cancel(); handleHomeDragEnd(); }}
+                onPointerCancel={() => { homeLongPress.cancel(); homeLongPress.fired.current = true; handleHomeDragEnd(); }}
+                onLostPointerCapture={homeLongPress.cancel}
+                onContextMenu={(event) => event.preventDefault()}
+              />
+            )}
+            <div data-feed-search-tabs data-hidden={meltOpen ? '' : undefined} className="relative z-20 flex scrollbar-hide">
+              {/* Settings Button - toggles current tab's filters.
+                  When a post overlay is open on top of the feed — or the images
+                  tab has swapped its grid for the scroll view — this slot becomes
+                  a back button so the top nav bar feels seamless: the user never
+                  "leaves" the feed. */}
+              <button
+                data-post-nav-back={isPostOverlayActive || undefined}
+                data-swipe-back={showNavBack ? '' : undefined}
+                onClick={showNavBack
+                  ? handleNavBack
+                  : () => window.dispatchEvent(new CustomEvent('home-tab-reclick', { detail: activeTab }))}
+                className={cn(
+                  "relative flex items-center justify-center px-3 h-[35px] lg:h-9 rounded-xl transition-colors overflow-hidden",
+                  hasActiveFilters
+                    ? "text-white"
+                    // Hover only where a real pointer hovers: phones keep
+                    // :hover after a tap, which left a stuck bubble here.
+                    : "text-zinc-400 [@media(hover:hover)]:hover:text-white [@media(hover:hover)]:hover:bg-white/5"
+                )}
+                aria-label={isPostOverlayActive ? _copy("copy.34c445f7d739", { defaultValue: "Back to feed" }) : isImagesScrollView ? _copy("copy.68f5b97c66d9", { defaultValue: "Back to grid" }) : _copy("copy.2ffafd1aa697", { defaultValue: "Feed settings" })}
+                aria-expanded={showNavBack ? undefined : islandFiltersOpen}
+              >
+                {/* Phones: a soft glow behind the icon says filters are on
+                    without looking like a second selected tab. Desktop keeps
+                    the glass pill. */}
+                {hasActiveFilters && !showNavBack && (
+                  <span
+                    aria-hidden
+                    data-feed-filters-glow
+                    className="lg:hidden pointer-events-none absolute inset-x-1.5 inset-y-1 rounded-full blur-[2px]"
+                    style={{ background: 'radial-gradient(closest-side, color-mix(in srgb, currentColor 55%, transparent), color-mix(in srgb, currentColor 15%, transparent) 60%, transparent)' }}
+                  />
+                )}
+                {hasActiveFilters && !showNavBack && (
+                  <div className={cn(
+                    "hidden lg:block absolute inset-0 translate-y-[0.6px] lg:translate-y-[0.25px] rounded-xl bg-gradient-to-br from-white/20 via-white/10 to-white/5 backdrop-blur-xl border border-white/30",
+                    isLightTheme
+                      ? "shadow-[0_2px_8px_rgba(0,0,0,0.1),inset_0_1px_0_rgba(255,255,255,0.2),inset_0_-1px_0_rgba(255,255,255,0.05)]"
+                      : "shadow-[0_4px_16px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.4),inset_0_-1px_0_rgba(255,255,255,0.1)]"
+                  )} />
+                )}
+                <AnimatePresence mode="wait" initial={false}>
+                  {showNavBack ? (
+                    <motion.div
+                      key="back"
+                      initial={{ rotate: -180, opacity: 0 }}
+                      animate={{ rotate: 0, opacity: 1 }}
+                      exit={{ rotate: 180, opacity: 0 }}
+                      transition={{ duration: 0.25, ease: "easeInOut" }}
+                      className="relative z-10"
+                    >
+                      <ArrowLeft className="w-4 h-4 text-white" />
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key="settings"
+                      initial={{ rotate: 180, opacity: 0 }}
+                      animate={{ rotate: 0, opacity: 1 }}
+                      exit={{ rotate: -180, opacity: 0 }}
+                      transition={{ duration: 0.25, ease: "easeInOut" }}
+                      className="relative z-10"
+                    >
+                      <Settings2 className="w-4 h-4" style={{ transform: `scale(${FEED_TAB_ICON_SCALE.settings})` }} />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </button>
+
+              {feedTabs.map((tab) => {
+                const isActive = activeTab === tab.value;
+                return (
+                  <button
+                    key={tab.value}
+                    data-feed-tab-btn
+                    data-active={isActive ? 'true' : undefined}
+                    ref={(el) => {
+                      setHomeTabRef(tab.value)(el);
+                      homeTabButtonPositions.current[tab.value] = el;
+                    }}
+                    onPointerEnter={() => warmFeedOnIntent(tab.value, queryClient.getQueriesData({ queryKey: ['unified-feed'] }).some(([, data]) => !!data))}
+                    onPointerDown={() => warmFeedOnIntent(tab.value, queryClient.getQueriesData({ queryKey: ['unified-feed'] }).some(([, data]) => !!data))}
+                    onClick={() => handleTabClick(tab.value)}
+                    aria-label={tab.label}
+                    aria-current={isActive ? 'page' : undefined}
+                    className={cn(
+                      'relative z-40 flex-1 flex items-center justify-center px-3 sm:px-4 py-2.5 rounded-xl',
+                      isActive ? 'text-white' : 'text-zinc-400 hover:text-white'
+                    )}
+                  >
+                    <tab.icon data-home-nav-glyph={tab.value === 'home' || undefined} className="relative z-10 w-4 h-4 origin-center" style={{ transform: feedTabIconTransform(tab.value) }} />
+                  </button>
+
+                );
+              })}
+            </div>
+            {searchOpen && isFeedSearchTab(activeTab) && searchLens && (
+              <FeedSearchLens
+                tab={activeTab}
+                hasActiveFilters={hasActiveFilters}
+                filtersOpen={islandFiltersOpen}
+                onToggleFilters={() => window.dispatchEvent(new CustomEvent('home-tab-reclick', { detail: activeTab }))}
+                onPickFeed={handleTabClick}
+              />
+            )}
+            {meltOpen && isFeedSearchTab(activeTab) && (
+              <FeedSearchBar
+                tab={activeTab}
+                hasActiveFilters={hasActiveFilters}
+                filtersOpen={islandFiltersOpen}
+                onToggleFilters={() => window.dispatchEvent(new CustomEvent('home-tab-reclick', { detail: activeTab }))}
+                onPickFeed={handleTabClick}
+              />
+            )}
+        </div>
+        {theme !== 'system' && <div ref={homeFiltersRef} className="contents" />}
+        {!islandTopBar && <FeedPillGlow refreshing={isRefreshing} />}
+        </div>
+        {theme === 'system' && <div ref={homeFiltersRef} className="absolute inset-x-0 top-0 z-0 pointer-events-none" />}
+        </FeedFilterAnchor>
+        {/* Active-filter chips — a sibling of the pill, not a row inside it.
+            Still within the sticky chrome, so they travel with the nav. */}
+        <div ref={homeChipsRef} className="contents" />
+      </div>
+
+      {/* Signed-out only: the prose the "dehub" brand term has to land on.
+          dehub.net 301s into this URL, and a 301 only carries a ranking if the
+          destination holds the query — the feed alone gave crawlers ~149 words.
+          Sits AFTER the sticky tab bar (a sibling, so its top-11/lg:top-0 offsets
+          and the hide-on-scroll transform are untouched) and before the feed
+          container, so it never enters the pull-to-refresh region. Returns null
+          when signed in, so the existing community's feed is unchanged.
+          Root only: this one instance also serves /app, /videos and /shorts, and
+          "/" is both the canonical indexable URL and the 301 target — the others
+          are noindex app chrome (see shouldServeSSR in the worker). */}
+      <div data-feed-swallow-bounds data-feed-welcome-bounds={location.pathname === '/' ? '' : undefined}>
+      <div ref={swallowContentRef} data-feed-swallow-shell>
+      <FeedSwallowMotion>
+      {location.pathname === '/' && <HomeIntro tab={activeTab} />}
+
+      {/* Feed Content - Pull-to-refresh only works within this container */}
+      <div 
+        ref={feedContainerRef}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        onTouchCancel={pullHandlers.onTouchCancel}
+        onWheel={handleWheel}
+        onMouseDown={pullHandlers.onMouseDown}
+        onMouseMove={pullHandlers.onMouseMove}
+        onMouseUp={pullHandlers.onMouseUp}
+        onMouseLeave={pullHandlers.onMouseLeave}
+        data-feed-pull-content
+        data-tab-swipe
+      >
+        {/* Keep the swallow clip stationary while the feed moves beneath it. */}
+        <div
+          ref={pullMotionRef}
+          data-feed-pull-motion
+          style={{ position: 'relative' }}
+        >
+        {/* Feeds mount lazily on first tab visit, then stay alive (CSS display toggle).
+            Memo wrappers prevent re-renders during drag — feeds only update when
+            their own props change, not when activeTab/deferredTab changes. */}
+        {shouldMountFeed('home') && (
+          <div style={{ display: deferredTab === 'home' && !searchQuery ? 'block' : 'none' }}>
+            <CachedPageActiveContext.Provider value={pageActive && deferredTab === 'home'}>
+            <MemoHomeFeed active={deferredTab === 'home'} shuffleKey={refreshKey} isRefreshing={isRefreshing} showFilters={showHomeFilters && deferredTab === 'home'} pinnedPostId={pinnedPostId} filtersPortalRef={isCollapsed && globalFeedNav?.filtersPortalElement ? globalFeedNav.filtersPortalElement : homeFiltersRef} chipsPortalRef={isCollapsed && globalFeedNav?.chipsPortalElement ? globalFeedNav.chipsPortalElement : homeChipsRef} />
+            </CachedPageActiveContext.Provider>
+          </div>
+        )}
+        {/* Home's filter panel is portalled into the pill, so the feed can hide
+            under its search results and the panel still opens. */}
+        {searchQuery && deferredTab === 'home' && (
+          <div className="px-2 sm:px-3">
+            <Suspense fallback={<FeedBodySkeleton />}>
+              <FeedSearchResults tab="home" query={searchQuery} />
+            </Suspense>
+          </div>
+        )}
+        {/* Every tab but home is a lazy chunk (see the imports): the Suspense
+            fallback is the same skeleton the feeds show while their first page
+            loads, so a first tap that beats the prefetch reads as loading, not
+            as an empty tab. */}
+        {shouldMountFeed('videos') && (
+          <div className={isCollapsed ? 'pt-2' : undefined} style={{ display: deferredTab === 'videos' ? 'block' : 'none' }}>
+            <CachedPageActiveContext.Provider value={pageActive && deferredTab === 'videos'}>
+            <Suspense fallback={<FeedBodySkeleton />}>
+              <MemoVideosFeed showFilters={showVideosFilters} refreshKey={refreshKey} searchQuery={deferredTab === 'videos' ? searchQuery : ''} />
+            </Suspense>
+            </CachedPageActiveContext.Provider>
+          </div>
+        )}
+        {shouldMountFeed('text') && (
+          <div style={{ display: deferredTab === 'text' ? 'block' : 'none' }}>
+            <CachedPageActiveContext.Provider value={pageActive && deferredTab === 'text'}>
+            <Suspense fallback={<FeedBodySkeleton />}>
+              <MemoTextFeed refreshKey={refreshKey} />
+            </Suspense>
+            </CachedPageActiveContext.Provider>
+          </div>
+        )}
+        {shouldMountFeed('images') && (
+          <div className={isCollapsed && !(islandTopBar && isMobile) ? 'pt-2' : undefined} style={{ display: deferredTab === 'images' ? 'block' : 'none' }}>
+            <CachedPageActiveContext.Provider value={pageActive && deferredTab === 'images'}>
+            <Suspense fallback={<FeedBodySkeleton />}>
+              <MemoImagesFeed
+                showCollage={showImagesCollage}
+                showFilters={showImagesFilters}
+                isRefreshing={isRefreshing}
+                refreshKey={refreshKey}
+                selectedPostId={selectedImageId}
+                onPostSelected={handleImageSelected}
+                searchQuery={deferredTab === 'images' ? searchQuery : ''}
+              />
+            </Suspense>
+            </CachedPageActiveContext.Provider>
+          </div>
+        )}
+        {shouldMountFeed('shorts') && (
+          <div className={isCollapsed && !(islandTopBar && isMobile) ? 'pt-2' : undefined} style={{ display: deferredTab === 'shorts' ? 'block' : 'none' }}>
+            <CachedPageActiveContext.Provider value={pageActive && deferredTab === 'shorts'}>
+            <Suspense fallback={<FeedBodySkeleton />}>
+              <MemoShortsFeed showFilters={showShortsFilters} isRefreshing={isRefreshing} refreshKey={refreshKey} startShortId={startShortId} onStartShortConsumed={() => setStartShortId(undefined)} searchQuery={deferredTab === 'shorts' ? searchQuery : ''} />
+            </Suspense>
+            </CachedPageActiveContext.Provider>
+          </div>
+        )}
+        {shouldMountFeed('live') && (
+          <div className={isCollapsed ? 'pt-2' : undefined} style={{ display: deferredTab === 'live' ? 'block' : 'none' }}>
+            <CachedPageActiveContext.Provider value={pageActive && deferredTab === 'live'}>
+            <Suspense fallback={<FeedBodySkeleton />}>
+              <MemoLiveFeed isRefreshing={isRefreshing} showFilters={showLiveFilters} />
+            </Suspense>
+            </CachedPageActiveContext.Provider>
+          </div>
+        )}
+        {shouldMountFeed('music') && (
+          <div className={isCollapsed ? 'pt-2' : undefined} style={{ display: deferredTab === 'music' ? 'block' : 'none' }}>
+            <CachedPageActiveContext.Provider value={pageActive && deferredTab === 'music'}>
+            <Suspense fallback={<FeedBodySkeleton />}>
+              <MemoMusicFeed showFilters={showMusicFilters} refreshKey={refreshKey} searchQuery={deferredTab === 'music' ? searchQuery : ''} />
+            </Suspense>
+            </CachedPageActiveContext.Provider>
+          </div>
+        )}
+        {shouldMountFeed('ppv') && (
+          <div className={isCollapsed ? 'pt-2' : undefined} style={{ display: deferredTab === 'ppv' ? 'block' : 'none' }}>
+            <CachedPageActiveContext.Provider value={pageActive && deferredTab === 'ppv'}>
+            <Suspense fallback={<FeedBodySkeleton />}>
+              <MemoPPVFeed />
+            </Suspense>
+            </CachedPageActiveContext.Provider>
+          </div>
+        )}
+        {shouldMountFeed('w2e') && (
+          <div className={isCollapsed ? 'pt-2' : undefined} style={{ display: deferredTab === 'w2e' ? 'block' : 'none' }}>
+            <CachedPageActiveContext.Provider value={pageActive && deferredTab === 'w2e'}>
+            <Suspense fallback={<FeedBodySkeleton />}>
+              <MemoW2EFeed />
+            </Suspense>
+            </CachedPageActiveContext.Provider>
+          </div>
+        )}
+        {/* end feed tabs */}
+        </div>
+        </div>
+      </FeedSwallowMotion>
+      </div>
+      </div>
+
+    </div>
+  );
+}

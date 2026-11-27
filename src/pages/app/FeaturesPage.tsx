@@ -1,0 +1,1591 @@
+import { translateCopy as _translateCopy } from '@/i18n/copy';
+import { FeedSwallowMotion } from '@/components/app/feeds/FeedSwallowMotion';
+import { useTranslation as _useCopy } from 'react-i18next';
+import i18n from '@/i18n';
+import { formatRelativeTime } from '@/i18n/date-locale';
+import { useSurfaceDraft, draftIdentity } from '@/hooks/use-surface-draft';
+/**
+ * Feature Requests Page
+ * =====================
+ * Community-driven feature request board.
+ * Users can submit ideas and vote on existing ones.
+ * Feature cards use the same UI pattern as text posts (ActionBar + CommentsWrapper).
+ */
+
+import { BrandIcon, ThemedIcon } from '@/components/app/war/WarHudIcon';
+import { useState, useMemo, useCallback, useRef, useEffect } from 'react';
+import type { MutableRefObject } from 'react';
+import { useFormDraft } from '@/hooks/use-form-draft';
+import { useTranslation as useI18n } from 'react-i18next';
+import { useFeedSwallowClip } from '@/hooks/use-feed-swallow-clip';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useTabIndicator } from '@/hooks/use-tab-indicator';
+import { GlassIndicator } from '@/components/app/feeds/GlassIndicator';
+import { useScrollFadeMask } from '@/components/app/feeds/useScrollFadeMask';
+import { Loader2, CheckCircle2, MoreVertical, ImagePlus, Github } from "lucide-react";
+import Sparkles from "@/components/ui/cut-icons/assistant";
+import Trash2 from "@/components/ui/cut-icons/delete";
+import Pencil from "@/components/ui/cut-icons/edit";
+import QueuedIcon from "@/components/ui/cut-icons/clock";
+import ShippedIcon from "@/components/ui/cut-icons/check";
+import BackToRequestsIcon from "@/components/ui/cut-icons/undo";
+import NotFeasibleIcon from "@/components/ui/cut-icons/blocked";
+
+import Search from "@/components/ui/cut-icons/search";
+import Plus from "@/components/ui/cut-icons/add";
+import X from "@/components/ui/cut-icons/close";
+import FullscreenIcon from "@/components/ui/cut-icons/fullscreen";
+import { ImageMarkupDialog } from '@/components/app/features/ImageMarkupDialog';
+import { HoldToTalkButton } from '@/components/app/features/HoldToTalkButton';
+import { RequestStatusRow } from '@/components/app/features/RequestStatusRow';
+
+import featuresLightbulb from '@/assets/features-lightbulb.png';
+import { TranslatableText, SharedTranslationProvider, useSharedTranslationControl } from '@/components/app/TranslatableText';
+import { PostMetadata } from '@/components/app/cards/PostMetadata';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { featurePromptFields, FEATURE_PROMPT_MAX_LENGTH } from '@/lib/feature-prompt';
+import { CardHeader } from '@/components/app/cards/CardHeader';
+import { ActionBar } from '@/components/app/cards/ActionBar';
+import { useAuth } from '@/contexts/AuthContext';
+import { cn } from '@/lib/utils';
+import { buildAvatarUrl, storageImage } from '@/lib/media-url';
+import { dehubLinkFor } from '@/lib/dehub-links';
+import { useProfileAvatar } from '@/hooks/use-profile-avatar-cache';
+import { useDebouncedValue } from '@/hooks/use-debounced-value';
+import { supabase } from '@/integrations/supabase/client';
+import {
+  useFeatureRequests,
+  useFeatureRequest,
+  useShippedFeatures,
+  useInProgressFeatures,
+  useNotFeasibleFeatures,
+  useUserVotes,
+  useFeatureCounts,
+  useSubmitFeatureRequest,
+  useVoteFeatureRequest,
+  useEditFeatureRequest,
+  useDeleteFeatureRequest,
+  useSetFeatureStatus,
+  useFeatureDeviceInfoIds,
+  isFeatureStatusEditor,
+  CATEGORY_LABELS,
+  type FeatureCategory,
+  type FeatureSort,
+  type FeatureStatus,
+  type FeatureRequest,
+} from '@/hooks/use-feature-requests';
+import {
+  featureAttachments,
+  isVideoAttachment,
+  MAX_FEATURE_ATTACHMENTS,
+  MAX_FEATURE_ATTACHMENT_BYTES,
+} from '@/lib/feature-attachments';
+import { z } from 'zod';
+import { FeatureRequestComments } from '@/components/app/features/FeatureRequestComments';
+import { FeatureDeviceInfo } from '@/components/app/features/FeatureDeviceInfo';
+import { TopBuildersCard } from '@/components/app/features/TopBuildersCard';
+import { SEOHead } from '@/components/SEOHead';
+
+import { formatCount } from '@/lib/format-count';
+// Built per use so its messages are read in the reader's language at the time.
+const featureSchema = () => z.object({
+  title: z.string().trim().min(1, _translateCopy("copy.d5b06872b556", { defaultValue: "Title is required" })).max(100, _translateCopy("copy.8b4f83e9c989", { defaultValue: "Title must be under 100 characters" })),
+  description: z.string().trim()
+    .min(1, _translateCopy("copy.032d33c52dda", { defaultValue: "Description is required" }))
+    .max(FEATURE_PROMPT_MAX_LENGTH, _translateCopy("copy.d8b5fc0e754c", {
+      defaultValue: "Description must be {{value1}} characters or less",
+      value1: FEATURE_PROMPT_MAX_LENGTH.toLocaleString(),
+    })),
+  category: z.enum(['ui_ux', 'performance', 'new_feature', 'bug_fix', 'integration', 'other']),
+});
+
+const CATEGORIES: { id: FeatureCategory | 'all'; labelKey: string }[] = [
+  { id: 'all', labelKey: 'features.all' },
+  { id: 'ui_ux', labelKey: 'features.uiUx' },
+  { id: 'performance', labelKey: 'features.performance' },
+  { id: 'new_feature', labelKey: 'features.newFeature' },
+  { id: 'bug_fix', labelKey: 'features.bugFix' },
+  { id: 'integration', labelKey: 'features.integration' },
+  { id: 'other', labelKey: 'features.other' },
+];
+
+type PageTab = 'requests' | 'shipping' | 'shipped';
+
+// The last chip in the Requests row, after "Other": requests the board owners
+// ruled out. It is a status view rather than a category, so it only exists on
+// the Requests tab and swaps the open list for the Not feasible one.
+const NOT_FEASIBLE = 'not_feasible' as const;
+type CategoryChip = FeatureCategory | 'all' | typeof NOT_FEASIBLE;
+
+const DEHUB_GITHUB_URL = 'https://github.com/Riftn';
+
+const SHIPPED_PAGE_SIZE = 20;
+
+const SORTS: { id: FeatureSort; labelKey: string }[] = [
+  { id: 'most_voted', labelKey: 'features.mostVoted' },
+  { id: 'newest', labelKey: 'features.newest' },
+];
+
+/**
+ * A request's attachments. One fills the card the way a single attachment
+ * always has; several tile so a multi-screenshot bug report stays scannable
+ * without pushing the vote controls off screen.
+ */
+/** Device px asked of the storage resizer for a request's pictures in the list. */
+const ATTACHMENT_LIST_WIDTH = 960;
+const ATTACHMENT_GRID_WIDTH = 640;
+
+/**
+ * A single attachment, with its space reserved before it arrives.
+ *
+ * These images are lazy, and an `<img>` that has not loaded has no intrinsic
+ * height — so `w-full max-h-64` alone gave a box 677px wide and 0px tall. A
+ * card whose screenshot has not scrolled into view therefore rendered as if it
+ * had no attachment at all, which is exactly how "see screenshot" reports get
+ * read as having no screenshot. Holding 16rem (the same 64 the loaded image is
+ * capped at) until `onLoad` also stops every card below it jumping down the
+ * page as attachments arrive.
+ */
+function LazyAttachmentImage({ url }: { url: string }) {
+  const { t: _copy } = _useCopy();
+  const [loaded, setLoaded] = useState(false);
+  // The box is 16rem tall at most, so a list-sized copy is plenty; the
+  // uploaded original (often a 1 MB screenshot) only loads if the resizer fails.
+  const [useOriginal, setUseOriginal] = useState(false);
+  const sized = useOriginal ? url : storageImage(url, ATTACHMENT_LIST_WIDTH);
+  return (
+    <div className={cn('relative w-full', !loaded && 'h-64 animate-pulse bg-white/[0.04]')}>
+      <img
+        src={sized}
+        alt={_copy("copy.040d2b3689dd", { defaultValue: "Attachment" })}
+        loading="lazy"
+        onLoad={() => setLoaded(true)}
+        // Errors must not strand the skeleton pulsing forever — settle the box
+        // and let the browser show its own broken-image state.
+        onError={() => { if (sized !== url) setUseOriginal(true); else setLoaded(true); }}
+        className={cn(
+          'w-full max-h-64 object-contain bg-black/30 transition-opacity duration-300',
+          loaded ? 'opacity-100' : 'absolute inset-0 h-full opacity-0'
+        )}
+      />
+    </div>
+  );
+}
+
+/**
+ * A video on a request. Small tiles are hard to watch, so the corner button
+ * (or a double tap) opens it full screen, iPhone Safari included.
+ */
+function FeatureVideo({ url, className }: { url: string; className: string }) {
+  const { t: _copy } = _useCopy();
+  const ref = useRef<HTMLVideoElement>(null);
+  const enlarge = useCallback(() => {
+    const video = ref.current as (HTMLVideoElement & { webkitEnterFullscreen?: () => void }) | null;
+    if (!video) return;
+    const play = () => { video.play().catch(() => {}); };
+    if (typeof video.requestFullscreen === 'function') {
+      video.requestFullscreen().then(play).catch(() => { try { video.webkitEnterFullscreen?.(); play(); } catch { /* noop */ } });
+    } else {
+      try { video.webkitEnterFullscreen?.(); play(); } catch { /* noop */ }
+    }
+  }, []);
+  return (
+    <div className="relative w-full h-full">
+      <video ref={ref} src={url} className={className} controls playsInline preload="metadata" onDoubleClick={enlarge} />
+      <button
+        type="button"
+        onClick={enlarge}
+        aria-label={_copy('copy.c461dbb2bab7', { defaultValue: 'Fullscreen' })}
+        data-keep-dark
+        className="absolute top-1.5 right-1.5 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-black/60 text-white backdrop-blur-md"
+      >
+        <FullscreenIcon className="h-4 w-4" />
+      </button>
+    </div>
+  );
+}
+
+function FeatureAttachments({ feature }: { feature: FeatureRequest }) {
+  const { t: _copy } = _useCopy();
+  const urls = featureAttachments(feature);
+  if (urls.length === 0) return null;
+
+  if (urls.length === 1) {
+    const url = urls[0];
+    return (
+      <div data-media-full className="rounded-xl overflow-hidden border border-white/10">
+        {isVideoAttachment(url) ? (
+          <FeatureVideo url={url} className="w-full max-h-64 object-contain bg-black" />
+        ) : (
+          <LazyAttachmentImage url={url} />
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div data-media-full className="grid grid-cols-2 gap-1.5">
+      {urls.map((url, index) => (
+        <div key={url} className="rounded-xl overflow-hidden border border-white/10 aspect-video bg-black/30">
+          {isVideoAttachment(url) ? (
+            <FeatureVideo url={url} className="w-full h-full object-cover" />
+          ) : (
+            <a href={url} target="_blank" rel="noopener noreferrer" className="block w-full h-full">
+              <img
+                src={storageImage(url, ATTACHMENT_GRID_WIDTH)}
+                onError={(e) => { if (e.currentTarget.src !== url) e.currentTarget.src = url; }}
+                alt={_copy("copy.9010b5b17d48", { defaultValue: "Attachment {{value1}} of {{value2}}", value1: index + 1, value2: urls.length })}
+                className="w-full h-full object-cover"
+                loading="lazy"
+              />
+            </a>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function formatTimeAgo(dateStr: string): string {
+  return formatRelativeTime(dateStr, i18n.language, 'short');
+}
+
+// ──────────────────────────────────────────────────
+// Feature Card Component (PostCard-style UI)
+// ──────────────────────────────────────────────────
+function FeatureCard({
+  feature,
+  currentVote,
+  onVote,
+  voteDisabled,
+  defaultCommentsOpen = false,
+  focusCommentId = null,
+}: {
+  feature: FeatureRequest;
+  currentVote: number | undefined;
+  onVote: (featureId: string, voteType: 1 | -1, currentVote: number | undefined) => void;
+  voteDisabled: boolean;
+  /** Open the comments on mount — set by a comment notification's deep link. */
+  defaultCommentsOpen?: boolean;
+  /** The comment that deep link was about, ringed once the thread is open. */
+  focusCommentId?: string | null;
+}) {
+  const { t: _copy } = _useCopy();
+  const { t } = useI18n();
+  const { isTranslated, isLoading: isTranslateLoading, error: translateError, handleTranslate, handleShowOriginal } = useSharedTranslationControl();
+  const [showComments, setShowComments] = useState(defaultCommentsOpen);
+  const [showMenu, setShowMenu] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editTitle, setEditTitle] = useSurfaceDraft("src/pages/app/FeaturesPage.tsx:editTitle", feature.title, feature.id);
+  const [editDescription, setEditDescription] = useSurfaceDraft("src/pages/app/FeaturesPage.tsx:editDescription", feature.description, feature.id);
+  // A saved request may also include the optional Device & OS line.
+  const editDescriptionLimit = Math.max(FEATURE_PROMPT_MAX_LENGTH, feature.description.length);
+  const [editCategory, setEditCategory] = useState<FeatureCategory>(feature.category);
+  // Attachments while editing: the ones already on the request that stay, and
+  // new photos or videos picked from the phone or computer.
+  const [editKeep, setEditKeep] = useState<string[]>([]);
+  const [editNew, setEditNew] = useState<{ file: File; preview: string }[]>([]);
+  const [editMediaError, setEditMediaError] = useState('');
+  const editFileRef = useRef<HTMLInputElement>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const { isAuthenticated, openLoginModal, walletAddress } = useAuth();
+
+  const editMutation = useEditFeatureRequest();
+  const deleteMutation = useDeleteFeatureRequest();
+
+  const statusMutation = useSetFeatureStatus();
+
+  const isAuthor = walletAddress && feature.author_wallet_address.toLowerCase() === walletAddress.toLowerCase();
+  // The board's owners can move anyone's request to Queued or Shipped.
+  const canSetStatus = isFeatureStatusEditor(walletAddress);
+  const { data: deviceInfoIds } = useFeatureDeviceInfoIds();
+  const hasDeviceInfo = canSetStatus && !!deviceInfoIds?.has(feature.id);
+  const isQueued = feature.status === 'in_progress';
+  const isShipped = feature.status === 'shipped' || feature.status === 'completed';
+  const isNotFeasible = feature.status === 'declined';
+  const notFeasibleReason = isNotFeasible ? feature.status_note?.trim() || '' : '';
+  const [reasonDraft, setReasonDraft] = useState<string | null>(null);
+  const setStatus = (status: 'open' | 'in_progress' | 'shipped') => {
+    setShowMenu(false);
+    statusMutation.mutate({ id: feature.id, status });
+  };
+  const startNotFeasible = () => {
+    setShowMenu(false);
+    setReasonDraft(notFeasibleReason);
+  };
+  const saveNotFeasible = () => {
+    statusMutation.mutate(
+      { id: feature.id, status: 'declined', note: reasonDraft ?? '' },
+      { onSuccess: () => setReasonDraft(null) },
+    );
+  };
+
+  const dbAvatarUrl = feature.author_avatar
+    ? buildAvatarUrl(feature.author_wallet_address, feature.author_avatar)
+    : undefined;
+  const walletAvatarUrl = useProfileAvatar(feature.author_wallet_address, dbAvatarUrl);
+  const usernameAvatarUrl = useProfileAvatar(
+    feature.author_username && feature.author_username.toLowerCase() !== feature.author_wallet_address.toLowerCase()
+      ? feature.author_username
+      : undefined
+  );
+  const avatarUrl = walletAvatarUrl ?? usernameAvatarUrl ?? dbAvatarUrl ?? null;
+
+  const displayName = feature.author_username || feature.author_wallet_address.slice(0, 6);
+  const handle = feature.author_username ? `@${feature.author_username}` : `${feature.author_wallet_address.slice(0, 6)}...${feature.author_wallet_address.slice(-4)}`;
+
+  // Determine like/dislike state from currentVote
+  const isLiked = currentVote === 1;
+  const isDisliked = currentVote === -1;
+
+  const handleLike = useCallback(() => {
+    onVote(feature.id, 1, currentVote);
+  }, [feature.id, currentVote, onVote]);
+
+  const handleDislike = useCallback(() => {
+    onVote(feature.id, -1, currentVote);
+  }, [feature.id, currentVote, onVote]);
+
+  const handleEdit = () => {
+    setEditTitle(feature.title);
+    setEditDescription(feature.description);
+    setEditCategory(feature.category);
+    setEditKeep(featureAttachments(feature));
+    clearEditNew();
+    setEditMediaError('');
+    setIsEditing(true);
+    setShowMenu(false);
+  };
+
+  const clearEditNew = () => setEditNew(prev => {
+    prev.forEach(a => URL.revokeObjectURL(a.preview));
+    return [];
+  });
+
+  const addEditFiles = (picked: File[]) => {
+    const valid = picked.filter(file => /^(image|video)\//.test(file.type) && file.size <= MAX_FEATURE_ATTACHMENT_BYTES);
+    const room = Math.max(0, MAX_FEATURE_ATTACHMENTS - editKeep.length - editNew.length);
+    const accepted = valid.slice(0, room);
+    setEditNew(prev => [...prev, ...accepted.map(file => ({ file, preview: URL.createObjectURL(file) }))]);
+    setEditMediaError(valid.length < picked.length
+      ? t('features.promptMediaError', 'Choose images or videos under 200MB each.')
+      : accepted.length < picked.length
+        ? t('features.promptMediaLimit', 'Up to {{max}} attachments.', { max: MAX_FEATURE_ATTACHMENTS }) : '');
+  };
+
+  const removeEditNew = (index: number) => setEditNew(prev => {
+    const gone = prev[index];
+    if (gone) URL.revokeObjectURL(gone.preview);
+    return prev.filter((_, i) => i !== index);
+  });
+
+  const handleSaveEdit = () => {
+    if (!editTitle.trim() || !editDescription.trim() || editDescription.length > editDescriptionLimit) return;
+    const before = featureAttachments(feature);
+    const mediaChanged = editNew.length > 0 || editKeep.length !== before.length || editKeep.some((u, i) => u !== before[i]);
+    editMutation.mutate(
+      {
+        id: feature.id, title: editTitle, description: editDescription, category: editCategory,
+        ...(mediaChanged ? { keepUrls: editKeep, newFiles: editNew.map(a => a.file) } : {}),
+      },
+      { onSuccess: () => { setIsEditing(false); clearEditNew(); } }
+    );
+  };
+
+  const handleDelete = () => {
+    setShowMenu(false);
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDelete = () => {
+    deleteMutation.mutate(feature.id, {
+      onSuccess: () => setShowDeleteConfirm(false),
+    });
+  };
+
+  // Close menu on outside click
+  useEffect(() => {
+    if (!showMenu) return;
+    const handler = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setShowMenu(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [showMenu]);
+
+  return (
+    <div
+      id={`feature-${feature.id}`}
+      className="overflow-visible relative rounded-xl border border-white/[0.12] bg-white/[0.03] backdrop-blur-[24px] p-3 scroll-mt-52"
+    >
+      {/* Header with three-dot menu */}
+      <div className="flex items-start">
+        <CardHeader
+          username={displayName}
+          handle={handle}
+          avatarSeed={avatarUrl || ''}
+          verified={false}
+          contentType="post"
+          creatorId={feature.author_wallet_address}
+          creatorUsername={feature.author_username || undefined}
+          badgeLookupId={feature.author_username || feature.author_wallet_address}
+          timestamp={formatTimeAgo(feature.created_at)}
+        />
+        {(isAuthor || canSetStatus) && (
+          <div className="relative shrink-0" ref={menuRef}>
+            <button
+              type="button"
+              onClick={() => setShowMenu(prev => !prev)}
+              className="w-8 h-8 flex items-center justify-center rounded-lg text-zinc-500 hover:text-white hover:bg-white/10 transition-colors"
+            >
+              <MoreVertical className="w-4 h-4" />
+            </button>
+            {showMenu && (
+              <div data-glass-menu className={cn("absolute right-0 top-9 z-50 rounded-xl border border-white/10 bg-zinc-900/95 backdrop-blur-xl shadow-xl overflow-hidden", canSetStatus ? 'w-48' : 'w-36')}>
+                {canSetStatus && (
+                  <>
+                    {!isQueued && (
+                      <button
+                        type="button"
+                        onClick={() => setStatus('in_progress')}
+                        disabled={statusMutation.isPending}
+                        className="flex items-center gap-2 w-full px-3 py-2.5 text-sm text-zinc-300 hover:bg-white/10 hover:text-white transition-colors"
+                      >
+                        <QueuedIcon className="w-3.5 h-3.5" />{_copy("copy.63eb38b938b8", { defaultValue: "Mark Queued" })}</button>
+                    )}
+                    {!isShipped && (
+                      <button
+                        type="button"
+                        onClick={() => setStatus('shipped')}
+                        disabled={statusMutation.isPending}
+                        className="flex items-center gap-2 w-full px-3 py-2.5 text-sm text-zinc-300 hover:bg-white/10 hover:text-white transition-colors"
+                      >
+                        <ShippedIcon className="w-3.5 h-3.5" />{_copy("copy.2fffca525795", { defaultValue: "Mark Shipped" })}</button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={startNotFeasible}
+                      disabled={statusMutation.isPending}
+                      className="flex items-center gap-2 w-full px-3 py-2.5 text-sm text-zinc-300 hover:bg-white/10 hover:text-white transition-colors"
+                    >
+                      <NotFeasibleIcon className="w-3.5 h-3.5" />{isNotFeasible ? _copy("copy.0d24977e6943", { defaultValue: "Edit reason" }) : _copy("copy.465fe84f18fc", { defaultValue: "Mark Not feasible" })}</button>
+                    {(isQueued || isShipped || isNotFeasible) && (
+                      <button
+                        type="button"
+                        onClick={() => setStatus('open')}
+                        disabled={statusMutation.isPending}
+                        className="flex items-center gap-2 w-full px-3 py-2.5 text-sm text-zinc-300 hover:bg-white/10 hover:text-white transition-colors"
+                      >
+                        <BackToRequestsIcon className="w-3.5 h-3.5" />{_copy("copy.3ee050a08bfa", { defaultValue: "Back to Build" })}</button>
+                    )}
+                  </>
+                )}
+                {isAuthor && (<>
+                <button
+                  type="button"
+                  onClick={handleEdit}
+                  className="flex items-center gap-2 w-full px-3 py-2.5 text-sm text-zinc-300 hover:bg-white/10 hover:text-white transition-colors"
+                >
+                  <Pencil className="w-3.5 h-3.5" />{_copy("copy.464c4ffd019e", { defaultValue: "Edit" })}</button>
+                <button
+                  type="button"
+                  onClick={handleDelete}
+                  className="flex items-center gap-2 w-full px-3 py-2.5 text-sm text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-colors"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />{_copy("copy.e2d0a54968ea", { defaultValue: "Delete" })}</button>
+                </>)}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Delete confirmation */}
+      {showDeleteConfirm && (
+        <div className="mb-3 p-3 rounded-lg border border-red-500/20 bg-red-500/5">
+          <p className="text-sm text-zinc-300 mb-2">{_copy("copy.bc9f6ccb582d", { defaultValue: "Are you sure you want to delete this feature request?" })}</p>
+          <div className="flex gap-2">
+            <Button
+              size="sm"
+              variant="destructive"
+              onClick={confirmDelete}
+              disabled={deleteMutation.isPending}
+            >
+              {deleteMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : _copy("copy.e2d0a54968ea", { defaultValue: "Delete" })}
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => setShowDeleteConfirm(false)}
+            >{_copy("copy.19766ed6ccb2", { defaultValue: "Cancel" })}</Button>
+          </div>
+        </div>
+      )}
+
+      {/* Owner's Not feasible reason, optional */}
+      {reasonDraft !== null && (
+        <div className="mb-3 p-3 rounded-lg border border-white/10 bg-white/[0.04] space-y-2">
+          <label htmlFor={`not-feasible-${feature.id}`} className="text-zinc-400 text-xs block">{_copy("copy.0a54f1d10336", { defaultValue: "Why is this not feasible? (optional)" })}</label>
+          <Input
+            id={`not-feasible-${feature.id}`}
+            value={reasonDraft}
+            onChange={(e) => setReasonDraft(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter') saveNotFeasible(); }}
+            maxLength={280}
+            autoFocus
+            placeholder={_copy("copy.3d024b567634", { defaultValue: "Short reason people will see" })}
+            className="bg-zinc-800/50 border-white/10 text-white rounded-lg text-sm"
+          />
+          <div className="flex gap-2">
+            <Button size="sm" variant="glass" onClick={saveNotFeasible} disabled={statusMutation.isPending}>
+              {statusMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : _copy("copy.465fe84f18fc", { defaultValue: "Mark Not feasible" })}
+            </Button>
+            <Button size="sm" variant="ghost" onClick={() => setReasonDraft(null)}>{_copy("copy.19766ed6ccb2", { defaultValue: "Cancel" })}</Button>
+          </div>
+        </div>
+      )}
+
+      {/* Content — editable or read-only */}
+      <div className="pt-1 space-y-2">
+        {isEditing ? (
+          <div className="space-y-3">
+            <div>
+              <label className="text-zinc-500 text-xs mb-1 block">{_copy("copy.7e8cd2056da7", { defaultValue: "Title" })}</label>
+              <Input
+                value={editTitle}
+                onChange={(e) => setEditTitle(e.target.value)}
+                maxLength={100}
+                className="bg-zinc-800/50 border-white/10 text-white rounded-lg text-sm"
+              />
+            </div>
+            <div>
+              <label className="text-zinc-500 text-xs mb-1 block">{_copy("copy.526e0087cc3f", { defaultValue: "Description" })}</label>
+              <textarea
+                value={editDescription}
+                onChange={(e) => setEditDescription(e.target.value)}
+                maxLength={editDescriptionLimit}
+                rows={3}
+                className="w-full bg-zinc-800/50 border border-white/10 text-white rounded-lg text-sm p-2.5 resize-none focus:outline-none focus:ring-1 focus:ring-white/20"
+              />
+            </div>
+            <div>
+              <label className="text-zinc-500 text-xs mb-1 block">{_copy("copy.292c06f0045a", { defaultValue: "Category" })}</label>
+              <select
+                value={editCategory}
+                onChange={(e) => setEditCategory(e.target.value as FeatureCategory)}
+                className="w-full bg-zinc-800/50 border border-white/10 text-white rounded-lg text-sm p-2 focus:outline-none focus:ring-1 focus:ring-white/20"
+              >
+                {Object.entries(CATEGORY_LABELS).map(([key, label]) => (
+                  <option key={key} value={key}>{label}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="text-zinc-500 text-xs mb-1 block">{t('features.editMedia', 'Photos and videos')}</label>
+              {(editKeep.length > 0 || editNew.length > 0) && (
+                <div className="flex flex-wrap gap-2 mb-2" data-edit-attachments>
+                  {[...editKeep.map((url, i) => ({ key: url, src: url, video: isVideoAttachment(url), remove: () => setEditKeep(prev => prev.filter((_, j) => j !== i)) })),
+                    ...editNew.map((a, i) => ({ key: a.preview, src: a.preview, video: a.file.type.startsWith('video/'), remove: () => removeEditNew(i) }))].map(item => (
+                    <div key={item.key} className="relative w-16 h-16 rounded-lg overflow-hidden border border-white/10 bg-black">
+                      {item.video
+                        ? <video src={`${item.src}#t=0.1`} className="w-full h-full object-cover" muted playsInline preload="metadata" />
+                        : <img src={item.src} alt="" className="w-full h-full object-cover" />}
+                      <button
+                        type="button"
+                        onClick={item.remove}
+                        disabled={editMutation.isPending}
+                        aria-label={t('features.removeAttachment', 'Remove attachment')}
+                        className="absolute top-0.5 right-0.5 w-5 h-5 rounded-full bg-black/70 text-white text-xs leading-none flex items-center justify-center"
+                      >×</button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <input ref={editFileRef} type="file" accept="image/*,video/*" multiple className="hidden" onChange={e => { addEditFiles(Array.from(e.target.files ?? [])); e.target.value = ''; }} />
+              <Button
+                type="button"
+                size="sm"
+                variant="ghost"
+                disabled={editMutation.isPending || editKeep.length + editNew.length >= MAX_FEATURE_ATTACHMENTS}
+                onClick={() => editFileRef.current?.click()}
+              >
+                <ImagePlus className="w-4 h-4" />{t('features.editAddMedia', 'Add photo or video')}
+              </Button>
+              {editMediaError && <p role="alert" className="text-xs text-red-400 mt-1">{editMediaError}</p>}
+            </div>
+            <div className="flex gap-2">
+              <Button
+                size="sm"
+                variant="glass"
+                onClick={handleSaveEdit}
+                disabled={editMutation.isPending || !editTitle.trim() || !editDescription.trim() || editDescription.length > editDescriptionLimit}
+              >
+                {editMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : _copy("copy.1509f561f241", { defaultValue: "Save" })}
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => { setIsEditing(false); clearEditNew(); }}
+              >{_copy("copy.19766ed6ccb2", { defaultValue: "Cancel" })}</Button>
+            </div>
+          </div>
+        ) : (
+          <>
+            <TranslatableText publicContent text={feature.title} className="text-white font-semibold text-sm leading-tight" as="h3" hideControls />
+            {feature.description !== feature.title && <TranslatableText publicContent text={feature.description} className="text-zinc-400 text-sm leading-relaxed" as="p" />}
+
+            {/* Attached media — one full-width, several as a grid */}
+            <FeatureAttachments feature={feature} />
+
+        {/* Category, status and the owners' progress note. */}
+        <RequestStatusRow
+          status={feature.status}
+          note={feature.status_note?.trim() || ''}
+          earlyAccessUntil={feature.early_access_until}
+          isPoster={!!isAuthor}
+          categoryChip={
+          <span className="text-zinc-300 text-[10px] font-medium px-2 py-0.5 rounded-lg bg-gradient-to-br from-white/15 via-white/8 to-white/3 backdrop-blur-xl border border-white/20 shadow-[0_2px_8px_rgba(0,0,0,0.15),inset_0_1px_0_rgba(255,255,255,0.3)]">
+            {CATEGORY_LABELS[feature.category]}
+          </span>
+          }
+        />
+        {/* The owners' reason for ruling it out. */}
+        {notFeasibleReason && (
+          <p className="text-zinc-400 text-xs leading-relaxed">
+            <span className="text-zinc-300 font-medium">{_copy("copy.ad389aa4c08e", { defaultValue: "Why:" })}</span>{' '}<TranslatableText publicContent text={notFeasibleReason} as="span" hideControls />
+          </p>
+        )}
+
+        {/* Board owners only: where it was sent from, to reproduce bugs. */}
+        {hasDeviceInfo && <FeatureDeviceInfo featureId={feature.id} />}
+
+        {/* Translate control */}
+        <PostMetadata
+          timestamp={feature.created_at}
+          translateControl={{
+            isTranslated,
+            isLoading: isTranslateLoading,
+            error: translateError,
+            onTranslate: handleTranslate,
+            onShowOriginal: handleShowOriginal,
+          }}
+        />
+
+        <div className="pt-1">
+          <ActionBar
+            postId={feature.id}
+            // A request is not a post: share its own board link, and drop the
+            // bookmark / pin / info buttons, which only know /app/post/<id>.
+            shareUrl={dehubLinkFor.featureRequest(feature.id)}
+            hideUtility
+            className="p-0"
+            onComment={() => setShowComments(prev => !prev)}
+            onLike={handleLike}
+            onDislike={handleDislike}
+            isLiked={isLiked}
+            isDisliked={isDisliked}
+            likeCount={feature.like_count ?? 0}
+            dislikeCount={feature.dislike_count ?? 0}
+            commentCount={feature.comment_count}
+          />
+        </div>
+          </>
+        )}
+
+        {/* Comments — the post comment section's thread, on this board's data. */}
+        <AnimatePresence>
+          {showComments && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <FeatureRequestComments
+                featureRequestId={feature.id}
+                featureTitle={feature.title}
+                featureAuthorAddress={feature.author_wallet_address}
+                focusCommentId={focusCommentId}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </div>
+  );
+}
+
+// ──────────────────────────────────────────────────
+// Submit Feature Drawer
+// ──────────────────────────────────────────────────
+function RequestLoadError({ retry }: { retry: () => void }) {
+  const { t } = useI18n();
+  return (
+    <div data-page-bento className="bg-zinc-900 rounded-2xl p-8 text-center">
+      <h3 className="text-white font-semibold mb-1">{t('features.loadFailed', "Couldn't load requests")}</h3>
+      <Button
+        onClick={retry}
+        variant="glass"
+        className="mt-3"
+      >
+        {t('common.retry', 'Retry')}
+      </Button>
+    </div>
+  );
+}
+
+function PromptComposer({ initialCategory, focusRequest, onPosted }: { initialCategory?: FeatureCategory; focusRequest: number; onPosted: () => void }) {
+  const { t } = useI18n();
+  const { isAuthenticated, openLoginModal } = useAuth();
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [deviceDetails, setDeviceDetails] = useState('');
+  const [category, setCategory] = useState<FeatureCategory>('new_feature');
+  const [attachments, setAttachments] = useState<{ file: File; preview: string }[]>([]);
+  const [error, setError] = useState('');
+  const [dragging, setDragging] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const promptRef = useRef<HTMLTextAreaElement>(null);
+  const previewsRef = useRef(attachments);
+  previewsRef.current = attachments;
+  const submitMutation = useSubmitFeatureRequest();
+  const draft = useFormDraft('feature-request', { title, description, deviceDetails }, (saved) => {
+    if (saved.title !== undefined) setTitle(saved.title);
+    if (saved.description !== undefined) setDescription(saved.description);
+    if (saved.deviceDetails !== undefined) setDeviceDetails(saved.deviceDetails);
+  });
+
+  useEffect(() => { if (initialCategory) setCategory(initialCategory); }, [initialCategory]);
+  useEffect(() => {
+    if (focusRequest) {
+      promptRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      promptRef.current?.focus({ preventScroll: true });
+    }
+  }, [focusRequest]);
+  useEffect(() => () => previewsRef.current.forEach(a => URL.revokeObjectURL(a.preview)), []);
+
+  const addFiles = (picked: File[]) => {
+    if (submitMutation.isPending) return;
+    const valid = picked.filter(file => /^(image|video)\//.test(file.type) && file.size <= MAX_FEATURE_ATTACHMENT_BYTES);
+    const room = Math.max(0, MAX_FEATURE_ATTACHMENTS - attachments.length);
+    const accepted = valid.slice(0, room);
+    setAttachments(prev => [...prev, ...accepted.map(file => ({ file, preview: URL.createObjectURL(file) }))]);
+    setError(valid.length < picked.length
+      ? t('features.promptMediaError', 'Choose images or videos under 200MB each.')
+      : accepted.length < picked.length
+        ? t('features.promptMediaLimit', 'Up to {{max}} attachments.', { max: MAX_FEATURE_ATTACHMENTS }) : '');
+  };
+  const [markupIndex, setMarkupIndex] = useState<number | null>(null);
+  const replaceAttachment = (index: number, file: File) => {
+    setAttachments(prev => prev.map((a, i) => {
+      if (i !== index) return a;
+      URL.revokeObjectURL(a.preview);
+      return { file, preview: URL.createObjectURL(file) };
+    }));
+    setMarkupIndex(null);
+  };
+  const removeAttachment = (index: number) => {
+    URL.revokeObjectURL(attachments[index].preview);
+    setAttachments(prev => prev.filter((_, i) => i !== index));
+    setError('');
+  };
+  const addSpoken = (spoken: string) => {
+    setDescription(previous => {
+      if (previous.length >= FEATURE_PROMPT_MAX_LENGTH) return previous;
+      const spacer = previous && !/\s$/.test(previous) ? ' ' : '';
+      return (previous + spacer + spoken).slice(0, FEATURE_PROMPT_MAX_LENGTH);
+    });
+    requestAnimationFrame(() => {
+      const box = promptRef.current;
+      if (!box) return;
+      box.focus({ preventScroll: true });
+      box.setSelectionRange(box.value.length, box.value.length);
+    });
+  };
+  const handleSubmit = () => {
+    if (!description.trim() || submitMutation.isPending) return;
+    if (!isAuthenticated) { openLoginModal(); return; }
+    const prompt = description.trim();
+    const result = featureSchema().safeParse({
+      title: featurePromptFields(prompt, title).title,
+      description: prompt, category,
+    });
+    if (!result.success) { setError(result.error.issues[0].message); return; }
+    setError('');
+    submitMutation.mutate({
+      title: featurePromptFields(prompt, title).title,
+      category,
+      description: featurePromptFields(prompt, title, deviceDetails).description,
+      mediaFiles: attachments.map(a => a.file),
+    }, { onSuccess: () => {
+      if (!draft.clear()) return;
+      setTitle(''); setDescription(''); setDeviceDetails('');
+      setCategory(initialCategory || 'new_feature');
+      previewsRef.current.forEach(a => URL.revokeObjectURL(a.preview));
+      setAttachments([]);
+      onPosted();
+    } });
+  };
+
+  return (
+    <section data-page-bento data-feature-composer className="rounded-2xl bg-zinc-900 p-4 sm:p-6 mb-3"
+      onDragOver={e => { if (e.dataTransfer.types.includes('Files')) { e.preventDefault(); setDragging(true); } }}
+      onDragLeave={e => { if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setDragging(false); }}
+      onDrop={e => { e.preventDefault(); setDragging(false); addFiles(Array.from(e.dataTransfer.files)); }}>
+      <h2 className="text-base sm:text-lg font-semibold text-white mb-1">{t('features.promptHeading', 'What should we build next?')}</h2>
+      <p className="text-xs text-zinc-400 mb-3">{t('features.promptHint', 'Describe it. Drop in a screenshot. Make it happen.')}</p>
+      <div className={cn('rounded-xl border border-white/15 bg-black/10 p-3 transition-colors focus-within:border-white/40', dragging && 'ring-2 ring-current')}>
+        <textarea ref={promptRef} value={description} onChange={e => setDescription(e.target.value)}
+          aria-label={t('features.promptLabel', 'Your prompt')}
+          placeholder={t('features.promptPlaceholder', 'Describe an idea, improvement, or bug…')}
+          maxLength={FEATURE_PROMPT_MAX_LENGTH} rows={4} disabled={submitMutation.isPending}
+          onKeyDown={e => { if ((e.metaKey || e.ctrlKey) && e.key === 'Enter' && !e.nativeEvent.isComposing) { e.preventDefault(); handleSubmit(); } }}
+          onPaste={e => { const files = Array.from(e.clipboardData.files); if (files.length) { e.preventDefault(); addFiles(files); } }}
+          className="w-full bg-transparent text-white placeholder:text-zinc-500 text-sm leading-relaxed resize-y min-h-24 max-h-80 outline-none disabled:opacity-60" />
+        {attachments.length > 0 && <div className="flex gap-2 overflow-x-auto py-2">
+          {attachments.map((attachment, index) => <div key={attachment.preview} className="relative shrink-0 w-28">
+            <div className="h-20 rounded-lg overflow-hidden border border-white/15 bg-black/20">
+              {attachment.file.type.startsWith('video/') ? <video src={`${attachment.preview}#t=0.1`} className="w-full h-full object-cover" muted playsInline preload="metadata" /> : <img src={attachment.preview} alt={attachment.file.name} className="w-full h-full object-cover" />}
+            </div>
+            <button type="button" disabled={submitMutation.isPending} onClick={() => removeAttachment(index)}
+              aria-label={t('features.removePromptAttachment', 'Remove {{name}}', { name: attachment.file.name })}
+              data-keep-dark className="absolute right-1 top-1 w-6 h-6 rounded-full bg-black/80 ring-1 ring-white/50 text-white flex items-center justify-center"><X className="w-3.5 h-3.5" /></button>
+            {attachment.file.type.startsWith('image/') && <button type="button" disabled={submitMutation.isPending} onClick={() => setMarkupIndex(index)}
+              aria-label={t('features.cropDraw', 'Crop & draw')} title={t('features.cropDraw', 'Crop & draw')}
+              data-keep-dark className="absolute left-1 top-1 w-6 h-6 rounded-full bg-black/80 ring-1 ring-white/50 text-white flex items-center justify-center"><Pencil className="w-3.5 h-3.5" /></button>}
+            <p className="text-[10px] text-zinc-400 truncate mt-1">{attachment.file.name}</p>
+          </div>)}
+        </div>}
+        <ImageMarkupDialog
+          file={markupIndex !== null ? attachments[markupIndex]?.file ?? null : null}
+          onClose={() => setMarkupIndex(null)}
+          onSave={file => { if (markupIndex !== null) replaceAttachment(markupIndex, file); }}
+        />
+        <div className="flex flex-wrap items-center gap-2 border-t border-white/10 pt-3 mt-2">
+          <input ref={fileInputRef} type="file" accept="image/*,video/*" multiple className="hidden" onChange={e => { addFiles(Array.from(e.target.files ?? [])); e.target.value = ''; }} />
+          <Button type="button" variant="ghost" size="sm" className="px-2" disabled={submitMutation.isPending || attachments.length >= MAX_FEATURE_ATTACHMENTS} onClick={() => fileInputRef.current?.click()}>
+            <ImagePlus className="w-4 h-4" />{t('features.promptAttach', 'Attach images')}
+          </Button>
+          <HoldToTalkButton disabled={submitMutation.isPending || description.length >= FEATURE_PROMPT_MAX_LENGTH}
+            beforeStart={() => { if (isAuthenticated) return false; openLoginModal(); return true; }}
+            onText={addSpoken} />
+          <span className="hidden sm:inline text-[11px] text-zinc-500">{t('features.promptDrop', 'Paste or drop images here')}</span>
+          <Button type="button" variant="glass" className="ml-auto" disabled={!description.trim() || submitMutation.isPending} onClick={handleSubmit}>
+            {submitMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
+            {t('features.promptPost', 'Post prompt')}
+          </Button>
+        </div>
+      </div>
+      <div className="flex justify-between gap-3 mt-2 text-[11px] text-zinc-500">
+        <span>{description.length}/{FEATURE_PROMPT_MAX_LENGTH}</span><span className="hidden sm:inline">{t('features.promptShortcut', 'Ctrl / ⌘ + Enter to post')}</span>
+      </div>
+      {error && <p role="alert" className="text-sm text-red-400 mt-2">{error}</p>}
+      <p data-device-info-note className="mt-1 text-[11px] text-zinc-500">{t('features.deviceInfoNote', 'Device info is attached to help us fix bugs.')}</p>
+      <details className="mt-2 text-xs text-zinc-400" open={initialCategory === 'bug_fix' ? true : undefined}>
+        <summary className="cursor-pointer py-1">{t('features.promptDetails', 'Optional details')}</summary>
+        <fieldset disabled={submitMutation.isPending} className="grid gap-3 mt-2">
+          <label>{t('features.titleLabel')}<Input className="mt-1 bg-zinc-800 border-white/15 text-white placeholder:text-zinc-500 rounded-lg" value={title} maxLength={100} onChange={e => setTitle(e.target.value)} /></label>
+          <label>{t('features.categoryLabel')}<select value={category} onChange={e => setCategory(e.target.value as FeatureCategory)} className="block w-full rounded-lg bg-zinc-800 border border-white/15 p-2 mt-1 text-white">
+            {CATEGORIES.filter(c => c.id !== 'all').map(cat => <option key={cat.id} value={cat.id}>{t(cat.labelKey)}</option>)}
+          </select></label>
+          <label>{t('features.promptDevice', 'Device & OS (for bugs)')}<Input className="mt-1 bg-zinc-800 border-white/15 text-white placeholder:text-zinc-500 rounded-lg" value={deviceDetails} maxLength={300} onChange={e => setDeviceDetails(e.target.value)} /></label>
+        </fieldset>
+      </details>
+    </section>
+  );
+}
+function FeatureSkeletons() {
+  return (
+    <div className="space-y-3">
+      {Array.from({ length: 5 }).map((_, i) => (
+        <div data-skeleton-group key={i} className="bg-zinc-900 rounded-2xl p-4 flex gap-3 animate-pulse">
+          <div className="flex flex-col items-center gap-1 min-w-[40px]">
+            <div className="w-8 h-8 rounded-lg bg-zinc-800" />
+            <div className="w-5 h-4 rounded bg-zinc-800" />
+            <div className="w-8 h-8 rounded-lg bg-zinc-800" />
+          </div>
+          <div className="flex-1 space-y-2">
+            <div className="h-4 w-3/4 rounded bg-zinc-800" />
+            <div className="h-3 w-full rounded bg-zinc-800" />
+            <div className="h-3 w-1/2 rounded bg-zinc-800" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ──────────────────────────────────────────────────
+// Shipped Feature Card (simpler, no voting)
+// ──────────────────────────────────────────────────
+function ShippedCard({ feature }: { feature: FeatureRequest }) {
+  const { t } = useI18n();
+  const { isTranslated: isShippedTranslated, isLoading: isShippedTranslateLoading, error: shippedTranslateError, handleTranslate: handleShippedTranslate, handleShowOriginal: handleShippedShowOriginal } = useSharedTranslationControl();
+  const [expanded, setExpanded] = useState(false);
+
+  return (
+    <div
+      className="rounded-xl border border-white/[0.12] bg-white/[0.03] backdrop-blur-[24px] p-3 flex gap-3 cursor-pointer hover:bg-white/[0.05] transition-colors"
+      onClick={() => setExpanded(!expanded)}
+    >
+      <div className="flex flex-col items-center justify-center min-w-[40px]">
+        <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center">
+          <CheckCircle2 className="w-4 h-4 text-white/70" />
+        </div>
+      </div>
+
+      <div className="flex-1 min-w-0">
+        <div className="flex items-start gap-2 mb-1.5">
+          <TranslatableText publicContent text={feature.title} className="text-white font-semibold text-sm leading-tight flex-1 min-w-0" as="h3" hideControls />
+          <span className="text-[10px] font-medium px-2 py-0.5 rounded-lg whitespace-nowrap shrink-0 bg-white/10 text-white/70">
+            {t('features.shippedBadge')}
+          </span>
+        </div>
+
+        <TranslatableText publicContent text={feature.description} className={`text-zinc-400 text-xs leading-relaxed mb-2 ${expanded ? '' : 'line-clamp-2'}`} as="p" />
+
+        {/* Translate control */}
+        <PostMetadata
+          timestamp={feature.updated_at}
+          translateControl={{
+            isTranslated: isShippedTranslated,
+            isLoading: isShippedTranslateLoading,
+            error: shippedTranslateError,
+            onTranslate: handleShippedTranslate,
+            onShowOriginal: handleShippedShowOriginal,
+          }}
+        />
+
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-zinc-400 bg-zinc-800 px-2 py-0.5 rounded-lg text-[10px] font-medium">
+            {CATEGORY_LABELS[feature.category]}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ──────────────────────────────────────────────────
+// Infinite Scroll Sentinel
+// ──────────────────────────────────────────────────
+function InfiniteScrollSentinel({ onIntersect, isFetching }: { onIntersect: () => void; isFetching: boolean }) {
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting && !isFetching) onIntersect(); },
+      { rootMargin: '200px' }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [onIntersect, isFetching]);
+
+  return (
+    <div ref={ref} className="flex justify-center py-4">
+      {isFetching && <Loader2 className="w-5 h-5 animate-spin text-zinc-500" />}
+    </div>
+  );
+}
+
+// ──────────────────────────────────────────────────
+// Main Page
+// ──────────────────────────────────────────────────
+export default function FeaturesPage() {
+  const { t: _copy } = _useCopy();
+  const { t } = useI18n();
+  const { isAuthenticated, openLoginModal, walletAddress } = useAuth();
+  const wallet = isAuthenticated ? walletAddress?.toLowerCase() : undefined;
+  const [mineOnly, setMineOnly] = useState(false);
+  const authorWallet = mineOnly ? wallet : undefined;
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { pathname, hash, state } = useLocation();
+  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState<PageTab>('requests');
+  const [sort, setSort] = useState<FeatureSort>('newest');
+  const [category, setCategory] = useState<CategoryChip>('all');
+  const showNotFeasible = activeTab === 'requests' && category === NOT_FEASIBLE;
+  // A real category for the queries: the Not feasible chip filters by status.
+  const listCategory: FeatureCategory | 'all' = category === NOT_FEASIBLE ? 'all' : category;
+  // Not feasible only lives on the Requests tab; leaving it falls back to All.
+  const openTab = useCallback((tab: PageTab) => {
+    setActiveTab(tab);
+    if (tab !== 'requests') setCategory((current) => (current === NOT_FEASIBLE ? 'all' : current));
+  }, []);
+  // Sort and category chips share one scroll row, so both indicators measure
+  // against the same layer. The tab is the layout-shift key for categories:
+  // the sort chips in front of them only exist on the Prompts tab.
+  const { layerRef: featuresCatLayerRef, setRef: setFeaturesCatRef, rect: featuresCatRect, onScroll: onFeaturesCatScroll } = useTabIndicator(category, activeTab);
+  const { ref: featuresCatFadeRef, style: featuresCatFadeStyle } = useScrollFadeMask<HTMLDivElement>();
+  // Prompts / Queued / Shipped. Counts arriving change the tab widths, which
+  // the hook's ResizeObserver picks up.
+  const { layerRef: pageTabLayerRef, setRef: setPageTabRef, rect: pageTabRect } = useTabIndicator(activeTab);
+  const { layerRef: featuresSortLayerRef, setRef: setFeaturesSortRef, rect: featuresSortRect, onScroll: onFeaturesSortScroll } = useTabIndicator(sort, activeTab);
+  const setFilterLayerRef = useCallback((el: HTMLDivElement | null) => {
+    (featuresCatLayerRef as MutableRefObject<HTMLDivElement | null>).current = el;
+    (featuresSortLayerRef as MutableRefObject<HTMLDivElement | null>).current = el;
+  }, [featuresCatLayerRef, featuresSortLayerRef]);
+  const onFilterRowScroll = useCallback(() => {
+    onFeaturesCatScroll();
+    onFeaturesSortScroll();
+  }, [onFeaturesCatScroll, onFeaturesSortScroll]);
+  const [searchInput, setSearchInput] = useSurfaceDraft("src/pages/app/FeaturesPage.tsx:searchInput", '');
+  const searchLabel = t('features.promptSearch', 'Search prompts…');
+  const search = useDebouncedValue(searchInput, 300);
+  const [composerFocus, setComposerFocus] = useState(0);
+  const [initialCategory, setInitialCategory] = useState<FeatureCategory | undefined>(undefined);
+
+  const handleSubmitClick = useCallback(() => {
+    if (!isAuthenticated) {
+      openLoginModal();
+      return;
+    }
+    setActiveTab('requests');
+    setCategory((current) => (current === NOT_FEASIBLE ? 'all' : current));
+    setComposerFocus(value => value + 1);
+  }, [isAuthenticated, openLoginModal]);
+
+  // Consume create links once so returning to this board keeps the user's place.
+  useEffect(() => {
+    if (searchParams.get('compose') === 'request') {
+      handleSubmitClick();
+      const next = new URLSearchParams(searchParams);
+      next.delete('compose');
+      if (next.has('tab')) next.set('tab', 'requests');
+      navigate({ pathname, search: next.toString(), hash }, { replace: true, state });
+      return;
+    }
+    const report = searchParams.get('report');
+    if (report === 'bug') {
+      setActiveTab('requests');
+      setCategory('bug_fix');
+      setInitialCategory('bug_fix');
+      setComposerFocus(value => value + 1);
+      setSearchParams({}, { replace: true });
+      return;
+    }
+
+    const requestedTab = searchParams.get('tab');
+    if (requestedTab === 'prompts') setActiveTab('requests');
+    if (requestedTab === 'queued') setActiveTab('shipping');
+    if (requestedTab === 'not-feasible' || requestedTab === 'unfeasible') {
+      setActiveTab('requests');
+      setCategory(NOT_FEASIBLE);
+    }
+    if (requestedTab === 'requests' || requestedTab === 'shipping' || requestedTab === 'shipped') {
+      setActiveTab(requestedTab);
+    }
+  }, [searchParams, setSearchParams, handleSubmitClick, navigate, pathname, hash, state]);
+
+  const { data: featuresData, isLoading, isError, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } = useFeatureRequests(sort, listCategory, search, authorWallet);
+  const allFeatures = useMemo(() => featuresData?.pages.flat() ?? [], [featuresData]);
+  const { data: shippedFeatures, isLoading: isLoadingShipped, isLoadingError: isShippedLoadError, refetch: refetchShipped } = useShippedFeatures(authorWallet);
+  const { data: inProgressFeatures, isLoading: isLoadingInProgress, isError: isErrorInProgress, refetch: refetchInProgress } = useInProgressFeatures(authorWallet);
+  const { data: notFeasibleFeatures, isLoading: isLoadingNotFeasible, isError: isErrorNotFeasible, refetch: refetchNotFeasible } = useNotFeasibleFeatures(authorWallet);
+
+  // A notification pins the linked request in its status section. The list query
+  // could never be relied on to hold it — it may be shipped, declined, outside
+  // the active category, or pages down the infinite scroll — so it is fetched
+  // by id and rendered on its own, then removed from whichever list would
+  // otherwise show it twice.
+  // Notifications link ?request=<id>; the share buttons on web and in the app
+  // hand out ?feature=<id>. Either one pins the card.
+  const focusedRequestId = searchParams.get('request') ?? searchParams.get('feature');
+  const { data: focusedRequest } = useFeatureRequest(authorWallet ? undefined : focusedRequestId);
+  const focusedCommentId = searchParams.get('comment');
+  // A comment link implies the thread should be open, whether or not the row
+  // that wrote the URL also said so.
+  const focusedCommentsOpen = searchParams.get('comments') === '1' || !!focusedCommentId;
+  const focusedStatus = focusedRequest?.status;
+  const focusedTab: PageTab = focusedStatus === 'in_progress'
+    ? 'shipping'
+    : focusedStatus === 'completed' || focusedStatus === 'shipped' ? 'shipped' : 'requests';
+  const focusedNotFeasible = focusedStatus === 'declined';
+  useEffect(() => {
+    if (!focusedRequestId || !focusedStatus) return;
+    setActiveTab(focusedTab);
+    setCategory(focusedNotFeasible ? NOT_FEASIBLE : 'all');
+  }, [focusedRequestId, focusedStatus, focusedTab, focusedNotFeasible]);
+
+  const showFocusedRequest = activeTab === focusedTab && showNotFeasible === focusedNotFeasible;
+  const focusedId = showFocusedRequest ? focusedRequest?.id ?? null : null;
+  const withoutFocused = useCallback(
+    <T extends { id: string }>(rows: T[] | undefined): T[] =>
+      focusedId ? (rows ?? []).filter((row) => row.id !== focusedId) : (rows ?? []),
+    [focusedId],
+  );
+  const features = useMemo(() => withoutFocused(allFeatures), [allFeatures, withoutFocused]);
+
+  // Shipped and Shipping arrive as whole arrays rather than a paged query, so
+  // the search box and category chips have to filter them here. Wiring the term
+  // into those queries instead would buy nothing -- the rows are already in
+  // memory -- and leaving it unwired is why the search box did nothing on
+  // every tab but Requests. normalizeRows() has already folded the legacy
+  // category aliases, so a plain equality check is enough.
+  const matchesFilters = useCallback(
+    (row: FeatureRequest) => {
+      if (listCategory !== 'all' && row.category !== listCategory) return false;
+      const q = search.trim().toLowerCase();
+      if (!q) return true;
+      return row.title.toLowerCase().includes(q) || row.description.toLowerCase().includes(q);
+    },
+    [listCategory, search],
+  );
+  const isFiltering = !!authorWallet || search.trim().length > 0 || listCategory !== 'all';
+  const visibleInProgress = useMemo(
+    () => withoutFocused(inProgressFeatures).filter(matchesFilters),
+    [inProgressFeatures, withoutFocused, matchesFilters],
+  );
+  // It sits at the far end of the chip row, so bring it into view when picked
+  // (or deep linked) instead of leaving the selection off screen.
+  useEffect(() => {
+    if (!showNotFeasible) return;
+    requestAnimationFrame(() => {
+      document.querySelector('[data-chip="not-feasible"]')?.scrollIntoView({ inline: 'nearest', block: 'nearest' });
+    });
+  }, [showNotFeasible]);
+  const visibleNotFeasible = useMemo(
+    () => withoutFocused(notFeasibleFeatures).filter(matchesFilters),
+    [notFeasibleFeatures, withoutFocused, matchesFilters],
+  );
+  const notFeasibleCount = notFeasibleFeatures?.length ?? 0;
+  const visibleShipped = useMemo(
+    () => withoutFocused(shippedFeatures).filter(matchesFilters),
+    [shippedFeatures, withoutFocused, matchesFilters],
+  );
+  // Shipped holds nearly the whole board. Mounting every card at once built
+  // ~20k nodes and froze the tab switch, so it reveals a page at a time like the
+  // Prompts list does. Linked requests are pinned separately above these rows.
+  const [shippedLimit, setShippedLimit] = useState(SHIPPED_PAGE_SIZE);
+  useEffect(() => setShippedLimit(SHIPPED_PAGE_SIZE), [category, search, authorWallet]);
+  const renderedShipped = useMemo(() => visibleShipped.slice(0, shippedLimit), [visibleShipped, shippedLimit]);
+  const showMoreShipped = useCallback(() => setShippedLimit((limit) => limit + SHIPPED_PAGE_SIZE), []);
+
+  // Bring the pinned card into view once it has actually rendered. Scrolling on
+  // the id alone would fire before the row exists on a cold load.
+  // A link to one comment scrolls to that comment instead (the thread does it).
+  useEffect(() => {
+    if (!focusedId || focusedCommentId) return;
+    requestAnimationFrame(() => {
+      document.getElementById(`feature-${focusedId}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }, [focusedId, focusedCommentId]);
+
+  const { data: userVotes } = useUserVotes();
+  const voteMutation = useVoteFeatureRequest();
+
+  const handleVote = useCallback(
+    (featureId: string, voteType: 1 | -1, currentVote: number | undefined) => {
+      if (!isAuthenticated) {
+        openLoginModal();
+        return;
+      }
+      voteMutation.mutate({ featureRequestId: featureId, voteType, currentVote });
+    },
+    [isAuthenticated, openLoginModal, voteMutation]
+  );
+
+  // `open` is counted server-side with the same status filter the list uses, so
+  // the tab badge always matches the rows below it.
+  const { data: counts } = useFeatureCounts(authorWallet);
+
+  const remainingCount = counts?.open ?? features.length;
+  const shippedCount = shippedFeatures?.length ?? 0;
+  const inProgressCount = inProgressFeatures?.length ?? 0;
+
+
+  // Swallow the feature-request list at the sticky header bento's top edge under
+  // the glass themes, exactly like the home feed cuts at its nav pill.
+  const contentRef = useRef<HTMLDivElement>(null);
+  useFeedSwallowClip(contentRef, '[data-feed-nav-outer] > [data-page-bento]', [], { allThemes: true });
+
+  return (
+    <div data-requests-page className="min-h-screen">
+      <SEOHead title={_copy("copy.5d2d9bc248a3", { defaultValue: "Build Riftn by talking to it | Riftn" })} description={_copy("copy.2c94a53da07c", { defaultValue: "Build Riftn by talking to it. Post ideas and bug reports as prompts, vote on what others asked for, and follow them from Queued to Shipped." })} url="https://riftn.com/build" jsonLd={{ '@context': 'https://schema.org', '@type': 'WebPage', name: 'Build Riftn', url: 'https://riftn.com/build', description: _copy("copy.d2c76d7df46f", { defaultValue: "Build Riftn by talking to it. Post ideas and bug reports as prompts and vote on what gets built next." }), isPartOf: { '@type': 'WebSite', name: 'Riftn', url: 'https://riftn.com' } }} />
+      <h1 className="sr-only">{_copy("copy.64ce9ca9f7d1", { defaultValue: "Build: shape Riftn by talking to it" })}</h1>
+      {/* Sticky nav pill. `data-feed-nav-outer` already rides the scroll on
+          mobile; `data-nav-hide-desktop` opts this one into the same thing on
+          desktop too. Because this header is a full bento — title, search,
+          three tabs, category pills and sort tabs — `data-nav-return-top`
+          keeps it hidden until the page reaches the top instead of covering a
+          request after any small upward correction. */}
+      <div data-feed-nav-outer data-nav-hide-desktop data-nav-return-top className="sticky top-11 lg:top-0 z-50 bg-black px-2 pt-1 pb-0 sm:px-3 sm:pt-1 sm:pb-0 lg:pt-2">
+        <div data-page-bento className="bg-zinc-900 rounded-2xl p-4 sm:p-6">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <BrandIcon src={featuresLightbulb} alt={_copy("copy.5697d03daef4", { defaultValue: "Features" })} className="w-12 h-12 object-contain" />
+            <div>
+              <h1 className="text-xl font-bold text-white">{t('features.promptPageTitle', 'Build')}</h1>
+              <p className="text-zinc-500 text-sm">{t('features.promptSubtitle', 'Build Riftn by talking to it.')}</p>
+            </div>
+          </div>
+          <Button
+            onClick={handleSubmitClick}
+            aria-label={t('features.promptNew', 'New prompt')}
+            variant="glass"
+            className="h-9 w-9 shrink-0 rounded-xl"
+            size="icon"
+          >
+            <Plus className="h-4 w-4" aria-hidden="true" />
+          </Button>
+        </div>
+
+        {/* Search */}
+        <div className="mb-3 flex items-center gap-2">
+          <div className="relative min-w-0 flex-1">
+            <Search aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              data-search-surface
+              aria-label={searchLabel}
+              placeholder={searchLabel}
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              className="block rounded-xl py-0 pl-10 text-white"
+            />
+          </div>
+          {wallet && (
+            <Button type="button" variant="glass" aria-pressed={mineOnly}
+              onClick={() => setMineOnly(previous => !previous)}
+              className={cn("max-w-[48%] rounded-xl", mineOnly && "bg-white/20 border-white/30")}>
+              <span className="truncate">{t('features.myRequests', 'My prompts')}</span>
+            </Button>
+          )}
+        </div>
+
+        {/* Page Tabs: Requests / Shipping / Shipped */}
+        <div ref={pageTabLayerRef} role="tablist" aria-label={t('features.promptPageTitle', 'Build')} className="relative flex gap-1 bg-zinc-800/40 rounded-xl p-1 mb-3">
+          {/* Measured from the active tab, so the glass hugs it however wide
+              the labels and counts render (iPhone Safari draws them wider). */}
+          <GlassIndicator rect={pageTabRect} borderRadius="0.5rem" className="left-0 top-0" enableTransition />
+          <button
+            type="button"
+            ref={setPageTabRef('requests')}
+            onClick={() => openTab('requests')}
+            role="tab" aria-selected={activeTab === 'requests'}
+            className={`relative z-10 flex-auto sm:flex-1 px-1.5 py-2 whitespace-nowrap rounded-lg text-sm font-medium transition-colors duration-300 flex items-center justify-center gap-1.5 ${
+              activeTab === 'requests' ? 'text-white' : 'text-zinc-500 hover:text-zinc-300'
+            }`}
+          >
+            {t('features.prompts', 'Prompts')}
+            {remainingCount > 0 && (
+              <span className="text-[10px] leading-4 bg-white/10 text-white/70 px-1.5 py-0.5 rounded-md font-semibold">
+                {formatCount(remainingCount)}
+              </span>
+            )}
+          </button>
+          <button
+            type="button"
+            ref={setPageTabRef('shipping')}
+            onClick={() => openTab('shipping')}
+            role="tab" aria-selected={activeTab === 'shipping'}
+            className={`relative z-10 flex-auto sm:flex-1 px-1.5 py-2 whitespace-nowrap rounded-lg text-sm font-medium transition-colors duration-300 flex items-center justify-center gap-1.5 ${
+              activeTab === 'shipping' ? 'text-white' : 'text-zinc-500 hover:text-zinc-300'
+            }`}
+          >
+            <Loader2 className="w-3.5 h-3.5 shrink-0 max-[359px]:hidden" />
+            {t('features.queued', 'Queued')}
+            {inProgressCount > 0 && (
+              <span className="text-[10px] leading-4 bg-white/10 text-white/70 px-1.5 py-0.5 rounded-md font-semibold">
+                {formatCount(inProgressCount)}
+              </span>
+            )}
+          </button>
+          <button
+            type="button"
+            ref={setPageTabRef('shipped')}
+            onClick={() => openTab('shipped')}
+            role="tab" aria-selected={activeTab === 'shipped'}
+            className={`relative z-10 flex-auto sm:flex-1 px-1.5 py-2 whitespace-nowrap rounded-lg text-sm font-medium transition-colors duration-300 flex items-center justify-center gap-1.5 ${
+              activeTab === 'shipped' ? 'text-white' : 'text-zinc-500 hover:text-zinc-300'
+            }`}
+          >
+            <CheckCircle2 className="w-3.5 h-3.5 shrink-0 max-[359px]:hidden" />
+            {t('features.shipped')}
+            {shippedCount > 0 && (
+              <span className="text-[10px] leading-4 bg-white/10 text-white/70 px-1.5 py-0.5 rounded-md font-semibold">
+                {formatCount(shippedCount)}
+              </span>
+            )}
+          </button>
+        </div>
+
+
+        {/* Category chips filter every tab. Shipped holds most of the board, so
+            hiding them there left ~136 rows with no way to narrow them at all.
+            Sort stays Requests-only: Shipping and Shipped are ordered by ship
+            date, which is the order people expect on a changelog. */}
+        {/* One scrollable row: sort chips first (Requests only), then every
+            category, with the GitHub link pinned bottom-right. Sort and
+            category each keep their own glass indicator in the shared layer,
+            so both selections stay visible and independent. */}
+        <div className="flex items-center gap-2">
+            <div className="relative min-w-0 flex-1">
+              <div ref={setFilterLayerRef} className="relative" style={{ overflowX: 'clip', overflowClipMargin: '8px' }}>
+                {activeTab === 'requests' && <GlassIndicator rect={featuresSortRect} borderRadius="0.5rem" />}
+                <GlassIndicator rect={featuresCatRect} borderRadius="0.5rem" />
+                <div
+                  ref={featuresCatFadeRef}
+                  className="relative z-20 flex items-center gap-2 overflow-x-auto scrollbar-invisible"
+                  style={featuresCatFadeStyle}
+                  onScroll={onFilterRowScroll}
+                >
+                  {activeTab === 'requests' && <>
+                    {SORTS.map((s) => (
+                      <button
+                        key={s.id}
+                        ref={setFeaturesSortRef(s.id)}
+                        type="button"
+                        onClick={() => setSort(s.id)}
+                        aria-pressed={sort === s.id}
+                        className={`relative z-40 px-3 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap transition-colors duration-200 ${
+                          sort === s.id ? 'text-white' : 'text-zinc-400 hover:text-white'
+                        }`}
+                      >
+                        <span className="relative z-10">{t(s.labelKey)}</span>
+                      </button>
+                    ))}
+                    <span aria-hidden="true" className="shrink-0 self-stretch w-px my-1.5 bg-white/10" />
+                  </>}
+                  {CATEGORIES.map((cat) => (
+                    <button
+                      key={cat.id}
+                      ref={setFeaturesCatRef(cat.id)}
+                      type="button"
+                      onClick={() => setCategory(cat.id)}
+                      aria-pressed={category === cat.id}
+                      className={`relative z-40 px-3 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap transition-colors duration-200 ${
+                        category === cat.id
+                          ? 'text-white'
+                          : 'text-zinc-400 hover:text-white'
+                      }`}
+                    >
+                      <span className="relative z-10">{t(cat.labelKey)}</span>
+                    </button>
+                  ))}
+                  {activeTab === 'requests' && (
+                    <button
+                      data-chip="not-feasible"
+                      ref={setFeaturesCatRef(NOT_FEASIBLE)}
+                      type="button"
+                      onClick={() => setCategory(NOT_FEASIBLE)}
+                      aria-pressed={category === NOT_FEASIBLE}
+                      className={`relative z-40 px-3 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap transition-colors duration-200 flex items-center gap-1.5 ${
+                        category === NOT_FEASIBLE ? 'text-white' : 'text-zinc-400 hover:text-white'
+                      }`}
+                    >
+                      <span className="relative z-10">{_copy("copy.2ab63e6ced90", { defaultValue: "Not feasible" })}</span>
+                      {notFeasibleCount > 0 && (
+                        <span className="relative z-10 text-[10px] leading-4 bg-white/10 text-white/70 px-1.5 py-0.5 rounded-md font-semibold">
+                          {formatCount(notFeasibleCount)}
+                        </span>
+                      )}
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+            <a
+              href={DEHUB_GITHUB_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`${t('commandCentre.viewAll')} GitHub`}
+              className="shrink-0 inline-flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-sm font-medium text-zinc-400 hover:text-white transition-colors"
+            >
+              {t('commandCentre.viewAll')}
+              <Github className="w-4 h-4" aria-hidden="true" />
+            </a>
+        </div>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div data-feed-swallow-bounds>
+<div ref={contentRef} className="px-2 sm:px-3 pt-2 pb-3">
+<FeedSwallowMotion>
+      <div hidden={activeTab !== 'requests' || showNotFeasible}>
+        <PromptComposer initialCategory={initialCategory} focusRequest={composerFocus} onPosted={() => { setCategory('all'); setSearchInput(''); setSort('newest'); }} />
+        {!isFiltering && <TopBuildersCard compact />}
+      </div>
+      {/* Keep the linked request and its comment in the matching status section. */}
+      {focusedRequest && showFocusedRequest && (
+        <div className="mb-3">
+          <SharedTranslationProvider key={focusedRequest.id}>
+            <FeatureCard
+              feature={focusedRequest}
+              currentVote={userVotes?.[focusedRequest.id]}
+              onVote={handleVote}
+              voteDisabled={voteMutation.isPending}
+              defaultCommentsOpen={focusedCommentsOpen}
+              focusCommentId={focusedCommentId}
+            />
+          </SharedTranslationProvider>
+        </div>
+      )}
+      {/* Feature List (Requests Tab) */}
+      {/* Not feasible (a chip on the Requests tab) */}
+      {showNotFeasible && (
+        <>
+          {isLoadingNotFeasible ? (
+            <FeatureSkeletons />
+          ) : isErrorNotFeasible ? (
+            <RequestLoadError retry={() => refetchNotFeasible()} />
+          ) : visibleNotFeasible.length > 0 ? (
+            <div className="space-y-3">
+              {visibleNotFeasible.map((feature) => (
+                <SharedTranslationProvider key={feature.id}>
+                  <FeatureCard
+                    feature={feature}
+                    currentVote={userVotes?.[feature.id]}
+                    onVote={handleVote}
+                    voteDisabled={voteMutation.isPending}
+                  />
+                </SharedTranslationProvider>
+              ))}
+            </div>
+          ) : (
+            <div data-page-bento className="bg-zinc-900 rounded-2xl p-8 text-center">
+              <ThemedIcon icon="features" alt="" className="w-16 h-16 object-contain mx-auto mb-4 opacity-65" />
+              <h3 className="text-white font-semibold mb-1">
+                {search.trim()
+                  ? t('follow.noMatches', { query: search.trim() })
+                  : _copy("copy.78b3ae9561ee", { defaultValue: "Nothing ruled out" })}
+              </h3>
+              {!search.trim() && <p className="text-zinc-500 text-sm">{_copy("copy.89b4d1850766", { defaultValue: "Requests we can't build right now show here, with the reason." })}</p>}
+            </div>
+          )}
+        </>
+      )}
+
+      {activeTab === 'requests' && !showNotFeasible && (
+        <>
+          {isLoading ? (
+            <FeatureSkeletons />
+          ) : isError ? (
+            <RequestLoadError retry={() => refetch()} />
+          ) : features.length > 0 ? (
+            <div className="space-y-3">
+              {features.map((feature) => (
+                <SharedTranslationProvider key={feature.id}>
+                  <FeatureCard
+                    feature={feature}
+                    currentVote={userVotes?.[feature.id]}
+                    onVote={handleVote}
+                    voteDisabled={voteMutation.isPending}
+                  />
+                </SharedTranslationProvider>
+              ))}
+              {/* Infinite scroll sentinel */}
+              {hasNextPage && (
+                <InfiniteScrollSentinel
+                  onIntersect={fetchNextPage}
+                  isFetching={isFetchingNextPage}
+                />
+              )}
+            </div>
+          ) : (
+            <div data-page-bento className="bg-zinc-900 rounded-2xl p-8 text-center">
+              <div className="w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                <BrandIcon src={featuresLightbulb} alt={_copy("copy.c46c50e9cf58", { defaultValue: "No features yet" })} className="w-16 h-16 object-contain opacity-40" />
+              </div>
+              <h3 className="text-white font-semibold mb-1">{isFiltering ? t('filters.noMatches') : t('features.noRequestsYet')}</h3>
+              {!isFiltering && <p className="text-zinc-500 text-sm mb-4">{t('features.beFirstIdea')}</p>}
+              <Button
+                onClick={handleSubmitClick}
+                variant="glass"
+              >
+                <Plus className="w-4 h-4" />
+                {t('features.submitFeatureRequest')}
+              </Button>
+            </div>
+          )}
+        </>
+      )}
+
+      {/* Shipping (In Progress) Tab */}
+      {activeTab === 'shipping' && (
+        <>
+          {isLoadingInProgress ? (
+            <FeatureSkeletons />
+          ) : isErrorInProgress ? (
+            <RequestLoadError retry={() => refetchInProgress()} />
+          ) : visibleInProgress.length > 0 ? (
+            <div className="space-y-3">
+              {visibleInProgress.map((feature) => (
+                <SharedTranslationProvider key={feature.id}>
+                  <FeatureCard
+                    feature={feature}
+                    currentVote={userVotes?.[feature.id]}
+                    onVote={handleVote}
+                    voteDisabled={voteMutation.isPending}
+                  />
+                </SharedTranslationProvider>
+              ))}
+            </div>
+          ) : (
+            <div data-page-bento className="bg-zinc-900 rounded-2xl p-8 text-center">
+              <ThemedIcon icon="features" alt="" className="w-16 h-16 object-contain mx-auto mb-4 opacity-65" />
+              <h3 className="text-white font-semibold mb-1">
+                {isFiltering
+                  ? (search.trim() ? t('follow.noMatches', { query: search.trim() }) : t('filters.noMatches'))
+                  : t('features.noShippingYet', 'Nothing in progress')}
+              </h3>
+              {!isFiltering && <p className="text-zinc-500 text-sm">{t('features.shippingAppearHere', 'Requests being built will appear here.')}</p>}
+            </div>
+          )}
+        </>
+      )}
+
+
+      {/* Shipped Features Tab */}
+      {activeTab === 'shipped' && (
+        <>
+          {isLoadingShipped ? (
+            <FeatureSkeletons />
+          ) : isShippedLoadError ? (
+            <RequestLoadError retry={() => refetchShipped()} />
+          ) : visibleShipped.length > 0 ? (
+            <div className="space-y-3">
+              {renderedShipped.map((feature) => (
+                <SharedTranslationProvider key={feature.id}>
+                  <FeatureCard
+                    feature={feature}
+                    currentVote={userVotes?.[feature.id]}
+                    onVote={handleVote}
+                    voteDisabled={voteMutation.isPending}
+                  />
+                </SharedTranslationProvider>
+              ))}
+              {renderedShipped.length < visibleShipped.length && (
+                <Button type="button" variant="outline" className="w-full" onClick={showMoreShipped}>
+                  {t('common.loadMore')}
+                </Button>
+              )}
+            </div>
+          ) : (
+            <div data-page-bento className="bg-zinc-900 rounded-2xl p-8 text-center">
+              <ThemedIcon icon="features" alt="" className="w-16 h-16 object-contain mx-auto mb-4 opacity-65" />
+              <h3 className="text-white font-semibold mb-1">
+                {isFiltering
+                  ? (search.trim() ? t('follow.noMatches', { query: search.trim() }) : t('filters.noMatches'))
+                  : t('features.noShippedYet')}
+              </h3>
+              {!isFiltering && <p className="text-zinc-500 text-sm">{t('features.shippedAppearHere')}</p>}
+            </div>
+          )}
+        </>
+      )}
+      </FeedSwallowMotion>
+</div>
+</div>
+
+
+    </div>
+  );
+}

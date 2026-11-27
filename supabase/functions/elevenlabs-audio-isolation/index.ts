@@ -1,0 +1,75 @@
+/**
+ * Audio isolation — pull the voice cleanly out of a noisy recording.
+ *
+ * Multipart in, raw audio out. Free, and the natural first step before dubbing
+ * or the voice changer: both of those re-perform whatever is in the file, room
+ * tone included, so cleaning first measurably improves them.
+ */
+import {
+  audioResponse,
+  corsHeaders,
+  errorResponse,
+  getApiKey,
+  readProviderError,
+  readUpload, ownElevenLabsFailure } from '../_shared/elevenlabs.ts';
+import { chargeForJob } from '../_shared/ai-payment-guard.ts';
+import { audioContainer } from '../_shared/speech-audio.ts';
+
+const MAX_UPLOAD_BYTES = 100 * 1024 * 1024;
+
+Deno.serve(async (req) => {
+  if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
+
+  // Before the upload is read, not after: an unauthenticated caller should not
+  // get to push 100 MB through this function to find out it is going to say no.
+  const charged = await chargeForJob(req, {
+    kind: 'tool',
+    ownKeyProvider: 'elevenlabs',
+    modelId: 'elevenlabs-audio-isolation',
+    actionType: 'elevenlabs-audio-isolation',
+    rateLimit: { limit: 30, windowMs: 60 * 60 * 1000 },
+    free: true,
+  });
+  if (!charged.ok) return charged.response;
+
+  try {
+    const apiKey = charged.ownKey ?? getApiKey();
+    if (!apiKey) return errorResponse('ElevenLabs API key not configured', 500);
+
+    const upload = await readUpload(req);
+    if (!upload) return errorResponse('An audio or video file is required');
+    const { file } = upload;
+
+    if (file.size > MAX_UPLOAD_BYTES) {
+      return errorResponse('That file is over 100 MB. Use a shorter or smaller one.');
+    }
+
+    const outbound = new FormData();
+    outbound.append('audio', file, file.name || 'input.mp3');
+
+    const response = await fetch(
+      'https://api.elevenlabs.io/v1/audio-isolation',
+      {
+        method: 'POST',
+        headers: { 'xi-api-key': apiKey },
+        body: outbound,
+      },
+    );
+
+    if (!response.ok) {
+
+      if (charged.ownKey) { const own = await ownElevenLabsFailure(charged.wallet, response); if (own) return own; }
+      const errText = await response.text();
+      console.error('ElevenLabs audio-isolation error:', response.status, errText);
+      return errorResponse(readProviderError(errText, 'Could not clean that recording'), 502);
+    }
+
+    const buffer = await response.arrayBuffer();
+    const container = audioContainer(buffer);
+    if (!container) return errorResponse('The audio service returned an invalid recording', 502);
+    return audioResponse(buffer, container === 'wav' ? 'audio/wav' : 'audio/mpeg');
+  } catch (err) {
+    console.error('elevenlabs-audio-isolation error:', err);
+    return errorResponse('Internal server error', 500);
+  }
+});

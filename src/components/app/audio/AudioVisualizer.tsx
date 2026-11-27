@@ -1,0 +1,1553 @@
+import { translateCopy as _translateCopy } from '@/i18n/copy';
+import { useTranslation as _useCopy } from 'react-i18next';
+import { useMediaVolume, useMediaMuted, setVolume, setMediaMuted as setSelfMuted } from '@/lib/video-preferences';
+import { videoPlaybackManager } from '@/lib/video-playback-manager';
+import * as React from 'react';
+import './audio-studio.css';
+import './glass-hold.css';
+import { audioStudioShapeKey } from '@/components/app/audio/audio-studio-shape';
+import { writeShape } from '@/lib/remembered-shape';
+import { useRef, useContext, useEffect, useLayoutEffect, useState, useCallback, useMemo } from 'react';
+import { CachedPageActiveContext } from '@/contexts/CachedPageActiveContext';
+import { useTranslation } from 'react-i18next';
+import {
+  popOutAudioPost,
+  takeBackAudioPost,
+  toggleAudioPost,
+  useAudioPostPlayback,
+  type AudioPostTrack,
+} from '@/lib/audio-post-playback';
+import { ChevronDown, MicVocal, Minimize, PictureInPicture2, RotateCcw, RotateCw, Play as GlassPlay, Pause as GlassPause } from "lucide-react";
+import { AudioLyrics } from "./AudioLyrics";
+import { VolumeSoundCue } from "./VolumeSoundCue";
+import { useGlassHold } from "./glass-hold";
+import Volume2 from "@/components/ui/cut-icons/volume";
+import VolumeX from "@/components/ui/cut-icons/mute";
+import Maximize from "@/components/ui/cut-icons/fullscreen";
+
+import Play from "@/components/ui/cut-icons/play";
+import Pause from "@/components/ui/cut-icons/pause";
+
+import { MediaControlIcon } from '@/components/app/video/MediaControlIcon';
+import { useVideoScrubZone } from '@/hooks/use-video-scrub-zone';
+import { useAppTheme } from '@/contexts/ThemeContext';
+import { isCanvasTheme } from '@/lib/canvas-themes';
+import { cn } from '@/lib/utils';
+import { registerOffDocumentMedia } from '@/lib/pause-media-in';
+import {
+  claimHandoffAudio,
+  getHandoffAudio,
+  detachHandoffAudio,
+  isHandoffAudioActive,
+  releaseHandoffAudio,
+  setHandoffAudio,
+  subscribeHandoffAudio,
+  type AudioHandoffGraph,
+} from '@/lib/audio-handoff';
+import { Slider } from '@/components/ui/slider';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Drawer, DrawerContent, DrawerTitle } from '@/components/ui/drawer';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { StylePreview } from './StylePreview';
+import { LOW_FRAME_MS, calmContext, noteVisualizerFrame, subscribeLowPower, visualizerLowPower } from './visualizer-quality';
+import { useScrollFadeMask } from '@/components/app/feeds/useScrollFadeMask';
+import {
+  VisualizerStyle,
+  drawBars,
+  drawWaveform,
+  drawCircular,
+  drawSpectrum,
+  drawMirror,
+  drawRings,
+  drawPulse,
+  drawTerrain,
+  drawOrb,
+  drawStatic,
+  setVisualizerInk,
+  decodeAudioWaveform,
+  seededPeaks,
+  idleFrequencyData,
+  idleTimeData,
+  resetSpectrum,
+  resetRings,
+  resetPulse,
+  resetTerrain,
+  resetOrb,
+  resetStatic,
+} from './visualizer-styles';
+import {
+  AudioListener,
+  EXTRA_STYLES,
+  drawExtra,
+  isExtraStyle,
+  makePalette,
+  type ExtraStyle,
+} from './visualizer-extra';
+
+/** The original ten plus the extras. */
+type AnyStyle = VisualizerStyle | ExtraStyle;
+
+interface AudioVisualizerProps {
+  audioUrl: string;
+  isPlaying: boolean;
+  onPlayPause: () => void;
+  className?: string;
+  displayTitle?: string;
+  artworkUrl?: string;
+  showStylePicker?: boolean;
+  /** When true the audio output is muted (visualizer still animates). */
+  muted?: boolean;
+  /** Seed for the static waveform style (e.g. post id). */
+  seed?: string;
+  /**
+   * Gate for the full-track waveform decode: fetching + decodeAudioData on the
+   * whole file costs 10s of MB + ~50ms main-thread per file, so feed cards
+   * pass their near-viewport flag here. Until true, the seeded fallback
+   * pattern renders instead. Defaults to true for non-feed usages.
+   */
+  decodeEnabled?: boolean;
+  /**
+   * Feed cards: draw the real waveform only once the track is played. The
+   * decode downloads the WHOLE file (a long recording is tens of MB) and holds
+   * its decoded samples in memory, which scrolling past a post never needs;
+   * the seeded pattern stands in until then.
+   */
+  waveformOnPlay?: boolean;
+  /**
+   * Track length in seconds when the caller already knows it (the feed payload
+   * carries `audioDuration`), so the scrubber can show a real total before
+   * anything has been downloaded.
+   */
+  durationHint?: number;
+  /**
+   * Fullscreen, owned by the caller. It has to be, because only the caller
+   * knows which element carries the chrome — `use-video-fullscreen` puts one
+   * element in the top layer and everything outside it stops painting, so
+   * fullscreening the canvas alone would strand these controls on the hidden
+   * page. VideoCard passes its media container, which holds both. Without
+   * `onFullscreen` the button is not drawn at all.
+   */
+  onFullscreen?: (e: React.MouseEvent) => void;
+  isFullscreen?: boolean;
+  /**
+   * Off for a caller that already draws its own media overlay — the
+   * composer preview puts the file name and a Music badge exactly there, and
+   * two things in one corner is worse than no volume control.
+   */
+  showVolume?: boolean;
+  onMuteChange?: (muted: boolean) => void;
+  /**
+   * What the corner player shows for this post. When given, a pop-out control
+   * is drawn beside fullscreen; without it there is nothing to pop out to.
+   */
+  popoutTrack?: AudioPostTrack;
+  /**
+   * The corner player took the track (`poppedOut` true) or gave it back with
+   * this play state. The card owning `isPlaying` uses it to step aside while
+   * the track is out, so two players never claim the media session at once.
+   */
+  onPopOutChange?: (poppedOut: boolean, playing: boolean) => void;
+  /**
+   * Post id. Cards showing the same post share one player through
+   * lib/audio-handoff, so opening a post from the feed picks the track up
+   * mid-track instead of restarting it. Without a key the card owns its
+   * player outright — right for the composer preview and voice notes, which
+   * exist in one place only.
+   */
+  handoffKey?: string;
+  /**
+   * This card has taken the shared player over and it is (or is not) already
+   * playing. The card owning `isPlaying` uses it to fall into step — the post
+   * page opens on a track that is already running, and going back to a feed
+   * whose track was paused on the post page must not show it as playing.
+   */
+  onPlaybackAdopted?: (playing: boolean) => void;
+  /** Open with lyrics showing (state gallery). */
+  initialShowLyrics?: boolean;
+}
+
+const STYLES: { value: AnyStyle; label: string }[] = [
+  { value: 'static', get label() { return _translateCopy("copy.21b111cbfe6e", { defaultValue: "Default" }); } },
+  { value: 'bars', get label() { return _translateCopy("copy.f2c3526915d3", { defaultValue: "Bars" }); } },
+  { value: 'waveform', get label() { return _translateCopy("copy.43eb1b148ebb", { defaultValue: "Wave" }); } },
+  { value: 'circular', get label() { return _translateCopy("copy.02693d5af964", { defaultValue: "Radial" }); } },
+  { value: 'spectrum', get label() { return _translateCopy("copy.fc457d42d767", { defaultValue: "Spectrum" }); } },
+  { value: 'mirror', get label() { return _translateCopy("copy.90fade6fb78e", { defaultValue: "Mirror" }); } },
+  { value: 'rings', get label() { return _translateCopy("copy.bab4c75d0722", { defaultValue: "Rings" }); } },
+  { value: 'pulse', get label() { return _translateCopy("copy.f7a403c6cdf3", { defaultValue: "Pulse" }); } },
+  { value: 'terrain', get label() { return _translateCopy("copy.5dd6e0396c9d", { defaultValue: "Terrain" }); } },
+  { value: 'orb', get label() { return _translateCopy("copy.8483460e43ab", { defaultValue: "Orb" }); } },
+  ...EXTRA_STYLES,
+];
+
+/** Styles the picker adds per step as it scrolls; each brings a live preview. */
+const STYLE_PAGE = 9;
+
+/** One pill on the System/Glass card shows the playing style; tapping it opens every style, a page at a time, each with a small live example. */
+function StudioStylePicker({ style, onPick, title, hue, theme, seed }: { style: AnyStyle; onPick: (s: AnyStyle) => void; title: string; hue: number; theme: string; seed: string }) {
+  const [open, setOpen] = useState(false);
+  const [shown, setShown] = useState(STYLE_PAGE);
+  const isMobile = useIsMobile();
+  const label = (v: AnyStyle) => STYLES.find(s => s.value === v)?.label ?? v;
+  // Next page when the end of the list scrolls into view. The marker remounts
+  // per page, so a page that still leaves it on screen asks for the next one.
+  const pageObserver = useRef<IntersectionObserver | null>(null);
+  const moreRef = useCallback((node: HTMLDivElement | null) => {
+    pageObserver.current?.disconnect();
+    pageObserver.current = null;
+    if (!node) return;
+    pageObserver.current = new IntersectionObserver(([entry]) => { if (entry.isIntersecting) setShown(n => Math.min(STYLES.length, n + STYLE_PAGE)); });
+    pageObserver.current.observe(node);
+  }, []);
+  const pill = (
+    <button type="button" data-audio-studio-pill aria-expanded={open} aria-haspopup="dialog" onClick={isMobile ? () => setOpen(true) : undefined}>
+      {label(style)}<ChevronDown aria-hidden />
+    </button>
+  );
+  const grid = (
+    <div data-audio-studio-style-menu role="group" aria-label={title} onWheel={event => event.stopPropagation()}>
+      {STYLES.slice(0, shown).map(s => (
+        <button key={s.value} type="button" data-active={s.value === style || undefined} aria-pressed={s.value === style} onClick={() => { onPick(s.value); setOpen(false); }}>
+          <StylePreview style={s.value} hue={hue} theme={theme} seed={seed} />
+          <span>{s.label}</span>
+        </button>
+      ))}
+      {shown < STYLES.length && <div key={shown} ref={moreRef} data-audio-style-more aria-hidden />}
+    </div>
+  );
+  if (isMobile) return (
+    <div data-audio-studio-styles onClick={e => e.stopPropagation()}>
+      {pill}
+      <Drawer open={open} onOpenChange={setOpen}>
+        <DrawerContent glass column hideHandle={false} data-audio-studio-style-drawer>
+          <DrawerTitle className="px-5 pt-3 pb-1 text-sm font-semibold">{title}</DrawerTitle>
+          {grid}
+        </DrawerContent>
+      </Drawer>
+    </div>
+  );
+  return (
+    <div data-audio-studio-styles onClick={e => e.stopPropagation()}>
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>{pill}</PopoverTrigger>
+        <PopoverContent data-glass-menu side="top" align="start" collisionPadding={12} className="w-[min(320px,calc(100vw-24px))] p-2" onClick={e => e.stopPropagation()}>
+          {grid}
+        </PopoverContent>
+      </Popover>
+    </div>
+  );
+}
+
+/** One height for every control in the bottom row, so they line up. */
+const CONTROL_H = 'h-8';
+const HUE_GRADIENT =
+  'linear-gradient(to right, hsl(0, 80%, 60%), hsl(60, 80%, 60%), hsl(120, 80%, 60%), hsl(180, 80%, 60%), hsl(240, 80%, 60%), hsl(300, 80%, 60%), hsl(360, 80%, 60%))';
+
+const STATIC_BAR_COUNT = 100;
+const MAX_WAVEFORM_DECODE_SECONDS = 120;
+/** CSS px of the studio animation that runs on under the deck (audio-studio.css). */
+const STUDIO_BLEED = 44;
+/** Matches `fftSize: 256` below — an idle frame has to be the analyser's size. */
+const IDLE_BIN_COUNT = 128;
+/** Pointer travel that turns a press on the canvas into a scrub. */
+const SCRUB_THRESHOLD_PX = 6;
+const EMPTY_DATA = new Uint8Array(0);
+
+// Shared across all AudioVisualizer instances — see setupAudio for why.
+let sharedVisualizerContext: AudioContext | null = null;
+
+/** True for a file on another host, which needs a CORS load to be tapped. */
+function needsCors(url: string): boolean {
+  if (!url || /^(blob|data):/i.test(url)) return false;
+  try {
+    return new URL(url, window.location.href).origin !== window.location.origin;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Whether Web Audio can hear this element. A cross-host file loaded without
+ * CORS comes out of a source node as silence, so it must play on its own.
+ */
+function canTapElement(el: HTMLAudioElement): boolean {
+  return !needsCors(el.currentSrc || el.src) || el.crossOrigin != null;
+}
+
+const formatTime = (seconds: number) => {
+  if (!Number.isFinite(seconds) || seconds <= 0) return '0:00';
+  const m = Math.floor(seconds / 60);
+  const s = Math.floor(seconds % 60);
+  return `${m}:${s.toString().padStart(2, '0')}`;
+};
+
+const clamp01 = (n: number) => (Number.isFinite(n) ? Math.max(0, Math.min(1, n)) : 0);
+
+
+/** Records the studio deck's height so its loading placeholder can match it. */
+function rememberStudioHeight(el: HTMLDivElement | null) {
+  if (!el || typeof window === 'undefined') return;
+  requestAnimationFrame(() => { if (el.isConnected && el.offsetHeight > 120 && !el.hasAttribute('data-audio-studio-fullscreen')) writeShape(audioStudioShapeKey(), el.offsetHeight); });
+}
+
+export function AudioVisualizer({
+  audioUrl,
+  isPlaying: isPlayingProp,
+  onPlayPause,
+  className = '',
+  displayTitle,
+  artworkUrl,
+  showStylePicker = true,
+  muted = false,
+  seed = 'default',
+  decodeEnabled = true,
+  waveformOnPlay = false,
+  durationHint = 0,
+  onFullscreen,
+  isFullscreen = false,
+  showVolume = true,
+  onMuteChange,
+  popoutTrack,
+  onPopOutChange,
+  handoffKey,
+  onPlaybackAdopted,
+  initialShowLyrics = false,
+}: AudioVisualizerProps) {
+  const { t: _copy } = _useCopy();
+  const surfaceActive = useContext(CachedPageActiveContext);
+  const { t } = useTranslation();
+  /* ─── The corner player ──────────────────────────────────────────────
+     While this post is popped out the track lives in lib/audio-post-playback
+     and this component is a view onto it: the play state comes from there,
+     play/pause is forwarded, and the element it handed over is not touched
+     on unmount. The element and the analyser chain stay where they are — the
+     card keeps animating off the same graph while it is on screen. */
+  const shared = useAudioPostPlayback();
+  const isPoppedOut = !!popoutTrack && shared.tokenId === popoutTrack.tokenId;
+  /** Lyrics over the animation; offered wherever the pop-out is (real posts). */
+  const [showLyrics, setShowLyrics] = useState(initialShowLyrics);
+  const isPoppedOutRef = useRef(isPoppedOut);
+  isPoppedOutRef.current = isPoppedOut;
+  /** True from hand-over until the element comes back or the engine drops it. */
+  const handedOverRef = useRef(false);
+  const isPlaying = isPoppedOut ? shared.isPlaying : isPlayingProp;
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const sourceRef = useRef<MediaElementAudioSourceNode | null>(null);
+  /**
+   * The <audio> element is never put in the document — the canvas is what goes
+   * on screen, the element only makes the sound. PersistentPageCache pauses a
+   * page's media by walking its subtree, so it could not see this one at all:
+   * a track started in the feed kept playing through every later navigation.
+   * Registering it against the canvas is what puts it back on that page's books.
+   */
+  const unregisterMediaRef = useRef<(() => void) | null>(null);
+  const releaseOffDocument = useCallback(() => {
+    unregisterMediaRef.current?.();
+    unregisterMediaRef.current = null;
+  }, []);
+  /** Take an element on as this card's, and as this page's. */
+  const adoptAudioElement = useCallback((el: HTMLAudioElement) => {
+    releaseOffDocument();
+    unregisterMediaRef.current = registerOffDocumentMedia(el, () => canvasRef.current);
+    audioRef.current = el;
+  }, [releaseOffDocument]);
+
+  /* ─── The shared player ──────────────────────────────────────────────
+     Every card showing this post claims the same <audio> element and the
+     Web Audio chain around it (lib/audio-handoff), innermost claim wins. So
+     opening a post from the feed does not restart the track: the post page's
+     card takes the running player over, and closing it hands the player
+     straight back down to the feed card, which never unmounted.
+
+     A card that does not hold the claim still SHOWS the track — its scrubber
+     and waveform read the shared element — but may not write to it. Two cards
+     both forwarding play/pause and both setting `muted` is the whole reason
+     the claim exists. */
+  const claimRef = useRef<object | null>(null);
+  const handoffKeyRef = useRef(handoffKey);
+  handoffKeyRef.current = handoffKey;
+  // Bumped whenever the player changes hands, so everything below re-reads it.
+  const [claimVersion, setClaimVersion] = useState(0);
+  const isActiveClaim = surfaceActive && (!handoffKey || isHandoffAudioActive(handoffKey, claimRef.current));
+  const isActiveClaimRef = useRef(isActiveClaim);
+  isActiveClaimRef.current = isActiveClaim;
+  const onPlaybackAdoptedRef = useRef(onPlaybackAdopted);
+  onPlaybackAdoptedRef.current = onPlaybackAdopted;
+  const adoptionPendingRef = useRef<boolean | null>(null);
+
+  const { theme, themeChoice } = useAppTheme();
+  const isLightTheme = (theme === 'light' || themeChoice === 'system-light');
+  const studioLayout = isCanvasTheme(theme) || theme === 'system' || isLightTheme;
+  const visualizerLight = isLightTheme && !studioLayout;
+  // Themes without the studio deck keep the card's own shape, so the loading
+  // placeholder must not reserve the deck's height for them.
+  useEffect(() => { if (!studioLayout) writeShape(audioStudioShapeKey(), 0); }, [studioLayout]);
+  const animationRef = useRef<number | null>(null);
+  const isConnectedRef = useRef(false);
+  // The presets do not fit a narrow card. Mask whichever edge is actually
+  // hiding one — a painted gradient strip would have to guess the colour of
+  // the artwork behind it, which is why they are banned repo-wide.
+  const { ref: chipScrollRef, style: chipFadeStyle } = useScrollFadeMask<HTMLDivElement>();
+
+  // Every card starts on Bars; a pick sticks until it unmounts.
+  const styleKey = `dehub.audio.style.${handoffKey || seed}`;
+  const readStyle = () => {
+    try {
+      const saved = window.localStorage.getItem(styleKey);
+      if (STYLES.some(item => item.value === saved)) return saved as AnyStyle;
+    } catch { /* Storage may be unavailable. */ }
+    return 'bars';
+  };
+  const [style, setStyleState] = useState<AnyStyle>(readStyle);
+  useEffect(() => { setStyleState(readStyle()); }, [styleKey, theme]);
+  const setStyle = useCallback((value: AnyStyle) => {
+    setStyleState(value);
+    try { window.localStorage.setItem(styleKey, value); } catch { /* Session-only selection. */ }
+  }, [styleKey]);
+  const listenerRef = useRef<AudioListener | null>(null);
+  const extraStateRef = useRef<Record<string, unknown>>({});
+  const [hue, setHue] = useState(0);
+  const hueHold = useGlassHold();
+  const volumeHold = useGlassHold();
+  const [reducedMotion, setReducedMotion] = useState(false);
+  useEffect(() => {
+    const preference = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const sync = () => setReducedMotion(preference.matches);
+    sync(); preference.addEventListener('change', sync);
+    return () => preference.removeEventListener('change', sync);
+  }, []);
+  const [waveformPeaks, setWaveformPeaks] = useState<number[] | null>(null);
+  const [duration, setDuration] = useState(durationHint);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [scrubRatio, setScrubRatio] = useState<number | null>(null);
+  const volume = useMediaVolume();
+  const selfMuted = useMediaMuted();
+  // Bumped when the <audio> element is created, so the listener effect below
+  // attaches no matter which path built it (near-viewport, play, or a seek).
+  const [audioElVersion, setAudioElVersion] = useState(0);
+
+  const isPlayingRef = useRef(isPlaying);
+  isPlayingRef.current = isPlaying;
+  const scrubRatioRef = useRef<number | null>(null);
+  scrubRatioRef.current = scrubRatio;
+  const pendingSeekRef = useRef<number | null>(null);
+  const peaksRef = useRef<number[] | null>(null);
+  peaksRef.current = waveformPeaks;
+
+  // Store onPlayPause in a ref to avoid dependency issues
+  const onPlayPauseRef = useRef(onPlayPause);
+  useEffect(() => {
+    onPlayPauseRef.current = onPlayPause;
+  }, [onPlayPause]);
+
+  // Store muted prop in ref for use during setup
+  const mutedRef = useRef(muted);
+  mutedRef.current = muted;
+
+  // Short tracks can afford a separate full-file decode for waveform peaks.
+  // Long tracks use the existing seeded shape and live analyser so playback
+  // doesn't also download and scan minutes of uncompressed audio.
+  useEffect(() => {
+    if (!isActiveClaim || !Number.isFinite(duration) || duration <= 0 || duration > MAX_WAVEFORM_DECODE_SECONDS) return;
+    if (!isPlaying && (waveformOnPlay || !decodeEnabled)) return;
+    let stale = false;
+    decodeAudioWaveform(audioUrl, STATIC_BAR_COUNT, (peaks) => {
+      if (!stale) setWaveformPeaks(peaks);
+    });
+    return () => { stale = true; };
+  }, [audioUrl, decodeEnabled, duration, isActiveClaim, waveformOnPlay, isPlaying]);
+
+  /**
+   * Point this card's refs at `graph` — the shared player, arriving from the
+   * pool or back from the corner player. `isConnectedRef` matters: an element
+   * may only be given a MediaElementSource ONCE for the life of the page, and
+   * an element that has one is audible only through it. So a card taking the
+   * player over adopts the chain rather than building a second one.
+   */
+  const adoptGraph = useCallback((graph: AudioHandoffGraph) => {
+    audioRef.current = graph.el;
+    sourceRef.current = graph.source;
+    analyserRef.current = graph.analyser;
+    audioContextRef.current = graph.source ? sharedVisualizerContext : null;
+    isConnectedRef.current = !!graph.source;
+    setAudioElVersion((v) => v + 1);
+  }, []);
+
+  /**
+   * The <audio> element on its own, without the Web Audio graph. Split out of
+   * `setupAudio` so the scrubber has a duration and a seek target before the
+   * first play — the graph still waits for the click, which is what the
+   * autoplay policy actually checks.
+   *
+   * Null when this card is keyed into a shared player it does not hold: the
+   * card on top builds it, and building a second element here would download
+   * the track twice and leave an orphan nothing ever tears down.
+   */
+  const ensureAudioElement = useCallback((): HTMLAudioElement | null => {
+    const existing = audioRef.current;
+    if (existing) return existing;
+    if (handoffKey) {
+      const shared = getHandoffAudio(handoffKey, claimRef.current);
+      if (shared) {
+        adoptGraph(shared);
+        return shared.el;
+      }
+      if (!isHandoffAudioActive(handoffKey, claimRef.current)) return null;
+    }
+    const el = new Audio();
+    // A file from another host has to be fetched in CORS mode to go through
+    // Web Audio: without it Chrome plays the element but the source node
+    // outputs silence, so the track runs with no sound. The media CDN sends
+    // CORS headers for our sites, so ask for it. If a host refuses, drop back
+    // to a plain load and keep the element out of the graph (see setupAudio).
+    if (needsCors(audioUrl)) {
+      el.crossOrigin = 'anonymous';
+      const onCorsError = () => {
+        if (isConnectedRef.current || el.crossOrigin == null) return;
+        el.removeAttribute('crossorigin');
+        el.src = audioUrl;
+        el.load();
+      };
+      el.addEventListener('error', onCorsError, { once: true });
+    }
+    el.preload = 'metadata';
+    el.muted = mutedRef.current;
+    el.src = audioUrl;
+    if (handoffKey) {
+      // The pool owns the element from here, registration included, so its
+      // page changes with the claim rather than with a React render.
+      audioRef.current = el;
+      setHandoffAudio(handoffKey, claimRef.current, { el, source: null, analyser: null });
+    } else {
+      adoptAudioElement(el);
+    }
+    setAudioElVersion((v) => v + 1);
+    return el;
+  }, [audioUrl, adoptAudioElement, adoptGraph, handoffKey]);
+
+  /**
+   * Hold a claim for as long as this card is mounted. The feed card keeps its
+   * claim while the post page is open — that is what the player drops back to
+   * when the overlay closes — so releasing it is the unmount's job, never the
+   * hand-over's.
+   */
+  useEffect(() => {
+    if (!handoffKey || !surfaceActive) return;
+    claimRef.current = claimHandoffAudio(handoffKey, () => canvasRef.current);
+    const unsubscribe = subscribeHandoffAudio(handoffKey, () => setClaimVersion((v) => v + 1));
+    setClaimVersion((v) => v + 1);
+    return () => {
+      unsubscribe();
+      const token = claimRef.current;
+      claimRef.current = null;
+      audioRef.current = null;
+      sourceRef.current = null;
+      analyserRef.current = null;
+      isConnectedRef.current = false;
+      if (token) releaseHandoffAudio(handoffKey, token);
+    };
+  }, [handoffKey, surfaceActive]);
+
+  // Taking the player over: pick the chain up, and tell the card that owns
+  // `isPlaying` what it actually walked into.
+  useLayoutEffect(() => {
+    if (!handoffKey || !isActiveClaim || isPoppedOut) return;
+    const graph = getHandoffAudio(handoffKey, claimRef.current);
+    if (!graph) return;
+    if (audioRef.current !== graph.el || sourceRef.current !== graph.source) adoptGraph(graph);
+    const playing = !graph.el.paused;
+    if (playing !== isPlayingRef.current) {
+      adoptionPendingRef.current = playing;
+      onPlaybackAdoptedRef.current?.(playing);
+    }
+    // Read once, at the moment the player changes hands.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [claimVersion, isActiveClaim, isPoppedOut, handoffKey]);
+
+  // Metadata is cheap; the full-file decode next door is not, so both ride the
+  // same near-viewport gate.
+  useEffect(() => {
+    if (!decodeEnabled && !isPlaying) return;
+    // The corner player has this track: a second element buys nothing.
+    if (isPoppedOut) return;
+    ensureAudioElement();
+  }, [decodeEnabled, isPlaying, isPoppedOut, ensureAudioElement]);
+
+  // Keep the scrubber in step with the element, however it got there.
+  useEffect(() => {
+    const el = audioRef.current;
+    if (!el) return;
+    const onTime = () => {
+      if (isActiveClaimRef.current && decodeEnabled) setCurrentTime(el.currentTime);
+    };
+    const onMeta = () => {
+      if (Number.isFinite(el.duration) && el.duration > 0) {
+        setDuration(el.duration);
+        if (pendingSeekRef.current !== null) {
+          el.currentTime = pendingSeekRef.current * el.duration;
+          pendingSeekRef.current = null;
+        }
+      }
+    };
+    const onEnded = () => {
+      if (isPoppedOutRef.current) return; // the corner player rests at the end
+      if (!isActiveClaimRef.current) return; // the card holding the player owns the end
+      el.currentTime = 0;
+      setCurrentTime(0);
+      onPlayPauseRef.current();
+    };
+    el.addEventListener('timeupdate', onTime);
+    el.addEventListener('seeked', onTime);
+    el.addEventListener('loadedmetadata', onMeta);
+    el.addEventListener('durationchange', onMeta);
+    el.addEventListener('ended', onEnded);
+    onMeta();
+    onTime();
+    return () => {
+      el.removeEventListener('timeupdate', onTime);
+      el.removeEventListener('seeked', onTime);
+      el.removeEventListener('loadedmetadata', onMeta);
+      el.removeEventListener('durationchange', onMeta);
+      el.removeEventListener('ended', onEnded);
+    };
+  }, [audioElVersion, decodeEnabled]);
+
+  useEffect(() => {
+    setDuration((d) => (d > 0 ? d : durationHint));
+  }, [durationHint]);
+
+  const setupAudio = useCallback(() => {
+    if (isConnectedRef.current) return;
+
+    try {
+      const el = ensureAudioElement();
+      if (!el) return;
+      // A cross-host file loaded without CORS would play silent through the
+      // graph. Leave it out: the speaker gets it straight from the element and
+      // the visualizer falls back to its decoded / seeded pattern.
+      if (!canTapElement(el)) return;
+
+      // ONE AudioContext shared by every visualizer instance: Chrome caps ~6
+      // live contexts per page, and feed cards live forever in persistent
+      // pages — per-card contexts exhausted the cap after a few audio posts,
+      // silently breaking later visualizers. Per-element sources/analysers
+      // still attach to the shared context (one source per element is fine).
+      if (!sharedVisualizerContext) {
+        // The track plays through Web Audio, which iPhone Safari silences when
+        // the ring switch is on mute. A 'playback' session plays like a music
+        // app instead (Safari 16.4+; other browsers lack it and ignore this).
+        const session = (navigator as Navigator & { audioSession?: { type: string } }).audioSession;
+        if (session && session.type !== 'playback') {
+          try { session.type = 'playback'; } catch { /* read-only on some builds */ }
+        }
+        sharedVisualizerContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      }
+      audioContextRef.current = sharedVisualizerContext;
+
+      const ctx = audioContextRef.current;
+
+      if (ctx.state === 'suspended') {
+        ctx.resume();
+      }
+
+      analyserRef.current = ctx.createAnalyser();
+      analyserRef.current.fftSize = 256;
+      analyserRef.current.smoothingTimeConstant = 0.8;
+
+      sourceRef.current = ctx.createMediaElementSource(el);
+      sourceRef.current.connect(analyserRef.current);
+      analyserRef.current.connect(ctx.destination);
+
+      isConnectedRef.current = true;
+      // Hand the chain to the pool with the element: the card that takes the
+      // player over must adopt this source, never build a second one.
+      if (handoffKey) {
+        setHandoffAudio(handoffKey, claimRef.current, {
+          el,
+          source: sourceRef.current,
+          analyser: analyserRef.current,
+        });
+      }
+    } catch (err) {
+      console.error('Failed to setup audio:', err);
+    }
+  }, [ensureAudioElement, handoffKey]);
+
+  /* ─── Canvas sizing ───────────────────────────────────────────────────────
+     The backing store used to be a fixed 320×160 stretched by CSS to whatever
+     the card was — soft, smeared bars on anything wider than a phone. Size it
+     to its own box at device resolution instead. */
+  const [canvasSize, setCanvasSize] = useState({ w: 320, h: 160 });
+  // Slow devices draw a 1x canvas at 30 frames a second with no glow.
+  const lowPower = React.useSyncExternalStore(subscribeLowPower, visualizerLowPower, () => false);
+  // Nothing is drawn while the card is scrolled out of view.
+  const onScreenRef = useRef(true);
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas || typeof IntersectionObserver === 'undefined') return;
+    const observer = new IntersectionObserver(([entry]) => { onScreenRef.current = entry.isIntersecting; });
+    observer.observe(canvas);
+    return () => { observer.disconnect(); onScreenRef.current = true; };
+  }, []);
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const apply = () => {
+      const rect = canvas.getBoundingClientRect();
+      if (!rect.width || !rect.height) return;
+      const dpr = Math.min(window.devicePixelRatio || 1, lowPower ? 1 : 2);
+      const w = Math.round(rect.width * dpr);
+      const h = Math.round(rect.height * dpr);
+      setCanvasSize((prev) => (prev.w === w && prev.h === h ? prev : { w, h }));
+    };
+    apply();
+    if (typeof ResizeObserver === 'undefined') return;
+    const ro = new ResizeObserver(apply);
+    ro.observe(canvas);
+    return () => ro.disconnect();
+  }, [theme, lowPower]);
+
+  /* ─── Drawing ─────────────────────────────────────────────────────────── */
+
+  const idleShape = useMemo(
+    () => (waveformPeaks && waveformPeaks.length ? waveformPeaks : seededPeaks(seed, STATIC_BAR_COUNT)),
+    [waveformPeaks, seed],
+  );
+  const idleFrequency = useMemo(() => idleFrequencyData(idleShape, IDLE_BIN_COUNT), [idleShape]);
+  const idleTime = useMemo(() => idleTimeData(idleShape, IDLE_BIN_COUNT), [idleShape]);
+
+  const drawFrame = useCallback(() => {
+    // Paper flips the painters' lightness scale; see setVisualizerInk.
+    setVisualizerInk(visualizerLight);
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    const calm = visualizerLowPower();
+    if (calm) calmContext(ctx);
+
+    const { width } = canvas;
+    // Studio card: the animation stands on the deck's top line, and the strip
+    // under the deck gets a mirrored copy for its frosted glass to bleed.
+    const studio = !isFullscreen && studioLayout;
+    const bleed = studio ? Math.round(STUDIO_BLEED * width / (canvas.clientWidth || width)) : 0;
+    const height = canvas.height - bleed;
+    if (!width || height <= 0) return;
+    if (bleed) ctx.clearRect(0, 0, width, canvas.height);
+    paintFrame(ctx, canvas, width, height);
+    if (bleed) {
+      ctx.save();
+      ctx.setTransform(1, 0, 0, -1, 0, height * 2);
+      // Frosted in the canvas itself, so the bleed reads as glass even where
+      // the deck's backdrop blur doesn't render.
+      if (!calm) ctx.filter = `blur(${Math.round(bleed / 4)}px) saturate(1.4)`;
+      ctx.globalAlpha = .85;
+      ctx.drawImage(canvas, 0, height - bleed, width, bleed, 0, height - bleed, width, bleed);
+      ctx.restore();
+      // Fade the reflection out so it melts into the deck instead of ending in an edge.
+      ctx.save();
+      ctx.globalCompositeOperation = 'destination-out';
+      const fade = ctx.createLinearGradient(0, height, 0, height + bleed);
+      fade.addColorStop(0, 'rgba(0,0,0,.15)');
+      fade.addColorStop(1, 'rgba(0,0,0,1)');
+      ctx.fillStyle = fade;
+      ctx.fillRect(0, height, width, bleed);
+      ctx.restore();
+    }
+  }, [style, hue, seed, idleFrequency, idleTime, idleShape, visualizerLight, studioLayout, theme, isFullscreen]);
+
+  function paintFrame(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement, width: number, height: number) {
+    if (style === 'static') {
+      const audio = audioRef.current;
+      const played = audio && audio.duration ? audio.currentTime / audio.duration : 0;
+      // A drag paints where the finger is, not where the audio is, so the
+      // waveform tracks the scrub instead of lagging a whole gesture behind.
+      const progress = scrubRatioRef.current ?? played;
+      // Default reads the analyser too now — it blooms out of the playhead —
+      // but only while actually playing. The synthesised idle frame the other
+      // styles fall back on would leave a frozen lump in the waveform on a
+      // paused card, and this is the style people scrub against.
+      let staticData = EMPTY_DATA;
+      const staticAnalyser = analyserRef.current;
+      if (staticAnalyser && isPlayingRef.current) {
+        const freq = new Uint8Array(staticAnalyser.frequencyBinCount);
+        staticAnalyser.getByteFrequencyData(freq);
+        staticData = freq;
+      }
+      if (theme === 'glass') {
+        ctx.clearRect(0, 0, width, height);
+        const shape = peaksRef.current?.length ? peaksRef.current : idleShape;
+        const step = width / shape.length;
+        shape.forEach((peak, index) => {
+          const level = staticData.length ? staticData[Math.floor(index / shape.length * staticData.length)] / 255 : 0;
+          const envelope = .025 + .975 * Math.pow(Math.sin(Math.PI * index / Math.max(1, shape.length - 1)), 1.5);
+          const barHeight = Math.max(1, Math.min(1, peak + level * .15) * envelope * height * .88);
+          ctx.fillStyle = index / shape.length <= progress ? '#efffff' : 'rgba(190,255,250,.65)';
+          const barWidth = Math.max(1, step * .5);
+          ctx.beginPath();
+          ctx.roundRect(index * step, height - barHeight, barWidth, barHeight, Math.min(barWidth / 2, barHeight / 2));
+          ctx.fill();
+        });
+      } else drawStatic(ctx, staticData, width, height, hue, seed, progress, peaksRef.current, STATIC_BAR_COUNT);
+      return;
+    }
+
+    // Everything else reads the analyser while playing. Paused — or before the
+    // graph exists — it gets a frame synthesised from the track's own waveform,
+    // so picking a style always visibly changes the canvas.
+    const analyser = analyserRef.current;
+    let frequencyData = idleFrequency;
+    let timeData = idleTime;
+    let liveSignal = false;
+    if (analyser && isPlayingRef.current) {
+      // Allocate and fill in one step: annotating these as `Uint8Array` widens
+      // the buffer to ArrayBufferLike and CI rejects the analyser call, while
+      // the local typecheck lets it through. See the TypedArray variance note.
+      const freq = new Uint8Array(analyser.frequencyBinCount);
+      const time = new Uint8Array(analyser.frequencyBinCount);
+      analyser.getByteFrequencyData(freq);
+      analyser.getByteTimeDomainData(time);
+      // Muted media and unavailable analysis can return an all-zero spectrum.
+      // Keep the selected visual alive without changing audio output.
+      const hasSignal = freq.some(value => value > 0);
+      liveSignal = hasSignal;
+      if (hasSignal) {
+        frequencyData = freq;
+        timeData = time;
+      } else {
+        const phase = performance.now() / 850;
+        frequencyData = Uint8Array.from(idleFrequency, (value, index) =>
+          Math.round(value * (.55 + .45 * Math.sin(phase + index * .13) ** 2)));
+        timeData = Uint8Array.from(idleTime, (value, index) =>
+          Math.round(128 + (value - 128) * Math.sin(phase + index * .04)));
+      }
+    }
+
+    if (isExtraStyle(style)) {
+      const listener = (listenerRef.current ||= new AudioListener());
+      const audio = audioRef.current;
+      const played = audio && audio.duration ? audio.currentTime / audio.duration : 0;
+      const progress = scrubRatioRef.current ?? played;
+      const now = performance.now() / 1000;
+      if (isPlayingRef.current && liveSignal) listener.fromAnalyser(frequencyData, timeData, now, progress, idleShape);
+      else if (isPlayingRef.current) listener.fromSynth(now, progress, idleShape, .65);
+      else listener.hold(now, progress, idleShape);
+      const cssW = canvas.clientWidth || width;
+      const scale = width / cssW;
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.clearRect(0, 0, width, height);
+      ctx.setTransform(scale, 0, 0, scale, 0, 0);
+      drawExtra(style, ctx as never, width / scale, height / scale, listener.frame, makePalette(hue, visualizerLight, theme), extraStateRef.current as never);
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      return;
+    }
+
+    switch (style) {
+      case 'bars':
+        drawBars(ctx, frequencyData, width, height, hue);
+        break;
+      case 'waveform':
+        drawWaveform(ctx, timeData, width, height, hue);
+        break;
+      case 'circular':
+        drawCircular(ctx, frequencyData, width, height, hue);
+        break;
+      case 'spectrum':
+        drawSpectrum(ctx, frequencyData, width, height, hue);
+        break;
+      case 'mirror':
+        drawMirror(ctx, frequencyData, width, height, hue);
+        break;
+      case 'rings':
+        drawRings(ctx, frequencyData, width, height, hue);
+        break;
+      case 'pulse':
+        drawPulse(ctx, frequencyData, width, height, hue);
+        break;
+      case 'terrain':
+        drawTerrain(ctx, frequencyData, width, height, hue);
+        break;
+      case 'orb':
+        drawOrb(ctx, frequencyData, width, height, hue);
+        break;
+    }
+  }
+
+  const drawFrameRef = useRef(drawFrame);
+  drawFrameRef.current = drawFrame;
+
+  // ONE animation loop, started and stopped by isPlaying alone. It used to
+  // restart on every `draw` identity change without cancelling the previous
+  // frame, so changing style or dragging the hue slider mid-playback left a
+  // second (then a third) rAF loop running against the same canvas.
+  useEffect(() => {
+    if (!isPlaying || !isActiveClaim || !decodeEnabled || reducedMotion) {
+      if (animationRef.current) cancelAnimationFrame(animationRef.current);
+      animationRef.current = null;
+      return;
+    }
+    let alive = true;
+    let last = 0;
+    const loop = (now: number) => {
+      if (!alive) return;
+      const due = !visualizerLowPower() || now - last >= LOW_FRAME_MS - 2;
+      if (due && onScreenRef.current) {
+        const gap = last ? now - last : 0;
+        last = now;
+        const started = performance.now();
+        drawFrameRef.current();
+        noteVisualizerFrame(performance.now() - started, gap);
+      }
+      animationRef.current = requestAnimationFrame(loop);
+    };
+    drawFrameRef.current();
+    animationRef.current = requestAnimationFrame(loop);
+    return () => {
+      alive = false;
+      if (animationRef.current) cancelAnimationFrame(animationRef.current);
+      animationRef.current = null;
+    };
+  }, [isPlaying, isActiveClaim, decodeEnabled, reducedMotion]);
+
+  // Repaint the idle frame whenever anything it depends on changes. Without
+  // this a style picked while paused left the *previous* style's last frame on
+  // the canvas, which is what "can't change the animation" looked like.
+  useEffect(() => {
+    if (isPlaying && !reducedMotion) return;
+    drawFrame();
+  }, [isPlaying, reducedMotion, drawFrame, canvasSize, scrubRatio, currentTime]);
+
+  useEffect(() => {
+    resetSpectrum();
+    resetRings();
+    resetPulse();
+    resetTerrain();
+    resetOrb();
+    resetStatic();
+    extraStateRef.current = {};
+  }, [style]);
+
+  /* ─── Playback ────────────────────────────────────────────────────────── */
+
+  // Play/pause runs synchronously off the user gesture: setupAudio + play()
+  // land in the same call-stack as the click, which is what the autoplay policy
+  // checks.
+  const handlePlayPause = useCallback(() => {
+    if (isPoppedOutRef.current) {
+      toggleAudioPost();
+      return;
+    }
+    if (!isPlayingRef.current) {
+      if (!isConnectedRef.current) setupAudio();
+      // A context the browser parked (tab in the background, phone call)
+      // keeps the track silent until it is resumed inside a tap.
+      const ctx = audioContextRef.current;
+      if (isConnectedRef.current && ctx?.state === 'suspended') void ctx.resume();
+    }
+    onPlayPauseRef.current();
+  }, [setupAudio]);
+
+  /**
+   * Pop out — or dock back. Popping out hands the element and its analyser
+   * chain over as they are (nothing reloads, nothing goes quiet), starts the
+   * track if it was idle, and leaves fullscreen: a corner player you cannot
+   * browse past is no corner player. Docking takes the same element back.
+   */
+  const handlePopOut = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      if (!popoutTrack) return;
+      if (isPoppedOutRef.current) {
+        const graph = takeBackAudioPost(popoutTrack.tokenId);
+        if (!graph) return;
+        if (handoffKey) {
+          audioRef.current = graph.el;
+          setHandoffAudio(handoffKey, claimRef.current, graph);
+        } else {
+          adoptAudioElement(graph.el);
+        }
+        sourceRef.current = graph.source;
+        analyserRef.current = graph.analyser;
+        audioContextRef.current = graph.source ? sharedVisualizerContext : null;
+        isConnectedRef.current = !!graph.source;
+        handedOverRef.current = false;
+        setAudioElVersion((v) => v + 1);
+        onPopOutChange?.(false, !graph.el.paused);
+        return;
+      }
+      if (isFullscreen && onFullscreen) onFullscreen(e);
+      const el = audioRef.current;
+      const wasPlaying = isPlayingRef.current;
+      handedOverRef.current = !!el;
+      // The corner player survives navigation on purpose — hand the page's
+      // claim over with the element, or the next route change would pause it.
+      // Same for the shared player: the pool must let go, not tear down.
+      if (handoffKey) detachHandoffAudio(handoffKey);
+      else releaseOffDocument();
+      const startAt = pendingSeekRef.current ?? (duration > 0 ? currentTime / duration : null);
+      pendingSeekRef.current = null;
+      popOutAudioPost({
+        track: {
+          ...popoutTrack,
+          title: popoutTrack.title || t('audioPost.untitled'),
+          artist: popoutTrack.artist || t('audioPost.creator'),
+        },
+        graph: el ? { el, source: sourceRef.current, analyser: analyserRef.current } : null,
+        startAt: el ? null : startAt,
+      });
+      onPopOutChange?.(true, wasPlaying);
+    },
+    [
+      popoutTrack, isFullscreen, onFullscreen, onPopOutChange, duration, currentTime, t,
+      adoptAudioElement, releaseOffDocument, handoffKey,
+    ],
+  );
+
+  // The corner player closed on this track — its X, or something else took
+  // the session — without handing the element back. Let go of it: the engine
+  // has already paused it and dropped its source. The next play builds a fresh
+  // element at the position the scrubber is showing.
+  useEffect(() => {
+    if (isPoppedOut || !handedOverRef.current) return;
+    handedOverRef.current = false;
+    const at = duration > 0 ? clamp01(currentTime / duration) : null;
+    releaseOffDocument();
+    audioRef.current = null;
+    sourceRef.current = null;
+    analyserRef.current = null;
+    audioContextRef.current = null;
+    isConnectedRef.current = false;
+    pendingSeekRef.current = at !== null && at < 0.999 ? at : null;
+    setAudioElVersion((v) => v + 1);
+    // Keyed on the hand-back alone: the position is read once, at that moment.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isPoppedOut]);
+
+  // Separate effect for playback control — runs AFTER state update from parent
+  useEffect(() => {
+    if (!audioRef.current || isPoppedOut || !isActiveClaim) return;
+    if (adoptionPendingRef.current !== null) {
+      if (isPlaying !== adoptionPendingRef.current) return;
+      adoptionPendingRef.current = null;
+    }
+
+    if (isPlaying) {
+      audioRef.current.play().catch((err) => {
+        console.error(err);
+        // Refused or unplayable (iPhone rejects some formats): show the play
+        // button again rather than a pause button stuck at 0:00. An AbortError
+        // is just a pause landing first, which already put the button back.
+        if (err?.name !== 'AbortError' && isPlayingRef.current) onPlayPauseRef.current();
+      });
+    } else {
+      audioRef.current.pause();
+    }
+  }, [isPlaying, isPoppedOut, isActiveClaim, audioElVersion]);
+
+  // Sync muted + volume. The caller's `muted` and the visualizer's own control
+  // are OR'd rather than one overwriting the other: VideoCard mutes for its own
+  // reasons, and a listener dragging this to zero should not be undone by an
+  // unrelated re-render from the card.
+  useEffect(() => {
+    const el = audioRef.current;
+    if (!el || !isActiveClaim) return;
+    el.muted = muted || selfMuted;
+    el.volume = volume;
+  }, [muted, selfMuted, volume, isActiveClaim, audioElVersion]);
+
+  /* ─── Seeking ─────────────────────────────────────────────────────────────
+     Two surfaces share it: the slim bar under the controls, and the canvas
+     itself — a waveform you cannot drag was the whole complaint. The bar, being
+     a deliberate target, tracks from pointerdown. The canvas only commits on
+     pointerup and only if the press was not a scroll (a scroll gets
+     pointercancel), so flicking the feed past a card never nudges its
+     position. */
+
+  const seekTo = useCallback((ratio: number) => {
+    const clamped = clamp01(ratio);
+    const el = ensureAudioElement();
+    if (!el) return;
+    const total = Number.isFinite(el.duration) && el.duration > 0 ? el.duration : 0;
+    if (!total) {
+      // Metadata has not landed yet — the loadedmetadata handler applies this.
+      pendingSeekRef.current = clamped;
+      if (duration > 0) setCurrentTime(clamped * duration);
+      return;
+    }
+    el.currentTime = clamped * total;
+    setCurrentTime(clamped * total);
+  }, [duration, ensureAudioElement]);
+
+  const scrubStateRef = useRef<{ startX: number; moved: boolean; live: boolean } | null>(null);
+
+  const ratioFrom = (el: HTMLElement, clientX: number) => {
+    const rect = el.getBoundingClientRect();
+    if (!rect.width) return 0;
+    return clamp01((clientX - rect.left) / rect.width);
+  };
+
+  const beginScrub = useCallback((el: HTMLElement, e: React.PointerEvent, live: boolean) => {
+    scrubStateRef.current = { startX: e.clientX, moved: false, live };
+    try { el.setPointerCapture(e.pointerId); } catch { /* not captured — moves still arrive */ }
+    if (live) setScrubRatio(ratioFrom(el, e.clientX));
+  }, []);
+
+  const moveScrub = useCallback((el: HTMLElement, e: React.PointerEvent) => {
+    const state = scrubStateRef.current;
+    if (!state) return;
+    if (!state.moved && !state.live && Math.abs(e.clientX - state.startX) < SCRUB_THRESHOLD_PX) return;
+    state.moved = true;
+    setScrubRatio(ratioFrom(el, e.clientX));
+  }, []);
+
+  const endScrub = useCallback((el: HTMLElement, e: React.PointerEvent) => {
+    const state = scrubStateRef.current;
+    scrubStateRef.current = null;
+    try { el.releasePointerCapture(e.pointerId); } catch { /* already released */ }
+    if (!state) return;
+    seekTo(ratioFrom(el, e.clientX));
+    setScrubRatio(null);
+  }, [seekTo]);
+
+  const cancelScrub = useCallback(() => {
+    scrubStateRef.current = null;
+    setScrubRatio(null);
+  }, []);
+
+  const bottomScrub = useVideoScrubZone({
+    enabled: duration > 0,
+    duration,
+    onStart: cancelScrub,
+    onPreview: time => setScrubRatio(time / duration),
+    onCommit: time => seekTo(time / duration),
+    onFinish: () => setScrubRatio(null),
+    onCancel: cancelScrub,
+    ignoreSelector: '[data-audio-style-picker]',
+  });
+
+  const handleSeekKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === ' ' || e.key === 'Enter') {
+      e.preventDefault();
+      handlePlayPause();
+      return;
+    }
+    if (!duration) return;
+    const step = e.shiftKey ? 10 : 5;
+    if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      seekTo((currentTime - step) / duration);
+    } else if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      seekTo((currentTime + step) / duration);
+    } else if (e.key === 'Home') {
+      e.preventDefault();
+      seekTo(0);
+    } else if (e.key === 'End') {
+      e.preventDefault();
+      seekTo(1);
+    }
+  }, [currentTime, duration, seekTo, handlePlayPause]);
+
+  useEffect(() => {
+    return () => {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
+      unregisterMediaRef.current?.();
+      unregisterMediaRef.current = null;
+      // A handed-over element and its nodes belong to the corner player now;
+      // it carries on after this card is gone and tears them down itself.
+      // A pooled one is the same story with a different owner: the claim
+      // effect above released it, and lib/audio-handoff hands it back down to
+      // the feed card or parks it. Tearing it down here would stop the track
+      // the moment you closed the post you opened it from.
+      if (!handedOverRef.current && !handoffKeyRef.current) {
+        if (audioRef.current) {
+          audioRef.current.pause();
+          audioRef.current.removeAttribute('src');
+        }
+        // Detach this card's nodes from the SHARED context (never close it —
+        // other visualizers may be using it).
+        sourceRef.current?.disconnect();
+        analyserRef.current?.disconnect();
+      }
+      audioRef.current = null;
+      sourceRef.current = null;
+      analyserRef.current = null;
+      audioContextRef.current = null;
+      isConnectedRef.current = false;
+      resetSpectrum();
+      resetRings();
+      resetPulse();
+      resetTerrain();
+      resetOrb();
+      resetStatic();
+    };
+  }, []);
+
+  const playedRatio = duration > 0 ? clamp01(currentTime / duration) : 0;
+  const displayRatio = scrubRatio ?? playedRatio;
+  const displayTime = scrubRatio !== null ? scrubRatio * duration : currentTime;
+  const isEffectivelyMuted = muted || selfMuted || volume === 0;
+
+  const stopBubble = (e: React.SyntheticEvent) => e.stopPropagation();
+
+  if (studioLayout) return (
+    <div ref={rememberStudioHeight} data-no-swipe data-video-controls data-audio-player data-audio-studio data-material={isLightTheme ? 'light' : theme} data-audio-studio-fullscreen={isFullscreen || undefined} className={className} onClick={stopBubble}>
+      <div data-audio-studio-title>
+        {artworkUrl && !artworkUrl.split('?')[0].endsWith('/placeholder.svg') && <img data-audio-studio-cover src={artworkUrl} alt="" loading="lazy" onError={event => { event.currentTarget.hidden = true; }} />}
+        <div><strong>{displayTitle || popoutTrack?.title || t('audioPost.untitled')}</strong>
+        <span>{popoutTrack?.artist || t('audioPost.creator')}</span></div>
+      </div>
+      <div data-audio-studio-motion data-keep-dark>
+      <canvas ref={canvasRef} width={canvasSize.w} height={canvasSize.h}
+        style={{ touchAction: 'pan-y' }}
+        onPointerDown={e => beginScrub(e.currentTarget, e, false)}
+        onPointerMove={e => moveScrub(e.currentTarget, e)}
+        onPointerUp={e => endScrub(e.currentTarget, e)} onPointerCancel={cancelScrub} />
+        {showLyrics && popoutTrack && <AudioLyrics tokenId={popoutTrack.tokenId} currentTime={currentTime} />}
+        {/* Fullscreen is the animation alone: play and exit over it, the card hidden. */}
+        {isFullscreen && onFullscreen && <div data-audio-studio-fs-bar>
+          <button type="button" aria-label={isPlaying ? t('audioPost.pause') : t('audioPost.play')} onClick={handlePlayPause}>{isPlaying ? <GlassPause fill="currentColor" /> : <GlassPlay fill="currentColor" />}</button>
+          <button type="button" aria-label={_copy('copy.37fd4e355ba3', { defaultValue: 'Exit fullscreen' })} onClick={onFullscreen}><Minimize /></button>
+        </div>}
+      </div>
+      <div data-audio-studio-deck>
+        <svg data-audio-studio-wave viewBox="0 0 600 32" preserveAspectRatio="none" aria-hidden="true">
+          {idleShape.map((peak, index) => {
+            const envelope = .1 + .9 * Math.pow(Math.sin(Math.PI * index / Math.max(1, idleShape.length - 1)), .8);
+            const height = Math.max(2, peak * envelope * 30);
+            return <rect key={index} x={index / idleShape.length * 600} y={32 - height} width={Math.max(1, 600 / idleShape.length * .45)} height={height} rx="1" fill={index / idleShape.length <= displayRatio ? 'currentColor' : 'currentColor'} opacity={index / idleShape.length <= displayRatio ? .95 : .35} />;
+          })}
+        </svg>
+        <div data-audio-studio-time><span>{formatTime(displayTime)}</span><span>{formatTime(duration)}</span></div>
+        <input type="range" min={0} max={1000} step={1} value={Math.round(displayRatio * 1000)}
+          aria-label={_copy('copy.67ae3405bcd4', { defaultValue: 'Seek' })}
+          onChange={e => seekTo(Number(e.target.value) / 1000)} />
+        <div data-audio-studio-transport>
+          <button type="button" aria-label={_copy("copy.3df2df39406e", { defaultValue: "−10 s" })} onClick={() => seekTo(duration ? (currentTime - 10) / duration : 0)}><RotateCcw /><small>10</small></button>
+          <button type="button" data-audio-studio-play aria-label={isPlaying ? t('audioPost.pause') : t('audioPost.play')} onClick={handlePlayPause}>{isPlaying ? <GlassPause fill="currentColor" /> : <GlassPlay fill="currentColor" />}</button>
+          <button type="button" aria-label={_copy("copy.71f45c5efe99", { defaultValue: "+10 s" })} onClick={() => seekTo(duration ? (currentTime + 10) / duration : 0)}><RotateCw /><small>10</small></button>
+        </div>
+      </div>
+      <div data-audio-studio-options>
+          {showStylePicker && <StudioStylePicker style={style} onPick={setStyle} title={t('creator.style', { defaultValue: 'Style' })} hue={hue} theme={theme} seed={seed} />}
+          {popoutTrack && <button type="button" data-audio-lyrics-toggle aria-label={t('audioPost.lyrics')} aria-pressed={showLyrics} data-active={showLyrics || undefined} onClick={() => setShowLyrics(v => !v)}><MicVocal /></button>}
+          {popoutTrack && <button type="button" aria-label={isPoppedOut ? t('audioPost.closeCornerPlayer') : t('audioPost.popOut')} onClick={handlePopOut}><PictureInPicture2 /></button>}
+          {showVolume && <button type="button" aria-label={isEffectivelyMuted ? _copy('copy.ce4ee4efc5e3', { defaultValue: 'Unmute' }) : _copy('copy.8dd6857baf02', { defaultValue: 'Mute' })} onClick={() => { const next = !isEffectivelyMuted; if (!next && volume === 0) setVolume(.8); setSelfMuted(next); videoPlaybackManager.globalMuted = next; onMuteChange?.(next); }}><Volume2 /></button>}
+          {onFullscreen && <button type="button" aria-label={isFullscreen ? _copy('copy.37fd4e355ba3', { defaultValue: 'Exit fullscreen' }) : _copy('copy.c461dbb2bab7', { defaultValue: 'Fullscreen' })} onClick={onFullscreen}><Maximize /></button>}
+          {(showVolume || showStylePicker) && <div data-audio-studio-levels>
+            {showStylePicker && <input type="range" min="0" max="360" value={hue} aria-label={_copy('copy.89a167dad6da', { defaultValue: 'Visualizer colour' })} onChange={e => setHue(Number(e.target.value))} data-audio-hue {...hueHold} />}
+            {showVolume && <div data-audio-studio-volume style={{ '--volume-fill': isEffectivelyMuted ? 0 : volume } as React.CSSProperties}>
+              <input {...volumeHold} aria-label={_copy('copy.b10fb966d720', { defaultValue: 'Volume' })} type="range" min="0" max="100" value={isEffectivelyMuted ? 0 : Math.round(volume * 100)} onChange={e => { const value = Number(e.target.value); setVolume(value / 100); setSelfMuted(value === 0); videoPlaybackManager.globalMuted = value === 0; onMuteChange?.(value === 0); }} />
+              <VolumeSoundCue level={isEffectivelyMuted ? 0 : volume} active={isPlaying && !isEffectivelyMuted} trackHeight={8} thumbRadius={7.5} />
+            </div>}
+          </div>}
+      </div>
+    </div>
+  );
+
+  return (
+    <div data-no-swipe data-video-controls data-audio-player className={`relative ${className}`} {...bottomScrub}>
+      <canvas
+        ref={canvasRef}
+        width={canvasSize.w}
+        height={canvasSize.h}
+        className="w-full h-full rounded-xl bg-black/40 select-none"
+        style={{ touchAction: 'pan-y' }}
+        onPointerDown={(e) => beginScrub(e.currentTarget, e, false)}
+        onPointerMove={(e) => moveScrub(e.currentTarget, e)}
+        onPointerUp={(e) => endScrub(e.currentTarget, e)}
+        onPointerCancel={cancelScrub}
+      />
+
+      {showLyrics && popoutTrack && <AudioLyrics tokenId={popoutTrack.tokenId} currentTime={currentTime} />}
+
+      {/* Colour takes the corner; volume sits beside it. */}
+      <div
+        data-audio-colour
+        className="absolute right-2 top-2 z-20 pointer-events-none"
+      >
+        {/* Colour slider matches the unframed volume slider. */}
+        {showStylePicker && (
+                <div
+          className={cn('pointer-events-auto shrink-0 flex items-center px-1', CONTROL_H)}
+          style={{ '--hue-thumb': hue === 0 ? 'hsl(0, 0%, 100%)' : `hsl(${hue}, 80%, 60%)` } as React.CSSProperties}
+          onClick={stopBubble}
+          onPointerDown={stopBubble}
+        >
+          {/* No overflow-hidden: the 12px thumb lives in a 6px track, so
+              clipping to the track cut the grab handle in half — which is
+              exactly what you see the moment you drag it. The gradient is
+              a background, and border-radius clips that on its own. */}
+          <div className="relative w-14 h-1.5 rounded-full" style={{ background: HUE_GRADIENT }}>
+            <Slider
+              value={[hue]}
+              min={0}
+              max={360}
+              step={1}
+              onValueChange={(value) => setHue(value[0])}
+              {...hueHold}
+              aria-label={_copy("copy.89a167dad6da", { defaultValue: "Visualizer colour" })}
+              /* Root overflows the track vertically so the grab area is
+                 26px rather than 6px. Targets Slider's own data-* hooks —
+                 the old [class*=Track] selectors matched nothing, since
+                 those are utility classes, not component names. */
+              className={cn(
+                'absolute -inset-y-2.5 inset-x-0 w-full py-0',
+                '[&_[data-slider-track]]:bg-transparent [&_[data-slider-range]]:bg-transparent',
+                '[&_[data-slider-thumb]]:h-3 [&_[data-slider-thumb]]:w-3',
+                '[&_[data-slider-thumb]]:border-2 [&_[data-slider-thumb]]:border-white',
+                '[&_[data-slider-thumb]]:bg-[var(--hue-thumb)]',
+                '[&_[data-slider-thumb]]:shadow-[0_1px_4px_rgba(0,0,0,0.45)]',
+              )}
+            />
+          </div>
+        </div>
+        )}
+
+
+      </div>
+
+      {/* Normally beside colour; the first feed post clears the nav capsule. */}
+      <div
+        data-audio-volume
+        data-audio-fullscreen={isFullscreen || undefined}
+        className={cn('absolute top-2 z-20 pointer-events-auto', showStylePicker ? 'right-[76px]' : 'right-2')}
+      >
+              {showVolume && (
+              <div
+                className={cn('shrink-0 flex items-center gap-1.5 px-1', CONTROL_H)}
+                onClick={stopBubble}
+                onPointerDown={stopBubble}
+              >
+                <button
+                  type="button"
+                  data-on-media
+                  data-audio-bare
+                  aria-label={isEffectivelyMuted ? _copy("copy.ce4ee4efc5e3", { defaultValue: "Unmute" }) : _copy("copy.8dd6857baf02", { defaultValue: "Mute" })}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (!isEffectivelyMuted) { setSelfMuted(true); videoPlaybackManager.globalMuted = true; onMuteChange?.(true); return; }
+                    setSelfMuted(false);
+                    videoPlaybackManager.globalMuted = false;
+                    onMuteChange?.(false);
+                    // Unmuting a slider dragged to zero has to put the level back,
+                    // or the icon flips and the track stays silent.
+                    if (volume === 0) setVolume(0.8);
+                  }}
+                  className="shrink-0 w-8 h-8 flex items-center justify-center text-white/80 hover:text-white transition-colors"
+                >
+                  <MediaControlIcon icon={isEffectivelyMuted ? VolumeX : Volume2} />
+                </button>
+                {/* The fill is Slider's own Range, not a div sized to the value:
+                    Radix insets the thumb by half its width so it never overhangs the
+                    track, so a hand-painted fill and the thumb drift apart at both
+                    ends. The Track clips the Range for us and leaves the thumb alone
+                    — it is a sibling, not a child. */}
+                <div className="relative w-12 h-1.5">
+                  <Slider
+                    value={[isEffectivelyMuted ? 0 : Math.round(volume * 100)]}
+                    min={0}
+                    max={100}
+                    step={1}
+                    {...volumeHold}
+                    aria-label={_copy("copy.b10fb966d720", { defaultValue: "Volume" })}
+                    onValueChange={(value) => {
+                      setVolume(value[0] / 100);
+                      setSelfMuted(value[0] === 0);
+                      videoPlaybackManager.globalMuted = value[0] === 0;
+                      onMuteChange?.(value[0] === 0);
+                    }}
+                    className={cn(
+                      'absolute -inset-y-2.5 inset-x-0 w-full py-0',
+                      '[&_[data-slider-track]]:bg-white/25 [&_[data-slider-range]]:bg-white/85',
+                      '[&_[data-slider-thumb]]:h-3 [&_[data-slider-thumb]]:w-3',
+                      '[&_[data-slider-thumb]]:border-2 [&_[data-slider-thumb]]:border-white',
+                      '[&_[data-slider-thumb]]:bg-white',
+                      '[&_[data-slider-thumb]]:shadow-[0_1px_4px_rgba(0,0,0,0.45)]',
+                    )}
+                  />
+                  <VolumeSoundCue level={isEffectivelyMuted ? 0 : volume} active={isPlaying && !isEffectivelyMuted} trackHeight={6} thumbRadius={6} />
+                </div>
+              </div>
+              )}
+      </div>
+
+      {/* Controls. There is no centre overlay any more: the play button used to
+          sit invisibly in the middle of the canvas and appear on hover, so a
+          mouse anywhere near the card flashed a pause button, and the
+          invisible-but-clickable box swallowed every press aimed at the
+          waveform underneath it. */}
+      <div data-audio-controls className="absolute inset-x-0 bottom-0 z-20 pointer-events-none">
+        <div data-audio-scrub-surface className="absolute inset-x-0 bottom-0 h-16 touch-pan-y pointer-events-auto" />
+        {/* Video-style play/countdown and tools above the edge scrubber.
+            The style picker gives up width and scrolls before buttons clip. */}
+        <div
+          data-audio-button-row
+          className="relative flex items-center gap-2 px-1.5 pb-1.5 pointer-events-none"
+          // pan-y too: this bar spans the card, so a feed swipe that starts on
+          // it has to scroll the page. The style row still pans sideways.
+          style={{ touchAction: 'pan-x pan-y' }}
+          onClick={stopBubble}
+          onPointerDown={stopBubble}
+        >
+          <button
+            type="button"
+            data-on-media
+            data-audio-bare
+            aria-label={isPlaying ? _copy("copy.858e4ba7a29f", { defaultValue: "Pause" }) : _copy("copy.436e61016e26", { defaultValue: "Play" })}
+            onClick={(e) => { e.stopPropagation(); handlePlayPause(); }}
+            className={cn(
+              'pointer-events-auto shrink-0 w-8 flex items-center justify-center transition-colors',
+              CONTROL_H,
+              'text-white hover:opacity-80',
+            )}
+          >
+            <MediaControlIcon icon={isPlaying ? Pause : Play} />
+          </button>
+
+          <span data-audio-bare className="min-w-[36px] text-center text-xs font-medium tabular-nums text-white">
+            {formatTime(Math.max(0, Math.ceil(duration - displayTime)))}
+          </span>
+          {showStylePicker && (
+            <>
+              {/* Style picker - scrolls when the card is too narrow for all
+                  presets, masked at whichever edge is actually hiding one so a
+                  half-chip dissolves instead of being sliced. */}
+              {showStylePicker && (
+              <div
+                ref={chipScrollRef}
+                data-no-swipe
+                data-audio-style-picker
+                className="pointer-events-auto flex-1 min-w-0 overflow-x-auto overscroll-x-contain scrollbar-none"
+                style={chipFadeStyle}
+                onTouchStart={stopBubble}
+              >
+                <div className="flex gap-1 w-max">
+                  {STYLES.map((s) => (
+                    <button
+                      key={s.value}
+                      type="button"
+                      data-on-media
+                      data-audio-style
+                      data-keep-round
+                      data-active={style === s.value || undefined}
+                      aria-pressed={style === s.value}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        setStyle(s.value);
+                      }}
+                      onPointerDown={stopBubble}
+                      onTouchStart={stopBubble}
+                      className={cn(
+                        // Faint dark backing so labels stay readable over white-heavy themes.
+                        'relative inline-flex items-center px-2 text-[10px] font-medium rounded-full whitespace-nowrap transition-opacity duration-300 text-white bg-black/25',
+                        style !== s.value && 'opacity-60 hover:opacity-90',
+                        CONTROL_H,
+                      )}
+                    >
+                      {/* "Beam", like the profile tabs: a short glowing line
+                          under the selected style instead of a filled pill. */}
+                      {style === s.value && (
+                        <span
+                          aria-hidden
+                          data-audio-style-active
+                          className="pointer-events-none absolute bottom-1 left-1/2 h-[2px] w-[40%] min-w-[10px] -translate-x-1/2 rounded-full bg-current shadow-[0_0_8px_currentColor,0_0_2px_currentColor]"
+                        />
+                      )}
+                      <span className="relative z-10">{s.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+              )}
+            </>
+          )}
+        {popoutTrack && (
+          <button
+            type="button"
+            data-on-media
+            data-audio-bare
+            data-audio-lyrics-toggle
+            aria-label={t('audioPost.lyrics')}
+            title={t('audioPost.lyrics')}
+            aria-pressed={showLyrics}
+            onClick={(e) => { e.stopPropagation(); setShowLyrics((v) => !v); }}
+            onPointerDown={stopBubble}
+            className={cn(
+              'pointer-events-auto shrink-0 w-8 flex items-center justify-center transition-colors',
+              CONTROL_H,
+              showLyrics ? 'opacity-100' : 'opacity-80 hover:opacity-100',
+            )}
+          >
+            <MediaControlIcon icon={MicVocal} active={showLyrics} />
+          </button>
+        )}
+        {popoutTrack && (
+          <button
+            type="button"
+            data-on-media
+            data-audio-bare
+            aria-label={isPoppedOut ? t('audioPost.closeCornerPlayer') : t('audioPost.popOut')}
+            title={isPoppedOut ? t('audioPost.closeCornerPlayer') : t('audioPost.popOut')}
+            aria-pressed={isPoppedOut}
+            onClick={handlePopOut}
+            onPointerDown={stopBubble}
+            className={cn(
+              'pointer-events-auto shrink-0 w-8 flex items-center justify-center transition-colors',
+              CONTROL_H,
+              isPoppedOut
+                ? 'opacity-100'
+                : 'opacity-80 hover:opacity-100',
+            )}
+          >
+            <MediaControlIcon icon={PictureInPicture2} />
+          </button>
+        )}
+
+        {onFullscreen && (
+          <button
+            type="button"
+            data-on-media
+            data-audio-bare
+            aria-label={isFullscreen ? _copy("copy.37fd4e355ba3", { defaultValue: "Exit fullscreen" }) : _copy("copy.c461dbb2bab7", { defaultValue: "Fullscreen" })}
+            onClick={(e) => { e.stopPropagation(); onFullscreen(e); }}
+            onPointerDown={stopBubble}
+            className={cn(
+              'pointer-events-auto shrink-0 w-8 flex items-center justify-center transition-colors',
+              CONTROL_H,
+              'text-white hover:opacity-80',
+            )}
+          >
+            <MediaControlIcon icon={isFullscreen ? Minimize : Maximize} />
+          </button>
+        )}
+        </div>
+          <div
+            data-scrub-track
+            role="slider"
+            tabIndex={0}
+            aria-label={_copy("copy.67ae3405bcd4", { defaultValue: "Seek" })}
+            aria-valuemin={0}
+            aria-valuemax={Math.max(0, Math.round(duration))}
+            aria-valuenow={Math.max(0, Math.round(displayTime))}
+            aria-valuetext={_copy("copy.a48c498b8725", { defaultValue: "{{value1}} of {{value2}}", value1: formatTime(displayTime), value2: formatTime(duration) })}
+            className="absolute inset-x-0 bottom-0 h-3.5 cursor-pointer outline-none pointer-events-auto focus-visible:ring-2 focus-visible:ring-white"
+            style={{ touchAction: 'none' }}
+            onKeyDown={handleSeekKeyDown}
+          >
+            <div className="absolute inset-x-0 bottom-0 h-[3px] border-[0.5px] border-black/65 bg-white/30" />
+            <div
+              className="absolute bottom-[0.5px] left-[0.5px] h-[2px] bg-white"
+              style={{ width: `${displayRatio * 100}%` }}
+            />
+          </div>
+      </div>
+    </div>
+  );
+}

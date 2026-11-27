@@ -1,0 +1,533 @@
+/**
+ * CommentsWrapper
+ * ===============
+ * Phone (<md): the half-screen comments split (Pill Split), like a post page
+ *   with its comments open: the card slides up under the top chrome and the
+ *   thread takes the full width of the bottom half, the same as the app.
+ * Feed cards (md and up): inline expandable section that grows the bottom
+ *   of the post bento — no drawer, no scrim, the card just gets taller.
+ * Immersive surfaces (fullscreen shorts / immersive video, `immersive` prop):
+ *   non-modal bottom-sheet drawer, because there is no bento to expand into and
+ *   the media needs to stay visible behind the comments.
+ * Collapsed sidebar (multi-column): compact height to fit smaller cards.
+ */
+
+import { Drawer, DrawerContent } from '@/components/ui/drawer';
+import { AnimatePresence, motion } from 'framer-motion';
+import { useSidebarCollapse } from '@/contexts/SidebarCollapseContext';
+import { lockBodyScroll } from '@/lib/body-scroll-lock';
+import { dismissKeyboard, useKeyboardSafeSheet } from '@/hooks/use-keyboard-open';
+import { lazy, Suspense, useState, useEffect, useRef, useCallback, type PointerEvent as ReactPointerEvent } from 'react';
+import { useTranslation } from 'react-i18next';
+import type { ReplyPolicy } from '@/lib/api/dehub/types';
+import { PostCommentsSplit } from '@/components/app/post-stage/PostCommentsSplit';
+
+// The thread itself is a lazy chunk. This wrapper sits inside every feed card,
+// so CommentsSection (the composer, reactions, likers drawer, translation…)
+// was in the entry bundle for a thread most cards never open. All three
+// surfaces below only render it once `open` is true, so the first open on a
+// page fetches it; the section's own loading state covers the beat.
+const CommentsSection = lazy(() => import('./CommentsSection').then(m => ({ default: m.CommentsSection })));
+
+interface CommentsWrapperProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  tokenId: string;
+  initialTab?: 'replies' | 'quotes' | 'reposts' | 'search';
+  /**
+   * Fullscreen surfaces (shorts, immersive video) where the comments must
+   * overlay as a bottom-sheet drawer because there is no post bento to expand.
+   * Feed cards leave this off and get the inline bento expansion on every
+   * breakpoint.
+   */
+  immersive?: boolean;
+  /** Creator turned replies off — swaps the composer for a notice. */
+  commentsDisabled?: boolean;
+  /** Who may reply, when replies are on; shown above the composer. */
+  replyPolicy?: ReplyPolicy;
+  /** The post is published for children — see CommentsSection. */
+  forKids?: boolean;
+  /**
+   * Post author's wallet address. Forwarded to CommentsSection, which hides the
+   * author's straight comments from the list — pass it only when the host page
+   * renders those comments itself (the author thread on the post page).
+   */
+  postAuthorAddress?: string;
+  /**
+   * Dedicated post pages keep comments in the document flow on every
+   * breakpoint. That gives the page one bounded, internally scrolling comment
+   * window before the ad and related-post continuation instead of replacing
+   * the page with a phone drawer.
+   */
+  forceInline?: boolean;
+  /** Phone post page ("Stage") — see CommentsSection `stage`. Inline only. */
+  stage?: boolean;
+  stageCount?: number;
+  /** The post's own comment count, when the host has it (see CommentsSection). */
+  knownCount?: number;
+  onStageTabChange?: (tab: 'replies' | 'quotes' | 'reposts' | 'search') => void;
+}
+
+function useIsTabletOrMobile() {
+  const [isTabletOrMobile, setIsTabletOrMobile] = useState(false);
+  useEffect(() => {
+    const query = window.matchMedia('(max-width: 1023px)');
+    const check = () => setIsTabletOrMobile(query.matches);
+    check();
+    query.addEventListener('change', check);
+    return () => query.removeEventListener('change', check);
+  }, []);
+  return isTabletOrMobile;
+}
+
+function useIsPhone() {
+  const [isPhone, setIsPhone] = useState(false);
+  useEffect(() => {
+    const query = window.matchMedia('(max-width: 767px)');
+    const check = () => setIsPhone(query.matches);
+    check();
+    query.addEventListener('change', check);
+    return () => query.removeEventListener('change', check);
+  }, []);
+  return isPhone;
+}
+
+function useAdaptiveDrawerHeight(enabled: boolean) {
+  const [drawerHeight, setDrawerHeight] = useState('78dvh');
+
+  useEffect(() => {
+    if (!enabled) return;
+
+    const calculateHeight = () => {
+      const viewportHeight = window.visualViewport?.height ?? window.innerHeight;
+      // Tall enough for five comments; 56% (max 560px) showed about two.
+      const calculated = Math.round(viewportHeight * 0.78);
+      const clamped = Math.min(Math.max(calculated, 420), 760);
+      const finalHeight = Math.min(clamped, Math.round(viewportHeight - 24));
+      setDrawerHeight(`${finalHeight}px`);
+    };
+
+    calculateHeight();
+    window.addEventListener('resize', calculateHeight);
+    window.visualViewport?.addEventListener('resize', calculateHeight);
+
+    return () => {
+      window.removeEventListener('resize', calculateHeight);
+      window.visualViewport?.removeEventListener('resize', calculateHeight);
+    };
+  }, [enabled]);
+
+  return drawerHeight;
+}
+
+/** Can this element still take `deltaY` worth of scrolling in that direction? */
+function canAbsorb(el: Element, deltaY: number) {
+  const room = deltaY > 0
+    ? el.scrollHeight - el.clientHeight - el.scrollTop
+    : el.scrollTop;
+  if (room <= 1) return false;
+  if (el === document.scrollingElement) return true;
+  const overflowY = getComputedStyle(el).overflowY;
+  return overflowY === 'auto' || overflowY === 'scroll';
+}
+
+/**
+ * Hand the wheel back to the page once the comment list bottoms out.
+ *
+ * The dropdown scrolls internally, so without this the wheel dead-ends: the
+ * user reaches the last reply, keeps scrolling because they want the next post,
+ * and the feed sits still. Browsers latch a wheel gesture to the scroller it
+ * started on and only chain to the page once the gesture stops, which is the
+ * same dead end for anyone who scrolls in one continuous motion. So when
+ * nothing inside the dropdown can take the delta, scroll the page ourselves.
+ */
+function useWheelChaining(enabled: boolean) {
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!enabled || !el) return;
+
+    const onWheel = (e: WheelEvent) => {
+      // Pinch-zoom, and horizontal swipes the feed reads as tab switches.
+      if (e.ctrlKey || Math.abs(e.deltaX) > Math.abs(e.deltaY) || !e.deltaY) return;
+
+      let node: Element | null = e.target as Element;
+      while (node && !canAbsorb(node, e.deltaY)) {
+        node = node.parentElement;
+      }
+      // Nothing left to scroll anywhere, or the list itself can still move —
+      // either way the browser's own handling is correct.
+      if (!node || el.contains(node)) return;
+
+      // deltaMode is lines on Firefox/Windows and pages on some remotes.
+      const step = e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? node.clientHeight : 1;
+      node.scrollTop += e.deltaY * step;
+      e.preventDefault();
+    };
+
+    // Non-passive: React registers its own wheel listener as passive, so the
+    // preventDefault above only lands on a listener we attach ourselves.
+    el.addEventListener('wheel', onWheel, { passive: false });
+    return () => el.removeEventListener('wheel', onWheel);
+  }, [enabled]);
+
+  return ref;
+}
+
+/** Far enough down to have been a dismiss, had the sheet been dismissible. */
+const SWIPE_WARN_PX = 60;
+
+/**
+ * Refuse to close a comment sheet out from under someone mid-sentence.
+ *
+ * Every dismissal route is covered: the scrim, Escape, and the drag-down —
+ * which vaul is told to stop honouring (`dismissible={false}`) while there is
+ * unsent text, since its close path leaves the sheet mid-drag if the parent
+ * declines to close. Each of them raises the same confirmation instead of
+ * silently swallowing the gesture, so the sheet never just sits there
+ * ignoring the reader either.
+ *
+ * The text itself is never at stake — it is in the draft store before this
+ * runs (lib/comment-draft-cache) — but "I typed a paragraph and it vanished"
+ * is what an unexpected dismiss feels like, whatever is on disk.
+ */
+function useCloseGuard(onOpenChange: (open: boolean) => void) {
+  const [hasUnsent, setHasUnsent] = useState(false);
+  const [confirming, setConfirming] = useState(false);
+  const dragStart = useRef<number | null>(null);
+
+  // Stable: CommentsSection has this in an effect's dependencies.
+  const onDirtyChange = useCallback((dirty: boolean) => setHasUnsent(dirty), []);
+
+  const requestClose = useCallback(() => {
+    if (!hasUnsent) {
+      onOpenChange(false);
+      return;
+    }
+    // Let the keyboard go first, or the sheet is still keyboard-sized and the
+    // confirmation renders in a sliver.
+    dismissKeyboard();
+    setConfirming(true);
+  }, [hasUnsent, onOpenChange]);
+
+  const handleOpenChange = useCallback(
+    (next: boolean) => {
+      if (!next) {
+        requestClose();
+        return;
+      }
+      onOpenChange(next);
+    },
+    [onOpenChange, requestClose],
+  );
+
+  const discard = useCallback(() => {
+    setConfirming(false);
+    onOpenChange(false);
+  }, [onOpenChange]);
+
+  const keepWriting = useCallback(() => setConfirming(false), []);
+
+  /** Watches for the drag-down that `dismissible={false}` is now swallowing. */
+  const dragProps = {
+    onPointerDown: (e: ReactPointerEvent<HTMLDivElement>) => {
+      const target = e.target as Element | null;
+      // The sheet body is `data-vaul-no-drag`, so a gesture starting there was
+      // never a dismiss — it is the list scrolling or the composer.
+      dragStart.current = target?.closest?.('[data-vaul-no-drag]') ? null : e.clientY;
+    },
+    onPointerMove: (e: ReactPointerEvent<HTMLDivElement>) => {
+      if (dragStart.current === null || !hasUnsent) return;
+      if (e.clientY - dragStart.current < SWIPE_WARN_PX) return;
+      dragStart.current = null;
+      requestClose();
+    },
+    onPointerUp: () => {
+      dragStart.current = null;
+    },
+  };
+
+  return {
+    hasUnsent,
+    confirming,
+    onDirtyChange,
+    handleOpenChange,
+    requestClose,
+    discard,
+    keepWriting,
+    dragProps,
+  };
+}
+
+/** The confirmation itself — drawn inside the sheet, not as a nested overlay. */
+function DiscardGuard({ onKeepWriting, onDiscard }: { onKeepWriting: () => void; onDiscard: () => void }) {
+  const { t } = useTranslation();
+  return (
+    <div
+      data-comments-discard-guard
+      data-vaul-no-drag
+      className="absolute inset-0 z-30 flex items-center justify-center bg-black/70 backdrop-blur-sm px-6"
+      onClick={e => e.stopPropagation()}
+    >
+      <div className="w-full max-w-[300px] rounded-2xl border border-white/10 bg-zinc-900/95 p-4 text-center shadow-2xl">
+        <p className="text-sm font-semibold text-white">{t('comments.discardTitle')}</p>
+        <p className="mt-1.5 text-xs leading-relaxed text-zinc-400">{t('comments.discardBody')}</p>
+        <div className="mt-4 flex gap-2">
+          <button
+            type="button"
+            onClick={onKeepWriting}
+            className="flex-1 rounded-xl bg-white px-3 py-2.5 text-sm font-semibold text-black"
+          >
+            {t('comments.keepWriting')}
+          </button>
+          <button
+            type="button"
+            onClick={onDiscard}
+            className="flex-1 rounded-xl border border-white/15 px-3 py-2.5 text-sm font-medium text-zinc-300"
+          >
+            {t('comments.closeAnyway')}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function CommentsWrapper({ open, onOpenChange, tokenId, initialTab, immersive = false, commentsDisabled = false, replyPolicy, forKids = false, postAuthorAddress, forceInline = false, stage = false, stageCount, knownCount, onStageTabChange }: CommentsWrapperProps) {
+  const isTabletOrMobile = useIsTabletOrMobile();
+  const isPhone = useIsPhone();
+  const adaptiveDrawerHeight = useAdaptiveDrawerHeight(isTabletOrMobile && immersive);
+  const { isCollapsed } = useSidebarCollapse();
+
+  // This sheet holds the page itself.
+  //
+  // Every other drawer gets it for free: `noBodyStyles` turns vaul's own lock
+  // off on the grounds that Radix's modal Dialog wraps the overlay in
+  // RemoveScroll. True at modal={true}, and this is the one sheet in the app
+  // that passes modal={false} — so neither lock engaged and the feed scrolled
+  // behind the open sheet. Shorts happens to be covered because the viewer
+  // locks the body itself; immersive video does not, so there it was visible.
+  //
+  // Counted, so it nests with the viewer's own lock instead of fighting it.
+  const immersiveSheet = !forceInline && isTabletOrMobile && immersive;
+  const phoneSheet = !forceInline && isPhone && !immersive;
+  // Below `md` the section lays itself out as `h-full` around an absolutely
+  // positioned list, so it needs a definite height here or the list collapses.
+  const inlineWindowClass = 'h-[60vh] overflow-hidden md:h-auto md:overflow-y-auto';
+  useEffect(() => {
+    if (!immersiveSheet || !open) return;
+    return lockBodyScroll('immersive-comments');
+  }, [immersiveSheet, open]);
+
+  // Both sheets put the composer at their bottom edge, which on iOS is behind
+  // the keyboard: see useKeyboardSafeSheet for why `dvh` and `bottom: 0` are
+  // not enough there.
+  const { style: keyboardStyle } = useKeyboardSafeSheet(open && immersiveSheet);
+  const splitAnchorRef = useRef<HTMLSpanElement>(null);
+  useEffect(() => {
+    if (!phoneSheet || !open) return;
+    const card = splitAnchorRef.current?.closest<HTMLElement>('[data-feed-item]') ?? splitAnchorRef.current?.parentElement;
+    if (card) bringCardUnderChrome(card);
+  }, [phoneSheet, open]);
+  const guard = useCloseGuard(onOpenChange);
+  // Inline expansion only — the immersive drawer sits over fullscreen media and
+  // should keep the scroll to itself.
+  const wheelChainRef = useWheelChaining(open && !isPhone && !(isTabletOrMobile && immersive));
+
+  // Phone, non-immersive: the half-screen split (Pill Split), right over the
+  // feed. The card slides up under the top chrome first, so the post stays in
+  // view above its comments, the same picture as a post page with them open.
+  if (phoneSheet) {
+    return (
+      <>
+        <span ref={splitAnchorRef} hidden />
+        <AnimatePresence>
+          {open && (
+            <PostCommentsSplit key="feed-comments-split" onClose={guard.requestClose} closeOnTapAbove>
+              <div data-comments-wrapper className="px-1">
+                <Suspense fallback={null}>
+                  {/* Keyed on the post: a host that swaps the post under a
+                      mounted wrapper would otherwise hand the section's draft,
+                      reply target and optimistic rows to the next post. */}
+                  <CommentsSection
+                    key={tokenId}
+                    tokenId={tokenId}
+                    onClose={guard.requestClose}
+                    initialTab={initialTab}
+                    commentsDisabled={commentsDisabled}
+                    replyPolicy={replyPolicy}
+                    forKids={forKids}
+                    postAuthorAddress={postAuthorAddress}
+                    onDirtyChange={guard.onDirtyChange}
+                  />
+                </Suspense>
+              </div>
+              {guard.confirming && (
+                <DiscardGuard onKeepWriting={guard.keepWriting} onDiscard={guard.discard} />
+              )}
+            </PostCommentsSplit>
+          )}
+        </AnimatePresence>
+      </>
+    );
+  }
+
+  // Only fullscreen/immersive surfaces use the bottom-sheet drawer. Feed cards
+  // fall through to the inline expansion below on every breakpoint.
+  if (immersiveSheet) {
+    return (
+      <Drawer
+        open={open}
+        onOpenChange={guard.handleOpenChange}
+        modal={false}
+        dismissible={!guard.hasUnsent}
+        repositionInputs={false}
+      >
+        <DrawerContent
+          glass
+          data-comments-wrapper
+          className="flex flex-col overflow-hidden !bg-black/60 !backdrop-blur-[24px] border border-white/[0.08]"
+          style={{
+            height: adaptiveDrawerHeight,
+            maxHeight: 'calc(100dvh - env(safe-area-inset-top) - 8px)',
+            ...keyboardStyle,
+          }}
+          onPointerDownOutside={e => {
+            if (!guard.hasUnsent) return;
+            e.preventDefault();
+            guard.requestClose();
+          }}
+          onEscapeKeyDown={e => {
+            if (!guard.hasUnsent) return;
+            e.preventDefault();
+            guard.requestClose();
+          }}
+          {...guard.dragProps}
+        >
+          <div
+            className="flex-1 min-h-0 px-3 h-full"
+            style={{ paddingBottom: keyboardStyle ? 4 : 12 }}
+            data-vaul-no-drag
+          >
+            <Suspense fallback={null}>
+              <CommentsSection
+                key={tokenId}
+                tokenId={tokenId}
+                onClose={guard.requestClose}
+                initialTab={initialTab}
+                commentsDisabled={commentsDisabled}
+                replyPolicy={replyPolicy}
+                forKids={forKids}
+                postAuthorAddress={postAuthorAddress}
+                onDirtyChange={guard.onDirtyChange}
+              />
+            </Suspense>
+          </div>
+          {guard.confirming && (
+            <DiscardGuard onKeepWriting={guard.keepWriting} onDiscard={guard.discard} />
+          )}
+        </DrawerContent>
+      </Drawer>
+    );
+  }
+
+  // When sidebar is collapsed (multi-column feed), use compact sizing
+  const isCompact = isCollapsed;
+
+  // The dedicated post page: no box, no window of its own. The comments lie on
+  // the page in its own scroll, full width, the way the app's post screen has
+  // them — and nothing here may clip, or the pinned tab row and reply bar in
+  // CommentsSection lose their sticky containing block.
+  if (forceInline) {
+    return open ? (
+      <div data-comments-wrapper data-no-navigate className={stage ? undefined : 'mt-3'} onClick={(e) => e.stopPropagation()}>
+        <Suspense fallback={null}>
+          <CommentsSection
+            key={tokenId}
+            tokenId={tokenId}
+            onClose={() => onOpenChange(false)}
+            initialTab={initialTab}
+            commentsDisabled={commentsDisabled}
+            replyPolicy={replyPolicy}
+            forKids={forKids}
+            postAuthorAddress={postAuthorAddress}
+            page
+            stage={stage}
+            stageCount={stageCount}
+            knownCount={knownCount}
+            onStageTabChange={onStageTabChange}
+          />
+        </Suspense>
+      </div>
+    ) : null;
+  }
+
+  return (
+    <AnimatePresence>
+      {open && (
+        <motion.div
+          initial={{ height: 0, opacity: 0 }}
+          animate={{ height: 'auto', opacity: 1 }}
+          exit={{ height: 0, opacity: 0 }}
+          transition={{ duration: 0.3, ease: 'easeInOut' }}
+          className="overflow-hidden"
+        >
+          <div
+            ref={wheelChainRef}
+            data-comments-wrapper
+            data-no-navigate
+            onClick={(e) => e.stopPropagation()}
+            // No `overscroll-behavior: contain` here on purpose: this section is
+            // part of the card, not an overlay, so scrolling past the last reply
+            // has to carry on into the feed the way a side panel does. Adding it
+            // back traps the wheel and the page reads as frozen.
+            style={{ touchAction: 'pan-y' }}
+            // Mobile (<md): CommentsSection lays out as `h-full` with an
+            // absolutely-positioned, scrollable list inside a flex-1 region, so
+            // it needs a definite parent height — an `auto`-height wrapper
+            // collapses the list to 0 and the comments vanish. Give it a fixed
+            // viewport height and let the section scroll internally. Desktop
+            // keeps the grow-to-content behaviour (CommentsSection carries its
+            // own min-h-[400px]).
+            data-comments-inline
+            className={`rounded-2xl border border-white/10 mt-3 ${inlineWindowClass} ${
+              isCompact ? 'md:max-h-[40vh] text-sm' : ''
+            }`}
+          >
+            <Suspense fallback={null}>
+              <CommentsSection
+                key={tokenId}
+                tokenId={tokenId}
+                onClose={() => onOpenChange(false)}
+                initialTab={initialTab}
+                commentsDisabled={commentsDisabled}
+                replyPolicy={replyPolicy}
+                forKids={forKids}
+                postAuthorAddress={postAuthorAddress}
+              />
+            </Suspense>
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
+/**
+ * Slides a feed card so its top sits just under whatever top chrome is on
+ * screen (the logo bar and the feed pill), leaving the bottom half for the
+ * comments split. scroll-margin does the offset, so it works whichever
+ * element scrolls the card.
+ */
+function bringCardUnderChrome(card: HTMLElement) {
+  let top = 0;
+  for (const el of document.querySelectorAll<HTMLElement>('[data-mobile-header], [data-feed-nav]')) {
+    const box = el.getBoundingClientRect();
+    if (box.height > 0 && box.bottom > 0 && box.top < window.innerHeight / 3) top = Math.max(top, box.bottom);
+  }
+  const previous = card.style.scrollMarginTop;
+  card.style.scrollMarginTop = `${Math.round(top + 8)}px`;
+  card.scrollIntoView?.({ block: 'start', behavior: 'smooth' });
+  card.style.scrollMarginTop = previous;
+}

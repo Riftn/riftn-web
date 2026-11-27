@@ -1,0 +1,289 @@
+/**
+ * anon-views
+ * ==========
+ * Records and serves post views for visitors with no Riftn session.
+ *
+ * Why this exists: api.dehub.io requires a valid JWT on /api/record-view and
+ * /api/view/batch (no header → 400 "Invalid signature", bad token → 401), so a
+ * signed-out visitor scrolling the feed records nothing. Signed-in views still
+ * go to the Riftn API; only signed-out ones land here, so the two halves never
+ * double-count the same person.
+ *
+ * Dedup happens here, not there. A signed-out viewer is identified by a salted
+ * SHA-256 of the client-supplied device id plus the request IP — the device id
+ * alone is clearable, the IP alone is shared by everyone behind a NAT, and the
+ * salt makes the hash useless to anyone who obtains the table. The raw IP is
+ * never stored. That hash cannot go into the Riftn API's own dedup, which is a
+ * Redis set of wallet addresses, which is why this half is deduped separately.
+ *
+ * Dedup sorts the views, it no longer discards any. Everything is FORWARDED to
+ * the Riftn API, which folds it into the post's `totalViews` — the number the
+ * apps render: first-of-the-day views as `tokenIds`, the rest as
+ * `repeatTokenIds`, which count on every post once per viewer per 30 minutes —
+ * the viewer hash rides along as `viewerKey` so the API can hold that
+ * cooldown. Clients used to fetch this store separately and add it on at display
+ * time, which is why a post's view count painted low and then jumped a moment
+ * later.
+ *
+ * Endpoints (verify_jwt = false — anonymous by definition):
+ *   POST /            { tokenIds: string[], deviceId: string } → { recorded }
+ *   GET  /?token_ids=1,2,3                                     → { counts: {} }
+ *
+ * The GET is kept for inspecting the signed-out half directly; nothing in the
+ * apps calls it any more.
+ */
+
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-wallet-address, x-dehub-token, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version, x-request-id, prefer',
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+};
+
+// Matches MAX_BATCH_SIZE in src/lib/view-tracker.ts. A request carrying more
+// than this is a client bug or an inflation attempt; we take the first slice
+// rather than rejecting outright so a genuine oversized batch still counts.
+const MAX_TOKENS_PER_REQUEST = 50;
+
+// Token ids are numeric strings in the Riftn API. Rejecting anything else keeps
+// junk out of the totals table, which is keyed by token_id.
+const TOKEN_ID_PATTERN = /^\d{1,20}$/;
+
+const DEHUB_API_BASE = (Deno.env.get('DEHUB_API_BASE') || 'https://api.dehub.io')
+  .replace(/\/api\/?$/, '').replace(/\/$/, '');
+
+// The Riftn API refuses to count a view it cannot attribute, so the forward is
+// abandoned rather than retried if it takes longer than this. The view is
+// already recorded here either way.
+const FORWARD_TIMEOUT_MS = 5000;
+
+function json(body: unknown, status = 200): Response {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+  });
+}
+
+function errorResponse(message: string, status = 400): Response {
+  return json({ success: false, message }, status);
+}
+
+/**
+ * The client's IP, as seen through Supabase's edge proxy.
+ *
+ * cf-connecting-ip is set by Cloudflare directly from the TCP connection and
+ * is stripped/overwritten on the way in, so a caller cannot forge it — prefer
+ * it whenever present.
+ *
+ * x-forwarded-for is attacker-controllable: a client can prepend any fake
+ * value to it before the request ever reaches a trusted proxy, so taking
+ * "the first entry" really means "whatever the caller put there." Trusting it
+ * would let a script rotate a fake IP on every request and, combined with a
+ * freely-rotatable deviceId, mint unlimited "new" viewer hashes and defeat the
+ * one-view-per-viewer-per-day dedup entirely. Only fall back to it as a
+ * last resort when no trusted header is present.
+ */
+function getClientIp(req: Request): string {
+  const cfIp = req.headers.get('cf-connecting-ip');
+  if (cfIp) return cfIp;
+
+  const realIp = req.headers.get('x-real-ip');
+  if (realIp) return realIp;
+
+  const forwarded = req.headers.get('x-forwarded-for');
+  if (forwarded) {
+    const first = forwarded.split(',')[0]?.trim();
+    if (first) return first;
+  }
+
+  return 'unknown';
+}
+
+async function hashViewer(deviceId: string, ip: string): Promise<string> {
+  // Falls back to the service role key as salt if ANON_VIEW_SALT is unset, so a
+  // missing env var degrades to "still salted with a project-local secret"
+  // rather than to an unsalted, rainbow-table-able hash of an IP address.
+  const salt = Deno.env.get('ANON_VIEW_SALT')
+    || Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+    || '';
+  const data = new TextEncoder().encode(`${salt}|${deviceId}|${ip}`);
+  const digest = await crypto.subtle.digest('SHA-256', data);
+  return Array.from(new Uint8Array(digest))
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
+}
+
+/**
+ * Hand the newly-recorded views to the Riftn API, where they land in the post's
+ * `totalViews` — the count the apps display.
+ *
+ * A successful ledger write is not a successful public view until this forward
+ * succeeds. Report failures so callers can retry through the normal cooldown.
+ */
+async function forwardToDeHub(
+  tokenIds: string[],
+  repeatTokenIds: string[] = [],
+  viewerKey?: string,
+): Promise<boolean> {
+  if (tokenIds.length === 0 && repeatTokenIds.length === 0) return true;
+
+  const serviceKey = Deno.env.get('VIEW_SERVICE_KEY');
+  if (!serviceKey) {
+    console.error('[anon-views] VIEW_SERVICE_KEY is not set — views recorded but not forwarded');
+    return false;
+  }
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), FORWARD_TIMEOUT_MS);
+
+  try {
+    const response = await fetch(`${DEHUB_API_BASE}/api/view/anonymous`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'x-service-key': serviceKey,
+      },
+      body: JSON.stringify({
+        tokenIds: tokenIds.map(Number),
+        repeatTokenIds: repeatTokenIds.map(Number),
+        viewerKey,
+      }),
+      signal: controller.signal,
+    });
+
+    if (!response.ok) {
+      console.error(`[anon-views] forward failed: ${response.status}`, await response.text());
+      return false;
+    }
+    return (await response.json()).success === true;
+  } catch (error) {
+    console.error('[anon-views] forward error:', error);
+    return false;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+function normalizeTokenIds(raw: unknown): string[] {
+  if (!Array.isArray(raw)) return [];
+  const seen = new Set<string>();
+  for (const value of raw) {
+    if (typeof value !== 'string' && typeof value !== 'number') continue;
+    const id = String(value).trim();
+    if (TOKEN_ID_PATTERN.test(id)) seen.add(id);
+    if (seen.size >= MAX_TOKENS_PER_REQUEST) break;
+  }
+  return Array.from(seen);
+}
+
+Deno.serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders });
+  }
+
+  const supabase = createClient(
+    Deno.env.get('SUPABASE_URL')!,
+    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+  );
+
+  try {
+    // ── Read: aggregate counts for a set of posts ──
+    if (req.method === 'GET') {
+      const url = new URL(req.url);
+      const tokenIds = normalizeTokenIds(
+        (url.searchParams.get('token_ids') || '').split(',').filter(Boolean),
+      );
+
+      if (tokenIds.length === 0) {
+        return json({ success: true, counts: {} });
+      }
+
+      const { data, error } = await supabase.rpc('get_anonymous_view_counts', {
+        p_token_ids: tokenIds,
+      });
+
+      if (error) {
+        console.error('[anon-views] count query failed:', error);
+        return errorResponse('Failed to fetch view counts', 500);
+      }
+
+      const counts: Record<string, number> = {};
+      for (const row of (data || []) as Array<{ token_id: string; view_count: number }>) {
+        counts[row.token_id] = Number(row.view_count) || 0;
+      }
+
+      return json({ success: true, counts });
+    }
+
+    // ── Write: record a batch of anonymous views ──
+    if (req.method === 'POST') {
+      let body: Record<string, unknown>;
+      try {
+        body = await req.json();
+      } catch {
+        return errorResponse('Invalid JSON body');
+      }
+
+      const tokenIds = normalizeTokenIds(body.tokenIds);
+      if (tokenIds.length === 0) {
+        return errorResponse('tokenIds must contain at least one numeric token id');
+      }
+
+      // The device id is required but not trusted — it is only one of two
+      // ingredients in the viewer hash, and the other (the IP) is not
+      // client-controlled, so forging it cannot inflate a count past one view
+      // per IP per post per day.
+      const deviceId = typeof body.deviceId === 'string' ? body.deviceId.trim().slice(0, 64) : '';
+      if (!deviceId) {
+        return errorResponse('deviceId is required');
+      }
+
+      const viewerHash = await hashViewer(deviceId, getClientIp(req));
+
+      // Returns the ids that survived dedup, not just how many — the forward
+      // below needs to name them.
+      const { data, error } = await supabase.rpc('record_anonymous_views', {
+        p_token_ids: tokenIds,
+        p_viewer_hash: viewerHash,
+      });
+
+      if (error) {
+        console.error('[anon-views] record failed:', error);
+        return errorResponse('Failed to record views', 500);
+      }
+
+      const newIds = Array.isArray(data) ? (data as string[]) : [];
+
+      // The ledger above still records one row per viewer per post per day —
+      // that table is the record of unique signed-out VIEWERS and stays that.
+      // But the ids it deduped away are real views of real posts, and used to
+      // be dropped here. They go on to the API as repeats, which counts them
+      // once per viewer per post per 30 minutes. The split is the whole reason
+      // this forward names two lists.
+      const newIdSet = new Set(newIds);
+      const repeatIds = tokenIds.filter((id) => !newIdSet.has(id));
+
+      console.log(
+        `[anon-views] recorded ${newIds.length}/${tokenIds.length} anonymous views (${repeatIds.length} repeat)`,
+      );
+
+      if (!await forwardToDeHub(newIds, repeatIds, viewerHash)) {
+        return errorResponse('Public view recording is temporarily unavailable', 503);
+      }
+
+      return json({
+        success: true,
+        recorded: newIds.length,
+        repeats: repeatIds.length,
+        submitted: tokenIds.length,
+      });
+    }
+
+    return errorResponse('Method not allowed', 405);
+  } catch (err) {
+    console.error('[anon-views] unexpected error:', err);
+    return errorResponse('Internal server error', 500);
+  }
+});

@@ -1,0 +1,347 @@
+import { useTranslation as _useCopy } from 'react-i18next';
+import { useSurfaceDraft } from '@/hooks/use-surface-draft';
+import { tokenLabel } from '@/lib/token-label';
+/**
+ * Glossary Page
+ * =============
+ * Explains all UI elements, icons, buttons and features of the app.
+ * Native-feeling page rendered inside the app layout.
+ */
+
+import { BrandIcon } from '@/components/app/war/WarHudIcon';
+import { AppState } from '@/components/app/AppState';
+import { useEffect, useState, useMemo } from 'react';
+import { useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { SEOHead } from '@/components/SEOHead';
+import { PageBody, PageIsland } from '@/components/app/page-kit/PageKit';
+import glossaryIcon from '@/assets/glossary-icon.png';
+import dhbCoinIcon from '@/assets/dehub-coin.png';
+import { badgeImage, badgeThresholds } from '@/lib/staking-badges';
+import { platformFeeForIndex } from '@/lib/badge-perks';
+import { useBadgeScale } from '@/hooks/use-badge-scale';
+import medal1 from '@/assets/medal-1.png';
+import medal2 from '@/assets/medal-2.png';
+import medal3 from '@/assets/medal-3.png';
+import medal4 from '@/assets/medal-4.png';
+import medal5 from '@/assets/medal-5.png';
+import medal6 from '@/assets/medal-6.png';
+import medal7 from '@/assets/medal-7.png';
+import medal8 from '@/assets/medal-8.png';
+import medal9 from '@/assets/medal-9.png';
+import medal10 from '@/assets/medal-10.png';
+
+const MEDALS = [medal1, medal2, medal3, medal4, medal5, medal6, medal7, medal8, medal9, medal10];
+import { Ticket, Heart, Star, Unlock, ArrowUpDown, Zap, Crown, TrendingUp, Clock, CheckCircle2, RotateCcw, ChevronUp, ChevronDown, Pin, AtSign, Hash, Globe, Tag, HandCoins } from "lucide-react";
+import ThumbsDown from "@/components/ui/cut-icons/dislike";
+import Languages from "@/components/ui/cut-icons/language";
+import Eye from "@/components/ui/cut-icons/visibility";
+import Flag from "@/components/ui/cut-icons/report";
+import MoreHorizontal from "@/components/ui/cut-icons/more";
+import Sparkles from "@/components/ui/cut-icons/assistant";
+import Trophy from "@/components/ui/cut-icons/leaderboard";
+import Wallet from "@/components/ui/cut-icons/wallet";
+import ShieldCheck from "@/components/ui/cut-icons/security";
+import Lightbulb from "@/components/ui/cut-icons/feature-requests";
+import Radio from "@/components/ui/cut-icons/live";
+import Video from "@/components/ui/cut-icons/video";
+import Image from "@/components/ui/cut-icons/images";
+import Coins from "@/components/ui/cut-icons/coins";
+import Users from "@/components/ui/cut-icons/communities";
+import Lock from "@/components/ui/cut-icons/privacy";
+import BookOpen from "@/components/ui/cut-icons/docs";
+import Volume2 from "@/components/ui/cut-icons/volume";
+import Copy from "@/components/ui/cut-icons/copy";
+import ExternalLink from "@/components/ui/cut-icons/open-externally";
+import Pencil from "@/components/ui/cut-icons/edit";
+import Trash2 from "@/components/ui/cut-icons/delete";
+import Info from "@/components/ui/cut-icons/information";
+import PieChart from "@/components/ui/cut-icons/fractions";
+import BarChart3 from "@/components/ui/cut-icons/stats";
+import EyeOff from "@/components/ui/cut-icons/hidden";
+
+import ThumbsUp from "@/components/ui/cut-icons/like";
+import MessageSquare from "@/components/ui/cut-icons/messages";
+import Share2 from "@/components/ui/cut-icons/feedshare";
+import Bookmark from "@/components/ui/cut-icons/save";
+import Bell from "@/components/ui/cut-icons/alerts";
+import Send from "@/components/ui/cut-icons/send";
+import Search from "@/components/ui/cut-icons/search";
+import Settings from "@/components/ui/cut-icons/settings";
+import Home from "@/components/ui/cut-icons/home";
+import Play from "@/components/ui/cut-icons/play";
+import Mic from "@/components/ui/cut-icons/mic";
+import Gem from "@/components/ui/cut-icons/diamond";
+import Plus from "@/components/ui/cut-icons/add";
+
+import { Input } from '@/components/ui/input';
+
+interface GlossaryEntry {
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+}
+
+interface GlossarySection {
+  title: string;
+  entries: GlossaryEntry[];
+}
+
+function GlossaryCard({ icon, title, description }: GlossaryEntry) {
+  return (
+    <div className="flex items-start gap-3 p-3 rounded-xl bg-white/[0.04] border border-white/[0.06] hover:bg-white/[0.07] transition-colors">
+      <div className="shrink-0 w-9 h-9 rounded-lg bg-white/[0.08] flex items-center justify-center text-zinc-300">
+        {icon}
+      </div>
+      <div className="min-w-0">
+        <h3 className="text-sm font-semibold text-white mb-0.5">{title}</h3>
+        <p className="text-xs text-zinc-400 leading-relaxed">{description}</p>
+      </div>
+    </div>
+  );
+}
+
+function SectionBlock({ title, entries, id }: GlossarySection & { id?: string }) {
+  return (
+    <section data-kit-section className="bg-zinc-900 p-4" id={id}>
+      <h2 className="text-base font-bold text-white mb-3 flex items-center gap-2">
+        <div className="w-1 h-5 rounded-full bg-gradient-to-b from-white via-zinc-300 to-zinc-500" />
+        {title}
+      </h2>
+      <div className="grid gap-2">
+        {entries.map((entry, i) => (
+          <GlossaryCard key={i} {...entry} />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+export default function GlossaryPage() {
+  const { t: _copy } = _useCopy();
+  const { t } = useTranslation();
+  const location = useLocation();
+  const iconSize = 18;
+  const [searchQuery, setSearchQuery] = useSurfaceDraft("pages/app/GlossaryPage.tsx:searchQuery", '');
+  // Tier requirements are pegged in dollars, so quote today's ladder rather
+  // than the numbers the table was originally written with.
+  const badgeLadder = badgeThresholds(useBadgeScale());
+
+  // Swallow the glossary sections at the sticky header bento's top edge under
+  // the glass themes, exactly like the home feed cuts at its nav pill.
+
+  useEffect(() => {
+    if (location.hash) {
+      const el = document.getElementById(location.hash.slice(1));
+      if (el) setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+    }
+  }, [location.hash]);
+
+  // Memoized: this ~140-entry array (with JSX icons) was rebuilt on every
+  // render — including each keystroke in the search box — and its fresh
+  // identity forced the filteredSections useMemo below to recompute too.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const sections: (GlossarySection & { id?: string })[] = useMemo(() => [
+    {
+      title: t('glossary.sections.postInteractions', 'Post Interactions'),
+      entries: [
+        { icon: <ThumbsUp size={iconSize} />, title: t('glossary.thumbsUp', 'Thumbs Up (Like)'), description: t('glossary.thumbsUpDesc', 'Shows you like or agree with a post. Increases the post\'s engagement score and helps it rank higher in the feed.') },
+        { icon: <ThumbsDown size={iconSize} />, title: t('glossary.thumbsDown', 'Thumbs Down (Dislike)'), description: t('glossary.thumbsDownDesc', 'Shows you dislike or disagree with a post. This feedback helps improve content recommendations.') },
+        { icon: <MessageSquare size={iconSize} />, title: t('glossary.comment', 'Comment'), description: t('glossary.commentDesc', 'Opens the comment section where you can reply to a post, join discussions, and interact with other users.') },
+        { icon: <Share2 size={iconSize} />, title: t('glossary.share', 'Share'), description: t('glossary.shareDesc', 'Share a post externally via a link, or copy the post URL to your clipboard to send to others.') },
+        { icon: <Bookmark size={iconSize} />, title: t('glossary.bookmark', 'Bookmark'), description: t('glossary.bookmarkDesc', 'Save a post to your bookmarks for later. Access all saved posts from the Bookmarks page in the sidebar.') },
+        { icon: <Gem size={iconSize} />, title: t('glossary.tip', 'Tip'), description: t('glossary.tipDesc') },
+        { icon: <Flag size={iconSize} />, title: t('glossary.report', 'Report'), description: t('glossary.reportDesc', 'Flag inappropriate or harmful content for review. Reports help keep the community safe.') },
+        { icon: <MoreHorizontal size={iconSize} />, title: t('glossary.moreOptions', 'More Options (⋯)'), description: t('glossary.moreOptionsDesc', 'Opens additional actions like editing, deleting, or reporting a post.') },
+      ],
+    },
+    {
+      title: t('glossary.sections.translation', 'Translation'),
+      entries: [
+        { icon: <Languages size={iconSize} />, title: t('glossary.translateButton', 'Translate Button'), description: t('glossary.translateButtonDesc', 'Translates post text, bios, and comments into your preferred language. The app auto-detects your browser language or you can set one manually in Settings.') },
+        { icon: <RotateCcw size={iconSize} />, title: t('glossary.showOriginal', 'Show Original'), description: t('glossary.showOriginalDesc', 'After translating, tap this to revert back to the original language of the content.') },
+      ],
+    },
+    {
+      title: t('glossary.sections.contentTypes', 'Content Types'),
+      entries: [
+        { icon: <Image size={iconSize} />, title: t('glossary.imagePost', 'Image Post'), description: t('glossary.imagePostDesc', 'A post containing one or more images. Images are stored on-chain as NFTs with a unique Token ID.') },
+        { icon: <Video size={iconSize} />, title: t('glossary.videoPost', 'Video Post'), description: t('glossary.videoPostDesc', 'A post containing a video. Videos can be set to public, private, or pay-per-view (PPV).') },
+        { icon: <Radio size={iconSize} />, title: t('glossary.liveStream', 'Live Stream'), description: t('glossary.liveStreamDesc', 'A real-time broadcast. Viewers can watch, comment, and tip the streamer. Streams use low-latency HLS technology.') },
+        { icon: <Clock size={iconSize} />, title: t('glossary.story', 'Story'), description: t('glossary.storyDesc', 'Short video content that expires after 24 hours. Tap a user\'s avatar ring on the home feed to view their story.') },
+        { icon: <Play size={iconSize} />, title: t('glossary.audio', 'Audio'), description: t('glossary.audioDesc', 'An audio post with a visual waveform player. Creators can upload music, podcasts, or voice recordings.') },
+        { icon: <Mic size={iconSize} />, title: t('glossary.audioSpace', 'Audio Space'), description: t('glossary.audioSpaceDesc', 'A live audio room where users can speak, listen, and raise their hand to join the conversation.') },
+      ],
+    },
+    {
+      title: t('glossary.sections.visibility', 'Visibility & Access'),
+      entries: [
+        { icon: <Unlock size={iconSize} />, title: t('glossary.public', 'Public'), description: t('glossary.publicDesc', 'Content visible to everyone. Anyone can view, like, and comment on public posts.') },
+        { icon: <Lock size={iconSize} />, title: t('glossary.private', 'Private'), description: t('glossary.privateDesc', 'Content only visible to you. Private posts are hidden from other users and the public feed.') },
+        { icon: <Ticket size={iconSize} />, title: t('glossary.ppv', 'Pay-Per-View (PPV)'), description: t('glossary.ppvDesc') },
+        { icon: <Crown size={iconSize} />, title: t('glossary.subscriberOnly', 'Subscriber Only'), description: t('glossary.subscriberOnlyDesc', 'Content restricted to users who have subscribed to the creator\'s channel.') },
+      ],
+    },
+    {
+      id: 'post-info',
+      title: t('glossary.sections.postInfo', 'Post Info Page'),
+      entries: [
+        { icon: <Info size={iconSize} />, title: t('glossary.postInfoPage', 'Post Info'), description: t('glossary.postInfoPageDesc', 'A detailed view of any post showing its on-chain data, engagement stats, ownership fractions, and creator info. Access it by tapping the "ⓘ" icon on any post.') },
+        { icon: <Hash size={iconSize} />, title: t('glossary.tokenIdInfo', 'Token ID'), description: t('glossary.tokenIdInfoDesc', 'The unique on-chain identifier a post gets once it is minted as an NFT. Shown at the top of the Post Info page for minted posts.') },
+        { icon: <ExternalLink size={iconSize} />, title: t('glossary.txHash', 'Transaction Hash'), description: t('glossary.txHashInfoDesc', 'The blockchain transaction hash from when the post was minted. Click it to open the block explorer (BaseScan or BscScan) and verify the on-chain record.') },
+        { icon: <Eye size={iconSize} />, title: t('glossary.engagementStats', 'Engagement Stats'), description: t('glossary.engagementStatsDesc', 'The Post Info page shows total likes, dislikes, views, comments, and tips received — giving a complete snapshot of how the post is performing.') },
+        { icon: <Globe size={iconSize} />, title: t('glossary.visibilityControl', 'Visibility Control'), description: t('glossary.visibilityControlDesc', 'Post owners can change their post\'s visibility between Public (anyone can see), Unlisted (only via direct link), and Private (only you). Accessible from the Post Info page.') },
+        { icon: <EyeOff size={iconSize} />, title: t('glossary.unlisted', 'Unlisted'), description: t('glossary.unlistedDesc', 'A visibility setting where the post won\'t appear in feeds or search, but anyone with the direct link can still view it.') },
+        { icon: <Pencil size={iconSize} />, title: t('glossary.editFromInfo', 'Edit Post (from Info)'), description: t('glossary.editFromInfoDesc', 'Post owners can edit the title and description of their post directly from the Post Info page by tapping the edit button.') },
+        { icon: <HandCoins size={iconSize} />, title: t('glossary.totalTips', 'Total Tips Received'), description: t('glossary.totalTipsDesc') },
+        { icon: <Ticket size={iconSize} />, title: t('glossary.ppvPurchases', 'PPV Purchases'), description: t('glossary.ppvPurchasesDesc', 'For pay-per-view posts, shows the number of users who have purchased access and the total revenue earned by the creator.') },
+      ],
+    },
+    {
+      id: 'fractions',
+      title: t('glossary.sections.fractions', 'Fractions & Ownership'),
+      entries: [
+        { icon: <PieChart size={iconSize} />, title: t('glossary.fractions', 'Fractions'), description: t('glossary.fractionsDesc', 'A post minted on Riftn becomes an NFT split into 1,000 fractions, and the creator starts with all 1,000 — 100% ownership of the content. Minting is optional and can happen when you publish or later.') },
+        { icon: <Users size={iconSize} />, title: t('glossary.holders', 'Holders'), description: t('glossary.holdersDesc', 'The list of wallet addresses that own fractions of a post. Shown on the Post Info page with each holder\'s balance and ownership percentage.') },
+        { icon: <BarChart3 size={iconSize} />, title: t('glossary.ownershipBar', 'Ownership Bar'), description: t('glossary.ownershipBarDesc', 'A progress bar on the Post Info page showing how many of the 1,000 fractions the creator still holds vs. how many have been distributed or sold.') },
+        { icon: <Tag size={iconSize} />, title: t('glossary.listFractions', 'List Fractions'), description: t('glossary.listFractionsDesc') },
+        { icon: <Coins size={iconSize} />, title: t('glossary.fractionMarketplace', 'Fraction Marketplace'), description: t('glossary.fractionMarketplaceDesc', 'The marketplace tab on the Post Info page where fraction holders can list their fractions for sale and buyers can make offers. Enables trading of content ownership.') },
+        { icon: <Plus size={iconSize} />, title: t('glossary.makeOffer', 'Make Offer'), description: t('glossary.makeOfferDesc', 'Submit a buy offer for fractions of a post at a price you choose. The fraction holder can accept or reject your offer.') },
+      ],
+    },
+    {
+      title: t('glossary.sections.wallet', 'Wallet & Tokens'),
+      entries: [
+        { icon: <img src={dhbCoinIcon} alt={tokenLabel()} className="w-6 h-6" />, title: t('glossary.dhbToken'), description: t('glossary.dhbTokenDesc') },
+        { icon: <Wallet size={iconSize} />, title: t('glossary.wallet', 'Wallet'), description: t('glossary.walletDesc') },
+        { icon: <ArrowUpDown size={iconSize} />, title: t('glossary.swap', 'Swap'), description: t('glossary.swapDesc', 'Exchange one token for another directly within the app. Swaps happen on-chain using decentralized exchanges.') },
+        { icon: <TrendingUp size={iconSize} />, title: t('glossary.staking', 'Staking'), description: t('glossary.stakingDesc') },
+        { icon: <Copy size={iconSize} />, title: t('glossary.txHash', 'Transaction Hash'), description: t('glossary.txHashDesc', 'A unique identifier for any on-chain transaction. Click it to view the full transaction details on a blockchain explorer.') },
+      ],
+    },
+    {
+      title: t('glossary.sections.social', 'Social Features'),
+      entries: [
+        { icon: <Users size={iconSize} />, title: t('glossary.followers', 'Followers / Following'), description: t('glossary.followersDesc', 'Follow other users to see their posts in your feed. Your follower count is displayed on your profile.') },
+        { icon: <Bell size={iconSize} />, title: t('glossary.notifications', 'Notifications'), description: t('glossary.notificationsDesc', 'Alerts for likes, comments, tips, follows, and other activity related to your account.') },
+        { icon: <Send size={iconSize} />, title: t('glossary.dm', 'Direct Messages'), description: t('glossary.dmDesc', 'Private messages between users. Currently available on the mobile app with web support coming soon.') },
+        { icon: <AtSign size={iconSize} />, title: t('glossary.mention', 'Mentions (@)'), description: t('glossary.mentionDesc', 'Tag another user in a post or comment by typing @ followed by their username. They will receive a notification.') },
+      ],
+    },
+    {
+      title: t('glossary.sections.navigation', 'Navigation'),
+      entries: [
+        { icon: <Home size={iconSize} />, title: t('glossary.homeFeed', 'Home Feed'), description: t('glossary.homeFeedDesc', 'Your main feed showing posts from people you follow and trending content.') },
+        { icon: <Search size={iconSize} />, title: t('glossary.explore', 'Explore'), description: t('glossary.exploreDesc', 'Discover new content and users. Browse by category: videos, images, live streams, and more.') },
+        { icon: <Trophy size={iconSize} />, title: t('glossary.leaderboard', 'Leaderboard'), description: t('glossary.leaderboardDesc', 'Rankings of top users by balance, tips sent, tips received, followers, and more. Updated periodically.') },
+        { icon: <Sparkles size={iconSize} />, title: t('glossary.assistant', 'AI Assistant'), description: t('glossary.assistantDesc', 'An AI-powered chat assistant that can answer questions, generate images, create videos, and help with platform features.') },
+        { icon: <Settings size={iconSize} />, title: t('glossary.settings', 'Settings'), description: t('glossary.settingsDesc', 'Manage your account preferences, language, privacy settings, and appearance.') },
+      ],
+    },
+    {
+      title: t('glossary.sections.governance', 'Governance & Community'),
+      entries: [
+        { icon: <ShieldCheck size={iconSize} />, title: t('glossary.governance', 'Governance'), description: t('glossary.governanceDesc') },
+        { icon: <Lightbulb size={iconSize} />, title: t('glossary.featureRequests', 'Build'), description: t('glossary.featureRequestsDesc', 'Suggest new features and vote on community ideas. Popular requests get prioritized for development.') },
+        { icon: <ChevronUp size={iconSize} />, title: t('glossary.upvote', 'Upvote'), description: t('glossary.upvoteDesc', 'Vote in favor of a governance proposal or feature request. Helps signal community support.') },
+        { icon: <ChevronDown size={iconSize} />, title: t('glossary.downvote', 'Downvote'), description: t('glossary.downvoteDesc', 'Vote against a governance proposal or feature request. Helps signal community opposition.') },
+      ],
+    },
+    {
+      id: 'badges',
+      title: t('glossary.sections.badges', 'Badges & Ranking'),
+      entries: [
+        { icon: <CheckCircle2 size={iconSize} />, title: t('glossary.stakingBadge', 'Staking Badges'), description: t('glossary.stakingBadgeDesc') },
+        ...badgeLadder.map((b, i) => {
+          const fee = platformFeeForIndex(i);
+          return {
+            icon: <img src={badgeImage(b.name) || ''} alt={b.name} className="w-6 h-6 object-contain art-rim" />,
+            title: b.name,
+            description: t('glossary.badgeRequires', { amount: b.min.toLocaleString(), fee }),
+          };
+        }),
+        { icon: <Trophy size={iconSize} />, title: t('glossary.leaderboardRanking', 'Leaderboard Ranking'), description: t('glossary.leaderboardRankingDesc') },
+        { icon: <TrendingUp size={iconSize} />, title: t('glossary.delta', 'Ranking Delta (▲▼)'), description: t('glossary.deltaDesc', 'The green or red arrow next to a leaderboard entry shows how much a user\'s balance changed over the selected time period (1 day, 1 week, etc.).') },
+        ...MEDALS.map((medal, i) => ({
+          icon: (
+            <span
+              className="medal-shine-container w-6 h-6"
+              style={{ '--medal-mask': `url(${medal})` } as React.CSSProperties}
+            >
+              <img src={medal} alt={_copy("copy.11fe66e7be8e", { defaultValue: "Rank {{value1}}", value1: i + 1 })} className="w-6 h-6 object-contain relative" />
+            </span>
+          ),
+          title: _copy("copy.20c63c3c707d", { defaultValue: "#{{value1}} Trophy", value1: i + 1 }),
+          description: _copy("copy.a86233be3ef9", { defaultValue: "Awarded to the #{{value1}} ranked user on the leaderboard. Displayed next to their avatar.", value1: i + 1 }),
+        })),
+        { icon: <Zap size={iconSize} />, title: t('glossary.tokenId', 'Token ID'), description: t('glossary.tokenIdDesc', 'A unique on-chain identifier a post gets when it\'s minted as an NFT on the blockchain. Minting is optional, so a post that hasn\'t been minted has no Token ID yet.') },
+      ],
+    },
+    {
+      title: t('glossary.sections.postActions', 'Post Management'),
+      entries: [
+        { icon: <Pencil size={iconSize} />, title: t('glossary.edit', 'Edit Post'), description: t('glossary.editDesc', 'Modify the title or description of a post you created. Only the original creator can edit their posts.') },
+        { icon: <Trash2 size={iconSize} />, title: t('glossary.delete', 'Delete Post'), description: t('glossary.deleteDesc', 'Permanently remove a post from the feed. The on-chain record remains but the content is no longer displayed.') },
+        { icon: <Pin size={iconSize} />, title: t('glossary.pin', 'Pin Post'), description: t('glossary.pinDesc', 'Pin a post to the top of your profile so visitors see it first.') },
+        { icon: <ExternalLink size={iconSize} />, title: t('glossary.viewOnExplorer', 'View on Explorer'), description: t('glossary.viewOnExplorerDesc', 'Opens the blockchain explorer (BaseScan) to view the on-chain transaction details for a post or transfer.') },
+      ],
+    },
+  ], [t, _copy]);
+
+  // Filter sections based on search query
+  const filteredSections = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return sections;
+    
+    return sections
+      .map(section => ({
+        ...section,
+        entries: section.entries.filter(
+          entry =>
+            entry.title.toLowerCase().includes(q) ||
+            entry.description.toLowerCase().includes(q)
+        ),
+      }))
+      .filter(section => section.entries.length > 0);
+  }, [searchQuery, sections]);
+
+  return (
+    <div className="min-h-screen">
+      <SEOHead title={_copy("copy.278632c72021", { defaultValue: "Glossary: Icons, Features & Web3 Terms" })} description={_copy("copy.f36d0d409464", { defaultValue: "Learn what every icon, button and feature means on Riftn. A complete guide to the platform's UI, Web3 terms, staking badges and more." })} url="https://riftn.com/app/glossary" jsonLd={{ '@context': 'https://schema.org', '@type': 'DefinedTermSet', name: 'Riftn Glossary', url: 'https://riftn.com/app/glossary', description: _copy("copy.0e6ebb58c64c", { defaultValue: "Complete guide to Riftn icons, features and Web3 terms." }) }} />
+      <h1 className="sr-only">{_copy("copy.0af1e8b4951c", { defaultValue: "Riftn Glossary — Decentralised Social Media, Censorship Resistant & Freedom of Speech" })}</h1>
+      <PageIsland
+        icon={<BrandIcon src={glossaryIcon} alt={_copy("copy.4c4e436f9a45", { defaultValue: "Glossary" })} className="w-8 h-8 object-contain brightness-75" />}
+        title={t('glossary.title', 'Glossary')}
+        subtitle={t('glossary.subtitle', 'Learn what every icon and feature means')}
+      >
+        {/* Search */}
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+          <Input
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder={_copy("copy.06b670994b28", { defaultValue: "Search glossary..." })}
+            className="pl-9 bg-white/[0.04] border-white/[0.08] text-white placeholder:text-zinc-500 h-9 text-sm rounded-xl"
+          />
+        </div>
+      </PageIsland>
+
+      {/* Sections */}
+      <PageBody>
+        {filteredSections.length > 0 ? (
+          filteredSections.map((section, i) => (
+            <SectionBlock key={i} {...section} />
+          ))
+        ) : (
+          <AppState
+            icon="search"
+            title={_copy("copy.71d37c72e19b", { defaultValue: "No results for \"{{value1}}\"", value1: searchQuery })}
+            description={_copy("copy.ce18e358bf01", { defaultValue: "Try a different term." })}
+            kind="search-empty"
+            size="section"
+          />
+        )}
+      </PageBody>
+    </div>
+  );
+}

@@ -1,0 +1,1253 @@
+import { useTranslation as _useCopy } from 'react-i18next';
+import { useSurfaceDraft, draftIdentity } from '@/hooks/use-surface-draft';
+/**
+ * Post Card Component
+ * ===================
+ * Displays text-based post content with universal styling.
+ * 
+ * @example
+ * ```tsx
+ * <PostCard post={postData} />
+ * ```
+ */
+
+import { useState, memo, useEffect, useCallback, useRef, lazy, Suspense, type ReactNode } from 'react';
+import { DhbAmount } from '@/components/app/DhbAmount';
+import { useAutoOpenComments } from '@/hooks/use-auto-open-comments';
+import { useNavigate } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
+import { Globe, UserCheck, BarChart2, Star } from "lucide-react";
+import Link2 from "@/components/ui/cut-icons/link";
+import Flag from "@/components/ui/cut-icons/report";
+import Ban from "@/components/ui/cut-icons/blocked";
+import Eye from "@/components/ui/cut-icons/visibility";
+import EyeOff from "@/components/ui/cut-icons/hidden";
+import Trash2 from "@/components/ui/cut-icons/delete";
+import UserPlus from "@/components/ui/cut-icons/add-account";
+import VolumeX from "@/components/ui/cut-icons/mute";
+import Pencil from "@/components/ui/cut-icons/edit";
+import Coins from "@/components/ui/cut-icons/coins";
+import Gift from "@/components/ui/cut-icons/gifts";
+import Lock from "@/components/ui/cut-icons/privacy";
+
+import MessageSquare from "@/components/ui/cut-icons/messages";
+import Repeat2 from "@/components/ui/cut-icons/repost";
+import Plus from "@/components/ui/cut-icons/add";
+import X from "@/components/ui/cut-icons/close";
+
+import { ThemedIcon } from '@/components/app/war/WarHudIcon';
+import { useSuperpowers } from '@/hooks/use-superpowers';
+import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
+import { CardHeader } from './CardHeader';
+import { PostHeaderBoostButton, PostHeaderOptionsButton } from './PostHeaderOptionsButton';
+import { useBoostedPost } from './boosted-post';
+import { MatureContentGate, useMatureGate } from './MatureContentGate';
+import { ContentWarningGate, useContentWarning } from './ContentWarningGate';
+import { ActionBar } from './ActionBar';
+import { ShopBoardLazy } from '../live/ShopBoardLazy';
+import { CommentsWrapper } from './CommentsWrapper';
+import { PostMetadata } from './PostMetadata';
+import { ArticleFeedCover } from '@/components/app/article/ArticleFeedCoverLazy';
+// The full reader is only needed after opening an article, never for feed previews.
+const ArticleReader = lazy(() =>
+  import('@/components/app/article/ArticleReader').then((m) => ({ default: m.ArticleReader }))
+);
+import { QuotedPostEmbed, RemovedQuoteNotice } from './QuotedPostEmbed';
+import { FeedLinkPreviews } from './FeedLinkPreviews';
+import { DehubLinkEmbeds, useDehubLinks } from '@/components/app/cards/DehubLinkEmbedsLazy';
+import { AssetRefCards, useAssetRefsInText } from '@/components/app/cards/AssetRefCards';
+import { TranslatableText, useTranslation, renderTextWithLinks } from '../TranslatableText';
+import { useTranslation as useI18n } from 'react-i18next';
+import { PostAIChatLazy } from './PostAIChatLazy';
+import { ReportModal } from '../modals/ReportModal';
+import { DeletePostModal } from '../modals/DeletePostModal';
+// Lazy, mounted on demand — see the note on the same pair in VideoCard.
+const MintChainSheet = lazy(() =>
+  import('@/components/app/mint/MintChainSheet').then((m) => ({ default: m.MintChainSheet })),
+);
+const EditPostModal = lazy(() =>
+  import('../modals/EditPostModal').then((m) => ({ default: m.EditPostModal }))
+);
+import { applyOptimisticEdit } from '@/lib/optimistic-edit';
+import { useMintExistingPost } from '@/hooks/use-mint-existing-post';
+import { QuotePostModalLazy } from '../modals/QuotePostModalLazy';
+import { TipModalLazy as TipModal } from '../modals/TipModalLazy';
+import { useFeedViewTracking } from '@/hooks/use-view-tracking';
+import { usePostTipCount } from '@/hooks/use-post-tip-count';
+import { useAuth } from '@/contexts/AuthContext';
+import { usePostLinkCopyCount, useTrackPostLinkCopy } from '@/hooks/use-link-copy-count';
+import { updateTokenVisibility, repostPost, isFollowing as checkIsFollowing, reportPostEvent, type TokenVisibility } from '@/lib/api/dehub';
+import { useFollow } from '@/hooks/use-follow';
+import { cacheTextPostForNavigation } from '@/lib/post-cache';
+import { warmPostPage } from '@/lib/preload-post-page';
+import { useCreatePoll } from '@/hooks/use-polls';
+import { PollCard } from './PollCard';
+import { LazyQuizCard } from '@/components/app/quiz/LazyQuizCard';
+import { PostUtilityMenuItems } from './PostUtilityMenuItems';
+import { usePostMenuContext } from '@/lib/post-menu';
+import { useBlockAuthor } from '@/hooks/use-block-author';
+import { useMuteAuthor } from '@/hooks/use-mute-author';
+import { useTapGestures } from '@/hooks/use-tap-gestures';
+import { TapReactionBurst } from '@/components/app/cards/TapReactionBurst';
+import { VerifyUnlockButton } from './VerifyUnlockButton';
+import { isHoldGated, isSubscriberGated, cheapestSubscriberQuote } from '@/lib/content-gate';
+import { SubscribeFromPrice } from './SubscribeFromPrice';
+import { isTokenUnlocked, markTokenUnlocked } from '@/lib/unlocked-tokens-store';
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  wasDrawerJustDismissed,
+} from '@/components/ui/drawer';
+import type { TextPost } from '@/types/feed.types';
+import { usePostStage } from '@/components/app/post-stage/post-stage-context';
+import { FeedCaptionExpander } from './FeedCaptionExpander';
+import { StageMediaChrome } from '@/components/app/post-stage/StageMediaChrome';
+import { StageCreatorRow } from '@/components/app/post-stage/StageCreatorRow';
+import { viewerShareUrl } from '@/lib/share-url';
+import { KeywordFilterGate } from './KeywordFilterGate';
+import { noteProfileFeedOpen, useProfileFeedContext } from '@/lib/profile-feed-origin';
+
+/**
+ * Lazy, and only mounted while open.
+ *
+ * PostCard is on the boot path — it is the feed — so a static import here puts
+ * the boost sheet and everything it reaches (use-superpowers and the
+ * superpowers API, ~20 KB together) into the entry bundle for every session,
+ * to serve a drawer that opens behind two taps on the post options menu.
+ * scripts/check-entry-bundle.mjs fails the build once enough of these
+ * accumulate, which is what happened.
+ */
+const BoostModal = lazy(() =>
+  import('../modals/BoostModal').then((m) => ({ default: m.BoostModal }))
+);
+
+/**
+ * Lazy for the same reason, and more so: the subscriber sheet renders PlanCard,
+ * which reaches the subscription contracts. Feed cards are the boot path.
+ */
+const SubscriberGateDrawer = lazy(() =>
+  import('./SubscriberGateDrawer').then((m) => ({ default: m.SubscriberGateDrawer }))
+);
+
+// Use lg breakpoint (1024px) to determine if we show drawer vs inline
+function useIsTabletOrMobile() {
+  const [isTabletOrMobile, setIsTabletOrMobile] = useState(false);
+  
+  useEffect(() => {
+    const mql = window.matchMedia('(max-width: 1023px)');
+    const onChange = () => setIsTabletOrMobile(mql.matches);
+    mql.addEventListener('change', onChange);
+    setIsTabletOrMobile(mql.matches);
+    return () => mql.removeEventListener('change', onChange);
+  }, []);
+  
+  return isTabletOrMobile;
+}
+
+interface PostCardProps {
+  post: TextPost;
+  postPage?: boolean;
+  /** Dedicated pages own one shared comments window below the post card. */
+  onOpenComments?: (tab?: 'replies' | 'quotes' | 'reposts' | 'search') => void;
+  /**
+   * Rendered inside the card, between the action bar and the comments — the
+   * author-thread block on the post page. Its presence also tells the comments
+   * section to hide the author's straight comments (the slot shows them).
+   * Feed cards leave it unset and behave exactly as before.
+   */
+  threadSlot?: ReactNode;
+}
+
+/**
+ * The address a text post presents at: an article at its readable
+ * /app/post/<title-slug>, an off-chain post at /newpost/<n>, anything else at
+ * /app/post/<tokenId>. Every one of them resolves on web and in the app.
+ */
+function postOwnPath(post: { id: string; articleSlug?: string; newPostId?: number }): string {
+  if (post.articleSlug) return `/app/post/${post.articleSlug}`;
+  if (post.newPostId) return `/newpost/${post.newPostId}`;
+  return `/app/post/${post.id}`;
+}
+
+const PostCardBody = memo(function PostCard({ post, postPage, threadSlot, onOpenComments }: PostCardProps) {
+  const { t: _copy } = _useCopy();
+  const [showComments, setShowComments] = useState(false);
+  const [commentsInitialTab, setCommentsInitialTab] = useState<'replies' | 'quotes' | 'reposts' | 'search' | undefined>(undefined);
+  useAutoOpenComments(setShowComments, post.id);
+  const { t } = useI18n();
+  const [showAIChat, setShowAIChat] = useState(false);
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editModalMounted, setEditModalMounted] = useState(false);
+  useEffect(() => {
+    if (showEditModal) setEditModalMounted(true);
+  }, [showEditModal]);
+  const [showBoostModal, setShowBoostModal] = useState(false);
+
+  const [showOptionsDrawer, setShowOptionsDrawer] = useState(false);
+  const [showQuoteModal, setShowQuoteModal] = useState(false);
+  const [showTipModal, setShowTipModal] = useState(false);
+  const [showPollCreator, setShowPollCreator] = useState(false);
+  const [pollQuestion, setPollQuestion] = useSurfaceDraft("components/app/cards/PostCard.tsx:pollQuestion", '', draftIdentity(post));
+  const [pollOptions, setPollOptions] = useState(['', '']);
+  const [pollMultiple, setPollMultiple] = useState(false);
+  const [pollExpiry, setPollExpiry] = useSurfaceDraft("components/app/cards/PostCard.tsx:pollExpiry", '', draftIdentity(post));
+  const createPollMutation = useCreatePoll();
+  const { data: tipCount = 0 } = usePostTipCount(post.id, post.totalTips);
+  const [visibility, setVisibility] = useState<TokenVisibility>('public');
+  const isTabletOrMobile = useIsTabletOrMobile();
+  const navigate = useNavigate();
+  const boosted = useBoostedPost();
+  const queryClient = useQueryClient();
+  const profileFeed = useProfileFeedContext();
+  const bodyNavigationRef = useRef<HTMLDivElement>(null);
+  const { walletAddress, openLoginModal } = useAuth();
+  // Deep Current is the one power spent on somebody ELSE's post, so it is
+  // the one row that belongs in this half of the menu. `status.powers` is
+  // the authority for whether this account has it — the badge the client
+  // draws from a live wallet read deliberately over-reports.
+  const { data: superpowerStatus } = useSuperpowers(!!walletAddress);
+  const canGiftBoost = !!superpowerStatus?.powers.some(
+    p => p.key === 'deep_current' && p.unlocked && p.available,
+  );
+  // The options menu offers the same copy as the share sheet, so it counts the
+  // same. Shares one react-query key with the ActionBar below, so no extra
+  // request — and the bump lands on the card's own share counter.
+  const { data: linkCopyCount = 0 } = usePostLinkCopyCount(post.id);
+  const trackLinkCopy = useTrackPostLinkCopy();
+  const { mint: mintExisting, isMinting } = useMintExistingPost();
+  const [showMintSheet, setShowMintSheet] = useState(false);
+  const [mintSheetMounted, setMintSheetMounted] = useState(false);
+  useEffect(() => { if (showMintSheet) setMintSheetMounted(true); }, [showMintSheet]);
+  // No `isMuting` any more: the only control that used it was the ✕ removed
+  // from the header, and the options menu closes on click rather than
+  // disabling itself.
+  const { blockAuthor } = useBlockAuthor();
+  const { muteAuthor } = useMuteAuthor();
+
+  const handleBlockAuthor = useCallback(() => {
+    if (!walletAddress) { openLoginModal(); return; }
+    if (!post.author.id) return;
+    blockAuthor(post.author.id, post.author.name || post.author.handle || undefined);
+  }, [walletAddress, openLoginModal, post.author.id, post.author.name, post.author.handle, blockAuthor]);
+
+  const handleMuteAuthor = useCallback(() => {
+    if (!walletAddress) { openLoginModal(); return; }
+    if (!post.author.id) return;
+    muteAuthor(post.author.id, post.author.name || post.author.handle || undefined);
+  }, [walletAddress, openLoginModal, post.author.id, post.author.name, post.author.handle, muteAuthor]);
+
+  const isOwnPost = !!post.isOwner || !!(
+    walletAddress && post.author.id?.toLowerCase() === walletAddress.toLowerCase()
+  );
+
+  // The warning is for whoever is looking at the screen, so it covers the
+  // author's own post too.
+  const matureGate = useMatureGate(post.contentRating);
+  const contentWarning = useContentWarning(post.spoilerText);
+
+  // Two independent gates, and they are not the same question. `isLocked` is a
+  // holdings gate — own N of a token, which any stranger can go and buy.
+  // `isSubGated` is a subscriber gate — subscribe to THIS creator, which only
+  // they can grant. A post can carry either, both, or neither.
+  const [showLockedDrawer, setShowLockedDrawer] = useState(false);
+  const [showSubDrawer, setShowSubDrawer] = useState(false);
+  const [locallyUnlocked, setLocallyUnlocked] = useState(false);
+  const [locallySubscribed, setLocallySubscribed] = useState(false);
+  const storedUnlocked = isTokenUnlocked(post.id);
+  const canBypassGating = !!(isOwnPost || post.isOwner || post.isUnlocked || locallyUnlocked || storedUnlocked);
+  const isLocked = isHoldGated(post.isLocked, post.lockedPrice) && !canBypassGating;
+  const isSubGated = isSubscriberGated(post.subscriberPlans, !!isOwnPost || !!post.isOwner || locallySubscribed);
+  // Cheapest plan a reader can actually buy. The price lives on the plan's
+  // chain entry, not on `plan.price` — that field does not exist on this
+  // payload, and reading it gave NaN, which formatCompact renders as "0".
+  const cheapestQuote = cheapestSubscriberQuote(post.subscriberPlans);
+
+  const formatCompact = (num: number | null | undefined): string => {
+    const n = Number(num);
+    if (!Number.isFinite(n) || n <= 0) return '0';
+    if (n >= 1000000) return `${Math.floor(n / 1000000)}M`;
+    if (n >= 1000) return `${Math.floor(n / 1000)}K`;
+    return String(Math.floor(n));
+  };
+
+  const postTokenId = parseInt(post.id, 10) || undefined;
+  // The phone post page ("Stage"). Null in every feed.
+  const stage = usePostStage();
+  const registerOptions = stage?.registerOptions;
+  const openPostOptions = useCallback(() => {
+    if (!walletAddress) { openLoginModal(); return; }
+    setShowOptionsDrawer(true);
+  }, [walletAddress, openLoginModal]);
+  useEffect(() => {
+    if (!registerOptions) return;
+    registerOptions(openPostOptions);
+    return () => registerOptions(null);
+  }, [registerOptions, openPostOptions]);
+
+  // Follow state for the post author — shared override wins over the lazy check
+  const [isFollowingAuthor, setIsFollowingAuthor] = useState<boolean | null>(null);
+  const { isFollowing: followOverride, toggleFollow } = useFollow(post.author.id);
+  const effectiveFollowingAuthor = followOverride ?? isFollowingAuthor;
+
+  // Lazy: only check follow status when options drawer opens — avoids N API calls on feed mount
+  useEffect(() => {
+    if (!showOptionsDrawer || !walletAddress || isOwnPost || !post.author.id || isFollowingAuthor !== null || followOverride !== undefined) return;
+    let cancelled = false;
+    checkIsFollowing(post.author.id).then((res) => {
+      if (!cancelled) setIsFollowingAuthor(res);
+    }).catch(() => {});
+    return () => { cancelled = true; };
+  }, [showOptionsDrawer, walletAddress, isOwnPost, post.author.id, isFollowingAuthor, followOverride]);
+
+  const handleFollowFromMenu = useCallback(() => {
+    if (!walletAddress) { openLoginModal(); return; }
+    if (!post.author.id) return;
+    toggleFollow(false, { name: post.author.name || post.author.handle || _copy("copy.04f8996da763", { defaultValue: "user" }) });
+  }, [walletAddress, openLoginModal, post.author.id, post.author.name, post.author.handle, toggleFollow, _copy]);
+  
+  // View tracking - batches views when post is visible for 2+ seconds
+  const viewRef = useFeedViewTracking(post.id);
+
+  // Translation hook for post content
+  const {
+    isTranslated,
+    translatedText,
+    isLoading: isTranslateLoading,
+    error: translateError,
+    handleTranslate,
+    handleShowOriginal,
+    sourceLang,
+    isTooShort: nothingToTranslate,
+  } = useTranslation(post.content, true, viewRef, true);
+
+  // Riftn links in the body become cards, and the URLs that became cards come
+  // out of the text. Run on the text actually being displayed so the strip
+  // matches what is on screen — a translation that mangled a URL then keeps it
+  // as visible text rather than dropping it for a card that never renders.
+  const bodyText = isTranslated ? translatedText : post.content;
+  const { links: dehubLinks, displayText: bodyWithoutLinks } = useDehubLinks(bodyText);
+  // Same idea for market references, and in this order: the entity pass claims
+  // whole URLs first, so a dehub.io link carrying a hex id cannot also read as a
+  // contract address.
+  const { refs: assetRefs, displayText: displayBody } = useAssetRefsInText(bodyWithoutLinks, undefined, post.hideAssetCards);
+
+  // Navigate to single post page when clicking non-interactive areas
+  // Pre-cache post data for instant display on the single post page
+  /** A click opens the post at once; on a phone a double tap on the text likes it. */
+  const tapGestures = useTapGestures({
+    postId: post.id,
+    singleTapOnly: true,
+    touchLadder: true,
+    reactionArea: 'center',
+    enableLongPress: false,
+    onSingleTap: (event) => {
+      if (wasDrawerJustDismissed() || window.getSelection()?.toString().length) return;
+      // A quoted post opens itself; the tap must not open this one 360ms later.
+      const excluded = (event.target as HTMLElement | null)?.closest?.('[data-glass-embed], [data-no-navigate]');
+      // Our wrapper blocks the compatibility click, not its own pointer tap.
+      // Keep nested quotes and controls excluded after the tap timer resolves.
+      if (excluded && excluded !== bodyNavigationRef.current) return;
+      // A cut-off body opens the rest of its text first; the next tap opens the post.
+      const more = bodyNavigationRef.current?.querySelector<HTMLButtonElement>('[data-caption-more]');
+      if (more) { more.click(); return; }
+      // Already on this post's own page: another push only adds a Back step.
+      const path = window.location.pathname;
+      if (path === `/app/post/${post.id}` || path === postOwnPath(post) || (post.newPostId && path === `/newpost/${post.newPostId}`)) return;
+      cacheTextPostForNavigation(queryClient, post);
+      noteProfileFeedOpen(profileFeed, post.id);
+      navigate(post.articleSlug ? postOwnPath(post) : `/app/post/${post.id}`, { state: { fromFeed: true } });
+    },
+  });
+
+  const handleCardClick = useCallback((e: React.MouseEvent) => {
+    // Swallow the ghost click left behind when a bottom sheet was just dismissed
+    // by tapping the scrim — otherwise that tap navigates into the post.
+    if (wasDrawerJustDismissed() || window.location.pathname === `/app/post/${post.id}` || window.location.pathname === postOwnPath(post)) return;
+    const target = e.target as HTMLElement;
+    const isInteractive = target.closest('button, a, input, textarea, [role="button"], [data-no-navigate]');
+    if (isInteractive) return;
+    // Allow text selection without navigating
+    const selection = window.getSelection();
+    if (selection && selection.toString().length > 0) return;
+
+    // Cache the post data before navigation for instant display
+    cacheTextPostForNavigation(queryClient, post);
+    noteProfileFeedOpen(profileFeed, post.id);
+    navigate(post.articleSlug ? postOwnPath(post) : `/app/post/${post.id}`, { state: { fromFeed: true } });
+  }, [navigate, post.id, queryClient, post, profileFeed]);
+
+  // Articles open in place, like every other post. They used to reload the
+  // whole site through window.location.
+  const isPostPage = /\/app\/post\/|\/newpost\//.test(window.location.pathname);
+  const openArticle = useCallback(() => {
+    cacheTextPostForNavigation(queryClient, post);
+    noteProfileFeedOpen(profileFeed, post.id);
+    navigate(postOwnPath(post), { state: { fromFeed: true } });
+  }, [navigate, queryClient, post, profileFeed]);
+
+  const handleRepost = useCallback(async () => {
+    if (!walletAddress) { openLoginModal(); return; }
+    const numericId = parseInt(post.id, 10);
+    if (isNaN(numericId)) return;
+    try {
+      await repostPost(numericId);
+      // Mark caches stale WITHOUT refetching now — refetching the unified feed
+      // tears down the infinite-scroll list and snaps the user back to the top.
+      // ActionBar already shows optimistic state for the (un)repost.
+      queryClient.invalidateQueries({ queryKey: ['unified-feed'], refetchType: 'none' });
+      queryClient.invalidateQueries({ queryKey: ['user-reposts'], refetchType: 'none' });
+    } catch (err) {
+      toast.error(_copy("copy.7527dc6722fc", { defaultValue: "Failed to repost" }));
+      throw err; // let ActionBar roll back its optimistic repost state
+    }
+  }, [post.id, walletAddress, openLoginModal, queryClient, _copy]);
+
+  const handleQuote = useCallback(() => {
+    if (!walletAddress) { openLoginModal(); return; }
+    setShowQuoteModal(true);
+  }, [walletAddress, openLoginModal]);
+
+  const handleShareAsImage = useCallback(async () => {
+    try {
+      // Loaded on demand: share-as-image is a menu action, not first paint.
+      const { buildPostShareImage } = await import('@/lib/build-post-share-image');
+      const blob = await buildPostShareImage({
+        postId: post.id,
+      });
+
+      const file = new File([blob], 'dehub-post.png', { type: 'image/png' });
+      const postUrl = viewerShareUrl(`https://riftn.com${postOwnPath(post)}`);
+
+      if (navigator.canShare?.({ files: [file] })) {
+        await navigator.share({
+          files: [file],
+          text: post.content?.slice(0, 100) ?? '',
+          url: postUrl,
+        });
+        void import('@/lib/analytics').then((m) => m.trackShare('image', { kind: 'post' }));
+        reportPostEvent(post.id, 'share');
+      } else {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'dehub-post.png';
+        a.click();
+        URL.revokeObjectURL(a.href);
+        toast.success(_copy("copy.c37f27200a86", { defaultValue: "Image downloaded" }));
+      }
+    } catch (err) {
+      if ((err as Error)?.name !== 'AbortError') {
+        console.error('[ShareAsImage]', err);
+        toast.error(_copy("copy.5d00a37c220c", { defaultValue: "Failed to share image" }));
+      }
+    }
+  }, [post.id, post.newPostId, post.content, _copy]);
+
+  // Right-click anywhere on the card: every action for the post at the pointer.
+  const onPostContextMenu = usePostMenuContext(() => ({
+    id: post.id,
+    newPostId: post.status === 'signed' ? post.newPostId ?? null : null,
+    articleSlug: post.articleSlug,
+    authorId: post.author.id,
+    authorName: post.author.name,
+    authorHandle: post.author.handle,
+    text: post.content,
+    title: post.rawName ?? post.title ?? post.content,
+    isOwn: isOwnPost,
+    visibility: post.visibility,
+    quotePolicy: post.quotePolicy,
+    myReaction: post.myReaction,
+    isReposted: post.isReposted,
+    noTip: !!post.author.paymentsDisabled,
+    actions: {
+      comments: () => {
+        if (onOpenComments) { onOpenComments(); return; }
+        setCommentsInitialTab(undefined);
+        setShowComments(true);
+      },
+      askAI: () => { if (!walletAddress) { openLoginModal(); return; } setShowAIChat(true); },
+      seeEngagements: () => {
+        if (onOpenComments) { onOpenComments('reposts'); return; }
+        setCommentsInitialTab('reposts');
+        setShowComments(true);
+      },
+      quote: handleQuote,
+      tip: () => setShowTipModal(true),
+      report: () => setShowReportModal(true),
+      boost: () => setShowBoostModal(true),
+      edit: isOwnPost ? () => setShowEditModal(true) : undefined,
+      delete: isOwnPost ? () => setShowDeleteModal(true) : undefined,
+    },
+  }));
+
+  // Build a minimal DeHubNFT for the quote modal from post data
+  const postAsNFT = {
+    tokenId: parseInt(post.id, 10) || 0,
+    name: post.content?.slice(0, 100) || '',
+    description: post.content,
+    imageUrl: '',
+    postType: 'image' as const,
+    minter: post.author.id,
+    minterUsername: post.author.handle,
+    minterDisplayName: post.author.name,
+    minterAvatarUrl: post.author.avatarSeed,
+    createdAt: post.createdAt || '',
+  };
+
+  return (
+    <div
+      ref={viewRef}
+      data-post-card
+      data-stats-token={post.id}
+      onClick={handleCardClick}
+      onContextMenu={onPostContextMenu}
+      onPointerDownCapture={warmPostPage}
+      className="overflow-visible relative cursor-pointer isolate"
+    >
+      <div className={stage ? 'contents' : 'flex items-start min-w-0'}>
+      {stage ? (
+        /* Phone post page: no media to float on, so back / boost
+           sit in a row of their own above the creator row. */
+        <>
+          <StageMediaChrome
+            placement="inline"
+            onBack={stage.onBack}
+            onBoost={isOwnPost && postTokenId ? () => setShowBoostModal(true) : undefined}
+          />
+          <div className="mb-3">
+            <StageCreatorRow
+              tokenId={postTokenId}
+              name={post.author.name}
+              avatar={post.author.avatarSeed}
+              handle={post.author.handle}
+              creatorId={post.author.id}
+              badgeBalance={post.author.badgeBalance}
+              verified={post.author.verified}
+            />
+          </div>
+        </>
+      ) : (
+      <CardHeader
+        postPage={postPage}
+        tokenId={postTokenId}
+        username={post.author.name}
+        visibility={post.visibility}
+        handle={post.author.handle}
+        avatarSeed={post.author.avatarSeed}
+        verified={post.author.verified}
+        contentType="post"
+        creatorId={post.author.id}
+        creatorUsername={post.author.handle}
+        badgeBalance={post.author.badgeBalance}
+      />
+      )}
+
+      {/* Header controls share the row's width with the creator. On the
+          phone post page the buttons are in the Stage row above; the sheet
+          stays mounted here for them. */}
+      <div className={stage ? 'hidden' : 'z-10 flex shrink-0 items-start gap-2'}>
+        {(isOwnPost || boosted) && (
+          <PostHeaderBoostButton
+            rowGap={8}
+            lit={boosted}
+            onClick={() => (isOwnPost ? setShowBoostModal(true) : navigate('/app/superpowers'))}
+            disabled={isOwnPost && !postTokenId}
+            aria-label={isOwnPost ? t('postOptions.boostPost') : _copy("copy.c1f1c8819e33", { defaultValue: "Boosted" })}
+          />
+        )}
+        
+        <Drawer open={showOptionsDrawer} onOpenChange={setShowOptionsDrawer}>
+          {/* Opens via state, not DrawerTrigger: a trigger forces vaul's Root to
+              stay mounted, and each mounted Root holds a window scroll listener
+              for its lifetime. Times every card in an infinite feed, that was the
+              biggest cost of scrolling it. */}
+          <PostHeaderOptionsButton
+            onClick={() => { if (!walletAddress) { openLoginModal(); return; } setShowOptionsDrawer(true); }}
+          />
+          <DrawerContent scrollable column glass className="px-4 pb-6">
+            <DrawerHeader className="pb-2">
+              <DrawerTitle className="text-white text-lg">{t('postOptions.options')}</DrawerTitle>
+            </DrawerHeader>
+            <div className="flex flex-col gap-1">
+              {/* Bookmark / pin / post info. Also on the action bar as icons
+                  on desktop — both surfaces read the same state, so the menu is
+                  a reliable place to find them at every width. */}
+              <PostUtilityMenuItems
+                onActionBar
+                onAskAI={() => { setShowOptionsDrawer(false); if (!walletAddress) { openLoginModal(); return; } setShowAIChat(true); }}
+                postId={post.id}
+                tokenId={postTokenId}
+                isOwnPost={isOwnPost}
+                onBeforeNavigate={() => setShowOptionsDrawer(false)}
+                linkText={dehubLinks.length === 0 ? post.content : undefined}
+                onClose={() => setShowOptionsDrawer(false)}
+              />
+              <button
+                onClick={() => setShowReportModal(true)}
+                className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left"
+              >
+                <Flag className="w-5 h-5" /> {t('postOptions.report')}
+              </button>
+              <button
+                onClick={() => {
+                  const url = viewerShareUrl(`${window.location.origin}${post.articleSlug ? postOwnPath(post) : `/app/post/${post.id}`}`);
+                  navigator.clipboard.writeText(url);
+                  toast.success(t('postOptions.postUrlCopied'));
+                  trackLinkCopy(post.id, walletAddress, linkCopyCount);
+                }}
+                className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left"
+              >
+                <Link2 className="w-5 h-5" /> {t('postOptions.copyPostUrl')}
+              </button>
+              <button
+                onClick={() => {
+                  setCommentsInitialTab('reposts');
+                  setShowComments(true);
+                }}
+                className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left"
+              >
+                <Repeat2 className="w-5 h-5" />{_copy("copy.3c6161e34023", { defaultValue: " See Engagements" })}</button>
+              {!isOwnPost && effectiveFollowingAuthor === false && (
+                <button
+                  onClick={handleFollowFromMenu}
+                  className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left"
+                >
+                  <UserPlus className="w-5 h-5" />{_copy("copy.641d1ef657bd", { defaultValue: "Follow" })}</button>
+              )}
+              {!isOwnPost && effectiveFollowingAuthor === true && (
+                <button
+                  disabled
+                  className="flex items-center gap-3 px-4 py-3 text-zinc-500 rounded-xl text-left cursor-default"
+                >
+                  <UserCheck className="w-5 h-5" />{_copy("copy.56a12e72f40d", { defaultValue: " Following" })}</button>
+              )}
+              {/* Mute sits above Block deliberately: it is the one most people
+                  actually want, and it is reversible and invisible, where Block
+                  severs the relationship in both directions. */}
+              {!isOwnPost && (
+                <button
+                  onClick={() => { setShowOptionsDrawer(false); handleMuteAuthor(); }}
+                  className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left"
+                >
+                  <VolumeX className="w-5 h-5" /> {t('postOptions.muteCreator')}
+                </button>
+              )}
+              {!isOwnPost && (
+                <button
+                  onClick={() => { setShowOptionsDrawer(false); handleBlockAuthor(); }}
+                  className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left"
+                >
+                  <Ban className="w-5 h-5" /> {t('postOptions.blockCreator')}
+                </button>
+              )}
+              {!isOwnPost && canGiftBoost && (
+                <button
+                  onClick={() => { setShowOptionsDrawer(false); setTimeout(() => setShowBoostModal(true), 300); }}
+                  disabled={!postTokenId}
+                  className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left disabled:opacity-40"
+                >
+                  <Gift className="w-5 h-5" /> {t('postOptions.giftBoost', { defaultValue: 'Gift a boost' })}
+                </button>
+              )}
+              {isOwnPost && (
+                <>
+                  <div className="border-t border-white/10 my-1" />
+                  <button
+                    onClick={() => { setShowOptionsDrawer(false); setTimeout(() => setShowPollCreator(true), 300); }}
+                    className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left"
+                  >
+                    <BarChart2 className="w-5 h-5" />{_copy("copy.b8e082c979d9", { defaultValue: " Create Poll" })}</button>
+                  <button
+                    onClick={() => { setShowOptionsDrawer(false); setTimeout(() => setShowEditModal(true), 300); }}
+                    className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left"
+                  >
+                    <Pencil className="w-5 h-5" /> {t('postOptions.editPost')}
+                  </button>
+                  {/* Boost. Shown to every owner rather than only to badge
+                      holders: the modal explains what a badge buys and links to
+                      staking, which is worth more than hiding the row from the
+                      people who have not staked yet. */}
+                  <button
+                    onClick={() => { setShowOptionsDrawer(false); setTimeout(() => setShowBoostModal(true), 300); }}
+                    disabled={!postTokenId}
+                    className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left disabled:opacity-40"
+                  >
+                    <ThemedIcon icon="superpowers" alt="" className="w-5 h-5 object-contain" /> {t('postOptions.boostPost')}
+                  </button>
+                  {/* Only for posts that were published off-chain — a minted
+                      post has nothing to do here, and 'signed' is the status
+                      the backend keeps them at for life. */}
+                  {post.status === 'signed' && (
+                    <button
+                      onClick={() => {
+                        setShowOptionsDrawer(false);
+                        if (postTokenId) setTimeout(() => setShowMintSheet(true), 300);
+                      }}
+                      disabled={!postTokenId || isMinting}
+                      className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left disabled:opacity-40"
+                    >
+                      <Coins className="w-5 h-5" />{_copy("copy.e60be9da2148", { defaultValue: " Mint post" })}</button>
+                  )}
+                  <button
+                    onClick={() => { setShowOptionsDrawer(false); setTimeout(() => setShowDeleteModal(true), 300); }}
+                    className="flex items-center gap-3 px-4 py-3 text-red-400 hover:bg-white/10 rounded-xl transition-colors text-left"
+                  >
+                    <Trash2 className="w-5 h-5" /> {t('postOptions.deletePost')}
+                  </button>
+                  <button
+                    onClick={async () => {
+                      const next: TokenVisibility = visibility === 'public' ? 'private' : 'public';
+                      try {
+                        await updateTokenVisibility(post.id, next);
+                        setVisibility(next);
+                        toast.success(next === 'private' ? _copy("copy.bc3aabd76a18", { defaultValue: "Post set to private" }) : _copy("copy.30a9e349befb", { defaultValue: "Post set to public" }));
+                      } catch { toast.error(_copy("copy.67ca6fcb8233", { defaultValue: "Failed to update visibility" })); }
+                    }}
+                    className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left"
+                  >
+                    {visibility === 'public' ? <EyeOff className="w-5 h-5" /> : <Globe className="w-5 h-5" />}
+                    {visibility === 'public' ? _copy("copy.ffab73178509", { defaultValue: "Make Private" }) : _copy("copy.24139936d627", { defaultValue: "Make Public" })}
+                  </button>
+                </>
+              )}
+            </div>
+          </DrawerContent>
+        </Drawer>
+
+        {/* The ✕ that used to sit here was a second way to fire handleBlockAuthor
+            — the same call the options menu already makes, and a control no
+            other card carried. Removed rather than duplicated; muting lives in
+            the ⋯ menu on all three cards. */}
+      </div>
+
+      </div>
+
+      {/* Pointer gestures own body navigation; the compatibility click is
+          excluded here so one release cannot push two history entries.
+          Holds remain available for text selection. */}
+      <div
+        ref={bodyNavigationRef}
+        className="relative pt-3 space-y-2"
+        data-no-navigate
+      >
+        {/* The tap ladder covers the post's body and nothing else.
+            It used to sit on the wrapper above, which also holds the action
+            bar, the shop board and the whole comments block — so a double-click
+            to select a word in a comment or the composer counted as a double
+            tap and cast a like, and a triple-click to select a paragraph cast a
+            love. Radix portals the phone comments drawer but React events still
+            bubble through it, so the drawer was in range too. */}
+        <div className="space-y-2" {...tapGestures}>
+        <TapReactionBurst postId={post.id} />
+        {/* A text post's body is its content, so the warning covers the text
+            and its embeds. Metadata and the action bar stay below it, so the
+            post can still be reported or opened without being read first. */}
+        {contentWarning.hidden ? (
+        <ContentWarningGate text={contentWarning.text} onReveal={contentWarning.reveal} />
+        ) : matureGate.isGated ? (
+        <MatureContentGate
+          onReveal={matureGate.reveal}
+          description={_copy("copy.5ca2fd8dd3f8", { defaultValue: "The creator marked this post as adult or graphic." })}
+        />
+        ) : (isLocked || isSubGated) ? (
+        <>
+        {/* Title stays visible as the headline; only the body is gated. */}
+        {post.title && (
+          <h3 className="text-white text-[15.25px] sm:text-[17px] leading-snug">{renderTextWithLinks(post.title, { flagged: post.communityAlertPending })}</h3>
+        )}
+        {displayBody?.trim() && (() => {
+          const firstLine = displayBody.split('\n')[0];
+          return (
+            <div className="space-y-2.5">
+              {/* Real alpha fade via mask-image, not a background-color gradient
+                  overlay — a color gradient has to match each theme's surface
+                  color and breaks on glass/blurred/image backgrounds, while a
+                  mask fades the text's own opacity to transparent and composites
+                  correctly over whatever sits behind the card. */}
+              <div className="relative overflow-hidden" style={{ maxHeight: '2.6em' }}>
+                <p
+                  className="text-white/90 text-[15.25px] leading-[22.5px]"
+                  style={{
+                    WebkitMaskImage: 'linear-gradient(to bottom, black 0%, black 45%, transparent 95%)',
+                    maskImage: 'linear-gradient(to bottom, black 0%, black 45%, transparent 95%)',
+                  }}
+                >
+                  {renderTextWithLinks(firstLine)}
+                </p>
+              </div>
+              {/* Each gate gets its own button, because each opens a different
+                  sheet and asks for a different thing. A post carrying both
+                  shows both — either one satisfied is enough to read it. */}
+              <div className="flex flex-wrap items-center gap-2">
+                {isSubGated && (
+                  <button
+                    onClick={(e) => { e.stopPropagation(); setShowSubDrawer(true); }}
+                    className={cn(
+                      "flex items-center gap-1.5 text-sm font-semibold text-white bg-white/10 hover:bg-white/15 border border-white/15 px-3.5 py-1.5 transition-colors w-fit",
+                      cheapestQuote ? "rounded-2xl" : "rounded-full",
+                    )}
+                  >
+                    <Star className="w-3.5 h-3.5" />
+                    {cheapestQuote ? (
+                      <SubscribeFromPrice quote={cheapestQuote} align="start" iconClassName="h-4 w-4" />
+                    ) : (
+                      _copy("copy.0ad5874f8903", { defaultValue: "Subscribe to read" })
+                    )}
+                  </button>
+                )}
+                {isLocked && (
+                  <button
+                    onClick={(e) => { e.stopPropagation(); setShowLockedDrawer(true); }}
+                    className="flex items-center gap-1.5 text-sm font-semibold text-white bg-white/10 hover:bg-white/15 border border-white/15 rounded-full px-3.5 py-1.5 transition-colors w-fit"
+                  >
+                    <Lock className="w-3.5 h-3.5" />
+                    {/* Deliberately not "Subscribe" — isLockContent is "hold N
+                        of this token", which is a different gate to the one
+                        above and has no subscription anywhere in it. */}{_copy("copy.50691a64ba5a", { defaultValue: "Hold " })}<DhbAmount amount={formatCompact(Number(post.lockedPrice))} currency={post.lockedCurrency} />{_copy("copy.dcab65256653", { defaultValue: " to read" })}</button>
+                )}
+              </div>
+            </div>
+          );
+        })()}
+        </>
+        ) : (
+        <>
+        {post.articleBody ? (() => {
+          const summary = displayBody?.trim()
+            ? <TranslatableText publicContent text={displayBody} className="" as="p" auto={false} flagged={post.communityAlertPending} />
+            : null;
+          return isPostPage ? (
+            <Suspense fallback={<ArticleFeedCover title={post.title} body={post.articleBody} coverUrl={post.articleImageUrl} onOpen={openArticle}>{summary}</ArticleFeedCover>}>
+            <ArticleReader
+              title={post.title}
+              body={post.articleBody}
+              coverUrl={post.articleImageUrl}
+              createdAt={post.createdAt}
+              shareUrl={`${window.location.origin}${postOwnPath(post)}`}
+              onComment={() => {
+                if (onOpenComments) { onOpenComments(); return; }
+                setCommentsInitialTab(undefined);
+                setShowComments(true);
+              }}
+              onTip={post.author.paymentsDisabled ? undefined : () => setShowTipModal(true)}
+            >
+              {summary}
+            </ArticleReader>
+            </Suspense>
+          ) : (
+            <ArticleFeedCover title={post.title} body={post.articleBody} coverUrl={post.articleImageUrl} onOpen={openArticle}>
+              {summary && <div className="article-ink-2 text-[15.25px] leading-[22.5px]">{summary}</div>}
+            </ArticleFeedCover>
+          );
+        })() : (
+        <>
+        {/* Title */}
+        {post.title && (
+          <h3 className="text-white text-[15.25px] sm:text-[17px] leading-snug">{renderTextWithLinks(post.title, { flagged: post.communityAlertPending })}</h3>
+        )}
+        {/* auto={false}: the useTranslation above owns this post's translation
+            and `bodyWithoutLinks` is already its output. Left on, TranslatableText
+            ran a second translation of the same body — and once the first one
+            landed, a third of the translated text. */}
+        {displayBody?.trim() ? (
+          !stage && !threadSlot ? (
+            <FeedCaptionExpander lines={6} textKey={displayBody}>
+              <TranslatableText publicContent text={displayBody} className="text-white/90 text-[15.25px] leading-[22.5px]" as="p" auto={false} flagged={post.communityAlertPending} />
+            </FeedCaptionExpander>
+          ) : (
+            <TranslatableText publicContent text={displayBody} className="text-white/90 text-[15.25px] leading-[22.5px]" as="p" auto={false} flagged={post.communityAlertPending} />
+          )
+        ) : null}
+        </>
+        )}
+
+        {/* Quoted post embed (Twitter-style) */}
+        {post.isQuotePost && post.quotedPost && (
+          <QuotedPostEmbed quotedPost={post.quotedPost} quoteTokenId={post.id} className="mt-2" />
+        )}
+        {post.isQuotePost && post.quoteRevoked && <RemovedQuoteNotice className="mt-2" />}
+
+        {/* Riftn entity cards — post, profile, community, invite, store, item, event */}
+        <DehubLinkEmbeds links={dehubLinks} />
+
+        {/* Market cards — a contract address somebody pasted, or a $TICKER */}
+        <AssetRefCards refs={assetRefs} />
+
+        {/* OG previews for outside links. Skipped when an entity card is already
+            showing: two stacked cards for one line of text is noise. */}
+        {post.content && dehubLinks.length === 0 && <FeedLinkPreviews text={post.content} hidden={post.hiddenLinkPreviews} />}
+        </>
+        )}
+        </div>
+
+        {/* Metadata: timestamp and views */}
+        <PostMetadata
+          className="!mt-3"
+          timestamp={post.createdAt}
+          viewCount={post.views}
+          tokenId={post.id}
+          isOwnPost={isOwnPost}
+          translateControl={nothingToTranslate ? undefined : {
+            isTranslated,
+            isLoading: isTranslateLoading,
+            error: translateError,
+            onTranslate: handleTranslate,
+            onShowOriginal: handleShowOriginal,
+            sourceLang,
+          }}
+        />
+
+        {!isLocked && !isSubGated && parseInt(post.id, 10) > 0 && <PollCard tokenId={parseInt(post.id, 10)} />}
+        {!isLocked && !isSubGated && post.hasQuiz && parseInt(post.id, 10) > 0 && <LazyQuizCard tokenId={parseInt(post.id, 10)} />}
+
+        {/* The creator's Shop board — affiliate links, opened in place. */}
+        <ShopBoardLazy tokenId={post.id} links={post.shopLinks} listingCount={post.shopListingCount} variant="inline" />
+
+        <div className="pt-1">
+          <ActionBar
+            postId={post.id}
+            newPostSlug={post.status === 'signed' ? post.newPostId ?? null : null}
+            articleSlug={post.articleSlug}
+            tokenId={parseInt(post.id, 10) || undefined}
+            isOwnPost={!!isOwnPost}
+            quotePolicy={post.quotePolicy}
+            visibility={post.visibility}
+            stage={stage}
+            utilityDesktopAnchor
+            className="p-0"
+            onComment={() => {
+              if (onOpenComments) {
+                onOpenComments();
+                return;
+              }
+              setCommentsInitialTab(undefined);
+              setShowComments(prev => !prev);
+            }}
+            onRepost={handleRepost}
+            onQuote={handleQuote}
+            onShareAsImage={handleShareAsImage}
+            isLiked={post.isLiked}
+            isDisliked={post.isDisliked}
+            myReaction={post.myReaction}
+            reactionCounts={post.reactionCounts}
+            likeCount={post.stats.likes}
+            dislikeCount={post.stats.dislikes}
+            commentCount={post.stats.comments}
+            repostCount={post.stats.reposts}
+            isReposted={post.isReposted}
+            isOptimistic={post.isOptimistic}
+            tipCount={tipCount}
+            onTip={post.author.paymentsDisabled ? undefined : () => setShowTipModal(true)}
+            onSeeEngagements={() => {
+              if (onOpenComments) {
+                onOpenComments('reposts');
+                return;
+              }
+              setCommentsInitialTab('reposts');
+              setShowComments(true);
+            }}
+          />
+        </div>
+
+        {/* Author thread — the post page hangs the author's own straight
+            comments here, X-style, above the comments list. */}
+        {threadSlot}
+
+        {/* Comments */}
+        {!onOpenComments && (
+          <CommentsWrapper
+            open={showComments}
+            onOpenChange={setShowComments}
+            tokenId={post.id}
+            initialTab={commentsInitialTab}
+            commentsDisabled={!!(post as { commentsDisabled?: boolean }).commentsDisabled}
+            replyPolicy={post.replyPolicy}
+            forKids={!!post.forKids}
+            postAuthorAddress={threadSlot ? post.author.id : undefined}
+          />
+        )}
+      </div>
+
+      {/* Poll Creator Drawer */}
+      <Drawer open={showPollCreator} onOpenChange={setShowPollCreator}>
+        <DrawerContent column glass className="px-4 pb-8" data-no-navigate onClick={(e: React.MouseEvent) => e.stopPropagation()}>
+          <DrawerHeader className="pb-2">
+            <DrawerTitle className="text-white text-lg">{_copy("copy.b2b9c2e81c4c", { defaultValue: "Create Poll" })}</DrawerTitle>
+          </DrawerHeader>
+          <div className="flex flex-col gap-3 mt-1">
+            <input
+              className="w-full bg-white/10 rounded-xl px-4 py-3 text-white placeholder-zinc-500 text-sm outline-none focus:ring-1 focus:ring-white/20"
+              placeholder={_copy("copy.d6a2035c7300", { defaultValue: "Ask a question…" })}
+              value={pollQuestion}
+              onChange={e => setPollQuestion(e.target.value)}
+              maxLength={200}
+            />
+            <div className="space-y-2">
+              {pollOptions.map((opt, i) => (
+                <div key={i} className="flex items-center gap-2">
+                  <input
+                    className="flex-1 bg-white/10 rounded-xl px-4 py-2.5 text-white placeholder-zinc-500 text-sm outline-none focus:ring-1 focus:ring-white/20"
+                    placeholder={_copy("copy.c553678c42d5", { defaultValue: "Option {{value1}}", value1: i + 1 })}
+                    value={opt}
+                    onChange={e => {
+                      const next = [...pollOptions];
+                      next[i] = e.target.value;
+                      setPollOptions(next);
+                    }}
+                    maxLength={100}
+                  />
+                  {pollOptions.length > 2 && (
+                    <button
+                      onClick={() => setPollOptions(pollOptions.filter((_, j) => j !== i))}
+                      className="text-zinc-500 hover:text-white transition-colors"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+              ))}
+              {pollOptions.length < 4 && (
+                <button
+                  onClick={() => setPollOptions([...pollOptions, ''])}
+                  className="flex items-center gap-2 text-sm text-zinc-400 hover:text-white transition-colors px-1"
+                >
+                  <Plus className="w-4 h-4" />{_copy("copy.d66886c7e738", { defaultValue: " Add option" })}</button>
+              )}
+            </div>
+            <label className="flex items-center gap-3 px-1 cursor-pointer">
+              <input
+                type="checkbox"
+                className="w-4 h-4 rounded accent-white"
+                checked={pollMultiple}
+                onChange={e => setPollMultiple(e.target.checked)}
+              />
+              <span className="text-sm text-zinc-300">{_copy("copy.3c1cc071d396", { defaultValue: "Allow multiple choices" })}</span>
+            </label>
+            <input
+              type="datetime-local"
+              className="w-full bg-white/10 rounded-xl px-4 py-2.5 text-zinc-300 text-sm outline-none focus:ring-1 focus:ring-white/20"
+              value={pollExpiry}
+              onChange={e => setPollExpiry(e.target.value)}
+            />
+            <button
+              disabled={!pollQuestion.trim() || pollOptions.filter(o => o.trim()).length < 2 || createPollMutation.isPending}
+              onClick={async () => {
+                const tokenIdNum = parseInt(post.id, 10);
+                if (!tokenIdNum) return;
+                try {
+                  await createPollMutation.mutateAsync({
+                    tokenId: tokenIdNum,
+                    question: pollQuestion.trim(),
+                    options: pollOptions.filter(o => o.trim()),
+                    isMultipleChoice: pollMultiple,
+                    expiresAt: pollExpiry || undefined,
+                  });
+                  setShowPollCreator(false);
+                  setPollQuestion.complete(pollQuestion, '');
+                  setPollOptions(['', '']);
+                  setPollMultiple(false);
+                  setPollExpiry.complete(pollExpiry, '');
+                  queryClient.invalidateQueries({ queryKey: ['polls', tokenIdNum] });
+                } catch {}
+              }}
+              className="w-full py-3 rounded-xl bg-white text-black font-semibold text-sm disabled:opacity-40 disabled:cursor-not-allowed transition-opacity"
+            >
+              {createPollMutation.isPending ? _copy("copy.c79ed9492e3c", { defaultValue: "Creating…" }) : _copy("copy.b2b9c2e81c4c", { defaultValue: "Create Poll" })}
+            </button>
+          </div>
+        </DrawerContent>
+      </Drawer>
+
+      {/* Subscriber sheet. Separate from the hold-gate sheet below because it
+          asks a different question and buys a different thing. */}
+      {isSubGated && (
+        <Drawer open={showSubDrawer} onOpenChange={setShowSubDrawer}>
+          <DrawerContent scrollable column glass className="px-4 pb-6" data-no-navigate onClick={(e: React.MouseEvent) => e.stopPropagation()}>
+            <Suspense fallback={<div className="py-10 text-center text-white/60 text-sm">{_copy("copy.ba3bbbe10d8b", { defaultValue: "Loading…" })}</div>}>
+              <SubscriberGateDrawer
+                creatorAddress={post.author.id}
+                creatorName={post.author.name || post.author.handle}
+                previewPlans={post.subscriberPlans}
+                onSubscribed={() => {
+                  setLocallySubscribed(true);
+                  setShowSubDrawer(false);
+                  queryClient.invalidateQueries({ queryKey: ['unified-feed'] });
+                  queryClient.invalidateQueries({ queryKey: ['dehub-feed'] });
+                }}
+              />
+            </Suspense>
+          </DrawerContent>
+        </Drawer>
+      )}
+
+      {/* Locked Drawer - controlled, rendered at root level for mobile compatibility */}
+      {isLocked && (
+        <Drawer open={showLockedDrawer} onOpenChange={setShowLockedDrawer}>
+          <DrawerContent scrollable column glass className="px-4 pb-6" data-no-navigate onClick={(e: React.MouseEvent) => e.stopPropagation()}>
+            <DrawerHeader className="pb-3 relative">
+              <DrawerTitle className="text-white text-lg flex items-center gap-2">
+                <Lock className="w-5 h-5 text-white" />
+                {t('drawers.gatedTitle')}
+              </DrawerTitle>
+              <button onClick={() => setShowLockedDrawer(false)} className="absolute top-3 right-0 p-1.5 rounded-lg bg-white/[0.06] hover:bg-white/[0.12] transition-colors">
+                <X className="w-4 h-4 text-zinc-400" />
+              </button>
+            </DrawerHeader>
+            <div className="flex flex-col gap-4">
+              {post.lockedPrice && post.lockedPrice > 0 && (
+                <div className="flex items-center justify-between px-4 py-4 bg-white/5 rounded-xl border border-white/10">
+                  <span className="text-white text-sm">{t('drawers.mustHoldToView')}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-white text-lg font-bold"><DhbAmount amount={formatCompact(post.lockedPrice)} currency={post.lockedCurrency} /></span>
+                  </div>
+                </div>
+              )}
+              <p className="text-center text-white/60 text-sm">
+                {t('drawers.gatedDescription')}
+              </p>
+              {post.lockedPrice && post.lockedPrice > 0 && (
+                <VerifyUnlockButton
+                  requiredAmount={post.lockedPrice}
+                  currency={post.lockedCurrency || 'DHB'}
+                  tokenAddress={post.lockedTokenAddress}
+                  chainId={post.lockedChainId}
+                  onUnlocked={() => {
+                    setShowLockedDrawer(false);
+                    setLocallyUnlocked(true);
+                    markTokenUnlocked(post.id);
+                    queryClient.invalidateQueries({ queryKey: ['unified-feed'] });
+                    queryClient.invalidateQueries({ queryKey: ['dehub-feed'] });
+                  }}
+                />
+              )}
+            </div>
+          </DrawerContent>
+        </Drawer>
+      )}
+
+      {/* AI Chat */}
+      <PostAIChatLazy
+        isOpen={showAIChat}
+        onClose={() => setShowAIChat(false)}
+        postContext={{
+          tokenId: post.id,
+          type: 'post',
+          author: post.author.name,
+          caption: post.content
+        }}
+      />
+
+      {/* Report Modal */}
+      <ReportModal
+        open={showReportModal}
+        onOpenChange={setShowReportModal}
+        tokenId={post.id}
+        contentType="post"
+      />
+
+      {/* Mint chain picker — mounted on first open, like the edit modal. */}
+      {mintSheetMounted && (
+        <Suspense fallback={null}>
+          <MintChainSheet
+            open={showMintSheet}
+            onOpenChange={setShowMintSheet}
+            defaultChainId={post.chainId}
+            isMinting={isMinting}
+            // A post mints its 1,000 fractions. Copies and royalties are for
+            // NFTs made in the market's Create tab.
+            hideEdition
+            onConfirm={(chainId, edition) => {
+              if (!postTokenId) return;
+              mintExisting(postTokenId, post.chainId, chainId, edition).then((ok) => {
+                if (ok) setShowMintSheet(false);
+              });
+            }}
+          />
+        </Suspense>
+      )}
+
+      {/* Delete Post Modal */}
+      <DeletePostModal
+        open={showDeleteModal}
+        onOpenChange={setShowDeleteModal}
+        tokenId={post.id}
+        onSuccess={() => {
+          queryClient.invalidateQueries({ queryKey: ['unified-feed'] });
+        }}
+      />
+
+      {/* Edit Post Modal — mounted on first open and kept, so the drawer's
+          close animation still runs. */}
+      {editModalMounted && (
+        <Suspense fallback={null}>
+          <EditPostModal
+            open={showEditModal}
+            onOpenChange={setShowEditModal}
+            tokenId={post.id}
+            currentTitle={post.rawName ?? post.title ?? ''}
+            currentDescription={post.rawDescription ?? post.content ?? ''}
+            currentArticleBody={post.articleBody}
+            currentCategories={post.categories ?? []}
+            currentContentRating={post.contentRating}
+            currentSpoilerText={post.spoilerText}
+            currentQuotePolicy={post.quotePolicy}
+            currentReplyPolicy={post.replyPolicy}
+            currentVisibility={(post as any).justMe ? 'self' : (post as any).visibility}
+            currentForKids={post.forKids}
+            currentShopLinks={post.shopLinks}
+            onSuccess={(edited) => {
+              applyOptimisticEdit(queryClient, post.id, edited);
+            }}
+          />
+        </Suspense>
+      )}
+
+      {/* Boost Modal — mounted only while open, so the chunk is fetched on the
+          tap that opens it rather than with the feed. */}
+      {showBoostModal && (
+        <Suspense fallback={null}>
+          <BoostModal
+            open={showBoostModal}
+            onOpenChange={setShowBoostModal}
+            tokenId={postTokenId}
+            postTitle={post.rawName ?? post.title ?? post.content ?? ''}
+          />
+        </Suspense>
+      )}
+
+      {/* Quote Post Modal */}
+      <QuotePostModalLazy
+        open={showQuoteModal}
+        onOpenChange={setShowQuoteModal}
+        quotedPost={postAsNFT}
+      />
+
+      {/* Tip Modal */}
+      <TipModal
+        open={showTipModal}
+        onOpenChange={setShowTipModal}
+        creatorAddress={post.author.id}
+        creatorName={post.author.name}
+        tokenId={post.id}
+      />
+
+    </div>
+  );
+});
+
+/** Every post passes the viewer's keyword filters first — see KeywordFilterGate. */
+export const PostCard = memo(function FilteredPostCard(props: PostCardProps) {
+  const { post } = props;
+  return (
+    <KeywordFilterGate
+      texts={[post.title, post.content, post.articleBody, post.spoilerText, ...(post.mediaDescriptions ?? [])]}
+      authorId={post.author?.id}
+    >
+      <PostCardBody {...props} />
+    </KeywordFilterGate>
+  );
+});

@@ -1,0 +1,291 @@
+import { useTranslation as _useCopy } from 'react-i18next';
+import { ElectricLogo } from './ElectricLogo';
+import { FeedRefreshLogo } from './FeedRefreshLogo';
+import { useKeyboardSafeSheet } from '@/hooks/use-keyboard-open';
+import { useGlobalDropZone } from '@/hooks/use-global-drop-zone';
+import { openNotificationsDrawer, warmNotificationsDrawer } from '../NotificationsDrawer';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { isHomePath } from '@/lib/home-path';
+import { isHomeFeedRoute } from '@/lib/home-routes';
+import Menu from "@/components/ui/cut-icons/menu";
+import { NotificationBell } from './NotificationBell';
+
+import { Drawer, DrawerContent, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer';
+import { useTranslation } from 'react-i18next';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useAuth } from '@/contexts/AuthContext';
+
+import { useUnreadNotificationCount } from '@/hooks/use-notifications';
+import { useCustomUnreadCount } from '@/hooks/use-custom-notifications';
+import { buildAvatarUrl } from '@/lib/media-url';
+import { useCallback, useLayoutEffect, useRef, memo } from 'react';
+import { useAnyOverlayOpen } from '@/lib/overlay-open';
+import { useScrollDirection } from '@/hooks/use-scroll-direction';
+import { useAppTheme } from '@/contexts/ThemeContext';
+import { WarLogo } from '@/components/app/war/WarLogoLazy';
+import { warmLoginSheet } from '@/components/app/LoginModal';
+// The centred slot is narrow, so this bar wears the bare mark rather than the
+// wordmark. Same asset the collapsed desktop rail uses; it is a white PNG, and
+// the light theme's `header … img[alt="dehub"]` rule inverts it to ink on paper
+// — so it must NOT be swapped for the black mark here the way the rail does it,
+// or light mode would invert a black mark back to white.
+import dehubMark from '@/assets/dehub-logo-compact.png';
+import { scrollDocumentToSmooth } from '@/lib/document-scroll';
+import { FeedIslandCapsule } from './FeedIslandCapsule';
+import { MobileAccountButton } from './MobileAccountButton';
+import { usePostFeedLook } from '@/lib/post-feed-look';
+
+const HeaderLogo = memo(function HeaderLogo({ onClick, onPointerDown, isAuthenticated }: {
+  onClick: (e: React.MouseEvent) => void;
+  onPointerDown: () => void;
+  isAuthenticated: boolean;
+}) {
+  const { t: _copy } = _useCopy();
+  const { theme } = useAppTheme();
+  return (
+    <button data-entry-logo onClick={onClick} onPointerDown={onPointerDown} className="flex h-11 min-w-11 shrink-0 items-center justify-center cursor-pointer" aria-label={isAuthenticated ? _copy("copy.8ee0cba52fcd", { defaultValue: "dehub home" }) : _copy("copy.c189840cf7e2", { defaultValue: "Log in" })}>
+      <FeedRefreshLogo>
+      <ElectricLogo still={theme === 'war' ? <img src={dehubMark} alt="Riftn" className="block h-[36px] w-[42px] object-contain" decoding="async" /> : undefined}>{theme === 'war' ? (
+        // Fixed width here rather than w-auto: the hologram is a canvas, which
+        // has no intrinsic aspect ratio to derive a width from.
+        <WarLogo src={dehubMark} alt="Riftn" className="h-[36px] w-[42px]" />
+      ) : (
+        <img
+          src={dehubMark}
+          alt="Riftn"
+          className="block h-[36px] w-[42px] object-contain"
+          loading="eager"
+          decoding="async"
+          fetchPriority="high"
+          width={42}
+          height={36}
+        />
+      )}</ElectricLogo>
+      </FeedRefreshLogo>
+    </button>
+  );
+});
+
+/** How far the avatar and bell sit inside the feed pill's side edges. */
+const TOP_BAR_PILL_INSET = 4;
+
+interface MobileHeaderProps {
+  isOpen: boolean;
+  onOpenChange: (open: boolean) => void;
+  children: React.ReactNode;
+}
+
+export function MobileHeader({ isOpen, onOpenChange, children }: MobileHeaderProps) {
+  const { style: keyboardStyle } = useKeyboardSafeSheet(isOpen);
+  const { t: _copy } = _useCopy();
+  const { t } = useTranslation();
+  const { openPostModal } = useGlobalDropZone();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { isAuthenticated, user, openLoginModal } = useAuth();
+  
+  // Drop below every overlay scrim (dialog/sheet z-50, drawer z-100) while a
+  // sheet is open — at the usual z-60 the header floats crisp above dialog
+  // backdrops instead of dimming with the page (lib/overlay-open).
+  const anyOverlayOpen = useAnyOverlayOpen();
+  // Same hide-on-scroll-down / show-on-scroll-up behaviour as the mobile nav bars.
+  const navVisible = useScrollDirection();
+  const { theme } = useAppTheme();
+  // Immersive theme: no bar at all. The island capsule (FeedIslandCapsule) is the
+  // home feed's only top chrome; the header stays mounted, hidden, for its menu
+  // drawer.
+  const islandBar = theme === 'immersive';
+  const { data: unreadCount } = useUnreadNotificationCount();
+  const { data: customUnread } = useCustomUnreadCount();
+  const totalNotifUnread = (unreadCount?.total ?? 0) + (customUnread ?? 0);
+
+  // Use ref for pathname so handleLogoClick is stable across renders
+  const pathnameRef = useRef(location.pathname);
+  pathnameRef.current = location.pathname;
+
+  const handleLogoClick = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!isAuthenticated) {
+      openLoginModal();
+      return;
+    }
+    if (isHomePath(pathnameRef.current)) {
+      scrollDocumentToSmooth();
+    } else {
+      navigate('/app');
+    }
+  }, [isAuthenticated, openLoginModal, navigate]);
+
+  // With or without the /app prefix — both spellings reach the same page.
+  const isPostPage = /^\/(?:app\/)?(?:post|video)\//.test(location.pathname);
+  // When the post overlay is opened from the feed, the home page's sticky tab bar hosts
+  // the back button (settings-toggle slot). The top RIFTN bar stays exactly as it was on the feed.
+  const isOverlayFromFeed = isPostPage && !!(location.state as any)?.fromFeed;
+  // The bar (menu, dehub mark, bell) belongs to the home feed only. Every
+  // other page already names itself in its own pill, so the bar there was a
+  // second banner over it. It stays over the post overlay opened from the
+  // feed, which is still the home feed underneath.
+  //
+  // Hidden, not unmounted: the menu drawer lives inside, and a menu item
+  // navigates away while the sheet is still sliding shut.
+  // A phone text, image or audio post opened from anywhere else (a
+  // notification, a profile) keeps the bar too, so it looks the same.
+  const postFeedLook = usePostFeedLook();
+  const showBar = isHomeFeedRoute(location.pathname) || isOverlayFromFeed || (isPostPage && postFeedLook);
+  // Pages read this to drop the bar's 2.75rem clearance (index.css).
+  useLayoutEffect(() => {
+    document.documentElement.toggleAttribute('data-no-top-bar', !showBar || islandBar);
+  }, [showBar, islandBar]);
+
+  // The avatar and bell sit a hair inside the feed pill's side edges. Read off
+  // the pill as drawn, since every theme gives it its own inset; the CSS
+  // default covers the moment before it mounts.
+  const headerRef = useRef<HTMLElement>(null);
+  useLayoutEffect(() => {
+    const header = headerRef.current;
+    if (!header || !showBar || islandBar) return;
+    const sync = () => {
+      const pill = document.querySelector<HTMLElement>('[data-feed-nav]');
+      if (!pill) return;
+      const rect = pill.getBoundingClientRect();
+      if (!rect.width) return;
+      header.style.setProperty('--top-bar-edge', `${Math.max(0, rect.left) + TOP_BAR_PILL_INSET}px`);
+    };
+    sync();
+    // The pill mounts with the feed and themes restyle it after a switch.
+    const timer = window.setTimeout(sync, 400);
+    window.addEventListener('resize', sync);
+    return () => {
+      window.clearTimeout(timer);
+      window.removeEventListener('resize', sync);
+    };
+  }, [showBar, islandBar, theme, location.pathname]);
+
+  // The centre logo opens the login drawer for guests. Warm it on touch-start
+  // so the sheet is ready before the tap completes.
+  const warmSheetForLogin = useCallback(() => {
+    if (!isAuthenticated) warmLoginSheet();
+  }, [isAuthenticated]);
+
+  return (
+    <>
+    <header ref={headerRef} data-mobile-header data-clear-top-bar={theme === 'system' ? undefined : ''} className={`${showBar && !islandBar ? '' : 'hidden '}lg:hidden fixed top-0 left-0 right-0 ${anyOverlayOpen ? 'z-[40]' : 'z-[60]'} px-[var(--top-bar-edge,16px)] h-11 flex items-center justify-between pointer-events-auto transition-transform duration-300 ease-in-out ${(isAuthenticated && !navVisible && !isOpen && !anyOverlayOpen) ? '-translate-y-full' : 'translate-y-0'} ${isOpen ? 'bg-transparent' : 'bg-black'}`}
+      style={isAuthenticated && theme === 'system' && !isOpen && !anyOverlayOpen ? { transform: 'translateY(var(--system-feed-header-offset, 0px))' } : undefined}
+    >
+      {/* Profile — left slot.
+          Direct post-page URL access: back button replaces the menu/settings toggle.
+          When opened as an overlay from the feed, the feed's tab bar already hosts a back button,
+          so we keep the normal menu/avatar here to preserve the "you never left the feed" feel. */}
+      <div className="flex items-center">
+        {isAuthenticated ? (
+          <Drawer open={isOpen} onOpenChange={onOpenChange} repositionInputs={false}>
+
+            <DrawerTrigger asChild>
+              {user ? (
+                <button
+                  className="flex h-11 w-11 shrink-0 items-center justify-start rounded-lg hover:opacity-80 transition-opacity"
+                  aria-label={_copy("copy.c02651240c87", { defaultValue: "Toggle menu" })}
+                >
+                  <Avatar data-own-avatar className="w-[30px] h-[30px]">
+                    {user.avatarImageUrl && user.address && (
+                      <AvatarImage
+                        src={buildAvatarUrl(user.address, user.avatarImageUrl)}
+                        alt={_copy("copy.f66ca816cb1e", { defaultValue: "{{value1}}'s avatar", value1: user.displayName || user.username })}
+                        className="object-cover"
+                        loading="eager"
+                      />
+                    )}
+                    <AvatarFallback className="bg-zinc-700 text-white text-xs font-medium">
+                      {(user.displayName || user.username)?.charAt(0).toUpperCase() || 'U'}
+                    </AvatarFallback>
+                  </Avatar>
+                </button>
+              ) : (
+                <button
+                  className="flex h-11 w-11 shrink-0 items-center justify-start rounded-lg transition-colors"
+                  aria-label={_copy("copy.c02651240c87", { defaultValue: "Toggle menu" })}
+                >
+                  <Menu className="w-[26px] h-[26px] text-white" />
+                </button>
+              )}
+            </DrawerTrigger>
+            {/* 85dvh, not 85vh: `vh` is the LARGE viewport, measured as if the
+                browser chrome were hidden, while the sheet's `bottom-0` sits at
+                the bottom of what is actually on screen. On iOS Safari that
+                pushed the top of the menu — the search field — off the top of
+                the screen, with no way to scroll it back into view. */}
+            <DrawerContent glass className="max-h-[85dvh]" style={keyboardStyle ?? undefined} aria-describedby={undefined}>
+              <DrawerTitle className="sr-only">{t('sidebar.searchMenu')}</DrawerTitle>
+              {/* Column, not a scroller: the menu pins its profile + search to
+                  the top and its account actions to the bottom, and scrolls
+                  only the tiles between them — same as the app. */}
+              <div className="flex min-h-0 flex-1 flex-col px-4 pt-4 pb-[max(0.625rem,env(safe-area-inset-bottom))]">
+                {children}
+              </div>
+            </DrawerContent>
+          </Drawer>
+        ) : (
+          <MobileAccountButton action="signup" onClick={() => openLoginModal({ intent: 'signup' })} onPointerDown={warmSheetForLogin} />
+        )}
+      </div>
+
+      {/* dehub mark — centred on the bar itself, not between the side slots, so
+          it stays put whether or not the notification bell is rendered (it is
+          signed-in only) and whichever left control is showing. */}
+      <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 flex items-center">
+        <HeaderLogo onClick={handleLogoClick} onPointerDown={warmSheetForLogin} isAuthenticated={isAuthenticated} />
+      </div>
+
+      {/* Notifications — right slot, only visible when logged in.
+          When the post overlay is opened from the feed, keep the RIFTN header exactly as it was. */}
+      <div className="flex items-center">
+        {isAuthenticated && (
+          <button
+            onClick={() => openNotificationsDrawer()}
+            onPointerDown={warmNotificationsDrawer}
+            className="relative flex h-11 w-11 shrink-0 items-center justify-end text-white transition-colors"
+            aria-label={`${_copy("copy.788011833a5a", { defaultValue: "Notifications" })}${totalNotifUnread > 0 ? ` (${totalNotifUnread})` : ''}`}
+          >
+            {/* The bell's body (not the clapper below it) sits on the mark's
+                bottom edge: at 29.75 it runs y 2.3 to 24.9 and x 2.3 to 27.4 of its
+                box, so the box moves down 2.7px (0.2px above that edge) and out 2.4px. A flex box, not a
+                block, or a line box taller than the bell lifts it. */}
+            <span className="flex h-[29.75px] w-[29.75px] -mr-[2.4px] translate-y-[2.7px]">
+              <NotificationBell unread={totalNotifUnread} size={29.75} active={showBar && navVisible && !anyOverlayOpen && !isOpen} />
+            </span>
+          </button>
+        )}
+        {!isAuthenticated && (
+          <MobileAccountButton action="signin" onClick={() => openLoginModal()} onPointerDown={warmSheetForLogin} />
+        )}
+      </div>
+    </header>
+    {islandBar && showBar && (
+      <FeedIslandCapsule
+        isAuthenticated={isAuthenticated}
+        onLogoPointerDown={warmSheetForLogin}
+        visible={(!isAuthenticated || navVisible) && !isOpen && !anyOverlayOpen && !isPostPage}
+        avatar={isAuthenticated && user ? (
+          <Avatar className="w-[28px] h-[28px] rounded-lg">
+            {user.avatarImageUrl && user.address && (
+              <AvatarImage
+                src={buildAvatarUrl(user.address, user.avatarImageUrl)}
+                alt=""
+                className="object-cover rounded-lg"
+              />
+            )}
+            <AvatarFallback className="bg-zinc-700 text-white text-xs font-medium rounded-lg">
+              {(user.displayName || user.username)?.charAt(0).toUpperCase() || 'U'}
+            </AvatarFallback>
+          </Avatar>
+        ) : null}
+        onAvatarClick={() => (isAuthenticated ? onOpenChange(true) : openLoginModal({ intent: 'signup' }))}
+        onCreatePost={() => (isAuthenticated ? openPostModal() : openLoginModal())}
+        logoSrc={dehubMark}
+        unread={isAuthenticated ? totalNotifUnread : 0}
+        onBellClick={() => (isAuthenticated ? openNotificationsDrawer() : openLoginModal())}
+      />
+    )}
+    </>
+  );
+}

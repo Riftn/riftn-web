@@ -1,0 +1,10124 @@
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[]
+
+export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "14.1"
+  }
+  public: {
+    Tables: {
+      ad_accounts: {
+        Row: {
+          balance_usd: number
+          company_name: string | null
+          created_at: string
+          status: string
+          total_deposited_usd: number
+          total_spent_usd: number
+          updated_at: string
+          wallet_address: string
+          website: string | null
+        }
+        Insert: {
+          balance_usd?: number
+          company_name?: string | null
+          created_at?: string
+          status?: string
+          total_deposited_usd?: number
+          total_spent_usd?: number
+          updated_at?: string
+          wallet_address: string
+          website?: string | null
+        }
+        Update: {
+          balance_usd?: number
+          company_name?: string | null
+          created_at?: string
+          status?: string
+          total_deposited_usd?: number
+          total_spent_usd?: number
+          updated_at?: string
+          wallet_address?: string
+          website?: string | null
+        }
+        Relationships: []
+      }
+      ad_audience_members: {
+        Row: {
+          campaign_id: string
+          created_at: string
+          source: string
+          wallet_address: string
+        }
+        Insert: {
+          campaign_id: string
+          created_at?: string
+          source: string
+          wallet_address: string
+        }
+        Update: {
+          campaign_id?: string
+          created_at?: string
+          source?: string
+          wallet_address?: string
+        }
+        Relationships: []
+      }
+      ad_campaigns: {
+        Row: {
+          approved_at: string | null
+          created_at: string
+          cta_url: string | null
+          daily_budget_usd: number
+          end_at: string | null
+          frequency_cap: number
+          id: string
+          name: string
+          objective: string
+          review_note: string | null
+          spent_usd: number
+          start_at: string
+          status: string
+          targeting: Json
+          total_budget_usd: number
+          updated_at: string
+          wallet_address: string
+        }
+        Insert: {
+          approved_at?: string | null
+          created_at?: string
+          cta_url?: string | null
+          daily_budget_usd: number
+          end_at?: string | null
+          frequency_cap?: number
+          id?: string
+          name: string
+          objective?: string
+          review_note?: string | null
+          spent_usd?: number
+          start_at?: string
+          status?: string
+          targeting?: Json
+          total_budget_usd: number
+          updated_at?: string
+          wallet_address: string
+        }
+        Update: {
+          approved_at?: string | null
+          created_at?: string
+          cta_url?: string | null
+          daily_budget_usd?: number
+          end_at?: string | null
+          frequency_cap?: number
+          id?: string
+          name?: string
+          objective?: string
+          review_note?: string | null
+          spent_usd?: number
+          start_at?: string
+          status?: string
+          targeting?: Json
+          total_budget_usd?: number
+          updated_at?: string
+          wallet_address?: string
+        }
+        Relationships: []
+      }
+      ad_config: {
+        Row: {
+          key: string
+          value: Json
+        }
+        Insert: {
+          key: string
+          value: Json
+        }
+        Update: {
+          key?: string
+          value?: Json
+        }
+        Relationships: []
+      }
+      ad_creatives: {
+        Row: {
+          body: string | null
+          campaign_id: string
+          created_at: string
+          cta_label: string
+          cta_url: string | null
+          duration_seconds: number | null
+          headline: string
+          height: number | null
+          id: string
+          kind: string
+          media_url: string | null
+          review_note: string | null
+          status: string
+          thumbnail_url: string | null
+          updated_at: string
+          wallet_address: string
+          width: number | null
+        }
+        Insert: {
+          body?: string | null
+          campaign_id: string
+          created_at?: string
+          cta_label?: string
+          cta_url?: string | null
+          duration_seconds?: number | null
+          headline: string
+          height?: number | null
+          id?: string
+          kind: string
+          media_url?: string | null
+          review_note?: string | null
+          status?: string
+          thumbnail_url?: string | null
+          updated_at?: string
+          wallet_address: string
+          width?: number | null
+        }
+        Update: {
+          body?: string | null
+          campaign_id?: string
+          created_at?: string
+          cta_label?: string
+          cta_url?: string | null
+          duration_seconds?: number | null
+          headline?: string
+          height?: number | null
+          id?: string
+          kind?: string
+          media_url?: string | null
+          review_note?: string | null
+          status?: string
+          thumbnail_url?: string | null
+          updated_at?: string
+          wallet_address?: string
+          width?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ad_creatives_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "ad_campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ad_creator_support_sessions: {
+        Row: {
+          campaign_id: string
+          created_at: string
+          creative_id: string
+          creator_share_usd: number
+          creator_wallet: string
+          credited_at: string | null
+          expires_at: string
+          id: string
+          post_id: string
+          price_usd: number
+          progress_at: string
+          reported_seconds: number
+          viewer_tier: string
+          viewer_wallet: string
+          watched_seconds: number
+        }
+        Insert: {
+          campaign_id: string
+          created_at?: string
+          creative_id: string
+          creator_share_usd: number
+          creator_wallet: string
+          credited_at?: string | null
+          expires_at: string
+          id: string
+          post_id: string
+          price_usd: number
+          progress_at?: string
+          reported_seconds?: number
+          viewer_tier: string
+          viewer_wallet: string
+          watched_seconds?: number
+        }
+        Update: {
+          campaign_id?: string
+          created_at?: string
+          creative_id?: string
+          creator_share_usd?: number
+          creator_wallet?: string
+          credited_at?: string | null
+          expires_at?: string
+          id?: string
+          post_id?: string
+          price_usd?: number
+          progress_at?: string
+          reported_seconds?: number
+          viewer_tier?: string
+          viewer_wallet?: string
+          watched_seconds?: number
+        }
+        Relationships: []
+      }
+      ad_daily_stats: {
+        Row: {
+          by_tier: Json
+          campaign_id: string
+          clicks: number
+          creative_id: string
+          day: string
+          impressions: number
+          spend_usd: number
+          viewer_share_usd: number
+        }
+        Insert: {
+          by_tier?: Json
+          campaign_id: string
+          clicks?: number
+          creative_id: string
+          day: string
+          impressions?: number
+          spend_usd?: number
+          viewer_share_usd?: number
+        }
+        Update: {
+          by_tier?: Json
+          campaign_id?: string
+          clicks?: number
+          creative_id?: string
+          day?: string
+          impressions?: number
+          spend_usd?: number
+          viewer_share_usd?: number
+        }
+        Relationships: []
+      }
+      ad_earnings: {
+        Row: {
+          total_earned_usd: number
+          total_paid_usd: number
+          updated_at: string
+          wallet_address: string
+        }
+        Insert: {
+          total_earned_usd?: number
+          total_paid_usd?: number
+          updated_at?: string
+          wallet_address: string
+        }
+        Update: {
+          total_earned_usd?: number
+          total_paid_usd?: number
+          updated_at?: string
+          wallet_address?: string
+        }
+        Relationships: []
+      }
+      ad_events: {
+        Row: {
+          campaign_id: string
+          created_at: string
+          creative_id: string
+          event_type: string
+          id: string
+          price_usd: number
+          serve_id: string
+          surface: string
+          viewer_key: string
+          viewer_share_usd: number
+          viewer_tier: string
+          viewer_wallet: string | null
+        }
+        Insert: {
+          campaign_id: string
+          created_at?: string
+          creative_id: string
+          event_type: string
+          id?: string
+          price_usd?: number
+          serve_id: string
+          surface?: string
+          viewer_key: string
+          viewer_share_usd?: number
+          viewer_tier?: string
+          viewer_wallet?: string | null
+        }
+        Update: {
+          campaign_id?: string
+          created_at?: string
+          creative_id?: string
+          event_type?: string
+          id?: string
+          price_usd?: number
+          serve_id?: string
+          surface?: string
+          viewer_key?: string
+          viewer_share_usd?: number
+          viewer_tier?: string
+          viewer_wallet?: string | null
+        }
+        Relationships: []
+      }
+      ad_frequency: {
+        Row: {
+          campaign_id: string
+          day: string
+          impressions: number
+          viewer_key: string
+        }
+        Insert: {
+          campaign_id: string
+          day: string
+          impressions?: number
+          viewer_key: string
+        }
+        Update: {
+          campaign_id?: string
+          day?: string
+          impressions?: number
+          viewer_key?: string
+        }
+        Relationships: []
+      }
+      ad_payments: {
+        Row: {
+          chain: string
+          created_at: string
+          dhb_amount: number
+          dhb_price_usd: number
+          id: string
+          tx_hash: string
+          usd_value: number
+          wallet_address: string
+        }
+        Insert: {
+          chain: string
+          created_at?: string
+          dhb_amount: number
+          dhb_price_usd: number
+          id?: string
+          tx_hash: string
+          usd_value: number
+          wallet_address: string
+        }
+        Update: {
+          chain?: string
+          created_at?: string
+          dhb_amount?: number
+          dhb_price_usd?: number
+          id?: string
+          tx_hash?: string
+          usd_value?: number
+          wallet_address?: string
+        }
+        Relationships: []
+      }
+      affiliate_codes: {
+        Row: {
+          active: boolean
+          code: string
+          commission_pct: number
+          created_at: string
+          id: string
+          landing_cta_label: string | null
+          landing_ctas: Json
+          landing_destination: string | null
+          landing_headline: string | null
+          landing_message: string | null
+          owner_address: string
+          share_name: string | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          code: string
+          commission_pct?: number
+          created_at?: string
+          id?: string
+          landing_cta_label?: string | null
+          landing_ctas?: Json
+          landing_destination?: string | null
+          landing_headline?: string | null
+          landing_message?: string | null
+          owner_address: string
+          share_name?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          code?: string
+          commission_pct?: number
+          created_at?: string
+          id?: string
+          landing_cta_label?: string | null
+          landing_ctas?: Json
+          landing_destination?: string | null
+          landing_headline?: string | null
+          landing_message?: string | null
+          owner_address?: string
+          share_name?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      affiliate_cta_clicks: {
+        Row: {
+          clicked_at: string
+          code: string
+          destination: string
+          id: string
+          owner_address: string
+          visitor_id: string
+        }
+        Insert: {
+          clicked_at?: string
+          code: string
+          destination: string
+          id?: string
+          owner_address: string
+          visitor_id: string
+        }
+        Update: {
+          clicked_at?: string
+          code?: string
+          destination?: string
+          id?: string
+          owner_address?: string
+          visitor_id?: string
+        }
+        Relationships: []
+      }
+      affiliate_earnings: {
+        Row: {
+          code: string | null
+          commission_cents: number
+          created_at: string
+          currency: string
+          gross_amount_cents: number
+          id: string
+          owner_address: string
+          referred_address: string
+          source: string
+          source_ref: string | null
+          status: string
+          tier: number
+        }
+        Insert: {
+          code?: string | null
+          commission_cents?: number
+          created_at?: string
+          currency?: string
+          gross_amount_cents?: number
+          id?: string
+          owner_address: string
+          referred_address: string
+          source: string
+          source_ref?: string | null
+          status?: string
+          tier?: number
+        }
+        Update: {
+          code?: string | null
+          commission_cents?: number
+          created_at?: string
+          currency?: string
+          gross_amount_cents?: number
+          id?: string
+          owner_address?: string
+          referred_address?: string
+          source?: string
+          source_ref?: string | null
+          status?: string
+          tier?: number
+        }
+        Relationships: []
+      }
+      affiliate_page_views: {
+        Row: {
+          code: string
+          id: string
+          owner_address: string
+          source: string | null
+          viewed_at: string
+          visitor_id: string
+        }
+        Insert: {
+          code: string
+          id?: string
+          owner_address: string
+          source?: string | null
+          viewed_at?: string
+          visitor_id: string
+        }
+        Update: {
+          code?: string
+          id?: string
+          owner_address?: string
+          source?: string | null
+          viewed_at?: string
+          visitor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "affiliate_page_views_code_fkey"
+            columns: ["code"]
+            isOneToOne: false
+            referencedRelation: "affiliate_codes"
+            referencedColumns: ["code"]
+          },
+        ]
+      }
+      affiliate_referrals: {
+        Row: {
+          code: string
+          created_at: string
+          id: string
+          l2_owner_address: string | null
+          owner_address: string
+          referred_address: string
+          source: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          id?: string
+          l2_owner_address?: string | null
+          owner_address: string
+          referred_address: string
+          source?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          id?: string
+          l2_owner_address?: string | null
+          owner_address?: string
+          referred_address?: string
+          source?: string | null
+        }
+        Relationships: []
+      }
+      affiliate_sub_referrals: {
+        Row: {
+          owner_address: string
+          referral_id: string
+          sub_id: string
+        }
+        Insert: {
+          owner_address: string
+          referral_id: string
+          sub_id: string
+        }
+        Update: {
+          owner_address?: string
+          referral_id?: string
+          sub_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "affiliate_sub_referrals_referral_id_fkey"
+            columns: ["referral_id"]
+            isOneToOne: true
+            referencedRelation: "affiliate_referrals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_agent_controls: {
+        Row: {
+          agent_id: string
+          last_alert_at: string | null
+          settings: Json
+          updated_at: string
+        }
+        Insert: {
+          agent_id: string
+          last_alert_at?: string | null
+          settings?: Json
+          updated_at?: string
+        }
+        Update: {
+          agent_id?: string
+          last_alert_at?: string | null
+          settings?: Json
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_agent_controls_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: true
+            referencedRelation: "ai_agents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_agent_life_events: {
+        Row: {
+          agent_id: string
+          content: string | null
+          created_at: string
+          id: number
+          kind: string
+          meta: Json
+          target: string | null
+        }
+        Insert: {
+          agent_id: string
+          content?: string | null
+          created_at?: string
+          id?: never
+          kind: string
+          meta?: Json
+          target?: string | null
+        }
+        Update: {
+          agent_id?: string
+          content?: string | null
+          created_at?: string
+          id?: never
+          kind?: string
+          meta?: Json
+          target?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_agent_life_events_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "ai_agents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_agent_lives: {
+        Row: {
+          agent_id: string
+          lease_until: string | null
+          next_at: string
+          persona: Json | null
+          sentient: boolean
+          state: Json
+          updated_at: string
+        }
+        Insert: {
+          agent_id: string
+          lease_until?: string | null
+          next_at?: string
+          persona?: Json | null
+          sentient?: boolean
+          state?: Json
+          updated_at?: string
+        }
+        Update: {
+          agent_id?: string
+          lease_until?: string | null
+          next_at?: string
+          persona?: Json | null
+          sentient?: boolean
+          state?: Json
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_agent_lives_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: true
+            referencedRelation: "ai_agents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_agent_news_cache: {
+        Row: {
+          feed: string
+          fetched_at: string
+          stories: Json
+        }
+        Insert: {
+          feed: string
+          fetched_at?: string
+          stories?: Json
+        }
+        Update: {
+          feed?: string
+          fetched_at?: string
+          stories?: Json
+        }
+        Relationships: []
+      }
+      ai_agent_post_slots: {
+        Row: {
+          next_post_at: string
+          owner_wallet: string
+        }
+        Insert: {
+          next_post_at?: string
+          owner_wallet: string
+        }
+        Update: {
+          next_post_at?: string
+          owner_wallet?: string
+        }
+        Relationships: []
+      }
+      ai_agent_rate_limits: {
+        Row: {
+          action_type: string
+          agent_id: string
+          count: number | null
+          window_start: string | null
+        }
+        Insert: {
+          action_type: string
+          agent_id: string
+          count?: number | null
+          window_start?: string | null
+        }
+        Update: {
+          action_type?: string
+          agent_id?: string
+          count?: number | null
+          window_start?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_agent_rate_limits_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "ai_agents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_agent_receipts: {
+        Row: {
+          agent_id: string
+          alert_delivery: string | null
+          arguments: Json
+          created_at: string
+          id: string
+          result: Json | null
+          rollback_status: string | null
+          status: string
+          tool: string
+          undo: Json | null
+          updated_at: string
+        }
+        Insert: {
+          agent_id: string
+          alert_delivery?: string | null
+          arguments: Json
+          created_at?: string
+          id?: string
+          result?: Json | null
+          rollback_status?: string | null
+          status: string
+          tool: string
+          undo?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          agent_id?: string
+          alert_delivery?: string | null
+          arguments?: Json
+          created_at?: string
+          id?: string
+          result?: Json | null
+          rollback_status?: string | null
+          status?: string
+          tool?: string
+          undo?: Json | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_agent_receipts_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "ai_agents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_agent_runner: {
+        Row: {
+          endpoint: string
+          id: boolean
+          secret: string
+        }
+        Insert: {
+          endpoint?: string
+          id?: boolean
+          secret?: string
+        }
+        Update: {
+          endpoint?: string
+          id?: boolean
+          secret?: string
+        }
+        Relationships: []
+      }
+      ai_agent_task_actions: {
+        Row: {
+          created_at: string
+          cycle: number
+          id: string
+          result: Json | null
+          status: string
+          step: number
+          target: string
+          task_id: string
+          tool: string
+        }
+        Insert: {
+          created_at?: string
+          cycle: number
+          id?: string
+          result?: Json | null
+          status: string
+          step: number
+          target: string
+          task_id: string
+          tool: string
+        }
+        Update: {
+          created_at?: string
+          cycle?: number
+          id?: string
+          result?: Json | null
+          status?: string
+          step?: number
+          target?: string
+          task_id?: string
+          tool?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_agent_task_actions_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "ai_agent_tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_agent_tasks: {
+        Row: {
+          agent_id: string
+          completed_actions: number
+          created_at: string
+          cursor: Json
+          cycle: number
+          cycle_started_at: string
+          id: string
+          lease: string | null
+          lease_until: string | null
+          message: string | null
+          needs_review: boolean
+          next_run_at: string
+          owner_wallet: string
+          plan: Json
+          prompt: string
+          request_id: string
+          status: string
+          swarm_id: string | null
+          swarm_index: number | null
+          swarm_mode: string
+          swarm_size: number | null
+          updated_at: string
+          workspace_template_id: string | null
+        }
+        Insert: {
+          agent_id: string
+          completed_actions?: number
+          created_at?: string
+          cursor?: Json
+          cycle?: number
+          cycle_started_at?: string
+          id?: string
+          lease?: string | null
+          lease_until?: string | null
+          message?: string | null
+          needs_review?: boolean
+          next_run_at?: string
+          owner_wallet: string
+          plan: Json
+          prompt: string
+          request_id: string
+          status?: string
+          swarm_id?: string | null
+          swarm_index?: number | null
+          swarm_mode?: string
+          swarm_size?: number | null
+          updated_at?: string
+          workspace_template_id?: string | null
+        }
+        Update: {
+          agent_id?: string
+          completed_actions?: number
+          created_at?: string
+          cursor?: Json
+          cycle?: number
+          cycle_started_at?: string
+          id?: string
+          lease?: string | null
+          lease_until?: string | null
+          message?: string | null
+          needs_review?: boolean
+          next_run_at?: string
+          owner_wallet?: string
+          plan?: Json
+          prompt?: string
+          request_id?: string
+          status?: string
+          swarm_id?: string | null
+          swarm_index?: number | null
+          swarm_mode?: string
+          swarm_size?: number | null
+          updated_at?: string
+          workspace_template_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_agent_tasks_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "ai_agents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_agent_templates: {
+        Row: {
+          created_at: string
+          evaluation: Json
+          id: string
+          name: string
+          owner_wallet: string
+          prompt: string
+          published: boolean
+        }
+        Insert: {
+          created_at?: string
+          evaluation?: Json
+          id?: string
+          name: string
+          owner_wallet: string
+          prompt: string
+          published?: boolean
+        }
+        Update: {
+          created_at?: string
+          evaluation?: Json
+          id?: string
+          name?: string
+          owner_wallet?: string
+          prompt?: string
+          published?: boolean
+        }
+        Relationships: []
+      }
+      ai_agents: {
+        Row: {
+          api_key: string
+          created_at: string | null
+          description: string | null
+          human_owner_wallet: string | null
+          id: string
+          is_active: boolean | null
+          last_active_at: string | null
+          metadata: Json | null
+          name: string
+          owner_wallet_address: string
+          updated_at: string | null
+          wallet_private_key: string | null
+        }
+        Insert: {
+          api_key: string
+          created_at?: string | null
+          description?: string | null
+          human_owner_wallet?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_active_at?: string | null
+          metadata?: Json | null
+          name: string
+          owner_wallet_address: string
+          updated_at?: string | null
+          wallet_private_key?: string | null
+        }
+        Update: {
+          api_key?: string
+          created_at?: string | null
+          description?: string | null
+          human_owner_wallet?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_active_at?: string | null
+          metadata?: Json | null
+          name?: string
+          owner_wallet_address?: string
+          updated_at?: string | null
+          wallet_private_key?: string | null
+        }
+        Relationships: []
+      }
+      ai_conversations: {
+        Row: {
+          created_at: string
+          id: string
+          title: string | null
+          updated_at: string
+          wallet_address: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          title?: string | null
+          updated_at?: string
+          wallet_address: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          title?: string | null
+          updated_at?: string
+          wallet_address?: string
+        }
+        Relationships: []
+      }
+      ai_free_generations: {
+        Row: {
+          created_at: string
+          job_id: string
+          model: string
+          wallet_address: string
+        }
+        Insert: {
+          created_at?: string
+          job_id: string
+          model: string
+          wallet_address: string
+        }
+        Update: {
+          created_at?: string
+          job_id?: string
+          model?: string
+          wallet_address?: string
+        }
+        Relationships: []
+      }
+      ai_generation_jobs: {
+        Row: {
+          created_at: string
+          credit_debit_key: string | null
+          endpoint: string
+          id: string
+          kind: string
+          metadata: Json
+          model: string
+          payment_source: string
+          prediction_id: string | null
+          price_dhb: number
+          provider: string | null
+          provider_app: string | null
+          result: Json | null
+          status: string
+          tx_hash: string | null
+          updated_at: string
+          wallet_address: string
+        }
+        Insert: {
+          created_at?: string
+          credit_debit_key?: string | null
+          endpoint: string
+          id: string
+          kind: string
+          metadata?: Json
+          model: string
+          payment_source?: string
+          prediction_id?: string | null
+          price_dhb: number
+          provider?: string | null
+          provider_app?: string | null
+          result?: Json | null
+          status?: string
+          tx_hash?: string | null
+          updated_at?: string
+          wallet_address: string
+        }
+        Update: {
+          created_at?: string
+          credit_debit_key?: string | null
+          endpoint?: string
+          id?: string
+          kind?: string
+          metadata?: Json
+          model?: string
+          payment_source?: string
+          prediction_id?: string | null
+          price_dhb?: number
+          provider?: string | null
+          provider_app?: string | null
+          result?: Json | null
+          status?: string
+          tx_hash?: string | null
+          updated_at?: string
+          wallet_address?: string
+        }
+        Relationships: []
+      }
+      ai_messages: {
+        Row: {
+          attached_image: string | null
+          audio_url: string | null
+          content: string
+          conversation_id: string
+          created_at: string
+          id: string
+          image_url: string | null
+          role: string
+          video_url: string | null
+        }
+        Insert: {
+          attached_image?: string | null
+          audio_url?: string | null
+          content: string
+          conversation_id: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          role: string
+          video_url?: string | null
+        }
+        Update: {
+          attached_image?: string | null
+          audio_url?: string | null
+          content?: string
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          role?: string
+          video_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "ai_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_payment_refunds: {
+        Row: {
+          created_at: string
+          dhb: number
+          job_id: string
+          payment_id: string
+        }
+        Insert: {
+          created_at?: string
+          dhb: number
+          job_id: string
+          payment_id: string
+        }
+        Update: {
+          created_at?: string
+          dhb?: number
+          job_id?: string
+          payment_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_payment_refunds_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "ai_payments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_payments: {
+        Row: {
+          chain: string
+          created_at: string
+          id: string
+          paid_dhb: number
+          purpose: string
+          remaining_dhb: number
+          tx_hash: string
+          updated_at: string
+          wallet_address: string
+        }
+        Insert: {
+          chain: string
+          created_at?: string
+          id?: string
+          paid_dhb: number
+          purpose?: string
+          remaining_dhb: number
+          tx_hash: string
+          updated_at?: string
+          wallet_address: string
+        }
+        Update: {
+          chain?: string
+          created_at?: string
+          id?: string
+          paid_dhb?: number
+          purpose?: string
+          remaining_dhb?: number
+          tx_hash?: string
+          updated_at?: string
+          wallet_address?: string
+        }
+        Relationships: []
+      }
+      ai_provider_usage_daily: {
+        Row: {
+          attempts: number
+          cached_tokens: number
+          day: string
+          elapsed_ms: number
+          fallback_reason: string
+          feature: string
+          http_status: number
+          input_tokens: number
+          outcome: string
+          output_tokens: number
+          provider: string
+          reasoning_tokens: number
+          requested_model: string
+          route: string
+          served_model: string
+          updated_at: string
+          usage_missing: number
+          usage_reports: number
+        }
+        Insert: {
+          attempts?: number
+          cached_tokens?: number
+          day: string
+          elapsed_ms?: number
+          fallback_reason: string
+          feature: string
+          http_status: number
+          input_tokens?: number
+          outcome: string
+          output_tokens?: number
+          provider: string
+          reasoning_tokens?: number
+          requested_model: string
+          route: string
+          served_model: string
+          updated_at?: string
+          usage_missing?: number
+          usage_reports?: number
+        }
+        Update: {
+          attempts?: number
+          cached_tokens?: number
+          day?: string
+          elapsed_ms?: number
+          fallback_reason?: string
+          feature?: string
+          http_status?: number
+          input_tokens?: number
+          outcome?: string
+          output_tokens?: number
+          provider?: string
+          reasoning_tokens?: number
+          requested_model?: string
+          route?: string
+          served_model?: string
+          updated_at?: string
+          usage_missing?: number
+          usage_reports?: number
+        }
+        Relationships: []
+      }
+      ai_user_memories: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          importance: number
+          memory_type: string
+          updated_at: string
+          wallet_address: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          importance?: number
+          memory_type?: string
+          updated_at?: string
+          wallet_address: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          importance?: number
+          memory_type?: string
+          updated_at?: string
+          wallet_address?: string
+        }
+        Relationships: []
+      }
+      anonymous_post_view_totals: {
+        Row: {
+          token_id: string
+          updated_at: string
+          view_count: number
+        }
+        Insert: {
+          token_id: string
+          updated_at?: string
+          view_count?: number
+        }
+        Update: {
+          token_id?: string
+          updated_at?: string
+          view_count?: number
+        }
+        Relationships: []
+      }
+      anonymous_post_views: {
+        Row: {
+          created_at: string
+          id: number
+          token_id: string
+          view_date: string
+          viewer_hash: string
+        }
+        Insert: {
+          created_at?: string
+          id?: never
+          token_id: string
+          view_date?: string
+          viewer_hash: string
+        }
+        Update: {
+          created_at?: string
+          id?: never
+          token_id?: string
+          view_date?: string
+          viewer_hash?: string
+        }
+        Relationships: []
+      }
+      app_min_versions: {
+        Row: {
+          min_version: string | null
+          platform: string
+          recommended_version: string | null
+          store_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          min_version?: string | null
+          platform: string
+          recommended_version?: string | null
+          store_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          min_version?: string | null
+          platform?: string
+          recommended_version?: string | null
+          store_url?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      arcade_map_presence: {
+        Row: {
+          avatar_url: string | null
+          latitude: number
+          longitude: number
+          precision_km: number
+          public_id: string
+          updated_at: string
+          username: string | null
+          wallet_address: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          latitude: number
+          longitude: number
+          precision_km?: number
+          public_id?: string
+          updated_at?: string
+          username?: string | null
+          wallet_address: string
+        }
+        Update: {
+          avatar_url?: string | null
+          latitude?: number
+          longitude?: number
+          precision_km?: number
+          public_id?: string
+          updated_at?: string
+          username?: string | null
+          wallet_address?: string
+        }
+        Relationships: []
+      }
+      arcade_runs: {
+        Row: {
+          checkpoints: number
+          flags: string[]
+          game: string
+          id: string
+          last_seen_at: string
+          life: number
+          progress: number
+          scored_at: string | null
+          started_at: string
+          status: string
+          wallet: string
+        }
+        Insert: {
+          checkpoints?: number
+          flags?: string[]
+          game: string
+          id?: string
+          last_seen_at?: string
+          life?: number
+          progress?: number
+          scored_at?: string | null
+          started_at?: string
+          status?: string
+          wallet: string
+        }
+        Update: {
+          checkpoints?: number
+          flags?: string[]
+          game?: string
+          id?: string
+          last_seen_at?: string
+          life?: number
+          progress?: number
+          scored_at?: string | null
+          started_at?: string
+          status?: string
+          wallet?: string
+        }
+        Relationships: []
+      }
+      arcade_scores: {
+        Row: {
+          achieved_at: string
+          detail: Json
+          game: string
+          runs: number
+          score: number
+          updated_at: string
+          wallet: string
+        }
+        Insert: {
+          achieved_at?: string
+          detail?: Json
+          game: string
+          runs?: number
+          score: number
+          updated_at?: string
+          wallet: string
+        }
+        Update: {
+          achieved_at?: string
+          detail?: Json
+          game?: string
+          runs?: number
+          score?: number
+          updated_at?: string
+          wallet?: string
+        }
+        Relationships: []
+      }
+      arcade_submissions: {
+        Row: {
+          contact_email: string
+          created_at: string
+          description: string
+          id: string
+          mobile_support: boolean
+          playable_url: string
+          rights_confirmed: boolean
+          source_url: string | null
+          status: string
+          title: string
+        }
+        Insert: {
+          contact_email: string
+          created_at?: string
+          description: string
+          id?: string
+          mobile_support?: boolean
+          playable_url: string
+          rights_confirmed: boolean
+          source_url?: string | null
+          status?: string
+          title: string
+        }
+        Update: {
+          contact_email?: string
+          created_at?: string
+          description?: string
+          id?: string
+          mobile_support?: boolean
+          playable_url?: string
+          rights_confirmed?: boolean
+          source_url?: string | null
+          status?: string
+          title?: string
+        }
+        Relationships: []
+      }
+      audio_spaces: {
+        Row: {
+          channel_name: string
+          cover_image_url: string | null
+          created_at: string
+          description: string | null
+          ended_at: string | null
+          entry_locked: boolean
+          host_avatar: string | null
+          host_username: string | null
+          host_wallet_address: string
+          id: string
+          last_speech_at: string | null
+          listener_count: number
+          recording_url: string | null
+          scheduled_at: string | null
+          short_id: number
+          speaker_count: number
+          started_at: string
+          status: string
+          title: string
+          topic: string | null
+          total_listens: number
+        }
+        Insert: {
+          channel_name: string
+          cover_image_url?: string | null
+          created_at?: string
+          description?: string | null
+          ended_at?: string | null
+          entry_locked?: boolean
+          host_avatar?: string | null
+          host_username?: string | null
+          host_wallet_address: string
+          id?: string
+          last_speech_at?: string | null
+          listener_count?: number
+          recording_url?: string | null
+          scheduled_at?: string | null
+          short_id?: number
+          speaker_count?: number
+          started_at?: string
+          status?: string
+          title: string
+          topic?: string | null
+          total_listens?: number
+        }
+        Update: {
+          channel_name?: string
+          cover_image_url?: string | null
+          created_at?: string
+          description?: string | null
+          ended_at?: string | null
+          entry_locked?: boolean
+          host_avatar?: string | null
+          host_username?: string | null
+          host_wallet_address?: string
+          id?: string
+          last_speech_at?: string | null
+          listener_count?: number
+          recording_url?: string | null
+          scheduled_at?: string | null
+          short_id?: number
+          speaker_count?: number
+          started_at?: string
+          status?: string
+          title?: string
+          topic?: string | null
+          total_listens?: number
+        }
+        Relationships: []
+      }
+      builder_files: {
+        Row: {
+          content: string
+          path: string
+          project_id: string
+          updated_at: string
+        }
+        Insert: {
+          content: string
+          path: string
+          project_id: string
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          path?: string
+          project_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "builder_files_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "builder_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      builder_messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          project_id: string
+          role: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          project_id: string
+          role: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          project_id?: string
+          role?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "builder_messages_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "builder_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      builder_projects: {
+        Row: {
+          created_at: string
+          emoji: string
+          error: string | null
+          id: string
+          is_public: boolean
+          name: string
+          prompt: string
+          status: string
+          status_detail: string | null
+          updated_at: string
+          version: number
+          wallet: string
+        }
+        Insert: {
+          created_at?: string
+          emoji?: string
+          error?: string | null
+          id?: string
+          is_public?: boolean
+          name?: string
+          prompt: string
+          status?: string
+          status_detail?: string | null
+          updated_at?: string
+          version?: number
+          wallet: string
+        }
+        Update: {
+          created_at?: string
+          emoji?: string
+          error?: string | null
+          id?: string
+          is_public?: boolean
+          name?: string
+          prompt?: string
+          status?: string
+          status_detail?: string | null
+          updated_at?: string
+          version?: number
+          wallet?: string
+        }
+        Relationships: []
+      }
+      builder_usage: {
+        Row: {
+          builds: number
+          day: string
+          wallet: string
+        }
+        Insert: {
+          builds?: number
+          day: string
+          wallet: string
+        }
+        Update: {
+          builds?: number
+          day?: string
+          wallet?: string
+        }
+        Relationships: []
+      }
+      buy_bot_state: {
+        Row: {
+          id: string
+          last_block_number: number
+          last_tx_hashes: string[]
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          last_block_number?: number
+          last_tx_hashes?: string[]
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          last_block_number?: number
+          last_tx_hashes?: string[]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      call_sessions: {
+        Row: {
+          call_type: string
+          caller_address: string
+          created_at: string
+          group_id: string | null
+          group_name: string | null
+          id: string
+          recipient_address: string
+          signaling_data: Json | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          call_type: string
+          caller_address: string
+          created_at?: string
+          group_id?: string | null
+          group_name?: string | null
+          id?: string
+          recipient_address: string
+          signaling_data?: Json | null
+          status: string
+          updated_at?: string
+        }
+        Update: {
+          call_type?: string
+          caller_address?: string
+          created_at?: string
+          group_id?: string | null
+          group_name?: string | null
+          id?: string
+          recipient_address?: string
+          signaling_data?: Json | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      callback_requests: {
+        Row: {
+          call_type: string
+          created_at: string
+          expires_at: string
+          id: string
+          message: string | null
+          recipient_address: string
+          requester_address: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          call_type: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          message?: string | null
+          recipient_address: string
+          requester_address: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          call_type?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          message?: string | null
+          recipient_address?: string
+          requester_address?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      category_post_log: {
+        Row: {
+          id: string
+          name: string
+          posted_at: string
+          token_id: number | null
+        }
+        Insert: {
+          id?: string
+          name: string
+          posted_at?: string
+          token_id?: number | null
+        }
+        Update: {
+          id?: string
+          name?: string
+          posted_at?: string
+          token_id?: number | null
+        }
+        Relationships: []
+      }
+      chess_matches: {
+        Row: {
+          black_ms: number | null
+          black_wallet: string | null
+          clock_initial_ms: number
+          created_at: string
+          created_by: string
+          end_reason: string | null
+          fen: string
+          finished_at: string | null
+          id: string
+          last_move_at: string | null
+          opponent: string | null
+          ply: number
+          stake_dhb: number
+          start_fen: string | null
+          status: string
+          turn: string
+          wagers_settled: boolean
+          white_ms: number | null
+          white_wallet: string | null
+          winner: string | null
+        }
+        Insert: {
+          black_ms?: number | null
+          black_wallet?: string | null
+          clock_initial_ms: number
+          created_at?: string
+          created_by: string
+          end_reason?: string | null
+          fen: string
+          finished_at?: string | null
+          id?: string
+          last_move_at?: string | null
+          opponent?: string | null
+          ply?: number
+          stake_dhb?: number
+          start_fen?: string | null
+          status?: string
+          turn?: string
+          wagers_settled?: boolean
+          white_ms?: number | null
+          white_wallet?: string | null
+          winner?: string | null
+        }
+        Update: {
+          black_ms?: number | null
+          black_wallet?: string | null
+          clock_initial_ms?: number
+          created_at?: string
+          created_by?: string
+          end_reason?: string | null
+          fen?: string
+          finished_at?: string | null
+          id?: string
+          last_move_at?: string | null
+          opponent?: string | null
+          ply?: number
+          stake_dhb?: number
+          start_fen?: string | null
+          status?: string
+          turn?: string
+          wagers_settled?: boolean
+          white_ms?: number | null
+          white_wallet?: string | null
+          winner?: string | null
+        }
+        Relationships: []
+      }
+      chess_moves: {
+        Row: {
+          black_ms: number | null
+          created_at: string
+          fen_after: string
+          from_sq: string
+          id: number
+          match_id: string
+          ply: number
+          promotion: string | null
+          san: string
+          to_sq: string
+          wallet: string
+          white_ms: number | null
+        }
+        Insert: {
+          black_ms?: number | null
+          created_at?: string
+          fen_after: string
+          from_sq: string
+          id?: never
+          match_id: string
+          ply: number
+          promotion?: string | null
+          san: string
+          to_sq: string
+          wallet: string
+          white_ms?: number | null
+        }
+        Update: {
+          black_ms?: number | null
+          created_at?: string
+          fen_after?: string
+          from_sq?: string
+          id?: never
+          match_id?: string
+          ply?: number
+          promotion?: string | null
+          san?: string
+          to_sq?: string
+          wallet?: string
+          white_ms?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chess_moves_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "chess_matches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      chirp_speech_usage: {
+        Row: {
+          characters: number
+          month: string
+          updated_at: string
+        }
+        Insert: {
+          characters?: number
+          month: string
+          updated_at?: string
+        }
+        Update: {
+          characters?: number
+          month?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      client_error_logs: {
+        Row: {
+          component: string | null
+          created_at: string | null
+          id: string
+          level: string
+          message: string
+          metadata: Json | null
+          stack_trace: string | null
+          user_address: string | null
+        }
+        Insert: {
+          component?: string | null
+          created_at?: string | null
+          id?: string
+          level: string
+          message: string
+          metadata?: Json | null
+          stack_trace?: string | null
+          user_address?: string | null
+        }
+        Update: {
+          component?: string | null
+          created_at?: string | null
+          id?: string
+          level?: string
+          message?: string
+          metadata?: Json | null
+          stack_trace?: string | null
+          user_address?: string | null
+        }
+        Relationships: []
+      }
+      communities: {
+        Row: {
+          avatar_url: string | null
+          banner_url: string | null
+          created_at: string
+          creator_wallet_address: string
+          default_permissions: Json
+          description: string | null
+          id: string
+          is_private: boolean
+          member_count: number
+          name: string
+          rules: Json | null
+          slow_mode_seconds: number
+          slug: string
+          ticker_chain_id: string | null
+          ticker_contract_address: string | null
+          ticker_pair_address: string | null
+          ticker_symbol: string | null
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          banner_url?: string | null
+          created_at?: string
+          creator_wallet_address: string
+          default_permissions?: Json
+          description?: string | null
+          id?: string
+          is_private?: boolean
+          member_count?: number
+          name: string
+          rules?: Json | null
+          slow_mode_seconds?: number
+          slug: string
+          ticker_chain_id?: string | null
+          ticker_contract_address?: string | null
+          ticker_pair_address?: string | null
+          ticker_symbol?: string | null
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          banner_url?: string | null
+          created_at?: string
+          creator_wallet_address?: string
+          default_permissions?: Json
+          description?: string | null
+          id?: string
+          is_private?: boolean
+          member_count?: number
+          name?: string
+          rules?: Json | null
+          slow_mode_seconds?: number
+          slug?: string
+          ticker_chain_id?: string | null
+          ticker_contract_address?: string | null
+          ticker_pair_address?: string | null
+          ticker_symbol?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      community_admin_log: {
+        Row: {
+          action: string
+          actor_wallet_address: string
+          community_id: string
+          created_at: string
+          detail: Json
+          id: string
+          target_message_id: string | null
+          target_wallet_address: string | null
+        }
+        Insert: {
+          action: string
+          actor_wallet_address: string
+          community_id: string
+          created_at?: string
+          detail?: Json
+          id?: string
+          target_message_id?: string | null
+          target_wallet_address?: string | null
+        }
+        Update: {
+          action?: string
+          actor_wallet_address?: string
+          community_id?: string
+          created_at?: string
+          detail?: Json
+          id?: string
+          target_message_id?: string | null
+          target_wallet_address?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_admin_log_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      community_chat_messages: {
+        Row: {
+          avatar_url: string | null
+          badge_balance: number | null
+          community_id: string
+          content: string
+          created_at: string
+          display_name: string | null
+          edited_at: string | null
+          id: string
+          image_url: string | null
+          message_type: string
+          pinned_at: string | null
+          pinned_by: string | null
+          reactions: Json | null
+          reply_to_id: string | null
+          username: string | null
+          wallet_address: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          badge_balance?: number | null
+          community_id: string
+          content?: string
+          created_at?: string
+          display_name?: string | null
+          edited_at?: string | null
+          id?: string
+          image_url?: string | null
+          message_type?: string
+          pinned_at?: string | null
+          pinned_by?: string | null
+          reactions?: Json | null
+          reply_to_id?: string | null
+          username?: string | null
+          wallet_address: string
+        }
+        Update: {
+          avatar_url?: string | null
+          badge_balance?: number | null
+          community_id?: string
+          content?: string
+          created_at?: string
+          display_name?: string | null
+          edited_at?: string | null
+          id?: string
+          image_url?: string | null
+          message_type?: string
+          pinned_at?: string | null
+          pinned_by?: string | null
+          reactions?: Json | null
+          reply_to_id?: string | null
+          username?: string | null
+          wallet_address?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_chat_messages_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "community_chat_messages_reply_to_id_fkey"
+            columns: ["reply_to_id"]
+            isOneToOne: false
+            referencedRelation: "community_chat_messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      community_event_rsvps: {
+        Row: {
+          created_at: string
+          event_id: string
+          id: string
+          status: string
+          wallet_address: string
+        }
+        Insert: {
+          created_at?: string
+          event_id: string
+          id?: string
+          status?: string
+          wallet_address: string
+        }
+        Update: {
+          created_at?: string
+          event_id?: string
+          id?: string
+          status?: string
+          wallet_address?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_event_rsvps_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "community_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      community_events: {
+        Row: {
+          community_id: string | null
+          cover_image_url: string | null
+          created_at: string
+          creator_avatar: string | null
+          creator_username: string | null
+          creator_wallet_address: string
+          description: string | null
+          ends_at: string | null
+          event_number: number
+          gate_fee: number
+          going_count: number
+          id: string
+          interested_count: number
+          is_private: boolean
+          location: string | null
+          starts_at: string
+          title: string
+        }
+        Insert: {
+          community_id?: string | null
+          cover_image_url?: string | null
+          created_at?: string
+          creator_avatar?: string | null
+          creator_username?: string | null
+          creator_wallet_address: string
+          description?: string | null
+          ends_at?: string | null
+          event_number?: number
+          gate_fee?: number
+          going_count?: number
+          id?: string
+          interested_count?: number
+          is_private?: boolean
+          location?: string | null
+          starts_at: string
+          title: string
+        }
+        Update: {
+          community_id?: string | null
+          cover_image_url?: string | null
+          created_at?: string
+          creator_avatar?: string | null
+          creator_username?: string | null
+          creator_wallet_address?: string
+          description?: string | null
+          ends_at?: string | null
+          event_number?: number
+          gate_fee?: number
+          going_count?: number
+          id?: string
+          interested_count?: number
+          is_private?: boolean
+          location?: string | null
+          starts_at?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_events_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      community_invite_attempts: {
+        Row: {
+          community_id: string
+          created_at: string
+          inviter: string
+          recipient: string
+          status: string
+        }
+        Insert: {
+          community_id: string
+          created_at?: string
+          inviter: string
+          recipient: string
+          status?: string
+        }
+        Update: {
+          community_id?: string
+          created_at?: string
+          inviter?: string
+          recipient?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_invite_attempts_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      community_invite_links: {
+        Row: {
+          code: string
+          community_id: string
+          created_at: string
+          created_by: string
+          expires_at: string | null
+          id: string
+          max_uses: number | null
+          name: string | null
+          requires_approval: boolean
+          revoked_at: string | null
+          uses: number
+        }
+        Insert: {
+          code: string
+          community_id: string
+          created_at?: string
+          created_by: string
+          expires_at?: string | null
+          id?: string
+          max_uses?: number | null
+          name?: string | null
+          requires_approval?: boolean
+          revoked_at?: string | null
+          uses?: number
+        }
+        Update: {
+          code?: string
+          community_id?: string
+          created_at?: string
+          created_by?: string
+          expires_at?: string | null
+          id?: string
+          max_uses?: number | null
+          name?: string | null
+          requires_approval?: boolean
+          revoked_at?: string | null
+          uses?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_invite_links_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      community_members: {
+        Row: {
+          ban_reason: string | null
+          banned_until: string | null
+          community_id: string
+          custom_title: string | null
+          id: string
+          joined_at: string
+          moderated_at: string | null
+          moderated_by: string | null
+          muted_until: string | null
+          permissions: Json
+          promoted_by: string | null
+          role: string
+          status: string
+          wallet_address: string
+        }
+        Insert: {
+          ban_reason?: string | null
+          banned_until?: string | null
+          community_id: string
+          custom_title?: string | null
+          id?: string
+          joined_at?: string
+          moderated_at?: string | null
+          moderated_by?: string | null
+          muted_until?: string | null
+          permissions?: Json
+          promoted_by?: string | null
+          role?: string
+          status?: string
+          wallet_address: string
+        }
+        Update: {
+          ban_reason?: string | null
+          banned_until?: string | null
+          community_id?: string
+          custom_title?: string | null
+          id?: string
+          joined_at?: string
+          moderated_at?: string | null
+          moderated_by?: string | null
+          muted_until?: string | null
+          permissions?: Json
+          promoted_by?: string | null
+          role?: string
+          status?: string
+          wallet_address?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_members_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      community_post_shares: {
+        Row: {
+          community_id: string
+          created_at: string
+          shared_by: string
+          token_id: number
+        }
+        Insert: {
+          community_id: string
+          created_at?: string
+          shared_by: string
+          token_id: number
+        }
+        Update: {
+          community_id?: string
+          created_at?: string
+          shared_by?: string
+          token_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_post_shares_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      creator_applications: {
+        Row: {
+          created_at: string
+          email: string
+          expected_compensation: string
+          id: string
+          instagram_username: string | null
+          other_socials: string | null
+          total_follower_reach: string
+          twitch_username: string | null
+          x_username: string | null
+          youtube_username: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          expected_compensation: string
+          id?: string
+          instagram_username?: string | null
+          other_socials?: string | null
+          total_follower_reach: string
+          twitch_username?: string | null
+          x_username?: string | null
+          youtube_username?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          expected_compensation?: string
+          id?: string
+          instagram_username?: string | null
+          other_socials?: string | null
+          total_follower_reach?: string
+          twitch_username?: string | null
+          x_username?: string | null
+          youtube_username?: string | null
+        }
+        Relationships: []
+      }
+      creator_assets: {
+        Row: {
+          created_at: string
+          id: string
+          metadata: Json
+          ready: boolean
+          storage_path: string | null
+          wallet_address: string
+        }
+        Insert: {
+          created_at?: string
+          id: string
+          metadata?: Json
+          ready?: boolean
+          storage_path?: string | null
+          wallet_address: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          metadata?: Json
+          ready?: boolean
+          storage_path?: string | null
+          wallet_address?: string
+        }
+        Relationships: []
+      }
+      creator_flows: {
+        Row: {
+          cover_url: string | null
+          created_at: string
+          data: Json
+          id: string
+          is_public: boolean
+          name: string
+          node_count: number
+          updated_at: string
+          wallet: string
+        }
+        Insert: {
+          cover_url?: string | null
+          created_at?: string
+          data?: Json
+          id: string
+          is_public?: boolean
+          name?: string
+          node_count?: number
+          updated_at?: string
+          wallet: string
+        }
+        Update: {
+          cover_url?: string | null
+          created_at?: string
+          data?: Json
+          id?: string
+          is_public?: boolean
+          name?: string
+          node_count?: number
+          updated_at?: string
+          wallet?: string
+        }
+        Relationships: []
+      }
+      creator_folder_items: {
+        Row: {
+          created_at: string
+          folder_id: string
+          item_id: string
+          wallet: string
+        }
+        Insert: {
+          created_at?: string
+          folder_id: string
+          item_id: string
+          wallet: string
+        }
+        Update: {
+          created_at?: string
+          folder_id?: string
+          item_id?: string
+          wallet?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "creator_folder_items_folder_id_fkey"
+            columns: ["folder_id"]
+            isOneToOne: false
+            referencedRelation: "creator_folders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      creator_folders: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          order_index: number
+          parent_id: string | null
+          updated_at: string
+          wallet: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          order_index?: number
+          parent_id?: string | null
+          updated_at?: string
+          wallet: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          order_index?: number
+          parent_id?: string | null
+          updated_at?: string
+          wallet?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "creator_folders_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "creator_folders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      creator_pack_items: {
+        Row: {
+          animated: boolean
+          created_at: string
+          emoji: string | null
+          id: string
+          image_url: string
+          pack_id: string
+          position: number
+        }
+        Insert: {
+          animated?: boolean
+          created_at?: string
+          emoji?: string | null
+          id?: string
+          image_url: string
+          pack_id: string
+          position?: number
+        }
+        Update: {
+          animated?: boolean
+          created_at?: string
+          emoji?: string | null
+          id?: string
+          image_url?: string
+          pack_id?: string
+          position?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "creator_pack_items_pack_id_fkey"
+            columns: ["pack_id"]
+            isOneToOne: false
+            referencedRelation: "creator_packs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      creator_packs: {
+        Row: {
+          cover_url: string | null
+          created_at: string
+          id: string
+          item_count: number
+          kind: string
+          name: string
+          owner: string
+          save_count: number
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          cover_url?: string | null
+          created_at?: string
+          id?: string
+          item_count?: number
+          kind: string
+          name: string
+          owner: string
+          save_count?: number
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          cover_url?: string | null
+          created_at?: string
+          id?: string
+          item_count?: number
+          kind?: string
+          name?: string
+          owner?: string
+          save_count?: number
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      creator_public_posters: {
+        Row: {
+          created_at: string
+          id: string
+          image_url: string
+          price_dhb: number
+          skill_slug: string
+        }
+        Insert: {
+          created_at?: string
+          id: string
+          image_url: string
+          price_dhb?: number
+          skill_slug?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          image_url?: string
+          price_dhb?: number
+          skill_slug?: string
+        }
+        Relationships: []
+      }
+      custom_emojis: {
+        Row: {
+          animated: boolean
+          category: string | null
+          created_at: string
+          created_by: string
+          external_id: string | null
+          id: string
+          image_url: string
+          pack_id: string | null
+          shortcode: string
+          source: string
+        }
+        Insert: {
+          animated?: boolean
+          category?: string | null
+          created_at?: string
+          created_by: string
+          external_id?: string | null
+          id?: string
+          image_url: string
+          pack_id?: string | null
+          shortcode: string
+          source?: string
+        }
+        Update: {
+          animated?: boolean
+          category?: string | null
+          created_at?: string
+          created_by?: string
+          external_id?: string | null
+          id?: string
+          image_url?: string
+          pack_id?: string | null
+          shortcode?: string
+          source?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "custom_emojis_pack_id_fkey"
+            columns: ["pack_id"]
+            isOneToOne: false
+            referencedRelation: "creator_packs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      custom_notifications: {
+        Row: {
+          actor_address: string
+          actor_avatar: string | null
+          actor_username: string | null
+          content: string
+          created_at: string
+          id: string
+          read: boolean
+          recipient_address: string
+          reference_comment_id: string | null
+          reference_id: string | null
+          reference_title: string | null
+          type: string
+        }
+        Insert: {
+          actor_address: string
+          actor_avatar?: string | null
+          actor_username?: string | null
+          content?: string
+          created_at?: string
+          id?: string
+          read?: boolean
+          recipient_address: string
+          reference_comment_id?: string | null
+          reference_id?: string | null
+          reference_title?: string | null
+          type?: string
+        }
+        Update: {
+          actor_address?: string
+          actor_avatar?: string | null
+          actor_username?: string | null
+          content?: string
+          created_at?: string
+          id?: string
+          read?: boolean
+          recipient_address?: string
+          reference_comment_id?: string | null
+          reference_id?: string | null
+          reference_title?: string | null
+          type?: string
+        }
+        Relationships: []
+      }
+      custom_voices: {
+        Row: {
+          created_at: string | null
+          elevenlabs_voice_id: string
+          id: string
+          is_stage_voice: boolean
+          name: string
+          wallet_address: string
+        }
+        Insert: {
+          created_at?: string | null
+          elevenlabs_voice_id: string
+          id?: string
+          is_stage_voice?: boolean
+          name: string
+          wallet_address: string
+        }
+        Update: {
+          created_at?: string | null
+          elevenlabs_voice_id?: string
+          id?: string
+          is_stage_voice?: boolean
+          name?: string
+          wallet_address?: string
+        }
+        Relationships: []
+      }
+      dao_proposal_voters: {
+        Row: {
+          proposal_id: string
+          vote_weight: number
+          wallet_address: string
+        }
+        Insert: {
+          proposal_id: string
+          vote_weight: number
+          wallet_address: string
+        }
+        Update: {
+          proposal_id?: string
+          vote_weight?: number
+          wallet_address?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dao_proposal_voters_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "dao_proposals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      dao_proposal_votes: {
+        Row: {
+          created_at: string
+          proposal_id: string
+          updated_at: string
+          vote_type: number
+          vote_weight: number
+          wallet_address: string
+        }
+        Insert: {
+          created_at?: string
+          proposal_id: string
+          updated_at?: string
+          vote_type: number
+          vote_weight: number
+          wallet_address: string
+        }
+        Update: {
+          created_at?: string
+          proposal_id?: string
+          updated_at?: string
+          vote_type?: number
+          vote_weight?: number
+          wallet_address?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dao_proposal_votes_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "dao_proposals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dao_proposal_votes_proposal_id_wallet_address_fkey"
+            columns: ["proposal_id", "wallet_address"]
+            isOneToOne: true
+            referencedRelation: "dao_proposal_voters"
+            referencedColumns: ["proposal_id", "wallet_address"]
+          },
+        ]
+      }
+      dao_proposals: {
+        Row: {
+          accept_dhb: number
+          accepted_at: string | null
+          created_at: string
+          description: string
+          dhb_amount: number | null
+          electorate_dhb: number
+          fulfilled_at: string | null
+          fulfilment_tx_hash: string | null
+          id: string
+          kind: string
+          payment_amount: number | null
+          payment_asset: string | null
+          payment_chain_id: number | null
+          payment_due_at: string | null
+          payment_reminder_sent_at: string | null
+          payment_submitted_at: string | null
+          payment_tx_hash: string | null
+          payment_verified_at: string | null
+          payment_verified_by: string | null
+          price_usd: number | null
+          proposer_address: string
+          proposer_avatar: string | null
+          proposer_username: string | null
+          recipient_address: string | null
+          reject_dhb: number
+          spend_amount: number | null
+          spend_asset: string | null
+          status: string
+          title: string
+          total_usd: number | null
+          updated_at: string
+          voting_ends_at: string
+          voting_reminder_sent_at: string | null
+        }
+        Insert: {
+          accept_dhb?: number
+          accepted_at?: string | null
+          created_at?: string
+          description: string
+          dhb_amount?: number | null
+          electorate_dhb?: number
+          fulfilled_at?: string | null
+          fulfilment_tx_hash?: string | null
+          id?: string
+          kind: string
+          payment_amount?: number | null
+          payment_asset?: string | null
+          payment_chain_id?: number | null
+          payment_due_at?: string | null
+          payment_reminder_sent_at?: string | null
+          payment_submitted_at?: string | null
+          payment_tx_hash?: string | null
+          payment_verified_at?: string | null
+          payment_verified_by?: string | null
+          price_usd?: number | null
+          proposer_address: string
+          proposer_avatar?: string | null
+          proposer_username?: string | null
+          recipient_address?: string | null
+          reject_dhb?: number
+          spend_amount?: number | null
+          spend_asset?: string | null
+          status?: string
+          title: string
+          total_usd?: number | null
+          updated_at?: string
+          voting_ends_at: string
+          voting_reminder_sent_at?: string | null
+        }
+        Update: {
+          accept_dhb?: number
+          accepted_at?: string | null
+          created_at?: string
+          description?: string
+          dhb_amount?: number | null
+          electorate_dhb?: number
+          fulfilled_at?: string | null
+          fulfilment_tx_hash?: string | null
+          id?: string
+          kind?: string
+          payment_amount?: number | null
+          payment_asset?: string | null
+          payment_chain_id?: number | null
+          payment_due_at?: string | null
+          payment_reminder_sent_at?: string | null
+          payment_submitted_at?: string | null
+          payment_tx_hash?: string | null
+          payment_verified_at?: string | null
+          payment_verified_by?: string | null
+          price_usd?: number | null
+          proposer_address?: string
+          proposer_avatar?: string | null
+          proposer_username?: string | null
+          recipient_address?: string | null
+          reject_dhb?: number
+          spend_amount?: number | null
+          spend_asset?: string | null
+          status?: string
+          title?: string
+          total_usd?: number | null
+          updated_at?: string
+          voting_ends_at?: string
+          voting_reminder_sent_at?: string | null
+        }
+        Relationships: []
+      }
+      dex_market_tick: {
+        Row: {
+          id: boolean
+          observed_at: string
+          revision: number
+        }
+        Insert: {
+          id?: boolean
+          observed_at?: string
+          revision?: number
+        }
+        Update: {
+          id?: boolean
+          observed_at?: string
+          revision?: number
+        }
+        Relationships: []
+      }
+      dex_pool_orders: {
+        Row: {
+          created_at: string
+          maker: string
+          order_ref: string
+          owner_address: string
+          pool_id: string
+          price: number
+          side: string
+          token_amount: number
+          tx_hash: string
+          usd_amount: number
+        }
+        Insert: {
+          created_at?: string
+          maker: string
+          order_ref: string
+          owner_address: string
+          pool_id: string
+          price: number
+          side: string
+          token_amount: number
+          tx_hash: string
+          usd_amount: number
+        }
+        Update: {
+          created_at?: string
+          maker?: string
+          order_ref?: string
+          owner_address?: string
+          pool_id?: string
+          price?: number
+          side?: string
+          token_amount?: number
+          tx_hash?: string
+          usd_amount?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dex_pool_orders_pool_id_fkey"
+            columns: ["pool_id"]
+            isOneToOne: false
+            referencedRelation: "dex_pools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      dex_pool_positions: {
+        Row: {
+          block_number: number
+          chain_id: number
+          created_at: string
+          mint_tx_hash: string
+          token_id: string
+        }
+        Insert: {
+          block_number: number
+          chain_id: number
+          created_at?: string
+          mint_tx_hash: string
+          token_id: string
+        }
+        Update: {
+          block_number?: number
+          chain_id?: number
+          created_at?: string
+          mint_tx_hash?: string
+          token_id?: string
+        }
+        Relationships: []
+      }
+      dex_pool_scan: {
+        Row: {
+          chain_id: number
+          floor_block: number
+          from_block: number
+          to_block: number
+          updated_at: string
+          window_blocks: number
+        }
+        Insert: {
+          chain_id: number
+          floor_block: number
+          from_block: number
+          to_block: number
+          updated_at?: string
+          window_blocks?: number
+        }
+        Update: {
+          chain_id?: number
+          floor_block?: number
+          from_block?: number
+          to_block?: number
+          updated_at?: string
+          window_blocks?: number
+        }
+        Relationships: []
+      }
+      dex_pool_trades: {
+        Row: {
+          created_at: string
+          owner_address: string
+          pool_id: string
+          price: number
+          side: string
+          token_amount: number
+          trader: string
+          tx_hash: string
+          usd_amount: number
+        }
+        Insert: {
+          created_at?: string
+          owner_address: string
+          pool_id: string
+          price: number
+          side: string
+          token_amount: number
+          trader: string
+          tx_hash: string
+          usd_amount: number
+        }
+        Update: {
+          created_at?: string
+          owner_address?: string
+          pool_id?: string
+          price?: number
+          side?: string
+          token_amount?: number
+          trader?: string
+          tx_hash?: string
+          usd_amount?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dex_pool_trades_pool_id_fkey"
+            columns: ["pool_id"]
+            isOneToOne: false
+            referencedRelation: "dex_pools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      dex_pools: {
+        Row: {
+          chain: string
+          created_at: string
+          creator_address: string
+          decimals: number
+          fee_dhb: number
+          fee_tx_hash: string
+          fee_usd: number
+          id: string
+          image_url: string | null
+          name: string
+          symbol: string
+          token_address: string
+        }
+        Insert: {
+          chain: string
+          created_at?: string
+          creator_address: string
+          decimals: number
+          fee_dhb: number
+          fee_tx_hash: string
+          fee_usd: number
+          id?: string
+          image_url?: string | null
+          name: string
+          symbol: string
+          token_address: string
+        }
+        Update: {
+          chain?: string
+          created_at?: string
+          creator_address?: string
+          decimals?: number
+          fee_dhb?: number
+          fee_tx_hash?: string
+          fee_usd?: number
+          id?: string
+          image_url?: string | null
+          name?: string
+          symbol?: string
+          token_address?: string
+        }
+        Relationships: []
+      }
+      dex_sell_positions: {
+        Row: {
+          chain_id: number
+          created_at: string
+          dhb_amount: number | null
+          max_usdc_per_dhb: number
+          min_usdc_per_dhb: number
+          mint_tx_hash: string
+          owner_address: string
+          side: string
+          token_id: string
+          usdc_amount: number | null
+        }
+        Insert: {
+          chain_id: number
+          created_at?: string
+          dhb_amount?: number | null
+          max_usdc_per_dhb: number
+          min_usdc_per_dhb: number
+          mint_tx_hash: string
+          owner_address: string
+          side?: string
+          token_id: string
+          usdc_amount?: number | null
+        }
+        Update: {
+          chain_id?: number
+          created_at?: string
+          dhb_amount?: number | null
+          max_usdc_per_dhb?: number
+          min_usdc_per_dhb?: number
+          mint_tx_hash?: string
+          owner_address?: string
+          side?: string
+          token_id?: string
+          usdc_amount?: number | null
+        }
+        Relationships: []
+      }
+      dhb_payment_claims: {
+        Row: {
+          chain: string | null
+          claimed_at: string
+          dhb: number
+          purpose: string
+          tx_hash: string
+          wallet_address: string
+        }
+        Insert: {
+          chain?: string | null
+          claimed_at?: string
+          dhb: number
+          purpose: string
+          tx_hash: string
+          wallet_address: string
+        }
+        Update: {
+          chain?: string | null
+          claimed_at?: string
+          dhb?: number
+          purpose?: string
+          tx_hash?: string
+          wallet_address?: string
+        }
+        Relationships: []
+      }
+      dub_jobs: {
+        Row: {
+          created_at: string
+          dubbing_id: string
+          wallet_address: string
+        }
+        Insert: {
+          created_at?: string
+          dubbing_id: string
+          wallet_address: string
+        }
+        Update: {
+          created_at?: string
+          dubbing_id?: string
+          wallet_address?: string
+        }
+        Relationships: []
+      }
+      edge_rate_limits: {
+        Row: {
+          action_type: string
+          bucket_key: string
+          count: number
+          window_start: string
+        }
+        Insert: {
+          action_type: string
+          bucket_key: string
+          count?: number
+          window_start?: string
+        }
+        Update: {
+          action_type?: string
+          bucket_key?: string
+          count?: number
+          window_start?: string
+        }
+        Relationships: []
+      }
+      editor_assets: {
+        Row: {
+          created_at: string
+          duration_seconds: number | null
+          height: number | null
+          id: string
+          kind: string
+          last_used_at: string
+          mime_type: string
+          name: string
+          posted_post_id: string | null
+          preserved: boolean
+          provenance: Json | null
+          size_bytes: number
+          storage_path: string
+          thumbnail_path: string | null
+          updated_at: string
+          wallet_address: string
+          width: number | null
+        }
+        Insert: {
+          created_at?: string
+          duration_seconds?: number | null
+          height?: number | null
+          id?: string
+          kind: string
+          last_used_at?: string
+          mime_type: string
+          name: string
+          posted_post_id?: string | null
+          preserved?: boolean
+          provenance?: Json | null
+          size_bytes?: number
+          storage_path: string
+          thumbnail_path?: string | null
+          updated_at?: string
+          wallet_address: string
+          width?: number | null
+        }
+        Update: {
+          created_at?: string
+          duration_seconds?: number | null
+          height?: number | null
+          id?: string
+          kind?: string
+          last_used_at?: string
+          mime_type?: string
+          name?: string
+          posted_post_id?: string | null
+          preserved?: boolean
+          provenance?: Json | null
+          size_bytes?: number
+          storage_path?: string
+          thumbnail_path?: string | null
+          updated_at?: string
+          wallet_address?: string
+          width?: number | null
+        }
+        Relationships: []
+      }
+      editor_cloud_comments: {
+        Row: {
+          assignee_wallet: string | null
+          at_seconds: number
+          author_wallet: string
+          body: string
+          clip_id: string | null
+          created_at: string
+          id: string
+          owner_wallet: string
+          parent_id: string | null
+          project_id: string
+          resolved: boolean
+          revision: number
+          state_version: number
+          updated_at: string
+        }
+        Insert: {
+          assignee_wallet?: string | null
+          at_seconds: number
+          author_wallet: string
+          body: string
+          clip_id?: string | null
+          created_at?: string
+          id: string
+          owner_wallet: string
+          parent_id?: string | null
+          project_id: string
+          resolved?: boolean
+          revision: number
+          state_version?: number
+          updated_at?: string
+        }
+        Update: {
+          assignee_wallet?: string | null
+          at_seconds?: number
+          author_wallet?: string
+          body?: string
+          clip_id?: string | null
+          created_at?: string
+          id?: string
+          owner_wallet?: string
+          parent_id?: string | null
+          project_id?: string
+          resolved?: boolean
+          revision?: number
+          state_version?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "editor_cloud_comments_owner_wallet_project_id_parent_id_fkey"
+            columns: ["owner_wallet", "project_id", "parent_id"]
+            isOneToOne: false
+            referencedRelation: "editor_cloud_comments"
+            referencedColumns: ["owner_wallet", "project_id", "id"]
+          },
+          {
+            foreignKeyName: "editor_cloud_comments_owner_wallet_project_id_revision_fkey"
+            columns: ["owner_wallet", "project_id", "revision"]
+            isOneToOne: false
+            referencedRelation: "editor_cloud_revisions"
+            referencedColumns: ["wallet_address", "project_id", "revision"]
+          },
+        ]
+      }
+      editor_cloud_draft_clients: {
+        Row: {
+          actor_wallet: string
+          anchor_revision: number | null
+          base_revision: number | null
+          client_id: string
+          committed_revision: number | null
+          document_hash: string | null
+          expires_at: string
+          owner_wallet: string
+          project_id: string
+          request_id: string | null
+          sequence: number
+          stored_at: string | null
+          writer_id: string
+        }
+        Insert: {
+          actor_wallet: string
+          anchor_revision?: number | null
+          base_revision?: number | null
+          client_id: string
+          committed_revision?: number | null
+          document_hash?: string | null
+          expires_at?: string
+          owner_wallet: string
+          project_id: string
+          request_id?: string | null
+          sequence?: number
+          stored_at?: string | null
+          writer_id?: string
+        }
+        Update: {
+          actor_wallet?: string
+          anchor_revision?: number | null
+          base_revision?: number | null
+          client_id?: string
+          committed_revision?: number | null
+          document_hash?: string | null
+          expires_at?: string
+          owner_wallet?: string
+          project_id?: string
+          request_id?: string | null
+          sequence?: number
+          stored_at?: string | null
+          writer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "editor_cloud_draft_clients_owner_wallet_project_id_fkey"
+            columns: ["owner_wallet", "project_id"]
+            isOneToOne: false
+            referencedRelation: "editor_cloud_projects"
+            referencedColumns: ["wallet_address", "id"]
+          },
+        ]
+      }
+      editor_cloud_draft_receipts: {
+        Row: {
+          actor_wallet: string
+          anchor_revision: number
+          base_revision: number
+          committed_revision: number | null
+          document_hash: string
+          expires_at: string
+          outcome: string
+          owner_wallet: string
+          project_id: string
+          request_id: string
+          sequence: number
+          stored_at: string
+          writer_id: string
+        }
+        Insert: {
+          actor_wallet: string
+          anchor_revision: number
+          base_revision: number
+          committed_revision?: number | null
+          document_hash: string
+          expires_at: string
+          outcome: string
+          owner_wallet: string
+          project_id: string
+          request_id: string
+          sequence: number
+          stored_at: string
+          writer_id: string
+        }
+        Update: {
+          actor_wallet?: string
+          anchor_revision?: number
+          base_revision?: number
+          committed_revision?: number | null
+          document_hash?: string
+          expires_at?: string
+          outcome?: string
+          owner_wallet?: string
+          project_id?: string
+          request_id?: string
+          sequence?: number
+          stored_at?: string
+          writer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "editor_cloud_draft_receipts_owner_wallet_project_id_fkey"
+            columns: ["owner_wallet", "project_id"]
+            isOneToOne: false
+            referencedRelation: "editor_cloud_projects"
+            referencedColumns: ["wallet_address", "id"]
+          },
+        ]
+      }
+      editor_cloud_drafts: {
+        Row: {
+          anchor_revision: number
+          document: Json
+          owner_wallet: string
+          project_id: string
+          revision: number
+          updated_at: string
+        }
+        Insert: {
+          anchor_revision: number
+          document: Json
+          owner_wallet: string
+          project_id: string
+          revision: number
+          updated_at?: string
+        }
+        Update: {
+          anchor_revision?: number
+          document?: Json
+          owner_wallet?: string
+          project_id?: string
+          revision?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "editor_cloud_drafts_owner_wallet_project_id_fkey"
+            columns: ["owner_wallet", "project_id"]
+            isOneToOne: true
+            referencedRelation: "editor_cloud_projects"
+            referencedColumns: ["wallet_address", "id"]
+          },
+        ]
+      }
+      editor_cloud_members: {
+        Row: {
+          accepted: boolean
+          member_wallet: string
+          owner_wallet: string
+          project_id: string
+          revoked: boolean
+          role: string
+          state_version: number
+          updated_at: string
+        }
+        Insert: {
+          accepted?: boolean
+          member_wallet: string
+          owner_wallet: string
+          project_id: string
+          revoked?: boolean
+          role: string
+          state_version?: number
+          updated_at?: string
+        }
+        Update: {
+          accepted?: boolean
+          member_wallet?: string
+          owner_wallet?: string
+          project_id?: string
+          revoked?: boolean
+          role?: string
+          state_version?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "editor_cloud_members_owner_wallet_project_id_fkey"
+            columns: ["owner_wallet", "project_id"]
+            isOneToOne: false
+            referencedRelation: "editor_cloud_projects"
+            referencedColumns: ["wallet_address", "id"]
+          },
+        ]
+      }
+      editor_cloud_projects: {
+        Row: {
+          created_at: string
+          id: string
+          revision: number
+          state_version: number
+          title: string
+          trashed_at: string | null
+          updated_at: string
+          wallet_address: string
+        }
+        Insert: {
+          created_at?: string
+          id: string
+          revision?: number
+          state_version?: number
+          title: string
+          trashed_at?: string | null
+          updated_at?: string
+          wallet_address: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          revision?: number
+          state_version?: number
+          title?: string
+          trashed_at?: string | null
+          updated_at?: string
+          wallet_address?: string
+        }
+        Relationships: []
+      }
+      editor_cloud_revisions: {
+        Row: {
+          created_at: string
+          document: Json
+          draft_base_revision: number | null
+          editor_wallet: string | null
+          project_id: string
+          request_id: string
+          revision: number
+          saved_base_revision: number | null
+          wallet_address: string
+        }
+        Insert: {
+          created_at?: string
+          document: Json
+          draft_base_revision?: number | null
+          editor_wallet?: string | null
+          project_id: string
+          request_id: string
+          revision: number
+          saved_base_revision?: number | null
+          wallet_address: string
+        }
+        Update: {
+          created_at?: string
+          document?: Json
+          draft_base_revision?: number | null
+          editor_wallet?: string | null
+          project_id?: string
+          request_id?: string
+          revision?: number
+          saved_base_revision?: number | null
+          wallet_address?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "editor_cloud_revisions_wallet_address_project_id_fkey"
+            columns: ["wallet_address", "project_id"]
+            isOneToOne: false
+            referencedRelation: "editor_cloud_projects"
+            referencedColumns: ["wallet_address", "id"]
+          },
+        ]
+      }
+      editor_cloud_uploads: {
+        Row: {
+          expires_at: string
+          path: string
+          shared_project_id: string | null
+          size_bytes: number
+          uploader_wallet: string | null
+          wallet_address: string
+        }
+        Insert: {
+          expires_at?: string
+          path: string
+          shared_project_id?: string | null
+          size_bytes: number
+          uploader_wallet?: string | null
+          wallet_address: string
+        }
+        Update: {
+          expires_at?: string
+          path?: string
+          shared_project_id?: string | null
+          size_bytes?: number
+          uploader_wallet?: string | null
+          wallet_address?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "editor_cloud_shared_upload_project"
+            columns: ["wallet_address", "shared_project_id"]
+            isOneToOne: false
+            referencedRelation: "editor_cloud_projects"
+            referencedColumns: ["wallet_address", "id"]
+          },
+        ]
+      }
+      email_send_log: {
+        Row: {
+          created_at: string
+          error_message: string | null
+          id: string
+          message_id: string | null
+          metadata: Json | null
+          recipient_email: string
+          status: string
+          template_name: string
+        }
+        Insert: {
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          message_id?: string | null
+          metadata?: Json | null
+          recipient_email: string
+          status: string
+          template_name: string
+        }
+        Update: {
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          message_id?: string | null
+          metadata?: Json | null
+          recipient_email?: string
+          status?: string
+          template_name?: string
+        }
+        Relationships: []
+      }
+      email_send_state: {
+        Row: {
+          auth_email_ttl_minutes: number
+          batch_size: number
+          id: number
+          retry_after_until: string | null
+          send_delay_ms: number
+          transactional_email_ttl_minutes: number
+          updated_at: string
+        }
+        Insert: {
+          auth_email_ttl_minutes?: number
+          batch_size?: number
+          id?: number
+          retry_after_until?: string | null
+          send_delay_ms?: number
+          transactional_email_ttl_minutes?: number
+          updated_at?: string
+        }
+        Update: {
+          auth_email_ttl_minutes?: number
+          batch_size?: number
+          id?: number
+          retry_after_until?: string | null
+          send_delay_ms?: number
+          transactional_email_ttl_minutes?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      email_unsubscribe_tokens: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          token: string
+          used_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          token: string
+          used_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          token?: string
+          used_at?: string | null
+        }
+        Relationships: []
+      }
+      event_chat_messages: {
+        Row: {
+          avatar_url: string | null
+          badge_balance: number | null
+          content: string
+          created_at: string
+          display_name: string | null
+          event_id: string
+          id: string
+          image_url: string | null
+          message_type: string
+          reactions: Json | null
+          reply_to_id: string | null
+          username: string | null
+          wallet_address: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          badge_balance?: number | null
+          content?: string
+          created_at?: string
+          display_name?: string | null
+          event_id: string
+          id?: string
+          image_url?: string | null
+          message_type?: string
+          reactions?: Json | null
+          reply_to_id?: string | null
+          username?: string | null
+          wallet_address: string
+        }
+        Update: {
+          avatar_url?: string | null
+          badge_balance?: number | null
+          content?: string
+          created_at?: string
+          display_name?: string | null
+          event_id?: string
+          id?: string
+          image_url?: string | null
+          message_type?: string
+          reactions?: Json | null
+          reply_to_id?: string | null
+          username?: string | null
+          wallet_address?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_chat_messages_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "community_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_chat_messages_reply_to_id_fkey"
+            columns: ["reply_to_id"]
+            isOneToOne: false
+            referencedRelation: "event_chat_messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_gate_payments: {
+        Row: {
+          amount: number
+          chain_id: number
+          created_at: string
+          creator_wallet_address: string
+          event_id: string
+          id: string
+          payer_wallet_address: string
+          tx_hash: string
+        }
+        Insert: {
+          amount: number
+          chain_id?: number
+          created_at?: string
+          creator_wallet_address: string
+          event_id: string
+          id?: string
+          payer_wallet_address: string
+          tx_hash: string
+        }
+        Update: {
+          amount?: number
+          chain_id?: number
+          created_at?: string
+          creator_wallet_address?: string
+          event_id?: string
+          id?: string
+          payer_wallet_address?: string
+          tx_hash?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_gate_payments_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "community_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      feature_request_comment_reactions: {
+        Row: {
+          comment_id: string
+          created_at: string
+          id: string
+          reaction: string
+          wallet_address: string
+        }
+        Insert: {
+          comment_id: string
+          created_at?: string
+          id?: string
+          reaction: string
+          wallet_address: string
+        }
+        Update: {
+          comment_id?: string
+          created_at?: string
+          id?: string
+          reaction?: string
+          wallet_address?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feature_request_comment_reactions_comment_id_fkey"
+            columns: ["comment_id"]
+            isOneToOne: false
+            referencedRelation: "feature_request_comments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      feature_request_comments: {
+        Row: {
+          avatar: string | null
+          content: string
+          created_at: string
+          feature_request_id: string
+          id: string
+          media_duration: number | null
+          media_type: string | null
+          media_url: string | null
+          parent_id: string | null
+          updated_at: string | null
+          username: string | null
+          wallet_address: string
+        }
+        Insert: {
+          avatar?: string | null
+          content: string
+          created_at?: string
+          feature_request_id: string
+          id?: string
+          media_duration?: number | null
+          media_type?: string | null
+          media_url?: string | null
+          parent_id?: string | null
+          updated_at?: string | null
+          username?: string | null
+          wallet_address: string
+        }
+        Update: {
+          avatar?: string | null
+          content?: string
+          created_at?: string
+          feature_request_id?: string
+          id?: string
+          media_duration?: number | null
+          media_type?: string | null
+          media_url?: string | null
+          parent_id?: string | null
+          updated_at?: string | null
+          username?: string | null
+          wallet_address?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feature_request_comments_feature_request_id_fkey"
+            columns: ["feature_request_id"]
+            isOneToOne: false
+            referencedRelation: "feature_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feature_request_comments_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "feature_request_comments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      feature_request_votes: {
+        Row: {
+          created_at: string
+          feature_request_id: string
+          id: string
+          vote_type: number
+          wallet_address: string
+        }
+        Insert: {
+          created_at?: string
+          feature_request_id: string
+          id?: string
+          vote_type: number
+          wallet_address: string
+        }
+        Update: {
+          created_at?: string
+          feature_request_id?: string
+          id?: string
+          vote_type?: number
+          wallet_address?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feature_request_votes_feature_request_id_fkey"
+            columns: ["feature_request_id"]
+            isOneToOne: false
+            referencedRelation: "feature_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      feature_requests: {
+        Row: {
+          author_avatar: string | null
+          author_username: string | null
+          author_wallet_address: string
+          category: string
+          comment_count: number
+          created_at: string
+          description: string
+          dislike_count: number
+          id: string
+          image_url: string | null
+          image_urls: string[] | null
+          like_count: number
+          shipped_url: string | null
+          early_access_until: string | null
+          status_note: string | null
+          status: string
+          title: string
+          title_auto: boolean
+          updated_at: string
+          vote_count: number
+        }
+        Insert: {
+          author_avatar?: string | null
+          author_username?: string | null
+          author_wallet_address: string
+          category?: string
+          comment_count?: number
+          created_at?: string
+          description: string
+          dislike_count?: number
+          id?: string
+          image_url?: string | null
+          image_urls?: string[] | null
+          like_count?: number
+          shipped_url?: string | null
+          early_access_until?: string | null
+          status_note?: string | null
+          status?: string
+          title: string
+          title_auto?: boolean
+          updated_at?: string
+          vote_count?: number
+        }
+        Update: {
+          author_avatar?: string | null
+          author_username?: string | null
+          author_wallet_address?: string
+          category?: string
+          comment_count?: number
+          created_at?: string
+          description?: string
+          dislike_count?: number
+          id?: string
+          image_url?: string | null
+          image_urls?: string[] | null
+          like_count?: number
+          shipped_url?: string | null
+          early_access_until?: string | null
+          status_note?: string | null
+          status?: string
+          title?: string
+          title_auto?: boolean
+          updated_at?: string
+          vote_count?: number
+        }
+        Relationships: []
+      }
+      feature_shipped_notifications: {
+        Row: {
+          created_at: string
+          feature_request_id: string
+          id: string
+          wallet_address: string
+        }
+        Insert: {
+          created_at?: string
+          feature_request_id: string
+          id?: string
+          wallet_address: string
+        }
+        Update: {
+          created_at?: string
+          feature_request_id?: string
+          id?: string
+          wallet_address?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feature_shipped_notifications_feature_request_id_fkey"
+            columns: ["feature_request_id"]
+            isOneToOne: false
+            referencedRelation: "feature_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      film_reviews: {
+        Row: {
+          address: string
+          body: string | null
+          created_at: string
+          id: string
+          justwatch_id: string
+          object_type: string
+          poster: string | null
+          rating: number
+          title: string
+          updated_at: string
+          year: number | null
+        }
+        Insert: {
+          address: string
+          body?: string | null
+          created_at?: string
+          id?: string
+          justwatch_id: string
+          object_type: string
+          poster?: string | null
+          rating: number
+          title: string
+          updated_at?: string
+          year?: number | null
+        }
+        Update: {
+          address?: string
+          body?: string | null
+          created_at?: string
+          id?: string
+          justwatch_id?: string
+          object_type?: string
+          poster?: string | null
+          rating?: number
+          title?: string
+          updated_at?: string
+          year?: number | null
+        }
+        Relationships: []
+      }
+      fraction_listings: {
+        Row: {
+          chain_id: number
+          created_at: string
+          creator_address: string | null
+          creator_username: string | null
+          filled_quantity: number
+          id: string
+          post_image_url: string | null
+          post_title: string | null
+          post_type: string | null
+          price_per_fraction: number
+          quantity: number
+          seller_address: string
+          status: string
+          token_id: string
+          updated_at: string
+        }
+        Insert: {
+          chain_id?: number
+          created_at?: string
+          creator_address?: string | null
+          creator_username?: string | null
+          filled_quantity?: number
+          id?: string
+          post_image_url?: string | null
+          post_title?: string | null
+          post_type?: string | null
+          price_per_fraction: number
+          quantity: number
+          seller_address: string
+          status?: string
+          token_id: string
+          updated_at?: string
+        }
+        Update: {
+          chain_id?: number
+          created_at?: string
+          creator_address?: string | null
+          creator_username?: string | null
+          filled_quantity?: number
+          id?: string
+          post_image_url?: string | null
+          post_title?: string | null
+          post_type?: string | null
+          price_per_fraction?: number
+          quantity?: number
+          seller_address?: string
+          status?: string
+          token_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      fraction_offers: {
+        Row: {
+          buyer_address: string
+          chain_id: number
+          created_at: string
+          id: string
+          listing_id: string | null
+          price_per_fraction: number
+          quantity: number
+          status: string
+          target_seller: string | null
+          token_id: string
+          tx_hash: string | null
+          updated_at: string
+        }
+        Insert: {
+          buyer_address: string
+          chain_id?: number
+          created_at?: string
+          id?: string
+          listing_id?: string | null
+          price_per_fraction: number
+          quantity: number
+          status?: string
+          target_seller?: string | null
+          token_id: string
+          tx_hash?: string | null
+          updated_at?: string
+        }
+        Update: {
+          buyer_address?: string
+          chain_id?: number
+          created_at?: string
+          id?: string
+          listing_id?: string | null
+          price_per_fraction?: number
+          quantity?: number
+          status?: string
+          target_seller?: string | null
+          token_id?: string
+          tx_hash?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fraction_offers_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "fraction_listings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fraction_trades: {
+        Row: {
+          buyer_address: string
+          chain_id: number
+          created_at: string
+          delivered_at: string | null
+          delivery_tx_hash: string | null
+          id: string
+          listing_id: string | null
+          offer_id: string | null
+          paid_at: string | null
+          price_per_fraction: number
+          quantity: number
+          seller_address: string
+          settle_by: string | null
+          settled_at: string | null
+          status: string
+          token_id: string
+          total_dhb: number
+          tx_hash: string | null
+          verified_at: string | null
+        }
+        Insert: {
+          buyer_address: string
+          chain_id?: number
+          created_at?: string
+          delivered_at?: string | null
+          delivery_tx_hash?: string | null
+          id?: string
+          listing_id?: string | null
+          offer_id?: string | null
+          paid_at?: string | null
+          price_per_fraction: number
+          quantity: number
+          seller_address: string
+          settle_by?: string | null
+          settled_at?: string | null
+          status?: string
+          token_id: string
+          total_dhb: number
+          tx_hash?: string | null
+          verified_at?: string | null
+        }
+        Update: {
+          buyer_address?: string
+          chain_id?: number
+          created_at?: string
+          delivered_at?: string | null
+          delivery_tx_hash?: string | null
+          id?: string
+          listing_id?: string | null
+          offer_id?: string | null
+          paid_at?: string | null
+          price_per_fraction?: number
+          quantity?: number
+          seller_address?: string
+          settle_by?: string | null
+          settled_at?: string | null
+          status?: string
+          token_id?: string
+          total_dhb?: number
+          tx_hash?: string | null
+          verified_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fraction_trades_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "fraction_listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fraction_trades_offer_id_fkey"
+            columns: ["offer_id"]
+            isOneToOne: false
+            referencedRelation: "fraction_offers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      governance_comment_reactions: {
+        Row: {
+          comment_id: string
+          created_at: string
+          id: string
+          reaction: string
+          wallet_address: string
+        }
+        Insert: {
+          comment_id: string
+          created_at?: string
+          id?: string
+          reaction: string
+          wallet_address: string
+        }
+        Update: {
+          comment_id?: string
+          created_at?: string
+          id?: string
+          reaction?: string
+          wallet_address?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "governance_comment_reactions_comment_id_fkey"
+            columns: ["comment_id"]
+            isOneToOne: false
+            referencedRelation: "governance_comments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      governance_comments: {
+        Row: {
+          avatar: string | null
+          content: string
+          created_at: string
+          id: string
+          parent_id: string | null
+          proposal_id: string
+          updated_at: string | null
+          username: string | null
+          wallet_address: string
+        }
+        Insert: {
+          avatar?: string | null
+          content: string
+          created_at?: string
+          id?: string
+          parent_id?: string | null
+          proposal_id: string
+          updated_at?: string | null
+          username?: string | null
+          wallet_address: string
+        }
+        Update: {
+          avatar?: string | null
+          content?: string
+          created_at?: string
+          id?: string
+          parent_id?: string | null
+          proposal_id?: string
+          updated_at?: string | null
+          username?: string | null
+          wallet_address?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "governance_comments_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "governance_comments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "governance_comments_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "governance_proposals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      governance_proposals: {
+        Row: {
+          author_avatar: string | null
+          author_username: string | null
+          author_wallet_address: string
+          comment_count: number
+          created_at: string
+          description: string
+          dislike_count: number
+          fee_tx_hash: string | null
+          id: string
+          like_count: number
+          media_type: string | null
+          media_url: string | null
+          proposal_number: number
+          status: string
+          title: string
+          updated_at: string
+          vote_count: number
+          voting_ends_at: string | null
+        }
+        Insert: {
+          author_avatar?: string | null
+          author_username?: string | null
+          author_wallet_address: string
+          comment_count?: number
+          created_at?: string
+          description: string
+          dislike_count?: number
+          fee_tx_hash?: string | null
+          id?: string
+          like_count?: number
+          media_type?: string | null
+          media_url?: string | null
+          proposal_number?: number
+          status?: string
+          title: string
+          updated_at?: string
+          vote_count?: number
+          voting_ends_at?: string | null
+        }
+        Update: {
+          author_avatar?: string | null
+          author_username?: string | null
+          author_wallet_address?: string
+          comment_count?: number
+          created_at?: string
+          description?: string
+          dislike_count?: number
+          fee_tx_hash?: string | null
+          id?: string
+          like_count?: number
+          media_type?: string | null
+          media_url?: string | null
+          proposal_number?: number
+          status?: string
+          title?: string
+          updated_at?: string
+          vote_count?: number
+          voting_ends_at?: string | null
+        }
+        Relationships: []
+      }
+      governance_votes: {
+        Row: {
+          badge_name: string | null
+          created_at: string
+          id: string
+          proposal_id: string
+          vote_type: number
+          vote_weight: number
+          wallet_address: string
+        }
+        Insert: {
+          badge_name?: string | null
+          created_at?: string
+          id?: string
+          proposal_id: string
+          vote_type: number
+          vote_weight?: number
+          wallet_address: string
+        }
+        Update: {
+          badge_name?: string | null
+          created_at?: string
+          id?: string
+          proposal_id?: string
+          vote_type?: number
+          vote_weight?: number
+          wallet_address?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "governance_votes_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "governance_proposals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      job_applications: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          instagram: string | null
+          linkedin: string | null
+          name: string
+          other_socials: string | null
+          past_experience: string | null
+          role: string
+          telegram: string | null
+          twitter: string | null
+          why_hire_you: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          instagram?: string | null
+          linkedin?: string | null
+          name: string
+          other_socials?: string | null
+          past_experience?: string | null
+          role: string
+          telegram?: string | null
+          twitter?: string | null
+          why_hire_you?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          instagram?: string | null
+          linkedin?: string | null
+          name?: string
+          other_socials?: string | null
+          past_experience?: string | null
+          role?: string
+          telegram?: string | null
+          twitter?: string | null
+          why_hire_you?: string | null
+        }
+        Relationships: []
+      }
+      launchpad_tokens: {
+        Row: {
+          chain_id: number
+          created_at: string
+          creator_address: string
+          curve_type: string
+          description: string | null
+          graduation_target_usd: number
+          id: string
+          image_url: string | null
+          market_cap_usd: number
+          mint_address: string | null
+          name: string
+          progress_bps: number
+          socials: Json
+          status: string
+          supply_sold: number
+          symbol: string
+          updated_at: string
+          volume_24h: number
+        }
+        Insert: {
+          chain_id?: number
+          created_at?: string
+          creator_address: string
+          curve_type?: string
+          description?: string | null
+          graduation_target_usd?: number
+          id?: string
+          image_url?: string | null
+          market_cap_usd?: number
+          mint_address?: string | null
+          name: string
+          progress_bps?: number
+          socials?: Json
+          status?: string
+          supply_sold?: number
+          symbol: string
+          updated_at?: string
+          volume_24h?: number
+        }
+        Update: {
+          chain_id?: number
+          created_at?: string
+          creator_address?: string
+          curve_type?: string
+          description?: string | null
+          graduation_target_usd?: number
+          id?: string
+          image_url?: string | null
+          market_cap_usd?: number
+          mint_address?: string | null
+          name?: string
+          progress_bps?: number
+          socials?: Json
+          status?: string
+          supply_sold?: number
+          symbol?: string
+          updated_at?: string
+          volume_24h?: number
+        }
+        Relationships: []
+      }
+      launchpad_trades: {
+        Row: {
+          created_at: string
+          dhb_in: number
+          id: string
+          price_per_token: number
+          side: string
+          token_id: string
+          tokens_out: number
+          trader_address: string
+          tx_hash: string | null
+        }
+        Insert: {
+          created_at?: string
+          dhb_in: number
+          id?: string
+          price_per_token: number
+          side: string
+          token_id: string
+          tokens_out: number
+          trader_address: string
+          tx_hash?: string | null
+        }
+        Update: {
+          created_at?: string
+          dhb_in?: number
+          id?: string
+          price_per_token?: number
+          side?: string
+          token_id?: string
+          tokens_out?: number
+          trader_address?: string
+          tx_hash?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "launchpad_trades_token_id_fkey"
+            columns: ["token_id"]
+            isOneToOne: false
+            referencedRelation: "launchpad_tokens"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      leaderboard_cache: {
+        Row: {
+          data: Json
+          id: string
+          period: string
+          sort_mode: string
+          updated_at: string
+        }
+        Insert: {
+          data: Json
+          id?: string
+          period: string
+          sort_mode: string
+          updated_at?: string
+        }
+        Update: {
+          data?: Json
+          id?: string
+          period?: string
+          sort_mode?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      leaderboard_snapshots: {
+        Row: {
+          account: string
+          balance: number
+          created_at: string
+          followers: number | null
+          id: string
+          likes: number | null
+          received_tips: number
+          sent_tips: number
+          snapshot_date: string
+          subscribers: number | null
+        }
+        Insert: {
+          account: string
+          balance?: number
+          created_at?: string
+          followers?: number | null
+          id?: string
+          likes?: number | null
+          received_tips?: number
+          sent_tips?: number
+          snapshot_date?: string
+          subscribers?: number | null
+        }
+        Update: {
+          account?: string
+          balance?: number
+          created_at?: string
+          followers?: number | null
+          id?: string
+          likes?: number | null
+          received_tips?: number
+          sent_tips?: number
+          snapshot_date?: string
+          subscribers?: number | null
+        }
+        Relationships: []
+      }
+      legacy_accounts: {
+        Row: {
+          badge_balance: number | null
+          email: string
+          eth_address: string
+          id: number
+          imported_at: string
+          signup_method: string | null
+          username: string | null
+        }
+        Insert: {
+          badge_balance?: number | null
+          email: string
+          eth_address: string
+          id?: number
+          imported_at?: string
+          signup_method?: string | null
+          username?: string | null
+        }
+        Update: {
+          badge_balance?: number | null
+          email?: string
+          eth_address?: string
+          id?: number
+          imported_at?: string
+          signup_method?: string | null
+          username?: string | null
+        }
+        Relationships: []
+      }
+      live_stream_sessions: {
+        Row: {
+          address: string
+          heartbeat_at: string
+          started_at: string
+          stream_id: string | null
+          token_id: string
+        }
+        Insert: {
+          address: string
+          heartbeat_at?: string
+          started_at?: string
+          stream_id?: string | null
+          token_id: string
+        }
+        Update: {
+          address?: string
+          heartbeat_at?: string
+          started_at?: string
+          stream_id?: string | null
+          token_id?: string
+        }
+        Relationships: []
+      }
+      maboroshi_stage_payments: {
+        Row: {
+          created_at: string
+          key: string
+          price_dhb: number
+          status: string
+          tx_hash: string
+          updated_at: string
+          wallet_address: string
+        }
+        Insert: {
+          created_at?: string
+          key: string
+          price_dhb: number
+          status?: string
+          tx_hash: string
+          updated_at?: string
+          wallet_address: string
+        }
+        Update: {
+          created_at?: string
+          key?: string
+          price_dhb?: number
+          status?: string
+          tx_hash?: string
+          updated_at?: string
+          wallet_address?: string
+        }
+        Relationships: []
+      }
+      miniapp_apps: {
+        Row: {
+          category: string | null
+          crawled_at: string | null
+          created_at: string
+          description: string | null
+          domain: string
+          home_url: string
+          icon_url: string | null
+          id: string
+          manifest: Json
+          name: string
+          notify_key_hash: string | null
+          owner_wallet: string | null
+          permissions: string[]
+          review_note: string | null
+          reviewed_at: string | null
+          slug: string
+          source: string
+          splash_background_color: string | null
+          splash_image_url: string | null
+          status: string
+          submitted_by: string | null
+          subtitle: string | null
+          tags: string[]
+          tier: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          crawled_at?: string | null
+          created_at?: string
+          description?: string | null
+          domain: string
+          home_url: string
+          icon_url?: string | null
+          id?: string
+          manifest?: Json
+          name: string
+          notify_key_hash?: string | null
+          owner_wallet?: string | null
+          permissions?: string[]
+          review_note?: string | null
+          reviewed_at?: string | null
+          slug: string
+          source?: string
+          splash_background_color?: string | null
+          splash_image_url?: string | null
+          status?: string
+          submitted_by?: string | null
+          subtitle?: string | null
+          tags?: string[]
+          tier?: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          crawled_at?: string | null
+          created_at?: string
+          description?: string | null
+          domain?: string
+          home_url?: string
+          icon_url?: string | null
+          id?: string
+          manifest?: Json
+          name?: string
+          notify_key_hash?: string | null
+          owner_wallet?: string | null
+          permissions?: string[]
+          review_note?: string | null
+          reviewed_at?: string | null
+          slug?: string
+          source?: string
+          splash_background_color?: string | null
+          splash_image_url?: string | null
+          status?: string
+          submitted_by?: string | null
+          subtitle?: string | null
+          tags?: string[]
+          tier?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      miniapp_config: {
+        Row: {
+          key: string
+          updated_at: string
+          value: Json
+        }
+        Insert: {
+          key: string
+          updated_at?: string
+          value: Json
+        }
+        Update: {
+          key?: string
+          updated_at?: string
+          value?: Json
+        }
+        Relationships: []
+      }
+      miniapp_installs: {
+        Row: {
+          app_id: string
+          created_at: string
+          notifications_on: boolean
+          wallet: string
+        }
+        Insert: {
+          app_id: string
+          created_at?: string
+          notifications_on?: boolean
+          wallet: string
+        }
+        Update: {
+          app_id?: string
+          created_at?: string
+          notifications_on?: boolean
+          wallet?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "miniapp_installs_app_id_fkey"
+            columns: ["app_id"]
+            isOneToOne: false
+            referencedRelation: "miniapp_apps"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      miniapp_notification_log: {
+        Row: {
+          app_id: string
+          notification_id: string
+          sent_at: string
+          wallet: string
+        }
+        Insert: {
+          app_id: string
+          notification_id: string
+          sent_at?: string
+          wallet: string
+        }
+        Update: {
+          app_id?: string
+          notification_id?: string
+          sent_at?: string
+          wallet?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "miniapp_notification_log_app_id_fkey"
+            columns: ["app_id"]
+            isOneToOne: false
+            referencedRelation: "miniapp_apps"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      miniapp_opens: {
+        Row: {
+          app_id: string
+          day: string
+          wallet: string
+        }
+        Insert: {
+          app_id: string
+          day?: string
+          wallet: string
+        }
+        Update: {
+          app_id?: string
+          day?: string
+          wallet?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "miniapp_opens_app_id_fkey"
+            columns: ["app_id"]
+            isOneToOne: false
+            referencedRelation: "miniapp_apps"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      miniapp_payments: {
+        Row: {
+          amount_dhb: number
+          app_id: string
+          chain_id: number
+          created_at: string
+          id: string
+          memo: string | null
+          payer_account: string | null
+          payer_wallet: string
+          recipient: string
+          tx_hash: string
+        }
+        Insert: {
+          amount_dhb: number
+          app_id: string
+          chain_id: number
+          created_at?: string
+          id?: string
+          memo?: string | null
+          payer_account?: string | null
+          payer_wallet: string
+          recipient: string
+          tx_hash: string
+        }
+        Update: {
+          amount_dhb?: number
+          app_id?: string
+          chain_id?: number
+          created_at?: string
+          id?: string
+          memo?: string | null
+          payer_account?: string | null
+          payer_wallet?: string
+          recipient?: string
+          tx_hash?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "miniapp_payments_app_id_fkey"
+            columns: ["app_id"]
+            isOneToOne: false
+            referencedRelation: "miniapp_apps"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      miniapp_rewards: {
+        Row: {
+          amount_dhb: number
+          app_id: string
+          computed_at: string
+          owner_wallet: string
+          paid_at: string | null
+          paid_tx: string | null
+          share: number
+          week_start: string
+          weight: number
+        }
+        Insert: {
+          amount_dhb: number
+          app_id: string
+          computed_at?: string
+          owner_wallet: string
+          paid_at?: string | null
+          paid_tx?: string | null
+          share: number
+          week_start: string
+          weight: number
+        }
+        Update: {
+          amount_dhb?: number
+          app_id?: string
+          computed_at?: string
+          owner_wallet?: string
+          paid_at?: string | null
+          paid_tx?: string | null
+          share?: number
+          week_start?: string
+          weight?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "miniapp_rewards_app_id_fkey"
+            columns: ["app_id"]
+            isOneToOne: false
+            referencedRelation: "miniapp_apps"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      miniapp_scores: {
+        Row: {
+          app_id: string
+          day: string
+          is_new: boolean
+          rank: number | null
+          returning_users: number
+          score: number
+          weekly_users: number
+        }
+        Insert: {
+          app_id: string
+          day: string
+          is_new?: boolean
+          rank?: number | null
+          returning_users?: number
+          score?: number
+          weekly_users?: number
+        }
+        Update: {
+          app_id?: string
+          day?: string
+          is_new?: boolean
+          rank?: number | null
+          returning_users?: number
+          score?: number
+          weekly_users?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "miniapp_scores_app_id_fkey"
+            columns: ["app_id"]
+            isOneToOne: false
+            referencedRelation: "miniapp_apps"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      miniapp_signing_keys: {
+        Row: {
+          alg: string
+          created_at: string
+          kid: string
+          private_jwk: Json
+          public_jwk: Json
+          retired_at: string | null
+        }
+        Insert: {
+          alg?: string
+          created_at?: string
+          kid: string
+          private_jwk: Json
+          public_jwk: Json
+          retired_at?: string | null
+        }
+        Update: {
+          alg?: string
+          created_at?: string
+          kid?: string
+          private_jwk?: Json
+          public_jwk?: Json
+          retired_at?: string | null
+        }
+        Relationships: []
+      }
+      new_members: {
+        Row: {
+          avatar_url: string | null
+          badge_balance: number | null
+          display_name: string | null
+          first_seen_at: string
+          joined_at: string
+          opted_out: boolean
+          updated_at: string
+          username: string | null
+          wallet_address: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          badge_balance?: number | null
+          display_name?: string | null
+          first_seen_at?: string
+          joined_at: string
+          opted_out?: boolean
+          updated_at?: string
+          username?: string | null
+          wallet_address: string
+        }
+        Update: {
+          avatar_url?: string | null
+          badge_balance?: number | null
+          display_name?: string | null
+          first_seen_at?: string
+          joined_at?: string
+          opted_out?: boolean
+          updated_at?: string
+          username?: string | null
+          wallet_address?: string
+        }
+        Relationships: []
+      }
+      onboarding_events: {
+        Row: {
+          action: string
+          at: string
+          id: string
+          rating: string | null
+          step_id: string
+          wallet_address: string
+        }
+        Insert: {
+          action: string
+          at?: string
+          id?: string
+          rating?: string | null
+          step_id: string
+          wallet_address: string
+        }
+        Update: {
+          action?: string
+          at?: string
+          id?: string
+          rating?: string | null
+          step_id?: string
+          wallet_address?: string
+        }
+        Relationships: []
+      }
+      onboarding_progress: {
+        Row: {
+          completed_at: string | null
+          dismissed_at: string | null
+          started_at: string
+          steps: Json
+          wallet_address: string
+        }
+        Insert: {
+          completed_at?: string | null
+          dismissed_at?: string | null
+          started_at?: string
+          steps?: Json
+          wallet_address: string
+        }
+        Update: {
+          completed_at?: string | null
+          dismissed_at?: string | null
+          started_at?: string
+          steps?: Json
+          wallet_address?: string
+        }
+        Relationships: []
+      }
+      page_view_events: {
+        Row: {
+          address: string | null
+          created_at: string
+          ext_referrer_host: string | null
+          id: number
+          path: string
+          prev_path: string | null
+          viewer_id: string
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string
+          ext_referrer_host?: string | null
+          id?: never
+          path: string
+          prev_path?: string | null
+          viewer_id: string
+        }
+        Update: {
+          address?: string | null
+          created_at?: string
+          ext_referrer_host?: string | null
+          id?: never
+          path?: string
+          prev_path?: string | null
+          viewer_id?: string
+        }
+        Relationships: []
+      }
+      passkey_challenges: {
+        Row: {
+          challenge: string
+          created_at: string
+          expires_at: string
+          purpose: string
+          rp_id: string
+          user_handle: string | null
+          user_id: string | null
+        }
+        Insert: {
+          challenge: string
+          created_at?: string
+          expires_at: string
+          purpose: string
+          rp_id: string
+          user_handle?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          challenge?: string
+          created_at?: string
+          expires_at?: string
+          purpose?: string
+          rp_id?: string
+          user_handle?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      passkey_identities: {
+        Row: {
+          aaguid: string | null
+          backed_up: boolean | null
+          counter: number
+          created_at: string
+          credential_id: string
+          device_label: string | null
+          id: string
+          last_used_at: string | null
+          public_key: string
+          rp_id: string
+          transports: string[] | null
+          user_handle: string
+          user_id: string
+        }
+        Insert: {
+          aaguid?: string | null
+          backed_up?: boolean | null
+          counter?: number
+          created_at?: string
+          credential_id: string
+          device_label?: string | null
+          id?: string
+          last_used_at?: string | null
+          public_key: string
+          rp_id: string
+          transports?: string[] | null
+          user_handle: string
+          user_id: string
+        }
+        Update: {
+          aaguid?: string | null
+          backed_up?: boolean | null
+          counter?: number
+          created_at?: string
+          credential_id?: string
+          device_label?: string | null
+          id?: string
+          last_used_at?: string | null
+          public_key?: string
+          rp_id?: string
+          transports?: string[] | null
+          user_handle?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      phone_otp_codes: {
+        Row: {
+          attempts: number
+          code_hash: string
+          created_at: string
+          expires_at: string
+          phone: string
+        }
+        Insert: {
+          attempts?: number
+          code_hash: string
+          created_at?: string
+          expires_at: string
+          phone: string
+        }
+        Update: {
+          attempts?: number
+          code_hash?: string
+          created_at?: string
+          expires_at?: string
+          phone?: string
+        }
+        Relationships: []
+      }
+      pinned_communities: {
+        Row: {
+          community_id: string
+          created_at: string
+          display_order: number
+          id: string
+          wallet_address: string
+        }
+        Insert: {
+          community_id: string
+          created_at?: string
+          display_order?: number
+          id?: string
+          wallet_address: string
+        }
+        Update: {
+          community_id?: string
+          created_at?: string
+          display_order?: number
+          id?: string
+          wallet_address?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pinned_communities_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      post_discussion_settings: {
+        Row: {
+          common_ground: boolean
+          creator_address: string
+          token_id: number
+          updated_at: string | null
+        }
+        Insert: {
+          common_ground?: boolean
+          creator_address: string
+          token_id: number
+          updated_at?: string | null
+        }
+        Update: {
+          common_ground?: boolean
+          creator_address?: string
+          token_id?: number
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      post_drafts: {
+        Row: {
+          created_at: string
+          description: string
+          has_image: boolean
+          has_video: boolean
+          id: string
+          metadata: Json | null
+          selected_category: string
+          text: string
+          title_text: string
+          updated_at: string
+          user_id: string | null
+          wallet_address: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string
+          has_image?: boolean
+          has_video?: boolean
+          id?: string
+          metadata?: Json | null
+          selected_category?: string
+          text?: string
+          title_text?: string
+          updated_at?: string
+          user_id?: string | null
+          wallet_address: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          has_image?: boolean
+          has_video?: boolean
+          id?: string
+          metadata?: Json | null
+          selected_category?: string
+          text?: string
+          title_text?: string
+          updated_at?: string
+          user_id?: string | null
+          wallet_address?: string
+        }
+        Relationships: []
+      }
+      post_link_copies: {
+        Row: {
+          created_at: string
+          id: string
+          token_id: number
+          wallet_address: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          token_id: number
+          wallet_address?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          token_id?: number
+          wallet_address?: string | null
+        }
+        Relationships: []
+      }
+      post_translations: {
+        Row: {
+          created_at: string
+          hit_count: number
+          last_used_at: string
+          provider: string
+          source_lang: string | null
+          target_lang: string
+          text_hash: string
+          translated_text: string
+        }
+        Insert: {
+          created_at?: string
+          hit_count?: number
+          last_used_at?: string
+          provider: string
+          source_lang?: string | null
+          target_lang: string
+          text_hash: string
+          translated_text: string
+        }
+        Update: {
+          created_at?: string
+          hit_count?: number
+          last_used_at?: string
+          provider?: string
+          source_lang?: string | null
+          target_lang?: string
+          text_hash?: string
+          translated_text?: string
+        }
+        Relationships: []
+      }
+      ppv_purchases: {
+        Row: {
+          amount: number
+          buyer_address: string
+          chain_id: number
+          created_at: string
+          creator_address: string
+          currency: string
+          id: string
+          token_id: string
+          tx_hash: string
+        }
+        Insert: {
+          amount: number
+          buyer_address: string
+          chain_id?: number
+          created_at?: string
+          creator_address: string
+          currency?: string
+          id?: string
+          token_id: string
+          tx_hash: string
+        }
+        Update: {
+          amount?: number
+          buyer_address?: string
+          chain_id?: number
+          created_at?: string
+          creator_address?: string
+          currency?: string
+          id?: string
+          token_id?: string
+          tx_hash?: string
+        }
+        Relationships: []
+      }
+      premium_subscriptions: {
+        Row: {
+          cancel_at_period_end: boolean
+          created_at: string
+          current_period_end: string | null
+          current_period_start: string | null
+          environment: string
+          id: string
+          price_id: string
+          product_id: string
+          status: string
+          stripe_customer_id: string
+          stripe_subscription_id: string
+          updated_at: string
+          wallet_address: string
+          xl_cashback_eligible: boolean
+        }
+        Insert: {
+          cancel_at_period_end?: boolean
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          environment?: string
+          id?: string
+          price_id: string
+          product_id: string
+          status?: string
+          stripe_customer_id: string
+          stripe_subscription_id: string
+          updated_at?: string
+          wallet_address: string
+          xl_cashback_eligible?: boolean
+        }
+        Update: {
+          cancel_at_period_end?: boolean
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          environment?: string
+          id?: string
+          price_id?: string
+          product_id?: string
+          status?: string
+          stripe_customer_id?: string
+          stripe_subscription_id?: string
+          updated_at?: string
+          wallet_address?: string
+          xl_cashback_eligible?: boolean
+        }
+        Relationships: []
+      }
+      raise_hand_requests: {
+        Row: {
+          avatar: string | null
+          created_at: string
+          id: string
+          resolved_at: string | null
+          space_id: string
+          status: string
+          username: string | null
+          wallet_address: string
+        }
+        Insert: {
+          avatar?: string | null
+          created_at?: string
+          id?: string
+          resolved_at?: string | null
+          space_id: string
+          status?: string
+          username?: string | null
+          wallet_address: string
+        }
+        Update: {
+          avatar?: string | null
+          created_at?: string
+          id?: string
+          resolved_at?: string | null
+          space_id?: string
+          status?: string
+          username?: string | null
+          wallet_address?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "raise_hand_requests_space_id_fkey"
+            columns: ["space_id"]
+            isOneToOne: false
+            referencedRelation: "audio_spaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      santa_snake_scores: {
+        Row: {
+          score: number
+          updated_at: string
+          username: string | null
+          wallet_address: string
+        }
+        Insert: {
+          score?: number
+          updated_at?: string
+          username?: string | null
+          wallet_address: string
+        }
+        Update: {
+          score?: number
+          updated_at?: string
+          username?: string | null
+          wallet_address?: string
+        }
+        Relationships: []
+      }
+      saved_addresses: {
+        Row: {
+          address_line1: string
+          address_line2: string | null
+          city: string
+          country: string
+          created_at: string
+          full_name: string
+          id: string
+          is_default: boolean
+          label: string
+          postal_code: string
+          state: string
+          updated_at: string
+          wallet_address: string
+        }
+        Insert: {
+          address_line1?: string
+          address_line2?: string | null
+          city?: string
+          country?: string
+          created_at?: string
+          full_name?: string
+          id?: string
+          is_default?: boolean
+          label?: string
+          postal_code?: string
+          state?: string
+          updated_at?: string
+          wallet_address: string
+        }
+        Update: {
+          address_line1?: string
+          address_line2?: string | null
+          city?: string
+          country?: string
+          created_at?: string
+          full_name?: string
+          id?: string
+          is_default?: boolean
+          label?: string
+          postal_code?: string
+          state?: string
+          updated_at?: string
+          wallet_address?: string
+        }
+        Relationships: []
+      }
+      saved_creator_packs: {
+        Row: {
+          created_at: string
+          pack_id: string
+          wallet: string
+        }
+        Insert: {
+          created_at?: string
+          pack_id: string
+          wallet: string
+        }
+        Update: {
+          created_at?: string
+          pack_id?: string
+          wallet?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_creator_packs_pack_id_fkey"
+            columns: ["pack_id"]
+            isOneToOne: false
+            referencedRelation: "creator_packs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_credit_topups: {
+        Row: {
+          chain: string
+          created_at: string
+          dhb: number
+          dhb_price_usd: number
+          discount_pct: number
+          id: string
+          posts: number
+          tx_hash: string
+          usd: number
+          wallet_address: string
+        }
+        Insert: {
+          chain: string
+          created_at?: string
+          dhb: number
+          dhb_price_usd: number
+          discount_pct?: number
+          id?: string
+          posts: number
+          tx_hash: string
+          usd: number
+          wallet_address: string
+        }
+        Update: {
+          chain?: string
+          created_at?: string
+          dhb?: number
+          dhb_price_usd?: number
+          discount_pct?: number
+          id?: string
+          posts?: number
+          tx_hash?: string
+          usd?: number
+          wallet_address?: string
+        }
+        Relationships: []
+      }
+      social_crossposts: {
+        Row: {
+          created_at: string
+          credits_charged: number
+          credits_refunded: number
+          error: string | null
+          id: string
+          platforms: Json
+          scheduled_for: string | null
+          status: string
+          wallet_address: string
+          zernio_post_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          credits_charged?: number
+          credits_refunded?: number
+          error?: string | null
+          id?: string
+          platforms?: Json
+          scheduled_for?: string | null
+          status?: string
+          wallet_address: string
+          zernio_post_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          credits_charged?: number
+          credits_refunded?: number
+          error?: string | null
+          id?: string
+          platforms?: Json
+          scheduled_for?: string | null
+          status?: string
+          wallet_address?: string
+          zernio_post_id?: string | null
+        }
+        Relationships: []
+      }
+      social_farcaster_signers: {
+        Row: {
+          approval_url: string | null
+          created_at: string
+          fid: number | null
+          public_key: string | null
+          signer_uuid: string
+          status: string
+          updated_at: string
+          username: string | null
+          wallet_address: string
+        }
+        Insert: {
+          approval_url?: string | null
+          created_at?: string
+          fid?: number | null
+          public_key?: string | null
+          signer_uuid: string
+          status?: string
+          updated_at?: string
+          username?: string | null
+          wallet_address: string
+        }
+        Update: {
+          approval_url?: string | null
+          created_at?: string
+          fid?: number | null
+          public_key?: string | null
+          signer_uuid?: string
+          status?: string
+          updated_at?: string
+          username?: string | null
+          wallet_address?: string
+        }
+        Relationships: []
+      }
+      social_post_credits: {
+        Row: {
+          credits: number
+          updated_at: string
+          wallet_address: string
+        }
+        Insert: {
+          credits?: number
+          updated_at?: string
+          wallet_address: string
+        }
+        Update: {
+          credits?: number
+          updated_at?: string
+          wallet_address?: string
+        }
+        Relationships: []
+      }
+      social_profiles: {
+        Row: {
+          created_at: string
+          wallet_address: string
+          zernio_profile_id: string
+        }
+        Insert: {
+          created_at?: string
+          wallet_address: string
+          zernio_profile_id: string
+        }
+        Update: {
+          created_at?: string
+          wallet_address?: string
+          zernio_profile_id?: string
+        }
+        Relationships: []
+      }
+      space_participants: {
+        Row: {
+          avatar: string | null
+          hand_raised: boolean
+          id: string
+          is_muted: boolean
+          joined_at: string
+          left_at: string | null
+          role: string
+          space_id: string
+          username: string | null
+          wallet_address: string
+        }
+        Insert: {
+          avatar?: string | null
+          hand_raised?: boolean
+          id?: string
+          is_muted?: boolean
+          joined_at?: string
+          left_at?: string | null
+          role?: string
+          space_id: string
+          username?: string | null
+          wallet_address: string
+        }
+        Update: {
+          avatar?: string | null
+          hand_raised?: boolean
+          id?: string
+          is_muted?: boolean
+          joined_at?: string
+          left_at?: string | null
+          role?: string
+          space_id?: string
+          username?: string | null
+          wallet_address?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "space_participants_space_id_fkey"
+            columns: ["space_id"]
+            isOneToOne: false
+            referencedRelation: "audio_spaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stage_chat_messages: {
+        Row: {
+          avatar_url: string | null
+          badge_balance: number | null
+          content: string
+          created_at: string
+          display_name: string | null
+          id: string
+          image_url: string | null
+          message_type: string
+          reactions: Json
+          reply_to_id: string | null
+          space_id: string
+          username: string | null
+          wallet_address: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          badge_balance?: number | null
+          content?: string
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          image_url?: string | null
+          message_type?: string
+          reactions?: Json
+          reply_to_id?: string | null
+          space_id: string
+          username?: string | null
+          wallet_address: string
+        }
+        Update: {
+          avatar_url?: string | null
+          badge_balance?: number | null
+          content?: string
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          image_url?: string | null
+          message_type?: string
+          reactions?: Json
+          reply_to_id?: string | null
+          space_id?: string
+          username?: string | null
+          wallet_address?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stage_chat_messages_reply_to_id_fkey"
+            columns: ["reply_to_id"]
+            isOneToOne: false
+            referencedRelation: "stage_chat_messages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stage_chat_messages_space_id_fkey"
+            columns: ["space_id"]
+            isOneToOne: false
+            referencedRelation: "audio_spaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stage_dub_usage: {
+        Row: {
+          created_at: string
+          id: string
+          language: string
+          last_started_at: string | null
+          minutes: number
+          price_dhb_per_min: number
+          settled_at: string | null
+          settled_ref: string | null
+          space_id: string
+          updated_at: string
+          wallet_address: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          language: string
+          last_started_at?: string | null
+          minutes?: number
+          price_dhb_per_min: number
+          settled_at?: string | null
+          settled_ref?: string | null
+          space_id: string
+          updated_at?: string
+          wallet_address: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          language?: string
+          last_started_at?: string | null
+          minutes?: number
+          price_dhb_per_min?: number
+          settled_at?: string | null
+          settled_ref?: string | null
+          space_id?: string
+          updated_at?: string
+          wallet_address?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stage_dub_usage_space_id_fkey"
+            columns: ["space_id"]
+            isOneToOne: false
+            referencedRelation: "audio_spaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stage_entry_requests: {
+        Row: { space_id: string; wallet_address: string; requested_at: string; approved_at: string | null }
+        Insert: { space_id: string; wallet_address: string; requested_at?: string; approved_at?: string | null }
+        Update: { space_id?: string; wallet_address?: string; requested_at?: string; approved_at?: string | null }
+        Relationships: [{
+          foreignKeyName: "stage_entry_requests_space_id_fkey"
+          columns: ["space_id"]
+          isOneToOne: false
+          referencedRelation: "audio_spaces"
+          referencedColumns: ["id"]
+        }]
+      }
+      stage_reminders: {
+        Row: {
+          created_at: string
+          id: string
+          pre_start_notified_at: string | null
+          space_id: string
+          wallet_address: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          pre_start_notified_at?: string | null
+          space_id: string
+          wallet_address: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          pre_start_notified_at?: string | null
+          space_id?: string
+          wallet_address?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stage_reminders_space_id_fkey"
+            columns: ["space_id"]
+            isOneToOne: false
+            referencedRelation: "audio_spaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      staking_records: {
+        Row: {
+          action: string
+          amount: number
+          chain: string
+          created_at: string
+          id: string
+          tx_hash: string
+          wallet_address: string
+        }
+        Insert: {
+          action?: string
+          amount: number
+          chain: string
+          created_at?: string
+          id?: string
+          tx_hash: string
+          wallet_address: string
+        }
+        Update: {
+          action?: string
+          amount?: number
+          chain?: string
+          created_at?: string
+          id?: string
+          tx_hash?: string
+          wallet_address?: string
+        }
+        Relationships: []
+      }
+      store_listings: {
+        Row: {
+          category: string
+          condition: string | null
+          created_at: string
+          currency: string
+          description: string | null
+          digital_file_url: string | null
+          external_url: string | null
+          id: string
+          images: Json | null
+          is_digital: boolean
+          pod_provider: string | null
+          price: number
+          shipping_info: string | null
+          status: string
+          stock_quantity: number | null
+          store_id: string
+          title: string
+          updated_at: string
+          wallet_address: string
+        }
+        Insert: {
+          category?: string
+          condition?: string | null
+          created_at?: string
+          currency?: string
+          description?: string | null
+          digital_file_url?: string | null
+          external_url?: string | null
+          id?: string
+          images?: Json | null
+          is_digital?: boolean
+          pod_provider?: string | null
+          price: number
+          shipping_info?: string | null
+          status?: string
+          stock_quantity?: number | null
+          store_id: string
+          title: string
+          updated_at?: string
+          wallet_address: string
+        }
+        Update: {
+          category?: string
+          condition?: string | null
+          created_at?: string
+          currency?: string
+          description?: string | null
+          digital_file_url?: string | null
+          external_url?: string | null
+          id?: string
+          images?: Json | null
+          is_digital?: boolean
+          pod_provider?: string | null
+          price?: number
+          shipping_info?: string | null
+          status?: string
+          stock_quantity?: number | null
+          store_id?: string
+          title?: string
+          updated_at?: string
+          wallet_address?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "store_listings_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      store_orders: {
+        Row: {
+          amount: number
+          buyer_address: string
+          created_at: string
+          id: string
+          listing_id: string
+          notes: string | null
+          paid_token_amount: number | null
+          paid_token_symbol: string | null
+          seller_address: string
+          shipping_address: string | null
+          source: string
+          status: string
+          stream_token_id: string | null
+          tx_hash: string | null
+          updated_at: string
+          verified_at: string | null
+          verify_error: string | null
+        }
+        Insert: {
+          amount: number
+          buyer_address: string
+          created_at?: string
+          id?: string
+          listing_id: string
+          notes?: string | null
+          paid_token_amount?: number | null
+          paid_token_symbol?: string | null
+          seller_address: string
+          shipping_address?: string | null
+          source?: string
+          status?: string
+          stream_token_id?: string | null
+          tx_hash?: string | null
+          updated_at?: string
+          verified_at?: string | null
+          verify_error?: string | null
+        }
+        Update: {
+          amount?: number
+          buyer_address?: string
+          created_at?: string
+          id?: string
+          listing_id?: string
+          notes?: string | null
+          paid_token_amount?: number | null
+          paid_token_symbol?: string | null
+          seller_address?: string
+          shipping_address?: string | null
+          source?: string
+          status?: string
+          stream_token_id?: string | null
+          tx_hash?: string | null
+          updated_at?: string
+          verified_at?: string | null
+          verify_error?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "store_orders_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "store_listings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      store_reviews: {
+        Row: {
+          comment: string | null
+          created_at: string
+          id: string
+          listing_id: string
+          rating: number
+          reviewer_address: string
+          seller_response: string | null
+          updated_at: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          listing_id: string
+          rating: number
+          reviewer_address: string
+          seller_response?: string | null
+          updated_at?: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          listing_id?: string
+          rating?: number
+          reviewer_address?: string
+          seller_response?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "store_reviews_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "store_listings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stores: {
+        Row: {
+          avatar_url: string | null
+          banner_url: string | null
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string | null
+          updated_at: string
+          wallet_address: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          banner_url?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string | null
+          updated_at?: string
+          wallet_address: string
+        }
+        Update: {
+          avatar_url?: string | null
+          banner_url?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string | null
+          updated_at?: string
+          wallet_address?: string
+        }
+        Relationships: []
+      }
+      stories: {
+        Row: {
+          avatar: string | null
+          created_at: string
+          expires_at: string
+          id: string
+          thumbnail_url: string | null
+          username: string | null
+          video_url: string
+          wallet_address: string
+        }
+        Insert: {
+          avatar?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          thumbnail_url?: string | null
+          username?: string | null
+          video_url: string
+          wallet_address: string
+        }
+        Update: {
+          avatar?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          thumbnail_url?: string | null
+          username?: string | null
+          video_url?: string
+          wallet_address?: string
+        }
+        Relationships: []
+      }
+      story_comments: {
+        Row: {
+          avatar: string | null
+          content: string
+          created_at: string
+          id: string
+          parent_id: string | null
+          story_id: string
+          username: string | null
+          wallet_address: string
+        }
+        Insert: {
+          avatar?: string | null
+          content: string
+          created_at?: string
+          id?: string
+          parent_id?: string | null
+          story_id: string
+          username?: string | null
+          wallet_address: string
+        }
+        Update: {
+          avatar?: string | null
+          content?: string
+          created_at?: string
+          id?: string
+          parent_id?: string | null
+          story_id?: string
+          username?: string | null
+          wallet_address?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "story_comments_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "story_comments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "story_comments_story_id_fkey"
+            columns: ["story_id"]
+            isOneToOne: false
+            referencedRelation: "stories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      story_reactions: {
+        Row: {
+          created_at: string
+          id: string
+          reaction_type: string
+          story_id: string
+          wallet_address: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          reaction_type: string
+          story_id: string
+          wallet_address: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          reaction_type?: string
+          story_id?: string
+          wallet_address?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "story_reactions_story_id_fkey"
+            columns: ["story_id"]
+            isOneToOne: false
+            referencedRelation: "stories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      story_views: {
+        Row: {
+          id: string
+          story_id: string
+          viewed_at: string
+          viewer_wallet_address: string | null
+        }
+        Insert: {
+          id?: string
+          story_id: string
+          viewed_at?: string
+          viewer_wallet_address?: string | null
+        }
+        Update: {
+          id?: string
+          story_id?: string
+          viewed_at?: string
+          viewer_wallet_address?: string | null
+        }
+        Relationships: []
+      }
+      stream_products: {
+        Row: {
+          created_at: string
+          creator_address: string
+          id: string
+          is_pinned: boolean
+          listing_id: string
+          live_price: number | null
+          pinned_at: string | null
+          position: number
+          token_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          creator_address: string
+          id?: string
+          is_pinned?: boolean
+          listing_id: string
+          live_price?: number | null
+          pinned_at?: string | null
+          position?: number
+          token_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          creator_address?: string
+          id?: string
+          is_pinned?: boolean
+          listing_id?: string
+          live_price?: number | null
+          pinned_at?: string | null
+          position?: number
+          token_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stream_products_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "store_listings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      suggested_profiles_cache: {
+        Row: {
+          address: string
+          avatar_url: string | null
+          badge_balance: number | null
+          display_name: string | null
+          followers: number | null
+          id: string
+          likes: number | null
+          updated_at: string | null
+          username: string | null
+        }
+        Insert: {
+          address: string
+          avatar_url?: string | null
+          badge_balance?: number | null
+          display_name?: string | null
+          followers?: number | null
+          id?: string
+          likes?: number | null
+          updated_at?: string | null
+          username?: string | null
+        }
+        Update: {
+          address?: string
+          avatar_url?: string | null
+          badge_balance?: number | null
+          display_name?: string | null
+          followers?: number | null
+          id?: string
+          likes?: number | null
+          updated_at?: string | null
+          username?: string | null
+        }
+        Relationships: []
+      }
+      suppressed_emails: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          metadata: Json | null
+          reason: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          metadata?: Json | null
+          reason: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          metadata?: Json | null
+          reason?: string
+        }
+        Relationships: []
+      }
+      ticker_search_log: {
+        Row: {
+          id: string
+          searched_at: string
+          symbol: string
+        }
+        Insert: {
+          id?: string
+          searched_at?: string
+          symbol: string
+        }
+        Update: {
+          id?: string
+          searched_at?: string
+          symbol?: string
+        }
+        Relationships: []
+      }
+      ticker_searches: {
+        Row: {
+          last_searched_at: string
+          search_count: number
+          symbol: string
+        }
+        Insert: {
+          last_searched_at?: string
+          search_count?: number
+          symbol: string
+        }
+        Update: {
+          last_searched_at?: string
+          search_count?: number
+          symbol?: string
+        }
+        Relationships: []
+      }
+      tip_leaderboard_cache: {
+        Row: {
+          chain_id: number
+          id: string
+          period: string
+          received_total: number
+          sent_total: number
+          updated_at: string
+          wallet_address: string
+        }
+        Insert: {
+          chain_id?: number
+          id?: string
+          period?: string
+          received_total?: number
+          sent_total?: number
+          updated_at?: string
+          wallet_address: string
+        }
+        Update: {
+          chain_id?: number
+          id?: string
+          period?: string
+          received_total?: number
+          sent_total?: number
+          updated_at?: string
+          wallet_address?: string
+        }
+        Relationships: []
+      }
+      tip_records: {
+        Row: {
+          amount: number
+          chain_id: number
+          comment_id: string | null
+          created_at: string
+          id: string
+          receiver_address: string
+          sender_address: string
+          token_id: string | null
+          tx_hash: string
+        }
+        Insert: {
+          amount: number
+          chain_id?: number
+          comment_id?: string | null
+          created_at?: string
+          id?: string
+          receiver_address: string
+          sender_address: string
+          token_id?: string | null
+          tx_hash: string
+        }
+        Update: {
+          amount?: number
+          chain_id?: number
+          comment_id?: string | null
+          created_at?: string
+          id?: string
+          receiver_address?: string
+          sender_address?: string
+          token_id?: string | null
+          tx_hash?: string
+        }
+        Relationships: []
+      }
+      token_listing_waitlist: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          source: string | null
+          supabase_user_id: string | null
+          token: string
+          updated_at: string
+          username: string | null
+          wallet_address: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          source?: string | null
+          supabase_user_id?: string | null
+          token: string
+          updated_at?: string
+          username?: string | null
+          wallet_address?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          source?: string | null
+          supabase_user_id?: string | null
+          token?: string
+          updated_at?: string
+          username?: string | null
+          wallet_address?: string | null
+        }
+        Relationships: []
+      }
+      transcript_correction_votes: {
+        Row: {
+          address: string
+          correction_id: string
+          created_at: string
+          vote: number
+        }
+        Insert: {
+          address: string
+          correction_id: string
+          created_at?: string
+          vote: number
+        }
+        Update: {
+          address?: string
+          correction_id?: string
+          created_at?: string
+          vote?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transcript_correction_votes_correction_id_fkey"
+            columns: ["correction_id"]
+            isOneToOne: false
+            referencedRelation: "transcript_corrections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      transcript_corrections: {
+        Row: {
+          address: string
+          created_at: string
+          id: string
+          original_text: string
+          segment_index: number
+          status: string
+          text: string
+          transcript_id: string
+          updated_at: string
+          votes_down: number
+          votes_up: number
+        }
+        Insert: {
+          address: string
+          created_at?: string
+          id?: string
+          original_text: string
+          segment_index: number
+          status?: string
+          text: string
+          transcript_id: string
+          updated_at?: string
+          votes_down?: number
+          votes_up?: number
+        }
+        Update: {
+          address?: string
+          created_at?: string
+          id?: string
+          original_text?: string
+          segment_index?: number
+          status?: string
+          text?: string
+          transcript_id?: string
+          updated_at?: string
+          votes_down?: number
+          votes_up?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transcript_corrections_transcript_id_fkey"
+            columns: ["transcript_id"]
+            isOneToOne: false
+            referencedRelation: "stage_transcripts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transcript_corrections_transcript_id_fkey"
+            columns: ["transcript_id"]
+            isOneToOne: false
+            referencedRelation: "transcripts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      transcript_translations: {
+        Row: {
+          chapters: Json
+          created_at: string
+          error: string | null
+          id: string
+          language: string
+          segments: Json
+          status: string
+          summary: string | null
+          transcript_id: string
+          updated_at: string
+        }
+        Insert: {
+          chapters?: Json
+          created_at?: string
+          error?: string | null
+          id?: string
+          language: string
+          segments?: Json
+          status?: string
+          summary?: string | null
+          transcript_id: string
+          updated_at?: string
+        }
+        Update: {
+          chapters?: Json
+          created_at?: string
+          error?: string | null
+          id?: string
+          language?: string
+          segments?: Json
+          status?: string
+          summary?: string | null
+          transcript_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transcript_translations_transcript_id_fkey"
+            columns: ["transcript_id"]
+            isOneToOne: false
+            referencedRelation: "stage_transcripts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transcript_translations_transcript_id_fkey"
+            columns: ["transcript_id"]
+            isOneToOne: false
+            referencedRelation: "transcripts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      transcription_worker: {
+        Row: {
+          enabled: boolean
+          id: number
+          runpod_api_key: string | null
+          runpod_endpoint_id: string | null
+          secret: string | null
+          updated_at: string
+          worker_url: string | null
+        }
+        Insert: {
+          enabled?: boolean
+          id?: number
+          runpod_api_key?: string | null
+          runpod_endpoint_id?: string | null
+          secret?: string | null
+          updated_at?: string
+          worker_url?: string | null
+        }
+        Update: {
+          enabled?: boolean
+          id?: number
+          runpod_api_key?: string | null
+          runpod_endpoint_id?: string | null
+          secret?: string | null
+          updated_at?: string
+          worker_url?: string | null
+        }
+        Relationships: []
+      }
+      transcripts: {
+        Row: {
+          attempts: number
+          chapters: Json
+          created_at: string
+          duration_seconds: number | null
+          engine_job_id: string | null
+          error: string | null
+          full_text: string | null
+          id: string
+          last_attempt_at: string | null
+          model: string | null
+          provider: string | null
+          search_tsv: unknown
+          segments: Json
+          source_kind: string
+          source_lang: string | null
+          source_ref: string
+          speaker_map: Json
+          speaker_overrides: Json
+          speaker_timeline: Json
+          status: string
+          summary: string | null
+          summary_status: string
+          updated_at: string
+          visibility: string
+          visibility_locked: boolean
+          vtt: string | null
+        }
+        Insert: {
+          attempts?: number
+          chapters?: Json
+          created_at?: string
+          duration_seconds?: number | null
+          engine_job_id?: string | null
+          error?: string | null
+          full_text?: string | null
+          id?: string
+          last_attempt_at?: string | null
+          model?: string | null
+          provider?: string | null
+          search_tsv?: unknown
+          segments?: Json
+          source_kind: string
+          source_lang?: string | null
+          source_ref: string
+          speaker_map?: Json
+          speaker_overrides?: Json
+          speaker_timeline?: Json
+          status?: string
+          summary?: string | null
+          summary_status?: string
+          updated_at?: string
+          visibility?: string
+          visibility_locked?: boolean
+          vtt?: string | null
+        }
+        Update: {
+          attempts?: number
+          chapters?: Json
+          created_at?: string
+          duration_seconds?: number | null
+          engine_job_id?: string | null
+          error?: string | null
+          full_text?: string | null
+          id?: string
+          last_attempt_at?: string | null
+          model?: string | null
+          provider?: string | null
+          search_tsv?: unknown
+          segments?: Json
+          source_kind?: string
+          source_lang?: string | null
+          source_ref?: string
+          speaker_map?: Json
+          speaker_overrides?: Json
+          speaker_timeline?: Json
+          status?: string
+          summary?: string | null
+          summary_status?: string
+          updated_at?: string
+          visibility?: string
+          visibility_locked?: boolean
+          vtt?: string | null
+        }
+        Relationships: []
+      }
+      translation_spend_daily: {
+        Row: {
+          day: string
+          paid_calls: number
+        }
+        Insert: {
+          day: string
+          paid_calls?: number
+        }
+        Update: {
+          day?: string
+          paid_calls?: number
+        }
+        Relationships: []
+      }
+      trench_alerts: {
+        Row: {
+          created_at: string
+          direction: string
+          fired_at: string | null
+          fired_price: number | null
+          id: string
+          notify: boolean
+          symbol: string
+          target: number
+          wallet: string
+        }
+        Insert: {
+          created_at?: string
+          direction: string
+          fired_at?: string | null
+          fired_price?: number | null
+          id?: string
+          notify?: boolean
+          symbol: string
+          target: number
+          wallet: string
+        }
+        Update: {
+          created_at?: string
+          direction?: string
+          fired_at?: string | null
+          fired_price?: number | null
+          id?: string
+          notify?: boolean
+          symbol?: string
+          target?: number
+          wallet?: string
+        }
+        Relationships: []
+      }
+      trench_desks: {
+        Row: {
+          document: Json
+          name: string
+          revision: number
+          updated_at: string
+          wallet: string
+        }
+        Insert: {
+          document: Json
+          name: string
+          revision?: number
+          updated_at?: string
+          wallet: string
+        }
+        Update: {
+          document?: Json
+          name?: string
+          revision?: number
+          updated_at?: string
+          wallet?: string
+        }
+        Relationships: []
+      }
+      trench_members: {
+        Row: {
+          name: string
+          pose: Json
+          room: string
+          seen_at: string
+          wallet: string
+        }
+        Insert: {
+          name: string
+          pose?: Json
+          room: string
+          seen_at?: string
+          wallet: string
+        }
+        Update: {
+          name?: string
+          pose?: Json
+          room?: string
+          seen_at?: string
+          wallet?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trench_members_room_fkey"
+            columns: ["room"]
+            isOneToOne: false
+            referencedRelation: "trench_rooms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trench_paper: {
+        Row: {
+          cash: number
+          drawdown: number
+          equity: number
+          holdings: Json
+          name: string
+          peak: number
+          updated_at: string
+          wallet: string
+          week: string
+        }
+        Insert: {
+          cash?: number
+          drawdown?: number
+          equity?: number
+          holdings?: Json
+          name: string
+          peak?: number
+          updated_at?: string
+          wallet: string
+          week: string
+        }
+        Update: {
+          cash?: number
+          drawdown?: number
+          equity?: number
+          holdings?: Json
+          name?: string
+          peak?: number
+          updated_at?: string
+          wallet?: string
+          week?: string
+        }
+        Relationships: []
+      }
+      trench_rooms: {
+        Row: {
+          expires_at: string
+          focus: Json
+          host: string
+          id: string
+          name: string
+        }
+        Insert: {
+          expires_at?: string
+          focus?: Json
+          host: string
+          id?: string
+          name: string
+        }
+        Update: {
+          expires_at?: string
+          focus?: Json
+          host?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      trench_trades: {
+        Row: {
+          created_at: string
+          id: string
+          price: number
+          quantity: number
+          side: string
+          symbol: string
+          wallet: string
+          week: string
+        }
+        Insert: {
+          created_at?: string
+          id: string
+          price: number
+          quantity: number
+          side: string
+          symbol: string
+          wallet: string
+          week: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          price?: number
+          quantity?: number
+          side?: string
+          symbol?: string
+          wallet?: string
+          week?: string
+        }
+        Relationships: []
+      }
+      trending_categories: {
+        Row: {
+          id: string
+          name: string
+          post_count: number
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          post_count?: number
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          post_count?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      tv_channels_verified: {
+        Row: {
+          broken_reports: number
+          category: string
+          country: string
+          id: string
+          is_active: boolean
+          last_verified_at: string
+          logo: string | null
+          name: string
+          stream_url: string
+        }
+        Insert: {
+          broken_reports?: number
+          category?: string
+          country?: string
+          id: string
+          is_active?: boolean
+          last_verified_at?: string
+          logo?: string | null
+          name: string
+          stream_url: string
+        }
+        Update: {
+          broken_reports?: number
+          category?: string
+          country?: string
+          id?: string
+          is_active?: boolean
+          last_verified_at?: string
+          logo?: string | null
+          name?: string
+          stream_url?: string
+        }
+        Relationships: []
+      }
+      tv_chat_messages: {
+        Row: {
+          avatar_url: string | null
+          badge_balance: number | null
+          channel_id: string
+          content: string
+          created_at: string
+          display_name: string | null
+          id: string
+          image_url: string | null
+          message_type: string
+          reactions: Json | null
+          reply_to_id: string | null
+          username: string | null
+          wallet_address: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          badge_balance?: number | null
+          channel_id: string
+          content?: string
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          image_url?: string | null
+          message_type?: string
+          reactions?: Json | null
+          reply_to_id?: string | null
+          username?: string | null
+          wallet_address: string
+        }
+        Update: {
+          avatar_url?: string | null
+          badge_balance?: number | null
+          channel_id?: string
+          content?: string
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          image_url?: string | null
+          message_type?: string
+          reactions?: Json | null
+          reply_to_id?: string | null
+          username?: string | null
+          wallet_address?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tv_chat_messages_reply_to_id_fkey"
+            columns: ["reply_to_id"]
+            isOneToOne: false
+            referencedRelation: "tv_chat_messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_characters: {
+        Row: {
+          created_at: string
+          creator_username: string | null
+          creator_wallet_address: string
+          description: string
+          id: string
+          is_featured: boolean
+          name: string
+          primary_image_url: string | null
+          reference_image_urls: string[]
+          slug: string
+          updated_at: string
+          usage_count: number
+          visibility: string
+        }
+        Insert: {
+          created_at?: string
+          creator_username?: string | null
+          creator_wallet_address: string
+          description?: string
+          id?: string
+          is_featured?: boolean
+          name: string
+          primary_image_url?: string | null
+          reference_image_urls?: string[]
+          slug: string
+          updated_at?: string
+          usage_count?: number
+          visibility?: string
+        }
+        Update: {
+          created_at?: string
+          creator_username?: string | null
+          creator_wallet_address?: string
+          description?: string
+          id?: string
+          is_featured?: boolean
+          name?: string
+          primary_image_url?: string | null
+          reference_image_urls?: string[]
+          slug?: string
+          updated_at?: string
+          usage_count?: number
+          visibility?: string
+        }
+        Relationships: []
+      }
+      user_display_preferences: {
+        Row: {
+          created_at: string
+          preferences: Json
+          reaction_tip_seen: boolean
+          shorts_enabled: boolean
+          stories_enabled: boolean
+          updated_at: string
+          video_dub_tip_seen: boolean
+          wallet_address: string
+        }
+        Insert: {
+          created_at?: string
+          preferences?: Json
+          reaction_tip_seen?: boolean
+          shorts_enabled?: boolean
+          stories_enabled?: boolean
+          updated_at?: string
+          video_dub_tip_seen?: boolean
+          wallet_address: string
+        }
+        Update: {
+          created_at?: string
+          preferences?: Json
+          reaction_tip_seen?: boolean
+          shorts_enabled?: boolean
+          stories_enabled?: boolean
+          updated_at?: string
+          video_dub_tip_seen?: boolean
+          wallet_address?: string
+        }
+        Relationships: []
+      }
+      user_feedback_surveys: {
+        Row: {
+          age_range: string | null
+          answers: Json
+          created_at: string
+          gender: string | null
+          id: string
+          referral_source: string | null
+          signup_experience: string | null
+          survey_version: number
+          tipping_or_gifting: string | null
+          wallet_address: string
+        }
+        Insert: {
+          age_range?: string | null
+          answers?: Json
+          created_at?: string
+          gender?: string | null
+          id?: string
+          referral_source?: string | null
+          signup_experience?: string | null
+          survey_version?: number
+          tipping_or_gifting?: string | null
+          wallet_address: string
+        }
+        Update: {
+          age_range?: string | null
+          answers?: Json
+          created_at?: string
+          gender?: string | null
+          id?: string
+          referral_source?: string | null
+          signup_experience?: string | null
+          survey_version?: number
+          tipping_or_gifting?: string | null
+          wallet_address?: string
+        }
+        Relationships: []
+      }
+      user_privacy_settings: {
+        Row: {
+          created_at: string
+          default_post_visibility: string
+          hide_follower_counts: boolean
+          id: string
+          show_followers_following: boolean
+          updated_at: string
+          wallet_address: string
+        }
+        Insert: {
+          created_at?: string
+          default_post_visibility?: string
+          hide_follower_counts?: boolean
+          id?: string
+          show_followers_following?: boolean
+          updated_at?: string
+          wallet_address: string
+        }
+        Update: {
+          created_at?: string
+          default_post_visibility?: string
+          hide_follower_counts?: boolean
+          id?: string
+          show_followers_following?: boolean
+          updated_at?: string
+          wallet_address?: string
+        }
+        Relationships: []
+      }
+      user_skills: {
+        Row: {
+          asset_urls: string[]
+          created_at: string
+          creator_username: string | null
+          creator_wallet_address: string
+          description: string
+          id: string
+          is_featured: boolean
+          kind: string
+          model: string
+          name: string
+          slug: string
+          system_prompt: string
+          trigger_phrases: string[]
+          updated_at: string
+          usage_count: number
+        }
+        Insert: {
+          asset_urls?: string[]
+          created_at?: string
+          creator_username?: string | null
+          creator_wallet_address: string
+          description?: string
+          id?: string
+          is_featured?: boolean
+          kind?: string
+          model?: string
+          name: string
+          slug: string
+          system_prompt: string
+          trigger_phrases?: string[]
+          updated_at?: string
+          usage_count?: number
+        }
+        Update: {
+          asset_urls?: string[]
+          created_at?: string
+          creator_username?: string | null
+          creator_wallet_address?: string
+          description?: string
+          id?: string
+          is_featured?: boolean
+          kind?: string
+          model?: string
+          name?: string
+          slug?: string
+          system_prompt?: string
+          trigger_phrases?: string[]
+          updated_at?: string
+          usage_count?: number
+        }
+        Relationships: []
+      }
+      user_testimonials: {
+        Row: {
+          allow_name: boolean
+          allow_promo: boolean
+          body: string
+          created_at: string
+          id: string
+          reviewed_at: string | null
+          status: string
+          time_using: string | null
+          username: string | null
+          wallet_address: string
+        }
+        Insert: {
+          allow_name?: boolean
+          allow_promo?: boolean
+          body: string
+          created_at?: string
+          id?: string
+          reviewed_at?: string | null
+          status?: string
+          time_using?: string | null
+          username?: string | null
+          wallet_address: string
+        }
+        Update: {
+          allow_name?: boolean
+          allow_promo?: boolean
+          body?: string
+          created_at?: string
+          id?: string
+          reviewed_at?: string | null
+          status?: string
+          time_using?: string | null
+          username?: string | null
+          wallet_address?: string
+        }
+        Relationships: []
+      }
+      user_wallet_archives: {
+        Row: {
+          backup_record: Json | null
+          created_at: string
+          eth_address: string
+          id: string
+          passkey_records: Json
+          profile_rotated_at: string | null
+          recovery_record: Json | null
+          replacement_address: string
+          user_id: string
+          wallet_record: Json
+        }
+        Insert: {
+          backup_record?: Json | null
+          created_at?: string
+          eth_address: string
+          id?: string
+          passkey_records?: Json
+          profile_rotated_at?: string | null
+          recovery_record?: Json | null
+          replacement_address: string
+          user_id: string
+          wallet_record: Json
+        }
+        Update: {
+          backup_record?: Json | null
+          created_at?: string
+          eth_address?: string
+          id?: string
+          passkey_records?: Json
+          profile_rotated_at?: string | null
+          recovery_record?: Json | null
+          replacement_address?: string
+          user_id?: string
+          wallet_record?: Json
+        }
+        Relationships: []
+      }
+      user_wallet_passkeys: {
+        Row: {
+          backed_up: boolean | null
+          created_at: string
+          credential_id: string
+          encrypted_seed: string
+          id: string
+          iv: string
+          kdf_iterations: number
+          label: string | null
+          last_used_at: string | null
+          prf_salt: string
+          salt: string
+          transports: string[] | null
+          user_id: string
+        }
+        Insert: {
+          backed_up?: boolean | null
+          created_at?: string
+          credential_id: string
+          encrypted_seed: string
+          id?: string
+          iv: string
+          kdf_iterations?: number
+          label?: string | null
+          last_used_at?: string | null
+          prf_salt: string
+          salt: string
+          transports?: string[] | null
+          user_id: string
+        }
+        Update: {
+          backed_up?: boolean | null
+          created_at?: string
+          credential_id?: string
+          encrypted_seed?: string
+          id?: string
+          iv?: string
+          kdf_iterations?: number
+          label?: string | null
+          last_used_at?: string | null
+          prf_salt?: string
+          salt?: string
+          transports?: string[] | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_wallet_recovery: {
+        Row: {
+          created_at: string
+          encrypted_seed: string
+          iv: string
+          kdf_iterations: number
+          salt: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          encrypted_seed: string
+          iv: string
+          kdf_iterations?: number
+          salt: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          encrypted_seed?: string
+          iv?: string
+          kdf_iterations?: number
+          salt?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_wallets: {
+        Row: {
+          created_at: string
+          encrypted_seed: string | null
+          eth_address: string
+          iv: string | null
+          kdf_iterations: number
+          salt: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          encrypted_seed?: string | null
+          eth_address: string
+          iv?: string | null
+          kdf_iterations?: number
+          salt?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          encrypted_seed?: string | null
+          eth_address?: string
+          iv?: string | null
+          kdf_iterations?: number
+          salt?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      video_dub_worker: {
+        Row: {
+          id: number
+          runpod_api_key: string | null
+          runpod_endpoint_id: string | null
+          secret: string
+          updated_at: string
+          worker_url: string | null
+        }
+        Insert: {
+          id: number
+          runpod_api_key?: string | null
+          runpod_endpoint_id?: string | null
+          secret: string
+          updated_at?: string
+          worker_url?: string | null
+        }
+        Update: {
+          id?: number
+          runpod_api_key?: string | null
+          runpod_endpoint_id?: string | null
+          secret?: string
+          updated_at?: string
+          worker_url?: string | null
+        }
+        Relationships: []
+      }
+      video_dubs: {
+        Row: {
+          attempts: number
+          audio_url: string | null
+          created_at: string
+          duration_seconds: number | null
+          error: string | null
+          id: string
+          job_id: string | null
+          language: string
+          last_attempt_at: string | null
+          provider: string | null
+          status: string
+          transcript_id: string
+          updated_at: string
+          voice: string | null
+        }
+        Insert: {
+          attempts?: number
+          audio_url?: string | null
+          created_at?: string
+          duration_seconds?: number | null
+          error?: string | null
+          id?: string
+          job_id?: string | null
+          language: string
+          last_attempt_at?: string | null
+          provider?: string | null
+          status?: string
+          transcript_id: string
+          updated_at?: string
+          voice?: string | null
+        }
+        Update: {
+          attempts?: number
+          audio_url?: string | null
+          created_at?: string
+          duration_seconds?: number | null
+          error?: string | null
+          id?: string
+          job_id?: string | null
+          language?: string
+          last_attempt_at?: string | null
+          provider?: string | null
+          status?: string
+          transcript_id?: string
+          updated_at?: string
+          voice?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "video_dubs_transcript_id_fkey"
+            columns: ["transcript_id"]
+            isOneToOne: false
+            referencedRelation: "stage_transcripts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "video_dubs_transcript_id_fkey"
+            columns: ["transcript_id"]
+            isOneToOne: false
+            referencedRelation: "transcripts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      video_segment_votes: {
+        Row: {
+          address: string
+          created_at: string
+          segment_id: string
+          vote: number
+        }
+        Insert: {
+          address: string
+          created_at?: string
+          segment_id: string
+          vote: number
+        }
+        Update: {
+          address?: string
+          created_at?: string
+          segment_id?: string
+          vote?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "video_segment_votes_segment_id_fkey"
+            columns: ["segment_id"]
+            isOneToOne: false
+            referencedRelation: "video_segments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      video_segments: {
+        Row: {
+          address: string
+          category: string
+          created_at: string
+          end_seconds: number
+          id: string
+          start_seconds: number
+          status: string
+          token_id: number
+          updated_at: string
+          votes_down: number
+          votes_up: number
+        }
+        Insert: {
+          address: string
+          category: string
+          created_at?: string
+          end_seconds: number
+          id?: string
+          start_seconds: number
+          status?: string
+          token_id: number
+          updated_at?: string
+          votes_down?: number
+          votes_up?: number
+        }
+        Update: {
+          address?: string
+          category?: string
+          created_at?: string
+          end_seconds?: number
+          id?: string
+          start_seconds?: number
+          status?: string
+          token_id?: number
+          updated_at?: string
+          votes_down?: number
+          votes_up?: number
+        }
+        Relationships: []
+      }
+      voice_clone_payments: {
+        Row: {
+          chain: string
+          consumed_at: string | null
+          created_at: string
+          id: string
+          price_dhb: number
+          tx_hash: string
+          voice_id: string | null
+          wallet_address: string
+        }
+        Insert: {
+          chain: string
+          consumed_at?: string | null
+          created_at?: string
+          id?: string
+          price_dhb: number
+          tx_hash: string
+          voice_id?: string | null
+          wallet_address: string
+        }
+        Update: {
+          chain?: string
+          consumed_at?: string | null
+          created_at?: string
+          id?: string
+          price_dhb?: number
+          tx_hash?: string
+          voice_id?: string | null
+          wallet_address?: string
+        }
+        Relationships: []
+      }
+      wallet_backup_status: {
+        Row: {
+          backed_up_at: string | null
+          eth_address: string
+          last_dismissed_at: string | null
+          reminders_dismissed: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          backed_up_at?: string | null
+          eth_address: string
+          last_dismissed_at?: string | null
+          reminders_dismissed?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          backed_up_at?: string | null
+          eth_address?: string
+          last_dismissed_at?: string | null
+          reminders_dismissed?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      winter_wonderland_results: {
+        Row: {
+          created_at: string
+          draw_date: string
+          id: string
+          results: Json
+        }
+        Insert: {
+          created_at?: string
+          draw_date?: string
+          id?: string
+          results: Json
+        }
+        Update: {
+          created_at?: string
+          draw_date?: string
+          id?: string
+          results?: Json
+        }
+        Relationships: []
+      }
+      work_application_comments: {
+        Row: {
+          application_id: string
+          author_address: string
+          body: string
+          created_at: string
+          id: string
+          job_id: string
+        }
+        Insert: {
+          application_id: string
+          author_address: string
+          body: string
+          created_at?: string
+          id?: string
+          job_id: string
+        }
+        Update: {
+          application_id?: string
+          author_address?: string
+          body?: string
+          created_at?: string
+          id?: string
+          job_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "work_application_comments_application_id_job_id_fkey"
+            columns: ["application_id", "job_id"]
+            isOneToOne: false
+            referencedRelation: "work_applications"
+            referencedColumns: ["id", "job_id"]
+          },
+        ]
+      }
+      work_applications: {
+        Row: {
+          applicant_address: string
+          cover_letter: string
+          created_at: string
+          id: string
+          job_id: string
+          proposed_amount: number | null
+          status: Database["public"]["Enums"]["work_app_status"]
+          updated_at: string
+        }
+        Insert: {
+          applicant_address: string
+          cover_letter?: string
+          created_at?: string
+          id?: string
+          job_id: string
+          proposed_amount?: number | null
+          status?: Database["public"]["Enums"]["work_app_status"]
+          updated_at?: string
+        }
+        Update: {
+          applicant_address?: string
+          cover_letter?: string
+          created_at?: string
+          id?: string
+          job_id?: string
+          proposed_amount?: number | null
+          status?: Database["public"]["Enums"]["work_app_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "work_applications_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "work_jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      work_config: {
+        Row: {
+          chain_id: number
+          deployment_tx_hash: string | null
+          escrow_address: string | null
+          expected_code_hash: string | null
+          fee_recipient: string
+          id: number
+          owner_address: string
+        }
+        Insert: {
+          chain_id?: number
+          deployment_tx_hash?: string | null
+          escrow_address?: string | null
+          expected_code_hash?: string | null
+          fee_recipient?: string
+          id: number
+          owner_address?: string
+        }
+        Update: {
+          chain_id?: number
+          deployment_tx_hash?: string | null
+          escrow_address?: string | null
+          expected_code_hash?: string | null
+          fee_recipient?: string
+          id?: number
+          owner_address?: string
+        }
+        Relationships: []
+      }
+      work_disputes: {
+        Row: {
+          created_at: string
+          evidence_url: string | null
+          id: string
+          job_id: string
+          opened_by_address: string
+          poster_refund: number | null
+          reason: string
+          resolution_note: string | null
+          resolution_tx_hash: string | null
+          resolved_at: string | null
+          resolved_by_address: string | null
+          resolved_by_admin: string | null
+          status: Database["public"]["Enums"]["work_dispute_status"]
+          updated_at: string
+          worker_amount: number | null
+        }
+        Insert: {
+          created_at?: string
+          evidence_url?: string | null
+          id?: string
+          job_id: string
+          opened_by_address: string
+          poster_refund?: number | null
+          reason: string
+          resolution_note?: string | null
+          resolution_tx_hash?: string | null
+          resolved_at?: string | null
+          resolved_by_address?: string | null
+          resolved_by_admin?: string | null
+          status?: Database["public"]["Enums"]["work_dispute_status"]
+          updated_at?: string
+          worker_amount?: number | null
+        }
+        Update: {
+          created_at?: string
+          evidence_url?: string | null
+          id?: string
+          job_id?: string
+          opened_by_address?: string
+          poster_refund?: number | null
+          reason?: string
+          resolution_note?: string | null
+          resolution_tx_hash?: string | null
+          resolved_at?: string | null
+          resolved_by_address?: string | null
+          resolved_by_admin?: string | null
+          status?: Database["public"]["Enums"]["work_dispute_status"]
+          updated_at?: string
+          worker_amount?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "work_disputes_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "work_jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      work_jobs: {
+        Row: {
+          application_count: number
+          awarded_worker_address: string | null
+          boost_expires_at: string | null
+          cover_image_url: string | null
+          created_at: string
+          currency: Database["public"]["Enums"]["work_currency"]
+          deadline: string | null
+          description: string
+          fund_tx_hash: string | null
+          funded_amount: number
+          funding_state: string
+          id: string
+          job_number: number
+          job_type: Database["public"]["Enums"]["work_job_type"]
+          max_units: number
+          onchain_job_id: number | null
+          pending_fund_tx_hash: string | null
+          platform: Database["public"]["Enums"]["work_platform"] | null
+          poster_address: string
+          price_per_unit: number
+          refunded_amount: number
+          released_amount: number
+          status: Database["public"]["Enums"]["work_job_status"]
+          submission_count: number
+          tags: string[] | null
+          target_url: string | null
+          title: string
+          total_budget: number
+          units_approved: number
+          updated_at: string
+          view_count: number
+        }
+        Insert: {
+          application_count?: number
+          awarded_worker_address?: string | null
+          boost_expires_at?: string | null
+          cover_image_url?: string | null
+          created_at?: string
+          currency?: Database["public"]["Enums"]["work_currency"]
+          deadline?: string | null
+          description?: string
+          fund_tx_hash?: string | null
+          funded_amount?: number
+          funding_state?: string
+          id?: string
+          job_number?: number
+          job_type: Database["public"]["Enums"]["work_job_type"]
+          max_units?: number
+          onchain_job_id?: number | null
+          pending_fund_tx_hash?: string | null
+          platform?: Database["public"]["Enums"]["work_platform"] | null
+          poster_address: string
+          price_per_unit?: number
+          refunded_amount?: number
+          released_amount?: number
+          status?: Database["public"]["Enums"]["work_job_status"]
+          submission_count?: number
+          tags?: string[] | null
+          target_url?: string | null
+          title: string
+          total_budget?: number
+          units_approved?: number
+          updated_at?: string
+          view_count?: number
+        }
+        Update: {
+          application_count?: number
+          awarded_worker_address?: string | null
+          boost_expires_at?: string | null
+          cover_image_url?: string | null
+          created_at?: string
+          currency?: Database["public"]["Enums"]["work_currency"]
+          deadline?: string | null
+          description?: string
+          fund_tx_hash?: string | null
+          funded_amount?: number
+          funding_state?: string
+          id?: string
+          job_number?: number
+          job_type?: Database["public"]["Enums"]["work_job_type"]
+          max_units?: number
+          onchain_job_id?: number | null
+          pending_fund_tx_hash?: string | null
+          platform?: Database["public"]["Enums"]["work_platform"] | null
+          poster_address?: string
+          price_per_unit?: number
+          refunded_amount?: number
+          released_amount?: number
+          status?: Database["public"]["Enums"]["work_job_status"]
+          submission_count?: number
+          tags?: string[] | null
+          target_url?: string | null
+          title?: string
+          total_budget?: number
+          units_approved?: number
+          updated_at?: string
+          view_count?: number
+        }
+        Relationships: []
+      }
+      work_payment_intents: {
+        Row: {
+          amount: number
+          chain_id: number
+          created_at: string
+          currency: Database["public"]["Enums"]["work_currency"]
+          gross_amount: number
+          id: string
+          job_id: string
+          payer_address: string
+          state: string
+          submission_id: string
+          tx_hash: string | null
+          worker_address: string
+        }
+        Insert: {
+          amount: number
+          chain_id: number
+          created_at?: string
+          currency: Database["public"]["Enums"]["work_currency"]
+          gross_amount: number
+          id?: string
+          job_id: string
+          payer_address: string
+          state?: string
+          submission_id: string
+          tx_hash?: string | null
+          worker_address: string
+        }
+        Update: {
+          amount?: number
+          chain_id?: number
+          created_at?: string
+          currency?: Database["public"]["Enums"]["work_currency"]
+          gross_amount?: number
+          id?: string
+          job_id?: string
+          payer_address?: string
+          state?: string
+          submission_id?: string
+          tx_hash?: string | null
+          worker_address?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "work_payment_intents_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "work_jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "work_payment_intents_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "work_submissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      work_proof_registrations: {
+        Row: {
+          job_id: string
+          proof_hash: string
+          tx_hash: string
+          worker_address: string
+        }
+        Insert: {
+          job_id: string
+          proof_hash: string
+          tx_hash: string
+          worker_address: string
+        }
+        Update: {
+          job_id?: string
+          proof_hash?: string
+          tx_hash?: string
+          worker_address?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "work_proof_registrations_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "work_jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      work_reviews: {
+        Row: {
+          comment: string | null
+          created_at: string
+          id: string
+          job_id: string
+          rating: number
+          reviewee_address: string
+          reviewer_address: string
+          reviewer_role: Database["public"]["Enums"]["work_review_role"]
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          job_id: string
+          rating: number
+          reviewee_address: string
+          reviewer_address: string
+          reviewer_role: Database["public"]["Enums"]["work_review_role"]
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          job_id?: string
+          rating?: number
+          reviewee_address?: string
+          reviewer_address?: string
+          reviewer_role?: Database["public"]["Enums"]["work_review_role"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "work_reviews_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "work_jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      work_submissions: {
+        Row: {
+          approval_status: Database["public"]["Enums"]["work_submission_status"]
+          approved_units: number
+          created_at: string
+          gross_amount: number
+          id: string
+          job_id: string
+          last_polled_at: string | null
+          payout_amount: number
+          payout_chain_id: number | null
+          payout_state: string
+          payout_tx_hash: string | null
+          platform: Database["public"]["Enums"]["work_platform"] | null
+          proof_text: string | null
+          proof_url: string
+          rejection_reason: string | null
+          updated_at: string
+          view_count_cached: number
+          view_evidence_url: string | null
+          worker_address: string
+        }
+        Insert: {
+          approval_status?: Database["public"]["Enums"]["work_submission_status"]
+          approved_units?: number
+          created_at?: string
+          gross_amount?: number
+          id?: string
+          job_id: string
+          last_polled_at?: string | null
+          payout_amount?: number
+          payout_chain_id?: number | null
+          payout_state?: string
+          payout_tx_hash?: string | null
+          platform?: Database["public"]["Enums"]["work_platform"] | null
+          proof_text?: string | null
+          proof_url: string
+          rejection_reason?: string | null
+          updated_at?: string
+          view_count_cached?: number
+          view_evidence_url?: string | null
+          worker_address: string
+        }
+        Update: {
+          approval_status?: Database["public"]["Enums"]["work_submission_status"]
+          approved_units?: number
+          created_at?: string
+          gross_amount?: number
+          id?: string
+          job_id?: string
+          last_polled_at?: string | null
+          payout_amount?: number
+          payout_chain_id?: number | null
+          payout_state?: string
+          payout_tx_hash?: string | null
+          platform?: Database["public"]["Enums"]["work_platform"] | null
+          proof_text?: string | null
+          proof_url?: string
+          rejection_reason?: string | null
+          updated_at?: string
+          view_count_cached?: number
+          view_evidence_url?: string | null
+          worker_address?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "work_submissions_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "work_jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+    }
+    Views: {
+      chess_records: {
+        Row: {
+          draws: number | null
+          losses: number | null
+          played: number | null
+          wallet: string | null
+          wins: number | null
+        }
+        Relationships: []
+      }
+      fraction_seller_stats: {
+        Row: {
+          avg_settle_seconds: number | null
+          fractions_sold: number | null
+          open_trades: number | null
+          overdue_trades: number | null
+          seller_address: string | null
+          settled_trades: number | null
+          total_trades: number | null
+        }
+        Relationships: []
+      }
+      public_testimonials: {
+        Row: {
+          body: string | null
+          created_at: string | null
+          id: string | null
+          time_using: string | null
+          username: string | null
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string | null
+          id?: string | null
+          time_using?: string | null
+          username?: never
+        }
+        Update: {
+          body?: string | null
+          created_at?: string | null
+          id?: string | null
+          time_using?: string | null
+          username?: never
+        }
+        Relationships: []
+      }
+      stage_transcript_translations: {
+        Row: {
+          chapters: Json | null
+          created_at: string | null
+          error: string | null
+          id: string | null
+          language: string | null
+          segments: Json | null
+          stage_id: string | null
+          status: string | null
+          summary: string | null
+          updated_at: string | null
+        }
+        Relationships: []
+      }
+      stage_transcripts: {
+        Row: {
+          chapters: Json | null
+          created_at: string | null
+          error: string | null
+          full_text: string | null
+          id: string | null
+          privacy: string | null
+          segments: Json | null
+          source_language: string | null
+          speaker_map: Json | null
+          speaker_overrides: Json | null
+          speaker_timeline: Json | null
+          stage_id: string | null
+          status: string | null
+          summary: string | null
+          summary_status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          chapters?: Json | null
+          created_at?: string | null
+          error?: string | null
+          full_text?: string | null
+          id?: string | null
+          privacy?: string | null
+          segments?: Json | null
+          source_language?: string | null
+          speaker_map?: Json | null
+          speaker_overrides?: Json | null
+          speaker_timeline?: Json | null
+          stage_id?: never
+          status?: string | null
+          summary?: string | null
+          summary_status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          chapters?: Json | null
+          created_at?: string | null
+          error?: string | null
+          full_text?: string | null
+          id?: string | null
+          privacy?: string | null
+          segments?: Json | null
+          source_language?: string | null
+          speaker_map?: Json | null
+          speaker_overrides?: Json | null
+          speaker_timeline?: Json | null
+          stage_id?: never
+          status?: string | null
+          summary?: string | null
+          summary_status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      video_transcripts: {
+        Row: {
+          chunks_done: number | null
+          chunks_total: number | null
+          created_at: string | null
+          duration_seconds: number | null
+          error: string | null
+          model: string | null
+          overview: string | null
+          source_lang: string | null
+          status: string | null
+          token_id: number | null
+          transcript: Json | null
+          translations: Json | null
+          updated_at: string | null
+          vtt_original: string | null
+        }
+        Insert: {
+          chunks_done?: never
+          chunks_total?: never
+          created_at?: string | null
+          duration_seconds?: number | null
+          error?: string | null
+          model?: string | null
+          overview?: string | null
+          source_lang?: string | null
+          status?: string | null
+          token_id?: never
+          transcript?: never
+          translations?: never
+          updated_at?: string | null
+          vtt_original?: string | null
+        }
+        Update: {
+          chunks_done?: never
+          chunks_total?: never
+          created_at?: string | null
+          duration_seconds?: number | null
+          error?: string | null
+          model?: string | null
+          overview?: string | null
+          source_lang?: string | null
+          status?: string | null
+          token_id?: never
+          transcript?: never
+          translations?: never
+          updated_at?: string | null
+          vtt_original?: string | null
+        }
+        Relationships: []
+      }
+    }
+    Functions: {
+      account_erasure_storage: {
+        Args: { p_user_id?: string; p_wallet: string }
+        Returns: {
+          bucket_id: string
+          name: string
+        }[]
+      }
+      admin_onboarding_dropoff: {
+        Args: { p_since: string }
+        Returns: {
+          last_action: string
+          step_id: string
+          users: number
+        }[]
+      }
+      admin_onboarding_funnel: {
+        Args: { p_since: string }
+        Returns: {
+          completions: number
+          easy_count: number
+          hard_count: number
+          median_seconds: number
+          skips: number
+          step_id: string
+          viewers: number
+        }[]
+      }
+      admin_onboarding_totals: {
+        Args: { p_since: string }
+        Returns: {
+          active: number
+          completed: number
+          dismissed: number
+          started: number
+        }[]
+      }
+      admin_page_view_daily: {
+        Args: { p_paths: string[]; p_since: string }
+        Returns: {
+          day: string
+          visitors: number
+          visits: number
+        }[]
+      }
+      admin_page_view_paths: {
+        Args: { p_limit?: number; p_since: string }
+        Returns: {
+          path: string
+          visitors: number
+          visits: number
+        }[]
+      }
+      admin_page_view_sources: {
+        Args: { p_limit?: number; p_paths: string[]; p_since: string }
+        Returns: {
+          kind: string
+          source: string
+          visits: number
+        }[]
+      }
+      admin_page_view_totals: {
+        Args: { p_since: string }
+        Returns: {
+          signed_in_visits: number
+          visitors: number
+          visits: number
+        }[]
+      }
+      ads_advance_creator_support: {
+        Args: { p_seconds: number; p_session: string; p_viewer: string }
+        Returns: Json
+      }
+      ads_estimate_audience: { Args: { p_targeting: Json }; Returns: Json }
+      ads_topup_credit: {
+        Args: {
+          p_chain: string
+          p_dhb: number
+          p_price: number
+          p_tx_hash: string
+          p_usd: number
+          p_wallet: string
+        }
+        Returns: number
+      }
+      ads_track_click: {
+        Args: {
+          p_campaign: string
+          p_creative: string
+          p_serve_id: string
+          p_surface: string
+          p_tier: string
+          p_viewer_key: string
+          p_viewer_wallet: string
+        }
+        Returns: Json
+      }
+      ads_track_impression: {
+        Args: {
+          p_campaign: string
+          p_creative: string
+          p_price: number
+          p_serve_id: string
+          p_share: number
+          p_surface: string
+          p_tier: string
+          p_viewer_key: string
+          p_viewer_wallet: string
+        }
+        Returns: Json
+      }
+      affiliate_wallet: { Args: never; Returns: string }
+      agent_owner_allowed: { Args: { wallet: string }; Returns: boolean }
+      agent_workspace_ready: { Args: never; Returns: boolean }
+      ai_free_claim: {
+        Args: {
+          p_job_id: string
+          p_limit: number
+          p_model: string
+          p_wallet: string
+        }
+        Returns: boolean
+      }
+      ai_job_record_credits: {
+        Args: {
+          p_debit_key: string
+          p_dhb: number
+          p_endpoint: string
+          p_job_id: string
+          p_kind: string
+          p_metadata: Json
+          p_model: string
+          p_wallet: string
+        }
+        Returns: undefined
+      }
+      ai_job_spend: {
+        Args: {
+          p_dhb: number
+          p_endpoint: string
+          p_job_id: string
+          p_kind: string
+          p_metadata: Json
+          p_model: string
+          p_tx_hash: string
+          p_wallet: string
+        }
+        Returns: undefined
+      }
+      ai_payment_release: {
+        Args: {
+          p_dhb: number
+          p_job_id: string
+          p_tx_hash: string
+          p_wallet: string
+        }
+        Returns: number
+      }
+      ai_payment_spend: {
+        Args: { p_dhb: number; p_tx_hash: string; p_wallet: string }
+        Returns: number
+      }
+      attribute_affiliate_referral: {
+        Args: { p_code: string; p_sub_id?: string }
+        Returns: undefined
+      }
+      bulk_insert_category_log: { Args: { entries: Json }; Returns: number }
+      category_counts: {
+        Args: { p_since?: string }
+        Returns: {
+          name: string
+          post_count: number
+        }[]
+      }
+      chess_ladder: {
+        Args: { p_limit?: number }
+        Returns: {
+          draws: number
+          last_played: string
+          losses: number
+          played: number
+          rating: number
+          wallet: string
+          wins: number
+        }[]
+      }
+      claim_agent_life: { Args: never; Returns: string }
+      claim_agent_task: { Args: never; Returns: Json }
+      claim_paid_translation: { Args: { p_cap: number }; Returns: boolean }
+      claim_reaction_tip: { Args: never; Returns: boolean }
+      claim_video_dub_tip: { Args: never; Returns: boolean }
+      claim_xl_cashback_slot: {
+        Args: { p_subscription_id: string; p_xl_price_id: string }
+        Returns: boolean
+      }
+      cleanup_old_anonymous_post_views: { Args: never; Returns: undefined }
+      cleanup_old_client_error_logs: { Args: never; Returns: undefined }
+      cleanup_old_leaderboard_snapshots: { Args: never; Returns: undefined }
+      cleanup_old_story_views: { Args: never; Returns: undefined }
+      community_approve_member: {
+        Args: { _community_id: string; _target: string }
+        Returns: undefined
+      }
+      community_assert: {
+        Args: { _community_id: string; _perm: string }
+        Returns: string
+      }
+      community_ban_member: {
+        Args: {
+          _community_id: string
+          _reason?: string
+          _target: string
+          _until?: string
+        }
+        Returns: undefined
+      }
+      community_claim_invite: {
+        Args: { _community_id: string; _recipient: string }
+        Returns: string
+      }
+      community_confirm_invite: {
+        Args: { _community_id: string; _recipient: string }
+        Returns: undefined
+      }
+      community_create_invite: {
+        Args: {
+          _community_id: string
+          _expires_at?: string
+          _max_uses?: number
+          _name?: string
+          _requires_approval?: boolean
+        }
+        Returns: {
+          code: string
+          community_id: string
+          created_at: string
+          created_by: string
+          expires_at: string | null
+          id: string
+          max_uses: number | null
+          name: string | null
+          requires_approval: boolean
+          revoked_at: string | null
+          uses: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "community_invite_links"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      community_delete: { Args: { _community_id: string }; Returns: undefined }
+      community_delete_message: {
+        Args: { _message_id: string }
+        Returns: undefined
+      }
+      community_is_active_member: {
+        Args: { _community_id: string; _wallet: string }
+        Returns: boolean
+      }
+      community_join_via_invite: { Args: { _code: string }; Returns: string }
+      community_kick_member: {
+        Args: { _community_id: string; _target: string }
+        Returns: undefined
+      }
+      community_log: {
+        Args: {
+          _action: string
+          _actor: string
+          _community_id: string
+          _detail?: Json
+          _message_id?: string
+          _target?: string
+        }
+        Returns: undefined
+      }
+      community_mute_member: {
+        Args: { _community_id: string; _target: string; _until?: string }
+        Returns: undefined
+      }
+      community_notify_mentions: {
+        Args: {
+          _community_id: string
+          _here?: boolean
+          _mentions?: string[]
+          _message_id: string
+        }
+        Returns: number
+      }
+      community_permission: {
+        Args: { _community_id: string; _perm: string; _wallet: string }
+        Returns: boolean
+      }
+      community_pin_message: {
+        Args: { _message_id: string; _pinned: boolean }
+        Returns: undefined
+      }
+      community_post_wallet: { Args: never; Returns: string }
+      community_posts_readable: {
+        Args: { _community_id: string }
+        Returns: boolean
+      }
+      community_preview_invite: { Args: { _code: string }; Returns: Json }
+      community_privileged: { Args: never; Returns: boolean }
+      community_purge_member_messages: {
+        Args: { _community_id: string; _target: string }
+        Returns: number
+      }
+      community_reject_member: {
+        Args: { _community_id: string; _target: string }
+        Returns: undefined
+      }
+      community_remove_shared_post: {
+        Args: { _community_id: string; _token_id: number }
+        Returns: undefined
+      }
+      community_revoke_invite: {
+        Args: { _invite_id: string }
+        Returns: undefined
+      }
+      community_role_of: {
+        Args: { _community_id: string; _wallet: string }
+        Returns: string
+      }
+      community_set_member_role: {
+        Args: {
+          _community_id: string
+          _custom_title?: string
+          _permissions?: Json
+          _role: string
+          _target: string
+        }
+        Returns: undefined
+      }
+      community_share_post: {
+        Args: { _community_id: string; _token_id: number }
+        Returns: undefined
+      }
+      community_target_guard: {
+        Args: { _actor: string; _community_id: string; _target: string }
+        Returns: {
+          ban_reason: string | null
+          banned_until: string | null
+          community_id: string
+          custom_title: string | null
+          id: string
+          joined_at: string
+          moderated_at: string | null
+          moderated_by: string | null
+          muted_until: string | null
+          permissions: Json
+          promoted_by: string | null
+          role: string
+          status: string
+          wallet_address: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "community_members"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      community_transfer_ownership: {
+        Args: { _community_id: string; _new_owner: string }
+        Returns: undefined
+      }
+      community_unban_member: {
+        Args: { _community_id: string; _target: string }
+        Returns: undefined
+      }
+      community_unmute_member: {
+        Args: { _community_id: string; _target: string }
+        Returns: undefined
+      }
+      community_update_settings: {
+        Args: { _community_id: string; _patch: Json }
+        Returns: {
+          avatar_url: string | null
+          banner_url: string | null
+          created_at: string
+          creator_wallet_address: string
+          default_permissions: Json
+          description: string | null
+          id: string
+          is_private: boolean
+          member_count: number
+          name: string
+          rules: Json | null
+          slow_mode_seconds: number
+          slug: string
+          ticker_chain_id: string | null
+          ticker_contract_address: string | null
+          ticker_pair_address: string | null
+          ticker_symbol: string | null
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "communities"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      complete_wallet_replacement: {
+        Args: { p_new_address: string }
+        Returns: undefined
+      }
+      consume_agent_rate_limit: {
+        Args: {
+          p_action_type: string
+          p_agent_id: string
+          p_limit: number
+          p_window_ms: number
+        }
+        Returns: {
+          allowed: boolean
+          remaining: number
+          reset_at: string
+        }[]
+      }
+      consume_edge_rate_limit: {
+        Args: {
+          p_action_type: string
+          p_bucket_key: string
+          p_limit: number
+          p_window_ms: number
+        }
+        Returns: {
+          allowed: boolean
+          remaining: number
+          reset_at: string
+        }[]
+      }
+      consume_phone_otp: {
+        Args: { p_code_hash: string; p_max_attempts: number; p_phone: string }
+        Returns: {
+          reason: string
+          valid: boolean
+        }[]
+      }
+      create_agent_swarm_tasks: {
+        Args: {
+          p_agent_ids: string[]
+          p_interval_minutes: number
+          p_owner_wallet: string
+          p_plan: Json
+          p_prompt: string
+          p_request_id: string
+        }
+        Returns: {
+          id: string
+        }[]
+      }
+      create_agent_swarm_tasks_v2: {
+        Args: {
+          p_agent_ids: string[]
+          p_interval_minutes: number
+          p_mode: string
+          p_owner_wallet: string
+          p_plan: Json
+          p_prompt: string
+          p_request_id: string
+        }
+        Returns: {
+          id: string
+        }[]
+      }
+      create_paced_agent_swarm: {
+        Args: {
+          p_agent_ids: string[]
+          p_owner_wallet: string
+          p_plan: Json
+          p_prompt: string
+          p_request_id: string
+          p_targets: string[]
+        }
+        Returns: {
+          id: string
+        }[]
+      }
+      decrement_listing_stock: {
+        Args: { p_listing_id: string }
+        Returns: number
+      }
+      dex_market_sample_input: {
+        Args: { p_max_discovered?: number }
+        Returns: Json
+      }
+      editor_cloud_checkpoint_save: {
+        Args: {
+          p_document: Json
+          p_expected_draft_revision: number
+          p_expected_revision: number
+          p_id: string
+          p_owner: string
+          p_request_id: string
+        }
+        Returns: Json
+      }
+      editor_cloud_draft_load: {
+        Args: { p_id: string; p_owner: string }
+        Returns: Json
+      }
+      editor_cloud_draft_media_allowed: {
+        Args: { p_path: string }
+        Returns: boolean
+      }
+      editor_cloud_draft_open: {
+        Args: { p_client_id: string; p_id: string; p_owner: string }
+        Returns: Json
+      }
+      editor_cloud_draft_resolve: {
+        Args: {
+          p_anchor_revision: number
+          p_document: Json
+          p_expected_revision: number
+          p_id: string
+          p_owner: string
+          p_request_id: string
+          p_sequence: number
+          p_writer_id: string
+        }
+        Returns: Json
+      }
+      editor_cloud_draft_save: {
+        Args: {
+          p_anchor_revision: number
+          p_document: Json
+          p_expected_revision: number
+          p_id: string
+          p_owner: string
+          p_request_id: string
+          p_sequence: number
+          p_writer_id: string
+        }
+        Returns: Json
+      }
+      editor_cloud_edit_allowed: {
+        Args: { p_id: string; p_owner: string }
+        Returns: boolean
+      }
+      editor_cloud_edit_load: {
+        Args: { p_id: string; p_owner: string }
+        Returns: Json
+      }
+      editor_cloud_edit_save: {
+        Args: {
+          p_document: Json
+          p_expected_revision: number
+          p_id: string
+          p_owner: string
+          p_request_id: string
+        }
+        Returns: Json
+      }
+      editor_cloud_history: { Args: { p_id: string }; Returns: Json }
+      editor_cloud_list: { Args: never; Returns: Json }
+      editor_cloud_list_trash: { Args: never; Returns: Json }
+      editor_cloud_live_access: {
+        Args: { p_id: string; p_owner: string }
+        Returns: Json
+      }
+      editor_cloud_live_checkpoint: {
+        Args: { p_id: string; p_owner: string }
+        Returns: Json
+      }
+      editor_cloud_load: {
+        Args: { p_id: string; p_revision?: number }
+        Returns: Json
+      }
+      editor_cloud_prepare_media: {
+        Args: { p_extension: string; p_id: string; p_size: number }
+        Returns: Json
+      }
+      editor_cloud_prepare_shared_media: {
+        Args: {
+          p_extension: string
+          p_id: string
+          p_owner: string
+          p_project: string
+          p_size: number
+        }
+        Returns: Json
+      }
+      editor_cloud_restore: {
+        Args: {
+          p_expected_revision: number
+          p_id: string
+          p_request_id: string
+          p_revision: number
+        }
+        Returns: Json
+      }
+      editor_cloud_review_accept: {
+        Args: { p_expected_state: number; p_id: string; p_owner: string }
+        Returns: Json
+      }
+      editor_cloud_review_allowed: {
+        Args: { p_id: string; p_owner: string; p_write?: boolean }
+        Returns: boolean
+      }
+      editor_cloud_review_comment: {
+        Args: {
+          p_assignee?: string
+          p_body: string
+          p_clip_id?: string
+          p_comment_id: string
+          p_id: string
+          p_owner: string
+          p_parent_id?: string
+          p_revision: number
+          p_time: number
+        }
+        Returns: Json
+      }
+      editor_cloud_review_comment_json: {
+        Args: {
+          p: Database["public"]["Tables"]["editor_cloud_comments"]["Row"]
+        }
+        Returns: Json
+      }
+      editor_cloud_review_comments: {
+        Args: { p_id: string; p_owner: string }
+        Returns: Json
+      }
+      editor_cloud_review_inbox: { Args: never; Returns: Json }
+      editor_cloud_review_leave: {
+        Args: { p_expected_state: number; p_id: string; p_owner: string }
+        Returns: Json
+      }
+      editor_cloud_review_load: {
+        Args: { p_id: string; p_owner: string; p_revision?: number }
+        Returns: Json
+      }
+      editor_cloud_review_media_allowed: {
+        Args: { p_path: string }
+        Returns: boolean
+      }
+      editor_cloud_review_member_json: {
+        Args: { p: Database["public"]["Tables"]["editor_cloud_members"]["Row"] }
+        Returns: Json
+      }
+      editor_cloud_review_members: { Args: { p_id: string }; Returns: Json }
+      editor_cloud_review_resolve: {
+        Args: {
+          p_comment_id: string
+          p_expected_state: number
+          p_id: string
+          p_owner: string
+          p_resolved: boolean
+        }
+        Returns: Json
+      }
+      editor_cloud_review_share: {
+        Args: {
+          p_expected_state: number
+          p_id: string
+          p_member: string
+          p_role: string
+        }
+        Returns: Json
+      }
+      editor_cloud_save: {
+        Args: {
+          p_document: Json
+          p_expected_revision: number
+          p_id: string
+          p_request_id: string
+        }
+        Returns: Json
+      }
+      editor_cloud_set_trash: {
+        Args: {
+          p_expected_revision: number
+          p_expected_state: number
+          p_id: string
+          p_trashed: boolean
+        }
+        Returns: Json
+      }
+      editor_cloud_shared_upload_allowed: {
+        Args: { p_path: string }
+        Returns: boolean
+      }
+      editor_cloud_validate: {
+        Args: { p_document: Json; p_project_id: string; p_wallet: string }
+        Returns: undefined
+      }
+      editor_cloud_wallet: { Args: never; Returns: string }
+      end_inactive_stages: { Args: never; Returns: number }
+      erase_account_app_data: {
+        Args: { p_user_id?: string; p_wallet: string }
+        Returns: undefined
+      }
+      erase_editor_account_data: {
+        Args: { p_wallet: string }
+        Returns: undefined
+      }
+      evict_stale_post_translations: { Args: never; Returns: number }
+      get_affiliate_cta_stats: {
+        Args: never
+        Returns: {
+          clicks: number
+          destination: string
+          unique_visitors: number
+        }[]
+      }
+      get_affiliate_page_stats: {
+        Args: never
+        Returns: {
+          total_views: number
+          unique_visitors: number
+          views_30d: number
+        }[]
+      }
+      get_affiliate_sub_referrals: {
+        Args: never
+        Returns: {
+          referred_address: string
+          sub_id: string
+        }[]
+      }
+      get_anonymous_view_counts: {
+        Args: { p_token_ids: string[] }
+        Returns: {
+          token_id: string
+          view_count: number
+        }[]
+      }
+      get_creator_gallery: {
+        Args: { p_limit?: number }
+        Returns: {
+          created_at: string
+          id: string
+          image_url: string
+          video_url: string
+        }[]
+      }
+      get_dex_market: { Args: never; Returns: Json }
+      get_editor_storage_usage: {
+        Args: { _wallet: string }
+        Returns: {
+          asset_count: number
+          used_bytes: number
+        }[]
+      }
+      get_liked_request_completion_preference: { Args: never; Returns: boolean }
+      get_my_agents: {
+        Args: never
+        Returns: {
+          api_key: string
+          created_at: string
+          description: string
+          id: string
+          is_active: boolean
+          last_active_at: string
+          name: string
+          owner_wallet_address: string
+        }[]
+      }
+      get_post_link_copy_counts: {
+        Args: { p_token_ids: number[] }
+        Returns: {
+          copies: number
+          token_id: number
+        }[]
+      }
+      get_request_wallet_address: { Args: never; Returns: string }
+      get_signed_request_wallet_address: { Args: never; Returns: string }
+      get_user_id_by_email: { Args: { p_email: string }; Returns: string }
+      get_user_id_by_phone: { Args: { p_phone: string }; Returns: string }
+      governance_has_comment_badge: {
+        Args: { token?: string; wallet: string }
+        Returns: boolean
+      }
+      increment_category_count: { Args: { p_name: string }; Returns: undefined }
+      increment_stage_listens: {
+        Args: { p_space_id: string }
+        Returns: undefined
+      }
+      increment_ticker_search: {
+        Args: { p_symbol: string }
+        Returns: undefined
+      }
+      increment_user_character_usage: {
+        Args: { p_character_id: string }
+        Returns: undefined
+      }
+      increment_user_skill_usage: {
+        Args: { p_skill_id: string }
+        Returns: undefined
+      }
+      is_banned_from_community: {
+        Args: { _community_id: string; _wallet_address: string }
+        Returns: boolean
+      }
+      is_signed_stage_host: { Args: { p_space_id: string }; Returns: boolean }
+      is_stage_host: { Args: { p_space_id: string }; Returns: boolean }
+      issue_wallet_session: {
+        Args: {
+          p_app_version?: string
+          p_client?: string
+          p_ttl_seconds?: number
+          p_wallet: string
+        }
+        Returns: {
+          expires_at: string
+          token: string
+        }[]
+      }
+      join_token_listing_waitlist: {
+        Args: {
+          p_email: string
+          p_source?: string
+          p_token: string
+          p_username?: string
+          p_wallet_address?: string
+        }
+        Returns: Json
+      }
+      leaderboard_rank: {
+        Args: { p_address: string; p_sort?: string }
+        Returns: {
+          entries: number
+          rank: number
+          total: number
+        }[]
+      }
+      maboroshi_payment_refund: { Args: { p_key: string }; Returns: boolean }
+      maboroshi_payment_spend: {
+        Args: {
+          p_dhb: number
+          p_key: string
+          p_tx_hash: string
+          p_wallet: string
+        }
+        Returns: undefined
+      }
+      miniapp_compute_rewards: {
+        Args: { p_week_start?: string }
+        Returns: number
+      }
+      miniapp_compute_scores: { Args: { p_day?: string }; Returns: number }
+      record_affiliate_cta_click: {
+        Args: {
+          p_code: string
+          p_destination: string
+          p_viewer_address?: string
+          p_visitor_id: string
+        }
+        Returns: undefined
+      }
+      record_affiliate_page_view:
+        | {
+            Args: { p_code: string; p_source?: string; p_visitor_id: string }
+            Returns: undefined
+          }
+        | {
+            Args: {
+              p_code: string
+              p_source: string
+              p_viewer_address: string
+              p_visitor_id: string
+            }
+            Returns: undefined
+          }
+      record_agent_post_publication: {
+        Args: { p_owner_wallet: string }
+        Returns: undefined
+      }
+      record_ai_provider_usage: { Args: { p_rows: Json }; Returns: undefined }
+      record_anonymous_views: {
+        Args: { p_token_ids: string[]; p_viewer_hash: string }
+        Returns: number
+      }
+      record_dex_market_sample: { Args: { p_sample: Json }; Returns: Json }
+      record_dex_pool_positions: { Args: { p_rows: Json }; Returns: undefined }
+      record_page_views: {
+        Args: { p_address?: string; p_events: Json; p_viewer_id: string }
+        Returns: number
+      }
+      approve_stage_entry: { Args: { p_space_id: string; p_wallet: string }; Returns: boolean }
+      request_stage_entry: { Args: { p_space_id: string }; Returns: string }
+      recount_space: { Args: { p_space_id: string }; Returns: undefined }
+      release_fraction_listing: {
+        Args: { p_listing_id: string; p_quantity: number }
+        Returns: undefined
+      }
+      replace_user_wallet: {
+        Args: {
+          p_encrypted_seed: string
+          p_expected_address: string
+          p_iv: string
+          p_kdf_iterations: number
+          p_new_address: string
+          p_salt: string
+        }
+        Returns: Json
+      }
+      reserve_agent_post_slot: {
+        Args: { p_owner_wallet: string }
+        Returns: string
+      }
+      reserve_agent_registration:
+        | {
+            Args: {
+              _api_key: string
+              _description: string
+              _name: string
+              _owner: string
+              _private_key: string
+              _wallet: string
+            }
+            Returns: Json
+          }
+        | {
+            Args: {
+              _api_key: string
+              _description: string
+              _limit: number
+              _name: string
+              _owner: string
+              _private_key: string
+              _wallet: string
+            }
+            Returns: Json
+          }
+      reserve_chirp_characters: {
+        Args: { p_characters: number }
+        Returns: boolean
+      }
+      reserve_fraction_listing: {
+        Args: { p_listing_id: string; p_quantity: number }
+        Returns: number
+      }
+      resolve_due_dao_proposals: { Args: never; Returns: number }
+      resolve_due_governance_proposals: { Args: never; Returns: number }
+      set_dex_pool_image: {
+        Args: { p_image_url: string; p_pool_id: string }
+        Returns: undefined
+      }
+      set_liked_request_completion_preference: {
+        Args: { p_enabled: boolean }
+        Returns: boolean
+      }
+      social_credit_add: {
+        Args: {
+          p_chain: string
+          p_dhb: number
+          p_discount: number
+          p_posts: number
+          p_price: number
+          p_tx_hash: string
+          p_usd: number
+          p_wallet: string
+        }
+        Returns: number
+      }
+      social_credit_consume: {
+        Args: { p_n: number; p_wallet: string }
+        Returns: number
+      }
+      social_credit_refund: {
+        Args: { p_n: number; p_wallet: string }
+        Returns: number
+      }
+      stage_dub_tick: {
+        Args: {
+          p_language: string
+          p_price_per_min: number
+          p_space_id: string
+          p_start?: boolean
+          p_wallet: string
+        }
+        Returns: number
+      }
+      stage_dub_unsettled: {
+        Args: { p_wallet: string }
+        Returns: {
+          minutes: number
+          owed_dhb: number
+          price_dhb_per_min: number
+          space_id: string
+        }[]
+      }
+      tick_agent_lives: { Args: never; Returns: undefined }
+      tick_agent_tasks: { Args: never; Returns: undefined }
+      touch_post_translation: {
+        Args: { p_target_lang: string; p_text_hash: string }
+        Returns: undefined
+      }
+      touch_stage_speech: { Args: { space_id: string }; Returns: boolean }
+      track_post_link_copy: {
+        Args: { p_token_id: number; p_wallet?: string }
+        Returns: undefined
+      }
+      trench_fire_alert: {
+        Args: { p_id: string; p_price: number }
+        Returns: boolean
+      }
+      trench_market_watch: { Args: never; Returns: Json }
+      trench_save_desk: {
+        Args: {
+          p_document: Json
+          p_name: string
+          p_revision: number
+          p_wallet: string
+        }
+        Returns: {
+          document: Json
+          name: string
+          revision: number
+          updated_at: string
+          wallet: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "trench_desks"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      trench_scheduler_authorized: {
+        Args: { p_token: string }
+        Returns: boolean
+      }
+      trench_trade: {
+        Args: {
+          p_id: string
+          p_price: number
+          p_quantity: number
+          p_side: string
+          p_symbol: string
+          p_wallet: string
+        }
+        Returns: {
+          cash: number
+          drawdown: number
+          equity: number
+          holdings: Json
+          name: string
+          peak: number
+          updated_at: string
+          wallet: string
+          week: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "trench_paper"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      upsert_phone_otp: {
+        Args: { p_code_hash: string; p_phone: string; p_ttl_ms: number }
+        Returns: undefined
+      }
+      work_action: {
+        Args: {
+          p_action: string
+          p_id: string
+          p_note?: string
+          p_payload?: string
+          p_signature?: string
+        }
+        Returns: undefined
+      }
+      work_activate_escrow: {
+        Args: { p_payload: string; p_signature: string }
+        Returns: undefined
+      }
+      work_approve: {
+        Args: { p_evidence?: string; p_submission: string; p_views?: number }
+        Returns: {
+          approval_status: Database["public"]["Enums"]["work_submission_status"]
+          approved_units: number
+          created_at: string
+          gross_amount: number
+          id: string
+          job_id: string
+          last_polled_at: string | null
+          payout_amount: number
+          payout_chain_id: number | null
+          payout_state: string
+          payout_tx_hash: string | null
+          platform: Database["public"]["Enums"]["work_platform"] | null
+          proof_text: string | null
+          proof_url: string
+          rejection_reason: string | null
+          updated_at: string
+          view_count_cached: number
+          view_evidence_url: string | null
+          worker_address: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "work_submissions"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      work_cancel_signature: { Args: { p_intent: string }; Returns: undefined }
+      work_claim_funding: { Args: { p_job: string }; Returns: Json }
+      work_claim_payment: {
+        Args: { p_chain?: number; p_submission: string }
+        Returns: Json
+      }
+      work_event: {
+        Args: {
+          p_job: string
+          p_match?: Json
+          p_name: string
+          p_payload: string
+          p_signature: string
+        }
+        Returns: Json
+      }
+      work_expire_jobs: { Args: never; Returns: undefined }
+      work_finalize_payment: {
+        Args: { p_intent: string; p_payload: string; p_signature: string }
+        Returns: string
+      }
+      work_is_arbiter: { Args: never; Returns: boolean }
+      work_lock_job: {
+        Args: { p_id: string }
+        Returns: {
+          application_count: number
+          awarded_worker_address: string | null
+          boost_expires_at: string | null
+          cover_image_url: string | null
+          created_at: string
+          currency: Database["public"]["Enums"]["work_currency"]
+          deadline: string | null
+          description: string
+          fund_tx_hash: string | null
+          funded_amount: number
+          funding_state: string
+          id: string
+          job_number: number
+          job_type: Database["public"]["Enums"]["work_job_type"]
+          max_units: number
+          onchain_job_id: number | null
+          pending_fund_tx_hash: string | null
+          platform: Database["public"]["Enums"]["work_platform"] | null
+          poster_address: string
+          price_per_unit: number
+          refunded_amount: number
+          released_amount: number
+          status: Database["public"]["Enums"]["work_job_status"]
+          submission_count: number
+          tags: string[] | null
+          target_url: string | null
+          title: string
+          total_budget: number
+          units_approved: number
+          updated_at: string
+          view_count: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "work_jobs"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      work_proof_hash: { Args: { p_url: string }; Returns: string }
+      work_proof_registered: {
+        Args: { p_job: string; p_url: string }
+        Returns: boolean
+      }
+      work_publish: { Args: { p_job: string }; Returns: undefined }
+      work_publish_funded: {
+        Args: { p_job: string; p_payload: string; p_signature: string }
+        Returns: undefined
+      }
+      work_receipt: {
+        Args: { p_payload: string; p_signature: string }
+        Returns: Json
+      }
+      work_record_broadcast: {
+        Args: { p_hash: string; p_intent: string }
+        Returns: undefined
+      }
+      work_record_funding: {
+        Args: { p_cancel?: boolean; p_hash?: string; p_job: string }
+        Returns: undefined
+      }
+      work_record_proof: {
+        Args: {
+          p_job: string
+          p_payload: string
+          p_signature: string
+          p_url: string
+        }
+        Returns: undefined
+      }
+      work_resolve_dispute: {
+        Args: {
+          p_amount: number
+          p_dispute: string
+          p_note: string
+          p_payload?: string
+          p_refund?: number
+          p_signature?: string
+          p_worker: string
+        }
+        Returns: undefined
+      }
+      work_reviewable: {
+        Args: { p_job: string; p_worker: string }
+        Returns: boolean
+      }
+      work_wallet: { Args: never; Returns: string }
+    }
+    Enums: {
+      work_app_status: "pending" | "awarded" | "rejected" | "withdrawn"
+      work_currency: "DHB" | "USDC"
+      work_dispute_status:
+        | "open"
+        | "resolved_worker"
+        | "resolved_poster"
+        | "resolved_split"
+      work_job_status:
+        | "draft"
+        | "open"
+        | "in_progress"
+        | "completed"
+        | "disputed"
+        | "cancelled"
+        | "expired"
+      work_job_type: "shill" | "clipping" | "contract"
+      work_platform:
+        | "x"
+        | "youtube"
+        | "instagram"
+        | "tiktok"
+        | "facebook"
+        | "reddit"
+        | "other"
+      work_review_role: "poster" | "worker"
+      work_submission_status: "pending" | "approved" | "rejected" | "paid"
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
+}
+
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
+
+export type Tables<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+    : never) = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+      Row: infer R
+    }
+    ? R
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+        Row: infer R
+      }
+      ? R
+      : never
+    : never
+
+export type TablesInsert<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never) = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Insert: infer I
+    }
+    ? I
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Insert: infer I
+      }
+      ? I
+      : never
+    : never
+
+export type TablesUpdate<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never) = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Update: infer U
+    }
+    ? U
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Update: infer U
+      }
+      ? U
+      : never
+    : never
+
+export type Enums<
+  DefaultSchemaEnumNameOrOptions extends
+    | keyof DefaultSchema["Enums"]
+    | { schema: keyof DatabaseWithoutInternals },
+  EnumName extends (DefaultSchemaEnumNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+    : never) = never,
+> = DefaultSchemaEnumNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
+    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
+    : never
+
+export type CompositeTypes<
+  PublicCompositeTypeNameOrOptions extends
+    | keyof DefaultSchema["CompositeTypes"]
+    | { schema: keyof DatabaseWithoutInternals },
+  CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    : never) = never,
+> = PublicCompositeTypeNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
+    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+    : never
+
+export const Constants = {
+  public: {
+    Enums: {
+      work_app_status: ["pending", "awarded", "rejected", "withdrawn"],
+      work_currency: ["DHB", "USDC"],
+      work_dispute_status: [
+        "open",
+        "resolved_worker",
+        "resolved_poster",
+        "resolved_split",
+      ],
+      work_job_status: [
+        "draft",
+        "open",
+        "in_progress",
+        "completed",
+        "disputed",
+        "cancelled",
+        "expired",
+      ],
+      work_job_type: ["shill", "clipping", "contract"],
+      work_platform: [
+        "x",
+        "youtube",
+        "instagram",
+        "tiktok",
+        "facebook",
+        "reddit",
+        "other",
+      ],
+      work_review_role: ["poster", "worker"],
+      work_submission_status: ["pending", "approved", "rejected", "paid"],
+    },
+  },
+} as const

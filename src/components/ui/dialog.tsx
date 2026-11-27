@@ -1,0 +1,155 @@
+import { useTranslation as _useCopy } from 'react-i18next';
+import { overlayRoot } from "@/lib/overlay-root";
+import * as React from "react";
+import * as DialogPrimitive from "@radix-ui/react-dialog";
+import X from "@/components/ui/cut-icons/close";
+
+
+import { cn } from "@/lib/utils";
+import { OverlayOpenTracker } from "@/lib/overlay-open";
+import { guardOutsideDismiss } from "@/lib/overlay-dismiss";
+import { useWalletUnlockPrompt } from '@/lib/wallet-unlock-flow';
+import { OverlayContentPresent, useOverlayLifetime } from '@/hooks/use-overlay-lifetime';
+import { OverlayExit, useOverlayExitRef } from '@/components/ui/overlay-exit';
+
+const Dialog = ({ modal = true, onOpenChange, ...props }: React.ComponentProps<typeof DialogPrimitive.Root>) => {
+  const unlockOpen = useWalletUnlockPrompt();
+  const lifetime = useOverlayLifetime(props.open, props.defaultOpen, onOpenChange);
+  return <OverlayContentPresent.Provider value={lifetime.present}><OverlayExit present={lifetime.present}><DialogPrimitive.Root {...props} open={lifetime.open} modal={modal} onOpenChange={open => {
+    if (!open && unlockOpen) return;
+    lifetime.onChange(open);
+  }} /></OverlayExit></OverlayContentPresent.Provider>;
+};
+
+const DialogTrigger = DialogPrimitive.Trigger;
+
+const DialogPortal = (props: DialogPrimitive.DialogPortalProps) => (
+  <DialogPrimitive.Portal container={overlayRoot()} {...props} />
+);
+
+const DialogClose = DialogPrimitive.Close;
+
+const DialogOverlay = React.forwardRef<
+  React.ElementRef<typeof DialogPrimitive.Overlay>,
+  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Overlay>
+>(({ className, ...props }, ref) => (
+  <DialogPrimitive.Overlay
+    ref={useOverlayExitRef(ref)}
+    /* Radix does not emit a data-radix-* hook on the overlay; themes that want
+       to tint the scrim need one. */
+    data-radix-dialog-overlay
+    className={cn(
+      "fixed inset-0 z-50 bg-black/40 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+      className,
+    )}
+    {...props}
+  />
+));
+DialogOverlay.displayName = DialogPrimitive.Overlay.displayName;
+
+interface DialogContentProps extends React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> {
+  hideCloseButton?: boolean;
+  overlayClassName?: string;
+}
+
+const DialogContent = React.forwardRef<
+  React.ElementRef<typeof DialogPrimitive.Content>,
+  DialogContentProps
+>(({ className, children, hideCloseButton, overlayClassName, onPointerDownOutside, ...props }, ref) => {
+  const { t: _copy } = _useCopy();
+  const present = React.useContext(OverlayContentPresent);
+  const surfaceRef = useOverlayExitRef(ref);
+  if (!present) return null;
+  return (
+  <DialogPortal>
+    {/* Dialogs render as bottom sheets on mobile at z-50 — below the sticky
+        feed navs (z-110) and mobile header (z-60). Registering here lets that
+        chrome hide/dim while the dialog is open (lib/overlay-open). */}
+    <OverlayOpenTracker />
+    <DialogOverlay className={overlayClassName} />
+    <DialogPrimitive.Content
+      ref={surfaceRef}
+      className={cn(
+        // Mobile: bottom sheet style
+        "fixed z-50 grid w-full gap-4 p-6 shadow-2xl duration-200",
+        "inset-x-0 bottom-0 rounded-t-[20px] max-h-[85vh] overflow-y-auto",
+        "bg-zinc-900/80 backdrop-blur-xl border border-zinc-700/50",
+        "data-[state=open]:animate-in data-[state=closed]:animate-out",
+        "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+        "data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom",
+        // Desktop: centered modal
+        "sm:inset-auto sm:left-[50%] sm:top-[50%] sm:translate-x-[-50%] sm:translate-y-[-50%]",
+        // No sm:max-h-none here. It is the CSS initial value, so it caps
+        // nothing -- its only effect was to out-rank a caller's own
+        // sm:max-h-[...] in the cascade, which left the community manage
+        // sheet 1966px tall on a 748px viewport with its header, tabs and
+        // pending-approval list stranded above the top of the screen.
+        "sm:max-w-lg sm:rounded-2xl",
+        "sm:data-[state=closed]:slide-out-to-left-1/2 sm:data-[state=closed]:slide-out-to-top-[48%]",
+        "sm:data-[state=open]:slide-in-from-left-1/2 sm:data-[state=open]:slide-in-from-top-[48%]",
+        "focus:outline-none focus-visible:outline-none",
+        className,
+      )}
+      {...props}
+      /* After the spread: a sheet, Select, menu or toast opened from inside this
+         dialog portals to `body`, so its own clicks look like clicks off the
+         dialog. They are not (lib/overlay-dismiss). */
+      onPointerDownOutside={guardOutsideDismiss(onPointerDownOutside)}
+    >
+      {/* Mobile drag handle */}
+      {!hideCloseButton && <div className="mx-auto h-1.5 w-12 rounded-full bg-white/30 sm:hidden" />}
+      {children}
+      {!hideCloseButton && (
+        <DialogPrimitive.Close className="absolute right-4 top-4 rounded-full p-1 opacity-70 ring-offset-background transition-opacity hover:opacity-100 hover:bg-zinc-700/50 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none text-white/80">
+          <X className="h-4 w-4" />
+          <span className="sr-only">{_copy("copy.7d9eb7acb13e", { defaultValue: "Close" })}</span>
+        </DialogPrimitive.Close>
+      )}
+    </DialogPrimitive.Content>
+  </DialogPortal>
+  );
+});
+DialogContent.displayName = DialogPrimitive.Content.displayName;
+
+const DialogHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
+  <div className={cn("flex flex-col space-y-1.5 text-center sm:text-left", className)} {...props} />
+);
+DialogHeader.displayName = "DialogHeader";
+
+const DialogFooter = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
+  <div className={cn("flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2", className)} {...props} />
+);
+DialogFooter.displayName = "DialogFooter";
+
+const DialogTitle = React.forwardRef<
+  React.ElementRef<typeof DialogPrimitive.Title>,
+  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Title>
+>(({ className, ...props }, ref) => (
+  <DialogPrimitive.Title
+    ref={ref}
+    className={cn("text-lg font-semibold leading-none tracking-tight", className)}
+    {...props}
+  />
+));
+DialogTitle.displayName = DialogPrimitive.Title.displayName;
+
+const DialogDescription = React.forwardRef<
+  React.ElementRef<typeof DialogPrimitive.Description>,
+  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Description>
+>(({ className, ...props }, ref) => (
+  <DialogPrimitive.Description ref={ref} className={cn("text-sm text-muted-foreground", className)} {...props} />
+));
+DialogDescription.displayName = DialogPrimitive.Description.displayName;
+
+export {
+  Dialog,
+  DialogPortal,
+  DialogOverlay,
+  DialogClose,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogFooter,
+  DialogTitle,
+  DialogDescription,
+};

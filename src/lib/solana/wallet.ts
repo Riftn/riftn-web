@@ -1,0 +1,138 @@
+/**
+ * Phantom / Solana wallet helpers for Solana minting & SPL token-gating.
+ */
+
+// Type-only: keeps the ~350 kB @solana/web3.js runtime out of every chunk
+// that imports these helpers (the post composer path). Address validation
+// below uses a dependency-free base58 decode instead of `new PublicKey()`.
+import type { PublicKey } from '@solana/web3.js';
+import { BASE58_ALPHABET, base58Encode } from './base58';
+import { translateCopy as _translateCopy } from '@/i18n/copy';
+
+export interface SolanaWalletProvider {
+  isPhantom?: boolean;
+  isConnected?: boolean;
+  publicKey?: PublicKey | null;
+  connect: (opts?: { onlyIfTrusted?: boolean }) => Promise<{ publicKey: PublicKey }>;
+  disconnect: () => Promise<void>;
+  signTransaction: (transaction: import('@solana/web3.js').Transaction) => Promise<import('@solana/web3.js').Transaction>;
+  /** Phantom's arbitrary-message signing. Returns a raw 64-byte Ed25519 signature. */
+  signMessage?: (
+    message: Uint8Array,
+    display?: 'utf8' | 'hex',
+  ) => Promise<{ signature: Uint8Array; publicKey?: PublicKey }>;
+}
+
+declare global {
+  interface Window {
+    phantom?: { solana?: SolanaWalletProvider };
+    solana?: SolanaWalletProvider;
+  }
+}
+
+export function getSolanaProvider(): SolanaWalletProvider | null {
+  if (typeof window === 'undefined') return null;
+  const provider = window.phantom?.solana ?? window.solana ?? null;
+  if (!provider?.isPhantom && !provider?.publicKey && !provider?.connect) return null;
+  return provider;
+}
+
+/**
+ * A Solana address is base58 text that decodes to exactly 32 bytes — the same
+ * check `new PublicKey()` performs, minus the web3.js dependency.
+ */
+export function isValidSolanaAddress(address: string): boolean {
+  const trimmed = address.trim();
+  if (trimmed.length < 32 || trimmed.length > 44) return false;
+
+  const bytes: number[] = [];
+  for (const char of trimmed) {
+    const value = BASE58_ALPHABET.indexOf(char);
+    if (value === -1) return false;
+    let carry = value;
+    for (let i = 0; i < bytes.length; i++) {
+      carry += bytes[i] * 58;
+      bytes[i] = carry & 0xff;
+      carry >>= 8;
+    }
+    while (carry > 0) {
+      bytes.push(carry & 0xff);
+      carry >>= 8;
+    }
+  }
+  // Leading '1' characters encode leading zero bytes
+  let leadingZeros = 0;
+  for (const char of trimmed) {
+    if (char !== '1') break;
+    leadingZeros++;
+  }
+  return leadingZeros + bytes.length === 32;
+}
+
+export async function connectSolanaWallet(): Promise<string> {
+  const provider = getSolanaProvider();
+  if (!provider) {
+    throw new Error(_translateCopy('copy.b976792afa31', { defaultValue: 'Phantom wallet not found. Install Phantom or open this page in the Phantom browser.' }));
+  }
+
+  try {
+    const resp = await provider.connect();
+    const pubkey = resp.publicKey?.toBase58() ?? provider.publicKey?.toBase58();
+    if (!pubkey) throw new Error(_translateCopy('copy.8537866e57c9', { defaultValue: 'Could not read Solana wallet address' }));
+    return pubkey;
+  } catch (err: unknown) {
+    const code = (err as { code?: number })?.code;
+    if (code === 4001) throw new Error(_translateCopy('copy.a0c7a7192ad8', { defaultValue: 'Solana wallet connection was rejected' }));
+    throw err instanceof Error ? err : new Error(_translateCopy('copy.decf4d0b7c4e', { defaultValue: 'Failed to connect Solana wallet' }));
+  }
+}
+
+export async function getConnectedSolanaAddress(): Promise<string | null> {
+  const provider = getSolanaProvider();
+  if (!provider) return null;
+  try {
+    if (provider.publicKey) return provider.publicKey.toBase58();
+    const resp = await provider.connect({ onlyIfTrusted: true });
+    return resp.publicKey?.toBase58() ?? null;
+  } catch {
+    return null;
+  }
+}
+
+export interface SolanaLoginProof {
+  address: string;
+  signature: string;
+}
+
+/**
+ * Ask Phantom to countersign the Riftn login message with its Solana key.
+ *
+ * Why the login carries this at all: Phantom signs in through its Ethereum
+ * provider, and that EVM address is a by-product most Phantom users have never
+ * touched — no balance, no nonce, nothing on any chain. The backend's anti-bot
+ * signup gate judged people by it and turned every one of them away. Signing
+ * the SAME message with the Solana key lets the gate look at the half of the
+ * wallet that has actually been used, and hands the account a verified Solana
+ * address in the process — which is what makes the creator payable on Solana.
+ *
+ * Returns null rather than throwing on every failure path. This is additive:
+ * a user who dismisses the second prompt, or whose Phantom build predates
+ * `signMessage`, must still complete a perfectly ordinary EVM login.
+ */
+export async function signSolanaLoginProof(message: string): Promise<SolanaLoginProof | null> {
+  const provider = getSolanaProvider();
+  if (!provider?.signMessage) return null;
+
+  try {
+    const address = await connectSolanaWallet();
+    const encoded = new TextEncoder().encode(message);
+    const { signature } = await provider.signMessage(encoded, 'utf8');
+    if (!signature || signature.length !== 64) return null;
+    return { address, signature: base58Encode(signature) };
+  } catch (err) {
+    // Includes the user declining (4001). Not an error worth a toast — the
+    // EVM signature they already gave is what actually logs them in.
+    console.warn('[Solana] login proof unavailable:', err);
+    return null;
+  }
+}

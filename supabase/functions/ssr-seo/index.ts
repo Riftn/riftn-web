@@ -1,0 +1,1013 @@
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+
+const corsHeaders = {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-wallet-address, x-dehub-token, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version, x-request-id, prefer",
+};
+
+const DEHUB_API_BASE = "https://api.dehub.io";
+// Every crawler render reaches the API from this function's one IP. The
+// internal secret keeps a crawler burst off the API's per-IP limit, which
+// otherwise turned real posts and profiles into 404s.
+const INTERNAL_SERVICE_SECRET = Deno.env.get("INTERNAL_SERVICE_SECRET") || "";
+const API_HEADERS: Record<string, string> = INTERNAL_SERVICE_SECRET ? { "x-internal-secret": INTERNAL_SERVICE_SECRET } : {};
+const DEHUB_CDN_BASE = "https://dehubcdn.ams3.cdn.digitaloceanspaces.com/";
+const APP_URL = "https://riftn.com"; // Change to actual production URL if different
+
+// This page is prerendered HTML, and its "View on Riftn" button points at the
+// page's own URL. Anything classified as a crawler therefore gets the same
+// page back when it taps that button — which is what in-app browsers on X,
+// LinkedIn and WhatsApp were doing to real people. `?app=1` tells the
+// Cloudflare worker to serve the React SPA regardless of user agent.
+function appUrl(url: string): string {
+    return url.includes("app=1") ? url : `${url}${url.includes("?") ? "&" : "?"}app=1`;
+}
+
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL") || "https://aigxuutjaqsywioxjefr.supabase.co";
+const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY") || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFpZ3h1dXRqYXFzeXdpb3hqZWZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc2MzY0MzIsImV4cCI6MjA4MzIxMjQzMn0.hjMx0kShuJlaZ26UoG7RFGu3OC_aLR0C1Sf1qdk3x0I";
+const IMAGE_PROXY_BASE = `${SUPABASE_URL}/functions/v1/ssr-seo`;
+const OG_IMAGE_BASE = `${SUPABASE_URL}/functions/v1/og-image`;
+const DEHUB_LOGO = "https://aigxuutjaqsywioxjefr.supabase.co/storage/v1/object/public/logo/new_logo_Dehub.jpg";
+const AUDIO_OG_IMAGE = "https://aigxuutjaqsywioxjefr.supabase.co/storage/v1/object/public/logo/audio-wave%20(1).png";
+const BLOG_SHARE_IMAGE_BASE = `${SUPABASE_URL}/functions/v1/blog-share-image`;
+
+interface BlogManifestPost {
+    slug: string;
+    title: string;
+    excerpt?: string;
+    author?: string;
+    publishedAt?: string;
+    bannerImage?: string;
+}
+
+let _blogManifestCache: Map<string, BlogManifestPost> | null = null;
+let _blogManifestFetchedAt = 0;
+
+async function getBlogManifest(): Promise<Map<string, BlogManifestPost>> {
+    const now = Date.now();
+    if (_blogManifestCache && now - _blogManifestFetchedAt < 5 * 60 * 1000) {
+        return _blogManifestCache;
+    }
+    // Try APP_URL (dehub.io) for the blog manifest.
+    const origins = [
+        APP_URL,
+    ];
+    for (const origin of origins) {
+        try {
+            const res = await fetch(`${origin}/blog-manifest.json`, {
+                headers: { Accept: "application/json" },
+                signal: AbortSignal.timeout(5000),
+            });
+            if (!res.ok) continue;
+            const ct = res.headers.get("content-type") || "";
+            if (!ct.includes("json")) continue;
+            const data: BlogManifestPost[] = await res.json();
+            const map = new Map<string, BlogManifestPost>();
+            for (const p of data) map.set(p.slug, p);
+            _blogManifestCache = map;
+            _blogManifestFetchedAt = now;
+            return map;
+        } catch (e) {
+            console.error(`[SSR] blog manifest fetch failed for ${origin}`, e);
+        }
+    }
+    return _blogManifestCache || new Map();
+}
+
+
+async function getBlogPost(slug: string): Promise<BlogManifestPost | null> {
+    const m = await getBlogManifest();
+    return m.get(slug) || null;
+}
+
+function buildBlogShareImage(post: BlogManifestPost): string {
+    const p = new URLSearchParams();
+    p.set("slug", post.slug);
+    p.set("title", (post.title || "").slice(0, 240));
+    if (post.author) p.set("author", String(post.author).slice(0, 60));
+    if (post.publishedAt) {
+        try {
+            const d = new Date(post.publishedAt);
+            p.set("date", d.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" }));
+        } catch { /* ignore */ }
+    }
+    if (post.bannerImage) {
+        const banner = /^https?:\/\//i.test(post.bannerImage) ? post.bannerImage : `${APP_URL}${post.bannerImage.startsWith("/") ? "" : "/"}${post.bannerImage}`;
+        p.set("banner", banner);
+    }
+    p.set("width", "1200");
+    p.set("height", "630");
+    p.set("format", "png");
+    return `${BLOG_SHARE_IMAGE_BASE}?${p.toString()}`;
+}
+
+
+interface DeHubUser {
+    username?: string;
+    displayName?: string;
+    avatarImageUrl?: string;
+    aboutMe?: string;
+    address?: string;
+}
+
+interface DeHubNFT {
+    tokenId: number;
+    name: string;
+    title?: string;
+    description?: string;
+    imageUrl?: string;
+    articleImageUrl?: string;
+    socialImageUrl?: string;
+    imageUrls?: string[];
+    videoUrl?: string;
+    audioUrl?: string;
+    thumbnail_url?: string;
+    postType?: string;
+    createdAt?: string;
+    updatedAt?: string;
+    minterUsername?: string;
+    mintername?: string;
+    minterDisplayName?: string;
+    minterAvatarUrl?: string;
+    minterUser?: DeHubUser;
+}
+
+interface DeHubCommunity {
+    id: string;
+    name: string;
+    slug: string;
+    description: string | null;
+    avatar_url: string | null;
+    banner_url: string | null;
+    member_count: number;
+}
+
+async function fetchCommunity(slug: string): Promise<DeHubCommunity | null> {
+    try {
+        const res = await fetch(
+            `${SUPABASE_URL}/rest/v1/communities?slug=eq.${encodeURIComponent(slug)}&select=id,name,slug,description,avatar_url,banner_url,member_count&limit=1`,
+            {
+                headers: {
+                    "apikey": SUPABASE_ANON_KEY,
+                    "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+                },
+            }
+        );
+        if (!res.ok) return null;
+        const rows: DeHubCommunity[] = await res.json();
+        return rows[0] ?? null;
+    } catch {
+        return null;
+    }
+}
+
+function getExtension(path: string): string {
+    const match = path.match(/\.([a-zA-Z0-9-]+)$/);
+    if (!match) return "png";
+    return match[1].toLowerCase();
+}
+
+/**
+ * The page address our edge worker hands over. It ends up in the canonical tag
+ * and in the hop back to the app, so it has to be one of our own pages.
+ */
+function ownPageUrl(raw: string | null): string {
+    if (!raw || raw.length > 2048) return "";
+    try {
+        const u = new URL(raw);
+        if (u.protocol !== "https:" || u.username || u.password || u.port) return "";
+        if (!/(?:^|\.)(?:riftn\.com|dehub\.(?:io|net))$/.test(u.hostname)) return "";
+        return u.toString().replace(/[<>"'`\\]/g, (c) => "%" + c.charCodeAt(0).toString(16).toUpperCase());
+    } catch {
+        return "";
+    }
+}
+
+function ensureAbsoluteUrl(url: string): string {
+    if (!url) return DEHUB_LOGO;
+    if (url.startsWith("http")) return url;
+    return `${DEHUB_CDN_BASE}${url.replace(/^statics\//, "")}`;
+}
+
+/**
+ * Sync with frontend src/lib/media-url.ts
+ */
+function buildAvatarUrl(user: DeHubUser): string {
+    const apiPath = user.avatarImageUrl;
+    if (!apiPath) return DEHUB_LOGO;
+    if (apiPath.startsWith("http")) return apiPath;
+
+    // Frontend logic: cdn/avatars/{address}.{ext}
+    if (user.address) {
+        const ext = getExtension(apiPath);
+        return `${DEHUB_CDN_BASE}avatars/${user.address}.${ext}`;
+    }
+
+    // Fallback: strip statics/ and append relative path
+    return `${DEHUB_CDN_BASE}${apiPath.replace(/^statics\//, "")}`;
+}
+
+function buildPostImageUrl(nft: DeHubNFT): string | null {
+    // 1. Multi-image feed posts: imageUrls array → cdn/feed-images/{filename}
+    if (nft.imageUrls && nft.imageUrls.length > 0) {
+        const firstImg = nft.imageUrls[0];
+        if (firstImg.startsWith("http")) return firstImg;
+        const filename = firstImg.split("/").pop() || "";
+        if (filename) return `${DEHUB_CDN_BASE}feed-images/${filename}`;
+    }
+
+    // 2. Single NFT image: imageUrl → cdn/images/{tokenId}.{ext}
+    const apiPath = nft.imageUrl || nft.thumbnail_url;
+    if (!apiPath) return null; // No image, caller should fall back to minter avatar
+    if (apiPath.startsWith("http")) return apiPath;
+    if (apiPath.startsWith("images/")) return `${DEHUB_CDN_BASE}${apiPath}`;
+    const ext = getExtension(apiPath);
+    return `${DEHUB_CDN_BASE}images/${nft.tokenId}.${ext}`;
+}
+
+function getMimeType(url: string): string {
+    const ext = url.split("?")[0].match(/\.([a-zA-Z0-9]+)$/)?.[1]?.toLowerCase();
+    switch (ext) {
+        case "jpg":
+        case "jpeg":
+            return "image/jpeg";
+        case "gif":
+            return "image/gif";
+        case "webp":
+            return "image/webp";
+        case "svg":
+            return "image/svg+xml";
+        default:
+            return "image/png";
+    }
+}
+
+function buildProxiedImageUrl(functionBaseUrl: string, imageUrl: string): string {
+    // Use our own edge function as image proxy to serve correct Content-Type
+    return `${functionBaseUrl}?image_url=${encodeURIComponent(imageUrl)}`;
+}
+
+function buildVideoUrl(nft: DeHubNFT): string | null {
+    const videoPath = nft.videoUrl;
+    if (!videoPath) return null;
+    if (videoPath.startsWith("http")) return videoPath;
+    return `${DEHUB_CDN_BASE}videos/${nft.tokenId}.mp4`;
+}
+
+function getVideoMimeType(url: string): string {
+    const ext = url.split("?")[0].match(/\.([a-zA-Z0-9]+)$/)?.[1]?.toLowerCase();
+    switch (ext) {
+        case "webm":
+            return "video/webm";
+        case "mov":
+            return "video/quicktime";
+        default:
+            return "video/mp4";
+    }
+}
+
+function generateMetaHTML(data: {
+    title: string;
+    description: string;
+    image: string;
+    url: string;
+    type?: string;
+    twitterCard?: string;
+    imageWidth?: number;
+    imageHeight?: number;
+    functionBaseUrl?: string;
+    isBot: boolean;
+    videoUrl?: string | null;
+    jsonLd?: Record<string, unknown>;
+    bodyContent?: string;
+}): string {
+    const title = data.title.replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    const description = data.description.replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    const imageUrl = ensureAbsoluteUrl(data.image);
+    // Use direct CDN URL for both og:image and twitter:image.
+    // Proxied Supabase URLs lack image extensions → validators reject them, and CDN already serves correct Content-Type.
+    const ogImageUrl = imageUrl;
+    const twitterImageUrl = imageUrl;
+    const imgWidth = data.imageWidth;
+    const imgHeight = data.imageHeight;
+    const mimeType = getMimeType(imageUrl);
+
+    const isVideo = !!data.videoUrl;
+    const ogType = isVideo ? "video.other" : (data.type || "website");
+    const twitterCard = isVideo ? "player" : (data.twitterCard || "summary_large_image");
+
+    // Build video-specific OG tags
+    let videoTags = "";
+    if (isVideo && data.videoUrl) {
+        const videoMime = getVideoMimeType(data.videoUrl);
+        videoTags = `
+  <!-- Video OG Tags -->
+  <meta property="og:video" content="${data.videoUrl}">
+  <meta property="og:video:secure_url" content="${data.videoUrl}">
+  <meta property="og:video:type" content="${videoMime}">
+  <meta property="og:video:width" content="1280">
+  <meta property="og:video:height" content="720">`;
+    }
+
+    // Build Twitter player tags for video
+    let twitterVideoTags = "";
+    if (isVideo && data.videoUrl) {
+        twitterVideoTags = `
+  <meta name="twitter:player" content="${data.videoUrl}">
+  <meta name="twitter:player:width" content="1280">
+  <meta name="twitter:player:height" content="720">`;
+    }
+
+    return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${title}</title>
+
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="${description}">
+  <link rel="canonical" href="${data.url}">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="${ogType}">
+  <meta property="og:url" content="${data.url}">
+  <meta property="og:title" content="${title}">
+  <meta property="og:description" content="${description}">
+  <meta property="og:image" content="${ogImageUrl}">
+  <meta property="og:image:secure_url" content="${ogImageUrl}">
+  <meta property="og:image:type" content="${mimeType}">${imgWidth ? `
+  <meta property="og:image:width" content="${imgWidth}">` : ""}${imgHeight ? `
+  <meta property="og:image:height" content="${imgHeight}">` : ""}
+  <meta property="og:image:alt" content="${title}">
+  <meta property="fb:app_id" content="966242223397117">${videoTags}
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="${twitterCard}">
+  <meta name="twitter:url" content="${data.url}">
+  <meta name="twitter:title" content="${title}">
+  <meta name="twitter:description" content="${description}">
+  <meta name="twitter:image" content="${twitterImageUrl}">
+  <meta name="twitter:image:alt" content="${title}">
+  <meta name="twitter:site" content="@riftn_com">${twitterVideoTags}
+
+  ${!data.isBot
+            ? `
+  <meta http-equiv="refresh" content="0; url=${data.url}">
+  <script>window.location.href = '${data.url}';</script>
+  `
+            : ""
+        }
+
+  ${data.jsonLd ? `
+  <!-- JSON-LD Structured Data -->
+  <script type="application/ld+json">${JSON.stringify(data.jsonLd)}</script>
+  ` : ""}
+</head>
+<body style="font-family: sans-serif; background: black; color: white; display: flex; align-items: flex-start; justify-content: center; min-height: 100vh; margin: 0; padding: 40px 20px;">
+  <div style="max-width: 720px; text-align: center; padding: 20px;">
+    <h1>${title}</h1>
+    <p>${description}</p>
+    <img src="${imageUrl}" style="max-width: 100%; border-radius: 12px; margin-top: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);" alt="${title}" />
+    ${data.bodyContent ? `<div style="margin-top: 32px; text-align: left; line-height: 1.65; font-size: 15px; color: #ddd;">${data.bodyContent}</div>` : ""}
+    <p style="margin-top: 30px;"><a href="${appUrl(data.url)}" style="color: #00ff00; text-decoration: none; font-weight: bold; border: 1px solid #00ff00; padding: 10px 20px; border-radius: 5px;">View on Riftn</a></p>
+    <nav style="margin-top: 20px; font-size: 14px;">
+      <a href="${APP_URL}/app/explore" style="color: #aaa; margin: 0 8px;">Explore</a>
+      <a href="${APP_URL}/app/stages" style="color: #aaa; margin: 0 8px;">Stages</a>
+      <a href="${APP_URL}/app/tv" style="color: #aaa; margin: 0 8px;">Live TV</a>
+      <a href="${APP_URL}/app/governance" style="color: #aaa; margin: 0 8px;">Governance</a>
+      <a href="${APP_URL}/app/stake" style="color: #aaa; margin: 0 8px;">Staking</a>
+      <a href="${APP_URL}/app/leaderboard" style="color: #aaa; margin: 0 8px;">Leaderboard</a>
+      <a href="${APP_URL}/app/music" style="color: #aaa; margin: 0 8px;">Music</a>
+      <a href="${APP_URL}/app/features" style="color: #aaa; margin: 0 8px;">Features</a>
+      <a href="${APP_URL}/app/top-100" style="color: #aaa; margin: 0 8px;">Top 100 Cryptos</a>
+      <a href="${APP_URL}/app/glossary" style="color: #aaa; margin: 0 8px;">Glossary</a>
+      <a href="${APP_URL}/app/bridge" style="color: #aaa; margin: 0 8px;">Bridge</a>
+      <a href="${APP_URL}/app/agents" style="color: #aaa; margin: 0 8px;">AI Agents</a>
+      <a href="${APP_URL}/app/assistant" style="color: #aaa; margin: 0 8px;">AI Assistant</a>
+      <a href="${APP_URL}/app/buy" style="color: #aaa; margin: 0 8px;">Buy Crypto</a>
+      <a href="${APP_URL}/creators" style="color: #aaa; margin: 0 8px;">Become a Creator</a>
+      <a href="${APP_URL}/jobs" style="color: #aaa; margin: 0 8px;">Careers</a>
+    </nav>
+  </div>
+</body>
+</html>`;
+}
+
+function build404Html(url: string, isBot: boolean, functionBaseUrl: string): string {
+    return generateMetaHTML({
+        title: "Not Found | Riftn",
+        description: "This page doesn't exist on Riftn.",
+        image: DEHUB_LOGO,
+        url,
+        twitterCard: "summary",
+        imageWidth: 400,
+        imageHeight: 400,
+        functionBaseUrl,
+        isBot,
+    });
+}
+
+serve(async (req) => {
+    if (req.method === "OPTIONS") {
+        return new Response(null, { headers: corsHeaders });
+    }
+
+    try {
+        const url = new URL(req.url);
+
+        // Facebook/Twitter scrapers need proper MIME types to display images
+        const proxyImageUrl = url.searchParams.get("image_url");
+        if (proxyImageUrl) {
+            if (!proxyImageUrl.startsWith(DEHUB_CDN_BASE) && !proxyImageUrl.startsWith("https://riftn.com/") && !proxyImageUrl.startsWith("https://aigxuutjaqsywioxjefr.supabase.co/storage/")) {
+                return new Response("Forbidden", { status: 403 });
+            }
+            const imgResp = await fetch(proxyImageUrl);
+            if (!imgResp.ok) {
+                return new Response("Image not found", { status: 404 });
+            }
+            const body = await imgResp.arrayBuffer();
+            return new Response(body, {
+                headers: {
+                    ...corsHeaders,
+                    "Content-Type": getMimeType(proxyImageUrl),
+                    "Cache-Control": "public, max-age=86400",
+                },
+            });
+        }
+
+        const userAgent = req.headers.get("user-agent") || "";
+        // X-Is-Bot header set by the Cloudflare worker (more reliable than UA sniffing here)
+        // because the edge function always serves SSR HTML for shareable routes — it knows
+        // whether the original requester was a bot and tells us via this header.
+        const xIsBot = req.headers.get("x-is-bot");
+        const isBot = xIsBot !== null
+            ? xIsBot === "1"
+            : /bot|facebook|twitter|linkedin|whatsapp|telegram|slack|discord|facebot|oggrabber/i.test(userAgent);
+
+        const functionBaseUrl = IMAGE_PROXY_BASE;
+
+        let fullPath = url.searchParams.get("path") || "/";
+        const canonicalUrl = ownPageUrl(url.searchParams.get("original_url"))
+            || ownPageUrl(`${APP_URL}/${fullPath.replace(/^[\/\\]+/, "")}`)
+            || APP_URL;
+
+        let cleanPath = fullPath.split("?")[0];
+        if (cleanPath.startsWith("/")) cleanPath = cleanPath.substring(1);
+        const pathParts = cleanPath.split("/").filter(Boolean);
+
+        // 0. Affiliate Referral Landing (/r/{CODE}) — must run BEFORE profile handler
+        if (pathParts[0]?.toLowerCase() === "r" && pathParts[1]) {
+            const code = pathParts[1].toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 16);
+            if (code) {
+                let inviter = "A creator";
+                try {
+                    const r = await fetch(
+                        `${SUPABASE_URL}/rest/v1/affiliate_codes?code=eq.${code}&active=eq.true&select=share_name,owner_address&limit=1`,
+                        { headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` }, signal: AbortSignal.timeout(5000) },
+                    );
+                    if (r.ok) {
+                        const rows = await r.json();
+                        const row = rows[0];
+                        if (row?.share_name?.trim()) inviter = row.share_name.trim();
+                        else if (row?.owner_address) inviter = `${row.owner_address.slice(0, 6)}…${row.owner_address.slice(-4)}`;
+                    }
+                } catch { /* keep default */ }
+
+                const referralUrl = `${APP_URL}/r/${code}`;
+                const shareImage = `${SUPABASE_URL}/functions/v1/affiliate-share-image?code=${encodeURIComponent(code)}&width=1200&height=630&format=png&v=6`;
+                const title = `${inviter} invited you to Riftn, earn, post & build on-chain`;
+                const description = `Use invite code ${code} to join Riftn. The decentralised creator network for video, music, social, jobs and Web3.`;
+
+                const html = generateMetaHTML({
+                    title,
+                    description,
+                    image: shareImage,
+                    url: referralUrl,
+                    type: "website",
+                    twitterCard: "summary_large_image",
+                    imageWidth: 1200,
+                    imageHeight: 630,
+                    functionBaseUrl,
+                    isBot,
+                    jsonLd: {
+                        "@context": "https://schema.org",
+                        "@type": "WebPage",
+                        name: title,
+                        description,
+                        url: referralUrl,
+                        image: shareImage,
+                    },
+                });
+                return new Response(html, { headers: { ...corsHeaders, "Content-Type": "text/html; charset=utf-8", "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=7200" } });
+            }
+        }
+
+        // 0.5 Blog post handler (/docs/blog/:slug)
+        if (pathParts[0]?.toLowerCase() === "docs" && pathParts[1]?.toLowerCase() === "blog" && pathParts[2]) {
+            const slug = decodeURIComponent(pathParts[2]).split("?")[0];
+            const post = await getBlogPost(slug);
+            if (post) {
+                const canonical = `${APP_URL}/docs/blog/${slug}`;
+                const image = buildBlogShareImage(post);
+                const title = `${post.title} | Riftn Blog`;
+                const description = (post.excerpt || `${post.title}, read on Riftn.`).slice(0, 280);
+                const html = generateMetaHTML({
+                    title,
+                    description,
+                    image,
+                    url: canonical,
+                    type: "article",
+                    twitterCard: "summary_large_image",
+                    imageWidth: 1200,
+                    imageHeight: 630,
+                    functionBaseUrl,
+                    isBot,
+                    jsonLd: {
+                        "@context": "https://schema.org",
+                        "@type": "Article",
+                        headline: post.title,
+                        image: [image],
+                        datePublished: post.publishedAt,
+                        author: { "@type": "Person", name: post.author || "Riftn Team" },
+                        publisher: { "@type": "Organization", name: "Riftn" },
+                        mainEntityOfPage: canonical,
+                    },
+                });
+                return new Response(html, { headers: { ...corsHeaders, "Content-Type": "text/html; charset=utf-8", "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400" } });
+            }
+            // Blog slug not found → 404 so Google drops the URL instead of indexing our default shell.
+            return new Response(build404Html(canonicalUrl, isBot, functionBaseUrl), {
+                status: 404,
+                headers: { ...corsHeaders, "Content-Type": "text/html; charset=utf-8", "X-DeHub-NotFound": "1" },
+            });
+        }
+
+
+
+        // 1. Profile Handling (/@username or /username)
+        const possibleUsername = pathParts[0] || "";
+        const isSystemRoute = ["post", "app", "explore", "notifications", "messages", "settings", "r", "docs", "prompt", "premium", "affiliate", "work", "editor", "creators", "jobs", "features", "radio", "tv", "governance", "stake", "leaderboard", "music", "top-100", "glossary", "bridge", "agents", "assistant", "buy"].includes(
+            possibleUsername.toLowerCase(),
+        );
+
+
+        if (possibleUsername && !isSystemRoute) {
+            // Remove leading @ if present
+            const username = possibleUsername.startsWith("@") ? possibleUsername.substring(1) : possibleUsername;
+            console.log(`[SSR] Profile detected for: ${username}`);
+
+            const response = await fetch(`${DEHUB_API_BASE}/api/account_info/${username}`, {
+                headers: API_HEADERS,
+                signal: AbortSignal.timeout(7000),
+            });
+            const userData = await response.json();
+            const user: DeHubUser = userData.result || userData;
+
+            if (user && (user.username || user.address)) {
+                const displayName = user.displayName || user.username || "Riftn User";
+                const profileUrl = `${APP_URL}/${user.username || username}`;
+                const avatarUrl = buildAvatarUrl(user);
+                const isLogoFallback = avatarUrl === DEHUB_LOGO;
+                const html = generateMetaHTML({
+                    title: `Join @${user.username || username} on Riftn today!`,
+                    description:
+                        user.aboutMe || `Connect with ${displayName} on Riftn, the open source alternative to legacy media.`,
+                    image: avatarUrl,
+                    url: profileUrl,
+                    twitterCard: "summary",
+                    imageWidth: isLogoFallback ? 200 : 400,
+                    imageHeight: isLogoFallback ? 200 : 400,
+                    functionBaseUrl,
+                    isBot,
+                    jsonLd: {
+                        '@context': 'https://schema.org',
+                        '@type': 'Person',
+                        name: displayName,
+                        url: profileUrl,
+                        ...(user.aboutMe && { description: user.aboutMe }),
+                        ...(avatarUrl !== DEHUB_LOGO && { image: avatarUrl }),
+                        sameAs: profileUrl,
+                    },
+                });
+                return new Response(html, { headers: { ...corsHeaders, "Content-Type": "text/html; charset=utf-8", "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=7200" } });
+            }
+            // Username lookup failed → 404 (don't let a typo'd handle poison the index with a default shell).
+            return new Response(build404Html(canonicalUrl, isBot, functionBaseUrl), {
+                status: 404,
+                headers: { ...corsHeaders, "Content-Type": "text/html; charset=utf-8", "X-DeHub-NotFound": "1" },
+            });
+        }
+
+
+        // 2. Community Handling (/app/communities/{slug})
+        if (cleanPath.includes("/communities/")) {
+            const slug = cleanPath.split("/communities/")[1].split("/")[0];
+            const community = await fetchCommunity(slug);
+
+            if (community) {
+                const communityUrl = `${APP_URL}/app/communities/${community.slug}`;
+                // Use avatar (profile image) for community OG card
+                const ogImage = community.avatar_url || DEHUB_LOGO;
+                const hasRealImage = !!community.avatar_url;
+                const twitterCard = "summary";
+                const title = `Join ${community.name}'s community on Riftn today`;
+                const memberText = community.member_count > 0 ? ` • ${community.member_count} members` : "";
+                const description = community.description
+                    ? `${community.description}${memberText}`
+                    : `Join the ${community.name} community on Riftn, open source, censorship resistant media.${memberText}`;
+
+                const html = generateMetaHTML({
+                    title,
+                    description,
+                    image: ogImage,
+                    url: communityUrl,
+                    type: "website",
+                    twitterCard,
+                    imageWidth: 400,
+                    imageHeight: 400,
+                    functionBaseUrl,
+                    isBot,
+                    jsonLd: {
+                        "@context": "https://schema.org",
+                        "@type": "Organization",
+                        name: community.name,
+                        url: communityUrl,
+                        ...(community.description && { description: community.description }),
+                        ...(hasRealImage && { image: ogImage }),
+                    },
+                });
+                return new Response(html, { headers: { ...corsHeaders, "Content-Type": "text/html; charset=utf-8", "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=7200" } });
+            }
+            return new Response(build404Html(canonicalUrl, isBot, functionBaseUrl), {
+                status: 404,
+                headers: { ...corsHeaders, "Content-Type": "text/html; charset=utf-8", "X-DeHub-NotFound": "1" },
+            });
+        }
+
+
+        // Unified post previews, including off-chain links shared before minting.
+        if (cleanPath.includes("/post/") || cleanPath.includes("/newpost/")) {
+            const isNewPost = cleanPath.includes("/newpost/");
+            const slug = cleanPath.split(isNewPost ? "/newpost/" : "/post/")[1].split("/")[0];
+            let postId = slug;
+            if (isNewPost) {
+                const resolved = await fetch(`${DEHUB_API_BASE}/api/newpost/${slug}`, { headers: API_HEADERS, signal: AbortSignal.timeout(7000) });
+                if (!resolved.ok) return new Response(build404Html(canonicalUrl, isBot, functionBaseUrl), { status: 404, headers: { ...corsHeaders, "Content-Type": "text/html; charset=utf-8" } });
+                postId = String((await resolved.json()).tokenId || slug);
+            }
+
+            const response = await fetch(`${DEHUB_API_BASE}/api/nft_info/${postId}`, {
+                headers: API_HEADERS,
+                signal: AbortSignal.timeout(7000),
+            });
+            const nftData = await response.json();
+            const nft: DeHubNFT = nftData.result || (nftData?.tokenId ? nftData : null);
+
+            if (nft && nft.tokenId) {
+
+                const posterName = nft.minterDisplayName || nft.mintername || nft.minterUsername || "someone";
+                // trim() prevents nft.name=" " (whitespace-only) from being used as title —
+                // X/Twitter ignores cards with blank titles.
+                // Include the post id in the fallback: the edge fn 404s pages whose
+                // title byte-matches its NOT_FOUND_TITLES list, and the old generic
+                // "Post by someone on Riftn" collided with it for REAL posts that
+                // have a blank title and an anonymous minter.
+                const title = (nft.title || nft.name || "").trim() || `Post #${postId} by ${posterName} on Riftn`;
+                // Prefer the post's own body text as the description. Only fall
+                // back to the author-bio boilerplate when the post has no text
+                // at all — Google flags identical author-bio meta descriptions
+                // across 1,000s of URLs as low-quality/duplicate content.
+                const rawBody = (nft.description || "").trim();
+                const bodyForDesc = rawBody && rawBody.toLowerCase() !== title.toLowerCase() ? rawBody : "";
+                const description = (bodyForDesc || `Post by ${posterName} on Riftn, join the decentralized creator network.`).slice(0, 280);
+                const postUrl = isNewPost ? `${APP_URL}/newpost/${slug}` : `${APP_URL}/app/post/${postId}`;
+
+                const isAudio = nft.postType === "feed-audio";
+                const videoUrl = isAudio ? null : buildVideoUrl(nft);
+
+                let postImage: string;
+                let hasRealImage = false;
+                if (isAudio) {
+                    postImage = buildProxiedImageUrl(IMAGE_PROXY_BASE, AUDIO_OG_IMAGE);
+                    hasRealImage = true;
+                } else if (videoUrl) {
+                    postImage = ensureAbsoluteUrl(nft.thumbnail_url || nft.imageUrl || "") || DEHUB_LOGO;
+                    hasRealImage = !!(nft.thumbnail_url || nft.imageUrl);
+                } else {
+                    const builtImage = nft.socialImageUrl
+                        ? ensureAbsoluteUrl(nft.socialImageUrl.startsWith('nfts/images/')
+                            ? `${DEHUB_CDN_BASE}feed-images/${nft.socialImageUrl.split('/').pop()}`
+                            : nft.socialImageUrl)
+                        : nft.articleImageUrl
+                            ? ensureAbsoluteUrl(nft.articleImageUrl.startsWith('nfts/images/')
+                                ? `${DEHUB_CDN_BASE}feed-images/${nft.articleImageUrl.split('/').pop()}`
+                                : nft.articleImageUrl)
+                            : buildPostImageUrl(nft);
+                    if (builtImage) {
+                        postImage = builtImage;
+                        hasRealImage = true;
+                    } else {
+                        // Text post (no image, no video) — generate a dynamic OG card
+                        // that renders the post text as a styled 1200×630 PNG, similar
+                        // to how X/Twitter shows "tweet screenshot" cards when sharing.
+                        const postText = (nft.title || nft.name || "").trim();
+                        if (postText) {
+                            postImage = `${OG_IMAGE_BASE}?post_id=${postId}`;
+                            hasRealImage = true;
+                        } else {
+                            // Absolute fallback: minter avatar (no text to render)
+                            const minter = nft.minterUser;
+                            postImage = minter ? buildAvatarUrl(minter) : DEHUB_LOGO;
+                            hasRealImage = false;
+                        }
+                    }
+                }
+
+                // summary_large_image expects landscape images (posts with real images/video)
+                // summary works for square avatars and logo fallbacks
+                const twitterCardType = hasRealImage ? "summary_large_image" : "summary";
+
+                // Real publish/modify timestamps from the on-chain post record.
+                // Google requires ISO 8601 dates on Article/VideoObject; falling
+                // back to "today" makes every post look freshly published on
+                // every crawl, which suppresses ranking for older evergreen posts.
+                const datePublished = nft.createdAt || undefined;
+                const dateModified = nft.updatedAt || nft.createdAt || undefined;
+
+                const articleLd: Record<string, unknown> = {
+                    '@context': 'https://schema.org',
+                    '@type': 'Article',
+                    headline: title,
+                    description,
+                    url: postUrl,
+                    ...(datePublished && { datePublished }),
+                    ...(dateModified && { dateModified }),
+                    ...(nft.minterDisplayName && { author: { '@type': 'Person', name: nft.minterDisplayName } }),
+                    publisher: { '@type': 'Organization', name: 'Riftn', url: 'https://riftn.com' },
+                    ...(postImage && { image: postImage }),
+                };
+                const jsonLd: Record<string, unknown> = videoUrl
+                    ? {
+                        '@context': 'https://schema.org',
+                        '@graph': [
+                            articleLd,
+                            {
+                                '@type': 'VideoObject',
+                                name: title,
+                                description,
+                                thumbnailUrl: postImage,
+                                contentUrl: videoUrl,
+                                embedUrl: postUrl,
+                                uploadDate: datePublished || new Date().toISOString(),
+                                ...(nft.minterDisplayName && { author: { '@type': 'Person', name: nft.minterDisplayName } }),
+                            },
+                        ],
+                    }
+                    : articleLd;
+
+                const html = generateMetaHTML({
+                    title,
+                    description,
+                    image: postImage,
+                    url: postUrl,
+                    type: "article",
+                    twitterCard: twitterCardType,
+                    functionBaseUrl,
+                    isBot,
+                    videoUrl,
+                    jsonLd,
+                });
+                return new Response(html, { headers: { ...corsHeaders, "Content-Type": "text/html; charset=utf-8", "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=7200" } });
+            }
+            // Post lookup failed → 404 so Google removes deleted/never-existed posts from the index.
+            return new Response(build404Html(canonicalUrl, isBot, functionBaseUrl), {
+                status: 404,
+                headers: { ...corsHeaders, "Content-Type": "text/html; charset=utf-8", "X-DeHub-NotFound": "1" },
+            });
+        }
+
+
+        // 4. Static marketing/app routes — per-route title & description so shares
+        // on Telegram/X/Facebook show the right preview instead of the sitewide default.
+        const STATIC_ROUTES: Record<string, { title: string; description: string; body: string }> = {
+            "features": {
+                title: "Feature Requests & Bug Reporting | Riftn",
+                description: "Submit feature requests, report bugs, and vote on community ideas to shape Riftn's roadmap. Track open, in-progress, and shipped features.",
+                body: `<h2>Riftn Feature Requests &amp; Bug Board</h2><p>The Riftn Features page is a community-driven board where users submit new feature ideas, report bugs and issues, and vote on suggestions to help shape Riftn's roadmap.</p><h2>How it works</h2><ul><li><strong>Submit Ideas &amp; Bug Reports</strong>, suggest new features or report bugs with device details and attachments.</li><li><strong>Community Voting</strong>, vote on feature requests to help prioritize what gets built next.</li><li><strong>Transparent Roadmap</strong>, track requests across Open, Shipping (In Progress), and Shipped status tabs.</li><li><strong>Discussion &amp; Feedback</strong>, comment on requests and collaborate with the community and core team.</li></ul><p>Explore open feature requests, vote on your favorites, or submit your own ideas to help build the future of Riftn.</p>`,
+            },
+            "pricing": {
+                title: "Pricing | Riftn Creator Studio",
+                description: "Riftn Creator Studio pricing in GBP. Ultra, Team and Scale plans with monthly credits for AI image, video, music and poster generation.",
+                body: `<h2>Creator Studio plans</h2><p>Riftn Creator Studio is billed monthly in GBP. Each plan includes a pool of credits that can be spent on any AI tool, image, video, song, voice or poster generation, plus higher upload limits and priority queueing.</p><ul><li><strong>Ultra</strong>, for solo creators who post daily. Includes AI image generation, short-form video, songs and voiceovers.</li><li><strong>Team</strong>, shared workspace for small studios, with multi-seat access, brand kit sharing and higher video resolution.</li><li><strong>Scale</strong>, highest credit pool, long-form video, custom AI agents and priority support.</li></ul><h2>What credits cover</h2><p>Credits are consumed per generation. Image and voice generations are the cheapest; long video renders cost the most. Unused credits roll over for one month. Every plan includes unlimited posting to the Riftn decentralized feed and unlimited use of the video editor.</p>`,
+            },
+            "depin": {
+                title: "DePin | Community-Powered Media Infrastructure | Riftn",
+                description: "Riftn DePin lets people contribute storage, bandwidth and compute to help host, transcode and deliver media through a resilient network.",
+                body: `<h2>Community-powered media infrastructure</h2><p>DePin is now in development. Operators will be able to set limits for spare storage, bandwidth and compute while Riftn coordinates hosting, transcoding and delivery work.</p><h2>Designed for nodes to go offline</h2><p>Community nodes never hold the only copy. Riftn origin storage remains the source of truth, online replicas serve available segments, and playback falls back to origin when peers leave.</p><h2>Protected content stays encrypted</h2><p>Protected media can be stored as encrypted segments. Node operators do not receive playback keys simply because they host data. Public content remains publicly viewable through Riftn.</p><h2>Variable, revenue-funded rewards</h2><p>Verified contribution may receive a share of a platform-revenue-funded pool after an epoch closes. There is no fixed rate, minimum return, APY or guaranteed reward, and contribution records are not a promise of payment. Running a node creates electricity, bandwidth and hardware costs that may exceed any reward. Any future DHB settlement would occur on Base and remain subject to eligibility, network rules and applicable law.</p><p>The node client is not available yet. DePin will launch in controlled phases, beginning with delivery and adaptive video infrastructure.</p>`,
+            },
+            "creator": {
+                title: "Riftn Creator Studio: AI Image, Video & Music",
+                description: "Generate images, videos, songs and branded posters with the Riftn Creator Studio. One workspace for every AI tool a modern creator needs.",
+                body: `<h2>One studio for every AI tool</h2><p>The Riftn Creator Studio bundles image, video, music, voice and poster generation with per-job DHB payments and a private generation library. Pick a model, describe what you want and publish the result straight to the decentralized feed, no plugins, no context switching.</p><h2>Included tools</h2><ul><li>Image generation with FLUX, Ideogram, Recraft and Nano Banana models.</li><li>Video generation with Kling, Veo, Seedance and other available models.</li><li>Music generation with ElevenLabs.</li><li>Voice cloning and text-to-speech with ElevenLabs.</li><li>Branded poster templates using the Riftn design system.</li></ul><p>Completed results are saved to your private library. Check the saved status before leaving; pending saves can be retried. Paid jobs show a quote before payment, and free audio tools require sign-in with usage limits.</p>`,
+            },
+            "editor": {
+                title: "Riftn Video Editor: In-Browser Timeline",
+                description: "Edit video in your browser with the Riftn multi-track timeline, effects, transitions and one-click publish to the decentralized feed.",
+                body: `<h2>Edit in the browser, publish on-chain</h2><p>The Riftn Video Editor is a multi-track timeline that runs entirely in your browser. Import clips from your device or the Creator Studio, add music, subtitles, transitions and text overlays, then publish directly to the decentralized feed as a video post or Short.</p><h2>What you get</h2><ul><li>Multi-track timeline with drag-and-drop clip trimming.</li><li>Effects, transitions and adjustable colour filters.</li><li>Auto-generated subtitles with translation to 90+ languages.</li><li>Overlay stickers, text and brand fonts from the Riftn design system.</li><li>Export to 1080p and publish in one click.</li></ul>`,
+            },
+            "prompt": {
+                title: "Riftn Prompt: Personalize Your Feed",
+                description: "Tell Riftn what you want to see and shape a feed that actually matches your taste. Prompt-powered personalization for Web3 social.",
+                body: `<h2>A feed you actually describe</h2><p>Riftn Prompt lets you type what you want to see, topics, creators, moods, chains, and reshapes the Home feed in real time. Save multiple prompts as tabs, switch between them and refine as your interests change. No opaque algorithm, no engagement traps.</p>`,
+            },
+            "work": {
+                title: "Riftn Work: Web3 Jobs, Clipping & Escrow",
+                description: "Open jobs for commenting, clipping (paid per view) and on-chain contracts with escrow and disputes on Base. Get paid to create on Riftn.",
+                body: `<h2>Get paid to create</h2><p>Riftn Work is an on-chain marketplace for creator jobs. Post a job with a budget and criteria, receive submissions from creators worldwide, then release payment through the DeHubWork escrow contract on Base. Disputes are handled by community moderators.</p><h2>Job types</h2><ul><li><strong>Clipping</strong>, pay per verified view for short clips of your streams or long-form videos.</li><li><strong>Comment jobs</strong>, pay for high-quality engagement across posts.</li><li><strong>Custom briefs</strong>, hire creators for logos, videos, translation, community management and more.</li></ul>`,
+            },
+            "affiliate": {
+                title: "Riftn Affiliate: Earn 20% Revenue Share",
+                description: "Refer creators to Riftn and earn 20% of the revenue they generate, plus 5% from second-tier invites. Transparent on-chain payouts.",
+                body: `<h2>How the affiliate program works</h2><p>Every Riftn user gets a personal referral link. When someone signs up through your link and spends on Creator Studio credits, premium subscriptions or ads, you earn <strong>20% of the revenue</strong> for the lifetime of that account. Second-tier invites (their referrals) earn you another <strong>5%</strong>. Payouts happen in DHB and are fully visible on-chain.</p>`,
+            },
+            "premium": {
+                title: "Riftn Extra: Premium Membership",
+                description: "Unlock Riftn Extra: bigger uploads, priority AI credits, exclusive drops and creator perks across Riftn.",
+                body: `<h2>Riftn Extra perks</h2><ul><li>Larger video and image upload limits.</li><li>Priority AI credits and faster queue times in the Creator Studio.</li><li>Extra bookmark folders, saved prompts and profile customisation.</li><li>Exclusive drops, badges and community events.</li><li>Cashback on the XL tier for the first 50 subscribers.</li></ul><p>Riftn Extra is billed monthly via Stripe and unlocks across the entire Riftn network, social, video, music and TV.</p>`,
+            },
+            "governance": {
+                title: "Riftn Governance: Vote with DHB",
+                description: "Propose and vote on the future of Riftn with the DHB token. Transparent, on-chain governance for the decentralized social network.",
+                body: `<h2>On-chain governance</h2><p>DHB holders shape Riftn's roadmap. Any staker can open a proposal, for new features, moderation rules, treasury spend or partnerships, and the community votes with their staked DHB weight. Results are transparent, tallied on-chain and executed by the core team on approved proposals.</p>`,
+            },
+            "leaderboard": {
+                title: "Riftn Leaderboard: Top Creators & Stakers",
+                description: "See the top Riftn creators, DHB stakers and community leaders across Base and BNB Chain.",
+                body: `<h2>Who's on top</h2><p>The Riftn Leaderboard ranks the network's biggest creators, tippers and DHB stakers across both BNB Chain and Base. Snapshots are taken daily and the top ranks unlock silhouette badges, on-profile overlays and larger platform rewards.</p>`,
+            },
+            "top-100": {
+                title: "Top 100 Cryptos: Live Prices on Riftn",
+                description: "Track the top 100 cryptocurrencies with live prices, market cap and charts inside Riftn.",
+                body: `<h2>Live crypto market data</h2><p>The Top 100 page tracks the largest cryptocurrencies by market cap, with live prices, 24h volume, sparkline charts and full CMC-powered detail views. Click any ticker to open the in-app chart, add it to your watchlist or share it as a post.</p>`,
+            },
+            "music": {
+                title: "Riftn Music: Web3 Songs & Radio",
+                description: "Discover songs and radio stations from Web3 artists on Riftn. Stream, tip and collect on-chain.",
+                body: `<h2>Music, tipping and radio</h2><p>Riftn Music hosts songs from independent Web3 artists, stream them for free, tip in DHB or collect a token-gated release. Combine tracks into playlists, or tune into a 24/7 community radio station. Every play, tip and follow is recorded on-chain.</p>`,
+            },
+            "radio": {
+                title: "Riftn Radio: 24/7 Web3 Stations",
+                description: "Tune into Riftn Radio for 24/7 stations curated by the Web3 community.",
+                body: `<h2>Always-on Web3 radio</h2><p>Riftn Radio streams continuous audio stations curated by the community. Discover new artists, keep it in the background while you post, and tip your favourite tracks in DHB when they come on.</p>`,
+            },
+            "tv": {
+                title: "Riftn TV: Live Streams & Shows",
+                description: "Watch live streams and shows from creators across Riftn TV.",
+                body: `<h2>Live streams and shows</h2><p>Riftn TV brings creators' live streams together in one lineup, plus curated shows and picture-in-picture playback so you can keep watching while you scroll. Follow channels, get notified when they go live and tip in DHB from the player.</p>`,
+            },
+            "glossary": {
+                title: "Riftn Glossary: Web3 & DeFi Terms",
+                description: "Plain-English definitions for Web3, DeFi and Riftn-specific terms.",
+                body: `<h2>Plain-English Web3 glossary</h2><p>The Riftn Glossary explains the terms you'll encounter across the decentralized creator network, from wallet, gas and staking, to bridges, escrow, on-chain tipping and the DHB token itself. Written for creators, not for engineers.</p>`,
+            },
+            "bridge": {
+                title: "Riftn Bridge: Move DHB Cross-Chain",
+                description: "Bridge DHB between BNB Chain and Base securely from inside Riftn.",
+                body: `<h2>Cross-chain DHB, one click</h2><p>The Riftn Bridge moves DHB tokens between BNB Chain and Base through the platform wallet. Balances are rounded down to two decimals to match the on-chain settlement, and every transfer is verified via Alchemy before your balance updates.</p>`,
+            },
+            "agents": {
+                title: "Riftn Agents: AI Assistants for Creators",
+                description: "Custom AI agents that help you post, edit, moderate and grow on Riftn.",
+                body: `<h2>Your creator AI, always on</h2><p>Riftn Agents are configurable AI assistants that can auto-post, reply to comments, moderate your community, curate feeds and analyse growth. Pick from a library of pre-built agents or build your own via the MCP server, then let them work in the background while you create.</p>`,
+            },
+            "assistant": {
+                title: "Riftn Assistant: Your Creator AI",
+                description: "Chat with the Riftn Assistant to generate posts, images, videos and songs in seconds.",
+                body: `<h2>Chat, generate, post</h2><p>The Riftn Assistant is a chat interface into the entire Creator Studio. Ask it to draft a post, generate an image or video, translate captions, plan a content calendar or explain how the DHB token works, then publish the result to the feed without leaving the conversation.</p>`,
+            },
+            "creators": {
+                title: "Creators on Riftn: Discover & Follow",
+                description: "Discover creators building on Riftn and follow the ones that match your taste.",
+                body: `<h2>Meet the creators</h2><p>Browse Riftn's active creators by category, chain, badge tier or trending topic. Follow the ones you like, tip them in DHB and subscribe to their premium content, all from a single decentralized identity.</p>`,
+            },
+            "jobs": {
+                title: "Riftn Jobs: Work with the Team",
+                description: "Open roles at Riftn. Help build the decentralized social network.",
+                body: `<h2>Build Riftn with us</h2><p>Riftn is a small, distributed team building the decentralized creator network. Open roles cover engineering, design, growth, community and moderation. If you love Web3 and creator tools, we want to hear from you.</p>`,
+            },
+            "delete-account": {
+                title: "Delete Account and Data | Riftn",
+                description: "Permanently delete your Riftn account and associated data.",
+                body: `<h2>Delete your account</h2><p>You can permanently delete your Riftn profile, off-chain data (bookmarks, notifications, drafts, chat history) and cached media from this page. On-chain posts, tips and DHB transactions live on public blockchains and cannot be erased, they remain visible even after the profile is removed.</p>`,
+            },
+            "guides/best-decentralized-social-media": {
+                title: "Best Decentralized Social Media 2026 | Riftn Guide",
+                description: "Compare Riftn, Mastodon, Bluesky, Farcaster and Lens, features, tokens, moderation and how to choose the right decentralized social network.",
+                body: `<h2>Best decentralized social networks in 2026</h2><p>Decentralized social networks give creators ownership of their audience and their revenue. This guide compares the biggest options, Riftn, Mastodon, Bluesky, Farcaster and Lens, across features, tokens, moderation model and creator economics, and helps you pick the right one for your audience.</p><h3>How they differ</h3><ul><li><strong>Riftn</strong>, full creator suite (social, video, music, TV, jobs, AI studio) with the DHB token on BNB Chain and Base.</li><li><strong>Mastodon</strong>, federated microblogging, no token, community-run instances.</li><li><strong>Bluesky</strong>, AT Protocol microblogging with account portability, no token.</li><li><strong>Farcaster</strong>, Ethereum-based social protocol focused on frames and casts.</li><li><strong>Lens</strong>, social protocol on Polygon with tokenised profiles and follow NFTs.</li></ul>`,
+            },
+        };
+
+        // Was a per-route map of `dehub.io/__l5e/assets-v1/...` cards. Nothing has
+        // served that Lovable CDN prefix since the Cloudflare migration, and the
+        // SPA catch-all answers it 200 text/html, so every one of those routes
+        // handed crawlers an HTML document where a PNG was promised and rendered
+        // with no image at all. The replacement is committed under public/, so it
+        // ships with the build and cannot disappear out from under us.
+        //
+        // These routes are rendered by the worker now (MARKETING_PAGES in
+        // CLOUDFLARE_WORKER_SEO.js) and no longer reach this function; this stays
+        // correct so a future redeploy can't resurrect the broken URLs.
+        const DEFAULT_OG_IMAGE = `${APP_URL}/og/riftn-share.png`;
+
+        const rawKey = cleanPath.replace(/^\/+|\/+$/g, "").toLowerCase();
+        // Product pages live under /app/*; accept both `/slug` and `/app/slug`.
+        const normalizedKey = STATIC_ROUTES[rawKey] ? rawKey : rawKey.replace(/^app\//, "");
+        const staticMatch = STATIC_ROUTES[normalizedKey];
+        if (staticMatch) {
+            const routeImage = DEFAULT_OG_IMAGE;
+            const html = generateMetaHTML({
+                title: staticMatch.title,
+                description: staticMatch.description,
+                image: routeImage,
+                url: `${APP_URL}/${normalizedKey}`,
+                twitterCard: "summary_large_image",
+                imageWidth: 1200,
+                imageHeight: 630,
+                functionBaseUrl,
+                isBot,
+                bodyContent: staticMatch.body,
+                jsonLd: {
+                    "@context": "https://schema.org",
+                    "@type": "WebPage",
+                    name: staticMatch.title,
+                    description: staticMatch.description,
+                    url: `${APP_URL}/${normalizedKey}`,
+                },
+            });
+            return new Response(html, { headers: { ...corsHeaders, "Content-Type": "text/html; charset=utf-8", "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400" } });
+        }
+
+        // Default Fallback. Post/community paths only reach here when the
+        // entity lookup came back empty — tell the edge fn explicitly instead
+        // of making it sniff <title> strings (fragile byte-exact coupling).
+        // (Added per-response below — corsHeaders is module-level and must not
+        // be mutated or the header would leak onto every later response.)
+        const isEntityMiss = cleanPath.includes("/post/") || cleanPath.includes("/communities/");
+        // Default Fallback
+        const html = generateMetaHTML({
+            title: "Riftn | Open Source, User Owned & Censorship Resistant Media",
+            description:
+                "riftn.com is open source, user owned and censorship resistant media. Join the future of free speech and reach.",
+            image: "https://aigxuutjaqsywioxjefr.supabase.co/storage/v1/object/public/logo/new_logo_Dehub.jpg",
+            url: canonicalUrl,
+            twitterCard: "summary_large_image",
+            imageWidth: 1200,
+            imageHeight: 628,
+            functionBaseUrl,
+            isBot,
+            jsonLd: {
+                '@context': 'https://schema.org',
+                '@graph': [
+                    {
+                        '@type': 'WebSite',
+                        name: 'Riftn',
+                        url: 'https://riftn.com',
+                        description: 'Open source, user owned and censorship resistant media.',
+                        potentialAction: {
+                            '@type': 'SearchAction',
+                            target: 'https://riftn.com/app/explore?q={search_term_string}',
+                            'query-input': 'required name=search_term_string',
+                        },
+                    },
+                    {
+                        '@type': 'Organization',
+                        name: 'Riftn',
+                        url: 'https://riftn.com',
+                        logo: 'https://aigxuutjaqsywioxjefr.supabase.co/storage/v1/object/public/logo/new_logo_Dehub.jpg',
+                        sameAs: [
+                            'https://www.wikidata.org/wiki/Q140518527',
+                            'https://x.com/riftn_com',
+                            'https://github.com/Riftn',
+                            'https://www.linkedin.com/company/dehub-dao',
+                            'https://t.me/riftn_com',
+                            'https://play.google.com/store/apps/details?id=io.dehub.mobile',
+                            'https://www.coingecko.com/en/coins/dehub',
+                            'https://coinmarketcap.com/currencies/dehub/',
+                        ],
+                    },
+                ],
+            },
+        });
+        return new Response(html, {
+            headers: {
+                ...corsHeaders,
+                "Content-Type": "text/html; charset=utf-8",
+                ...(isEntityMiss ? { "X-DeHub-NotFound": "1" } : {}),
+            },
+        });
+    } catch (e) {
+        console.error("SSR SEO Error:", e);
+        return new Response("Error", { status: 500 });
+    }
+});

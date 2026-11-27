@@ -1,0 +1,419 @@
+import { translateCopy as _translateCopy } from '@/i18n/copy';
+import { useTranslation as _useCopy } from 'react-i18next';
+/**
+ * Cinematic Music (System theme, phones)
+ * ======================================
+ * The Music tab as a radio hero and a chart: one big "on air" station with a
+ * Listen button, a row of chips, then a numbered list with thin lines between
+ * rows. Desktop and the other themes keep the carousels in MusicFeed.
+ */
+
+import { useMemo, useState } from 'react';
+import { GlassFilterRow } from '@/components/app/feeds/GlassFilterRow';
+import { useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import { Heart, Headphones, Loader2 } from "lucide-react";
+import Radio from "@/components/ui/cut-icons/live";
+
+import Pause from "@/components/ui/cut-icons/pause";
+import Play from "@/components/ui/cut-icons/play";
+import Share2 from "@/components/ui/cut-icons/feedshare";
+
+import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
+import { useRadioPlayer } from '@/hooks/use-radio-player';
+import { getPrimaryTags, type RadioStation } from '@/lib/api/radio-browser';
+import { searchAllMusic, searchMusicVideos, searchRadio } from '@/lib/music-search';
+import { useChartSearch } from '@/hooks/use-chart-search';
+import { Input } from '@/components/ui/input';
+import { getCustomLogo } from '@/components/app/radio/RadioStationCard';
+import { StagesChart } from '@/components/app/music/StagesCarousel';
+import { openStageModal } from '@/contexts/StageContext';
+import { searchNFTs, type DeHubNFT } from '@/lib/api/dehub';
+import { fetchMusicVideoChart, MUSIC_VIDEO_CHART_SORTS, type MusicVideoChartSort } from '@/lib/music-video-chart';
+import '@/components/app/audio/audio-studio.css';
+import { formatViews } from '@/lib/feed-utils';
+import { isBlockedCreator, mapNFTToVideoItem } from '@/lib/music-feed-items';
+import type { VideoItem } from '@/types/feed.types';
+import { viewerShareUrl } from '@/lib/share-url';
+import { trackShare } from '@/lib/analytics';
+
+import { formatCount } from '@/lib/format-count';
+type Chip = 'top' | 'videos' | 'radio' | 'stages' | 'new';
+
+const CHIPS: { key: Chip; label: string }[] = [
+  { key: 'top', get label() { return _translateCopy("copy.50ea9e32e19c", { defaultValue: "Top 50" }); } },
+  { key: 'videos', get label() { return _translateCopy('music.chartVideos', { defaultValue: 'Music videos' }); } },
+  { key: 'radio', get label() { return _translateCopy("copy.2a7dfeb2f2b0", { defaultValue: "Radio" }); } },
+  { key: 'stages', get label() { return _translateCopy("copy.3a17aa4e4abb", { defaultValue: "Stages" }); } },
+  { key: 'new', get label() { return _translateCopy("copy.18fdd549b2ed", { defaultValue: "New" }); } },
+];
+
+const LIKED_STATIONS_KEY = 'dehub.likedStations';
+
+function readLikedStations(): string[] {
+  try {
+    return JSON.parse(localStorage.getItem(LIKED_STATIONS_KEY) || '[]');
+  } catch {
+    return [];
+  }
+}
+
+function stationLogo(station: RadioStation): string | undefined {
+  return getCustomLogo(station.name) || station.favicon || undefined;
+}
+
+// ============================================================================
+// HERO
+// ============================================================================
+
+function RadioHero({ station }: { station: RadioStation }) {
+  const { t: _copy } = _useCopy();
+  const { currentStation, isPlaying, isLoading, play, togglePlayPause } = useRadioPlayer();
+  const [liked, setLiked] = useState(() => readLikedStations().includes(station.stationuuid));
+  const [logoFailed, setLogoFailed] = useState(false);
+
+  const isCurrent = currentStation?.stationuuid === station.stationuuid;
+  const playing = isCurrent && isPlaying;
+  const loading = isCurrent && isLoading;
+  const logo = logoFailed ? undefined : stationLogo(station);
+  const tags = getPrimaryTags(station.tags, 3);
+
+  const listen = () => (isCurrent ? togglePlayPause() : play(station));
+
+  const toggleLike = () => {
+    const next = !liked;
+    setLiked(next);
+    try {
+      const ids = readLikedStations().filter((id) => id !== station.stationuuid);
+      if (next) ids.push(station.stationuuid);
+      localStorage.setItem(LIKED_STATIONS_KEY, JSON.stringify(ids));
+    } catch {
+      // Private mode: the heart still toggles for this visit.
+    }
+  };
+
+  const share = async () => {
+    const url = viewerShareUrl(`${window.location.origin}/app`);
+    const text = _copy("copy.b12d153bb3ac", { defaultValue: "Listening to {{value1}} on Riftn", value1: station.name });
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: station.name, text, url });
+        trackShare('native', { kind: 'music' });
+        return;
+      }
+      await navigator.clipboard.writeText(`${text} ${url}`);
+      trackShare('copy_link', { kind: 'music' });
+      toast.success(_copy("copy.d12860c21e78", { defaultValue: "Link copied" }));
+    } catch {
+      // Share sheet dismissed.
+    }
+  };
+
+  return (
+    <section data-music-hero className="relative -mx-2 overflow-hidden bg-zinc-950" style={{ height: 'min(118vw, 460px)' }}>
+      {logo && (
+        <img
+          src={logo}
+          alt=""
+          aria-hidden
+          className="absolute inset-0 h-full w-full scale-125 object-cover opacity-70 blur-2xl saturate-150"
+          onError={() => setLogoFailed(true)}
+        />
+      )}
+      <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,.35)_0%,rgba(0,0,0,0)_35%,rgba(0,0,0,.88)_100%)]" />
+
+      <div className="absolute inset-x-0 top-[calc(env(safe-area-inset-top,0px)+4.5rem)] flex justify-center">
+        <div className="h-36 w-36 overflow-hidden rounded-xl bg-zinc-800 shadow-[0_12px_40px_rgba(0,0,0,.55)] ring-1 ring-white/15">
+          {logo ? (
+            <img src={logo} alt={station.name} className="h-full w-full object-cover" onError={() => setLogoFailed(true)} />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center">
+              <Radio className="h-12 w-12 text-zinc-500" />
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="absolute inset-x-3.5 bottom-4 [text-shadow:0_1px_3px_rgba(0,0,0,.6)]">
+        <div className="flex items-center gap-2 text-xs">
+          <span className="inline-flex items-center gap-1 rounded-md bg-red-500 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white [text-shadow:none]">
+            <Radio className="h-3 w-3" strokeWidth={2.5} />{_copy("copy.89f55db34c78", { defaultValue: " On air" })}</span>
+          {station.clickcount > 0 && (
+            <span className="inline-flex items-center gap-1 text-zinc-200">
+              <Headphones className="h-3 w-3" /> {_copy("copy.35f4cdf11013", { defaultValue: "{{value1}} plays today", value1: formatViews(station.clickcount).replace(' views', '') })}</span>
+          )}
+        </div>
+        <h2 className="mt-2 text-[26px] font-bold leading-tight text-white line-clamp-2">{station.name}</h2>
+        {tags.length > 0 && <p className="mt-1 text-[13px] capitalize text-zinc-200">{tags.join(' · ')}</p>}
+        <div className="mt-3.5 flex items-center gap-2.5">
+          <button
+            onClick={listen}
+            className="flex h-11 items-center gap-2 rounded-[10px] px-[18px] font-bold [text-shadow:none] active:scale-95 transition-transform"
+            style={{ background: '#fff', color: '#000' }}
+          >
+            {loading ? (
+              <Loader2 className="h-[18px] w-[18px] animate-spin" />
+            ) : playing ? (
+              <Pause className="h-[18px] w-[18px] fill-current" />
+            ) : (
+              <Play className="h-[18px] w-[18px] fill-current" />
+            )}
+            {playing ? _copy("copy.858e4ba7a29f", { defaultValue: "Pause" }) : _copy("copy.225d29f6201e", { defaultValue: "Listen" })}
+          </button>
+          <button
+            onClick={toggleLike}
+            aria-label={liked ? _copy("copy.350650e80de8", { defaultValue: "Unlike station" }) : _copy("copy.e31da4912a6a", { defaultValue: "Like station" })}
+            aria-pressed={liked}
+            data-cinematic-glass
+            className="flex h-11 w-11 items-center justify-center rounded-[10px] text-white"
+          >
+            <Heart className={cn('h-5 w-5', liked && 'fill-red-500 text-red-500')} />
+          </button>
+          <button onClick={share} aria-label={_copy("copy.b38881c3328a", { defaultValue: "Share station" })} data-cinematic-glass className="flex h-11 w-11 items-center justify-center rounded-[10px] text-white">
+            <Share2 className="h-5 w-5" />
+          </button>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ============================================================================
+// CHART
+// ============================================================================
+
+function ChartRow({ rank, image, title, subtitle, trailing, onClick, active }: {
+  /** Chart position; null for a search match from outside the chart. */
+  rank: number | null;
+  image?: string;
+  title: string;
+  subtitle: string;
+  trailing?: React.ReactNode;
+  onClick: () => void;
+  active?: boolean;
+}) {
+  const [failed, setFailed] = useState(false);
+  return (
+    <button onClick={onClick} className="flex w-full items-center gap-3 border-b border-white/[0.12] px-3.5 py-2.5 text-left active:bg-white/5">
+      <span className={cn('w-[22px] shrink-0 text-center text-base font-bold', rank != null && rank <= 3 ? 'text-white' : 'text-zinc-500')}>{rank ?? '–'}</span>
+      <span className="h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-zinc-800">
+        {image && !failed ? (
+          <img src={image} alt="" loading="lazy" className="h-full w-full object-cover" onError={() => setFailed(true)} />
+        ) : (
+          <span className="flex h-full w-full items-center justify-center"><Radio className="h-5 w-5 text-zinc-500" /></span>
+        )}
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className={cn('block truncate text-[15px] font-semibold', active ? 'text-[rgb(var(--tint-accent,255_255_255))]' : 'text-white')}>{title}</span>
+        <span className="mt-0.5 block truncate text-xs text-zinc-400">{subtitle}</span>
+      </span>
+      {trailing && <span className="shrink-0 text-xs text-zinc-400">{trailing}</span>}
+    </button>
+  );
+}
+
+function ChartSkeleton() {
+  return (
+    <div>
+      {Array.from({ length: 6 }).map((_, i) => (
+        <div key={i} className="flex items-center gap-3 border-b border-white/[0.12] px-3.5 py-2.5">
+          <span className="h-4 w-[22px] rounded bg-white/5" />
+          <span className="h-12 w-12 rounded-lg theme-skeleton animate-pulse" />
+          <span className="flex-1 space-y-1.5">
+            <span className="block h-3.5 w-2/3 rounded theme-skeleton animate-pulse" />
+            <span className="block h-3 w-1/3 rounded theme-skeleton animate-pulse" />
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function useMusicChart(mode: 'trending' | 'new', blockedAddresses?: Set<string>, enabled = true) {
+  const { data, isLoading } = useQuery({
+    queryKey: ['music-chart', mode],
+    queryFn: async () => {
+      const res = await searchNFTs({ category: 'Music', unit: 50, sortMode: mode });
+      return (res.data || []) as DeHubNFT[];
+    },
+    enabled,
+    staleTime: 5 * 60 * 1000,
+  });
+  const items = useMemo<VideoItem[]>(
+    () => (data || []).filter((nft) => !isBlockedCreator(nft, blockedAddresses)).map((nft, i) => mapNFTToVideoItem(nft, i)),
+    [data, blockedAddresses],
+  );
+  return { items, isLoading };
+}
+
+function useMusicVideoChart(sort: MusicVideoChartSort, blockedAddresses?: Set<string>, enabled = true) {
+  const { data, isLoading } = useQuery({
+    queryKey: ['music-video-chart', 'cinematic', sort],
+    queryFn: () => fetchMusicVideoChart(sort),
+    enabled,
+    staleTime: 5 * 60 * 1000,
+  });
+  const items = useMemo<VideoItem[]>(
+    () => (data || []).filter((nft) => !isBlockedCreator(nft, blockedAddresses)).map((nft, i) => mapNFTToVideoItem(nft, i)),
+    [data, blockedAddresses],
+  );
+  return { items, isLoading };
+}
+
+function SectionTitle({ title, action, onAction }: { title: string; action?: string; onAction?: () => void }) {
+  return (
+    <div className="flex items-baseline justify-between px-3.5 pb-2 pt-5">
+      <h3 className="text-lg font-bold text-white">{title}</h3>
+      {action && (
+        <button onClick={onAction} className="text-[13px] font-medium text-zinc-400">{action}</button>
+      )}
+    </div>
+  );
+}
+
+// ============================================================================
+// MAIN
+// ============================================================================
+
+export function CinematicMusic({ radioStations, blockedAddresses, showFilters = false }: {
+  radioStations: RadioStation[];
+  blockedAddresses?: Set<string>;
+  showFilters?: boolean;
+}) {
+  const { t: _copy } = _useCopy();
+  const navigate = useNavigate();
+  const [chip, setChip] = useState<Chip>('top');
+  const [searches, setSearches] = useState<Partial<Record<Chip, string>>>({});
+  const search = searches[chip] ?? '';
+  const query = search.trim().toLocaleLowerCase();
+  // Searches reach the whole zone on the server, not just the chart on screen.
+  const radioFound = useChartSearch('radio', chip === 'radio' ? search : '', searchRadio);
+  const musicFound = useChartSearch('music', chip === 'top' || chip === 'new' ? search : '', searchAllMusic);
+  const videosFound = useChartSearch('music-videos', chip === 'videos' ? search : '', searchMusicVideos);
+  const radioQuery = chip === 'radio' && search.trim().length >= 2;
+  const searchingRadio = radioFound.isSearching && radioFound.items.length === 0;
+  const stations = radioQuery ? radioFound.items : radioStations;
+  const { currentStation, isPlaying, play, togglePlayPause } = useRadioPlayer();
+
+  const top = useMusicChart('trending', blockedAddresses, chip === 'top');
+  const fresh = useMusicChart('new', blockedAddresses, chip === 'new');
+  const [videoSort, setVideoSort] = useState<MusicVideoChartSort>('views');
+  const videos = useMusicVideoChart(videoSort, blockedAddresses, chip === 'videos');
+
+  // The station on air in the hero: whatever is playing, else the first pick.
+  const heroStation = (isPlaying && currentStation) || radioStations[0];
+
+  const openPost = (item: VideoItem) => navigate(`/app/post/${item.id}`, { state: { fromFeed: true } });
+
+  const renderTracks = (chart: { items: VideoItem[]; isLoading: boolean }, title: string, found: { items: VideoItem[]; isSearching: boolean }, header?: React.ReactNode) => {
+    // Chart matches keep their rank; matches from the rest of the zone follow.
+    const chartMatches = chart.items.map((item, i) => ({ item, rank: i + 1 as number | null }))
+      .filter(({ item }) => !query || `${item.title} ${item.channel}`.toLocaleLowerCase().includes(query));
+    const shown = new Set(chartMatches.map(({ item }) => item.id));
+    const rows = query.length >= 2
+      ? [...chartMatches, ...found.items.filter(item => !shown.has(item.id) && (shown.add(item.id), true)).map(item => ({ item, rank: null }))]
+      : chartMatches;
+    const list = { items: chart.items, isLoading: chart.isLoading || (rows.length === 0 && found.isSearching) };
+    return (
+    <>
+      <SectionTitle title={title} action={list.items.length > 0 ? _copy("copy.12e7b8220dc7", { defaultValue: "Play all" }) : undefined} onAction={() => list.items[0] && openPost(list.items[0])} />
+      {header}
+      <div className="-mx-2 border-t border-white/[0.12]">
+        {list.isLoading ? (
+          <ChartSkeleton />
+        ) : rows.length === 0 ? (
+          <p className="px-3.5 py-8 text-center text-sm text-zinc-500">{query ? _copy('explorePage.noResults', { defaultValue: 'No results found' }) : _copy("copy.2de5247a982a", { defaultValue: "Nothing here yet." })}</p>
+        ) : (
+          rows.map(({ item, rank }) => (
+            <ChartRow
+              key={item.id}
+              rank={rank}
+              image={item.thumbnail}
+              title={item.title || _copy("copy.f59ab8d1331b", { defaultValue: "Untitled" })}
+              subtitle={`${item.channel}${item.views ? ` · ${formatCount(item.views)}` : ''}`}
+              trailing={item.duration && item.duration !== '0:00' ? item.duration : undefined}
+              onClick={() => openPost(item)}
+            />
+          ))
+        )}
+      </div>
+    </>
+    );
+  };
+
+  return (
+    <div data-cinematic-music className="pb-32">
+      {showFilters && <div data-no-swipe data-feed-filter-panel className="mb-3 rounded-[15px] px-2 py-3">
+        <GlassFilterRow<Chip> items={CHIPS} activeKey={chip} onSelect={setChip} />
+      </div>}
+      {heroStation ? (
+        <RadioHero key={heroStation.stationuuid} station={heroStation} />
+      ) : (
+        <div className="-mx-2 animate-pulse theme-skeleton" style={{ height: 'min(118vw, 460px)' }} />
+      )}
+
+      {!showFilters && <div data-no-swipe className="-mx-2 mt-3.5 flex gap-2 overflow-x-auto px-3.5 scrollbar-hide">
+        {CHIPS.map((c) => (
+          <button
+            key={c.key}
+            onClick={() => setChip(c.key)}
+            data-cinematic-glass={chip === c.key ? undefined : ''}
+            aria-pressed={chip === c.key}
+            className="h-9 shrink-0 rounded-xl px-4 text-sm font-semibold text-white transition-colors"
+            style={chip === c.key ? { background: '#fff', color: '#000' } : undefined}
+          >
+            {c.label}
+          </button>
+        ))}
+      </div>}
+
+      {chip !== 'stages' && <Input type="search" value={search} onChange={event => setSearches(previous => ({ ...previous, [chip]: event.target.value }))} aria-label={_copy('common.search', { defaultValue: 'Search' })} placeholder={_copy('common.search', { defaultValue: 'Search' })} className="my-3" />}
+      {chip === 'top' && renderTracks(top, _copy("copy.50ea9e32e19c", { defaultValue: "Top 50" }), musicFound)}
+      {chip === 'new' && renderTracks(fresh, _copy("copy.136dfb88fd85", { defaultValue: "New releases" }), musicFound)}
+      {chip === 'videos' && renderTracks(videos, _copy('music.videoCharts', { defaultValue: 'Music Video Charts' }), videosFound, (
+        <div data-no-swipe data-music-chart-kind role="group" aria-label={_copy('music.videoChartOrder', { defaultValue: 'Music video chart order' })} className="overflow-x-auto px-0.5 scrollbar-hide">
+          {MUSIC_VIDEO_CHART_SORTS.map((sort) => (
+            <button key={sort.value} type="button" aria-selected={videoSort === sort.value} onClick={() => setVideoSort(sort.value)} className="shrink-0 whitespace-nowrap">
+              <span>{sort.label}</span>
+              {videoSort === sort.value && <span aria-hidden data-music-chart-beam />}
+            </button>
+          ))}
+        </div>
+      ))}
+      {chip === 'radio' && (
+        <>
+          <SectionTitle title={_copy("copy.38be740dac96", { defaultValue: "Radio stations" })} />
+          <div className="-mx-2 border-t border-white/[0.12]">
+            {searchingRadio ? (
+              <ChartSkeleton />
+            ) : stations.length === 0 ? (
+              <p className="px-3.5 py-8 text-center text-sm text-zinc-500">{_copy('explorePage.noResults', { defaultValue: 'No results found' })}</p>
+            ) : (
+              stations.map((station, i) => {
+                const current = currentStation?.stationuuid === station.stationuuid;
+                return (
+                  <ChartRow
+                    key={station.stationuuid}
+                    rank={radioQuery ? null : i + 1}
+                    image={stationLogo(station)}
+                    title={station.name}
+                    subtitle={getPrimaryTags(station.tags).join(', ') || _copy("copy.2a7dfeb2f2b0", { defaultValue: "Radio" })}
+                    active={current && isPlaying}
+                    trailing={current && isPlaying ? <Pause className="h-4 w-4 fill-current" /> : <Play className="h-4 w-4 fill-current" />}
+                    onClick={() => (current ? togglePlayPause() : play(station))}
+                  />
+                );
+              })
+            )}
+          </div>
+        </>
+      )}
+      {chip === 'stages' && (
+        <div className="pt-5">
+          <StagesChart onOpenStages={() => openStageModal('browse')} />
+        </div>
+      )}
+    </div>
+  );
+}

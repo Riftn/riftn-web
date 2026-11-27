@@ -1,0 +1,125 @@
+import { useTranslation as _useCopy } from 'react-i18next';
+import { useSurfaceDraft } from '@/hooks/use-surface-draft';
+/**
+ * Appeal a moderation decision.
+ *
+ * The notification that opens this already says what was removed and why. What
+ * it used to end with was a line asking the creator to email support — no
+ * reference, no record, and no way to know whether anyone read it. This files
+ * the appeal against that specific decision and hands back a reference number.
+ *
+ * @module components/app/notifications/AppealDrawer
+ */
+
+import { useEffect, useState } from 'react';
+import { Loader2, Scale } from 'lucide-react';
+import { toast } from 'sonner';
+import {
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerHeader,
+  DrawerTitle,
+} from '@/components/ui/drawer';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { appealModerationDecision } from '@/lib/api/dehub';
+
+const MIN_REASON = 20;
+const MAX_REASON = 4000;
+
+interface AppealDrawerProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  notificationId: string;
+  /** What the decision was about, shown back so the appeal is unambiguous. */
+  subject?: string;
+  onFiled?: (ref: string) => void;
+}
+
+export function AppealDrawer({
+  open,
+  onOpenChange,
+  notificationId,
+  subject,
+  onFiled,
+}: AppealDrawerProps) {
+  const { t: _copy } = _useCopy();
+  const [reason, setReason] = useSurfaceDraft("components/app/notifications/AppealDrawer.tsx:reason", '', notificationId);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // A fresh drawer is a fresh appeal — keeping the last draft would file it
+  // against whichever decision was opened next.
+  useEffect(() => {
+    if (!open) {
+      setReason.initialize('');
+      setIsSubmitting(false);
+    }
+  }, [open, setReason]);
+
+  const trimmed = reason.trim();
+  const canSubmit = trimmed.length >= MIN_REASON && !isSubmitting;
+
+  const handleSubmit = async () => {
+    if (!canSubmit) return;
+    setIsSubmitting(true);
+    try {
+      const result = await appealModerationDecision({ notificationId, reason: trimmed });
+      toast.success(
+        result.duplicateOf
+          ? _copy("copy.451d92e1a053", { defaultValue: "You have already appealed this — reference {{value1}}", value1: result.duplicateOf })
+          : _copy("copy.a81f575af757", { defaultValue: "Appeal filed — reference {{value1}}", value1: result.ref }),
+      );
+      onFiled?.(result.ref);
+      onOpenChange(false);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : _copy("copy.5d932ffb8a72", { defaultValue: "Could not file that appeal" }));
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <Drawer open={open} onOpenChange={onOpenChange}>
+      <DrawerContent column glass hideHandle={false} handleClassName="lg:hidden" className="max-h-[85dvh]">
+        <DrawerHeader className="text-left">
+          <DrawerTitle className="flex items-center gap-2 text-white">
+            <Scale className="w-5 h-5" />{_copy("copy.3c7e8ac23a6f", { defaultValue: "Appeal this decision" })}</DrawerTitle>
+          <DrawerDescription className="text-zinc-400">
+            {subject
+              ? _copy("copy.667f90e3b6d3", { defaultValue: "A person will read this and look again at {{value1}}.", value1: subject })
+              : _copy("copy.1cfb99a31f7b", { defaultValue: "A person will read this and look at the decision again." })}
+          </DrawerDescription>
+        </DrawerHeader>
+
+        <div className="px-4 pb-6 space-y-3" data-vaul-no-drag>
+          <Textarea
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            maxLength={MAX_REASON}
+            placeholder={_copy("copy.ebfe8c93e18f", { defaultValue: "What do you think was missed? Context about the content helps more than anything else." })}
+            className="bg-white/5 border-white/10 text-white min-h-[140px] rounded-xl resize-none"
+          />
+          <p className="text-xs text-zinc-500 text-right">
+            {trimmed.length < MIN_REASON
+              ? _copy("copy.1c6c54160ae0", { defaultValue: "{{value1}} more characters", value1: MIN_REASON - trimmed.length })
+              : `${reason.length}/${MAX_REASON}`}
+          </p>
+
+          <div className="flex gap-3 pt-1">
+            <Button
+              variant="ghost"
+              onClick={() => onOpenChange(false)}
+              disabled={isSubmitting}
+              className="flex-1 text-zinc-400 hover:text-white hover:bg-white/10"
+            >{_copy("copy.19766ed6ccb2", { defaultValue: "Cancel" })}</Button>
+            <Button onClick={handleSubmit} disabled={!canSubmit} variant="glass" className="flex-1">
+              {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}{_copy("copy.13f597e9b138", { defaultValue: "Send appeal" })}</Button>
+          </div>
+
+          <p className="text-[11px] text-zinc-500">{_copy("copy.2d129229aa3c", { defaultValue: "You get a reference number, and the answer comes back here. One appeal per decision — sending again shows you the first one." })}</p>
+        </div>
+      </DrawerContent>
+    </Drawer>
+  );
+}

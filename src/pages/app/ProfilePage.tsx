@@ -1,0 +1,1215 @@
+import { useTranslation as _useCopy } from 'react-i18next';
+import { useSurfaceDraft } from '@/hooks/use-surface-draft';
+import { tokenLabel } from '@/lib/token-label';
+import { fitIconInk } from '@/lib/optical-icon';
+import { useState, useMemo, useRef, useCallback, useEffect, useLayoutEffect, lazy, Suspense } from 'react';
+import { SEOHead } from '@/components/SEOHead';
+import { getAiScrapingPreference } from '@/lib/ai-scraping';
+import { profileFeedUrl } from '@/lib/profile-feed-url';
+import { useTranslation } from 'react-i18next';
+
+import '@/styles/profile-pull.css';
+import { ThemedIcon } from '@/components/app/war/WarHudIcon';
+import { isReservedUsername } from '@/lib/reserved-usernames';
+import { UsernameReserve } from '@/components/app/profile/UsernameReserve';
+import { motion } from 'framer-motion';
+import { useTabIndicator } from '@/hooks/use-tab-indicator';
+import { useFeedSwallowClip } from '@/hooks/use-feed-swallow-clip';
+import { FeedSwallowMotion } from '@/components/app/feeds/FeedSwallowMotion';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+
+import { LoginModal } from '@/components/app/LoginModal';
+import { AuthGate } from '@/components/app/AuthGate';
+import { FullscreenImageViewerLazy } from '@/components/app/cards/FullscreenImageViewerLazy';
+import { CreatePlanModal, EditPlanModal } from '@/components/app/subscriptions';
+import { TipModal } from '@/components/app/modals/TipModal';
+import { FollowersListDrawer } from '@/components/app/profile';
+import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+} from '@/components/ui/drawer';
+import dehubCoin from '@/assets/dehub-coin.png';
+
+import { useProfilePage } from '@/hooks/use-profile-page';
+import { usePinnedCommunities } from '@/hooks/use-communities';
+import { useProfileFollow } from '@/hooks/use-profile-follow';
+import { useUserPins } from '@/hooks/use-pins';
+import { Pin } from 'lucide-react';
+import { PostCard } from '@/components/app/cards/PostCard';
+import { ImageCard } from '@/components/app/cards/ImageCard';
+import { VideoCard } from '@/components/app/cards/VideoCard';
+import { formatTimeAgo, formatViews } from '@/lib/feed-utils';
+import { resolveViewCount } from '@/lib/engagement';
+import { buildAvatarUrl, extractAvatarPath, buildImageUrl, buildFeedImageUrls, buildVideoUrl, buildHlsUrl } from '@/lib/media-url';
+import { ProfileHeader } from '@/components/app/profile/ProfileHeader';
+import { ProfileTabContent } from '@/components/app/profile/ProfileTabContent';
+import { ProfileContentToolbar } from '@/components/app/profile/ProfileContentToolbar';
+import { ProfileSkeleton } from '@/components/app/PageSkeletons';
+import { ProfileOptionsContent } from '@/components/app/profile/ProfileOptionsDrawer';
+import { parseDefaultProfileTab, isProfileTabValue, type TabValue } from '@/components/app/profile/ProfileConstants';
+import { useScrollFadeMask } from '@/components/app/feeds/useScrollFadeMask';
+import type { SubscriptionPlan } from '@/lib/api/dehub';
+import { useCreateUsernameOffer } from '@/hooks/use-username-offers';
+import { useUsernameMarketConfig } from '@/hooks/use-username-market';
+import { useAppTheme } from '@/contexts/ThemeContext';
+import { CollapsingProfileHeader } from '@/components/app/profile/CollapsingProfileHeader';
+import { PageHeader } from '@/components/app/PageHeader';
+import { ProfileFollowButton } from '@/components/app/profile/ProfileFollowButton';
+import { UserAvatar } from '@/components/app/UserAvatar';
+import { BadgeIcon } from '@/components/app/BadgeIcon';
+import { StreamerBadge } from '@/components/app/live/StreamerBadge';
+import { POST_LOOK_EVENT, type PostLook } from '@/lib/post-menu';
+import { ProfilePostBgContext, ProfilePostBgArtContext, ProfilePostBgMapContext, PostBgPicker, usePostBgHold, type PostBgSave } from '@/components/app/profile/PostBackground';
+import { POST_BG_IMAGE_KEY, POST_BG_PHOTO_ID, POST_BG_VIDEO_HINT, mergePostBg, parsePostBg, postBgById, postBgFromStored, postBgPhotoStored, postBgStored, postBgImageUrl, withPostBgColors, type PostBg } from '@/lib/post-backgrounds';
+import { ArticleTilePicker, ProfileArticleTileContext } from '@/components/app/profile/ArticleTile';
+import { articleReadMinutes, mergeArticleTile, parseArticleTile, type ArticleTileLook } from '@/lib/article-tile';
+import { buildFeedImageUrls as articleTileCover } from '@/lib/media-url';
+import { updateProfile, setPostBackground } from '@/lib/api/dehub';
+import { PROFILE_VIEW_DEFAULT_KEY, ProfileViewModeContext, parseProfileViewDefault, startingProfileView, useProfileViewState, type ProfileViewMode } from '@/lib/profile-view-mode';
+import { usePrivacySettings } from '@/hooks/use-privacy-settings';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { checkUsernameAvailability } from '@/lib/api/dehub/auth';
+
+// Only the creator on their own profile ever opens this, so it stays out of every visitor's download.
+const ProfileArrangeSheet = lazy(() => import('@/components/app/profile/ProfileArrangeSheet').then((m) => ({ default: m.ProfileArrangeSheet })));
+
+/** Tabs served by the creator's own /api/feed content query. */
+const CONTENT_BACKED_TABS: TabValue[] = ['home', 'posts', 'images', 'videos', 'articles'];
+
+/**
+ * The profile tabs' selected mark: a short glowing line under the active tab
+ * ("Beam"), in place of the glass box other tab rows use. It takes the tab's
+ * own text colour, so every theme's ink (white on dark, near-black on light)
+ * carries through without a per-theme rule.
+ */
+function ProfileTabBeam({ rect, enableTransition }: {
+  rect: { x: number; y: number; width: number; height: number; ready: boolean };
+  enableTransition: boolean;
+}) {
+  if (!rect.ready) return null;
+  const width = Math.max(16, Math.round(rect.width * 0.4));
+  return (
+    <div
+      aria-hidden
+      data-profile-tab-beam
+      className="pointer-events-none absolute left-0 top-0 z-20 text-white"
+      style={{
+        width,
+        height: 3,
+        borderRadius: 3,
+        background: 'currentColor',
+        boxShadow: '0 0 10px currentColor, 0 0 2px currentColor',
+        transform: `translate(${rect.x + (rect.width - width) / 2}px, ${rect.y + rect.height - 4}px)`,
+        transition: enableTransition
+          ? 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), width 0.4s cubic-bezier(0.16, 1, 0.3, 1)'
+          : 'none',
+      }}
+    />
+  );
+}
+
+function PinnedPostItem({ pin }: { pin: any }) {
+  const { t: _copy } = _useCopy();
+  // API returns post fields flat on the pin item itself (not nested in pin.post)
+  const post: any = pin.post || pin;
+  if (!post?.tokenId) return null;
+
+  const postType = post.postType || (post.videoUrl ? 'video' : post.imageUrls?.length ? 'image' : 'post');
+  const creatorObj = post.creator || post.owner;
+  const rawAvatarPath = extractAvatarPath(post) || extractAvatarPath(creatorObj);
+  const resolvedAddress = post.minter || creatorObj?.id || creatorObj?.address;
+  const avatar = rawAvatarPath && resolvedAddress ? buildAvatarUrl(resolvedAddress, rawAvatarPath) || '/placeholder.svg' : '/placeholder.svg';
+  const rawTimestamp = post.createdAt || post.created_at;
+
+  return (
+    <div data-page-bento className="rounded-xl bg-zinc-900 border border-white/[0.08] overflow-hidden">
+      <div className="flex items-center gap-1.5 px-3 pt-2.5 pb-1">
+        <Pin className="w-3.5 h-3.5 text-zinc-400 fill-current" />
+        <span className="text-xs text-zinc-400 font-medium">{_copy("copy.79175cb0f6da", { defaultValue: "Pinned post" })}</span>
+      </div>
+      {(postType === 'video' || postType === 'audio' || postType === 'feed-audio') ? (
+        <VideoCard video={{
+          id: String(post.tokenId), type: 'video',
+          thumbnail: buildImageUrl(post.tokenId, post.imageUrl) || '/placeholder.svg',
+          videoUrl: buildVideoUrl(post.tokenId),
+          hlsUrl: buildHlsUrl(post.hlsUrl),
+          title: post.title || post.name || '',
+          channel: post.minterDisplayName || post.minterUsername || creatorObj?.display_name || 'Unknown',
+          channelAvatar: avatar, verified: false,
+          views: formatViews(resolveViewCount(post)).replace(' views', ''),
+          uploadedAgo: formatTimeAgo(rawTimestamp),
+          duration: '', durationSeconds: 0,
+          likeCount: post.totalVotes?.for || 0, dislikeCount: post.totalVotes?.against || 0,
+          commentCount: post.commentCount || 0, repostCount: (post.totalReposts || 0) + (post.quotes || 0),
+          isOwner: false, isUnlocked: false,
+          creatorId: resolvedAddress,
+          creatorUsername: post.minterUsername || creatorObj?.username,
+          creatorBadgeBalance: post.minterUser?.hideBadgeAndBalance ? 0 : post.minterUser?.badgeBalance,
+          creatorPaymentsDisabled: post.minterUser?.hideBadgeAndBalance === true,
+        }} />
+      ) : postType === 'image' || postType === 'feed-images' ? (
+        <ImageCard post={{
+          id: String(post.tokenId), type: 'image',
+          username: post.minterDisplayName || post.minterUsername || creatorObj?.display_name || 'Unknown',
+          verified: false, avatar,
+          image: buildImageUrl(post.tokenId, post.imageUrl) || '/placeholder.svg',
+          imageUrls: buildFeedImageUrls(post.imageUrls, undefined, (post as { imageSizes?: unknown }).imageSizes) || [buildImageUrl(post.tokenId, post.imageUrl) || '/placeholder.svg'],
+          caption: post.description || '', likes: post.totalVotes?.for || 0,
+          dislikes: post.totalVotes?.against || 0,
+          comments: post.commentCount || 0, views: formatViews(resolveViewCount(post)).replace(' views', ''),
+          timeAgo: formatTimeAgo(rawTimestamp),
+          creatorId: resolvedAddress,
+          creatorUsername: post.minterUsername || creatorObj?.username,
+          creatorBadgeBalance: post.minterUser?.hideBadgeAndBalance ? 0 : post.minterUser?.badgeBalance,
+          creatorPaymentsDisabled: post.minterUser?.hideBadgeAndBalance === true,
+          isOwner: false, isUnlocked: false,
+          repostCount: (post.totalReposts || 0) + (post.quotes || 0),
+        }} />
+      ) : (
+        <PostCard post={{
+          id: String(post.tokenId), type: 'post',
+          createdAt: rawTimestamp || '',
+          views: formatViews(resolveViewCount(post)).replace(' views', ''),
+          author: {
+            id: resolvedAddress,
+            name: post.minterDisplayName || post.minterUsername || creatorObj?.display_name || 'Unknown',
+            handle: post.minterUsername || creatorObj?.username || resolvedAddress?.slice(0, 8) || 'anon',
+            avatarSeed: avatar, verified: false,
+            badgeBalance: post.minterUser?.hideBadgeAndBalance ? 0 : post.minterUser?.badgeBalance,
+            paymentsDisabled: post.minterUser?.hideBadgeAndBalance === true,
+          },
+          content: post.description || post.name || '',
+          stats: {
+            comments: post.commentCount || 0,
+            reposts: (post.totalReposts || 0) + (post.quotes || 0),
+            likes: post.totalVotes?.for || 0,
+            dislikes: post.totalVotes?.against || 0,
+          },
+        }} />
+      )}
+    </div>
+  );
+}
+
+function PinnedPostSection({ profileAddress }: { profileAddress: string }) {
+  const { data } = useUserPins(profileAddress);
+  const pins = data?.items || [];
+  if (pins.length === 0) return null;
+
+  return (
+    <div className="space-y-2">
+      {pins.map((pin) => (
+        <PinnedPostItem key={pin.pinId} pin={pin} />
+      ))}
+    </div>
+  );
+}
+
+
+/** Longest the profile skeleton waits for tab counts and pins after the profile itself. */
+const PROFILE_REVEAL_CAP_MS = 900;
+const PROFILE_TABS_STICKY_TOP = 4;
+
+export default function ProfilePage() {
+  const { t: _copy } = _useCopy();
+  const { t } = useTranslation();
+  const { theme } = useAppTheme();
+  // UI-only state managed in orchestrator
+  const [activeTab, setActiveTab] = useState<TabValue>('home');
+  const tabContentRef = useRef<HTMLDivElement>(null);
+  const [tabContentMinHeight, setTabContentMinHeight] = useState(0);
+  const nextTabScroll = useRef<number | null>(null);
+  const [shareSheetOpen, setShareSheetOpen] = useState(false);
+  const [arrangeOpen, setArrangeOpen] = useState(false);
+  const [createPlanModalOpen, setCreatePlanModalOpen] = useState(false);
+  const [offerDrawerOpen, setOfferDrawerOpen] = useState(false);
+  const [offerAmount, setOfferAmount] = useSurfaceDraft("pages/app/ProfilePage.tsx:offerAmount", '');
+  const [offerMessage, setOfferMessage] = useSurfaceDraft("pages/app/ProfilePage.tsx:offerMessage", '');
+  const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
+  const [followListDrawerOpen, setFollowListDrawerOpen] = useState(false);
+  const [followListType, setFollowListType] = useState<'followers' | 'following'>('followers');
+  const [loginModalOpen, setLoginModalOpen] = useState(false);
+  const createOffer = useCreateUsernameOffer();
+  const { data: usernameMarketConfig } = useUsernameMarketConfig(offerDrawerOpen);
+  const [editingPlan, setEditingPlan] = useState<SubscriptionPlan | null>(null);
+  const [showTipModal, setShowTipModal] = useState(false);
+  
+
+  // All data fetching + derived state. activeTab goes in because the filter
+  // panel's post-type row only applies on the All tab.
+  const data = useProfilePage({ activeTab });
+
+  // Keep one profile shell until the first tab can paint. Once shown, the
+  // page stays mounted while its cached queries revalidate.
+  const revealAddress = data.apiProfile?.walletAddress;
+  const { isFetched: pinsFetched } = usePinnedCommunities(revealAddress);
+  const [revealCapAddress, setRevealCapAddress] = useState<string>();
+  const [revealedAddress, setRevealedAddress] = useState<string>();
+  useEffect(() => {
+    if (!revealAddress) return;
+    const timer = setTimeout(() => setRevealCapAddress(revealAddress), PROFILE_REVEAL_CAP_MS);
+    return () => clearTimeout(timer);
+  }, [revealAddress]);
+  const holdForDetails = !data.isProfileFromCache && revealCapAddress !== revealAddress
+    && !(data.isCountsSettled && pinsFetched);
+  const holdForReveal = !!data.profile && !!revealAddress && revealedAddress !== revealAddress
+    && (data.isAuthLoading || data.isLoadingContent || holdForDetails);
+  useEffect(() => {
+    if (data.profile && revealAddress && !holdForReveal) setRevealedAddress(revealAddress);
+  }, [data.profile, revealAddress, holdForReveal]);
+  // One short "done" beat after a pull refresh: the avatar ring closes and the photo pops.
+  const [justRefreshed, setJustRefreshed] = useState(false);
+  const wasRefreshing = useRef(false);
+  useEffect(() => {
+    if (data.isRefreshing) { wasRefreshing.current = true; return; }
+    if (!wasRefreshing.current) return;
+    wasRefreshing.current = false;
+    setJustRefreshed(true);
+    const timer = setTimeout(() => setJustRefreshed(false), 700);
+    return () => clearTimeout(timer);
+  }, [data.isRefreshing]);
+
+  // Land on the tab the profile owner chose to show first. Applied once per
+  // profile (keyed by wallet address) so a visitor's own tab clicks afterwards
+  // aren't clobbered, and navigating to a different profile re-applies theirs.
+  const appliedDefaultTabFor = useRef<string | null>(null);
+  const profileKey = data.apiProfile?.walletAddress || null;
+
+  const { defaultProfileView, readerProfileView, updateSettings } = usePrivacySettings({
+    refreshOnMount: false,
+  });
+  const hasAccount = data.isAuthenticated && !!data.currentWalletAddress;
+  const ownerDefault = parseProfileViewDefault(
+    data.apiProfile?.defaultProfileView ?? data.apiProfile?.customs?.[PROFILE_VIEW_DEFAULT_KEY],
+  );
+  const localProfileView = useProfileViewState(hasAccount ? null : profileKey, ownerDefault);
+  const profileView = hasAccount ? {
+    mode: startingProfileView(data.isViewingOwnProfile ? defaultProfileView : ownerDefault, readerProfileView, !!data.isViewingOwnProfile),
+    setMode: (mode: ProfileViewMode) => updateSettings(data.isViewingOwnProfile
+      ? { default_profile_view: mode }
+      : { reader_profile_view: mode }),
+  } : localProfileView;
+
+  // Text-post backdrop the owner picked (customs.postBg). A save shows at once
+  // through the override and the profile query catches up behind it.
+  const queryClient = useQueryClient();
+  const [postBgOpen, setPostBgOpen] = useState(false);
+  const [postBgSaving, setPostBgSaving] = useState(false);
+  const [postBgOverride, setPostBgOverride] = useState<{ owner: string; bg: PostBg | null } | null>(null);
+  const storedProfileBg = useMemo(() => parsePostBg(data.apiProfile?.customs), [data.apiProfile?.customs]);
+  const postBg = postBgOverride && postBgOverride.owner === profileKey ? postBgOverride.bg : storedProfileBg;
+  // The owner's own picture stays on the account even while another backdrop is on.
+  const postBgPhoto = postBg?.kind === 'photo' ? postBg.image ?? null : postBgImageUrl(data.apiProfile?.customs?.[POST_BG_IMAGE_KEY]);
+  // Which post the picker was opened from (null: the header / menu, so "all").
+  const [postBgTarget, setPostBgTarget] = useState<string | null>(null);
+  // Posts with their own backdrop: what the server sent, then saves made here.
+  const [postBgSaved, setPostBgSaved] = useState<{ owner: string; map: Map<string, PostBg | null> } | null>(null);
+  const postBgMap = useMemo(() => {
+    const map = new Map<string, PostBg | null>();
+    data.POST_BGS.forEach((raw, id) => { const bg = postBgFromStored(raw); if (bg) map.set(id, bg); });
+    if (postBgSaved && postBgSaved.owner === profileKey) postBgSaved.map.forEach((bg, id) => { if (bg) map.set(id, bg); else map.delete(id); });
+    return map;
+  }, [data.POST_BGS, postBgSaved, profileKey]);
+  const openPostBg = useCallback(() => { setPostBgTarget(null); setPostBgOpen(true); }, []);
+  const openPostBgFor = useCallback((held?: HTMLElement | null) => {
+    setPostBgTarget(held?.dataset.pbgPost || null);
+    setPostBgOpen(true);
+  }, []);
+  const postBgHold = usePostBgHold(!!data.isViewingOwnProfile, openPostBg);
+  // Holding (or right-clicking) one of your own text posts opens it for that post.
+  const postBgPostHold = usePostBgHold(!!data.isViewingOwnProfile, openPostBgFor, '[data-pbg-text]');
+  const postBgSample = useMemo(
+    // The held post's own words, else your newest text post.
+    () => (postBgTarget && data.PROFILE_POSTS.find((p) => String(p.id) === postBgTarget)?.content?.trim())
+      || data.PROFILE_POSTS.find((p) => !p.articleBody && p.content?.trim())?.content,
+    [data.PROFILE_POSTS, postBgTarget],
+  );
+  const savePostBg = useCallback(async ({ id, colors, file, photoUrl, scope }: PostBgSave) => {
+    if (!profileKey) return;
+    // Just this post: saved on the post, the profile's backdrop is left alone.
+    if (scope === 'post' && postBgTarget) {
+      const current = postBgMap.get(postBgTarget);
+      const unchanged = !file && (current?.id ?? null) === id &&
+        (current?.colors ?? []).join() === (colors ?? []).join() &&
+        (current?.image ?? null) === (photoUrl ?? null);
+      if (unchanged) { setPostBgOpen(false); return; }
+      setPostBgSaving(true);
+      try {
+        const stored = id === POST_BG_PHOTO_ID
+          ? (file ? POST_BG_PHOTO_ID : postBgPhotoStored(photoUrl))
+          : postBgStored(id, colors);
+        if (stored === null) {
+          toast.error(t('postBg.saveFailed', "Couldn't save your background. Try again."));
+          return;
+        }
+        const res = await setPostBackground(postBgTarget, stored, id === POST_BG_PHOTO_ID ? file : null);
+        const next = res.postBg ? postBgFromStored(res.postBg) : null;
+        setPostBgSaved((cur) => {
+          const map = new Map(cur && cur.owner === profileKey ? cur.map : []);
+          map.set(postBgTarget, next);
+          return { owner: profileKey, map };
+        });
+        setPostBgOpen(false);
+      } catch {
+        toast.error(t('postBg.saveFailed', "Couldn't save your background. Try again."));
+      } finally {
+        setPostBgSaving(false);
+      }
+      return;
+    }
+    const def = postBgById(id);
+    const next: PostBg | null = !def
+      ? null
+      : def.kind === 'photo'
+        ? { ...def, image: file ? URL.createObjectURL(file) + (/^video\//.test(file.type) ? POST_BG_VIDEO_HINT : '') : postBgPhoto ?? undefined }
+        : withPostBgColors(def, colors);
+    const fromPost = !!postBgTarget && postBgMap.size > 0;
+    const unchanged = !file && !fromPost && (postBg?.id ?? null) === (next?.id ?? null) && (postBg?.colors ?? []).join() === (next?.colors ?? []).join();
+    if (unchanged) { setPostBgOpen(false); return; }
+    setPostBgSaving(true);
+    try {
+      const customs = mergePostBg(data.apiProfile?.customs, { id, colors }) as Record<string, string | number | boolean>;
+      await updateProfile({ customs, ...(id === POST_BG_PHOTO_ID && file ? { postBgImg: file } : {}) });
+      setPostBgOverride({ owner: profileKey, bg: next });
+      // "All posts" (from a held post) means all of them, so posts with their
+      // own go back too. Holding the header only sets the profile's backdrop.
+      if (fromPost) {
+        await setPostBackground('all', '');
+        setPostBgSaved({ owner: profileKey, map: new Map([...postBgMap.keys()].map((k) => [k, null])) });
+      }
+      setPostBgOpen(false);
+      void queryClient.invalidateQueries({ queryKey: ['dehub-profile'] });
+    } catch {
+      toast.error(t('postBg.saveFailed', "Couldn't save your background. Try again."));
+    } finally {
+      setPostBgSaving(false);
+    }
+  }, [profileKey, postBg, postBgPhoto, postBgTarget, postBgMap, data.apiProfile?.customs, queryClient, t]);
+
+  // How the owner's articles look as grid tiles (customs.articleTile). Holding
+  // one of your own articles opens the picker, like text posts and backdrops.
+  const [articleTileOpen, setArticleTileOpen] = useState(false);
+  const [articleTileSaving, setArticleTileSaving] = useState(false);
+  const [articleTileOverride, setArticleTileOverride] = useState<{ owner: string; look: ArticleTileLook } | null>(null);
+  const articleTile: ArticleTileLook = articleTileOverride && articleTileOverride.owner === profileKey
+    ? articleTileOverride.look
+    : parseArticleTile(data.apiProfile?.customs);
+  const openArticleTile = useCallback(() => setArticleTileOpen(true), []);
+  const articleTileHold = usePostBgHold(!!data.isViewingOwnProfile, openArticleTile, '[data-tile="article"]');
+  // Right-click on your own text post or article opens the post menu; its
+  // "Post background" / "Article tiles" row lands here.
+  useEffect(() => {
+    if (!data.isViewingOwnProfile) return;
+    const onLook = (event: Event) => {
+      const look = (event as CustomEvent<PostLook>).detail;
+      if (!look) return;
+      if (look.kind === 'article') openArticleTile();
+      else openPostBgFor(look.el);
+    };
+    window.addEventListener(POST_LOOK_EVENT, onLook);
+    return () => window.removeEventListener(POST_LOOK_EVENT, onLook);
+  }, [data.isViewingOwnProfile, openArticleTile, openPostBgFor]);
+  const articleTileSample = useMemo(() => {
+    const a = data.PROFILE_POSTS.find((p) => !!p.articleBody);
+    return {
+      cover: a?.articleImageUrl ? articleTileCover([a.articleImageUrl], 480)?.[0] : undefined,
+      title: (a?.title || a?.content || t('articleTile.sampleTitle', 'Your article title')).trim(),
+      minutes: articleReadMinutes(a?.articleBody),
+      views: a?.views && a.views !== '0' ? a.views : undefined,
+    };
+  }, [data.PROFILE_POSTS, t]);
+  const saveArticleTile = useCallback(async (look: ArticleTileLook) => {
+    if (!profileKey) return;
+    if (articleTile === look) { setArticleTileOpen(false); return; }
+    setArticleTileSaving(true);
+    try {
+      const customs = mergeArticleTile(data.apiProfile?.customs, look) as Record<string, string | number | boolean>;
+      await updateProfile({ customs });
+      setArticleTileOverride({ owner: profileKey, look });
+      setArticleTileOpen(false);
+      void queryClient.invalidateQueries({ queryKey: ['dehub-profile'] });
+    } catch {
+      toast.error(t('articleTile.saveFailed', "Couldn't save. Try again."));
+    } finally {
+      setArticleTileSaving(false);
+    }
+  }, [profileKey, articleTile, data.apiProfile?.customs, queryClient, t]);
+  useEffect(() => {
+    if (!profileKey || appliedDefaultTabFor.current === profileKey) return;
+    appliedDefaultTabFor.current = profileKey;
+    setTabContentMinHeight(0);
+    // ?tab= wins over the saved default: it is only ever set by something that
+    // sent the user here to do one specific thing (the composer's Subscribers
+    // row pointing at plan creation), and landing them on Home instead makes
+    // that link a dead end.
+    const requestedTab = new URLSearchParams(window.location.search).get('tab');
+    if (requestedTab && isProfileTabValue(requestedTab)) {
+      setActiveTab(requestedTab);
+      return;
+    }
+    setActiveTab(parseDefaultProfileTab(
+      (data.apiProfile?.customs as Record<string, unknown> | undefined)?.defaultProfileTab
+    ));
+  }, [profileKey, data.apiProfile?.customs]);
+
+
+  // Swallow the tab content at the sticky tabs bento's upper rim, exactly
+  // like the home feed cuts at its nav pill (browser-driven scroll clip).
+  const profileHeaderRef = useRef<HTMLDivElement>(null);
+  const profileTabsRef = useRef<HTMLDivElement>(null);
+  const profileContentRef = useRef<HTMLDivElement>(null);
+  useFeedSwallowClip(
+    profileContentRef,
+    '[data-profile-tabs] > [data-feed-nav]',
+    // holdForReveal: the content mounts only once the reveal hold ends.
+    [!!data.profile, data.isAuthenticated, holdForReveal],
+    { allThemes: true },
+  );
+
+  // At the top edge, the tabs become the single profile navigation row.
+  const stuckSentinelRef = useRef<HTMLDivElement>(null);
+  const [isTabsStuck, setIsTabsStuck] = useState(false);
+  useEffect(() => {
+    const el = stuckSentinelRef.current;
+    if (!el) return;
+    // The desktop tab row replaces the feed pill when it reaches the top.
+    const desktop = window.matchMedia('(min-width: 1024px)');
+    let observer: IntersectionObserver;
+    const observe = () => {
+      observer?.disconnect();
+      observer = new IntersectionObserver(
+        ([entry]) => setIsTabsStuck(entry.boundingClientRect.top <= (entry.rootBounds?.top ?? PROFILE_TABS_STICKY_TOP)),
+        { rootMargin: `-${PROFILE_TABS_STICKY_TOP}px 0px 0px 0px`, threshold: 0 },
+      );
+      observer.observe(el);
+    };
+    observe();
+    desktop.addEventListener('change', observe);
+    return () => {
+      desktop.removeEventListener('change', observe);
+      observer?.disconnect();
+    };
+  }, [!!data.profile, holdForReveal]);
+
+  const selectTab = useCallback((tab: TabValue) => {
+    if (tab === activeTab) return;
+    const content = tabContentRef.current;
+    const sentinel = stuckSentinelRef.current;
+    const rail = profileTabsRef.current;
+    const current = window.scrollY;
+    let target = current;
+    // Once pinned, start the next panel just under the rail. Otherwise keep
+    // the expanded header at exactly the same position.
+    if (isTabsStuck && sentinel && rail) {
+      const sentinelTop = current + sentinel.getBoundingClientRect().bottom;
+      const railMargin = parseFloat(getComputedStyle(rail).marginTop) || 0;
+      const railTop = rail.getBoundingClientRect().top;
+      const pinnedAt = Math.ceil(sentinelTop + Math.max(1 - PROFILE_TABS_STICKY_TOP, railMargin - railTop));
+      target = Math.max(0, Math.min(current, pinnedAt));
+    }
+    // A loading or empty panel still needs enough height to reach the target.
+    // Set the floor with the tab change so the browser never clamps first.
+    let minHeight = 0;
+    if (content && target > 0) {
+      const contentTop = content.getBoundingClientRect().top + current;
+      minHeight = Math.max(0, Math.ceil(document.documentElement.clientHeight + target - contentTop));
+    }
+    setTabContentMinHeight(minHeight);
+    nextTabScroll.current = target;
+    setActiveTab(tab);
+  }, [activeTab, isTabsStuck]);
+
+  useLayoutEffect(() => {
+    const target = nextTabScroll.current;
+    nextTabScroll.current = null;
+    if (target !== null && target !== window.scrollY) {
+      window.scrollTo({ top: target, behavior: 'instant' });
+    }
+  }, [activeTab]);
+
+  const { layerRef: tabsIndicatorLayerRef, setRef: setTabRef, rect: tabIndicator, onScroll: handleTabsScroll } = useTabIndicator(activeTab, isTabsStuck);
+  const { ref: tabsFadeRef, style: tabsFadeStyle } = useScrollFadeMask<HTMLDivElement>();
+  useEffect(() => {
+    const button = profileTabButtonPositions.current[activeTab];
+    const rail = tabsFadeRef.current;
+    if (!button || !rail) return;
+    const buttonRect = button.getBoundingClientRect();
+    const railRect = rail.getBoundingClientRect();
+    if (buttonRect.left < railRect.left) rail.scrollLeft += buttonRect.left - railRect.left;
+    else if (buttonRect.right > railRect.right) rail.scrollLeft += buttonRect.right - railRect.right;
+  }, [activeTab, isTabsStuck, tabsFadeRef]);
+  // Even out the tab glyphs: each icon set draws its shape at a different share
+  // of the box, so the film strip stood a head taller than the speech bubble.
+  // Re-fit on resize too, which also catches a cached page being shown again.
+  const profileTabKeys = data.PROFILE_TABS.map((tab) => tab.value).join();
+  useEffect(() => {
+    const rail = tabsFadeRef.current;
+    if (!rail) return;
+    const fit = () => rail.querySelectorAll<SVGSVGElement>('svg[data-tab-glyph]').forEach(fitIconInk);
+    fit();
+    const observer = new ResizeObserver(fit);
+    observer.observe(rail);
+    return () => observer.disconnect();
+  }, [profileTabKeys, isTabsStuck, tabsFadeRef]);
+// Let a mouse wheel scroll the tab bar sideways when the tabs overflow.
+useEffect(() => {
+const rail = tabsFadeRef.current;
+if (!rail) return;
+const onWheel = (e: WheelEvent) => {
+if (Math.abs(e.deltaY) <= Math.abs(e.deltaX) || rail.scrollWidth <= rail.clientWidth) return;
+const max = rail.scrollWidth - rail.clientWidth;
+if ((e.deltaY < 0 && rail.scrollLeft <= 0) || (e.deltaY > 0 && rail.scrollLeft >= max)) return;
+e.preventDefault();
+rail.scrollLeft = Math.max(0, Math.min(max, rail.scrollLeft + e.deltaY));
+};
+rail.addEventListener('wheel', onWheel, { passive: false });
+return () => rail.removeEventListener('wheel', onWheel);
+}, [isTabsStuck, tabsFadeRef]);
+  const [tabTransition, setTabTransition] = useState(false);
+
+  // Drag-to-swipe state for profile tab indicator
+  const profileTabButtonPositions = useRef<Partial<Record<string, HTMLElement | null>>>({});
+  const profileDragState = useRef<{ startX: number; startRectX: number; startWidth: number; currentX: number } | null>(null);
+  const [isProfileDragging, setIsProfileDragging] = useState(false);
+  const [profileDragOffsetX, setProfileDragOffsetX] = useState(0);
+
+  const findNearestProfileTab = useCallback((indicatorCenterX: number) => {
+    const layer = tabsIndicatorLayerRef.current;
+    if (!layer) return activeTab;
+    const layerRect = layer.getBoundingClientRect();
+    let nearest: TabValue = activeTab;
+    let minDist = Infinity;
+    for (const [key, el] of Object.entries(profileTabButtonPositions.current)) {
+      if (!el) continue;
+      const br = el.getBoundingClientRect();
+      const btnCenter = br.left - layerRect.left + br.width / 2;
+      const dist = Math.abs(indicatorCenterX - btnCenter);
+      if (dist < minDist) { minDist = dist; nearest = key as TabValue; }
+    }
+    return nearest;
+  }, [activeTab, tabsIndicatorLayerRef]);
+
+  const handleProfileDragStart = useCallback((e: React.PointerEvent) => {
+    if (e.button !== 0) return;
+    e.preventDefault();
+    (e.target as HTMLElement).setPointerCapture(e.pointerId);
+    profileDragState.current = { startX: e.clientX, startRectX: tabIndicator.x, startWidth: tabIndicator.width, currentX: e.clientX };
+    setIsProfileDragging(true);
+    setProfileDragOffsetX(0);
+  }, [tabIndicator.x, tabIndicator.width]);
+
+  const handleProfileDragMove = useCallback((e: React.PointerEvent) => {
+    if (!profileDragState.current) return;
+    profileDragState.current.currentX = e.clientX;
+    const dx = e.clientX - profileDragState.current.startX;
+    setProfileDragOffsetX(dx);
+    const currentCenterX = profileDragState.current.startRectX + dx + profileDragState.current.startWidth / 2;
+    const nearest = findNearestProfileTab(currentCenterX);
+    if (nearest !== activeTab) {
+      setTabTransition(true);
+      selectTab(nearest);
+      setTimeout(() => setTabTransition(false), 450);
+    }
+  }, [activeTab, findNearestProfileTab, selectTab]);
+
+  const handleProfileDragEnd = useCallback(() => {
+    if (!profileDragState.current) return;
+    profileDragState.current = null;
+    setIsProfileDragging(false);
+    setProfileDragOffsetX(0);
+    setTabTransition(true);
+    setTimeout(() => setTabTransition(false), 450);
+  }, []);
+
+  const profileDragDisplayRect = isProfileDragging
+    ? { ...tabIndicator, x: (profileDragState.current?.startRectX ?? tabIndicator.x) + profileDragOffsetX, ready: true }
+    : tabIndicator;
+
+
+  // Follow logic
+  const { isFollowLoading, handleFollow, handleUnfollow } = useProfileFollow({
+    profile: data.profile,
+    isAuthenticated: data.isAuthenticated,
+    isTargetPrivate: data.isTargetPrivate,
+    setFollowStatus: data.setFollowStatus,
+    handleApiError: data.handleApiError,
+    setShareSheetOpen,
+    setLoginModalOpen,
+  });
+
+  // Share options component (passed to ProfileHeader for the drawer)
+  const ShareOptions = () => (
+    <ProfileOptionsContent
+      profile={data.profile!}
+      isViewingOwnProfile={data.isViewingOwnProfile}
+      isFollowing={data.isFollowing}
+      handleUnfollow={handleUnfollow}
+      setShareSheetOpen={setShareSheetOpen}
+      onMakeOffer={handleMakeOffer}
+      onTip={!data.isViewingOwnProfile && !data.profile.hideBadgeAndBalance ? () => setShowTipModal(true) : undefined}
+      isBlocked={data.isBlocked}
+      isBlockLoading={data.isBlockLoading}
+      handleBlock={data.handleBlock}
+      onPostBackground={data.isViewingOwnProfile ? openPostBg : undefined}
+    />
+  );
+
+  // Make Offer handler (from options drawer)
+  const handleMakeOffer = () => {
+    setShareSheetOpen(false);
+    setOfferDrawerOpen(true);
+  };
+
+  // What the typed dollar figure is worth in tokens at the moment of typing.
+  // Shown, never sent: the offer is denominated in dollars and converted again
+  // at checkout, exactly as an asking price is.
+  const offerDhb = (() => {
+    const usd = Number(offerAmount);
+    const peg = usernameMarketConfig?.dhbUsdPeg;
+    if (!Number.isFinite(usd) || usd <= 0 || !peg) return null;
+    return Math.ceil(usd / peg);
+  })();
+
+  const handleSubmitOffer = () => {
+    const handle = (data.profile?.handle || '').replace(/^@/, '');
+    const priceUsd = Number(offerAmount);
+    if (!handle) {
+      toast.error(t('profile.offerNeedsHandle'));
+      return;
+    }
+    if (!Number.isFinite(priceUsd) || priceUsd <= 0) {
+      toast.error(t('profile.validOfferAmount'));
+      return;
+    }
+    // The drawer closes on success only. A refused offer — a price out of
+    // bounds, an offer on a handle nobody holds — leaves the amount where the
+    // reader typed it, next to the toast saying why.
+    createOffer.mutate(
+      { username: handle, priceUsd, message: offerMessage.trim() || undefined },
+      {
+        onSuccess: () => {
+          setOfferDrawerOpen(false);
+          setOfferAmount.complete(offerAmount, '');
+          setOfferMessage.complete(offerMessage, '');
+        },
+      },
+    );
+  };
+
+  // Keep the existing profile during refresh; a cold load shows the same
+  // skeleton the route shows while its code loads, so there is one loader.
+  // Also wait if auth is still loading or the profile is refetching
+  // (race condition: private profiles return empty shell before auth token is available).
+  if (holdForReveal || (!data.profile && (data.isAuthLoading || data.isLoadingProfile || data.isFetchingProfile))) {
+    // The loaded page's own top bar, so the back arrow is already where it
+    // stays instead of a lone arrow that jumps when the profile arrives.
+    // While the reveal holds, the name and photo are already known (seeded by
+    // the tap or fetched): show them, so the page never opens faceless.
+    const seed = data.profile ? { name: data.profile.name, handle: data.profile.handle, avatarUrl: data.profile.avatarUrl, coverUrl: data.profile.coverUrl } : null;
+    return <div className="relative"><CollapsingProfileHeader /><ProfileSkeleton seed={seed} /></div>;
+  }
+
+  // Auth gate for own profile
+  if (data.isOwnProfile && !data.isAuthenticated) {
+    return <div className="relative"><CollapsingProfileHeader /><AuthGate description={t('profile.loginDescription')} /></div>;
+  }
+
+  // No profile found
+  if (!data.profile) {
+    const isUsernameRoute = !!data.routeUsername;
+    const displayUsername = data.routeUsername || '';
+    // A free, takeable name seen by a signed-out visitor offers "Reserve now".
+    // Signed in (or still finding out) gets the plain not-found page.
+    const showReserve =
+      isUsernameRoute &&
+      (!data.isProfileError || data.isProfileNotFound) &&
+      !data.isAuthenticated &&
+      !data.isAuthLoading &&
+      /^[a-z0-9_-]{1,30}$/i.test(displayUsername) &&
+      !isReservedUsername(displayUsername);
+    
+    const notFoundContent = (
+      <div className="relative min-h-screen flex flex-col items-center justify-center gap-6 p-4 text-center">
+        <PageHeader overlay plainBack />
+        {/* Any unknown top-level path lands here (/:username is the catch-all),
+            so this is the SPA's real 404: without its own head it kept the
+            home title, index,follow and a self canonical. */}
+        <SEOHead
+          title={showReserve ? t('profile.reserve.seoTitle', { defaultValue: '@{{name}} is available on Riftn', name: displayUsername.toLowerCase() }) : `${t('notFound.title')} | Riftn`}
+          description={showReserve ? t('profile.reserve.seoDescription', { defaultValue: 'Nobody has riftn.com/{{name}} yet. Reserve it and sign up to make it yours.', name: displayUsername.toLowerCase() }) : t('profile.notFound')}
+          noindex
+          noCanonical
+        />
+        {/* A name that is taken but resolves to no profile (a deactivated
+            account) must never be offered as free: ask the server first. */}
+        <MissingProfileBody
+          username={isUsernameRoute && (!data.isProfileError || data.isProfileNotFound) ? displayUsername : ''}
+          offerReserve={showReserve}
+          onTaken={() => data.refetchProfile?.()}
+          plain={(
+          <>
+            <ThemedIcon icon="profile" alt="" className="w-20 h-20 object-contain opacity-80" />
+            <h2 className="text-xl font-bold text-white">{t('profile.notFound')}</h2>
+            <p className="text-zinc-400 max-w-md">
+              {data.isProfileError && !data.isProfileNotFound
+                ? t('profile.unableToLoad')
+                : t('profile.doesNotExist')}
+            </p>
+            {/* A load error (e.g. a transient API hiccup while flicking tabs)
+                used to stick until a full page refresh — offer an in-place
+                retry that refetches the profile instead. */}
+            {data.isProfileError && !data.isProfileNotFound && (
+              <Button
+                onClick={() => data.refetchProfile?.()}
+                disabled={data.isFetchingProfile}
+                data-primary-cta
+                    className="h-11 px-6 bg-white hover:bg-white/90 text-black font-semibold rounded-xl"
+              >
+                {data.isFetchingProfile ? t('common.loading') : t('common.tryAgain')}
+              </Button>
+            )}
+          </>
+          )}
+        />
+      </div>
+    );
+
+    return notFoundContent;
+  }
+
+  const profileContent = (
+    <div 
+      ref={data.profileContainerRef}
+      data-classic-feed-layout={theme === 'system' ? '' : undefined}
+      data-profile-pull-root
+      data-profile-refreshing={data.isRefreshing ? '' : undefined}
+      data-profile-refreshed={justRefreshed ? '' : undefined}
+      className="min-h-screen"
+      onTouchStart={data.pullHandlers.onTouchStart}
+      onTouchMove={data.pullHandlers.onTouchMove}
+      onTouchEnd={data.pullHandlers.onTouchEnd}
+      onMouseDown={data.pullHandlers.onMouseDown}
+      onMouseMove={data.pullHandlers.onMouseMove}
+      onMouseUp={data.pullHandlers.onMouseUp}
+      onMouseLeave={data.pullHandlers.onMouseLeave}
+      onTouchCancel={data.pullHandlers.onTouchCancel}
+    >
+      {/* Canonical uses the bare /handle form (no @) — the sitemap-profiles fn
+          and the worker's bot HTML both use it, and an @-prefixed canonical
+          split the signal between two URLs for every profile. */}
+      <SEOHead
+        title={(data.profile?.name || data.profile?.handle) ? _copy("copy.d63869b9dc77", { defaultValue: "{{value1}} on Riftn — posts, videos & profile", value1: data.profile?.name || data.profile?.handle }) : _copy("copy.31169fe03ec0", { defaultValue: "Profile on Riftn" })}
+        description={data.profile?.bio || _copy("copy.11ef7a60f50a", { defaultValue: "View {{value1}} on Riftn", value1: data.profile?.name || data.profile?.handle || _copy("copy.f119e4acc42e", { defaultValue: "this profile" }) })}
+        url={`https://riftn.com/${(data.profile?.handle || '').replace(/^@/, '')}`}
+        aiScraping={data.profile ? getAiScrapingPreference(data.profile.customs) : undefined}
+        feed={data.profile?.handle && !data.isTargetPrivate ? { url: profileFeedUrl(data.profile.handle) } : undefined}
+        jsonLd={{
+          '@context': 'https://schema.org',
+          '@type': 'Person',
+          name: data.profile?.name || data.profile?.handle || 'Riftn User',
+          url: `https://riftn.com/${(data.profile?.handle || '').replace(/^@/, '')}`,
+          ...(data.profile?.bio && { description: data.profile.bio }),
+          ...(data.profile?.avatarUrl && { image: data.profile.avatarUrl }),
+          // Literal machine-readable field, never translated — a JSON-LD
+          // consumer expects a stable token, not a sentence in the viewer's
+          // locale.
+          ...(data.profile && {
+            usageInfo: getAiScrapingPreference(data.profile.customs) === 'allow' ? 'ai-training-allowed' : 'ai-training-prohibited',
+          }),
+        }}
+      />
+            <CollapsingProfileHeader tabsPinned={isTabsStuck} />
+      <div data-profile-pull-body className={cn('p-2 sm:p-3 space-y-3', (theme === 'system' || theme === 'immersive') && 'max-sm:pt-0')}>
+        {/* Profile Card Bento */}
+        <div
+          ref={(el) => { (profileHeaderRef as { current: HTMLDivElement | null }).current = el; postBgHold.hostRef.current = el; }}
+          className="relative max-sm:-mx-2"
+          {...postBgHold.handlers}
+        >
+        {postBgHold.ringEl}
+        <ProfileHeader
+          profile={data.profile}
+          apiProfile={data.apiProfile}
+          isViewingOwnProfile={data.isViewingOwnProfile}
+          isAuthenticated={data.isAuthenticated}
+          badgeUrl={data.badgeUrl}
+          badgeTier={data.badgeTier}
+          isFollowing={data.isFollowing}
+          isPending={data.isPending}
+          isTargetPrivate={data.isTargetPrivate}
+          isFollowLoading={isFollowLoading}
+          handleFollow={handleFollow}
+          handleUnfollow={handleUnfollow}
+          isSubscribed={data.isSubscribed}
+          hasPlans={data.hasPinnedPlans}
+          setFullscreenImage={setFullscreenImage}
+          setActiveTab={selectTab}
+          shareSheetOpen={shareSheetOpen}
+          setShareSheetOpen={setShareSheetOpen}
+          setLoginModalOpen={setLoginModalOpen}
+          ShareOptions={ShareOptions}
+          showFollowersFollowing={data.showFollowersFollowing}
+          showFollowersList={data.showFollowersList}
+          showFollowingList={data.showFollowingList}
+          hideFollowerCounts={data.hideFollowerCounts}
+          setFollowListType={setFollowListType}
+          setFollowListDrawerOpen={setFollowListDrawerOpen}
+          translatedBio={data.translatedBio}
+          setTranslatedBio={data.setTranslatedBio}
+          isBlocked={data.isBlocked}
+        />
+        </div>
+
+        {/* Back, profile identity, scrolling tabs and Follow share one pinned row. */}
+        <div ref={stuckSentinelRef} aria-hidden className="h-0" />
+        <div
+          data-feed-nav-outer
+          data-profile-tabs
+          ref={profileTabsRef}
+          data-joined={isTabsStuck}
+          data-nav-hide="off"
+          className="sticky z-50 -mx-2 sm:-mx-3 -mb-2 sm:-mb-3 px-2 sm:px-3 pt-1 pb-1"
+        >
+        <div data-page-bento data-feed-nav data-profile-single-row className={cn('bg-zinc-900 rounded-xl relative p-1', isTabsStuck && 'flex items-center gap-1')} style={{ overflowX: 'clip', overflowClipMargin: '8px' }}>
+          <div data-nav-glass-backdrop aria-hidden />
+          {isTabsStuck && <>
+            <div className="relative shrink-0 w-9 h-11">
+              <PageHeader overlay plainBack className="!top-1/2 !-translate-y-1/2 !left-0 !right-auto" />
+            </div>
+<span aria-hidden data-profile-back-divider className="mx-1 h-6 w-px shrink-0 bg-white/20" />
+            {!data.isViewingOwnProfile && <div className="flex shrink-0 items-center gap-2 pr-1" title={`${data.profile.name} ${data.profile.handle}`}>
+              <UserAvatar name={data.profile.name} handle={data.profile.handle} avatarUrl={data.profile.avatarUrl} size="sm" />
+              <div className="hidden min-w-0 max-w-24 md:block">
+                <div className="flex items-baseline gap-1 text-xs sm:text-sm font-bold leading-tight text-white">
+                  <p className="min-w-0 truncate">{data.profile.name}</p>
+                  <BadgeIcon src={data.badgeUrl} className="w-[1em] h-[1em]" />
+                  <StreamerBadge address={data.profile.walletAddress} />
+                </div>
+                <p className="truncate text-[10px] sm:text-xs leading-tight text-zinc-400">{data.profile.handle}</p>
+              </div>
+            </div>}
+          </>}
+          <div className="relative min-w-0 flex-1 overflow-hidden rounded-xl">
+          <div ref={tabsIndicatorLayerRef} className="relative overflow-visible">
+            <ProfileTabBeam rect={profileDragDisplayRect} enableTransition={!isProfileDragging && tabTransition} />
+            {/* Drag handle overlay */}
+            {profileDragDisplayRect.ready && (
+              <div
+                className="absolute z-30 cursor-grab active:cursor-grabbing"
+                style={{
+                  transform: `translate(${profileDragDisplayRect.x}px, ${profileDragDisplayRect.y}px)`,
+                  width: profileDragDisplayRect.width,
+                  height: profileDragDisplayRect.height,
+                  transition: !isProfileDragging && tabTransition
+                    ? 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), width 0.4s cubic-bezier(0.16, 1, 0.3, 1)'
+                    : 'none',
+                }}
+                onPointerDown={handleProfileDragStart}
+                onPointerMove={handleProfileDragMove}
+                onPointerUp={handleProfileDragEnd}
+                onPointerCancel={handleProfileDragEnd}
+              />
+            )}
+            <div
+              ref={tabsFadeRef}
+              className="relative z-20 flex overflow-x-auto scrollbar-hide"
+              style={{ touchAction: 'pan-x pan-y', WebkitOverflowScrolling: 'touch', ...tabsFadeStyle } as React.CSSProperties}
+              onScroll={handleTabsScroll}
+            >
+              {data.PROFILE_TABS.map((tab) => {
+                const isActive = activeTab === tab.value;
+                return (
+                  <button
+                    key={tab.value}
+                    ref={(el) => {
+                      setTabRef(tab.value)(el);
+                      profileTabButtonPositions.current[tab.value] = el;
+                    }}
+                    onClick={() => selectTab(tab.value)}
+                    aria-pressed={isActive}
+                    title={t(`profile.tabs.${tab.value}`, tab.label)}
+                    data-feed-tab-btn data-active={isActive}
+                    className={cn(
+                      'relative z-40 flex flex-col items-center justify-center gap-px px-2 rounded-xl transition-[color,opacity] duration-300 text-white',
+                      !isActive && 'opacity-60 hover:opacity-90',
+                      // Same tab size as the pinned bar, so the open pill doesn't squeeze them.
+                      isTabsStuck ? 'shrink-0 w-14 h-11' : 'flex-1 min-w-14 h-11',
+                    )}
+                  >
+                    <tab.icon data-tab-glyph className="w-[18px] h-[18px] relative z-10" />
+                    <span className="text-[10px] leading-tight font-medium relative z-10">{tab.count ?? '\u00a0'}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+          </div>
+          {isTabsStuck && <div className="profile-rail-follow shrink-0 max-w-[36%]">
+            <ProfileFollowButton profile={data.profile} apiProfile={data.apiProfile} isViewingOwnProfile={data.isViewingOwnProfile} isBlocked={data.isBlocked} isFetchingProfile={false} isFollowing={data.isFollowing} isPending={data.isPending} isTargetPrivate={data.isTargetPrivate} isFollowLoading={isFollowLoading} handleFollow={handleFollow} handleUnfollow={handleUnfollow} />
+          </div>}
+        </div>
+        </div>
+
+        {/* Keep the active panel tall enough to hold the scroll position as it loads. */}
+        <ProfileViewModeContext.Provider value={profileView}>
+        <div ref={tabContentRef} data-feed-swallow-bounds style={{ minHeight: tabContentMinHeight || undefined, overflowAnchor: 'none' }}>
+        <div ref={profileContentRef} data-profile-content>
+        <FeedSwallowMotion>
+        {/* Sort + search, on the four tabs actually backed by this creator's
+            content. The other tabs (plans, live, fractions, pinned) come from
+            their own endpoints and the toolbar would do nothing there. */}
+        {CONTENT_BACKED_TABS.includes(activeTab) && (
+          <ProfileContentToolbar
+            sort={data.contentSort}
+            onSortChange={data.setContentSort}
+            search={data.contentSearch}
+            onSearchChange={data.setContentSearch}
+            filters={data.contentFilters}
+            onFiltersChange={data.setContentFilters}
+            onFiltersReset={data.resetContentFilters}
+            filtersOpen={data.contentFiltersOpen}
+            onFiltersOpenChange={data.setContentFiltersOpen}
+            showViewToggle={activeTab === 'home' || activeTab === 'images' || activeTab === 'videos'}
+            showPostType={data.showPostTypeFilter}
+            resultCount={
+              activeTab === 'posts' || activeTab === 'articles' ? data.PROFILE_POSTS.length
+                : activeTab === 'images' ? data.PROFILE_IMAGES.length
+                : activeTab === 'videos' ? data.ALL_PROFILE_VIDEOS.length
+                : data.ALL_CONTENT.length
+            }
+            isLoading={data.isLoadingContent}
+            hasCustomOrder={data.hasCustomOrder}
+            onArrange={data.isViewingOwnProfile && data.profile?.walletAddress ? () => setArrangeOpen(true) : undefined}
+          />
+        )}
+        {data.isViewingOwnProfile && data.profile?.walletAddress && (
+          <Suspense fallback={null}>
+            {arrangeOpen && (
+              <ProfileArrangeSheet
+                open={arrangeOpen}
+                onOpenChange={setArrangeOpen}
+                address={data.profile.walletAddress}
+                hasCustomOrder={data.hasCustomOrder}
+                onSaved={(custom) => data.setContentSort(custom ? 'custom' : 'newest')}
+              />
+            )}
+          </Suspense>
+        )}
+        <ProfilePostBgContext.Provider value={postBg}>
+        <ProfilePostBgMapContext.Provider value={postBgMap}>
+        <ProfilePostBgArtContext.Provider value={data.profile?.avatarUrl ?? null}>
+        <ProfileArticleTileContext.Provider value={articleTile}>
+        <div ref={postBgPostHold.hostRef} className="relative" {...postBgPostHold.handlers}>
+        {postBgPostHold.ringEl}
+        <div ref={articleTileHold.hostRef} className="relative" {...articleTileHold.handlers}>
+        {articleTileHold.ringEl}
+        <div data-feed-root>
+            <ProfileTabContent
+              activeTab={activeTab}
+              profileAddress={data.apiProfile?.walletAddress || ''}
+              ALL_CONTENT={data.ALL_CONTENT}
+              PROFILE_POSTS={data.PROFILE_POSTS}
+              PROFILE_IMAGES={data.PROFILE_IMAGES}
+              ALL_PROFILE_VIDEOS={data.ALL_PROFILE_VIDEOS}
+              PROFILE_LIVE={data.PROFILE_LIVE}
+              isLoadingContent={data.isLoadingContent}
+              userContentData={data.userContentData}
+              hasNextContentPage={data.hasNextContentPage}
+              isFetchingNextContentPage={data.isFetchingNextContentPage}
+              fetchNextContentPage={data.fetchNextContentPage}
+              isTargetPrivate={data.isTargetPrivate}
+              isFollowing={data.isFollowing}
+              isPending={data.isPending}
+              isViewingOwnProfile={data.isViewingOwnProfile}
+              isContentFiltered={data.isContentFiltered}
+              canReorderGrid={data.canReorderGrid}
+              onGridReordered={() => data.setContentSort('custom')}
+              contentQuery={data.contentQuery}
+              optimisticPosts={data.optimisticPosts}
+              isLoadingPlans={data.isLoadingPlans}
+              hasPlans={data.hasPlans}
+              plans={data.plans}
+              isSubscribed={data.isSubscribed}
+              profile={data.profile}
+              setCreatePlanModalOpen={setCreatePlanModalOpen}
+              setEditingPlan={setEditingPlan}
+            />
+
+        </div>
+        </div>
+        </div>
+        </ProfileArticleTileContext.Provider>
+        </ProfilePostBgArtContext.Provider>
+        </ProfilePostBgMapContext.Provider>
+        </ProfilePostBgContext.Provider>
+        </FeedSwallowMotion>
+        </div>
+        </div>
+        </ProfileViewModeContext.Provider>
+      </div>
+
+      {data.isViewingOwnProfile && postBgOpen && (
+        <PostBgPicker
+          key={postBgTarget ?? 'profile'}
+          open
+          current={postBg}
+          name={data.profile.name}
+          handle={data.profile.handle}
+          avatarUrl={data.profile.avatarUrl}
+          sampleText={postBgSample}
+          photoUrl={postBgPhoto}
+          saving={postBgSaving}
+          postId={postBgTarget}
+          postCurrent={postBgTarget ? postBgMap.get(postBgTarget) ?? null : undefined}
+          onCancel={() => setPostBgOpen(false)}
+          onSave={savePostBg}
+        />
+      )}
+      {data.isViewingOwnProfile && (
+        <ArticleTilePicker
+          open={articleTileOpen}
+          current={articleTile}
+          sample={articleTileSample}
+          saving={articleTileSaving}
+          onCancel={() => setArticleTileOpen(false)}
+          onSave={saveArticleTile}
+        />
+      )}
+
+      {/* Make Offer Drawer */}
+      <Drawer open={offerDrawerOpen} onOpenChange={setOfferDrawerOpen}>
+        <DrawerContent column glass hideHandle={false} className="px-4 pb-8">
+          <DrawerHeader className="text-left">
+            <DrawerTitle className="text-white">{t('profile.makeOffer', { handle: data.profile.handle })}</DrawerTitle>
+          </DrawerHeader>
+          <div className="space-y-4">
+            <p className="text-zinc-400 text-sm">
+              {t('profile.enterOfferAmount')}
+            </p>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400">$</span>
+              <Input
+                type="number"
+                inputMode="decimal"
+                placeholder="0"
+                value={offerAmount}
+                onChange={(e) => setOfferAmount(e.target.value)}
+                className="pl-8 pr-14 bg-zinc-800 border-zinc-700 text-white"
+              />
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 text-sm font-medium">
+                USD
+              </span>
+            </div>
+            {offerDhb !== null && (
+              <p className="text-[11px] text-zinc-500 flex items-center gap-1.5">
+                <img src={dehubCoin} alt={tokenLabel()} className="w-3.5 h-3.5" />
+                {t('profile.offerWorthNow', { amount: offerDhb.toLocaleString(undefined, { maximumFractionDigits: 0 }) })}
+              </p>
+            )}
+            <Input
+              placeholder={t('profile.offerNotePlaceholder')}
+              value={offerMessage}
+              onChange={(e) => setOfferMessage(e.target.value)}
+              maxLength={280}
+              className="bg-zinc-800 border-zinc-700 text-white"
+            />
+            {/* The single most important line in the drawer. Nothing is spent
+                here, and the previous version of this screen said nothing at
+                all — which read as though the money had gone. */}
+            <p className="text-[11px] text-zinc-400 rounded-lg border border-white/10 bg-white/5 p-2">
+              {t('profile.offerCommitsNothing')}
+            </p>
+            <Button 
+              onClick={handleSubmitOffer}
+              disabled={createOffer.isPending}
+              className="w-full bg-white/10 backdrop-blur-xl border border-white/20 hover:bg-white/20 hover:border-white/40 text-white"
+            >
+              {t('profile.submitOffer')}
+            </Button>
+          </div>
+        </DrawerContent>
+      </Drawer>
+
+      {/* Fullscreen image viewer */}
+      <FullscreenImageViewerLazy
+        images={fullscreenImage ? [fullscreenImage] : []}
+        initialIndex={0}
+        isOpen={!!fullscreenImage}
+        onClose={() => setFullscreenImage(null)}
+      />
+      
+      {/* Create Plan Modal */}
+      <CreatePlanModal
+        open={createPlanModalOpen}
+        onOpenChange={setCreatePlanModalOpen}
+      />
+
+      {/* Edit Plan Modal */}
+      {editingPlan && (
+        <EditPlanModal
+          open={!!editingPlan}
+          onOpenChange={(open) => { if (!open) setEditingPlan(null); }}
+          plan={editingPlan}
+        />
+      )}
+
+      <FollowersListDrawer
+        open={followListDrawerOpen}
+        onOpenChange={setFollowListDrawerOpen}
+        profileAddress={data.apiProfile?.walletAddress || ''}
+        listType={followListType}
+      />
+      
+      {/* Login Modal */}
+      <LoginModal open={loginModalOpen} onOpenChange={setLoginModalOpen} />
+
+      {/* Tip Modal */}
+      <TipModal
+        open={showTipModal}
+        onOpenChange={setShowTipModal}
+        creatorAddress={data.profile?.walletAddress}
+        creatorName={data.profile?.name}
+        tokenId="0"
+      />
+    </div>
+  );
+
+  return profileContent;
+}
+
+/**
+ * Body of the profile-not-found page. When the handle is taken but resolves
+ * to nothing (its owner deactivated), it says "Profile not available" and
+ * never offers the name: deactivating must not cost anyone their username.
+ */
+function MissingProfileBody({ username, offerReserve, onTaken, plain }: {
+  username: string;
+  offerReserve: boolean;
+  onTaken: () => void;
+  plain: React.ReactNode;
+}) {
+  const { t } = useTranslation();
+  const check = useQuery({
+    queryKey: ['username-check', username.toLowerCase()],
+    queryFn: () => checkUsernameAvailability(username),
+    enabled: !!username,
+    staleTime: 30_000,
+    retry: false,
+  });
+  if (username && check.isLoading) return null;
+  if (username && check.data?.status && check.data.available === false) {
+    return (
+      <>
+        <ThemedIcon icon="profile" alt="" className="w-20 h-20 object-contain opacity-80" />
+        <h2 className="text-xl font-bold text-white">{t('profile.unavailable', 'Profile not available')}</h2>
+      </>
+    );
+  }
+  if (offerReserve && check.data?.available !== false) return <UsernameReserve username={username} onTaken={onTaken} />;
+  return <>{plain}</>;
+}

@@ -1,0 +1,241 @@
+/**
+ * Impersonation Detection
+ * =======================
+ * Scam comments work by wearing the creator's name. The account is different —
+ * it has to be — but the display name is copied closely enough that a reader
+ * skimming a thread reads it as the creator replying, and follows whatever it
+ * asks them to do.
+ *
+ * Plain string equality does not catch it, because the copy is never exact: a
+ * Cyrillic "а" for a Latin "a", a zero for an "o", a zero-width joiner in the
+ * middle, a trailing full stop. That is the same trick that walks straight
+ * through blocked-word lists, so the fix is the same one: fold the confusables
+ * away before comparing, then allow one typo of slack.
+ *
+ * This is a reader-side warning, not enforcement. It never hides a comment —
+ * it says whose account a name does not belong to, and lets the reader decide.
+ *
+ * @module lib/impersonation
+ */
+
+/**
+ * Characters that read as another character. Only the ones actually used in
+ * name spoofing — a full Unicode confusables table is thousands of entries and
+ * most of it is irrelevant to Latin-script display names.
+ */
+const CONFUSABLES: Record<string, string> = {
+  // Cyrillic
+  'а': 'a', 'в': 'b', 'е': 'e', 'к': 'k', 'м': 'm',
+  'н': 'h', 'о': 'o', 'р': 'p', 'с': 'c', 'т': 't',
+  'у': 'y', 'х': 'x', 'і': 'i', 'ј': 'j', 'ѕ': 's',
+  'ԁ': 'd', 'ѵ': 'v',
+  // Greek
+  'α': 'a', 'β': 'b', 'ε': 'e', 'ι': 'i', 'κ': 'k',
+  'ο': 'o', 'ρ': 'p', 'τ': 't', 'υ': 'u', 'χ': 'x',
+  'ν': 'v', 'µ': 'u',
+  // Latin lookalikes that survive NFKD
+  'ɡ': 'g', 'ɪ': 'i', 'ᴏ': 'o', 'ᴀ': 'a', 'ᴇ': 'e',
+  'ʀ': 'r', 'ⅼ': 'l',
+  // Digits and symbols standing in for letters
+  '0': 'o', '1': 'l', '3': 'e', '4': 'a', '5': 's', '7': 't', '8': 'b',
+  '@': 'a', '$': 's', '!': 'i', '|': 'l', '¡': 'i',
+};
+
+/** Zero-width and directional marks — invisible, and free spoofing material. */
+const INVISIBLE = /[​-‏‪-‮⁠-⁯﻿]/g;
+
+/** Combining accents left behind by NFKD. */
+const COMBINING = /[̀-ͯ]/g;
+
+/**
+ * Fold a display name to what a reader actually sees: no accents, no
+ * confusables, no invisibles, no punctuation, no repeated letters.
+ *
+ * Repeats collapse because "Riftnb" and "Riftn" are the same name to a
+ * skim-reader, and doubling a letter is the cheapest evasion there is.
+ */
+export function foldName(name: string): string {
+  if (!name) return '';
+  const stripped = name
+    .normalize('NFKD')
+    .replace(COMBINING, '')
+    .replace(INVISIBLE, '')
+    .toLowerCase();
+
+  let folded = '';
+  for (const char of stripped) {
+    folded += CONFUSABLES[char] ?? char;
+  }
+
+  return folded
+    .replace(/[^a-z0-9]/g, '')        // spaces, emoji, punctuation
+    .replace(/(.)\1+/g, '$1');        // "dehubbb" -> "dehub"
+}
+
+/** Levenshtein, bounded — anything past `max` stops early. */
+function editDistanceWithin(a: string, b: string, max: number): boolean {
+  if (Math.abs(a.length - b.length) > max) return false;
+  let previous = Array.from({ length: b.length + 1 }, (_, i) => i);
+  for (let i = 1; i <= a.length; i++) {
+    const current = [i];
+    let rowMin = i;
+    for (let j = 1; j <= b.length; j++) {
+      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+      const value = Math.min(previous[j] + 1, current[j - 1] + 1, previous[j - 1] + cost);
+      current.push(value);
+      if (value < rowMin) rowMin = value;
+    }
+    if (rowMin > max) return false;
+    previous = current;
+  }
+  return previous[b.length] <= max;
+}
+
+/** Names shorter than this are too generic to accuse anyone over. */
+const MIN_NAME_LENGTH = 4;
+
+/**
+ * Does `candidate` read as `target` without being it?
+ *
+ * Exact folded equality always counts. Beyond that, one edit of slack for a
+ * name of five characters or more — enough for a dropped letter or an inserted
+ * one, not enough to flag two people who happen to share a short handle.
+ */
+export function looksLike(candidate: string, target: string): boolean {
+  const a = foldName(candidate);
+  const b = foldName(target);
+  if (!a || !b) return false;
+  if (a.length < MIN_NAME_LENGTH || b.length < MIN_NAME_LENGTH) return a === b;
+  if (a === b) return true;
+  return b.length >= 5 && editDistanceWithin(a, b, 1);
+}
+
+export interface ImpersonationCheck {
+  /** The commenter is the post's creator. */
+  isCreator: boolean;
+  /** The commenter is not the creator but is wearing their name. */
+  isImpersonating: boolean;
+}
+
+/**
+ * Compare one commenter against the post's creator.
+ *
+ * Address is the identity; names are only ever evidence. A missing address on
+ * either side means no claim is made — an unknown author is not an accusation.
+ */
+export function checkImpersonation(
+  commenter: { address?: string | null; displayName?: string | null; username?: string | null },
+  creator: { address?: string | null; displayName?: string | null; username?: string | null } | null | undefined,
+): ImpersonationCheck {
+  const commenterAddress = (commenter.address ?? '').toLowerCase();
+  const creatorAddress = (creator?.address ?? '').toLowerCase();
+  if (!commenterAddress || !creatorAddress) return { isCreator: false, isImpersonating: false };
+
+  if (commenterAddress === creatorAddress) return { isCreator: true, isImpersonating: false };
+
+  const creatorNames = [creator?.displayName, creator?.username].filter((n): n is string => !!n);
+  const commenterNames = [commenter.displayName, commenter.username].filter((n): n is string => !!n);
+  const isImpersonating = creatorNames.some(target => commenterNames.some(name => looksLike(name, target)));
+
+  return { isCreator: false, isImpersonating };
+}
+
+/**
+ * Team names
+ * ==========
+ * Scammers copy the founder's name and photo onto a new account, DM members a
+ * story ("your profile is missing, it's a node issue") and send a
+ * "rectification" link that drains whatever wallet connects to it. These are
+ * the names only the team wears, with the wallet that owns each one. The API
+ * refuses new claims of them (dehub-stream-backend common/util/staff-names);
+ * this side warns about accounts that slipped in before that.
+ */
+type StaffName = {
+  label: string;
+  /** Always flagged on anyone else. */
+  names: string[];
+  /** The plain first name: only flagged with a team word around it ("Real Mal", "Mal | Founder"). */
+  firstName?: string;
+  owners: string[];
+  /** Usernames are unique and these are reserved, so whoever holds one is the owner. */
+  ownerUsernames: string[];
+};
+
+const STAFF_NAMES: StaffName[] = [
+  { label: 'Mal', names: ['maldoteth', 'maldot', 'maleth'], firstName: 'mal', owners: ['0x9324840523a5d17dd12a2f11a9472e5a199c1937'], ownerUsernames: ['maldoteth'] },
+  // The brand: someone simply called Riftn, or a fan account, is fine. Only a team
+  // word around it ("Riftn Support", "riftn_admin", "Riftn Team") reads as staff.
+  // The old DeHub name is not protected any more.
+  { label: 'Riftn', names: [], firstName: 'riftn', owners: ['0x06da979225262715ed57449d0573329a1e685140'], ownerUsernames: ['riftn', 'd'] },
+];
+
+/** Words that claim a team role. */
+const CLAIM_WORDS = [
+  'cofounder', 'founder', 'official', 'support', 'helpdesk', 'moderator', 'security',
+  'admin', 'team', 'staff', 'real', 'ceo', 'mod', 'help', 'service', 'customer', 'care', 'riftn',
+];
+/** Harmless padding: "Its Mal" or "Mal Dev" is still just someone called Mal. */
+const FILLER_WORDS = ['the', 'iam', 'its', 'eth', 'dot', 'dev', 'app', 'hq'];
+
+const prepWords = (words: string[]) => words.map((w) => foldName(w)).sort((a, b) => b.length - a.length);
+const ROLE_WORDS = prepWords([...CLAIM_WORDS, ...FILLER_WORDS]);
+const FILLER_ONLY = prepWords(FILLER_WORDS);
+
+/** Capital I and lowercase l look alike in most fonts: "MaI" is "Mal". */
+const foldIl = (value: string) => value.replace(/i/g, 'l');
+
+function nameCores(folded: string, words: string[] = ROLE_WORDS): string[] {
+  const out = new Set<string>([folded]);
+  let frontier = [folded];
+  for (let round = 0; round < 4 && frontier.length; round++) {
+    const next: string[] = [];
+    for (const value of frontier) {
+      for (const word of words) {
+        if (value.length > word.length && value.startsWith(word)) next.push(value.slice(word.length));
+        if (value.length > word.length && value.endsWith(word)) next.push(value.slice(0, -word.length));
+      }
+    }
+    frontier = next.filter((v) => !out.has(v));
+    frontier.forEach((v) => out.add(v));
+  }
+  return [...out];
+}
+
+/**
+ * Who this account is dressed up as, or null. The owning wallet, or whoever
+ * holds the owner username, never gets flagged, and neither does a verified
+ * or official account. Plenty of people are called Mal, and plenty of people
+ * put Riftn in their name, so a plain "Mal" or "Riftn" is not flagged here:
+ * only with a team word around it (support, admin, team, official...).
+ */
+export function staffImpersonated(
+  user: {
+    address?: string | null;
+    displayName?: string | null;
+    username?: string | null;
+    isVerified?: boolean | null;
+    verified?: boolean | null;
+    isOfficial?: boolean | null;
+  } | null | undefined,
+): string | null {
+  if (!user) return null;
+  // Verified and official accounts are never called fakes.
+  if (user.isVerified || user.verified || user.isOfficial) return null;
+  const address = (user.address ?? '').toLowerCase();
+  const handle = (user.username ?? '').trim().replace(/^@+/, '').toLowerCase();
+  for (const raw of [user.displayName, user.username]) {
+    if (!raw) continue;
+    const folded = foldName(raw);
+    if (!folded) continue;
+    const candidates = nameCores(folded).map(foldIl);
+    for (const entry of STAFF_NAMES) {
+      if (entry.owners.includes(address) || (handle && entry.ownerUsernames.includes(handle))) continue;
+      if (entry.names.some((n) => candidates.includes(foldIl(foldName(n))))) return entry.label;
+      if (entry.firstName) {
+        const target = foldIl(foldName(entry.firstName));
+        if (candidates.includes(target) && !nameCores(folded, FILLER_ONLY).map(foldIl).includes(target)) return entry.label;
+      }
+    }
+  }
+  return null;
+}

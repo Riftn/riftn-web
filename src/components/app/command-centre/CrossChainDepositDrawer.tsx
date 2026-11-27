@@ -1,0 +1,528 @@
+import { useSurfaceDraft } from '@/hooks/use-surface-draft';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { Loader2, Globe, AlertTriangle } from "lucide-react";
+import Copy from "@/components/ui/cut-icons/copy";
+import Check from "@/components/ui/cut-icons/check";
+import ExternalLink from "@/components/ui/cut-icons/open-externally";
+
+import ArrowLeft from "@/components/ui/cut-icons/back";
+import ChevronRight from "@/components/ui/cut-icons/next";
+import Search from "@/components/ui/cut-icons/search";
+
+import { useTranslation } from 'react-i18next';
+import { Drawer, DrawerContent } from '@/components/ui/drawer';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
+import {
+  SUPPORTED_CHAINS,
+  DESTINATION_ASSETS,
+  DEFAULT_DESTINATION,
+  type ChainInfo,
+  type TokenInfo,
+  type QuoteResponse,
+  type StatusResponse,
+} from '@/lib/near-intents';
+import { fetchOneClickChains, refundAddressFor, needsManualRefundAddress } from '@/lib/near-intents-tokens';
+import { sendNativeToken } from '@/lib/wallet/send';
+import { BNB_CHAIN_ID } from '@/lib/contracts/dhb-token';
+
+import ethLogo from '@/assets/eth-logo.png';
+import usdcLogo from '@/assets/usdc-logo.png';
+import usdtLogo from '@/assets/usdt-logo.png';
+import btcLogo from '@/assets/btc-logo.png';
+import bnbLogo from '@/assets/bnb-logo.png';
+import baseLogo from '@/assets/icons/base-logo.png';
+import solLogo from '@/assets/icons/solana-logo.png';
+import avaxLogo from '@/assets/avax-logo.png';
+
+// Icon map: iconKey → image src
+const ICON_MAP: Record<string, string> = {
+  ETH: ethLogo,
+  USDC: usdcLogo,
+  USDT: usdtLogo,
+  BTC: btcLogo,
+  BNB: bnbLogo,
+  BASE: baseLogo,
+  WETH: ethLogo,
+  SOL: solLogo,
+  AVAX: avaxLogo,
+};
+
+function TokenIcon({ iconKey, size = 'w-7 h-7' }: { iconKey: string; size?: string }) {
+  const src = ICON_MAP[iconKey];
+  if (src) {
+    return <img src={src} alt={iconKey} className={`${size} rounded-full`} />;
+  }
+  // Fallback: letter circle
+  return (
+    <div className={`${size} rounded-full bg-zinc-700 flex items-center justify-center shrink-0`}>
+      <span className="text-[10px] font-bold text-zinc-300">{iconKey.slice(0, 2)}</span>
+    </div>
+  );
+}
+
+interface CrossChainDepositDrawerProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  destinationSymbol?: string;
+  /** Open straight on this origin asset's amount step, e.g. `{ chain: 'bsc', symbol: 'BNB' }`. */
+  initialAsset?: { chain: string; symbol: string };
+}
+
+/** Origin chains whose native coin the connected EVM wallet can send itself, so nothing needs copying. */
+const WALLET_NATIVE_CHAINS: Record<string, number> = { bsc: BNB_CHAIN_ID };
+
+type Step = 'chains' | 'amount' | 'deposit' | 'success' | 'error';
+
+export function CrossChainDepositDrawer({ open, onOpenChange, destinationSymbol, initialAsset }: CrossChainDepositDrawerProps) {
+  const { walletAddress, user } = useAuth();
+  const { t } = useTranslation();
+  const dest = (destinationSymbol && DESTINATION_ASSETS[destinationSymbol]) || DEFAULT_DESTINATION;
+  const destLabel = dest.label;
+
+  const [step, setStep] = useState<Step>('chains');
+  const [selectedChain, setSelectedChain] = useState<ChainInfo | null>(null);
+  const [selectedToken, setSelectedToken] = useState<TokenInfo | null>(null);
+  const [amount, setAmount] = useSurfaceDraft("components/app/command-centre/CrossChainDepositDrawer.tsx:amount", '');
+  const [quoteLoading, setQuoteLoading] = useState(false);
+  const [quote, setQuote] = useState<QuoteResponse | null>(null);
+  const [quoteError, setQuoteError] = useState('');
+  const [copied, setCopied] = useState(false);
+  const [statusPolling, setStatusPolling] = useState(false);
+  const [depositStatus, setDepositStatus] = useState<StatusResponse | null>(null);
+  const [errorMsg, setErrorMsg] = useState('');
+
+  const [assetQuery, setAssetQuery] = useSurfaceDraft("components/app/command-centre/CrossChainDepositDrawer.tsx:assetQuery", '');
+  const [manualRefund, setManualRefund] = useSurfaceDraft("components/app/command-centre/CrossChainDepositDrawer.tsx:manualRefund", '');
+  const [walletSending, setWalletSending] = useState(false);
+  const initialApplied = useRef(false);
+
+  const solanaAddress = user?.solanaAddress ?? null;
+  const manualRefundNeeded = !!selectedChain && needsManualRefundAddress(selectedChain.id, solanaAddress);
+  const refundAddress = selectedChain
+    ? (refundAddressFor(selectedChain.id, walletAddress, solanaAddress) || manualRefund.trim() || null)
+    : null;
+
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // The gateway's own catalogue, cached for the session. It only moves when
+  // 1Click adds a route, and the hand-written list stands in if the call fails
+  // so the drawer never opens empty.
+  const { data: liveChains, isLoading: chainsLoading } = useQuery({
+    queryKey: ['one-click-chains'],
+    queryFn: fetchOneClickChains,
+    staleTime: 60 * 60_000,
+    gcTime: 60 * 60_000,
+    retry: 1,
+  });
+
+  const chains = liveChains ?? SUPPORTED_CHAINS;
+
+  /** Flattened chain+token rows, filtered by the search box. */
+  const assetRows = useMemo(() => {
+    const q = assetQuery.trim().toLowerCase();
+    const rows: { chain: ChainInfo; token: TokenInfo }[] = [];
+    for (const chain of chains) {
+      for (const token of chain.tokens) {
+        if (
+          q &&
+          !token.symbol.toLowerCase().includes(q) &&
+          !token.name.toLowerCase().includes(q) &&
+          !chain.name.toLowerCase().includes(q)
+        ) continue;
+        rows.push({ chain, token });
+      }
+    }
+    return rows;
+  }, [chains, assetQuery]);
+
+  useEffect(() => {
+    if (open) {
+      setStep('chains');
+      setSelectedChain(null);
+      setSelectedToken(null);
+      setAmount.initialize('');
+      setQuote(null);
+      setQuoteError('');
+      setDepositStatus(null);
+      setErrorMsg('');
+      setCopied(false);
+      setAssetQuery.initialize('');
+      setManualRefund.initialize('');
+      setWalletSending(false);
+      initialApplied.current = false;
+    }
+    return () => {
+      if (pollRef.current) clearInterval(pollRef.current);
+    };
+  }, [open, setAmount, setAssetQuery, setManualRefund]);
+
+  const handleSelectToken = (chain: ChainInfo, token: TokenInfo) => {
+    setSelectedChain(chain);
+    setSelectedToken(token);
+    setStep('amount');
+    setAmount.complete(amount, '');
+    setQuote(null);
+    setQuoteError('');
+  };
+
+  // The live catalogue may land after the drawer opens, so the preselection waits for it.
+  useEffect(() => {
+    if (!open || !initialAsset || initialApplied.current || chainsLoading) return;
+    initialApplied.current = true;
+    const chain = chains.find((c) => c.id === initialAsset.chain);
+    const token = chain?.tokens.find((tk) => tk.symbol === initialAsset.symbol);
+    if (chain && token) handleSelectToken(chain, token);
+  }, [open, initialAsset, chains, chainsLoading]);
+
+  const fetchQuote = useCallback(async () => {
+    if (!selectedToken || !amount || !walletAddress || parseFloat(amount) <= 0) return;
+    if (!refundAddress) return;
+
+    setQuoteLoading(true);
+    setQuoteError('');
+    setQuote(null);
+
+    try {
+      const amountInSmallest = (parseFloat(amount) * Math.pow(10, selectedToken.decimals)).toFixed(0);
+      const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+      const res = await fetch(
+        `https://${projectId}.supabase.co/functions/v1/cross-chain-quote?action=quote`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            originAsset: selectedToken.assetId,
+            destinationAsset: dest.assetId,
+            amount: amountInSmallest,
+            // A plain address, not `base:0x…` — the gateway rejects the
+            // prefixed form as an invalid recipient.
+            recipient: walletAddress,
+            refundTo: refundAddress,
+            amountType: 'in',
+          }),
+        }
+      );
+
+      const data = await res.json();
+      if (!res.ok || data?.error) throw new Error(data?.error || t("copy.5501d3ecddf6", { defaultValue: "Quote failed" }));
+      setQuote(data);
+    } catch (err: any) {
+      setQuoteError(err?.message || t("copy.37bcfc8af381", { defaultValue: "Failed to get quote" }));
+    } finally {
+      setQuoteLoading(false);
+    }
+  }, [selectedToken, amount, walletAddress, refundAddress, dest.assetId, t]);
+
+  useEffect(() => {
+    if (step !== 'amount' || !amount || parseFloat(amount) <= 0) return;
+    const timer = setTimeout(fetchQuote, 800);
+    return () => clearTimeout(timer);
+  }, [amount, step, fetchQuote]);
+
+  const handleProceedToDeposit = () => {
+    if (!quote?.quote?.depositAddress) return;
+    setStep('deposit');
+    startStatusPolling(quote.quote.depositAddress);
+  };
+
+  // What actually lands, not what the caller asked for — see DESTINATION_ASSETS.
+  const destSymbol = dest.symbol;
+
+  const startStatusPolling = (depositAddress: string) => {
+    setStatusPolling(true);
+    if (pollRef.current) clearInterval(pollRef.current);
+
+    pollRef.current = setInterval(async () => {
+      try {
+        const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+        const res = await fetch(
+          `https://${projectId}.supabase.co/functions/v1/cross-chain-quote?action=status&depositAddress=${depositAddress}`,
+          { headers: { 'Content-Type': 'application/json' } }
+        );
+        const status: StatusResponse = await res.json();
+        setDepositStatus(status);
+
+        if (status.status === 'SUCCESS') {
+          if (pollRef.current) clearInterval(pollRef.current);
+          setStatusPolling(false);
+          setStep('success');
+          toast.success(t('commandCentre.crossChainCompleted', { symbol: destSymbol }));
+        } else if (status.status === 'FAILED' || status.status === 'REFUNDED' || status.status === 'EXPIRED') {
+          if (pollRef.current) clearInterval(pollRef.current);
+          setStatusPolling(false);
+          setErrorMsg(status.status === 'EXPIRED' ? t('commandCentre.depositExpired') : t('commandCentre.depositFailedMsg'));
+          setStep('error');
+        }
+      } catch {
+        // Continue polling on network errors
+      }
+    }, 5000);
+  };
+
+  const depositAddress = quote?.quote?.depositAddress ?? null;
+  const destTxHash = depositStatus?.swapDetails?.destinationChainTxHashes?.[0]?.hash ?? null;
+
+  const walletChainId = selectedChain && selectedToken?.assetId.endsWith('-native.omft.near') ? WALLET_NATIVE_CHAINS[selectedChain.id] : undefined;
+  const handleWalletSend = async () => {
+    if (!depositAddress || !selectedToken || !walletChainId || walletSending) return;
+    setWalletSending(true);
+    try {
+      await sendNativeToken(depositAddress, amount, selectedToken.decimals, walletChainId as 56);
+      toast.success(t('commandCentre.walletSendSubmitted'));
+    } catch (err: any) {
+      toast.error(err?.shortMessage || err?.message || t('commandCentre.depositFailedMsg'));
+      setWalletSending(false);
+    }
+  };
+
+  const handleCopyAddress = () => {
+    if (!depositAddress) return;
+    navigator.clipboard.writeText(depositAddress);
+    setCopied(true);
+    toast.success(t('toasts.deposit_address_copied'));
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  // The gateway already formats the output for the destination's decimals, so
+  // there is nothing here to divide and nothing to get wrong.
+  const estimatedOut = quote?.quote?.amountOutFormatted
+    ? parseFloat(quote.quote.amountOutFormatted).toLocaleString(undefined, { maximumFractionDigits: 6 })
+    : null;
+
+  return (
+    <Drawer open={open} onOpenChange={onOpenChange}>
+      <DrawerContent column glass hideHandle={false} data-wallet-page>
+        <div className="p-5 pb-8 space-y-4 max-h-[80vh] overflow-y-auto">
+          {/* Header */}
+          <div className="flex items-center gap-3">
+            {step !== 'chains' && step !== 'success' && (
+              <button
+                onClick={() => {
+                  if (step === 'amount') setStep('chains');
+                  if (step === 'deposit') { setStep('amount'); if (pollRef.current) clearInterval(pollRef.current); }
+                  if (step === 'error') setStep('chains');
+                }}
+                className="text-white/60 hover:text-white transition-colors"
+              >
+                <ArrowLeft className="w-4 h-4" />
+              </button>
+            )}
+            <div>
+              <h3 className="text-white font-semibold text-base">
+                {step === 'chains' && t('commandCentre.depositFromAnyChain')}
+                {step === 'amount' && t('commandCentre.send') + ' ' + selectedToken?.symbol}
+                {step === 'deposit' && t('commandCentre.sendToDepositAddress')}
+                {step === 'success' && t('commandCentre.depositComplete')}
+                {step === 'error' && t('commandCentre.depositFailed')}
+              </h3>
+              {step === 'chains' && (
+                <p className="text-xs text-white/40">{t('commandCentre.sendCryptoToReceive', { dest: destLabel })}</p>
+              )}
+            </div>
+          </div>
+
+          {/* Step: Chain & Token Selection */}
+          {step === 'chains' && (
+            <div className="space-y-2">
+              <div className="relative">
+                <Search className="w-3.5 h-3.5 text-white/30 absolute left-3 top-1/2 -translate-y-1/2" />
+                <Input
+                  value={assetQuery}
+                  onChange={(e) => setAssetQuery(e.target.value)}
+                  placeholder={t('common.search')}
+                  className="bg-white/[0.06] border-white/10 text-white backdrop-blur-sm pl-8 h-9 text-sm"
+                />
+              </div>
+              <div className="space-y-1.5 max-h-[52vh] overflow-y-auto">
+                {assetRows.map(({ chain, token }) => (
+                  <button
+                    key={`${chain.id}-${token.assetId}`}
+                    onClick={() => handleSelectToken(chain, token)}
+                    className="w-full flex items-center gap-3 p-3 rounded-xl bg-white/[0.06] hover:bg-white/[0.10] backdrop-blur-sm border border-white/10 transition-colors"
+                  >
+                    <TokenIcon iconKey={token.iconKey} />
+                    <div className="text-left flex-1 min-w-0">
+                      <span className="text-sm font-medium text-white">{token.symbol}</span>
+                      <p className="text-xs text-white/40 truncate">{chain.name}</p>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-white/20 shrink-0" />
+                  </button>
+                ))}
+                {assetRows.length === 0 && (
+                  <p className="text-xs text-white/40 text-center py-6">
+                    {chainsLoading ? t('common.loading') : t('explorePage.noResults')}
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Step: Amount Input */}
+          {step === 'amount' && selectedToken && selectedChain && (
+            <>
+              <div className="flex items-center gap-2 text-xs text-white/50">
+                <TokenIcon iconKey={selectedToken.iconKey} size="w-5 h-5" />
+                <span>{t('commandCentre.tokenOnChainTo', { symbol: selectedToken.symbol, chain: selectedChain.name, dest: destLabel })}</span>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-sm text-white/50">{t('commandCentre.tokenAmount', { symbol: selectedToken.symbol })}</label>
+                <Input
+                  type="number"
+                  min="0"
+                  step="any"
+                  placeholder={`e.g. ${selectedToken.symbol === 'USDC' || selectedToken.symbol === 'USDT' ? '50' : '0.01'}`}
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  className="bg-white/[0.06] border-white/10 text-white backdrop-blur-sm text-lg font-mono"
+                />
+              </div>
+
+              {/* A refund has to land on the chain the deposit came from, and
+                  for a non-EVM chain we hold no address of theirs to use. */}
+              {manualRefundNeeded && (
+                <div className="space-y-1.5">
+                  <label className="text-sm text-white/50">
+                    {t('commandCentre.refundAddress', { chain: selectedChain.name })}
+                  </label>
+                  <Input
+                    value={manualRefund}
+                    onChange={(e) => setManualRefund(e.target.value)}
+                    className="bg-white/[0.06] border-white/10 text-white backdrop-blur-sm font-mono text-sm"
+                  />
+                  <p className="text-[11px] text-white/30">
+                    {t('commandCentre.refundAddressHint', { symbol: selectedToken.symbol })}
+                  </p>
+                </div>
+              )}
+
+              {/* Quote display */}
+              <div className="rounded-xl bg-white/[0.04] border border-white/10 p-3 space-y-2">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-white/50">{t('commandCentre.estimatedReceived', { symbol: destSymbol })}</span>
+                  {quoteLoading ? (
+                    <Loader2 className="w-3.5 h-3.5 text-white/40 animate-spin" />
+                  ) : estimatedOut ? (
+                    <span className="text-white font-mono">{estimatedOut} {destSymbol}</span>
+                  ) : (
+                    <span className="text-white/30">—</span>
+                  )}
+                </div>
+                {quoteError && (
+                  <p className="text-xs text-amber-400/80 flex items-center gap-1">
+                    <AlertTriangle className="w-3 h-3" /> {quoteError}
+                  </p>
+                )}
+              </div>
+
+              <Button
+                variant="glass"
+                className="w-full rounded-xl"
+                disabled={!quote || quoteLoading || !refundAddress}
+                onClick={handleProceedToDeposit}
+              >
+                <Globe className="w-4 h-4 mr-2" />
+                {t('commandCentre.getDepositAddress')}
+              </Button>
+            </>
+          )}
+
+          {/* Step: Deposit Address */}
+          {step === 'deposit' && quote && selectedToken && selectedChain && (
+            <>
+              <div className="rounded-xl bg-white/[0.04] border border-white/10 p-4 space-y-3">
+                <p className="text-xs text-white/50 text-center">
+                  {t('commandCentre.sendExactlyTo', { amount, symbol: selectedToken.symbol, chain: selectedChain.name })}
+                </p>
+                <div className="bg-white/[0.06] rounded-lg p-3 break-all font-mono text-xs text-white/80 text-center">
+                  {depositAddress}
+                </div>
+                {walletChainId && walletAddress && (
+                  <Button
+                    variant="glass"
+                    className="w-full rounded-xl"
+                    disabled={walletSending}
+                    onClick={() => void handleWalletSend()}
+                  >
+                    {walletSending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                    {t('commandCentre.sendFromWallet', { amount, symbol: selectedToken.symbol })}
+                  </Button>
+                )}
+                <Button
+                  variant="glass"
+                  className="w-full rounded-xl"
+                  onClick={handleCopyAddress}
+                >
+                  {copied ? <Check className="w-4 h-4 mr-2" /> : <Copy className="w-4 h-4 mr-2" />}
+                  {copied ? t('commandCentre.copiedAddress') : t('commandCentre.copyAddress')}
+                </Button>
+              </div>
+
+              <div className="rounded-xl bg-white/[0.04] border border-white/10 p-3 space-y-2">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-white/50">{t('commandCentre.status')}</span>
+                  <span className="flex items-center gap-1.5">
+                    {statusPolling && <Loader2 className="w-3 h-3 text-white/40 animate-spin" />}
+                    <span className="text-white/70">
+                      {depositStatus?.status === 'PROCESSING' ? t('commandCentre.processingDeposit') : t('commandCentre.waitingForDeposit')}
+                    </span>
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-white/50">{t('commandCentre.youllReceive')}</span>
+                  <span className="text-white font-mono">{estimatedOut} {destSymbol}</span>
+                </div>
+              </div>
+
+              <p className="text-[10px] text-white/30 text-center">
+                {t('commandCentre.depositExpireNote')}
+              </p>
+            </>
+          )}
+
+          {/* Step: Success */}
+          {step === 'success' && (
+            <div className="flex flex-col items-center gap-3 py-6">
+              <div className="w-12 h-12 rounded-full bg-emerald-500/20 flex items-center justify-center">
+                <Check className="w-6 h-6 text-emerald-400" />
+              </div>
+              <p className="text-sm text-white font-medium">{t('commandCentre.tokenReceived', { symbol: destSymbol })}</p>
+              <p className="text-xs text-white/40">
+                {t('commandCentre.depositedToWallet', { amount: estimatedOut, symbol: destSymbol })}
+              </p>
+              {destTxHash && (
+                <button
+                  onClick={() => window.open(`https://basescan.org/tx/${destTxHash}`, '_blank')}
+                  className="text-xs text-white flex items-center gap-1 hover:underline"
+                >
+                  {t('commandCentre.viewOnBaseScan')} <ExternalLink className="w-3 h-3" />
+                </button>
+              )}
+              <Button variant="glass" className="w-full rounded-xl mt-2" onClick={() => onOpenChange(false)}>
+                {t('commandCentre.done')}
+              </Button>
+            </div>
+          )}
+
+          {/* Step: Error */}
+          {step === 'error' && (
+            <div className="flex flex-col items-center gap-3 py-6">
+              <div className="w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center">
+                <AlertTriangle className="w-6 h-6 text-red-400" />
+              </div>
+              <p className="text-sm text-white font-medium">{t('commandCentre.depositFailed')}</p>
+              <p className="text-xs text-white/40 text-center max-w-[260px]">{errorMsg}</p>
+              <Button variant="glass" className="w-full rounded-xl mt-2" onClick={() => setStep('chains')}>
+                {t('commandCentre.tryAgain')}
+              </Button>
+            </div>
+          )}
+        </div>
+      </DrawerContent>
+    </Drawer>
+  );
+}

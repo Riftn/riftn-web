@@ -1,0 +1,304 @@
+import { useTranslation as _useCopy } from 'react-i18next';
+import { DISLIKES_VISIBILITY_KEY, dislikesArePublic } from '@/hooks/use-profile-dislikes';
+import { useEffect } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
+import { updateProfile } from '@/lib/api/dehub';
+import { useDeHubProfile } from '@/hooks/use-dehub-profile';
+import { parseDefaultProfileTab } from '@/components/app/profile/ProfileConstants';
+import { getAiScrapingPreference, mergeAiScrapingPreference, type AiScrapingPreference } from '@/lib/ai-scraping';
+import { getShowOnline, mergeShowOnline } from '@/lib/online-presence';
+import { getShowLastSeen, mergeShowLastSeen } from '@/lib/last-seen';
+import { translateCopy as _translateCopy } from '@/i18n/copy';
+import { PROFILE_VIEW_DEFAULT_KEY, PROFILE_VIEW_READER_KEY, parseProfileViewDefault, parseProfileViewReaderPref, type ProfileViewMode, type ProfileViewReaderPref } from '@/lib/profile-view-mode';
+
+/**
+ * Follow visibility modes stored in Riftn API customs.followVisibility:
+ * - 'public'      → numbers visible AND clickable (lists accessible)
+ * - 'counts-only' → numbers visible but NOT clickable
+ * - 'hidden'      → numbers completely hidden from visitors
+ */
+export type FollowVisibility = 'public' | 'counts-only' | 'hidden';
+
+/**
+ * Derive boolean flags from a single followVisibility string.
+ * Exported so callers that already hold the profile (e.g. the profile page)
+ * can parse customs directly instead of re-fetching the profile.
+ */
+export function parseVisibility(raw?: unknown): { showFollowersFollowing: boolean; hideFollowerCounts: boolean } {
+  const value = (typeof raw === 'string' ? raw : 'public') as FollowVisibility;
+
+  switch (value) {
+    case 'hidden':
+      return { showFollowersFollowing: false, hideFollowerCounts: true };
+    case 'counts-only':
+      return { showFollowersFollowing: false, hideFollowerCounts: false };
+    case 'public':
+    default:
+      return { showFollowersFollowing: true, hideFollowerCounts: false };
+  }
+}
+
+/** Per-list switches in customs. Absent means the list is shown. */
+export const FOLLOWERS_LIST_VISIBILITY_KEY = 'followersListVisibility';
+export const FOLLOWING_LIST_VISIBILITY_KEY = 'followingListVisibility';
+/** Absent means private: everyone's likes start hidden. */
+export const LIKES_VISIBILITY_KEY = 'likesVisibility';
+
+export function likesArePublic(customs: Record<string, unknown> | null | undefined): boolean {
+  return customs?.[LIKES_VISIBILITY_KEY] === 'public';
+}
+
+/**
+ * Which follow lists a visitor may open. The coarse followVisibility mode
+ * ('counts-only' / 'hidden') still hides both; on top of that each list can be
+ * hidden on its own. The API enforces the same rules.
+ */
+export function parseFollowLists(customs: Record<string, unknown> | null | undefined): {
+  showFollowersList: boolean;
+  showFollowingList: boolean;
+  hideFollowerCounts: boolean;
+} {
+  const { showFollowersFollowing, hideFollowerCounts } = parseVisibility(customs?.followVisibility);
+  return {
+    showFollowersList: showFollowersFollowing && customs?.[FOLLOWERS_LIST_VISIBILITY_KEY] !== 'hidden',
+    showFollowingList: showFollowersFollowing && customs?.[FOLLOWING_LIST_VISIBILITY_KEY] !== 'hidden',
+    hideFollowerCounts,
+  };
+}
+
+/**
+ * Hook to manage the current user's privacy settings via the Riftn API customs field.
+ */
+export function usePrivacySettings({ refreshOnMount = true } = {}) {
+  const { t: _copy } = _useCopy();
+  const { user, walletAddress, isAuthenticated, refreshUser } = useAuth();
+  const queryClient = useQueryClient();
+
+  // Read current profile (customs) from the existing profile query
+  const profileQuery = useDeHubProfile({
+    userId: walletAddress || undefined,
+    enabled: !!walletAddress && isAuthenticated,
+  });
+  const { data, isPlaceholderData, isFetchedAfterMount, refetch } = profileQuery;
+  const profile = data?.walletAddress?.toLowerCase() === walletAddress?.toLowerCase() ? data : undefined;
+
+  // Settings must show what the server has right now. The profile query
+  // paints from a week-old localStorage copy and keeps answers for five
+  // minutes, so without this a switch could show OFF while the account was
+  // ON (tips to dehub.io/camp were refused that way, 2026-10-31). Always ask
+  // again when the screen opens, and keep the switches locked until that
+  // answer is in.
+  useEffect(() => {
+    if (refreshOnMount && walletAddress && isAuthenticated) void refetch();
+  }, [refreshOnMount, walletAddress, isAuthenticated, refetch]);
+  const isLoading = !profile || isPlaceholderData || !isFetchedAfterMount;
+
+  const customs = profile?.customs;
+  const layoutAccount = profile ?? user;
+  const savedDefaultView = layoutAccount?.defaultProfileView ?? layoutAccount?.customs?.[PROFILE_VIEW_DEFAULT_KEY];
+  const { showFollowersFollowing, hideFollowerCounts } = parseVisibility(customs?.followVisibility);
+  const { showFollowersList, showFollowingList } = parseFollowLists(customs as Record<string, unknown> | undefined);
+  const isPrivate = profile?.isPrivate === true;
+  const hideBadgeAndBalance = profile?.hideBadgeAndBalance === true;
+  const aiScraping = getAiScrapingPreference(customs);
+  const showOnline = getShowOnline(customs);
+  const showLastSeen = getShowLastSeen(customs);
+
+  const updateMutation = useMutation({
+    scope: { id: `profile-settings:${walletAddress?.toLowerCase()}` },
+    mutationFn: async (updates: {
+      show_followers_following?: boolean;
+      hide_follower_counts?: boolean;
+      default_post_visibility?: 'public' | 'private';
+      default_profile_tab?: string;
+      default_profile_view?: ProfileViewMode;
+      reader_profile_view?: ProfileViewReaderPref;
+      is_private?: boolean;
+      hide_badge_and_balance?: boolean;
+      ai_scraping?: AiScrapingPreference;
+      show_online?: boolean;
+      show_last_seen?: boolean;
+      show_dislikes?: boolean;
+      show_followers_list?: boolean;
+      show_following_list?: boolean;
+      show_follower_counts?: boolean;
+      show_likes?: boolean;
+    }) => {
+      let listUpdates: Record<string, string> = {};
+      if (!walletAddress) throw new Error(_translateCopy("copy.76d1efbeed2d", { defaultValue: "Not authenticated" }));
+
+      const profileUpdate: Record<string, any> = {};
+
+      // The per-list switches. They rewrite followVisibility and hideFollowers
+      // too, so older apps that only know those keep matching what the API serves.
+      if (
+        updates.show_followers_list !== undefined ||
+        updates.show_following_list !== undefined ||
+        updates.show_follower_counts !== undefined
+      ) {
+        let followers = updates.show_followers_list ?? showFollowersList;
+        let following = updates.show_following_list ?? showFollowingList;
+        let counts = updates.show_follower_counts ?? !hideFollowerCounts;
+        // Hiding the numbers hides the lists; opening a list brings the numbers back.
+        if (updates.show_follower_counts === false) { followers = false; following = false; }
+        if (updates.show_followers_list || updates.show_following_list) counts = true;
+        updates.show_followers_following = undefined;
+        updates.hide_follower_counts = undefined;
+        profileUpdate.hideFollowers = !counts || (!followers && !following);
+        listUpdates = {
+          [FOLLOWERS_LIST_VISIBILITY_KEY]: followers ? 'public' : 'hidden',
+          [FOLLOWING_LIST_VISIBILITY_KEY]: following ? 'public' : 'hidden',
+          followVisibility: !counts ? 'hidden' : followers || following ? 'public' : 'counts-only',
+        };
+      }
+
+      // Use direct API fields for hideFollowers and isPrivate
+      if (updates.hide_follower_counts !== undefined || updates.show_followers_following !== undefined) {
+        // hideFollowers = true when visibility is 'hidden'
+        const hideFollowers = updates.hide_follower_counts === true || updates.show_followers_following === false;
+        profileUpdate.hideFollowers = hideFollowers;
+      }
+
+      if (updates.is_private !== undefined) {
+        profileUpdate.isPrivate = updates.is_private;
+      }
+      if (updates.hide_badge_and_balance !== undefined) {
+        profileUpdate.hideBadgeAndBalance = updates.hide_badge_and_balance;
+      }
+
+      // Keep customs for follow visibility granularity and default post visibility
+      const customsUpdates: Record<string, string> = { ...listUpdates };
+      if (updates.show_followers_following !== undefined || updates.hide_follower_counts !== undefined) {
+        let visibility: FollowVisibility;
+        if (updates.hide_follower_counts) {
+          visibility = 'hidden';
+        } else if (updates.show_followers_following === false) {
+          visibility = 'counts-only';
+        } else {
+          visibility = 'public';
+        }
+        customsUpdates.followVisibility = visibility;
+      }
+      if (updates.default_post_visibility !== undefined) {
+        customsUpdates.defaultPostVisibility = updates.default_post_visibility;
+      }
+      if (updates.default_profile_tab !== undefined) {
+        customsUpdates.defaultProfileTab = updates.default_profile_tab;
+      }
+      if (updates.default_profile_view !== undefined) {
+        profileUpdate.defaultProfileView = updates.default_profile_view;
+        profileUpdate.profileViewOthers = updates.default_profile_view;
+      }
+      if (updates.reader_profile_view !== undefined) profileUpdate.profileViewOthers = updates.reader_profile_view;
+      if (profileUpdate.profileViewOthers !== undefined) profileUpdate.layoutViewer = walletAddress;
+      if (updates.show_dislikes !== undefined) {
+        customsUpdates[DISLIKES_VISIBILITY_KEY] = updates.show_dislikes ? 'public' : 'private';
+      }
+      if (updates.show_likes !== undefined) {
+        customsUpdates[LIKES_VISIBILITY_KEY] = updates.show_likes ? 'public' : 'private';
+      }
+
+      let mergedCustoms: Record<string, string> | undefined;
+      if (Object.keys(customsUpdates).length > 0) {
+        const existingCustoms = (customs ?? {}) as Record<string, string>;
+        mergedCustoms = { ...existingCustoms, ...customsUpdates };
+      }
+      if (updates.ai_scraping !== undefined) {
+        mergedCustoms = mergeAiScrapingPreference(mergedCustoms ?? (customs as Record<string, string>), updates.ai_scraping);
+      }
+      if (updates.show_online !== undefined) {
+        mergedCustoms = mergeShowOnline(mergedCustoms ?? (customs as Record<string, string>), updates.show_online);
+      }
+      if (updates.show_last_seen !== undefined) {
+        mergedCustoms = mergeShowLastSeen(mergedCustoms ?? (customs as Record<string, string>), updates.show_last_seen);
+      }
+      if (mergedCustoms) {
+        profileUpdate.customs = mergedCustoms;
+      }
+
+      await updateProfile(profileUpdate);
+    },
+    onSuccess: async () => {
+      // Wait for the fresh profile so the switch never flicks back to the old
+      // position while it is clickable again.
+      await queryClient.invalidateQueries({ queryKey: ['dehub-profile'] });
+      void refreshUser();
+      toast.success(_copy("copy.3bc473d05556", { defaultValue: "Privacy settings updated" }));
+    },
+    onError: (error) => {
+      console.error('Failed to update privacy settings:', error);
+      toast.error(_copy("copy.63f6bf5375c1", { defaultValue: "Failed to update settings" }));
+    },
+  });
+
+  const updateSettings = (updates: {
+    show_followers_following?: boolean;
+    hide_follower_counts?: boolean;
+    default_post_visibility?: 'public' | 'private';
+    default_profile_tab?: string;
+    default_profile_view?: ProfileViewMode;
+    reader_profile_view?: ProfileViewReaderPref;
+    is_private?: boolean;
+    hide_badge_and_balance?: boolean;
+    ai_scraping?: AiScrapingPreference;
+    show_online?: boolean;
+    show_last_seen?: boolean;
+    show_dislikes?: boolean;
+    show_followers_list?: boolean;
+    show_following_list?: boolean;
+    show_follower_counts?: boolean;
+    show_likes?: boolean;
+  }) => {
+    updateMutation.mutate(updates);
+  };
+
+  return {
+    settings: null, // kept for interface compat
+    isLoading,
+    showFollowersFollowing,
+    hideFollowerCounts,
+    isPrivate,
+    hideBadgeAndBalance,
+    aiScraping,
+    showOnline,
+    showLastSeen,
+    showDislikes: dislikesArePublic(customs as Record<string, unknown> | undefined),
+    showFollowersList,
+    showFollowingList,
+    showLikes: likesArePublic(customs as Record<string, unknown> | undefined),
+    defaultPostVisibility: (customs?.defaultPostVisibility as 'public' | 'private') ?? 'public',
+    defaultProfileTab: parseDefaultProfileTab(customs?.defaultProfileTab),
+    defaultProfileView: parseProfileViewDefault(savedDefaultView),
+    readerProfileView: parseProfileViewReaderPref(
+      layoutAccount?.profileViewOthers ?? layoutAccount?.customs?.[PROFILE_VIEW_READER_KEY],
+      savedDefaultView,
+    ),
+    updateSettings,
+    isUpdating: updateMutation.isPending,
+  };
+}
+
+/**
+ * Hook to check another user's privacy settings (for profile pages).
+ * Reads from the customs field already present on the profile query.
+ */
+export function useUserPrivacySettings(walletAddress?: string) {
+  const { data: profile } = useDeHubProfile({
+    userId: walletAddress,
+    enabled: !!walletAddress,
+  });
+
+  const customs = profile?.customs;
+  const { showFollowersFollowing, hideFollowerCounts } = parseVisibility(customs?.followVisibility);
+
+  return {
+    settings: null,
+    isLoading: false,
+    showFollowersFollowing,
+    hideFollowerCounts,
+    defaultPostVisibility: (customs?.defaultPostVisibility as 'public' | 'private') ?? 'public',
+    aiScraping: getAiScrapingPreference(customs),
+  };
+}

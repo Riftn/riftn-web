@@ -1,0 +1,540 @@
+/**
+ * use-ads
+ * =======
+ * Data layer for the POVR ads portal (/app/ads): advertiser account,
+ * campaigns, creatives, media upload, stats, payments, top-ups and live
+ * audience estimates. All owner-scoped reads/writes go through the
+ * x-wallet-address header (withWalletHeader) per house RLS convention.
+ *
+ * The ad tables are newer than the generated Database types, so queries run
+ * through an untyped alias (adsDb) with hand-written row types from
+ * src/lib/ads/povr.ts — regenerating types.ts later is optional sugar.
+ */
+
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useLocation } from 'react-router-dom';
+import type { SupabaseClient } from '@supabase/supabase-js';
+import { supabase } from '@/integrations/supabase/client';
+import { withWalletHeader } from '@/lib/supabase-wallet-client';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
+import { translateCopy as _translateCopy } from '@/i18n/copy';
+import type {
+  AdAccount,
+  AdCampaign,
+  AdCreative,
+  AdDailyStat,
+  AdPayment,
+  AdTargeting,
+  AudienceEstimate,
+  CreativeKind,
+} from '@/lib/ads/povr';
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const adsDb = supabase as unknown as SupabaseClient<any, 'public', any>;
+
+export function useAdRevenue() {
+  const { walletAddress } = useAuth();
+  const wallet = walletAddress?.toLowerCase() ?? null;
+  return useQuery({
+    queryKey: ['ads', 'revenue', wallet], enabled: !!wallet, staleTime: 30000,
+    queryFn: async () => {
+      const { data, error } = await withWalletHeader(adsDb.from('ad_earnings').select('total_earned_usd,total_paid_usd').eq('wallet_address', wallet!).maybeSingle(), wallet);
+      if (error) throw error;
+      return Math.max(0, Number(data?.total_earned_usd ?? 0) - Number(data?.total_paid_usd ?? 0));
+    },
+  });
+}
+
+const keys = {
+  account: (w: string | null) => ['ads', 'account', w] as const,
+  campaigns: (w: string | null) => ['ads', 'campaigns', w] as const,
+  campaign: (id: string) => ['ads', 'campaign', id] as const,
+  creatives: (campaignId: string) => ['ads', 'creatives', campaignId] as const,
+  stats: (campaignId: string) => ['ads', 'stats', campaignId] as const,
+  allStats: (w: string | null) => ['ads', 'all-stats', w] as const,
+  payments: (w: string | null) => ['ads', 'payments', w] as const,
+  estimate: (t: AdTargeting) => ['ads', 'estimate', JSON.stringify(t)] as const,
+};
+
+// ---------------------------------------------------------------------------
+// Account
+// ---------------------------------------------------------------------------
+
+export function useAdAccount() {
+  const { walletAddress } = useAuth();
+  const wallet = walletAddress?.toLowerCase() ?? null;
+  return useQuery({
+    queryKey: keys.account(wallet),
+    enabled: !!wallet,
+    queryFn: async (): Promise<AdAccount | null> => {
+      const { data, error } = await withWalletHeader(
+        adsDb.from('ad_accounts').select('*').eq('wallet_address', wallet!).maybeSingle(),
+        wallet,
+      );
+      if (error) throw error;
+      return (data as AdAccount) ?? null;
+    },
+  });
+}
+
+export function useEnsureAdAccount() {
+  const { walletAddress } = useAuth();
+  const wallet = walletAddress?.toLowerCase() ?? null;
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (fields?: { company_name?: string; website?: string }) => {
+      if (!wallet) throw new Error(_translateCopy("copy.9af4aa875c03", { defaultValue: "Connect a wallet first" }));
+      // Insert-ignore first: merge-duplicates upsert would try to UPDATE
+      // wallet_address, which clients hold no column grant for.
+      const { error: insErr } = await withWalletHeader(
+        adsDb.from('ad_accounts').upsert(
+          { wallet_address: wallet },
+          { onConflict: 'wallet_address', ignoreDuplicates: true },
+        ),
+        wallet,
+      );
+      if (insErr) throw insErr;
+      if (fields && Object.keys(fields).length > 0) {
+        const { error: updErr } = await withWalletHeader(
+          adsDb.from('ad_accounts').update(fields).eq('wallet_address', wallet),
+          wallet,
+        );
+        if (updErr) throw updErr;
+      }
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: keys.account(wallet) }),
+    onError: (e: Error) => toast.error(e.message),
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Campaigns
+// ---------------------------------------------------------------------------
+
+export function useAdCampaigns() {
+  const { walletAddress } = useAuth();
+  const wallet = walletAddress?.toLowerCase() ?? null;
+  return useQuery({
+    queryKey: keys.campaigns(wallet),
+    enabled: !!wallet,
+    queryFn: async (): Promise<AdCampaign[]> => {
+      const { data, error } = await withWalletHeader(
+        adsDb.from('ad_campaigns').select('*').order('created_at', { ascending: false }),
+        wallet,
+      );
+      if (error) throw error;
+      return (data as AdCampaign[]) ?? [];
+    },
+  });
+}
+
+export function useAdCampaign(id: string | undefined) {
+  const { walletAddress } = useAuth();
+  const wallet = walletAddress?.toLowerCase() ?? null;
+  return useQuery({
+    queryKey: keys.campaign(id ?? 'none'),
+    enabled: !!wallet && !!id,
+    queryFn: async (): Promise<AdCampaign | null> => {
+      const { data, error } = await withWalletHeader(
+        adsDb.from('ad_campaigns').select('*').eq('id', id!).maybeSingle(),
+        wallet,
+      );
+      if (error) throw error;
+      return (data as AdCampaign) ?? null;
+    },
+  });
+}
+
+export interface CampaignDraft {
+  name: string;
+  objective: string;
+  daily_budget_usd: number;
+  total_budget_usd: number;
+  start_at?: string;
+  end_at?: string | null;
+  targeting: AdTargeting;
+  frequency_cap?: number;
+  cta_url?: string | null;
+  status?: 'draft' | 'pending_review';
+}
+
+export function useCreateCampaign() {
+  const { walletAddress } = useAuth();
+  const wallet = walletAddress?.toLowerCase() ?? null;
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (draft: CampaignDraft): Promise<AdCampaign> => {
+      if (!wallet) throw new Error(_translateCopy("copy.9af4aa875c03", { defaultValue: "Connect a wallet first" }));
+      const { data, error } = await withWalletHeader(
+        adsDb
+          .from('ad_campaigns')
+          .insert({ ...draft, wallet_address: wallet })
+          .select('*')
+          .single(),
+        wallet,
+      );
+      if (error) throw error;
+      return data as AdCampaign;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: keys.campaigns(wallet) }),
+    onError: (e: Error) => toast.error(e.message),
+  });
+}
+
+export function useUpdateCampaign() {
+  const { walletAddress } = useAuth();
+  const wallet = walletAddress?.toLowerCase() ?? null;
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, ...patch }: Omit<Partial<CampaignDraft>, 'status'> & { id: string; status?: string }) => {
+      const { error } = await withWalletHeader(
+        adsDb.from('ad_campaigns').update(patch).eq('id', id),
+        wallet,
+      );
+      if (error) throw error;
+    },
+    onSuccess: (_d, vars) => {
+      qc.invalidateQueries({ queryKey: keys.campaigns(wallet) });
+      qc.invalidateQueries({ queryKey: keys.campaign(vars.id) });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+}
+
+export function useDeleteCampaign() {
+  const { walletAddress } = useAuth();
+  const wallet = walletAddress?.toLowerCase() ?? null;
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await withWalletHeader(
+        adsDb.from('ad_campaigns').delete().eq('id', id),
+        wallet,
+      );
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: keys.campaigns(wallet) }),
+    onError: (e: Error) => toast.error(e.message),
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Creatives + media upload
+// ---------------------------------------------------------------------------
+
+export function useAdCreatives(campaignId: string | undefined) {
+  const { walletAddress } = useAuth();
+  const wallet = walletAddress?.toLowerCase() ?? null;
+  return useQuery({
+    queryKey: keys.creatives(campaignId ?? 'none'),
+    enabled: !!wallet && !!campaignId,
+    queryFn: async (): Promise<AdCreative[]> => {
+      const { data, error } = await withWalletHeader(
+        adsDb.from('ad_creatives').select('*').eq('campaign_id', campaignId!).order('created_at'),
+        wallet,
+      );
+      if (error) throw error;
+      return (data as AdCreative[]) ?? [];
+    },
+  });
+}
+
+const MEDIA_EXT: Record<string, string> = {
+  'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp', 'image/gif': 'gif',
+  'video/mp4': 'mp4', 'video/webm': 'webm', 'video/quicktime': 'mov',
+};
+
+/** Upload creative media to the public ad-media bucket → public URL. */
+export async function uploadAdMedia(wallet: string, file: File | Blob, contentType: string): Promise<string> {
+  const ext = MEDIA_EXT[contentType] ?? contentType.split('/')[1] ?? 'bin';
+  const path = `${wallet.toLowerCase()}/${crypto.randomUUID()}.${ext}`;
+  const { error } = await supabase.storage.from('ad-media').upload(path, file, {
+    contentType,
+    cacheControl: '31536000',
+    upsert: false,
+  });
+  if (error) throw error;
+  const { data } = supabase.storage.from('ad-media').getPublicUrl(path);
+  return data.publicUrl;
+}
+
+export interface CreativeDraft {
+  campaign_id: string;
+  kind: CreativeKind;
+  media_url?: string | null;
+  thumbnail_url?: string | null;
+  headline: string;
+  body?: string | null;
+  cta_label?: string;
+  cta_url?: string | null;
+  width?: number | null;
+  height?: number | null;
+  duration_seconds?: number | null;
+}
+
+export function useCreateCreative() {
+  const { walletAddress } = useAuth();
+  const wallet = walletAddress?.toLowerCase() ?? null;
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (draft: CreativeDraft): Promise<AdCreative> => {
+      if (!wallet) throw new Error(_translateCopy("copy.9af4aa875c03", { defaultValue: "Connect a wallet first" }));
+      const { data, error } = await withWalletHeader(
+        adsDb
+          .from('ad_creatives')
+          .insert({ ...draft, wallet_address: wallet })
+          .select('*')
+          .single(),
+        wallet,
+      );
+      if (error) throw error;
+      return data as AdCreative;
+    },
+    onSuccess: (d) => qc.invalidateQueries({ queryKey: keys.creatives(d.campaign_id) }),
+    onError: (e: Error) => toast.error(e.message),
+  });
+}
+
+export function useUpdateCreative() {
+  const { walletAddress } = useAuth();
+  const wallet = walletAddress?.toLowerCase() ?? null;
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, campaign_id, ...patch }: Partial<CreativeDraft> & { id: string; campaign_id: string }) => {
+      const { error } = await withWalletHeader(
+        adsDb.from('ad_creatives').update(patch).eq('id', id),
+        wallet,
+      );
+      if (error) throw error;
+      return campaign_id;
+    },
+    onSuccess: (campaignId) => qc.invalidateQueries({ queryKey: keys.creatives(campaignId) }),
+    onError: (e: Error) => toast.error(e.message),
+  });
+}
+
+export function useDeleteCreative() {
+  const { walletAddress } = useAuth();
+  const wallet = walletAddress?.toLowerCase() ?? null;
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, campaign_id }: { id: string; campaign_id: string }) => {
+      const { error } = await withWalletHeader(
+        adsDb.from('ad_creatives').delete().eq('id', id),
+        wallet,
+      );
+      if (error) throw error;
+      return campaign_id;
+    },
+    onSuccess: (campaignId) => qc.invalidateQueries({ queryKey: keys.creatives(campaignId) }),
+    onError: (e: Error) => toast.error(e.message),
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Stats
+// ---------------------------------------------------------------------------
+
+/**
+ * /app/ads lives in PersistentPageCache (never unmounts), so stats polling
+ * must stop when the user navigates away — otherwise one visit to the ads
+ * portal leaves 30s Supabase polls running for the whole session. Reactive:
+ * returning to the route restarts the interval.
+ */
+function useIsAdsRouteActive(): boolean {
+  const { pathname } = useLocation();
+  return pathname.replace(/\/+$/, '') === '/app/ads';
+}
+
+export function useCampaignStats(campaignId: string | undefined) {
+  const { walletAddress } = useAuth();
+  const wallet = walletAddress?.toLowerCase() ?? null;
+  const isAdsRouteActive = useIsAdsRouteActive();
+  return useQuery({
+    queryKey: keys.stats(campaignId ?? 'none'),
+    enabled: !!wallet && !!campaignId,
+    refetchInterval: isAdsRouteActive ? 30_000 : false,
+    queryFn: async (): Promise<AdDailyStat[]> => {
+      const { data, error } = await withWalletHeader(
+        adsDb.from('ad_daily_stats').select('*').eq('campaign_id', campaignId!).order('day'),
+        wallet,
+      );
+      if (error) throw error;
+      return (data as AdDailyStat[]) ?? [];
+    },
+  });
+}
+
+/** All stats across the advertiser's campaigns (dashboard KPIs). */
+export function useAllCampaignStats(campaignIds: string[]) {
+  const { walletAddress } = useAuth();
+  const wallet = walletAddress?.toLowerCase() ?? null;
+  const isAdsRouteActive = useIsAdsRouteActive();
+  return useQuery({
+    queryKey: [...keys.allStats(wallet), campaignIds.join(',')],
+    enabled: !!wallet && campaignIds.length > 0,
+    refetchInterval: isAdsRouteActive ? 30_000 : false,
+    queryFn: async (): Promise<AdDailyStat[]> => {
+      const { data, error } = await withWalletHeader(
+        adsDb.from('ad_daily_stats').select('*').in('campaign_id', campaignIds).order('day'),
+        wallet,
+      );
+      if (error) throw error;
+      return (data as AdDailyStat[]) ?? [];
+    },
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Payments + top-up
+// ---------------------------------------------------------------------------
+
+export function useAdPayments() {
+  const { walletAddress } = useAuth();
+  const wallet = walletAddress?.toLowerCase() ?? null;
+  return useQuery({
+    queryKey: keys.payments(wallet),
+    enabled: !!wallet,
+    queryFn: async (): Promise<AdPayment[]> => {
+      const { data, error } = await withWalletHeader(
+        adsDb.from('ad_payments').select('*').order('created_at', { ascending: false }).limit(50),
+        wallet,
+      );
+      if (error) throw error;
+      return (data as AdPayment[]) ?? [];
+    },
+  });
+}
+
+export interface AdsTopUpQuote {
+  /** The DHB price the credit will actually be struck at. */
+  dhbPriceUsd: number;
+  /** Minimum USD value a transfer must carry to be credited at all. */
+  minTopupUsd: number;
+}
+
+const DHB_BASE_TOKEN = '0xD20ab1015f6a2De4a6FdDEbAB270113F689c2F7c';
+
+/** Default when ad_config can't be read — matches the function's own default. */
+const DEFAULT_MIN_TOPUP_USD = 25;
+
+/**
+ * ads-topup's price ladder, run from the browser: DexScreener first,
+ * CoinGecko second, exactly as the function does it.
+ *
+ * This is the standby, not the source of truth. Edge functions here only go
+ * live when the deploy agent redeploys them — merging does nothing — so a
+ * client that could only ask the function would have its top-up button dead
+ * from the moment this ships until somebody runs a build turn. Reading the
+ * same two sources in the same order keeps the quote and the credit on the
+ * same number in the meantime.
+ */
+async function fetchDhbCreditPrice(): Promise<number | null> {
+  try {
+    const res = await fetch(`https://api.dexscreener.com/latest/dex/tokens/${DHB_BASE_TOKEN}`, {
+      headers: { Accept: 'application/json' },
+    });
+    if (res.ok) {
+      const data = await res.json();
+      const price = parseFloat(data?.pairs?.[0]?.priceUsd);
+      if (Number.isFinite(price) && price > 0) return price;
+    }
+  } catch { /* fall through */ }
+  try {
+    const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=dehub&vs_currencies=usd', {
+      headers: { Accept: 'application/json' },
+    });
+    if (res.ok) {
+      const data = await res.json();
+      const price = Number(data?.dehub?.usd);
+      if (Number.isFinite(price) && price > 0) return price;
+    }
+  } catch { /* fall through */ }
+  return null;
+}
+
+/**
+ * The price ads-topup would credit at, straight from the function that does
+ * the crediting.
+ *
+ * Sizing a top-up off get-dhb-price instead is the bug this replaces: that
+ * endpoint pins DHB at $0.001 for display, crediting uses the live market
+ * price, and the gap between them meant a $25 top-up arrived worth ~$14 and
+ * was refused by the minimum — after the DHB had left the wallet.
+ */
+export function useAdsTopUpQuote(enabled = true) {
+  return useQuery({
+    queryKey: ['ads', 'topup-quote'],
+    enabled,
+    staleTime: 60_000,
+    retry: 1,
+    queryFn: async (): Promise<AdsTopUpQuote> => {
+      try {
+        const { data, error } = await supabase.functions.invoke('ads-topup', { body: { quote: true } });
+        if (error) throw error;
+        if (data?.error) throw new Error(data.error);
+        const price = Number(data?.dhbPriceUsd);
+        if (Number.isFinite(price) && price > 0) {
+          return { dhbPriceUsd: price, minTopupUsd: Number(data?.minTopupUsd ?? DEFAULT_MIN_TOPUP_USD) };
+        }
+      } catch { /* fall through to the direct read */ }
+
+      const price = await fetchDhbCreditPrice();
+      if (!price) throw new Error('Token price unavailable');
+      return { dhbPriceUsd: price, minTopupUsd: DEFAULT_MIN_TOPUP_USD };
+    },
+  });
+}
+
+/** Verify an on-chain DHB transfer & credit the ad account. */
+export function useTopUpCredit() {
+  const { walletAddress } = useAuth();
+  const wallet = walletAddress?.toLowerCase() ?? null;
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (txHash: string) => {
+      if (!wallet) throw new Error(_translateCopy("copy.9af4aa875c03", { defaultValue: "Connect a wallet first" }));
+      const { data, error } = await supabase.functions.invoke('ads-topup', {
+        body: { txHash },
+        headers: { 'x-wallet-address': wallet },
+      });
+      if (error) {
+        // Surface the function's JSON error body when present.
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const ctx = (error as any)?.context;
+        let msg = error.message;
+        try {
+          const parsed = typeof ctx?.body === 'string' ? JSON.parse(ctx.body) : null;
+          if (parsed?.error) msg = parsed.error;
+        } catch { /* keep default */ }
+        throw new Error(msg);
+      }
+      if (data?.error) throw new Error(data.error);
+      return data as { ok: true; usdCredited: number; balanceUsd: number; dhbAmount: number; chain: string };
+    },
+    onSuccess: (d) => {
+      qc.invalidateQueries({ queryKey: keys.account(wallet) });
+      qc.invalidateQueries({ queryKey: keys.payments(wallet) });
+      toast.success(_translateCopy("copy.f4e1ba1bc848", { defaultValue: "Credited ${{value1}} to your ads balance", value1: d.usdCredited.toFixed(2) }));
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Audience estimation (live counts from real data)
+// ---------------------------------------------------------------------------
+
+export function useAudienceEstimate(targeting: AdTargeting, enabled = true) {
+  return useQuery({
+    queryKey: keys.estimate(targeting),
+    enabled,
+    staleTime: 60_000,
+    queryFn: async (): Promise<AudienceEstimate> => {
+      const { data, error } = await adsDb.rpc('ads_estimate_audience', { p_targeting: targeting });
+      if (error) throw error;
+      return (data as AudienceEstimate) ?? { audience: 0, byTier: {} };
+    },
+  });
+}

@@ -1,0 +1,243 @@
+/**
+ * Shorts Reel Component
+ * =====================
+ * Horizontal scrollable reel displaying short-form video previews.
+ * Uses real view counts from the API.
+ * 
+ * @example
+ * ```tsx
+ * <ShortsReel shorts={shortsData} />
+ * ```
+ */
+
+import { useEffect, useRef, useState, lazy, Suspense } from 'react';
+import { createPortal } from 'react-dom';
+import Eye from "@/components/ui/cut-icons/visibility";
+
+import Play from "@/components/ui/cut-icons/play";
+import ChevronRight from "@/components/ui/cut-icons/next";
+import ThumbsUp from "@/components/ui/cut-icons/like";
+
+import { AnimatePresence } from 'framer-motion';
+// Lazy for the same reason as the other call sites — see ShortsFeed.
+const ShortsViewer = lazy(() =>
+  import('./ShortsViewer').then(m => ({ default: m.ShortsViewer })),
+);
+import { SwipeableCarousel } from '@/components/app/SwipeableCarousel';
+import type { ShortVideo } from '@/types/feed.types';
+import { AutoplayVideo } from '@/components/app/AutoplayVideo';
+import { BadgedName } from '@/components/app/BadgedName';
+import { cdnImage, deviceWidth, isMdUp } from '@/lib/media-url';
+
+import { formatCount } from '@/lib/format-count';
+/**
+ * Tile is `w-[120px] md:w-[180px]` below. Both the poster and the raw-image
+ * fallback are sized from it, so the reel stops pulling full-width feed
+ * posters for a thumbnail the width of a thumb.
+ */
+function tilePosterWidth(): number {
+  return deviceWidth(isMdUp() ? 180 : 120);
+}
+
+/** Small squared-off avatar with image error fallback */
+/**
+ * Tiles built up front. The reel holds ~30 shorts but a phone shows three, and
+ * every full tile (player, observers, badge lookup) was built while the home
+ * page was still starting up, the biggest single block of work on first load.
+ * The rest stand as empty tiles of the same size and become real ones a batch
+ * at a time as the strip is swiped toward them.
+ */
+const FIRST_TILES = 5;
+const TILE_BATCH = 6;
+
+function TileSentinel({ onNear }: { onNear: () => void }) {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || typeof IntersectionObserver === 'undefined') { onNear(); return; }
+    const io = new IntersectionObserver(([entry]) => { if (entry.isIntersecting) onNear(); });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [onNear]);
+  return <div ref={ref} aria-hidden className="absolute inset-0" />;
+}
+
+function ShortAvatar({ avatar, username }: { avatar?: string; username?: string }) {
+  const [imgFailed, setImgFailed] = useState(false);
+  const showImg = avatar && !imgFailed;
+  return (
+    <div className="w-5 h-5 rounded-md bg-zinc-700 flex-shrink-0 overflow-hidden">
+      {showImg ? (
+        <img
+          /* 20 CSS px. This came straight off the API untransformed, so the
+             reel was pulling a full-size original per tile for a dot. */
+          src={cdnImage(avatar, { width: deviceWidth(20), fit: 'cover' })}
+          alt=""
+          className="w-full h-full object-cover"
+          loading="lazy"
+          decoding="async"
+          onError={() => setImgFailed(true)}
+        />
+      ) : (
+        <span className="w-full h-full flex items-center justify-center text-white text-[8px] font-medium">
+          {username?.[0]?.toUpperCase()}
+        </span>
+      )}
+    </div>
+  );
+}
+
+interface ShortsReelProps {
+  shorts: ShortVideo[];
+  /**
+   * Every short the page has loaded. The viewer plays the row's own shorts
+   * first and then carries on into these, instead of stopping dead on the
+   * row's last tile.
+   */
+  pool?: ShortVideo[];
+  /** Fetch more shorts into `pool` once the viewer nears its end. */
+  onLoadMore?: () => void;
+  hasMore?: boolean;
+  isLoadingMore?: boolean;
+}
+
+/** `list` with whatever of `more` it does not hold yet appended, order kept. */
+function appendNewShorts(list: ShortVideo[], more: readonly ShortVideo[]): ShortVideo[] {
+  const seen = new Set(list.map(short => short.id));
+  const added = more.filter(short => !seen.has(short.id) && seen.add(short.id));
+  return added.length ? [...list, ...added] : list;
+}
+
+export function ShortsReel({ shorts, pool, onLoadMore, hasMore, isLoadingMore }: ShortsReelProps) {
+  const [viewerOpen, setViewerOpen] = useState(false);
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  // Only ever appended to while the viewer is open: a page arriving must not
+  // reorder or drop the shorts already playing or behind the current one.
+  const [viewerShorts, setViewerShorts] = useState<ShortVideo[]>(shorts);
+  useEffect(() => {
+    if (viewerOpen && pool) setViewerShorts(prev => appendNewShorts(prev, pool));
+  }, [viewerOpen, pool]);
+  const posterWidth = tilePosterWidth();
+  const [builtTiles, setBuiltTiles] = useState(FIRST_TILES);
+  const buildMoreRef = useRef(() => setBuiltTiles(n => n + TILE_BATCH));
+
+  // There used to be a "pre-warm thumbnails" effect here that ran `new Image()`
+  // over every short on mount. It was doing the opposite of its name:
+  //
+  //  - it warmed the RAW CDN url, while the tiles below render the TRANSFORMED
+  //    one, so nothing it downloaded was ever reused — a measured 10 full-size
+  //    originals (up to 1500x844) fetched and discarded per home-feed load;
+  //  - it fetched every tile eagerly, defeating the `loading="lazy"` on the
+  //    tiles themselves, in a horizontally-scrolling strip where most tiles
+  //    start offscreen.
+  //
+  // The tiles' own lazy loading is the warm-up. An in-viewport lazy image is
+  // fetched immediately, so the visible tiles are no slower for this.
+
+  const handleShortClick = (index: number) => {
+    setViewerShorts(appendNewShorts(shorts, pool ?? []));
+    setSelectedIndex(index);
+    setViewerOpen(true);
+  };
+
+  return (
+    <>
+      <div data-shorts-carousel>
+
+
+        {/* Horizontal scroll */}
+        <SwipeableCarousel className="flex gap-3 overflow-x-auto scrollbar-hide pb-1">
+          {shorts.map((short, index) => index >= builtTiles ? (
+            <div key={short.id} className="flex-shrink-0 w-[120px] md:w-[180px]">
+              <div data-media-scrim className="relative aspect-[9/16] rounded-xl overflow-hidden" style={{ backgroundColor: "#111114" }}>
+                {index === builtTiles && <TileSentinel onNear={buildMoreRef.current} />}
+              </div>
+            </div>
+          ) : (
+            <div
+              key={short.id}
+              onClick={() => handleShortClick(index)}
+              className="flex-shrink-0 w-[120px] md:w-[180px] cursor-pointer group"
+            >
+              {/* Thumbnail */}
+              <div data-media-scrim className="relative aspect-[9/16] rounded-xl overflow-hidden" style={{ backgroundColor: "#111114" }}>
+                {short.videoUrl ? (
+                  <AutoplayVideo
+                    src={short.videoUrl}
+                    hlsSrc={short.hlsUrl}
+                    poster={short.thumbnail}
+                    disabled={viewerOpen}
+                    /* This reel sits in the first viewport of the home page;
+                       see the prop for why it holds the poster until the
+                       visitor's first scroll. */
+                    deferUntilInteraction
+                    className="w-full h-full group-hover:scale-105 transition-transform duration-300"
+                    threshold={0.3}
+                    playbackGroup="shorts-reel"
+                    posterWidth={posterWidth}
+                  />
+                ) : (
+                  <img
+                    src={cdnImage(short.thumbnail, { width: posterWidth })}
+                    alt=""
+                    className="w-full h-full object-cover rounded-lg group-hover:scale-105 transition-transform duration-300"
+                    /* The reel scrolls horizontally, so most of its tiles start
+                       outside the viewport — and every full-size thumbnail they
+                       pulled eagerly was competing with the LCP element. */
+                    loading="lazy"
+                    decoding="async"
+                  />
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/60" />
+                <div className="absolute top-2 left-2 right-2 flex items-center gap-1 text-[10px] md:text-xs text-white [text-shadow:0_4px_3px_rgb(0_0_0/0.07),0_2px_2px_rgb(0_0_0/0.06)]">
+                  <ShortAvatar avatar={short.avatar} username={short.displayName || short.username} />
+                  <BadgedName
+                    lookupId={short.creatorUsername || short.creatorId || short.username}
+                    username={short.creatorUsername || short.username}
+                    className="font-semibold"
+                  >
+                    {short.displayName || short.creatorUsername || short.username}
+                  </BadgedName>
+                </div>
+                
+                {/* Stats at bottom - using real views from API */}
+                <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between">
+                  <div className="flex items-center gap-1">
+                    <Eye className="w-3 h-3 text-white" />
+                    <span className="text-white text-xs font-medium">{short.views || '0'}</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <ThumbsUp className="w-3 h-3 text-white" />
+                    <span className="text-white text-xs font-medium">{formatCount(short.likes)}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </SwipeableCarousel>
+      </div>
+
+      {/* Full-screen Shorts Viewer - rendered via portal so the fixed overlay
+          fills the viewport rather than being trapped inside a transformed
+          feed ancestor (Framer Motion masonry wrappers apply inline transforms,
+          which would otherwise become the containing block for position:fixed). */}
+      {createPortal(
+        <Suspense fallback={null}>
+          <AnimatePresence>
+            {viewerOpen && (
+              <ShortsViewer
+                shorts={viewerShorts}
+                initialIndex={selectedIndex}
+                onClose={() => setViewerOpen(false)}
+                onLoadMore={onLoadMore}
+                hasMore={hasMore}
+                isLoadingMore={isLoadingMore}
+              />
+            )}
+          </AnimatePresence>
+        </Suspense>,
+        document.body
+      )}
+    </>
+  );
+}

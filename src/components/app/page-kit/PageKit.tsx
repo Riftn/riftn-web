@@ -1,0 +1,657 @@
+import { FeedSwallowMotion } from '@/components/app/feeds/FeedSwallowMotion';
+import { useTranslation as _useCopy } from 'react-i18next';
+/**
+ * Page kit
+ * ========
+ * The shared building blocks every app page uses to match the home feed:
+ *
+ * - PageIsland   the floating glass title pill (back, icon, title, actions)
+ *                with an optional tab row inside it. Sticky, like the home
+ *                capsule, and painted by the same nav glass on every theme.
+ * - PageTabs     squared tab chips (10px corners, like the feed buttons).
+ * - PageBody     the scrolling content column under the island.
+ * - PageSection  one block of content. A rounded bento on the canvas themes,
+ *                full width between hairlines on System phones, like posts.
+ * - PageEmpty    the standard empty / error / signed-out state.
+ *
+ * All the theme work lives in src/styles/page-kit.css, keyed on the data-kit
+ * attributes below, so a page never paints itself per theme.
+ */
+
+import { Fragment, createContext, useContext, useEffect, useId, useRef, useState, useSyncExternalStore, type HTMLAttributes, type ReactNode } from 'react';
+import { motion, useReducedMotion } from 'framer-motion';
+import { Search, X } from 'lucide-react';
+import ArrowLeft from "@/components/ui/cut-icons/back";
+
+import { useLocation, useNavigate } from 'react-router-dom';
+import { cn } from '@/lib/utils';
+import { useFeedSwallowClip } from '@/hooks/use-feed-swallow-clip';
+import { ThemedIcon } from '@/components/app/war/WarHudIcon';
+import { GlassIndicator } from '@/components/app/feeds/GlassIndicator';
+import { useTabIndicator } from '@/hooks/use-tab-indicator';
+
+import { formatCount } from '@/lib/format-count';
+/**
+ * Phones (below lg) draw every page's island as the home feed's top pill:
+ * same glass capsule, same icon tabs, same sliding glass indicator. Only what
+ * sits inside it changes from page to page. Desktop keeps the island.
+ */
+const PHONE_QUERY = '(max-width: 1023px)';
+function subscribePhone(cb: () => void) {
+  const mql = window.matchMedia(PHONE_QUERY);
+  mql.addEventListener('change', cb);
+  return () => mql.removeEventListener('change', cb);
+}
+/** Main dock pages: on phones these are where you go back to, so no arrow. */
+const PHONE_ROOT_PATHS = new Set(['/', '/app', '/app/explore', '/app/messages', '/chat', '/app/assistant']);
+export const isPhoneRootPath = (pathname: string) => PHONE_ROOT_PATHS.has(pathname.replace(/\/+$/, '') || '/');
+
+export function usePhonePill() {
+  return useSyncExternalStore(
+    subscribePhone,
+    () => window.matchMedia(PHONE_QUERY).matches,
+    () => false,
+  );
+}
+
+/** True inside the phone pill, so tabs and actions draw in the home pill's style. */
+const PillContext = createContext(false);
+
+/**
+ * The home pill's measures, shared by every page's pill on phones: a 36px row
+ * (a 16px icon in 10px of padding), page icons at 18px (the size Home's tab
+ * glyphs draw at), and one 14px semibold line of text.
+ */
+export const PILL_ROW = 'min-h-9';
+export const PILL_LEAD_ICON = 'h-[18px] w-[18px]';
+export const PILL_TEXT = 'text-[14px] font-semibold leading-tight';
+/** A plain icon button in the pill (IslandAction's look), for triggers that
+ *  need their own element, like a dropdown. */
+export const PILL_ACTION_CLASS =
+  'relative flex shrink-0 items-center justify-center rounded-xl px-2.5 py-2.5 text-zinc-400 transition-colors disabled:opacity-40 [@media(hover:hover)]:hover:bg-white/5 [@media(hover:hover)]:hover:text-white [&_svg]:!h-4 [&_svg]:!w-4 [&_svg]:!text-current';
+
+type IconKey = Parameters<typeof ThemedIcon>[0]['icon'];
+
+export interface PageIslandProps {
+  title: ReactNode;
+  subtitle?: ReactNode;
+  /** A theme icon key (drawn in every theme's style) or a custom node. */
+  icon?: IconKey | ReactNode;
+  /** Show the back arrow. On computers it defaults to off. On phones every
+   *  page shows it except the main dock pages (not every phone has a system
+   *  back button, iPhones especially); pass false to hide it. */
+  back?: boolean;
+  /** Where back goes when there is no history (direct link). */
+  backFallback?: string;
+  onBack?: () => void;
+  /** Square action buttons on the right. Use <IslandAction>. */
+  actions?: ReactNode;
+  /** A row under the title, usually <PageTabs>. */
+  tabs?: ReactNode;
+  /** Anything else inside the island under the tabs (search, filters). On
+   *  phones it waits behind a search button in the pill and slides out as a
+   *  full-width drawer attached under it. */
+  children?: ReactNode;
+  /** Phones: the pill's one line, in place of the title or tabs (Explore puts
+   *  its search field here). */
+  pillLine?: ReactNode;
+  /** Phones: the page opens and shuts the drawer itself (no search button is
+   *  added; the page puts its own toggle in the pill). */
+  drawerOpen?: boolean;
+  className?: string;
+}
+
+/** How far the search drawer's top runs up under the pill (the slot clips it). */
+const DRAWER_TUCK = 12;
+/** How far the open drawer reaches up behind the pill: past the pill's 12px
+ *  bottom corners, so its top corners hide under the pill's curve instead of
+ *  showing a notch where the two meet. */
+const DRAWER_BEHIND = 14;
+
+export function PageIsland({
+  title,
+  subtitle,
+  icon,
+  back,
+  backFallback = '/app',
+  onBack,
+  actions,
+  tabs,
+  children,
+  pillLine,
+  drawerOpen: drawerOpenProp,
+  className,
+}: PageIslandProps) {
+  const { t: _copy } = _useCopy();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const reduceMotion = useReducedMotion();
+  const [drawerOpenState, setDrawerOpen] = useState(false);
+  const drawerControlled = drawerOpenProp !== undefined;
+  const drawerOpen = drawerControlled ? drawerOpenProp : drawerOpenState;
+  const [drawerFilled, setDrawerFilled] = useState(false);
+  // A shut search drawer still sat (clipped) behind the pill, and anything
+  // moving in it, like the refresh arrow spinning during a refresh, repainted
+  // under the pill's frosted glass: on Android Chrome that made the pill's
+  // shine blink. Once shut it is taken out of painting entirely (kept in the
+  // DOM so a typed search survives); it comes back the moment it opens.
+  const [drawerShutDone, setDrawerShutDone] = useState(true);
+  const drawerPainted = drawerOpen || !drawerShutDone;
+  useEffect(() => { if (drawerOpen) setDrawerShutDone(false); }, [drawerOpen]);
+  const drawerRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!drawerOpen || drawerControlled) return;
+    const id = window.setTimeout(() => drawerRef.current?.querySelector<HTMLInputElement>('input')?.focus({ preventScroll: true }), 60);
+    return () => window.clearTimeout(id);
+  }, [drawerOpen, drawerControlled]);
+  const toggleDrawer = () => {
+    if (drawerOpen) {
+      // A search left typed in keeps the button lit, so a filtered list
+      // never looks unfiltered.
+      setDrawerFilled(!!drawerRef.current?.querySelector<HTMLInputElement>('input')?.value);
+      setDrawerOpen(false);
+    } else {
+      setDrawerOpen(true);
+    }
+  };
+
+  const handleBack = () => {
+    if (onBack) return onBack();
+    if (location.key && location.key !== 'default') navigate(-1);
+    else navigate(backFallback, { replace: true });
+  };
+
+  const phone = usePhonePill();
+  const showBack = back ?? (phone && !isPhoneRootPath(location.pathname));
+  if (phone) {
+    return (
+      <div data-feed-nav-outer data-kit-pill-outer className={cn('sticky top-11 z-50 px-2 pt-1 pb-2 sm:px-3', className)}>
+        <div
+          data-feed-nav
+          data-kit-pill
+          className="relative z-10 flex flex-col rounded-xl bg-zinc-900"
+          style={{ overflowX: 'clip', overflowClipMargin: '8px' }}
+        >
+          <span data-nav-glass-backdrop aria-hidden="true" />
+          <PillContext.Provider value>
+            <div className={cn('relative z-20 flex min-w-0 items-center', PILL_ROW)}>
+              {showBack ? (
+                <button
+                  type="button"
+                  data-kit-pill-lead
+                  data-swipe-back
+                  onClick={handleBack}
+                  aria-label={_copy("copy.6aadac2f2b7a", { defaultValue: "Go back" })}
+                  className="relative flex shrink-0 items-center justify-center rounded-xl px-3 py-2.5 text-zinc-400 transition-colors [@media(hover:hover)]:hover:bg-white/5 [@media(hover:hover)]:hover:text-white"
+                >
+                  <ArrowLeft className="relative z-10 h-4 w-4" />
+                </button>
+              ) : icon ? (
+                <span data-kit-pill-lead className="flex shrink-0 items-center justify-center pl-3 pr-2">
+                  {typeof icon === 'string' ? (
+                    <ThemedIcon icon={icon as IconKey} alt="" className={cn(PILL_LEAD_ICON, 'object-contain')} />
+                  ) : (
+                    <span className={cn('flex items-center justify-center [&>*]:h-[18px] [&>*]:w-[18px]', PILL_LEAD_ICON)}>{icon}</span>
+                  )}
+                </span>
+              ) : null}
+              {pillLine ? (
+                <>
+                  <h1 className="sr-only">{title}</h1>
+                  <div data-kit-pill-line className="flex min-w-0 flex-1 items-center">{pillLine}</div>
+                </>
+              ) : tabs ? (
+                <>
+                  <h1 className="sr-only">{title}</h1>
+                  <div data-kit-pill-tabs-slot className="min-w-0 flex-1">{tabs}</div>
+                </>
+              ) : (
+                <h1 data-kit-title className={cn('min-w-0 flex-1 truncate px-1 text-white', PILL_TEXT)}>{title}</h1>
+              )}
+              {actions || (children && !drawerControlled) ? (
+                <div data-kit-pill-actions className="flex shrink-0 items-center">
+                  {actions}
+                  {children && !drawerControlled ? (
+                    <IslandAction
+                      label={drawerOpen ? _copy('search.close', { defaultValue: 'Close search' }) : _copy('search.open', { defaultValue: 'Search' })}
+                      active={drawerOpen || drawerFilled}
+                      onClick={toggleDrawer}
+                    >
+                      {drawerOpen ? <X /> : <Search />}
+                    </IslandAction>
+                  ) : null}
+                </div>
+              ) : null}
+            </div>
+          </PillContext.Provider>
+        </div>
+        {children ? (
+          // The search slides out from under the pill as one full-width
+          // drawer in the pill's glass, like Home's new-posts drawer. Its top
+          // runs up behind the pill past the pill's rounded corners, so the
+          // two meet cleanly. Kept mounted while shut so a typed search
+          // survives closing it.
+          <motion.div
+            data-kit-search-slot
+            initial={false}
+            animate={{ height: drawerOpen ? 'auto' : 0, marginTop: drawerOpen ? -DRAWER_BEHIND : 0 }}
+            transition={reduceMotion ? { duration: 0 } : { type: 'spring', stiffness: 420, damping: 36, mass: 0.8 }}
+            onAnimationComplete={() => { if (!drawerOpen) setDrawerShutDone(true); }}
+            className="relative z-0 -mx-12 overflow-hidden px-12"
+            style={drawerPainted ? undefined : { display: 'none' }}
+            data-kit-search-slot-shut={drawerPainted ? undefined : ''}
+            aria-hidden={!drawerOpen}
+            ref={(el: HTMLDivElement | null) => { if (el) el.toggleAttribute('inert', !drawerOpen); }}
+          >
+            <motion.div
+              initial={false}
+              animate={{ y: drawerOpen ? 0 : '-100%' }}
+              transition={reduceMotion ? { duration: 0 } : { type: 'spring', stiffness: 420, damping: 32, mass: 0.8 }}
+            >
+              <div
+                ref={drawerRef}
+                data-feed-new-posts-chip
+                data-kit-search-drawer
+                className="relative px-2 pb-2"
+                style={{ marginTop: -DRAWER_TUCK, paddingTop: DRAWER_TUCK + DRAWER_BEHIND + 8 }}
+              >
+                <span data-nav-glass-backdrop aria-hidden="true" />
+                <span data-feed-new-posts-shade aria-hidden="true" style={{ top: DRAWER_TUCK + DRAWER_BEHIND }} />
+                <PillContext.Provider value>
+                  <div className="relative z-10 space-y-2">{children}</div>
+                </PillContext.Provider>
+              </div>
+            </motion.div>
+          </motion.div>
+        ) : null}
+      </div>
+    );
+  }
+
+  return (
+    <div data-feed-nav-outer data-kit-island-outer className={cn('sticky top-11 lg:top-0 z-50', className)}>
+      <div data-page-bento data-kit-island className="rounded-[22px] bg-zinc-900 px-3 pt-3 pb-2.5">
+        <span data-nav-glass-backdrop aria-hidden="true" />
+        <div className="flex min-h-9 items-center gap-2.5">
+          {showBack && (
+            <button type="button" data-kit-square data-swipe-back onClick={handleBack} aria-label={_copy("copy.6aadac2f2b7a", { defaultValue: "Go back" })} className="-ml-0.5">
+              <ArrowLeft className="h-[18px] w-[18px]" />
+            </button>
+          )}
+          {icon ? (
+            <span data-kit-island-icon className="flex h-8 w-8 shrink-0 items-center justify-center">
+              {typeof icon === 'string' ? (
+                <ThemedIcon icon={icon as IconKey} alt="" className="h-8 w-8 object-contain" />
+              ) : (
+                icon
+              )}
+            </span>
+          ) : null}
+          <div className="min-w-0 flex-1">
+            <h1 data-kit-title className="truncate text-[17px] font-bold leading-tight text-white">{title}</h1>
+            {subtitle ? (
+              <p data-kit-subtitle className="truncate text-[11.5px] leading-snug text-zinc-500">{subtitle}</p>
+            ) : null}
+          </div>
+          {actions ? <div className="flex shrink-0 items-center gap-1.5">{actions}</div> : null}
+        </div>
+        {tabs ? <div className="mt-2.5">{tabs}</div> : null}
+        {children ? <div className="mt-2.5 space-y-2.5">{children}</div> : null}
+      </div>
+    </div>
+  );
+}
+
+export function IslandAction({
+  label,
+  onClick,
+  children,
+  active,
+  disabled,
+}: {
+  label: string;
+  onClick?: () => void;
+  children: ReactNode;
+  active?: boolean;
+  disabled?: boolean;
+}) {
+  const inPill = useContext(PillContext);
+  if (inPill) {
+    return (
+      <button
+        type="button"
+        data-kit-pill-action
+        data-active={active ? 'true' : undefined}
+        onClick={onClick}
+        disabled={disabled}
+        aria-label={label}
+        title={label}
+        className={cn(PILL_ACTION_CLASS, active && 'text-white')}
+      >
+        {children}
+      </button>
+    );
+  }
+  return (
+    <button
+      type="button"
+      data-kit-square
+      data-active={active ? 'true' : undefined}
+      onClick={onClick}
+      disabled={disabled}
+      aria-label={label}
+      title={label}
+    >
+      {children}
+    </button>
+  );
+}
+
+export interface PageTab<T extends string = string> {
+  id: T;
+  label: ReactNode;
+  icon?: IconKey | ReactNode;
+  /** Glyph size in a header pill, in CSS pixels. */
+  pillIconSize?: number;
+  count?: number;
+  /** Hover text for an icon-only tab, so a mouse can learn what it is. */
+  hint?: string;
+}
+
+export function PageTabs<T extends string>({
+  tabs,
+  value,
+  onChange,
+  className,
+  size = 'md',
+  beforeTabs,
+  followSelection = false,
+}: {
+  tabs: PageTab<NoInfer<T>>[];
+  value: T;
+  onChange: (id: NoInfer<T>) => void;
+  className?: string;
+  size?: 'sm' | 'md';
+  /** Leading controls on the same row, before the category tabs. */
+  beforeTabs?: ReactNode;
+  /** Keep the active pill visible and animate it when selection can change outside the tab row. */
+  followSelection?: boolean;
+}) {
+  const inPill = useContext(PillContext);
+  const layoutId = useId();
+  const { layerRef, setRef, rect, onScroll } = useTabIndicator(value, inPill, undefined, 5);
+  const [glide, setGlide] = useState(false);
+  const reduceMotion = useReducedMotion();
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [overflow, setOverflow] = useState(false);
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!inPill || !el) return;
+    const check = () => {
+      setOverflow(el.scrollWidth - el.clientWidth > 2 && el.scrollLeft + el.clientWidth < el.scrollWidth - 2);
+      // The glass tile sits outside the scrolling row, so it is re-placed when
+      // the row scrolls or first gets its size (a page that mounts before its
+      // row can be measured otherwise never shows the tile).
+      onScroll();
+    };
+    check();
+    const ro = new ResizeObserver(check);
+    ro.observe(el);
+    // The row keeps its size when a tab grows (a count arriving), so watch
+    // the tabs too or the tile stays the old tab's width.
+    for (const tab of Array.from(el.children)) ro.observe(tab);
+    el.addEventListener('scroll', check, { passive: true });
+    return () => { ro.disconnect(); el.removeEventListener('scroll', check); };
+  }, [inPill, tabs.length, onScroll]);
+  useEffect(() => {
+    const row = scrollRef.current;
+    if (!followSelection || !inPill || !row || row.scrollWidth <= row.clientWidth + 1) return;
+    const tab = row.querySelector<HTMLElement>('[role="tab"][aria-selected="true"]');
+    if (!tab) return;
+    const rowBox = row.getBoundingClientRect();
+    const tabBox = tab.getBoundingClientRect();
+    const left = (tabBox.left + tabBox.right - rowBox.left - rowBox.right) / 2;
+    row.scrollBy({ left, behavior: reduceMotion ? 'instant' : 'smooth' });
+  }, [followSelection, inPill, reduceMotion, value]);
+  // A row first laid out while the page is still hidden (boot, fonts) measures
+  // as nothing and no resize follows, so keep trying briefly until it lands.
+  useEffect(() => {
+    if (!inPill || rect.ready) return;
+    const id = window.setInterval(onScroll, 200);
+    const stop = window.setTimeout(() => window.clearInterval(id), 6000);
+    return () => { window.clearInterval(id); window.clearTimeout(stop); };
+  }, [inPill, rect.ready, onScroll]);
+  if (inPill) {
+    return (
+      <div className="flex min-w-0 items-center">
+        {beforeTabs ? <div data-kit-pill-before className="flex shrink-0 items-center [&_[data-kit-square]]:contents">{beforeTabs}</div> : null}
+        <div ref={layerRef} className="relative min-w-0 flex-1 overflow-visible">
+          <div className="pointer-events-none absolute inset-0">
+              <GlassIndicator rect={rect} borderRadius="0.75rem" layoutKey={`kit-pill-${layoutId}-${value}`} enableTransition={glide || (followSelection && !reduceMotion)} fixedHeightPx={35} variant="nav" />
+          </div>
+          <div
+            ref={scrollRef}
+            role="tablist"
+            data-kit-tabs
+            data-kit-pill-tabs
+            data-overflow={overflow ? 'true' : undefined}
+            className={cn('scrollbar-hide relative z-20 flex overflow-x-auto data-[overflow=true]:[mask-image:linear-gradient(90deg,#000_calc(100%-28px),transparent)]', className)}
+          >
+            {tabs.map((tab) => {
+              const active = tab.id === value;
+              const iconOnly = !!tab.icon;
+              return (
+                <button
+                  key={tab.id}
+                  ref={setRef(tab.id)}
+                  type="button"
+                  role="tab"
+                  aria-selected={active}
+                  data-feed-tab-btn
+                  title={tab.hint}
+                  data-active={active ? 'true' : undefined}
+                  style={tab.pillIconSize === undefined ? undefined : { '--kit-pill-tab-icon-size': `${tab.pillIconSize}px` } as React.CSSProperties}
+                  onClick={() => {
+                    if (!active) {
+                      setGlide(true);
+                      window.setTimeout(() => setGlide(false), 450);
+                    }
+                    onChange(tab.id);
+                  }}
+                  className={cn(
+                    'relative z-10 flex flex-1 shrink-0 items-center justify-center rounded-xl py-2.5 text-[14px] font-semibold leading-4 transition-colors',
+                    // Icon tabs keep one width whatever the count: a count growing to "99+" used to
+                    // widen its tab and push the last icons out past the pill's right edge.
+                    iconOnly ? (typeof tab.count === 'number' ? 'min-w-[48px] px-2' : 'min-w-[32px] px-2') : 'whitespace-nowrap px-3',
+                    active ? 'text-white' : 'text-zinc-400 [@media(hover:hover)]:hover:text-white',
+                  )}
+                >
+                  {tab.icon ? (
+                    <span className="relative z-10 flex size-[var(--kit-pill-tab-icon-size,16px)] shrink-0 items-center justify-center [&_img]:size-full [&_svg]:size-full">
+                      {typeof tab.icon === 'string' ? <ThemedIcon icon={tab.icon as IconKey} alt="" className="h-4 w-4 object-contain" /> : tab.icon}
+                    </span>
+                  ) : null}
+                  <span className={iconOnly ? 'sr-only' : 'relative z-10'}>{tab.label}</span>
+                  {typeof tab.count === 'number' ? (
+                    // Beside the icon as plain text, as the app draws it; a white
+                    // dot over the icon hid the glyph and read as a red badge.
+                    <span data-kit-pill-count className={cn('z-10 font-semibold leading-none tabular-nums opacity-60', iconOnly ? 'pointer-events-none absolute left-[calc(50%_+_var(--kit-pill-tab-icon-size,16px)/2)] top-[5px] whitespace-nowrap text-[9.5px]' : 'relative ml-1 text-[12px]')}>{tab.count > 99 ? '99+' : tab.count}</span>
+                  ) : null}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    );
+  }
+  return (
+    <div
+      role="tablist"
+      data-kit-tabs
+      // `relative` keeps icon-only tabs' sr-only labels (position: absolute)
+      // inside this scroller. Without it they escape to the nearest scroll
+      // container — the bell drawer — and widen it, so the whole drawer pans
+      // sideways on iPhone.
+      className={cn('scrollbar-hide relative -mx-0.5 flex items-center gap-1.5 overflow-x-auto px-0.5', className)}
+    >
+      {beforeTabs}
+      {tabs.map((tab) => {
+        const active = tab.id === value;
+        return (
+            <Fragment key={tab.id}>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={active}
+              data-kit-chip
+              title={tab.hint}
+              data-size={size}
+              data-active={active ? 'true' : undefined}
+              onClick={() => onChange(tab.id)}
+            >
+              {tab.icon ? (
+                typeof tab.icon === 'string' ? (
+                  <ThemedIcon icon={tab.icon as IconKey} alt="" className="h-4 w-4 object-contain" />
+                ) : (
+                  tab.icon
+                )
+              ) : null}
+              <span>{tab.label}</span>
+              {typeof tab.count === 'number' ? <span data-kit-chip-count>{formatCount(tab.count)}</span> : null}
+            </button>
+          </Fragment>
+        );
+      })}
+    </div>
+  );
+}
+
+/**
+ * Where page content is cut as it scrolls up: the island on desktop, or the
+ * pill that PageIsland draws instead below 1024px. Matching only the island
+ * left every page uncut on phones and tablets, so cards and avatars slid up
+ * past the pill into the top of the screen.
+ */
+const KIT_TOP_CUT = '[data-kit-island-outer] > [data-page-bento], [data-kit-pill-outer] > [data-kit-pill]';
+
+/**
+ * The content column under the island. Swallows scrolled content at the
+ * island's top edge on the glass themes, like the home feed under its pill.
+ */
+export function PageBody({
+  children,
+  className,
+  measure,
+  frameClip,
+  ...bodyProps
+}: {
+  children: ReactNode;
+  className?: string;
+  /** Keep a readable width (forms, articles) instead of filling the column. */
+  measure?: boolean;
+  /** Cut under the island with a per-scroll clip instead of scroll-driven
+   *  transforms. For bodies inside their own scroller (the bell drawer),
+   *  where iOS WebKit leaves the transformed layers unpainted. */
+  frameClip?: boolean;
+} & HTMLAttributes<HTMLDivElement>) {
+  const ref = useRef<HTMLDivElement>(null);
+  useFeedSwallowClip(ref, KIT_TOP_CUT, [], { allThemes: true, frameOnly: frameClip });
+  return (
+    <div data-feed-swallow-bounds className="w-full">
+      <div {...bodyProps} ref={ref} data-kit-body className={cn('w-full pb-28 pt-3', measure && 'max-w-2xl', className)}>
+      <FeedSwallowMotion>
+      {children}
+      </FeedSwallowMotion>
+    </div>
+    </div>
+  );
+}
+
+export function PageSection({
+  title,
+  eyebrow,
+  action,
+  children,
+  className,
+  flush,
+  as: Tag = 'section',
+}: {
+  title?: ReactNode;
+  eyebrow?: ReactNode;
+  action?: ReactNode;
+  children?: ReactNode;
+  className?: string;
+  /** No inner padding (lists that draw their own rows edge to edge). */
+  flush?: boolean;
+  as?: 'section' | 'div';
+}) {
+  return (
+    <Tag data-page-bento data-kit-section className={cn('rounded-xl bg-zinc-900', !flush && 'p-4', className)}>
+      {title || eyebrow || action ? (
+        <header className={cn('mb-3 flex items-end justify-between gap-3', flush && 'px-4 pt-4')}>
+          <div className="min-w-0">
+            {eyebrow ? <p data-kit-eyebrow className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-zinc-500">{eyebrow}</p> : null}
+            {title ? <h2 className="truncate text-[15px] font-semibold text-white">{title}</h2> : null}
+          </div>
+          {action ? <div className="shrink-0">{action}</div> : null}
+        </header>
+      ) : null}
+      {children}
+    </Tag>
+  );
+}
+
+export function PageEmpty({
+  icon,
+  title,
+  body,
+  action,
+  className,
+}: {
+  icon?: IconKey | ReactNode;
+  title: ReactNode;
+  body?: ReactNode;
+  action?: ReactNode;
+  className?: string;
+}) {
+  return (
+    <div data-kit-empty className={cn('flex flex-col items-center px-6 py-14 text-center', className)}>
+      {icon ? (
+        <span className="mb-4 flex h-14 w-14 items-center justify-center">
+          {typeof icon === 'string' ? (
+            <ThemedIcon icon={icon as IconKey} alt="" className="h-14 w-14 object-contain" />
+          ) : (
+            icon
+          )}
+        </span>
+      ) : null}
+      <p className="text-[15px] font-semibold text-white">{title}</p>
+      {body ? <p className="mt-1.5 max-w-xs text-[13px] leading-relaxed text-zinc-500">{body}</p> : null}
+      {action ? <div className="mt-5">{action}</div> : null}
+    </div>
+  );
+}
+
+/** The main call to action: white on System, the theme colour elsewhere. */
+export function KitButton({
+  children,
+  onClick,
+  variant = 'primary',
+  disabled,
+  className,
+  type = 'button',
+}: {
+  children: ReactNode;
+  onClick?: () => void;
+  variant?: 'primary' | 'quiet';
+  disabled?: boolean;
+  className?: string;
+  type?: 'button' | 'submit';
+}) {
+  return (
+    <button type={type} data-kit-button={variant} onClick={onClick} disabled={disabled} className={className}>
+      {children}
+    </button>
+  );
+}

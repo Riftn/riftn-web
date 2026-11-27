@@ -1,0 +1,152 @@
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { afterEach, expect, it, vi } from 'vitest';
+import type { ReactElement, ReactNode } from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { isShortsPhoto, shortsPhotoMedia, interleaveShorts } from '@/lib/shorts-photos';
+import { ShortsPhotoPager } from '@/components/app/cards/ShortsPhotoPager';
+import { galleryIndex, rememberGalleryIndex } from '@/lib/media-presentation';
+import { VideoSlide } from '@/components/app/cards/VideoSlide';
+vi.mock('@/lib/thumbnail-fallback', () => ({ useResolvedThumbnail: (url: string) => url }));
+vi.mock('@/hooks/use-tap-gestures', () => ({ useTapGestures: () => ({}) }));
+vi.mock('@/components/app/cards/TapReactionBurst', () => ({ TapReactionBurst: () => null }));
+vi.mock('@/components/app/cards/TranscodeRetry', () => ({ TranscodeRetry: () => null }));
+vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => ({
+  'dex.next': 'Next photo', 'dex.previous': 'Previous photo', 'feed.images': 'Post photos',
+}[key] || key) }) }));
+
+const post = { postType: 'feed-images', imageUrls: ['nfts/images/1.jpg', 'nfts/images/2.jpg'],
+  description: 'A walk [soundtrack:5373:Morning:Artist:feed-audio/5373-audio.mp3]' };
+const clients: QueryClient[] = [];
+function renderSlide(node: ReactElement) {
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false, gcTime: Infinity } } });
+  clients.push(client);
+  return render(node, { wrapper: ({ children }: { children: ReactNode }) =>
+    <QueryClientProvider client={client}>{children}</QueryClientProvider> });
+}
+afterEach(() => {
+  cleanup();
+  clients.splice(0).forEach(client => client.clear());
+  vi.restoreAllMocks(); vi.unstubAllGlobals(); vi.useRealTimers();
+});
+it('immediately buffers the requested neighbour and selected clip', () => {
+  vi.useFakeTimers();
+  vi.spyOn(HTMLMediaElement.prototype, 'play').mockResolvedValue();
+  vi.spyOn(HTMLMediaElement.prototype, 'pause').mockImplementation(() => {});
+  const short = { id: 'first', type: 'short' as const, username: 'artist', verified: false,
+    likes: '0', videoUrl: '/first.mp4', thumbnail: '' };
+  const { container, rerender } = renderSlide(<VideoSlide short={short} isActive={false} isMuted preload="auto" />);
+  const player = () => container.querySelector('video')!;
+  expect(player().preload).toBe('auto');
+  rerender(<VideoSlide short={{ ...short, id: 'second' }} isActive={false} isMuted preload="auto" />);
+  expect(player().preload).toBe('auto');
+  rerender(<VideoSlide short={short} isActive={false} isMuted preload="metadata" />);
+  expect(player().preload).toBe('metadata');
+  rerender(<VideoSlide short={short} isActive isMuted preload="auto" />);
+  expect(player().preload).toBe('auto');
+});
+it('maps every photo and its single soundtrack without manufacturing a video', () => {
+  const media = shortsPhotoMedia(post)!;
+  expect(media.imageUrls).toHaveLength(2);
+  expect(media.imageUrls[0]).toContain('dehubcdn.ams3.cdn.digitaloceanspaces.com/feed-images/1.jpg');
+  expect(media.videoUrl).toBe('');
+  expect(media.soundtrackUrl).toContain('/feed-audio/5373-audio.mp3');
+  expect(media.description).toBe('A walk');
+  expect(isShortsPhoto({ ...post, transcodingStatus: 'failed' } as typeof post)).toBe(true);
+});
+it('keeps an incoming clip paused through the landing, then plays when selected', () => {
+  vi.useFakeTimers();
+  const play = vi.spyOn(HTMLMediaElement.prototype, 'play').mockResolvedValue();
+  const pause = vi.spyOn(HTMLMediaElement.prototype, 'pause').mockImplementation(() => {});
+  const short = { id: 'landing', type: 'short' as const, username: 'artist', verified: false,
+    likes: '0', videoUrl: '/landing.mp4', thumbnail: '' };
+  const { container, rerender } = renderSlide(<VideoSlide short={short} isActive={false} isMuted preload="auto" />);
+  act(() => vi.advanceTimersByTime(350));
+  expect(play).not.toHaveBeenCalled();
+  rerender(<VideoSlide short={short} isActive isMuted preload="auto" />);
+  act(() => vi.advanceTimersByTime(60));
+  expect(play).toHaveBeenCalledTimes(1);
+  const player = container.querySelector('video')!;
+  rerender(<VideoSlide short={short} isActive={false} isMuted preload="auto" />);
+  expect(pause).toHaveBeenCalled();
+  play.mockClear();
+  fireEvent.play(player);
+  expect(play).not.toHaveBeenCalled();
+});
+it('keeps gated, mature, silent and malformed posts out of the unguarded viewer', () => {
+  for (const change of [{ description: '' }, { imageUrls: ['javascript:bad'] }, { contentRating: 'mature' },
+    { streamInfo: { isPayPerView: true } }, { streamInfo: { isLockContent: true, lockContentAmount: 1 } },
+    { plansDetails: [{}] }, { streamInfo: { isAddBounty: true } }]) {
+    expect(isShortsPhoto({ ...post, ...change })).toBe(false);
+  }
+  expect(isShortsPhoto({ ...post, imageUrls: [], imageUrl: 'one.jpg' })).toBe(true);
+});
+it('includes photos before a full video reel consumes its limit', () => {
+  expect(interleaveShorts(['v1', 'v2', 'v3'], ['p1', 'p2'])).toEqual(['v1', 'p1', 'v2', 'p2', 'v3']);
+});
+it('pages horizontally within bounds and leaves vertical keys alone', () => {
+  render(<ShortsPhotoPager images={['one.jpg', 'two.jpg']} />);
+  fireEvent.click(screen.getByRole('button', { name: 'Next photo' }));
+  expect(screen.getByText('2 / 2')).toBeTruthy();
+  expect(screen.getByRole('button', { name: 'Next photo' })).toBeDisabled();
+  fireEvent.keyDown(screen.getByLabelText('Post photos'), { key: 'ArrowUp' });
+  expect(screen.getByText('2 / 2')).toBeTruthy();
+  fireEvent.keyDown(screen.getByLabelText('Post photos'), { key: 'ArrowLeft' });
+  expect(screen.getByText('1 / 2')).toBeTruthy();
+});
+it('starts on the selected feed photo and preserves subsequent horizontal navigation', () => {
+  rememberGalleryIndex('selected-photo-test', 1);
+  render(<ShortsPhotoPager images={['one.jpg', 'two.jpg', 'three.jpg']} galleryKey="selected-photo-test" />);
+  expect(screen.getByText('2 / 3')).toBeTruthy();
+  fireEvent.click(screen.getByRole('button', { name: 'Next photo' }));
+  expect(screen.getByText('3 / 3')).toBeTruthy();
+  expect(galleryIndex('selected-photo-test')).toBe(2);
+});
+it('does not show paging controls for a single musical photo', () => {
+  render(<ShortsPhotoPager images={['one.jpg']} />);
+  expect(screen.queryByRole('button')).toBeNull();
+});
+it('accepts horizontal flicks but leaves vertical gestures to the post pager', () => {
+  vi.stubGlobal('PointerEvent', MouseEvent);
+  render(<ShortsPhotoPager images={['one.jpg', 'two.jpg']} />);
+  const pager = screen.getByLabelText('Post photos');
+  fireEvent.pointerDown(pager, { clientX: 180, clientY: 100 });
+  fireEvent.pointerUp(pager, { clientX: 100, clientY: 108 });
+  expect(screen.getByText('2 / 2')).toBeTruthy();
+  fireEvent.pointerDown(pager, { clientX: 100, clientY: 180 });
+  fireEvent.pointerUp(pager, { clientX: 155, clientY: 20 });
+  expect(screen.getByText('2 / 2')).toBeTruthy();
+  fireEvent.pointerDown(pager, { clientX: 100, clientY: 100 });
+  fireEvent.pointerUp(pager, { clientX: 180, clientY: 108 });
+  expect(screen.getByText('1 / 2')).toBeTruthy();
+});
+it('retains the same playing soundtrack and position across photos, then pauses on leaving the post', async () => {
+  vi.useFakeTimers();
+  const play = vi.spyOn(HTMLMediaElement.prototype, 'play').mockResolvedValue();
+  const pause = vi.spyOn(HTMLMediaElement.prototype, 'pause').mockImplementation(() => {});
+  const short = { id: '5421', type: 'short' as const, username: 'artist', verified: false, likes: '0',
+    ...shortsPhotoMedia(post)! };
+  const { container, rerender } = renderSlide(<VideoSlide short={short} isActive isMuted={false} />);
+  await act(async () => { await import('@/components/app/cards/ShortsPhotoPager'); });
+  act(() => { vi.advanceTimersByTime(60); });
+  const player = container.querySelector('video')!;
+  player.currentTime = 12;
+  expect(play).toHaveBeenCalledTimes(1);
+  fireEvent.click(screen.getByRole('button', { name: 'Next photo' }));
+  expect(container.querySelector('video')).toBe(player);
+  expect(player.currentTime).toBe(12);
+  expect(play).toHaveBeenCalledTimes(1);
+  rerender(<VideoSlide short={short} isActive={false} isMuted={false} />);
+  expect(pause).toHaveBeenCalled();
+  play.mockClear();
+  fireEvent.play(player);
+  expect(play).not.toHaveBeenCalled();
+});
+it('fills the screen with tall photos and fits wide ones whole', () => {
+  render(<ShortsPhotoPager images={['tall.jpg', 'wide.jpg']} />);
+  const [tall, wide] = Array.from(document.querySelectorAll('[data-shorts-photos] img')) as HTMLImageElement[];
+  Object.defineProperties(tall, { naturalWidth: { value: 900 }, naturalHeight: { value: 1600 } });
+  Object.defineProperties(wide, { naturalWidth: { value: 1600 }, naturalHeight: { value: 900 } });
+  fireEvent.load(tall); fireEvent.load(wide);
+  expect(tall.dataset.photoFit).toBe('cover');
+  expect(wide.dataset.photoFit).toBe('contain');
+});

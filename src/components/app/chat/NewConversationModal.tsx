@@ -1,0 +1,563 @@
+import { useTranslation as _useCopy } from 'react-i18next';
+import { useSurfaceDraft } from '@/hooks/use-surface-draft';
+import { tokenLabel } from '@/lib/token-label';
+/**
+ * NewConversationModal Component
+ * ==============================
+ * Modal for searching and selecting a user to start a new DM conversation.
+ * If the recipient has a perMessageFee, shows a payment step first:
+ *   1. Check sender's DHB balance
+ *   2. Show fee confirmation with option to tip more
+ *   3. Process on-chain DHB transfer
+ *   4. Only then create the conversation
+ */
+
+/**
+ * NewConversationModal Component
+ * ==============================
+ * Modal for searching and selecting a user to start a new DM conversation.
+ * If the recipient has a perMessageFee, shows a payment step first:
+ *   1. Check sender's DHB balance
+ *   2. Show fee confirmation with option to tip more
+ *   3. Process on-chain DHB transfer
+ *   4. Only then create the conversation
+ */
+
+import { BrandIcon } from '@/components/app/war/WarHudIcon';
+import { AppState } from '@/components/app/AppState';
+import { DhbCoin } from '@/components/app/DhbAmount';
+import { useState, useCallback, useEffect } from 'react';
+import { useTranslation, Trans } from 'react-i18next';
+import { Loader2, AlertCircle } from "lucide-react";
+import Search from "@/components/ui/cut-icons/search";
+import ArrowLeft from "@/components/ui/cut-icons/back";
+
+import dehubCoin from '@/assets/dehub-coin.png';
+import padlockImg from '@/assets/padlock.png';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { useUserSearchForDM, useCreateConversation } from '@/hooks/use-messages';
+import { getAccountInfo, type DeHubUser, type DeHubConversation } from '@/lib/api/dehub';
+import { buildAvatarUrl, extractAvatarPath } from '@/lib/media-url';
+import { toast } from 'sonner';
+import { dhbText } from '@/lib/dhb-toast';
+import { VerifiedBadge } from '../VerifiedBadge';
+import { BadgeIcon } from '@/components/app/BadgeIcon';
+import { DM_FEE_WARNING_SEEN_KEY } from './DirectMessageChat';
+import {
+  getWalletAddress,
+  getERC20Balance,
+  switchChain,
+} from '@/lib/contracts/aa-utils';
+import { toastTxError } from '@/lib/tx-error-toast';
+import { DHB_TOKEN, toWei, getChainConfig, BASE_CHAIN_ID } from '@/lib/contracts/dhb-token';
+import { sendTip } from '@/lib/contracts/stream-controller';
+import { emitSendMessage } from '@/lib/api/dehub/dm-socket';
+import { prepareOutgoing } from '@/lib/dm-e2ee/keys';
+
+interface NewConversationModalProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onConversationCreated: (conversation: DeHubConversation) => void;
+  /** Pre-select a fee user so the modal opens directly to the payment step */
+  initialFeeUser?: DeHubUser | null;
+  /** Optional message body to send automatically once the recipient is picked */
+  initialMessage?: string;
+  /** Override modal title (e.g. "Invite to Community") */
+  title?: string;
+}
+
+/** Extract dmSettings from either array or object shape */
+function getDmSettings(user: DeHubUser) {
+  const raw = (user as any).dmSettings || (user as any).dmSetting;
+  return Array.isArray(raw) ? raw[0] : raw;
+}
+
+function UserSearchResult({ 
+  user, 
+  onSelect, 
+  isLoading,
+}: { 
+  user: DeHubUser; 
+  onSelect: () => void;
+  isLoading: boolean;
+}) {
+  const { t: _copy } = _useCopy();
+  const avatarPath = extractAvatarPath(user);
+  const avatarUrl = user.address ? buildAvatarUrl(user.address, avatarPath) : undefined;
+  const rawDisplayName = user.displayName || user.display_name;
+  const displayName = rawDisplayName || user.username || _copy("copy.b512d97e7cbf", { defaultValue: "User" });
+  const showHandle = !!user.username && !!rawDisplayName; // only show @handle when distinct from top line
+  const isVerified = user.isVerified || user.is_verified;
+  const badgeBalance = (user as any).badgeBalance ?? (user as any).balance ?? undefined;
+
+  const dmSettingsObj = getDmSettings(user);
+  const dmDisabled = dmSettingsObj?.disables?.includes('NEW_DM') || dmSettingsObj?.disables?.includes('all');
+  const perMessageFee = dmSettingsObj?.perMessageFee;
+  
+  return (
+    <button
+      onClick={onSelect}
+      disabled={isLoading || dmDisabled}
+      className={`w-full flex items-center gap-3 p-3 rounded-xl transition-colors text-left ${
+        dmDisabled
+          ? 'opacity-50 cursor-not-allowed'
+          : isLoading
+            ? 'opacity-60 cursor-wait'
+            : 'hover:bg-zinc-800'
+      }`}
+    >
+      <Avatar className="w-12 h-12">
+        {avatarUrl && <AvatarImage src={avatarUrl} />}
+        <AvatarFallback className="bg-zinc-700 text-white font-medium">
+          {displayName.charAt(0).toUpperCase()}
+        </AvatarFallback>
+      </Avatar>
+
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-1.5 min-w-0">
+          <span className="inline-flex items-baseline gap-1 shrink min-w-0">
+            <span className="font-semibold text-white text-sm truncate leading-tight">{displayName}</span>
+            <BadgeIcon badgeBalance={badgeBalance} badgeLock={(user as any).badgeLock} username={user.username || displayName} className="w-[1em] h-[1em]" />
+          </span>
+          {isVerified && <VerifiedBadge className="w-3.5 h-3.5 shrink-0" />}
+        </div>
+        {showHandle && (
+          <p className="text-xs text-zinc-500 truncate">@{user.username}</p>
+        )}
+        {dmDisabled && (
+          <p className="text-xs text-zinc-500 mt-1">{_copy("copy.c20ed70dd868", { defaultValue: "DMs disabled" })}</p>
+        )}
+        {!dmDisabled && !isLoading && perMessageFee && perMessageFee > 0 && (
+          <p className="text-xs text-zinc-400 mt-1 flex items-center gap-1">
+            <img src={dehubCoin} alt={tokenLabel()} className="w-3 h-3" />
+            {_copy("copy.742164ec53fb", { defaultValue: "{{value1}} to message", value1: perMessageFee.toLocaleString() })}</p>
+        )}
+        {isLoading && (
+          <p className="text-xs text-zinc-400 mt-1 flex items-center gap-1">
+            <Loader2 className="w-3 h-3 animate-spin" />{_copy("copy.36387a86fa81", { defaultValue: "Sending invite..." })}</p>
+        )}
+      </div>
+    </button>
+  );
+}
+
+/** Fee payment step shown before creating a conversation */
+function FeePaymentStep({
+  user,
+  fee,
+  onPaid,
+  onBack,
+}: {
+  user: DeHubUser;
+  fee: number;
+  onPaid: (firstMessage?: string, feeTxHash?: string) => void;
+  onBack: () => void;
+}) {
+  const { t: _copy } = _useCopy();
+  const { t } = useTranslation();
+  const [messageText, setMessageText] = useSurfaceDraft("components/app/chat/NewConversationModal.tsx:messageText", '');
+  const [customAmount, setCustomAmount] = useSurfaceDraft("components/app/chat/NewConversationModal.tsx:customAmount", '');
+  const [isSending, setIsSending] = useState(false);
+  const [balanceInfo, setBalanceInfo] = useState<{ checked: boolean; balance: number; sufficient: boolean }>({
+    checked: false, balance: 0, sufficient: false,
+  });
+  const [isCheckingBalance, setIsCheckingBalance] = useState(false);
+
+  const avatarPath = extractAvatarPath(user);
+  const avatarUrl = user.address ? buildAvatarUrl(user.address, avatarPath) : undefined;
+  const displayName = user.displayName || user.display_name || user.username || _copy("copy.b512d97e7cbf", { defaultValue: "User" });
+
+  const tipAmount = customAmount ? parseFloat(customAmount) : fee;
+  const isValidAmount = !Number.isNaN(tipAmount) && tipAmount >= fee;
+
+  // Check balance on mount
+  const checkBalance = useCallback(async () => {
+    setIsCheckingBalance(true);
+    try {
+      const chainId = BASE_CHAIN_ID;
+      const chainConfig = getChainConfig(chainId);
+      // Showing the balance must not open the wallet; only Pay does.
+      const signerAddress = await getWalletAddress({ silent: true });
+      const balanceWei = await getERC20Balance(chainConfig.dhbToken, signerAddress, chainId);
+      const balanceHuman = Number(balanceWei) / 1e18;
+      setBalanceInfo({
+        checked: true,
+        balance: balanceHuman,
+        sufficient: balanceHuman >= fee,
+      });
+    } catch (err) {
+      console.error('[NewConversationModal] Balance check failed:', err);
+      // Allow proceeding anyway — the transfer will fail if insufficient
+      setBalanceInfo({ checked: true, balance: 0, sufficient: true });
+    } finally {
+      setIsCheckingBalance(false);
+    }
+  }, [fee]);
+
+  // Auto-check on render
+  useState(() => { checkBalance(); });
+
+  const handlePay = async (amount: number) => {
+    if (Number.isNaN(amount) || amount < fee) {
+      toast.error(dhbText(_copy("copy.9fd0c1b98d0a", { defaultValue: "Minimum tip is {{value1}} DHB", value1: fee.toLocaleString() })));
+      return;
+    }
+    if (!messageText.trim()) {
+      toast.error(_copy("copy.bcc015afda01", { defaultValue: "Please enter a message" }));
+      return;
+    }
+
+    setIsSending(true);
+    try {
+      const chainId = BASE_CHAIN_ID;
+      const chainConfig = getChainConfig(chainId);
+      await switchChain(chainId);
+      const signerAddress = await getWalletAddress();
+      const amountWei = toWei(amount, DHB_TOKEN.decimals);
+      const balance = await getERC20Balance(chainConfig.dhbToken, signerAddress);
+
+      if (balance < amountWei) {
+        const balanceHuman = Number(balance) / 1e18;
+        toast.error(dhbText(_copy("copy.12e58368b1fe", { defaultValue: "Insufficient tokens. Need {{value1}} but have {{value2}}", value1: amount.toLocaleString(), value2: balanceHuman.toFixed(2) })));
+        setBalanceInfo({ checked: true, balance: balanceHuman, sufficient: false });
+        setIsSending(false);
+        return;
+      }
+
+      toast.loading(_copy("copy.aa3489b23c1c", { defaultValue: "Sending tip to unlock DMs..." }), { id: 'dm-fee-gate' });
+
+      const tipResult = await sendTip({
+        tokenId: 0,
+        amount,
+        to: user.address!,
+        chainId,
+      });
+      const txHash = tipResult.hash;
+
+      toast.success(dhbText(_copy("copy.a247af008271", { defaultValue: "Paid {{value1}} DHB — opening chat! 🎉", value1: amount.toLocaleString() })), { id: 'dm-fee-gate' });
+      // Paying to unlock DMs already makes the per-message cost explicit —
+      // don't make them click through the same warning again in the thread.
+      try {
+        localStorage.setItem(DM_FEE_WARNING_SEEN_KEY, '1');
+      } catch {
+        /* already paid — never block opening the chat */
+      }
+      onPaid(messageText.trim(), txHash);
+    } catch (error: unknown) {
+      console.error('[NewConversationModal] Payment failed:', error);
+      toastTxError(error, _copy("copy.17aadc092fe6", { defaultValue: "Payment failed" }), { id: 'dm-fee-gate' });
+    } finally {
+      setIsSending(false);
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      {/* Back button */}
+      <button
+        onClick={onBack}
+        data-swipe-back
+        className="flex items-center gap-1.5 text-sm text-zinc-400 hover:text-white transition-colors"
+      >
+        <ArrowLeft className="w-4 h-4" />{_copy("copy.22252a139c6a", { defaultValue: "Back to search" })}</button>
+
+      {/* User info */}
+      <div className="flex items-center gap-3 p-3 rounded-xl bg-zinc-800/50">
+        <Avatar className="w-12 h-12">
+          {avatarUrl && <AvatarImage src={avatarUrl} />}
+          <AvatarFallback className="bg-zinc-700 text-white font-medium">
+            {displayName.charAt(0).toUpperCase()}
+          </AvatarFallback>
+        </Avatar>
+        <div>
+          <p className="font-semibold text-white">{displayName}</p>
+          {user.username && <p className="text-sm text-zinc-500">@{user.username}</p>}
+        </div>
+      </div>
+
+      {/* Fee info */}
+      <div className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10">
+        <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0">
+          <BrandIcon src={padlockImg} alt={_copy("copy.db44b8db4f05", { defaultValue: "Lock" })} className="w-8 h-8 object-contain" />
+        </div>
+        <div>
+          <h3 className="text-white font-semibold text-sm">{_copy("copy.467f1b07dbab", { defaultValue: "Tip to Message" })}</h3>
+          <p className="text-zinc-400 text-xs leading-relaxed">
+            <Trans
+              i18nKey="copy.253ffa81cd88"
+              defaults="{{value1}} requires a minimum tip of <amount>{{value2}} <coin></coin></amount> to start a conversation."
+              values={{ value1: displayName, value2: fee.toLocaleString() }}
+              components={{ amount: <span className="text-white font-medium" />, coin: <DhbCoin /> }}
+            /></p>
+        </div>
+      </div>
+
+      {/* Balance check */}
+      {isCheckingBalance ? (
+        <div className="flex items-center gap-2 text-sm text-zinc-400 justify-center py-2">
+          <Loader2 className="w-4 h-4 animate-spin" />
+          {t('messages.checkingTokenBalance')}
+        </div>
+      ) : balanceInfo.checked && !balanceInfo.sufficient ? (
+        <div className="flex items-center gap-2 p-3 rounded-xl bg-white/5 border border-white/10">
+          <AlertCircle className="w-4 h-4 text-zinc-400 flex-shrink-0" />
+          <p className="text-xs text-zinc-300">
+            <Trans
+              i18nKey="copy.a5b214ef27ab"
+              defaults="Insufficient balance. You have {{value1}} <coin></coin> but need {{value2}} <coin></coin>."
+              values={{ value1: Math.floor(balanceInfo.balance).toLocaleString(), value2: fee.toLocaleString() }}
+              components={{ coin: <DhbCoin /> }}
+            />
+          </p>
+        </div>
+      ) : balanceInfo.checked ? (
+        <p className="text-xs text-zinc-500 text-center">
+          <Trans
+            i18nKey="copy.825123b7470b"
+            defaults="Your balance: {{value1}} <coin></coin>"
+            values={{ value1: Math.floor(balanceInfo.balance).toLocaleString() }}
+            components={{ coin: <DhbCoin /> }}
+          />
+        </p>
+      ) : null}
+
+      {/* Message input */}
+      <div>
+        <p className="text-white/60 text-xs mb-1.5">{_copy("copy.7a057bd996a3", { defaultValue: "Your message" })}</p>
+        <Input
+          type="text"
+          placeholder={_copy("copy.75e4e6c299c4", { defaultValue: "Type your first message..." })}
+          value={messageText}
+          onChange={(e) => setMessageText(e.target.value)}
+          disabled={isSending}
+          className="bg-white/5 border-white/10 text-white placeholder:text-white/30 h-11 text-sm"
+        />
+      </div>
+
+      {/* Pay minimum */}
+      <Button
+        variant="glass"
+        className="w-full h-11"
+        onClick={() => handlePay(fee)}
+        disabled={isSending || !messageText.trim() || (balanceInfo.checked && !balanceInfo.sufficient)}
+      >
+        {isSending && !customAmount ? (
+          <>
+            <Loader2 className="w-4 h-4 mr-2 animate-spin" />{_copy("copy.f40a853e58a1", { defaultValue: "Processing..." })}</>
+        ) : (
+          <>
+            <img src={dehubCoin} alt={tokenLabel()} className="w-4 h-4 mr-2" />{_copy("copy.052503ac5a38", { defaultValue: "Pay {{value1}} & Start Chat", value1: fee.toLocaleString() })}</>
+        )}
+      </Button>
+
+      {/* Divider */}
+      <div className="flex items-center gap-3">
+        <div className="flex-1 h-px bg-white/10" />
+        <span className="text-[10px] text-zinc-500 uppercase tracking-wider">{_copy("copy.20064a284635", { defaultValue: "or tip more to rank higher" })}</span>
+        <div className="flex-1 h-px bg-white/10" />
+      </div>
+
+      {/* Custom higher tip */}
+      <div className="flex gap-2">
+        <div className="relative flex-1">
+          <img src={dehubCoin} alt={tokenLabel()} className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 z-10" />
+          <Input
+            type="number"
+            min={fee}
+            step={1}
+            placeholder={_copy("copy.c9b91c503231", { defaultValue: "Enter amount (min {{value1}})", value1: fee.toLocaleString() })}
+            value={customAmount}
+            onChange={(e) => setCustomAmount(e.target.value)}
+            disabled={isSending}
+            className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-white/30 h-11 text-sm"
+          />
+        </div>
+        <Button
+          variant="glass"
+          className="h-11 px-4"
+          onClick={() => handlePay(tipAmount)}
+          disabled={isSending || !isValidAmount || !messageText.trim() || (balanceInfo.checked && !balanceInfo.sufficient)}
+        >
+          {isSending && customAmount ? (
+            <Loader2 className="w-4 h-4 animate-spin" />
+          ) : (
+            _copy("copy.f6f4688ff23d", { defaultValue: "Send" })
+          )}
+        </Button>
+      </div>
+
+      {customAmount && isValidAmount && tipAmount > fee && (
+        <p className="text-[10px] text-zinc-400 text-center">
+          <Trans
+            i18nKey="copy.0f8f49bd32e6"
+            defaults="🔥 Tipping {{value1}} <coin></coin> will rank you higher in {{value2}}'s inbox"
+            values={{ value1: tipAmount.toLocaleString(), value2: displayName }}
+            components={{ coin: <DhbCoin /> }}
+          />
+        </p>
+      )}
+    </div>
+  );
+}
+
+export function NewConversationModal({ 
+  open, 
+  onOpenChange, 
+  onConversationCreated,
+  initialFeeUser,
+  initialMessage,
+  title,
+}: NewConversationModalProps) {
+  const { t: _copy } = _useCopy();
+  const [searchQuery, setSearchQuery] = useSurfaceDraft("components/app/chat/NewConversationModal.tsx:searchQuery", '');
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [feeUser, setFeeUser] = useState<DeHubUser | null>(null);
+
+  // When modal opens with an initialFeeUser, jump straight to fee step
+  useEffect(() => {
+    if (open && initialFeeUser) {
+      setFeeUser(initialFeeUser);
+    }
+  }, [open, initialFeeUser]);
+  
+  const { data: searchResults, isLoading: isSearching } = useUserSearchForDM(searchQuery);
+  const createConversation = useCreateConversation();
+
+  const startConversation = async (user: DeHubUser, firstMessage?: string, feeTxHash?: string) => {
+    const userAddress = user.address || user._id;
+    const userSocketId = user._id || user.id;
+    if (!userAddress) {
+      toast.error(_copy("copy.3c53e332cf13", { defaultValue: "Unable to start conversation with this user" }));
+      return;
+    }
+
+    setSelectedUserId(userAddress);
+
+    try {
+      if (firstMessage && !feeTxHash) {
+        const conversation = await createConversation.mutateAsync({
+          recipientAddress: userAddress,
+          recipientUser: user,
+        });
+        if (conversation.id) {
+          const wire = await prepareOutgoing(userAddress, firstMessage);
+          await emitSendMessage({ dmId: conversation.id, content: wire.content, type: 'msg' });
+        }
+        onConversationCreated(conversation);
+        onOpenChange(false);
+        setSearchQuery.complete(searchQuery, '');
+        setFeeUser(null);
+        return;
+      }
+
+      const conversation = await createConversation.mutateAsync({
+        recipientAddress: userAddress,
+        recipientUser: user,
+      });
+
+      // Fee-paid first message goes through the socket immediately (fee tx already settled)
+      if (firstMessage && conversation.id && feeTxHash) {
+        const wire = await prepareOutgoing(userAddress, firstMessage);
+        await emitSendMessage({
+          dmId: conversation.id,
+          content: wire.content,
+          type: 'msg',
+          txHash: feeTxHash,
+        });
+      }
+
+      onConversationCreated(conversation);
+      onOpenChange(false);
+      setSearchQuery.complete(searchQuery, '');
+      setFeeUser(null);
+    } catch (error: any) {
+      toast.error(error.message || _copy("copy.6ba48fbb4e23", { defaultValue: "Failed to start conversation" }));
+    } finally {
+      setSelectedUserId(null);
+    }
+  };
+
+  const handleSelectUser = (user: DeHubUser) => {
+    const dmSettingsObj = getDmSettings(user);
+    const perMessageFee = dmSettingsObj?.perMessageFee;
+    if (perMessageFee && perMessageFee > 0) {
+      setFeeUser(user);
+      return;
+    }
+    startConversation(user, initialMessage);
+  };
+
+  const handleClose = () => {
+    onOpenChange(false);
+    setSelectedUserId(null);
+    setFeeUser(null);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={handleClose}>
+      <DialogContent className="bg-black/60 backdrop-blur-[24px] border border-white/10 shadow-2xl max-w-md">
+        <DialogHeader>
+          <DialogTitle className="text-white">{title || _copy("copy.8e51a80a4d7d", { defaultValue: "New Message" })}</DialogTitle>
+        </DialogHeader>
+
+        {feeUser ? (
+          <FeePaymentStep
+            user={feeUser}
+            fee={getDmSettings(feeUser)?.perMessageFee ?? 0}
+            onPaid={(firstMessage, feeTxHash) => startConversation(feeUser, firstMessage, feeTxHash)}
+            onBack={() => setFeeUser(null)}
+          />
+        ) : (
+          <>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+              <Input
+                type="search"
+                placeholder={_copy("copy.c45e9566dc3b", { defaultValue: "Search by username..." })}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500 rounded-xl"
+                autoFocus
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery.complete(searchQuery, '')}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 px-2 py-0.5 text-[10px] font-medium text-white/70 bg-white/10 hover:bg-white/20 border border-white/10 rounded-md transition-colors"
+                >{_copy("copy.83b12c2216ef", { defaultValue: "Clear" })}</button>
+              )}
+            </div>
+
+            <div className="max-h-80 overflow-y-auto -mx-2">
+              {searchQuery.length < 2 ? (
+                <div className="text-center py-8 text-zinc-500">
+                  <Search className="w-10 h-10 mx-auto mb-3 opacity-50" />
+                  <p>{_copy("copy.66708e5f5479", { defaultValue: "Enter at least 2 characters to search" })}</p>
+                </div>
+              ) : isSearching ? (
+                <div className="flex justify-center py-8">
+                  <Loader2 className="w-6 h-6 animate-spin text-zinc-500" />
+                </div>
+              ) : searchResults?.items?.length === 0 ? (
+                <AppState icon="search" title={_copy("copy.bf1e104fb3c8", { defaultValue: "No users found" })} description={_copy("copy.36b89662c2f6", { defaultValue: "Try a different search term." })} kind="search-empty" size="compact" />
+              ) : (
+                <div className="space-y-1 px-2">
+                  {searchResults?.items?.map((user) => (
+                    <UserSearchResult
+                      key={user._id || user.address}
+                      user={user}
+                      onSelect={() => handleSelectUser(user)}
+                      isLoading={selectedUserId === (user.address || user._id)}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          </>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}

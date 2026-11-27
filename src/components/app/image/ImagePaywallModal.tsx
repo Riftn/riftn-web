@@ -1,0 +1,287 @@
+import { useTranslation as _useCopy } from 'react-i18next';
+import { useState, lazy, Suspense } from 'react';
+import { useTranslation } from 'react-i18next';
+import { DhbCoin } from '@/components/app/DhbAmount';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Loader2, ImageIcon, AlertCircle, ChevronDown } from 'lucide-react';
+import { ImageModel, ImageModelKey, IMAGE_MODELS, IMAGE_MODEL_OPTIONS, getImageCostUsd } from '@/constants/image-models.constants';
+import dhbCoinImage from '@/assets/dehub-coin.png';
+import { toast } from 'sonner';
+import { useJobQuote, formatDhb, DHB_USD_PEG } from '@/hooks/use-ai-quote';
+import { payForJob, useSpendableDhb } from '@/lib/ai-payment';
+import { useNavigate } from 'react-router-dom';
+
+// Opens when Create is pressed without enough DHB: pay the same amount in another coin.
+const PayWithCoinSheet = lazy(() => import('@/components/app/credits/PayWithCoinSheet'));
+
+interface ImagePaywallModalProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  model: ImageModel;
+  selectedModelKey: ImageModelKey;
+  onModelChange: (modelKey: ImageModelKey) => void;
+  /** Receives the hash of the transfer that paid for this run. */
+  onConfirm: (txHash: string) => void;
+  isGenerating?: boolean;
+  /**
+   * How many images this run will produce. The studio composer lets creators
+   * batch up to 4, and each one costs a full generation, so the charge scales.
+   */
+  quantity?: number;
+}
+
+export function ImagePaywallModal({
+  open,
+  onOpenChange,
+  model,
+  selectedModelKey,
+  onModelChange,
+  onConfirm,
+  isGenerating = false,
+  quantity = 1,
+}: ImagePaywallModalProps) {
+  const { t: _copy } = _useCopy();
+  const [modelSelectorOpen, setModelSelectorOpen] = useState(false);
+  const [isPaying, setIsPaying] = useState(false);
+  const navigate = useNavigate();
+  const { t } = useTranslation();
+
+  const count = Math.max(1, Math.floor(quantity));
+  const unitCostUsd = getImageCostUsd(model);
+  const estimatedCostUsd = unitCostUsd * count;
+
+  // Priced by the server, so the figure shown here is the figure charged.
+  const { priceDhb: costDhb, priceUsd: quotedUsd, isLoading: isQuoting, error: quoteError } = useJobQuote(
+    { kind: 'image', modelId: selectedModelKey, quantity: count },
+    open,
+  );
+  const costUsd = selectedModelKey.startsWith('venice-') ? quotedUsd : estimatedCostUsd;
+  const { walletDhb, isLoading: isWalletLoading } = useSpendableDhb();
+
+  // Someone without the DHB cannot pay at all, so the honest answer is to send
+  // them to buy rather than offer a payment that is guaranteed to fail.
+  const needsTokens = !isWalletLoading && costDhb > 0 && walletDhb < costDhb;
+  const [coinPayOpen, setCoinPayOpen] = useState(false);
+
+  /**
+   * One way to pay: sign a DHB transfer for the price and hand the hash on.
+   *
+   * The generate function verifies that transfer on chain before it spends
+   * anything with a provider, so nothing here is taken on trust — and there is
+   * no balance in between that could hold value no token stands behind.
+   */
+  const handlePayAndGenerate = async (funded = false) => {
+    if (costDhb <= 0) return;
+
+    if (needsTokens && !funded) {
+      setCoinPayOpen(true);
+      return;
+    }
+
+    setIsPaying(true);
+    try {
+      toast.loading(t('tokenPaywall.paying', { amount: formatDhb(costDhb) }), { id: 'image-gen-payment' });
+      const txHash = await payForJob(costDhb);
+      toast.success(_copy("copy.0b8e8c184964", { defaultValue: "Payment confirmed. Generating..." }), { id: 'image-gen-payment' });
+      onConfirm(txHash);
+    } catch (err) {
+      toast.dismiss('image-gen-payment');
+      toast.error(err instanceof Error ? err.message : _copy("copy.4225d535fe99", { defaultValue: "Payment failed." }));
+    } finally {
+      setIsPaying(false);
+    }
+  };
+
+  return (
+    // Locked shut while a transfer is in flight. It cannot be recalled once
+    // signed, and a modal that unmounts mid-payment takes the hash with it —
+    // which is money paid for a generation that then never starts.
+    <>
+    <Dialog open={open} onOpenChange={(next) => { if (!isPaying) onOpenChange(next); }}>
+      <DialogContent className="bg-black/60 backdrop-blur-[24px] border border-white/10 shadow-2xl max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2 text-white">
+            <ImageIcon className="w-5 h-5 text-cyan-400" />{_copy("copy.0f44b5601ade", { defaultValue: "Generate Image" })}</DialogTitle>
+          <DialogDescription className="text-zinc-400">{_copy("copy.a16541cb1ea8", { defaultValue: "Select a model and confirm payment" })}</DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-4 py-4">
+          {/* Model Selector */}
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setModelSelectorOpen(!modelSelectorOpen)}
+              className="w-full bg-zinc-800/50 hover:bg-zinc-800 transition-colors rounded-xl p-4 text-left"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">{model.emoji}</span>
+                  <div>
+                    <p className="font-medium text-white">{model.name}</p>
+                    <p className="text-sm text-zinc-500">{model.description}</p>
+                  </div>
+                </div>
+                <ChevronDown className={`w-5 h-5 text-zinc-400 transition-transform ${modelSelectorOpen ? 'rotate-180' : ''}`} />
+              </div>
+            </button>
+            
+            {modelSelectorOpen && (
+              <div className="absolute top-full left-0 right-0 mt-2 bg-zinc-800 border border-zinc-700 rounded-xl overflow-hidden z-10 max-h-64 overflow-y-auto">
+                {IMAGE_MODEL_OPTIONS.map((option) => {
+                  const optionModel = IMAGE_MODELS[option.id as ImageModelKey];
+                  // Per-option figures are indicative; the selected model is
+                  // re-quoted by the server above before anything is charged.
+                  const optionCostUsd = getImageCostUsd(optionModel) * count;
+                  const optionCostDhb = Math.ceil(optionCostUsd / DHB_USD_PEG);
+
+                  return (
+                    <button
+                      key={option.id}
+                      type="button"
+                      onClick={() => {
+                        onModelChange(option.id as ImageModelKey);
+                        setModelSelectorOpen(false);
+                      }}
+                      className={`w-full flex items-center justify-between gap-3 px-4 py-3 text-left hover:bg-zinc-700 transition-colors ${
+                        selectedModelKey === option.id ? 'bg-zinc-700/50' : ''
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="text-xl">{option.emoji}</span>
+                        <div>
+                          <p className="font-medium text-white text-sm">{option.name}</p>
+                          <p className="text-xs text-zinc-500">{option.description}</p>
+                        </div>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <p className="text-sm font-medium text-white">${optionCostUsd.toFixed(2)}</p>
+                        <p className="text-xs text-zinc-500">{formatDhb(optionCostDhb)} <DhbCoin label={t('buyCoins.tokensUnit')} /></p>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Cost Breakdown */}
+          <div className="bg-zinc-800/50 rounded-xl p-4 space-y-3">
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-zinc-400">
+                {count > 1 ? _copy("copy.4b545391239a", { defaultValue: "Image Cost ({{value1}} × ${{value2}})", value1: count, value2: unitCostUsd.toFixed(2) }) : _copy("copy.b4f74fcb39e3", { defaultValue: "Image Cost" })}
+              </span>
+              <span className="text-zinc-300">${costUsd.toFixed(2)}</span>
+            </div>
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-zinc-400">{_copy("copy.6689b99d8132", { defaultValue: "Staker Discount" })}</span>
+              <span className="text-white font-bold">0%</span>
+            </div>
+            <div className="border-t border-zinc-700 pt-3">
+              <div className="flex items-center justify-between">
+                <span className="text-zinc-300 font-medium">{_copy("copy.c9b3c38247f7", { defaultValue: "Total" })}</span>
+                <span className="text-white font-semibold">${costUsd.toFixed(2)}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* DHB Cost */}
+          <div className="bg-gradient-to-r from-cyan-900/30 to-blue-900/30 rounded-xl p-4 border border-cyan-500/20">
+            {isQuoting ? (
+              <div className="flex items-center justify-center py-2">
+                <Loader2 className="w-5 h-5 animate-spin text-cyan-400" />
+                <span className="ml-2 text-zinc-400">{_copy("copy.b480f1c3b70b", { defaultValue: "Pricing this run..." })}</span>
+              </div>
+            ) : (
+              <>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <img src={dhbCoinImage} alt="" className="w-6 h-6" />
+                    <span className="text-white font-medium">{t('tokenPaywall.payWithTokens')}</span>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xl font-bold text-white">{formatDhb(costDhb)} <DhbCoin label={t('buyCoins.tokensUnit')} /></p>
+                    <p className="text-xs text-zinc-500">≈ ${costUsd.toFixed(3)}</p>
+                  </div>
+                </div>
+
+                {quoteError && (
+                  <div className="flex items-center gap-2 mt-2 text-yellow-500 text-xs">
+                    <AlertCircle className="w-3 h-3" />
+                    <span>{quoteError}</span>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+
+          {/* Wallet balance */}
+          <div className="flex items-center justify-between text-sm bg-zinc-800/30 rounded-lg p-3">
+            <span className="text-zinc-400">{t('tokenPaywall.yourTokens')}</span>
+            <div className="flex items-center gap-2">
+              <img src={dhbCoinImage} alt="" className="w-4 h-4" />
+              {isWalletLoading ? (
+                <Loader2 className="w-4 h-4 animate-spin text-zinc-400" />
+              ) : (
+                <span className={needsTokens ? 'text-red-400' : 'text-white font-bold'}>
+                  {formatDhb(walletDhb)} <DhbCoin label={t('buyCoins.tokensUnit')} />
+                </span>
+              )}
+            </div>
+          </div>
+
+          {count > 1 && (
+            <p className="text-xs text-zinc-400 text-center">{t('creator.batchPaymentHelp')}</p>
+          )}
+
+          {needsTokens && !isQuoting && (
+            <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-3">
+              <p className="text-red-400 text-sm text-center">{_copy("copy.27c7325ba6f7", { defaultValue: "This costs " })}{formatDhb(costDhb)} <DhbCoin label={t('buyCoins.tokensUnit')} />{_copy("copy.3d717322f7c9", { defaultValue: " and you hold " })}{formatDhb(walletDhb)}.
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Actions */}
+        <div className="flex gap-3">
+          <Button
+            variant="outline"
+            className="flex-1 bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700"
+            onClick={() => onOpenChange(false)}
+            disabled={isGenerating || isPaying}
+          >{_copy("copy.19766ed6ccb2", { defaultValue: "Cancel" })}</Button>
+          <Button
+            variant="glass"
+            className="flex-1 font-medium"
+            onClick={() => handlePayAndGenerate()}
+            disabled={isQuoting || isWalletLoading || isGenerating || isPaying}
+          >
+            {isPaying ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />{_copy("copy.6f1c75a574dc", { defaultValue: "Paying..." })}</>
+            ) : isGenerating ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />{_copy("copy.49286f33b674", { defaultValue: "Generating..." })}</>
+            ) : needsTokens ? (
+              t('coinPay.open', { defaultValue: 'Pay with another coin' })
+            ) : (
+              t('tokenPaywall.payAndGenerate', { amount: formatDhb(costDhb) })
+            )}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+      {coinPayOpen && (
+        <Suspense fallback={null}>
+          <PayWithCoinSheet
+            open={coinPayOpen}
+            onOpenChange={setCoinPayOpen}
+            costDhb={costDhb}
+            walletDhb={walletDhb}
+            onFunded={() => { setCoinPayOpen(false); void handlePayAndGenerate(true); }}
+          />
+        </Suspense>
+      )}
+    </>
+  );
+}

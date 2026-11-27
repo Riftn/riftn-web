@@ -1,0 +1,72 @@
+/* ==========================================================================
+   Live viewer, phone web: the "Who's here" sheet and the Follow pill.
+   ==========================================================================
+   Colours come from the post-stage tokens (--stage-*, post-stage.css), so
+   each theme's live surfaces match its post page. Canvas themes draw each
+   list in the sheet as a glass bento; System is full immersive, no boxes,
+   lists full width between hairlines.
+   ========================================================================== */
+
+[data-live-audience-ink] { color: var(--stage-ink, #f4f4f5); }
+[data-live-audience-muted] { color: var(--stage-muted, #9a9aa2); }
+[data-live-audience-accent] { color: var(--stage-accent, #fff); }
+
+[data-live-audience-section] {
+  margin: 0 12px 10px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: var(--stage-glass, rgb(255 255 255 / 0.08));
+  border: 1px solid var(--stage-border, rgb(255 255 255 / 0.12));
+}
+[data-live-audience-label] {
+  margin-bottom: 4px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--stage-muted, #9a9aa2);
+}
+
+html[data-theme='system'] [data-live-audience-section] {
+  margin: 0;
+  padding: 10px 16px;
+  border-radius: 0;
+  background: none;
+  border: 0;
+  border-top: 1px solid var(--stage-border, rgb(255 255 255 / 0.12));
+}
+html[data-theme='system'] [data-live-audience-section] [data-live-audience-row] + [data-live-audience-row] {
+  border-top: 1px solid rgb(255 255 255 / 0.08);
+}
+
+/* Follow on the live frame: a small + on the creator's face. Solid chrome
+   glass (an opaque fill under a glass sheen and rim), so the picture never
+   shows through it and it needs no backdrop blur, which iPhone Safari can't
+   afford over a playing live. Same on every theme: the live frame stays dark. */
+[data-live-follow] {
+  position: absolute;
+  right: -6px;
+  bottom: -6px;
+  width: 20px;
+  height: 20px;
+  border-radius: 7px;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 0.32), rgb(255 255 255 / 0.06) 55%, rgb(255 255 255 / 0.16)),
+    rgb(39 39 42);
+  border: 1px solid rgb(255 255 255 / 0.5);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.6),
+    inset 0 -1px 0 rgb(0 0 0 / 0.35),
+    0 1px 4px rgb(0 0 0 / 0.55);
+  transition: transform 150ms ease;
+}
+/* A finger-sized target around a 20px badge. */
+[data-live-follow]::before {
+  content: '';
+  position: absolute;
+  inset: -10px;
+}
+[data-live-follow]:active { transform: scale(0.9); }

@@ -1,0 +1,318 @@
+import { useTranslation as _useCopy } from 'react-i18next';
+/**
+ * Riftn Link Embed
+ * ================
+ * Turns a parsed Riftn entity link into the right card. Every surface that
+ * shows user-written text — feed cards, comments, DMs, community chat, the
+ * composer — renders links through here, so a store link looks the same in a
+ * DM as it does in the feed and a new entity kind reaches all of them at once.
+ *
+ * The fallback matters as much as the cards. Surfaces strip the URL out of the
+ * text before rendering, on the assumption that the card replaces it — so an
+ * embed that renders `null` when the entity fails to load (deleted, private,
+ * API down) takes the link with it and leaves the reader with a message that
+ * silently lost a third of its meaning. Every card here falls back to a chip
+ * that still goes where the link went.
+ */
+
+import { lazy, Suspense, type ReactNode } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import Link2 from "@/components/ui/cut-icons/link";
+
+import { resolveArticleSlug, resolveNewPost } from '@/lib/api/dehub';
+import type { DehubLinkMatch } from '@/lib/dehub-links';
+import { MAX_EMBEDS_PER_MESSAGE } from '@/lib/dehub-links';
+import { CommunityLinkEmbed } from '@/components/app/communities/CommunityLinkEmbed';
+import { CommunityInviteEmbed } from '@/components/app/communities/CommunityInviteEmbed';
+import { StoreLinkEmbed } from '@/components/app/stores/StoreLinkEmbed';
+import { EventLinkEmbed } from '@/components/app/events/EventLinkEmbed';
+import { StageLinkEmbed } from '@/components/app/stages/StageLinkEmbed';
+import { ProfileLinkEmbed } from '@/components/app/profile/ProfileLinkEmbed';
+import { SharedPostEmbed } from '@/components/app/chat/SharedPostEmbed';
+import { AppLinkEmbed } from '@/components/app/cards/AppLinkEmbed';
+import { ProposalLinkEmbed } from '@/components/app/governance/ProposalLinkEmbed';
+import { PageLinkEmbed } from '@/components/app/links/PageLinkEmbed';
+import { ArcadeLinkEmbed } from '@/components/app/links/ArcadeLinkEmbed';
+import { arcadeSlugOf } from '@/lib/api/dehub/arcade-card';
+
+/**
+ * Lazy, unlike its siblings. This switchboard is on the boot path — every feed
+ * card renders through it — and a static import pulls the whole /cinema data
+ * stack (API client, hooks, the 32-country locale table) into the entry bundle
+ * for the very large majority of sessions that never see a film link. The
+ * guardrail in scripts/check-entry-bundle.mjs fails the build over it.
+ */
+const FilmLinkEmbed = lazy(() =>
+  import('@/components/cinema/FilmLinkEmbed').then((m) => ({ default: m.FilmLinkEmbed }))
+);
+
+/** Lazy: the Requests hooks bring the board's whole data layer with them. */
+const FeatureRequestLinkEmbed = lazy(() =>
+  import('@/components/app/links/FeatureRequestLinkEmbed').then((m) => ({ default: m.FeatureRequestLinkEmbed }))
+);
+
+const SkillLinkEmbed = lazy(() =>
+  import('@/components/app/skills/SkillLinkEmbed').then(m => ({ default: m.SkillLinkEmbed }))
+);
+
+/**
+ * Lazy for the same reason as FilmLinkEmbed: `useWorkJob` pulls in
+ * `@/features/work/hooks/use-work`, which imports the on-chain contract stack
+ * (`dehub-work.ts`, `aa-utils.ts`, wagmi, web3auth) for its escrow/payout
+ * paths. A static import put ~90KB of wallet plumbing on the boot path for
+ * every session, the vast majority of which never see a bounty link.
+ */
+const BountyLinkEmbed = lazy(() =>
+  import('@/features/work/components/BountyLinkEmbed').then((m) => ({ default: m.BountyLinkEmbed }))
+);
+
+/**
+ * What a card renders when its entity could not be loaded: the link, still
+ * clickable, still in-app.
+ */
+export function DehubLinkFallback({ link }: { link: DehubLinkMatch }) {
+  const { t: _copy } = _useCopy();
+  const navigate = useNavigate();
+  const viewLabel = (() => {
+    switch (link.kind) {
+      case 'skill': return _copy('skills.useInAssistant');
+      case 'post': return _copy("copy.fe9715bcd31d", { defaultValue: "View post" });
+      case 'profile': return _copy("copy.d4788f256f73", { defaultValue: "View profile" });
+      case 'community': return _copy("copy.1b46d5d1250d", { defaultValue: "View community" });
+      case 'communityInvite': return _copy("copy.d9a48368402a", { defaultValue: "View community invite" });
+      case 'store': return _copy("copy.8ebcf526fab5", { defaultValue: "View store" });
+      case 'listing': return _copy("copy.89e22d40460e", { defaultValue: "View item" });
+      case 'event': return _copy("copy.691f700a56d1", { defaultValue: "View event" });
+      case 'stage': return _copy("copy.2074fadab822", { defaultValue: "View stage" });
+      case 'film': return _copy("copy.c9916d206fc0", { defaultValue: "View title" });
+      case 'bounty': return _copy("copy.132977c8bc76", { defaultValue: "View bounty" });
+      case 'app': return _copy("copy.34d0f5c1452f", { defaultValue: "View app" });
+      case 'proposal': return _copy("copy.fb66e1c96ee1", { defaultValue: "View proposal" });
+      case 'featureRequest': return _copy('dehubLinks.viewRequest', { defaultValue: 'View request' });
+      case 'page': return _copy('dehubLinks.openPage', { defaultValue: 'Open page' });
+    }
+  })();
+
+  return (
+    <button
+      type="button"
+      onClick={(e) => {
+        e.stopPropagation();
+        navigate(link.path);
+      }}
+      data-no-navigate
+      className="w-full flex items-center gap-2.5 px-3 py-2.5 mt-2 rounded-xl bg-white/[0.04] border border-white/[0.08] hover:bg-white/[0.07] transition-colors text-left"
+    >
+      <div className="w-8 h-8 rounded-lg bg-white/[0.06] flex items-center justify-center flex-shrink-0">
+        <Link2 className="w-4 h-4 text-zinc-500" />
+      </div>
+      <div className="min-w-0">
+        <p className="text-sm font-medium text-white truncate">{viewLabel}</p>
+        <p className="text-xs text-zinc-500 truncate">riftn.com{link.path}</p>
+      </div>
+    </button>
+  );
+}
+
+interface DehubLinkEmbedProps {
+  link: DehubLinkMatch;
+  /**
+   * Posts render at a fixed 280px inside a DM bubble and full-bleed everywhere
+   * else. Defaults to full width because the feed is the common case.
+   */
+  compact?: boolean;
+  className?: string;
+}
+
+/** Resolves /newpost/<n> to its tokenId, then renders the ordinary post card. */
+function NewPostSlugEmbed({
+  newPostId,
+  fullWidth,
+  className,
+  fallback,
+}: {
+  newPostId: string;
+  fullWidth: boolean;
+  className?: string;
+  fallback: ReactNode;
+}) {
+  const { data, isLoading } = useQuery({
+    queryKey: ['newpost-resolve', newPostId],
+    queryFn: () => resolveNewPost(newPostId),
+    // The slug→tokenId mapping never changes once assigned.
+    staleTime: Infinity,
+  });
+
+  if (isLoading) {
+    return <div className="mt-2 h-24 rounded-xl theme-skeleton animate-pulse" />;
+  }
+  if (!data) return <>{fallback}</>;
+
+  return (
+    <SharedPostEmbed
+      tokenId={String(data.tokenId)}
+      fullWidth={fullWidth}
+      className={className}
+      fallback={fallback}
+    />
+  );
+}
+
+/** Resolves /app/post/<article-title-slug> to its tokenId, then renders the ordinary post card. */
+function ArticleSlugEmbed({
+  slug,
+  fullWidth,
+  className,
+  fallback,
+}: {
+  slug: string;
+  fullWidth: boolean;
+  className?: string;
+  fallback: ReactNode;
+}) {
+  const { data, isLoading } = useQuery({
+    queryKey: ['article-slug', slug],
+    queryFn: () => resolveArticleSlug(slug),
+    staleTime: 10 * 60_000,
+  });
+  if (isLoading) {
+    return <div className="mt-2 h-24 rounded-xl theme-skeleton animate-pulse" />;
+  }
+  if (!data) return <>{fallback}</>;
+  return (
+    <SharedPostEmbed
+      tokenId={String(data.tokenId)}
+      fullWidth={fullWidth}
+      className={className}
+      fallback={fallback}
+    />
+  );
+}
+
+export function DehubLinkEmbed({ link, compact = false, className }: DehubLinkEmbedProps) {
+  const fallback = <DehubLinkFallback link={link} />;
+
+  switch (link.kind) {
+    case 'skill':
+      return <Suspense fallback={null}><SkillLinkEmbed slug={link.skillSlug!} path={link.path} fallback={fallback} /></Suspense>;
+    case 'post':
+      // The off-chain slug form carries no tokenId, and everything downstream
+      // keys on one — resolve it first, then render the same card.
+      if (!link.tokenId && link.articleSlug) {
+        return (
+          <ArticleSlugEmbed
+            slug={link.articleSlug}
+            fullWidth={!compact}
+            className={className}
+            fallback={fallback}
+          />
+        );
+      }
+      if (!link.tokenId && link.newPostId) {
+        return (
+          <NewPostSlugEmbed
+            newPostId={link.newPostId}
+            fullWidth={!compact}
+            className={className}
+            fallback={fallback}
+          />
+        );
+      }
+      return (
+        <SharedPostEmbed
+          tokenId={link.tokenId!}
+          fullWidth={!compact}
+          className={className}
+          fallback={fallback}
+        />
+      );
+    case 'profile':
+      return <ProfileLinkEmbed username={link.username!} fallback={fallback} />;
+    case 'community':
+      return <CommunityLinkEmbed slug={link.slug!} fallback={fallback} />;
+    case 'communityInvite':
+      return <CommunityInviteEmbed code={link.code!} fallback={fallback} />;
+    case 'store':
+      return <StoreLinkEmbed storeId={link.storeId!} listingId={null} fallback={fallback} />;
+    case 'listing':
+      return (
+        <StoreLinkEmbed
+          storeId={link.storeId!}
+          listingId={link.listingId!}
+          fallback={fallback}
+        />
+      );
+    case 'event':
+      return <EventLinkEmbed eventNumber={link.eventNumber!} fallback={fallback} />;
+    case 'stage':
+      return <StageLinkEmbed stageId={link.stageId} stageShortId={link.stageShortId} fallback={fallback} />;
+    case 'bounty':
+      // fallback={null}, not the chip — see the film case above for why.
+      return (
+        <Suspense fallback={null}>
+          <BountyLinkEmbed jobKey={link.bountyJobKey!} path={link.path} fallback={fallback} />
+        </Suspense>
+      );
+    case 'film':
+      // fallback={null}, not the chip: the chip is what renders when the title
+      // fails to LOAD, and flashing it for one frame on every film link while
+      // the chunk arrives reads as the card failing and then correcting itself.
+      return (
+        <Suspense fallback={null}>
+          <FilmLinkEmbed link={link} compact={compact} className={className} fallback={fallback} />
+        </Suspense>
+      );
+    case 'app':
+      return <AppLinkEmbed slug={link.appSlug!} path={link.path} fallback={fallback} />;
+    case 'proposal':
+      return <ProposalLinkEmbed proposalId={link.proposalId!} path={link.path} fallback={fallback} />;
+    case 'featureRequest':
+      return (
+        <Suspense fallback={null}>
+          <FeatureRequestLinkEmbed featureRequestId={link.featureRequestId!} path={link.path} fallback={fallback} />
+        </Suspense>
+      );
+    case 'page': {
+      // An arcade game cards as its score card: the game's art, and the
+      // sharer's best when the link names them.
+      const arcadeSlug = arcadeSlugOf(link.pagePath!);
+      if (arcadeSlug) return <ArcadeLinkEmbed slug={arcadeSlug} pagePath={link.pagePath!} path={link.path} fallback={fallback} />;
+      return <PageLinkEmbed pagePath={link.pagePath!} path={link.path} fallback={fallback} />;
+    }
+    default:
+      return fallback;
+  }
+}
+
+/**
+ * Render every Riftn link found in a block of text.
+ *
+ * Capped, because the cap is the difference between a rich message and a wall
+ * of cards: a message that pastes six links gets two cards and keeps the rest
+ * as text (the surfaces only strip what they carded — see `strippedForDisplay`).
+ */
+export { MAX_EMBEDS_PER_MESSAGE };
+
+export function DehubLinkEmbeds({
+  links,
+  compact = false,
+}: {
+  links: DehubLinkMatch[];
+  compact?: boolean;
+}) {
+  if (links.length === 0) return null;
+  return (
+    <>
+      {links.map((link) => (
+        <DehubLinkEmbed key={`${link.kind}-${link.path}`} link={link} compact={compact} />
+      ))}
+    </>
+  );
+}
+
+/**
+ * `useDehubLinks` lives in `DehubLinkEmbedsLazy` — it is a regex over a string
+ * and every feed card calls it, so it must not drag this switchboard onto the
+ * boot path with it.
+ */

@@ -1,0 +1,886 @@
+import { useTranslation as _useCopy } from 'react-i18next';
+/**
+ * Feature Requests Hook
+ * =====================
+ * Data fetching and mutations for the feature request board.
+ * Uses Supabase directly for CRUD operations with optimistic updates.
+ * Aggressively cached in sessionStorage for instant page loads.
+ */
+
+import { useQuery, useInfiniteQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
+import { getAccountInfo, getAccountByUsername } from '@/lib/api/dehub';
+import { extractAvatarPath } from '@/lib/media-url';
+import { escapeFilterValue } from '@/lib/postgrest-filter';
+import { MAX_FEATURE_ATTACHMENTS } from '@/lib/feature-attachments';
+import { collectWebDeviceInfo } from '@/lib/device-info';
+import i18n from '@/i18n';
+import { translateCopy as _translateCopy } from '@/i18n/copy';
+
+/**
+ * True when a write failed only because the column has not reached this
+ * database yet. PostgREST reports it from its schema cache (PGRST204); Postgres
+ * reports it directly (42703) when the cache is stale in the other direction.
+ */
+function isMissingColumn(error: unknown, column: string): boolean {
+  const e = error as { code?: string; message?: string } | null;
+  if (!e) return false;
+  if (e.code !== 'PGRST204' && e.code !== '42703') return false;
+  return typeof e.message === 'string' && e.message.includes(column);
+}
+
+export type FeatureCategory = 'ui_ux' | 'performance' | 'new_feature' | 'bug_fix' | 'integration' | 'other';
+export type FeatureStatus = 'open' | 'under_review' | 'planned' | 'in_progress' | 'completed' | 'shipped' | 'declined';
+export type FeatureSort = 'most_voted' | 'newest';
+
+export interface FeatureRequest {
+  id: string;
+  title: string;
+  description: string;
+  category: FeatureCategory;
+  status: FeatureStatus;
+  author_wallet_address: string;
+  author_username: string | null;
+  author_avatar: string | null;
+  image_url: string | null;
+  /** Every attachment; `image_url` mirrors the first. Read via featureAttachments(). */
+  image_urls?: string[] | null;
+  shipped_url?: string | null;
+  /** Short tag shown next to the status, e.g. "Future review". */
+  status_note?: string | null;
+  /** Shipped with a head start for its poster until this time (lib/early-access). */
+  early_access_until?: string | null;
+  vote_count: number;
+  like_count: number;
+  dislike_count: number;
+  comment_count: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface FeatureRequestVote {
+  id: string;
+  feature_request_id: string;
+  wallet_address: string;
+  vote_type: number;
+}
+
+const CATEGORY_LABELS: Record<FeatureCategory, string> = {
+  get ui_ux() { return _translateCopy("copy.4599f843c38a", { defaultValue: "UI/UX" }); },
+  get performance() { return _translateCopy("copy.442aded87a55", { defaultValue: "Performance" }); },
+  get new_feature() { return _translateCopy("copy.badca3cc6ee9", { defaultValue: "New Feature" }); },
+  get bug_fix() { return _translateCopy("copy.f082d3499d2d", { defaultValue: "Bug Fix" }); },
+  get integration() { return _translateCopy("copy.9a42d40a3f31", { defaultValue: "Integration" }); },
+  get other() { return _translateCopy("copy.f97e9da0e3b8", { defaultValue: "Other" }); },
+};
+
+// Rows submitted before the category enum settled carried `feature`/`bug`.
+// They aren't in CATEGORY_LABELS, so they rendered a blank badge and were
+// invisible under every filter chip except "All".
+//
+// Both the backfill and the CHECK constraint that stops it recurring live in
+// supabase/migrations/20260728000000_normalize_feature_request_categories.sql,
+// so the DB can no longer serve these values. This map is kept as the read-side
+// belt to that braces: it's what makes normalizeCategory total, so an unknown
+// category (constraint dropped, a value added server-side ahead of a client
+// release) degrades to a sensible badge instead of a blank one.
+const LEGACY_CATEGORY_ALIASES: Record<string, FeatureCategory> = {
+  feature: 'new_feature',
+  bug: 'bug_fix',
+};
+
+export function normalizeCategory(category: string): FeatureCategory {
+  if (category in CATEGORY_LABELS) return category as FeatureCategory;
+  return LEGACY_CATEGORY_ALIASES[category] ?? 'other';
+}
+
+function normalizeRows(rows: FeatureRequest[]): FeatureRequest[] {
+  return rows.map((r) =>
+    r.category in CATEGORY_LABELS ? r : { ...r, category: normalizeCategory(r.category) }
+  );
+}
+
+const STATUS_LABELS: Record<FeatureStatus, string> = {
+  get open() { return _translateCopy("copy.ed077f3d8125", { defaultValue: "Open" }); },
+  get under_review() { return _translateCopy("copy.115fe4ba8ea9", { defaultValue: "Under Review" }); },
+  get planned() { return _translateCopy("copy.fb6f7c93e6bf", { defaultValue: "Planned" }); },
+  get in_progress() { return _translateCopy("copy.b4cc4b07c300", { defaultValue: "In Progress" }); },
+  get completed() { return _translateCopy("copy.d332dadf1646", { defaultValue: "Shipped" }); },
+  get shipped() { return _translateCopy("copy.d332dadf1646", { defaultValue: "Shipped" }); },
+  get declined() { return _translateCopy("copy.2ab63e6ced90", { defaultValue: "Not feasible" }); },
+};
+
+export { CATEGORY_LABELS, STATUS_LABELS };
+
+// Session-level cache for instant page loads
+const CACHE_KEY = 'feature-requests-cache';
+const SHIPPED_CACHE_KEY = 'feature-requests-shipped-cache';
+const IN_PROGRESS_CACHE_KEY = 'feature-requests-in-progress-cache';
+
+
+function getSessionCache<T>(key: string): T | undefined {
+  try {
+    const raw = sessionStorage.getItem(key);
+    if (!raw) return undefined;
+    const { data, ts } = JSON.parse(raw);
+    // Cache valid for 5 minutes
+    if (Date.now() - ts > 5 * 60 * 1000) return undefined;
+    return data as T;
+  } catch { return undefined; }
+}
+
+function setSessionCache(key: string, data: unknown) {
+  try {
+    sessionStorage.setItem(key, JSON.stringify({ data, ts: Date.now() }));
+  } catch { /* quota exceeded — ignore */ }
+}
+
+const PAGE_SIZE = 15;
+
+// One request can sit in four caches at once: the paged Prompts list, the
+// Queued and Shipped arrays, and the single row a notification deep link pins.
+// Patching only the paged list left votes and comment counts frozen on every
+// Queued and Shipped card, which is where most of the board lives.
+const FEATURE_ROW_KEYS = [
+  ['feature-requests'],
+  ['feature-requests-shipped'],
+  ['feature-requests-in-progress'],
+  ['feature-requests-not-feasible'],
+  ['feature-request'],
+] as const;
+
+type FeatureQueryClient = ReturnType<typeof useQueryClient>;
+
+export function patchFeatureRow(
+  queryClient: FeatureQueryClient,
+  id: string,
+  patch: (row: FeatureRequest) => FeatureRequest,
+) {
+  const apply = (row: FeatureRequest) => (row?.id === id ? patch(row) : row);
+  for (const queryKey of FEATURE_ROW_KEYS) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    queryClient.setQueriesData({ queryKey }, (old: any) => {
+      if (!old) return old;
+      if (Array.isArray(old.pages)) return { ...old, pages: old.pages.map((page: FeatureRequest[]) => page.map(apply)) };
+      if (Array.isArray(old)) return old.map(apply);
+      if (typeof old === 'object' && 'id' in old) return apply(old);
+      return old;
+    });
+  }
+}
+
+function snapshotFeatureRows(queryClient: FeatureQueryClient) {
+  return FEATURE_ROW_KEYS.flatMap((queryKey) => queryClient.getQueriesData({ queryKey }));
+}
+
+// Edits and deletes change what a row says or whether it exists, so every list
+// that can hold it refetches, not only Prompts.
+function invalidateFeatureRows(queryClient: FeatureQueryClient) {
+  for (const queryKey of FEATURE_ROW_KEYS) queryClient.invalidateQueries({ queryKey });
+  queryClient.invalidateQueries({ queryKey: ['feature-requests-total-count'] });
+}
+
+// Every category a filter chip should match, including the legacy aliases that
+// fold into it — so picking "New Feature" also surfaces rows still stored as
+// `feature`.
+function categoryFilterValues(category: FeatureCategory): string[] {
+  const legacy = Object.entries(LEGACY_CATEGORY_ALIASES)
+    .filter(([, modern]) => modern === category)
+    .map(([old]) => old);
+  return [category, ...legacy];
+}
+
+
+export function useFeatureRequests(sort: FeatureSort, category: FeatureCategory | 'all', search: string, authorWallet?: string) {
+  return useInfiniteQuery({
+    queryKey: ['feature-requests', sort, category, search, authorWallet],
+    queryFn: async ({ pageParam = 0 }) => {
+      let query = supabase
+        .from('feature_requests')
+        .select('*');
+
+      if (authorWallet) query = query.ilike('author_wallet_address', authorWallet);
+      if (category !== 'all') {
+        query = query.in('category', categoryFilterValues(category));
+      }
+
+      if (search.trim()) {
+        const pattern = escapeFilterValue(`%${search.trim()}%`);
+        query = query.or(`title.ilike.${pattern},description.ilike.${pattern}`);
+      }
+
+      switch (sort) {
+        case 'most_voted':
+          query = query.order('vote_count', { ascending: false }).order('created_at', { ascending: false });
+          break;
+        case 'newest':
+          query = query.order('created_at', { ascending: false });
+          break;
+      }
+
+      // Exclude shipped/completed features from the main list — and declined
+      // ones, which are resolved too. In-progress items live on the Shipping tab.
+      query = query.not('status', 'in', '("completed","shipped","declined","in_progress")');
+
+
+      // Pagination
+      query = query.range(pageParam, pageParam + PAGE_SIZE - 1);
+
+      const { data, error } = await query;
+      if (error) throw error;
+      return normalizeRows((data || []) as FeatureRequest[]);
+    },
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) => {
+      if (lastPage.length < PAGE_SIZE) return undefined;
+      return allPages.length * PAGE_SIZE;
+    },
+    staleTime: 60_000,
+    gcTime: 5 * 60_000,
+  });
+}
+
+/**
+ * One feature request by id, for a deep link that has to work whatever the
+ * board is currently showing.
+ *
+ * A notification names a request that may be shipped, declined, filtered out by
+ * the active category, or eighty rows down the infinite list — none of which the
+ * list query would return. This fetches the single row so the page can pin it
+ * above everything else. A request that has since been deleted comes back null
+ * rather than throwing, and the page simply shows the normal board.
+ */
+export function useFeatureRequest(id: string | null) {
+  return useQuery({
+    queryKey: ['feature-request', id],
+    queryFn: async () => {
+      if (!id) return null;
+      const { data, error } = await supabase
+        .from('feature_requests')
+        .select('*')
+        .eq('id', id)
+        .maybeSingle();
+      if (error) throw error;
+      if (!data) return null;
+      return normalizeRows([data as FeatureRequest])[0] ?? null;
+    },
+    enabled: !!id,
+    staleTime: 60_000,
+  });
+}
+
+// `total` is every idea ever submitted (the header line); `open` is what the
+// Requests tab actually lists, counted with the same status filter the list
+// uses so the badge can't drift from the rows below it.
+export function useFeatureCounts(authorWallet?: string) {
+  return useQuery({
+    queryKey: ['feature-requests-total-count', authorWallet],
+    queryFn: async () => {
+      const count = () => {
+        const query = supabase.from('feature_requests').select('*', { count: 'exact', head: true });
+        return authorWallet ? query.ilike('author_wallet_address', authorWallet) : query;
+      };
+      const [totalRes, openRes] = await Promise.all([
+        count(),
+        count().not('status', 'in', '("completed","shipped","declined","in_progress")'),
+      ]);
+      if (totalRes.error) throw totalRes.error;
+      if (openRes.error) throw openRes.error;
+      return { total: totalRes.count ?? 0, open: openRes.count ?? 0 };
+    },
+    staleTime: 60_000,
+    gcTime: 5 * 60_000,
+  });
+}
+
+async function fetchStatusRows(statuses: FeatureStatus[], authorWallet?: string): Promise<FeatureRequest[]> {
+  const rows: FeatureRequest[] = [];
+  const pageSize = 500;
+  // The REST API caps each response. Apply status and author on every page.
+  for (let offset = 0; ; offset += pageSize) {
+    let query = supabase.from('feature_requests').select('*').in('status', statuses);
+    if (authorWallet) query = query.ilike('author_wallet_address', authorWallet);
+    const { data, error } = await query.order('updated_at', { ascending: false })
+      .order('id', { ascending: false }).range(offset, offset + pageSize - 1);
+    if (error) throw error;
+    const page = (data ?? []) as FeatureRequest[];
+    rows.push(...page);
+    if (page.length < pageSize) return normalizeRows(rows);
+  }
+}
+
+export function useShippedFeatures(authorWallet?: string) {
+  return useQuery({
+    queryKey: ['feature-requests-shipped', authorWallet],
+    queryFn: async () => {
+      const result = await fetchStatusRows(['completed', 'shipped'], authorWallet);
+      if (!authorWallet) setSessionCache(SHIPPED_CACHE_KEY, result);
+      return result;
+    },
+    initialData: () => authorWallet ? undefined : getSessionCache<FeatureRequest[]>(SHIPPED_CACHE_KEY),
+    initialDataUpdatedAt: () => {
+      if (authorWallet) return undefined;
+      try {
+        const raw = sessionStorage.getItem(SHIPPED_CACHE_KEY);
+        if (raw) return JSON.parse(raw).ts;
+      } catch {}
+      return undefined;
+    },
+    staleTime: 60_000,
+    gcTime: 5 * 60_000,
+  });
+}
+
+export function useInProgressFeatures(authorWallet?: string) {
+  return useQuery({
+    queryKey: ['feature-requests-in-progress', authorWallet],
+    queryFn: async () => {
+      const result = await fetchStatusRows(['in_progress'], authorWallet);
+      if (!authorWallet) setSessionCache(IN_PROGRESS_CACHE_KEY, result);
+      return result;
+    },
+    initialData: () => authorWallet ? undefined : getSessionCache<FeatureRequest[]>(IN_PROGRESS_CACHE_KEY),
+    initialDataUpdatedAt: () => {
+      if (authorWallet) return undefined;
+      try {
+        const raw = sessionStorage.getItem(IN_PROGRESS_CACHE_KEY);
+        if (raw) return JSON.parse(raw).ts;
+      } catch {}
+      return undefined;
+    },
+    staleTime: 60_000,
+    gcTime: 5 * 60_000,
+  });
+}
+
+// "Not feasible" — requests the board owners have ruled out (status
+// `declined`), with their optional reason in status_note. Few rows, so one
+// query and newest decisions first.
+export function useNotFeasibleFeatures(authorWallet?: string) {
+  return useQuery({
+    queryKey: ['feature-requests-not-feasible', authorWallet],
+    queryFn: () => fetchStatusRows(['declined'], authorWallet),
+    staleTime: 60_000,
+    gcTime: 5 * 60_000,
+  });
+}
+
+export function useUserVotes() {
+  const { walletAddress } = useAuth();
+
+  return useQuery({
+    queryKey: ['feature-request-votes', walletAddress],
+    queryFn: async () => {
+      if (!walletAddress) return {};
+      const { data, error } = await supabase
+        .from('feature_request_votes')
+        .select('feature_request_id, vote_type')
+        .eq('wallet_address', walletAddress.toLowerCase());
+
+      if (error) throw error;
+
+      const voteMap: Record<string, number> = {};
+      for (const vote of data || []) {
+        voteMap[vote.feature_request_id] = vote.vote_type;
+      }
+      return voteMap;
+    },
+    enabled: !!walletAddress,
+    staleTime: 60_000,
+  });
+}
+
+// The generated Database type doesn't include this table yet (managed via
+// migration, not regenerated) — reach it through a loosely-typed handle,
+// same escape hatch santa-leaderboard.ts uses.
+const shippedNotifications = () =>
+  (supabase as unknown as { from: (t: string) => any }).from('feature_shipped_notifications');
+
+export interface ShippedFeatureNotice {
+  id: string;
+  title: string;
+  description: string;
+  category: FeatureCategory;
+  shipped_url: string | null;
+  updated_at: string;
+}
+
+// Shipped items authored by this wallet that it hasn't been shown a
+// "your request shipped!" popup for yet — includes items shipped long before
+// this table existed, since eligibility is just "shipped + not yet notified".
+// Throw-proof (same reasoning as santa-leaderboard.ts): if the
+// feature_shipped_notifications migration hasn't landed yet, this quietly
+// returns [] instead of erroring on every authenticated page load.
+export function useUnnotifiedShippedFeatures() {
+  const { walletAddress, isAuthenticated } = useAuth();
+
+  return useQuery({
+    queryKey: ['feature-requests-unnotified-shipped', walletAddress],
+    queryFn: async () => {
+      const wallet = walletAddress!.toLowerCase();
+
+      try {
+        const [shippedRes, notifiedRes] = await Promise.all([
+          supabase
+            .from('feature_requests')
+            .select('id, title, description, category, shipped_url, updated_at')
+            .eq('author_wallet_address', wallet)
+            .in('status', ['completed', 'shipped']),
+          shippedNotifications()
+            .select('feature_request_id')
+            .eq('wallet_address', wallet)
+            .setHeader('x-wallet-address', wallet),
+        ]);
+
+        if (shippedRes.error || notifiedRes.error) return [];
+
+        const notifiedIds = new Set(
+          ((notifiedRes.data || []) as { feature_request_id: string }[]).map((n) => n.feature_request_id)
+        );
+        return ((shippedRes.data || []) as ShippedFeatureNotice[]).filter((f) => !notifiedIds.has(f.id));
+      } catch {
+        return [];
+      }
+    },
+    enabled: isAuthenticated && !!walletAddress,
+    staleTime: 60_000,
+    retry: false,
+  });
+}
+
+// Marks a batch of shipped feature requests as "notified" for this wallet so
+// the popup never shows again for them (upsert + ignoreDuplicates makes this
+// safe to call more than once, e.g. from two tabs).
+export function useMarkShippedNotified() {
+  const queryClient = useQueryClient();
+  const { walletAddress } = useAuth();
+
+  return useMutation({
+    mutationFn: async (featureRequestIds: string[]) => {
+      if (!walletAddress || featureRequestIds.length === 0) return;
+      const wallet = walletAddress.toLowerCase();
+      const rows = featureRequestIds.map((feature_request_id) => ({
+        wallet_address: wallet,
+        feature_request_id,
+      }));
+
+      const { error } = await shippedNotifications()
+        .upsert(rows, { onConflict: 'wallet_address,feature_request_id', ignoreDuplicates: true })
+        .setHeader('x-wallet-address', wallet);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['feature-requests-unnotified-shipped', walletAddress] });
+    },
+  });
+}
+
+/**
+ * Put a request's attachments in the `feature-media` bucket and hand back
+ * their public URLs, in order.
+ */
+async function uploadFeatureFiles(files: File[], walletAddress: string): Promise<string[]> {
+  const urls: string[] = [];
+  // Sequential rather than parallel: the filename is stamped with Date.now(),
+  // and concurrent uploads of same-extension files collide on it.
+  for (const [index, file] of files.entries()) {
+    const ext = file.name.split('.').pop()?.toLowerCase() || 'bin';
+    const filePath = `${walletAddress.toLowerCase()}/${Date.now()}-${index}.${ext}`;
+    const { error: uploadError } = await supabase.storage
+      .from('feature-media')
+      .upload(filePath, file, { contentType: file.type, upsert: false });
+    if (uploadError) throw new Error(`Upload failed: ${uploadError.message}`);
+    const { data: urlData } = supabase.storage.from('feature-media').getPublicUrl(filePath);
+    urls.push(urlData.publicUrl);
+  }
+  return urls;
+}
+
+/**
+ * Sends the device snapshot for a just-posted request. Fire and forget: a
+ * failure here must never cost the user their post. Board owners read it back
+ * with useFeatureDeviceInfo.
+ */
+function attachDeviceInfo(id: string | undefined, walletAddress: string, username?: string | null) {
+  if (!id) return;
+  try {
+    const info = collectWebDeviceInfo({ username, wallet: walletAddress, language: i18n.language });
+    // attach_feature_request_device_info is newer than the generated types.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    void (supabase as any)
+      .rpc('attach_feature_request_device_info', { p_id: id, p_info: info })
+      .setHeader('x-wallet-address', walletAddress.toLowerCase())
+      .then(({ error }: { error: unknown }) => { if (error) console.warn('Device info not attached', error); });
+  } catch (err) {
+    console.warn('Device info not attached', err);
+  }
+}
+
+/** When to look again for the title the server writes for an untitled request. */
+const TITLE_REFRESH_DELAYS_MS = [4_000, 12_000];
+
+export function useSubmitFeatureRequest() {
+  const { t: _copy } = _useCopy();
+  const queryClient = useQueryClient();
+  const { walletAddress, user } = useAuth();
+
+  return useMutation({
+    mutationFn: async ({ title, description, category, mediaFiles }: { title: string; description: string; category: FeatureCategory; mediaFiles?: File[] | null }) => {
+      if (!walletAddress) throw new Error(_translateCopy("copy.76d1efbeed2d", { defaultValue: "Not authenticated" }));
+
+      const files = (mediaFiles ?? []).slice(0, MAX_FEATURE_ATTACHMENTS);
+      const imageUrls = await uploadFeatureFiles(files, walletAddress);
+
+      const imageUrl = imageUrls[0] ?? null;
+
+      // Resolve avatar: auth context → wallet lookup → username lookup
+      let avatarPath = user?.avatarImageUrl || null;
+      if (!avatarPath && walletAddress) {
+        try {
+          const accountInfo = await getAccountInfo(walletAddress);
+          avatarPath = extractAvatarPath(accountInfo) || null;
+        } catch {
+          // continue to username fallback
+        }
+      }
+      if (!avatarPath && user?.username) {
+        try {
+          const accountInfoByUsername = await getAccountByUsername(user.username, walletAddress);
+          avatarPath = extractAvatarPath(accountInfoByUsername) || null;
+        } catch {
+          // Silently fail — avatar is optional
+        }
+      }
+
+      const row = {
+        title: title.trim(),
+        description: description.trim(),
+        category,
+        image_url: imageUrl,
+        author_wallet_address: walletAddress.toLowerCase(),
+        author_username: user?.username || null,
+        author_avatar: avatarPath,
+      };
+
+      // image_urls postdates the generated types, so the payload is widened to
+      // the row shape the database actually accepts.
+      type FeatureRequestInsert = typeof row & { image_urls?: string[] };
+      const insert = (payload: FeatureRequestInsert) =>
+        supabase
+          .from('feature_requests')
+          .insert(payload)
+          .select()
+          .single()
+          .setHeader('x-wallet-address', walletAddress.toLowerCase());
+
+      const { data, error } = await insert(
+        imageUrls.length > 0 ? { ...row, image_urls: imageUrls } : row,
+      );
+
+      // The board must keep accepting reports even where image_urls has not been
+      // migrated in yet: retry on the single-attachment shape rather than losing
+      // the submission. image_url already holds the first upload, so only the
+      // extra attachments are dropped, and the toast says so.
+      if (error && isMissingColumn(error, 'image_urls')) {
+        const retry = await insert(row);
+        if (retry.error) throw retry.error;
+        if (imageUrls.length > 1) {
+          toast.warning(_copy("copy.70db7d7e716b", { defaultValue: "Only the first attachment was saved — attachments are still rolling out" }));
+        }
+        attachDeviceInfo(retry.data?.id, walletAddress, user?.username);
+        return retry.data;
+      }
+
+      if (error) throw error;
+      attachDeviceInfo(data?.id, walletAddress, user?.username);
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['feature-requests'] });
+      queryClient.invalidateQueries({ queryKey: ['feature-requests-total-count'] });
+      // A request posted without a title is named on the server a moment
+      // later; look again so the new heading replaces the repeated first line.
+      for (const ms of TITLE_REFRESH_DELAYS_MS) {
+        setTimeout(() => queryClient.invalidateQueries({ queryKey: ['feature-requests'] }), ms);
+      }
+      toast.success(_copy("copy.27873a08f25d", { defaultValue: "Feature request submitted!" }));
+    },
+    onError: (error) => {
+      console.error('Submit feature request failed:', error);
+      toast.error(_copy("copy.c7ea1b9c02fb", { defaultValue: "Failed to submit feature request" }));
+    },
+  });
+}
+
+export function useVoteFeatureRequest() {
+  const { t: _copy } = _useCopy();
+  const queryClient = useQueryClient();
+  const { walletAddress } = useAuth();
+
+  return useMutation({
+    mutationFn: async ({ featureRequestId, voteType, currentVote }: { featureRequestId: string; voteType: 1 | -1; currentVote: number | undefined }) => {
+      if (!walletAddress) throw new Error(_translateCopy("copy.76d1efbeed2d", { defaultValue: "Not authenticated" }));
+
+      const wallet = walletAddress.toLowerCase();
+
+      if (currentVote === voteType) {
+        // Remove vote (toggle off)
+        const { error } = await supabase
+          .from('feature_request_votes')
+          .delete()
+          .eq('feature_request_id', featureRequestId)
+          .eq('wallet_address', wallet)
+          .setHeader('x-wallet-address', wallet);
+
+        if (error) throw error;
+        return { action: 'removed' as const };
+      } else {
+        // Upsert vote
+        const { error } = await supabase
+          .from('feature_request_votes')
+          .upsert(
+            {
+              feature_request_id: featureRequestId,
+              wallet_address: wallet,
+              vote_type: voteType,
+            },
+            { onConflict: 'feature_request_id,wallet_address' }
+          )
+          .setHeader('x-wallet-address', wallet);
+
+        if (error) throw error;
+        return { action: 'voted' as const };
+      }
+    },
+    onMutate: async ({ featureRequestId, voteType, currentVote }) => {
+      // Cancel in-flight queries
+      for (const queryKey of FEATURE_ROW_KEYS) await queryClient.cancelQueries({ queryKey });
+      await queryClient.cancelQueries({ queryKey: ['feature-request-votes'] });
+
+      // Snapshot previous state
+      const previousRequests = snapshotFeatureRows(queryClient);
+      const previousVotes = queryClient.getQueryData(['feature-request-votes', walletAddress]);
+
+      // Optimistically update votes map
+      queryClient.setQueryData(['feature-request-votes', walletAddress], (old: Record<string, number> | undefined) => {
+        const newVotes = { ...(old || {}) };
+        if (currentVote === voteType) {
+          delete newVotes[featureRequestId];
+        } else {
+          newVotes[featureRequestId] = voteType;
+        }
+        return newVotes;
+      });
+
+      // Optimistically update vote count + like/dislike counts wherever the row is cached
+      patchFeatureRow(queryClient, featureRequestId, (fr) => {
+        let voteDelta: number = voteType;
+        let likeDelta = 0;
+        let dislikeDelta = 0;
+
+        if (currentVote === voteType) {
+          // Toggle off
+          voteDelta = -voteType as number;
+          likeDelta = voteType === 1 ? -1 : 0;
+          dislikeDelta = voteType === -1 ? -1 : 0;
+        } else if (currentVote) {
+          // Switching
+          voteDelta = voteType - currentVote;
+          likeDelta = voteType === 1 ? 1 : -1;
+          dislikeDelta = voteType === -1 ? 1 : -1;
+        } else {
+          // New vote
+          likeDelta = voteType === 1 ? 1 : 0;
+          dislikeDelta = voteType === -1 ? 1 : 0;
+        }
+
+        return {
+          ...fr,
+          vote_count: fr.vote_count + voteDelta,
+          like_count: Math.max(0, (fr.like_count ?? 0) + likeDelta),
+          dislike_count: Math.max(0, (fr.dislike_count ?? 0) + dislikeDelta),
+        };
+      });
+
+      return { previousRequests, previousVotes };
+    },
+    onError: (_err, _vars, context) => {
+      // Rollback
+      if (context?.previousRequests) {
+        for (const [key, data] of context.previousRequests) {
+          queryClient.setQueryData(key, data);
+        }
+      }
+      if (context?.previousVotes) {
+        queryClient.setQueryData(['feature-request-votes', walletAddress], context.previousVotes);
+      }
+      toast.error(_copy("copy.485fbbcb6b0e", { defaultValue: "Vote failed. Please try again." }));
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['feature-request-votes'] });
+      // Also refresh feature requests to pick up DB-computed like/dislike counts
+      queryClient.invalidateQueries({ queryKey: ['feature-requests'], refetchType: 'none' });
+    },
+  });
+}
+
+export function useEditFeatureRequest() {
+  const { t: _copy } = _useCopy();
+  const queryClient = useQueryClient();
+  const { walletAddress } = useAuth();
+
+  return useMutation({
+    mutationFn: async ({ id, title, description, category, keepUrls, newFiles }: {
+      id: string; title: string; description: string; category: FeatureCategory;
+      /** The attachments to keep, in order. Leave out to keep them untouched. */
+      keepUrls?: string[];
+      /** New photos or videos added while editing. */
+      newFiles?: File[];
+    }) => {
+      if (!walletAddress) throw new Error(_translateCopy("copy.76d1efbeed2d", { defaultValue: "Not authenticated" }));
+      const patch: { title: string; description: string; category: FeatureCategory; image_url?: string | null; image_urls?: string[] | null } = {
+        title: title.trim(), description: description.trim(), category,
+      };
+      if (keepUrls || newFiles?.length) {
+        const room = Math.max(0, MAX_FEATURE_ATTACHMENTS - (keepUrls?.length ?? 0));
+        const added = await uploadFeatureFiles((newFiles ?? []).slice(0, room), walletAddress);
+        const urls = [...(keepUrls ?? []), ...added].slice(0, MAX_FEATURE_ATTACHMENTS);
+        patch.image_url = urls[0] ?? null;
+        patch.image_urls = urls.length ? urls : null;
+      }
+      const { data, error } = await supabase
+        .from('feature_requests')
+        .update(patch as never)
+        .eq('id', id)
+        .select()
+        .single()
+        .setHeader('x-wallet-address', walletAddress.toLowerCase());
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      invalidateFeatureRows(queryClient);
+      toast.success(_copy("copy.b8af57e311aa", { defaultValue: "Feature request updated!" }));
+    },
+    onError: () => {
+      toast.error(_copy("copy.db455cae992e", { defaultValue: "Failed to update feature request" }));
+    },
+  });
+}
+
+/**
+ * Accounts that can move any request to Queued or Shipped, whoever posted it.
+ * Only decides who sees the controls: the database's
+ * feature_request_status_editor_wallets() is the real check.
+ */
+// maldoteth's wallet since the 2026-11-09 move (the old one was erased).
+const FEATURE_STATUS_EDITOR_WALLETS = ['0xec4e2c7417f781b35d830671f013b3b91f29ba64']; // maldoteth
+
+export function isFeatureStatusEditor(wallet: string | null | undefined): boolean {
+  return !!wallet && FEATURE_STATUS_EDITOR_WALLETS.includes(wallet.toLowerCase());
+}
+
+/** Statuses the owners set from the page: Requests, Queued, Shipped, Not feasible. */
+export type EditableFeatureStatus = 'open' | 'in_progress' | 'shipped' | 'declined';
+
+export function useSetFeatureStatus() {
+  const { t: _copy } = _useCopy();
+  const queryClient = useQueryClient();
+  const { walletAddress } = useAuth();
+
+  return useMutation({
+    mutationFn: async ({ id, status, note }: { id: string; status: EditableFeatureStatus; note?: string }) => {
+      if (!walletAddress) throw new Error(_translateCopy("copy.76d1efbeed2d", { defaultValue: "Not authenticated" }));
+      // set_feature_request_status is newer than the generated types.
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { error } = await (supabase as any)
+        .rpc('set_feature_request_status', status === 'declined'
+          ? { p_id: id, p_status: status, p_note: note?.trim() || null }
+          : { p_id: id, p_status: status })
+        .setHeader('x-wallet-address', walletAddress.toLowerCase());
+      if (error) throw error;
+      return status;
+    },
+    onSuccess: (status) => {
+      invalidateFeatureRows(queryClient);
+      toast.success(
+        status === 'shipped'
+          ? _copy("copy.366cb56b38ce", { defaultValue: "Marked Shipped" })
+          : status === 'in_progress'
+            ? _copy("copy.ae6a0ffbe609", { defaultValue: "Marked Queued" })
+            : status === 'declined'
+              ? _copy("copy.79688f176607", { defaultValue: "Marked Not feasible" })
+            : _copy("copy.9db7b5ba03bb", { defaultValue: "Moved back to Requests" }),
+      );
+    },
+    onError: () => {
+      toast.error(_copy("copy.bb2be752e079", { defaultValue: "Couldn't change the status" }));
+    },
+  });
+}
+
+export function useDeleteFeatureRequest() {
+  const { t: _copy } = _useCopy();
+  const queryClient = useQueryClient();
+  const { walletAddress } = useAuth();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      if (!walletAddress) throw new Error(_translateCopy("copy.76d1efbeed2d", { defaultValue: "Not authenticated" }));
+      const { error } = await supabase
+        .from('feature_requests')
+        .delete()
+        .eq('id', id)
+        .setHeader('x-wallet-address', walletAddress.toLowerCase());
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      invalidateFeatureRows(queryClient);
+      toast.success(_copy("copy.be692c8e223e", { defaultValue: "Feature request deleted" }));
+    },
+    onError: () => {
+      toast.error(_copy("copy.b500b2068ac7", { defaultValue: "Failed to delete feature request" }));
+    },
+  });
+}
+
+/** Requests that carry a device snapshot. Board owners only; empty for everyone else. */
+export function useFeatureDeviceInfoIds() {
+  const { walletAddress } = useAuth();
+  const enabled = isFeatureStatusEditor(walletAddress);
+  return useQuery({
+    queryKey: ['feature-device-info-ids', walletAddress],
+    enabled,
+    staleTime: 60_000,
+    queryFn: async () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data, error } = await (supabase as any)
+        .rpc('feature_request_device_info_ids')
+        .setHeader('x-wallet-address', (walletAddress ?? '').toLowerCase());
+      if (error) throw error;
+      return new Set<string>(((data ?? []) as (string | { feature_request_device_info_ids: string })[])
+        .map(row => (typeof row === 'string' ? row : row.feature_request_device_info_ids)));
+    },
+  });
+}
+
+/** One request's device snapshot, fetched when the owner opens the row. */
+export function useFeatureDeviceInfo(id: string, open: boolean) {
+  const { walletAddress } = useAuth();
+  return useQuery({
+    queryKey: ['feature-device-info', id, walletAddress],
+    enabled: open && isFeatureStatusEditor(walletAddress),
+    staleTime: Infinity,
+    queryFn: async () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data, error } = await (supabase as any)
+        .rpc('get_feature_request_device_info', { p_id: id })
+        .setHeader('x-wallet-address', (walletAddress ?? '').toLowerCase());
+      if (error) throw error;
+      return (data ?? null) as Record<string, unknown> | null;
+    },
+  });
+}

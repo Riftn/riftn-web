@@ -1,0 +1,227 @@
+// Governance vote weight, decided on the server.
+//
+// The board weights a vote by the voter's staking badge: Crab counts once,
+// Megalodon counts thirteen times. That weight used to be computed in the
+// browser and sent up with the vote, which made it a number anyone could
+// choose — `vote_weight: 999` was a valid request. Weight is derived here
+// instead, from the balance the API reports for the wallet the token belongs
+// to, and the client's opinion is discarded.
+//
+// The ladder below mirrors `src/lib/staking-badges.ts`. It is duplicated
+// rather than imported because that module pulls in thirteen badge images
+// through Vite's `@/assets` alias, which no Deno function can resolve.
+// `src/lib/__tests__/governance-weight-parity.test.ts` fails the build if the
+// two ever disagree, so the copy cannot rot quietly.
+
+const BADGE_LEVELS: { name: string; min: number }[] = [
+  { name: "Crab", min: 10000 },
+  { name: "Ghost Lobster", min: 25000 },
+  { name: "Piranha", min: 50000 },
+  { name: "Giant Tortoise", min: 100000 },
+  { name: "King Cobra", min: 250000 },
+  { name: "Octopus", min: 500000 },
+  { name: "Crocodile", min: 1000000 },
+  { name: "Dolphin", min: 2000000 },
+  { name: "Tiger Shark", min: 3000000 },
+  { name: "Great White Shark", min: 5000000 },
+  { name: "Killer Whale", min: 10000000 },
+  { name: "Blue Whale", min: 25000000 },
+  { name: "Megalodon", min: 50000000 },
+];
+
+/** Tier → weight. One step per rung, which is the whole rule. */
+export const BADGE_VOTE_WEIGHT: Record<string, number> = Object.fromEntries(
+  BADGE_LEVELS.map((b, i) => [b.name, i + 1]),
+);
+
+const BADGE_ORDER = BADGE_LEVELS.map((b) => b.name);
+
+const USERNAME_BADGE_OVERRIDES: Record<string, string> = {
+  maldoteth: "Megalodon",
+  aaron: "Megalodon",
+  ma255: "Ghost Lobster",
+  dehubprime: "King Cobra",
+  algiers: "King Cobra",
+  angelbeattales: "Ghost Lobster",
+  infinitebaffle: "King Cobra",
+  angieluthien: "Octopus",
+  beinsports: "Ghost Lobster",
+};
+
+const BADGE_PRICE_ANCHOR = 0.001;
+const MAX_BADGE_SCALE = 1;
+const MIN_BADGE_SCALE = 0.001;
+
+function significant(value: number, digits: number): number {
+  if (!Number.isFinite(value) || value === 0) return 0;
+  return Number(value.toPrecision(digits));
+}
+
+export function badgeScaleForPrice(price: unknown): number {
+  const numeric = typeof price === "string" ? Number.parseFloat(price) : price;
+  if (typeof numeric !== "number" || !Number.isFinite(numeric) || numeric <= 0) return MAX_BADGE_SCALE;
+  const raw = significant(BADGE_PRICE_ANCHOR / numeric, 2);
+  return Math.min(MAX_BADGE_SCALE, Math.max(MIN_BADGE_SCALE, raw));
+}
+
+function thresholds(scale: number): { name: string; min: number }[] {
+  let previous = 0;
+  return BADGE_LEVELS.map((level) => {
+    const min = Math.max(1, previous + 1, significant(level.min * scale, 3));
+    previous = min;
+    return { name: level.name, min };
+  });
+}
+
+/**
+ * Tier names as they were spelled before 2026-09-13, mapped to the real ones.
+ *
+ * Mirrors `LEGACY_TIER_NAMES` in `src/lib/staking-badges.ts`. It matters more
+ * here than anywhere else, because **an edge function does not ride the
+ * deploy** — this file ships only when somebody redeploys governance-vote, so
+ * it is routinely a different age from the data it reads. It has to survive a
+ * stored lock in either spelling, in both directions: old rows before the
+ * backend's rename migration, new rows after it.
+ */
+const LEGACY_TIER_NAMES: Record<string, string> = {
+  Lobster: "Ghost Lobster",
+  Crocodite: "Crocodile",
+  Meglodon: "Megalodon",
+  Tortoise: "Giant Tortoise",
+  Cobra: "King Cobra",
+};
+
+function canonicalTierName(name: string): string {
+  return LEGACY_TIER_NAMES[name] ?? name;
+}
+
+function tierIndex(name: string | null): number {
+  return name ? BADGE_ORDER.indexOf(canonicalTierName(name)) : -1;
+}
+
+function earnedTier(amount: number, scale: number): string | null {
+  let current: string | null = null;
+  for (const b of thresholds(scale)) {
+    if (amount >= b.min) current = b.name;
+    else break;
+  }
+  return current;
+}
+
+export interface BadgeLock {
+  tier: string;
+  requirement: number;
+}
+
+export function parseBadgeLock(raw: unknown): BadgeLock | null {
+  if (!raw || typeof raw !== "object") return null;
+  const { tier, requirement } = raw as { tier?: unknown; requirement?: unknown };
+  if (typeof tier !== "string" || tierIndex(tier) < 0) return null;
+  const amount = typeof requirement === "string" ? parseFloat(requirement) : requirement;
+  if (typeof amount !== "number" || !Number.isFinite(amount) || amount <= 0) return null;
+  // Return the current spelling — `weightedTier` below compares it against the
+  // ladder, and a lock that parses but never matches is the same bug wearing a
+  // different hat.
+  return { tier: canonicalTierName(tier), requirement: amount };
+}
+
+/**
+ * The tier a holder draws: the one the ladder gives them, unless the tier they
+ * grandfathered is higher and they still hold what it cost.
+ */
+export function badgeTier(
+  badgeBalance: unknown,
+  username?: string | null,
+  opts: { scale?: number; lock?: unknown } = {},
+): string | null {
+  let granted: string | null = null;
+  if (username) {
+    const clean = username.replace("@", "").trim().toLowerCase();
+    if (Object.prototype.hasOwnProperty.call(USERNAME_BADGE_OVERRIDES, clean)) {
+      granted = USERNAME_BADGE_OVERRIDES[clean];
+    }
+  }
+  const amount = typeof badgeBalance === "string" ? parseFloat(badgeBalance) : badgeBalance;
+  if (typeof amount !== "number" || !Number.isFinite(amount)) return granted;
+
+  const scale = opts.scale ?? MAX_BADGE_SCALE;
+  const earned = earnedTier(amount, scale);
+  const lock = parseBadgeLock(opts.lock);
+  const locked = lock && amount >= lock.requirement ? lock.tier : null;
+  const highestEarned = tierIndex(locked) > tierIndex(earned) ? locked : earned;
+  return tierIndex(granted) > tierIndex(highestEarned) ? granted : highestEarned;
+}
+
+export interface ResolvedWeight {
+  weight: number;
+  badgeName: string | null;
+  /**
+   * Set only with `ownOnly`: the account wears a badge, but it was lent to it
+   * and what it holds itself earns none.
+   */
+  lent?: boolean;
+}
+
+const DEHUB_API_BASE = "https://api.dehub.io";
+
+// The pure tier resolver is also imported by the web regression tests.
+// Declare only the server runtime API this module uses.
+declare const Deno: { env: { get(key: string): string | undefined } };
+
+/** The DHB price the ladder is scaled by. A failed lookup means scale 1. */
+async function ladderScale(): Promise<number> {
+  try {
+    const url = `${Deno.env.get("SUPABASE_URL")}/functions/v1/get-dhb-price`;
+    const res = await fetch(url, {
+      headers: { apikey: Deno.env.get("SUPABASE_ANON_KEY") ?? "" },
+    });
+    if (!res.ok) return MAX_BADGE_SCALE;
+    const data = await res.json();
+    return badgeScaleForPrice(data?.prices?.DHB);
+  } catch {
+    return MAX_BADGE_SCALE;
+  }
+}
+
+/**
+ * The weight `wallet` votes with, read from the API's account row.
+ *
+ * Weight 0 means no badge, which the caller must treat as "cannot vote" — the
+ * board has always required a holding to vote and this is where that is now
+ * actually enforced. An unreachable API returns 0 rather than 1: failing open
+ * would hand a free vote to anyone who could make the lookup fail.
+ */
+export async function resolveVoteWeight(
+  wallet: string,
+  requireAccount = false,
+  opts: { ownOnly?: boolean } = {},
+): Promise<ResolvedWeight> {
+  let account: Record<string, unknown> | null = null;
+  try {
+    const res = await fetch(`${DEHUB_API_BASE}/api/account_info/${encodeURIComponent(wallet)}`);
+    if (res.ok) {
+      const body = await res.json();
+      account = (body && typeof body === "object" && "result" in body ? body.result : body) ?? null;
+    }
+  } catch {
+    account = null;
+  }
+  if (!account) {
+    if (requireAccount) throw new Error("Badge allowance is temporarily unavailable.");
+    return { weight: 0, badgeName: null };
+  }
+
+  const scale = await ladderScale();
+  const username = (account.username as string) ?? null;
+  const rendered = badgeTier(account.badgeBalance, username, { scale, lock: account.badgeLock });
+
+  // `badgeBalance` folds in a badge lent to this account. Governance counts
+  // only what the voter holds, so a lent badge is shown but does not vote.
+  // Older API rows without `ownBadgeBalance` fall back to the rendered figure.
+  const own = account.ownBadgeBalance;
+  const badgeName = opts.ownOnly && own !== undefined && own !== null
+    ? badgeTier(own, username, { scale, lock: account.badgeLock })
+    : rendered;
+  if (!badgeName) return { weight: 0, badgeName: null, lent: !!opts.ownOnly && !!rendered };
+  return { weight: BADGE_VOTE_WEIGHT[badgeName] ?? 1, badgeName };
+}

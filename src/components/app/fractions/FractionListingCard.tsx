@@ -1,0 +1,109 @@
+import { tokenLabel } from '@/lib/token-label';
+/**
+ * Fraction Listing Card
+ * =====================
+ * One listing in the market grid.
+ *
+ * The post title, thumbnail and creator are read off the listing row, not
+ * fetched. They were snapshotted when the listing was created precisely so a
+ * grid of sixty cards is one Supabase query instead of sixty /api/feed calls —
+ * the token id is the only field here that decides anything.
+ */
+
+import { memo } from 'react';
+import { useTranslation } from 'react-i18next';
+import { DhbCoin } from '@/components/app/DhbAmount';
+import Users from "@/components/ui/cut-icons/communities";
+
+import { FractionThumb } from './FractionThumb';
+import { truncateAddress } from '@/lib/api/token-holders';
+import { useTokenPrices } from '@/hooks/use-token-prices';
+import { SellerTrustBadge } from './SellerTrustBadge';
+import { TOTAL_FRACTIONS, type FractionListing, type FractionSellerStats } from '@/hooks/use-fraction-marketplace';
+import dehubCoin from '@/assets/dehub-coin.png';
+
+interface FractionListingCardProps {
+  listing: FractionListing;
+  stats?: FractionSellerStats | null;
+  isMine?: boolean;
+  onClick: () => void;
+}
+
+export const FractionListingCard = memo(function FractionListingCard({
+  listing,
+  stats,
+  isMine,
+  onClick,
+}: FractionListingCardProps) {
+  const { t } = useTranslation();
+  const available = listing.quantity - listing.filled_quantity;
+  const totalDhb = available * listing.price_per_fraction;
+  const { data: prices } = useTokenPrices();
+  const dhbUsd = prices?.DHB ?? 0;
+
+  // Share of the whole upload this listing represents. It is the number that
+  // makes a fraction price mean something — 50 of 1000 is 5% of the post.
+  const sharePct = (available / TOTAL_FRACTIONS) * 100;
+  const free = Number(listing.price_per_fraction) === 0;
+
+  return (
+    <button
+      onClick={onClick}
+      className="text-left rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm overflow-hidden hover:border-white/20 transition-colors group"
+    >
+      <div className="aspect-square bg-white/5 relative overflow-hidden">
+        <FractionThumb
+          tokenId={String(listing.token_id)}
+          imageUrl={listing.post_image_url}
+          title={listing.post_title}
+          postType={listing.post_type}
+          className="group-hover:scale-105 transition-transform duration-300"
+        />
+        <span data-on-media className="absolute top-2 left-2 text-[10px] font-semibold bg-black/70 text-white/90 px-1.5 py-0.5 rounded backdrop-blur-sm">
+          {available} / {TOTAL_FRACTIONS}
+        </span>
+        {free && !isMine && (
+          <span data-on-media className="absolute top-2 right-2 text-[10px] font-semibold bg-emerald-500/90 text-white px-1.5 py-0.5 rounded">
+            {t('fractions.freeBadge')}
+          </span>
+        )}
+        {isMine && (
+          <span className="absolute top-2 right-2 text-[10px] font-semibold bg-white/90 text-black px-1.5 py-0.5 rounded">
+            {t('fractions.yours')}
+          </span>
+        )}
+      </div>
+
+      <div className="p-3 space-y-1">
+        <h3 className="text-sm font-medium text-white truncate">
+          {listing.post_title || t('fractions.postNumber', { id: listing.token_id })}
+        </h3>
+        <p className="text-xs text-zinc-400 truncate flex items-center gap-1">
+          <Users className="w-3 h-3 shrink-0" />
+          {listing.creator_username || truncateAddress(listing.seller_address)}
+        </p>
+
+        {free ? (
+          <>
+            <p className="text-sm font-semibold text-white pt-0.5">{t('fractions.claim')}</p>
+            <p className="text-[10px] text-zinc-500">{t('fractions.freeShare', { pct: sharePct.toFixed(1) })}</p>
+          </>
+        ) : (
+          <>
+        <p className="text-sm font-semibold text-white flex items-center gap-1 pt-0.5">
+          <img src={dehubCoin} alt={tokenLabel()} className="w-4 h-4" />
+          {listing.price_per_fraction.toLocaleString(undefined, { maximumFractionDigits: 4 })}
+          <span className="text-[10px] font-normal text-zinc-500">{t('fractions.perFractionShort')}</span>
+        </p>
+        <p className="text-[10px] text-zinc-500">
+          {totalDhb.toLocaleString(undefined, { maximumFractionDigits: 2 })} <DhbCoin /> {t('fractions.forShareOfPost', { pct: sharePct.toFixed(1) })}
+          {dhbUsd > 0 && ` · $${(totalDhb * dhbUsd).toLocaleString(undefined, { maximumFractionDigits: 2 })}`}
+        </p>
+          </>
+        )}
+
+        <SellerTrustBadge stats={stats} compact className="pt-0.5" />
+      </div>
+    </button>
+  );
+});

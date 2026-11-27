@@ -1,0 +1,543 @@
+import { useTranslation as _useCopy } from 'react-i18next';
+import { useSurfaceDraft } from '@/hooks/use-surface-draft';
+/**
+ * General AI Chat Component
+ * =========================
+ * Grok-style AI chat interface for general questions.
+ * 
+ * RULE: All AI responses MUST be rendered through MarkdownText
+ * to ensure proper formatting (bold, italic, lists, etc.)
+ */
+
+import { useState, useRef, useEffect } from 'react';
+import { useTranslation as useI18n } from 'react-i18next';
+import { Loader2, ImageIcon } from "lucide-react";
+import Sparkles from "@/components/ui/cut-icons/assistant";
+
+import X from "@/components/ui/cut-icons/close";
+import Send from "@/components/ui/cut-icons/send";
+import Share from "@/components/ui/cut-icons/share";
+
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Button } from '@/components/ui/button';
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { supabase } from '@/integrations/supabase/client';
+import { invokeAi, readFunctionError } from '@/lib/ai-invoke';
+import { fetchJobQuote, formatDhb } from '@/hooks/use-ai-quote';
+import { payForJob } from '@/lib/ai-payment';
+import { toast } from 'sonner';
+import { useAuth } from '@/contexts/AuthContext';
+import { MarkdownText } from '@/lib/markdown';
+import { AssistantActionCard } from '@/components/app/assistant/AssistantActionCard';
+import { assistantActionIds, withoutAssistantActionLinks } from '@/lib/assistant-action-links';
+import { PostModal } from '@/features/post';
+import { SwapActionCard } from './SwapActionCard';
+import dehubLogo from '@/assets/riftn-logo-white.png';
+import {
+  isDeHubBrandedImageRequest,
+  requiresImageGeneration,
+  requiresLogoAsset,
+} from '@/lib/ai-intent';
+
+interface SwapAction {
+  tokenIn: string;
+  tokenOut: string;
+  tokenInSymbol: string;
+  tokenOutSymbol: string;
+  amount: string;
+  amountType: 'input' | 'output';
+}
+
+interface Message {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  imageUrl?: string;
+  attachedImage?: string;
+  swapAction?: SwapAction;
+}
+
+function buildDeHubBrandPrompt(userRequest: string): string {
+  return `RIFTN BRAND SYSTEM — "SM Template 2.0" (mandatory):
+- The attached image is the official Riftn wordmark. Composite it prominently, crisp, unaltered, pure white, with clear space around it. Do not redraw, recolor, gradient-fill, warp, or replace it.
+- Palette: STRICTLY monochrome. Black and charcoal grounds, brushed-steel and polished-chrome greys, cool off-whites, pure white highlights. NO colour hues at all — no red, orange, yellow, magenta, purple, green, blue, teal — and no neon or tinted ambient glow. Any ambient tint must read as cool near-white, under 10% saturation.
+- Ground: never flat black. Silk / brushed texture with a soft radial vignette, faint starfield dust, and a very faint dotted lattice that rakes across the frame — strongest at the upper-left light catch, gone by the lower-right.
+- Hero: ONE large photoreal chrome or black-metal object matched to the subject matter, lit from the upper-left, radial white glow behind it, deep drop shadow, bleeding off the RIGHT and BOTTOM edges of the frame. Never centred and contained.
+- Logo placement: the plain white Riftn logo sits bottom-left, straight on the art with only a soft dark halo. No pill, no white box, no black logo on white.
+- Chrome furniture: a mono "// type =" annotation stamp top-right and a QR bottom-right. Any box around them is four short CORNER BRACKETS (crop marks), never a dashed or solid rectangle. No "//dehub.io" mark; the only site is riftn.com.
+- Typography if any: Exo / Exo 2 only (geometric technical sans-serif), UPPERCASE display with a horizontal grey-to-white sweep, pure white or silver, generous letter-spacing. No emoji. No generic AI clichés.
+
+USER REQUEST: ${userRequest}`;
+}
+
+// Check if logo request also wants something creative (not just "show me the logo")
+function isCreativeLogoRequest(message: string): boolean {
+  const lower = message.toLowerCase();
+  const simpleShowPatterns = [
+    /^show\s*(me\s*)?(the\s*)?(riftn|dehub|ftv|your|official|brand|company)?\s*logo\.?$/,
+    /^(riftn|dehub|ftv)\s*logo\.?$/,
+    /^(the\s*)?(riftn|dehub|ftv|official)\s*logo\.?$/,
+    /^display\s*(the\s*)?(riftn|dehub|ftv)?\s*logo\.?$/
+  ];
+  
+  if (simpleShowPatterns.some(pattern => pattern.test(lower.trim()))) {
+    return false;
+  }
+  return true;
+}
+
+// Convert an image URL to base64 data URL
+async function imageUrlToBase64(url: string): Promise<string> {
+  const response = await fetch(url);
+  const blob = await response.blob();
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
+interface GeneralAIChatProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export function GeneralAIChat({ isOpen, onClose }: GeneralAIChatProps) {
+  const { t: _copy } = _useCopy();
+  const { walletAddress, openLoginModal } = useAuth();
+  const isMobile = useIsMobile();
+  const { t } = useI18n();
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [input, setInput] = useSurfaceDraft("components/app/chat/GeneralAIChat.tsx:input", '');
+  const [isLoading, setIsLoading] = useState(false);
+  const [attachedImage, setAttachedImage] = useState<string | null>(null);
+  const [postModalOpen, setPostModalOpen] = useState(false);
+  const [postModalFiles, setPostModalFiles] = useState<FileList | null>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Generate initial welcome message
+  useEffect(() => {
+    if (isOpen && messages.length === 0) {
+      setMessages([{
+        id: 'initial',
+        role: 'assistant',
+        content: t('aiChat.welcomeGeneral')
+      }]);
+    }
+  }, [isOpen]);
+
+  // Auto-scroll to bottom
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [messages]);
+
+  // Focus input when opened
+  useEffect(() => {
+    if (isOpen && inputRef.current) {
+      setTimeout(() => inputRef.current?.focus(), 100);
+    }
+  }, [isOpen]);
+
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      setAttachedImage(event.target?.result as string);
+    };
+    reader.readAsDataURL(file);
+    
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const handleSend = async () => {
+    if (!input.trim() || isLoading) return;
+
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      role: 'user',
+      content: input.trim(),
+      attachedImage: attachedImage || undefined
+    };
+
+    setMessages(prev => [...prev, userMessage]);
+    const currentInput = input.trim();
+    const currentAttachedImage = attachedImage;
+    setIsLoading(true);
+
+    try {
+      // Check if user wants to use the official logo in their image
+      const wantsDeHubBrand = isDeHubBrandedImageRequest(currentInput);
+      const wantsLogo = wantsDeHubBrand || requiresLogoAsset(currentInput);
+      const isCreativeLogo = wantsLogo && isCreativeLogoRequest(currentInput);
+      
+      // If just asking "show me the logo" without creative context, display it directly
+      if (wantsLogo && !isCreativeLogo) {
+        const assistantMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: t('aiChat.officialLogo'),
+          imageUrl: dehubLogo
+        };
+        setMessages(prev => [...prev, assistantMessage]);
+        if (setInput.complete(input, '')) setAttachedImage(null);
+        setIsLoading(false);
+        return;
+      }
+      
+      // For Riftn-branded requests, send the logo through the dedicated `logoImage`
+      // channel so the server's brand pipeline runs (scene + composite + brand rules).
+      // Sending it as `sourceImage` would bypass the pipeline and just edit the logo.
+      let effectiveSourceImage = currentAttachedImage;
+      let brandLogoImage: string | undefined;
+      if (wantsDeHubBrand) {
+        brandLogoImage = await imageUrlToBase64(dehubLogo);
+      } else if (isCreativeLogo) {
+        effectiveSourceImage = await imageUrlToBase64(dehubLogo);
+      }
+      const isImageRequest = isCreativeLogo || requiresImageGeneration(currentInput, !!currentAttachedImage);
+      
+      if (isImageRequest) {
+        // Generation is paid in live DHB, so this pays before it asks. There
+        // is no paywall modal on this surface — the price is quoted, the
+        // transfer is signed, and the hash rides along with the request. The
+        // model id matches generate-image's own default, or the quote would
+        // price a job the server is not about to run.
+        const { priceDhb } = await fetchJobQuote({ kind: 'image', modelId: 'gemini-2.5-flash' });
+        toast.loading(t('tokenPaywall.paying', { amount: formatDhb(priceDhb) }), { id: 'chat-image-payment' });
+        const txHash = await payForJob(priceDhb);
+        toast.dismiss('chat-image-payment');
+
+        const { data, error } = await invokeAi('generate-image', {
+          body: {
+            prompt: wantsDeHubBrand ? buildDeHubBrandPrompt(currentInput) : currentInput,
+            sourceImage: effectiveSourceImage || undefined,
+            logoImage: brandLogoImage,
+            txHash,
+          }
+        });
+
+
+        // The reason lives in the response body, not on the wrapper: throwing
+        // `error` raw showed "Edge Function returned a non-2xx status code" for a
+        // spent balance, a rate limit and a safety block alike.
+        if (error) throw new Error(await readFunctionError(error, data));
+
+        // Check for error in response (like safety blocks)
+        if (data.error) {
+          setMessages(prev => [...prev, {
+            id: (Date.now() + 1).toString(),
+            role: 'assistant',
+            content: data.error
+          }]);
+          return;
+        }
+
+        const assistantMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: data.text || (currentAttachedImage ? t('aiChat.editedImage') : t('aiChat.generatedImage')),
+          imageUrl: data.imageUrl
+        };
+
+        setMessages(prev => [...prev, assistantMessage]);
+        if (setInput.complete(input, '')) setAttachedImage(null);
+      } else {
+        const { data, error } = await supabase.functions.invoke('general-ai-chat', {
+          body: {
+            messages: [...messages, userMessage].map(m => ({
+              role: m.role,
+              content: m.content
+            })),
+            // The token is what proves who is asking — the API verifies it and
+            // scopes the personal-data tools to that account.
+            surface: 'assistant',
+            dehubToken: localStorage.getItem('dehub_token') || undefined,
+            isAuthenticated: !!walletAddress,
+          }
+        });
+
+        if (error) throw new Error(await readFunctionError(error, data));
+
+        const assistantMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: data.response || t('aiChat.noResponse'),
+          swapAction: data.swapAction || undefined,
+        };
+
+        setMessages(prev => [...prev, assistantMessage]);
+        if (setInput.complete(input, '')) setAttachedImage(null);
+      }
+    } catch (error) {
+      console.error('AI chat error:', error);
+      toast.dismiss('chat-image-payment');
+      // Carry the reason inside the translated line rather than replacing it,
+      // so "not enough DHB" or "rate limited" still reaches the user.
+      const reason = error instanceof Error ? error.message : '';
+      setMessages(prev => [...prev, {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: reason ? _copy("copy.e85262958f06", { defaultValue: "Sorry, I encountered an error ({{value1}}). Please try again.", value1: reason }) : t('aiChat.errorGeneric')
+      }]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  };
+
+  const handleClose = () => {
+    setMessages([]);
+    setAttachedImage(null);
+    onClose();
+  };
+
+  // Convert base64 image to FileList for PostModal
+  const handlePostImage = async (imageUrl: string) => {
+    try {
+      const response = await fetch(imageUrl);
+      const blob = await response.blob();
+      const file = new File([blob], 'ai-generated-image.png', { type: 'image/png' });
+      
+      const dataTransfer = new DataTransfer();
+      dataTransfer.items.add(file);
+      
+      setPostModalFiles(dataTransfer.files);
+      setPostModalOpen(true);
+    } catch (error) {
+      console.error('Error preparing image for post:', error);
+    }
+  };
+
+  const chatContent = (
+    <div className="flex flex-col h-full">
+      {/* Messages */}
+      <ScrollArea className="flex-1 px-4 [&>div>div]:!block [&_[data-radix-scroll-area-scrollbar]]:hidden" ref={scrollRef}>
+        <div className="py-4 space-y-4">
+          <AnimatePresence mode="popLayout">
+            {messages.map((message) => (
+              <motion.div
+                key={message.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+              >
+                <div
+                  className={`max-w-[85%] rounded-2xl px-4 py-2.5 ${
+                    message.role === 'user'
+                      ? 'bg-primary text-primary-foreground'
+                      : 'bg-white/10 text-white'
+                  }`}
+                >
+                  {/* Show attached image for user messages */}
+                  {message.attachedImage && (
+                    <div className="mb-2">
+                      <img 
+                        src={message.attachedImage} 
+                        alt={_copy("copy.ac6d9b76a141", { defaultValue: "Attached" })} 
+                        className="max-w-full max-h-48 rounded-lg object-contain"
+                      />
+                    </div>
+                  )}
+                  {message.role === 'assistant' ? (
+                    <>
+                      <MarkdownText content={withoutAssistantActionLinks(message.content)} className="text-sm" />
+                      {assistantActionIds(message.content).map((id) => (
+                        <AssistantActionCard key={id} actionId={id} />
+                      ))}
+                      {/* Show swap action card */}
+                      {message.swapAction && (
+                        <SwapActionCard action={message.swapAction} autoQuote />
+                      )}
+                      {/* Show generated image for assistant messages */}
+                      {message.imageUrl && (
+                        <div className="mt-2 space-y-2">
+                          <img 
+                            src={message.imageUrl} 
+                            alt={_copy("copy.827ec8d9f99d", { defaultValue: "Generated" })} 
+                            className="max-w-full rounded-lg"
+                          />
+                          <Button
+                            size="sm"
+                            onClick={() => handlePostImage(message.imageUrl!)}
+                            className="w-full gap-2 rounded-full"
+                          >
+                            <Share className="w-4 h-4" />
+                            {t('aiChat.post')}
+                          </Button>
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                  )}
+                </div>
+              </motion.div>
+            ))}
+          </AnimatePresence>
+          {isLoading && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="flex justify-start"
+            >
+              <div className="bg-white/10 rounded-2xl px-4 py-3">
+                <Loader2 className="w-4 h-4 animate-spin text-white/60" />
+              </div>
+            </motion.div>
+          )}
+        </div>
+      </ScrollArea>
+
+      {/* Input */}
+      <div className="p-4 border-t border-white/10">
+        {/* Attached image preview */}
+        {attachedImage && (
+          <div className="mb-2 relative inline-block">
+            <img 
+              src={attachedImage} 
+              alt={_copy("copy.ac6d9b76a141", { defaultValue: "Attached" })} 
+              className="max-h-24 rounded-lg object-contain"
+            />
+            <button
+              onClick={() => setAttachedImage(null)}
+              className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center"
+            >
+              <X className="w-3 h-3 text-white" />
+            </button>
+          </div>
+        )}
+        
+        <div className="flex gap-1.5 sm:gap-2">
+          {/* Hidden file input */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleImageSelect}
+            className="hidden"
+          />
+          
+          {/* Image upload button */}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => fileInputRef.current?.click()}
+                className="rounded-xl shrink-0 border-white/20 bg-white/5 hover:bg-white/10 w-9 h-9 sm:w-10 sm:h-10"
+              >
+                <ImageIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white/70" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>{t('aiChat.attachImage')}</TooltipContent>
+          </Tooltip>
+          
+          <input
+            ref={inputRef}
+            type="text"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder={attachedImage ? t('aiChat.describeEdits') : t('aiChat.askAnything')}
+            className="flex-1 bg-white/10 border border-white/10 rounded-full px-3 py-2 sm:px-4 sm:py-2.5 text-sm text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-primary/50"
+          />
+          <Button
+            size="icon"
+            onClick={handleSend}
+            disabled={!input.trim() || isLoading}
+            className="rounded-full shrink-0 w-9 h-9 sm:w-10 sm:h-10"
+          >
+            <Send className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+
+  // Prompt login if not authenticated
+  if (!walletAddress) {
+    if (isOpen) {
+      onClose();
+      openLoginModal();
+    }
+    return null;
+  }
+
+  if (isMobile) {
+    return (
+      <>
+        <Drawer open={isOpen} onOpenChange={(open) => !open && handleClose()}>
+          <DrawerContent data-ai-chat glass className="h-[85vh]">
+            <DrawerHeader className="border-b border-white/10 pb-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-5 h-5 text-white" />
+                  <DrawerTitle className="text-white">{t('aiChat.title')}</DrawerTitle>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleClose}
+                  className="text-white/60 hover:text-white"
+                >
+                  <X className="w-5 h-5" />
+                </Button>
+              </div>
+            </DrawerHeader>
+            {chatContent}
+          </DrawerContent>
+        </Drawer>
+
+        <PostModal
+          isOpen={postModalOpen}
+          onClose={() => setPostModalOpen(false)}
+          initialFiles={postModalFiles}
+          onFilesProcessed={() => setPostModalFiles(null)}
+        />
+      </>
+    );
+  }
+
+  return (
+    <>
+      <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
+        <DialogContent data-ai-chat className="max-w-lg h-[600px] p-0 bg-black/40 backdrop-blur-2xl border border-white/10 shadow-2xl flex flex-col">
+          <DialogHeader className="p-4 border-b border-white/10 shrink-0">
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-white" />
+              <DialogTitle className="text-white">{t('aiChat.title')}</DialogTitle>
+            </div>
+          </DialogHeader>
+          <div className="flex-1 overflow-hidden">
+            {chatContent}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <PostModal
+        isOpen={postModalOpen}
+        onClose={() => setPostModalOpen(false)}
+        initialFiles={postModalFiles}
+        onFilesProcessed={() => setPostModalFiles(null)}
+      />
+    </>
+  );
+}

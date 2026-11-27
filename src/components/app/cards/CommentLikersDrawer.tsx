@@ -1,0 +1,167 @@
+/**
+ * Comment Likers Drawer
+ * =====================
+ * Who liked a comment or reply. Opened by the comment's author tapping the
+ * like button on their own comment — you can't like your own, so that button
+ * is the door to this list instead.
+ *
+ * AUTHOR-ONLY, ON BOTH SIDES
+ * The client only routes the author here, but the gate that matters is the
+ * server's: /api/comment-likers returns an empty list with
+ * `canViewLikers: false` to anyone who didn't write the comment. So an empty
+ * `data` is ambiguous on its own — always read `canViewLikers` before
+ * rendering "no likes yet".
+ *
+ * Same middle-column clipping trick as ReactionInfoDrawer: on desktop the
+ * sheet pins to the feed column via `--app-main-left` / `--app-main-width` so
+ * it reads as part of the post, and falls back to a full-width bottom sheet
+ * below 768px.
+ */
+
+import { useMemo } from 'react';
+import { useInfiniteQuery } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { Loader2 } from "lucide-react";
+import ThumbsUp from "@/components/ui/cut-icons/like";
+
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { getCommentLikers, type CommentLiker } from '@/lib/api/dehub';
+import { buildAvatarUrl, extractAvatarPath } from '@/lib/media-url';
+import { BadgedName } from '@/components/app/BadgedName';
+import { AppState } from '@/components/app/AppState';
+
+import { formatCount } from '@/lib/format-count';
+import { profilePath } from '@/lib/profile-path';
+const PAGE_SIZE = 50;
+
+interface CommentLikersDrawerProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  /** Null while no comment is selected — the query stays disabled. */
+  commentId: string | null;
+  /** Where the likers come from; post comments read the Riftn API. */
+  loadPage?: typeof getCommentLikers;
+  /** Keeps a different source's pages out of the post cache. */
+  cacheScope?: string;
+}
+
+export function CommentLikersDrawer({ open, onOpenChange, commentId, loadPage = getCommentLikers, cacheScope = 'post' }: CommentLikersDrawerProps) {
+  const navigate = useNavigate();
+  const { t } = useTranslation();
+
+  const {
+    data,
+    isLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
+    queryKey: ['comment-likers', cacheScope, commentId],
+    queryFn: async ({ pageParam = 0 }) => {
+      const response = await loadPage(commentId!, pageParam, PAGE_SIZE);
+      return { ...response, page: pageParam };
+    },
+    getNextPageParam: (lastPage) => (lastPage.pagination?.hasMore ? lastPage.page + 1 : undefined),
+    initialPageParam: 0,
+    enabled: open && !!commentId,
+    staleTime: 1000 * 30,
+  });
+
+  const firstPage = data?.pages?.[0];
+  const canView = firstPage?.canViewLikers !== false;
+  const anonymousCount = firstPage?.anonymousBadgeHolderCount ?? 0;
+  const rows = useMemo(() => data?.pages.flatMap((page) => page.data ?? []) ?? [], [data]);
+  const totalCount = firstPage?.pagination?.totalCount ?? 0;
+
+  const goToProfile = (person: CommentLiker) => {
+    onOpenChange(false);
+    if (person.username) navigate(profilePath(person.username.replace('@', '')));
+    else if (person.address) navigate(`/app/profile?id=${person.address}`);
+  };
+
+  return (
+    <Drawer open={open} onOpenChange={onOpenChange}>
+      <DrawerContent
+        data-comment-likers-drawer
+        column
+        className="bg-black/60 backdrop-blur-2xl backdrop-saturate-[180%] border border-white/10 border-b-0 p-0 gap-0 rounded-t-2xl overflow-hidden z-[200] flex flex-col max-h-[80dvh]"
+      >
+        <DrawerHeader className="px-5 pt-4 pb-3 shrink-0">
+          <DrawerTitle className="text-base font-medium text-white text-center flex items-center justify-center gap-2">
+            <ThumbsUp aria-hidden="true" className="w-4 h-4" />
+            {t('postInfo.likes')}
+            <span className="text-white/40 font-normal">· {formatCount(totalCount)}</span>
+          </DrawerTitle>
+        </DrawerHeader>
+
+        <div className="flex-1 min-h-0 overflow-y-auto px-4 pb-6">
+          {isLoading ? (
+            <div className="flex items-center justify-center py-10">
+              <Loader2 className="w-5 h-5 text-zinc-500 animate-spin" />
+            </div>
+          ) : !canView ? (
+            <AppState icon="lock" title={t('comments.likersPrivateTitle')} description={t('comments.likersPrivateBody')} kind="restricted" size="drawer" />
+          ) : rows.length === 0 && anonymousCount === 0 ? (
+            <AppState icon="pinned" title={t('comments.likersEmptyTitle')} description={t('comments.likersEmptyBody')} size="drawer" />
+          ) : (
+            <div className="space-y-2">
+              {anonymousCount > 0 ? (
+                <div className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-zinc-300">
+                  {t('comments.anonymousLikes', { count: anonymousCount })}
+                </div>
+              ) : null}
+              {rows.map((person) => {
+                const displayName =
+                  person.displayName || person.username || person.address?.slice(0, 8) || t('comments.unknownUser');
+                const avatarUrl = buildAvatarUrl(person.address, extractAvatarPath(person));
+                return (
+                  <button
+                    key={person.address}
+                    onClick={() => goToProfile(person)}
+                    className="w-full flex items-center gap-3 p-3 rounded-xl bg-white/5 backdrop-blur-md border border-white/10 hover:bg-white/10 transition-colors text-left"
+                  >
+                    <Avatar className="w-10 h-10 rounded-lg">
+                      {avatarUrl ? <AvatarImage src={avatarUrl} alt={displayName} /> : null}
+                      <AvatarFallback className="bg-zinc-800 text-white rounded-lg text-sm">
+                        {displayName[0].toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <BadgedName
+                        badgeBalance={person.badgeBalance}
+                        username={person.username}
+                        className="font-semibold text-white text-sm"
+                        wrapperClassName="flex w-full"
+                      >
+                        {displayName}
+                      </BadgedName>
+                      {person.username && (
+                        <span className="text-zinc-500 text-xs truncate block">
+                          @{person.username.replace('@', '')}
+                        </span>
+                      )}
+                    </div>
+                  </button>
+                );
+              })}
+
+              {hasNextPage && (
+                <button
+                  onClick={() => fetchNextPage()}
+                  disabled={isFetchingNextPage}
+                  className="w-full py-3 rounded-xl bg-white/5 border border-white/10 text-sm text-white/70 hover:bg-white/10 hover:text-white transition-colors disabled:opacity-50"
+                >
+                  {isFetchingNextPage ? t('common.loading') : t('common.loadMore')}
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+      </DrawerContent>
+    </Drawer>
+  );
+}
+
+export default CommentLikersDrawer;

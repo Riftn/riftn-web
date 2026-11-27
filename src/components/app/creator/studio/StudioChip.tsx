@@ -1,0 +1,326 @@
+import { useSurfaceDraft } from '@/hooks/use-surface-draft';
+/**
+ * Composer setting chips.
+ * =======================
+ * The horizontally scrolling rail under the prompt box. Each chip shows its
+ * current value and opens a popover to change it, so every setting stays one
+ * tap away instead of hiding behind a settings screen.
+ *
+ * Shape rule for the studio: chips and pills are fully rounded, controls are
+ * rounded-xl, panels are rounded-2xl.
+ */
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { ChevronDown, Minus } from "lucide-react";
+import Check from "@/components/ui/cut-icons/check";
+
+import Plus from "@/components/ui/cut-icons/add";
+import Search from "@/components/ui/cut-icons/search";
+
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { cn } from '@/lib/utils';
+import { useCloseOnSurfaceSwitch, useSurfaceEpoch } from '@/hooks/use-surface-switch';
+
+// Matches the liquid-glass button spec at the top of src/index.css:
+// bg-white/10 + backdrop-blur-xl + border-white/20, hover to /20 and /40.
+const CHIP_BASE =
+  'inline-flex shrink-0 items-center gap-1 rounded-full border border-white/20 bg-white/10 px-2 py-1.5 text-[12px] font-medium text-white/85 backdrop-blur-xl transition hover:border-white/40 hover:bg-white/20 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 disabled:cursor-not-allowed disabled:opacity-40';
+
+export interface ChipOption<T extends string> {
+  value: T;
+  label: string;
+  /** Second line inside the popover row. */
+  detail?: string;
+  /** Right-aligned metadata, typically a price. */
+  meta?: string;
+  disabled?: boolean;
+  disabledReason?: string;
+}
+
+interface SelectChipProps<T extends string> {
+  label: string;
+  value: T;
+  options: ChipOption<T>[];
+  onChange: (value: T) => void;
+  /** Shown instead of the raw value on the chip face. */
+  display?: string;
+  disabled?: boolean;
+  /** Popover width. Model lists need more room than aspect ratios. */
+  width?: 'sm' | 'md';
+  /**
+   * Add a filter box above the list. Worth it once the catalogue is long
+   * enough that finding a named model means scrolling and reading.
+   */
+  searchable?: boolean;
+  /** Placeholder for the filter box. */
+  searchPlaceholder?: string;
+}
+
+export function SelectChip<T extends string>({
+  label,
+  value,
+  options,
+  onChange,
+  display,
+  disabled,
+  width = 'sm',
+  searchable = false,
+  searchPlaceholder,
+}: SelectChipProps<T>) {
+  const { t } = useTranslation();
+  // Defaulted here rather than in the signature: a default parameter cannot
+  // call the hook that translates it.
+  const searchPlaceholderText = searchPlaceholder ?? t('creator.searchEllipsis');
+  const current = options.find((o) => o.value === value);
+
+  // Controlled so the popover can be closed from outside. Radix portals it to
+  // document.body, where the co-mounted host's `display: none` cannot reach it.
+  const [open, setOpen] = useState(false);
+  const close = useCallback(() => setOpen(false), []);
+  useCloseOnSurfaceSwitch(close);
+  const epoch = useSurfaceEpoch();
+
+  const searchRef = useRef<HTMLInputElement>(null);
+  const [query, setQuery] = useSurfaceDraft("components/app/creator/studio/StudioChip.tsx:query", '', JSON.stringify(options.map(option => option.value)));
+  // A stale filter would hide the list on the next open.
+  useEffect(() => {
+    if (!open) setQuery.initialize('');
+  }, [open, setQuery]);
+
+  const visible = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return options;
+    // Match the value too, so "seedance-2.5" finds it as readily as "Seedance".
+    return options.filter((o) =>
+      `${o.label} ${o.detail ?? ''} ${o.value}`.toLowerCase().includes(q),
+    );
+  }, [options, query]);
+
+  return (
+    <Popover key={epoch} open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <button type="button" className={CHIP_BASE} disabled={disabled} title={current?.label ?? value} aria-label={`${label}: ${current?.label ?? value}`}>
+          <span className="max-w-[7rem] truncate">{display ?? current?.label ?? value}</span>
+          <ChevronDown className="h-3 w-3 shrink-0 text-white/50" />
+        </button>
+      </PopoverTrigger>
+      <PopoverContent
+        align="start"
+        sideOffset={8}
+        // Radix parks focus on the panel itself, so a filter box would sit
+        // there needing a second click before it could be typed into.
+        onOpenAutoFocus={
+          searchable
+            ? (e) => {
+                e.preventDefault();
+                requestAnimationFrame(() => searchRef.current?.focus());
+              }
+            : undefined
+        }
+        className={cn(
+          'max-h-[min(22rem,60vh)] overflow-y-auto rounded-2xl border-white/10 bg-zinc-950/95 p-1.5 text-white shadow-[0_8px_32px_rgba(0,0,0,0.5)] backdrop-blur-xl',
+          width === 'md' ? 'w-80' : 'w-56',
+        )}
+      >
+        <div className="sticky top-0 z-10 -mx-1.5 -mt-1.5 mb-0.5 bg-zinc-950/95 px-4 pb-1.5 pt-2.5 backdrop-blur-xl">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-white/40">
+            {label}
+          </p>
+          {searchable && (
+            <div className="relative mt-1.5">
+              <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-white/35" />
+              <input
+                ref={searchRef}
+                type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder={searchPlaceholderText}
+                aria-label={t('creator.searchField', { field: label.toLowerCase() })}
+                className="w-full rounded-lg border border-white/15 bg-white/[0.06] py-1.5 pl-8 pr-2.5 text-[13px] text-white outline-none transition placeholder:text-white/35 focus:border-white/35 focus:bg-white/[0.10]"
+              />
+            </div>
+          )}
+        </div>
+        {visible.length === 0 && (
+          <p className="px-2.5 py-6 text-center text-[12px] text-white/40">
+            {t('creator.nothingMatches', { query: query.trim() })}
+          </p>
+        )}
+        {visible.map((option) => (
+          <button
+            key={option.value}
+            type="button"
+            disabled={option.disabled}
+            title={option.disabled ? option.disabledReason : undefined}
+            onClick={() => {
+              onChange(option.value);
+              setOpen(false);
+            }}
+            className={cn(
+              'flex w-full items-start gap-2.5 rounded-xl px-2.5 py-2 text-left transition',
+              option.disabled
+                ? 'cursor-not-allowed opacity-35'
+                : 'hover:bg-white/10 focus-visible:bg-white/10 focus-visible:outline-none',
+              option.value === value && !option.disabled && 'bg-white/[0.08]',
+            )}
+          >
+            <Check
+              className={cn(
+                'mt-0.5 h-3.5 w-3.5 shrink-0',
+                option.value === value ? 'text-white' : 'text-transparent',
+              )}
+            />
+            <span className="min-w-0 flex-1">
+              <span className="block truncate text-[13px] font-medium text-white">{option.label}</span>
+              {(option.disabled && option.disabledReason ? option.disabledReason : option.detail) && (
+                <span className="mt-0.5 block text-[11px] leading-snug text-white/45">
+                  {option.disabled && option.disabledReason ? option.disabledReason : option.detail}
+                </span>
+              )}
+            </span>
+            {option.meta && (
+              <span className="shrink-0 pt-0.5 text-[11px] tabular-nums text-white/50">{option.meta}</span>
+            )}
+          </button>
+        ))}
+      </PopoverContent>
+    </Popover>
+  );
+}
+
+interface CounterChipProps {
+  draftScope: string;
+  /** Plural unit shown beside the number, e.g. "images". */
+  label: string;
+  /** Singular form, used when the value is 1. Defaults to `label`. */
+  singular?: string;
+  /** Compact visible unit; the full label remains available to assistive technology. */
+  displayUnit?: string;
+  value: number;
+  min: number;
+  max: number;
+  editable?: boolean;
+  allowedValues?: number[];
+  onChange: (value: number) => void;
+  disabled?: boolean;
+}
+
+export function CounterChip({
+  draftScope,
+  label,
+  singular,
+  displayUnit,
+  value,
+  min,
+  max,
+  editable = false,
+  allowedValues,
+  onChange,
+  disabled,
+}: CounterChipProps) {
+  const { t } = useTranslation();
+  const [draft, setDraft] = useSurfaceDraft("creator:counter", String(value), draftScope);
+  useEffect(() => setDraft.initialize(String(value)), [value, min, max, allowedValues, setDraft]);
+  const normalize = (next: number) => {
+    const clamped = Math.min(max, Math.max(min, Math.round(next)));
+    if (!allowedValues?.length) return clamped;
+    const eligible = allowedValues.filter((option) => option <= clamped);
+    return eligible.length ? Math.max(...eligible) : Math.min(...allowedValues);
+  };
+  const commit = () => {
+    const next = draft.trim() && Number.isFinite(Number(draft)) ? normalize(Number(draft)) : value;
+    setDraft(String(next));
+    onChange(next);
+    setDraft.clear();
+  };
+  const step = (delta: number) => {
+    const options = allowedValues?.filter((option) => delta > 0 ? option > value : option < value);
+    const next = options?.length
+      ? delta > 0 ? Math.min(...options) : Math.max(...options)
+      : normalize(value + delta);
+    setDraft(String(next));
+    onChange(next);
+    setDraft.clear();
+  };
+  const unit = value === 1 ? (singular ?? label) : label;
+
+  return (
+    <div
+      className={cn(
+        'inline-flex shrink-0 items-center gap-0.5 rounded-full border border-white/20 bg-white/10 px-1 py-0.5 backdrop-blur-xl',
+        disabled && 'opacity-40',
+      )}
+      role="group"
+      aria-label={`${label}: ${value}`}
+    >
+      <button
+        type="button"
+        onClick={() => step(-1)}
+        disabled={disabled || value <= min}
+        aria-label={t('creator.decrease', { field: label.toLowerCase() })}
+        className={cn('rounded-full p-1.5 text-white/70 transition hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 disabled:cursor-not-allowed disabled:opacity-30', displayUnit && editable && 'max-[400px]:hidden')}
+      >
+        <Minus className="h-3.5 w-3.5" />
+      </button>
+      <span className={cn('select-none text-center text-[12px] font-medium tabular-nums text-white/85', displayUnit ? 'min-w-7' : 'min-w-[3.75rem]')}>
+        {editable ? (
+          <input
+            type="text"
+            inputMode="numeric"
+            pattern="[0-9]*"
+            aria-label={label}
+            value={draft}
+            disabled={disabled}
+            onFocus={(e) => e.target.select()}
+            onChange={(e) => setDraft(e.target.value.replace(/\D/g, ''))}
+            onBlur={commit}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                e.currentTarget.blur();
+              }
+              if (e.key === 'Escape') {
+                setDraft(String(value));
+                e.preventDefault();
+              }
+            }}
+            className={cn('rounded bg-transparent text-center text-[16px] tabular-nums text-white outline-none focus-visible:ring-1 focus-visible:ring-white/50 sm:text-[13px]', displayUnit ? 'w-5' : 'w-9')}
+          />
+        ) : value}
+        <span className={cn('text-[11px] text-white/40', !displayUnit && 'ml-1')}>{displayUnit ?? unit}</span>
+      </span>
+      <button
+        type="button"
+        onClick={() => step(1)}
+        disabled={disabled || value >= max}
+        aria-label={t('creator.increase', { field: label.toLowerCase() })}
+        className={cn('rounded-full p-1.5 text-white/70 transition hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 disabled:cursor-not-allowed disabled:opacity-30', displayUnit && editable && 'max-[400px]:hidden')}
+      >
+        <Plus className="h-3.5 w-3.5" />
+      </button>
+    </div>
+  );
+}
+
+interface ToggleChipProps {
+  label: string;
+  active: boolean;
+  onClick: () => void;
+  icon?: React.ComponentType<{ className?: string }>;
+  disabled?: boolean;
+}
+
+export function ToggleChip({ label, active, onClick, icon: Icon, disabled }: ToggleChipProps) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      aria-pressed={active}
+      className={cn(CHIP_BASE, active && 'border-white/40 bg-white/20 text-white')}
+    >
+      {Icon && <Icon className="h-3.5 w-3.5" />}
+      {label}
+    </button>
+  );
+}

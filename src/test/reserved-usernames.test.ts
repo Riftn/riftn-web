@@ -1,0 +1,153 @@
+/**
+ * Profiles live at `/:username`, the last route in the router. Every static
+ * top-level path beats it, and the edge worker intercepts more paths before
+ * React boots at all. So a username that matches one of those is a profile
+ * nobody can ever open — and a product URL held by whoever registered first.
+ *
+ * That has already happened five times in production (`admin`, `explore`,
+ * `creators`, `wallet`, `blog` are all real accounts on real wallets), and the
+ * worker's SYSTEM_ROUTES list grew a reactive patch each time a new route
+ * shipped and started answering "Join @<route>" to crawlers.
+ *
+ * The compiler cannot see any of this: App.tsx route strings and the worker's
+ * redirect tables are just strings. So the invariant is asserted here — adding
+ * a top-level route without reserving its name fails this spec.
+ *
+ * NOTE: package.json has no `test` script and CI runs `tsc` only, so nothing
+ * executes this today. It is written to be correct the moment a runner is
+ * wired up; until then it is an executable statement of the contract.
+ */
+
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { describe, expect, it } from 'vitest';
+import { RESERVED_USERNAMES, isReservedUsername } from '@/lib/reserved-usernames';
+
+const ROOT = resolve(__dirname, '../..');
+const APP_TSX = readFileSync(resolve(ROOT, 'src/App.tsx'), 'utf8');
+const WORKER = readFileSync(resolve(ROOT, 'CLOUDFLARE_WORKER_SEO.js'), 'utf8');
+
+/** First path segment of every `path="/..."` in the router. */
+function routerTopLevelSegments(): string[] {
+  const segments = new Set<string>();
+  for (const match of APP_TSX.matchAll(/path="\/([^"]*)"/g)) {
+    const first = match[1].split('/')[0];
+    // `:username` is the dynamic route itself; `*` is the catch-all; a dotted
+    // segment (`skill.md`) is an asset, which isReservedUsername covers by rule.
+    if (!first || first.startsWith(':') || first.startsWith('*') || first.includes('.')) continue;
+    segments.add(first.toLowerCase());
+  }
+  return [...segments].sort();
+}
+
+/** Top-level paths the worker 301s away before the router ever sees them. */
+function workerRedirectSegments(): string[] {
+  const segments = new Set<string>();
+  for (const table of ['LEGAL_REDIRECTS', 'SPA_REDIRECTS']) {
+    const block = WORKER.match(new RegExp(`const ${table} = \\{([\\s\\S]*?)\\};`));
+    if (!block) continue;
+    for (const entry of block[1].matchAll(/'\/([^']*)'\s*:/g)) {
+      const first = entry[1].split('/')[0];
+      if (!first || first === 'app') continue;
+      segments.add(first.toLowerCase());
+    }
+  }
+  return [...segments].sort();
+}
+
+describe('reserved usernames', () => {
+  it('reserves every top-level route in the router', () => {
+    const unreserved = routerTopLevelSegments().filter((s) => !isReservedUsername(s));
+    expect(unreserved, `unreserved top-level routes: ${unreserved.join(', ')}`).toEqual([]);
+  });
+
+  it('reserves every path the edge worker redirects away', () => {
+    const unreserved = workerRedirectSegments().filter((s) => !isReservedUsername(s));
+    expect(unreserved, `unreserved worker redirects: ${unreserved.join(', ')}`).toEqual([]);
+  });
+
+  it('found routes to check (guards against the parsers silently matching nothing)', () => {
+    expect(routerTopLevelSegments().length).toBeGreaterThan(20);
+    expect(workerRedirectSegments().length).toBeGreaterThan(3);
+  });
+
+  it('matches case-insensitively and ignores @ and padding', () => {
+    // Router matching is case-insensitive, so /App resolves the /app route and
+    // a profile named `App` is just as unreachable as `app`.
+    for (const variant of ['App', 'APP', ' app ', '@app', '@App']) {
+      expect(isReservedUsername(variant), variant).toBe(true);
+    }
+  });
+
+  it('does not over-reserve ordinary names', () => {
+    for (const name of ['alice', 'dehub_fan', 'app1', 'appleton', 'postman']) {
+      expect(isReservedUsername(name), name).toBe(false);
+    }
+  });
+
+  it('reserves the handles already registered against product routes', () => {
+    // Real accounts hold all five today; they are why this file exists.
+    for (const taken of ['admin', 'explore', 'creators', 'wallet', 'blog']) {
+      expect(RESERVED_USERNAMES.has(taken), taken).toBe(true);
+    }
+  });
+});
+
+/**
+ * The other half of the same rule. The worker canonicalises `/app/<x>` onto
+ * `/<x>`, links the bare form in bot HTML and puts it in the sitemap — so a
+ * section that exists only under `/app` hands searchers and sharers a URL that
+ * falls through to `/:username` and renders the empty profile of a user who
+ * does not exist. That was fixed one section at a time for years, each time
+ * somebody noticed it; this asserts the whole set instead.
+ */
+describe('/app children answer at the bare path too', () => {
+  /** Every `<Route path="x">` nested inside the `<Route path="/app">` block. */
+  function appChildSegments(): string[] {
+    const block = APP_TSX.slice(APP_TSX.indexOf('<Route path="/app">'));
+    // The `/app` element closes at the same indent it opened at; its children
+    // are one level deeper, so this is the first line that can end the block.
+    const end = block.indexOf('\n            </Route>');
+    const segments = new Set<string>();
+    // Immediate children only — matched by indent. Anything deeper is nested
+    // under a child that has its own twin (launchpad/create and friends).
+    for (const line of (end > 0 ? block.slice(0, end) : block).split('\n')) {
+      const match = line.match(/^ {14}<Route path="([^"]+)"/);
+      if (!match) continue;
+      const first = match[1].split('/')[0];
+      if (!first || first.startsWith(':')) continue;
+      segments.add(first.toLowerCase());
+    }
+    return [...segments].sort();
+  }
+
+  // `wallet` is held by a real account. Routing the bare path would take that
+  // profile away from its owner, so /app/wallet keeps its one spelling. Any
+  // other name added here needs the same kind of reason.
+  const APP_ONLY = new Set(['wallet']);
+
+  it('gives every /app child a top-level twin', () => {
+    const topLevel = new Set(routerTopLevelSegments());
+    const missing = appChildSegments().filter((s) => !topLevel.has(s) && !APP_ONLY.has(s));
+    expect(missing, `/app-only sections: ${missing.join(', ')}`).toEqual([]);
+  });
+
+  it('found children to check', () => {
+    expect(appChildSegments().length).toBeGreaterThan(20);
+  });
+
+  it('refuses riftn and its lookalikes', () => {
+    for (const name of [
+      'riftn', 'RIFTN', '@Riftn', 'riftn_', 'riftn-', 'riftn1', 'riftn_official',
+      'riftnhq', 'r1ftn', 'rlftn', 'official_riftn', 'the_riftn', 'realriftn',
+    ]) {
+      expect(isReservedUsername(name)).toBe(true);
+    }
+  });
+
+  it('leaves names that only contain riftn mid-word alone', () => {
+    for (const name of ['driftnet', 'swiftnode', 'rift', 'rif_tom']) {
+      expect(isReservedUsername(name)).toBe(false);
+    }
+  });
+});

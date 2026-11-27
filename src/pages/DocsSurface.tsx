@@ -1,0 +1,210 @@
+import { useTranslation as _useCopy } from 'react-i18next';
+/**
+ * DocsSurface
+ * ===========
+ * The single, persistent full-page "docs" surface. It unifies what used to be
+ * two separate route trees:
+ *
+ *   • DocsRoutes    — mounted for /docs/*   (docs pages + the /docs/blog list)
+ *   • BlogGuideRoute — mounted for /guides/* (individual blog posts)
+ *
+ * Each of those mounted its OWN NextThemesProvider + LanguageProvider +
+ * SearchProvider (which rebuilds a Fuse.js index over the whole content map)
+ * and its OWN DocsLayout (the sidebar / header). So clicking a blog card
+ * (/docs/blog → /guides/<slug>) tore the entire surface down and rebuilt it —
+ * the sidebar re-rendered, the search index re-built, and the WebGL background
+ * flickered pause→resume→pause — on every single click on and off a post.
+ *
+ * Now the providers and DocsLayout mount ONCE here and stay mounted across the
+ * whole surface. DocsLayout is a layout route, so navigating between the blog
+ * list, a blog post (/docs/blog/<slug> OR the canonical /guides/<slug>), and
+ * any docs page only swaps the reading column in its <Outlet> — the side panels
+ * never remount.
+ *
+ * App.tsx anchors this component under a single pathless parent route matching
+ * /docs, /docs/*, and /guides/* so React keeps it mounted across the
+ * /docs ↔ /guides boundary (the sibling static /guides/... pages outrank the
+ * splat and are handled by their own routes).
+ */
+import { Suspense, lazy, useEffect } from "react";
+import { Routes, Route, Navigate } from "react-router-dom";
+import { ThemeProvider as NextThemesProvider } from "next-themes";
+import "@/styles/docs-dark.css";
+import "@/styles/docs-light.css";
+import "@/styles/docs-glass.css";
+
+import { LanguageProvider } from "@/contexts/LanguageContext";
+import { SearchProvider } from "@/components/search/SearchProvider";
+import { DocsChatBot } from "@/components/chat/DocsChatBot";
+import { DocsLayout } from "@/components/DocsLayout";
+import ComingSoonPage from "@/components/ComingSoonPage";
+import { useAppTheme } from "@/contexts/ThemeContext";
+import { getDocsForcedTheme } from "@/lib/docs-theme";
+import { badgeLightArtworkCss } from "@/lib/badge-light-artwork";
+import { setBackgroundPaused, scheduleBackgroundResume } from "@/lib/background-gate";
+import { DocsContentSkeleton } from "@/components/DocsLoadingSkeleton";
+
+const DocsHome = lazy(() => import("./docs/DocsHome"));
+const Overview = lazy(() => import("./docs/Overview"));
+const Advertising = lazy(() => import("./docs/Advertising"));
+const QuickStart = lazy(() => import("./docs/QuickStart"));
+const Team = lazy(() => import("./docs/Team"));
+const BrandGuidelines = lazy(() => import("./docs/BrandGuidelines"));
+const BrandAssets = lazy(() => import("./docs/BrandAssets"));
+const FeaturedIn = lazy(() => import("./docs/FeaturedIn"));
+const Dapp = lazy(() => import("./docs/Dapp"));
+const Games = lazy(() => import("./docs/Games"));
+const TokenOverview = lazy(() => import("./docs/TokenOverview"));
+const TokenEconomics = lazy(() => import("./docs/TokenEconomics"));
+const TokenUtility = lazy(() => import("./docs/TokenUtility"));
+const TokenWhereToBuy = lazy(() => import("./docs/TokenWhereToBuy"));
+const TokenGovernance = lazy(() => import("./docs/TokenGovernance"));
+const TokenSecurity = lazy(() => import("./docs/TokenSecurity"));
+const Terms = lazy(() => import("./docs/Terms"));
+const TermsOfService = lazy(() => import("./docs/TermsOfService"));
+const CommunityGuidelines = lazy(() => import("./docs/CommunityGuidelines"));
+const Contact = lazy(() => import("./docs/Contact"));
+const PrivacyPolicy = lazy(() => import("./docs/PrivacyPolicy"));
+const TokenStake = lazy(() => import("./docs/TokenStake"));
+const TokenBridge = lazy(() => import("./docs/TokenBridge"));
+const Roadmap = lazy(() => import("./docs/Roadmap"));
+const Blog = lazy(() => import("./docs/Blog"));
+const BlogPost = lazy(() => import("./docs/BlogPost"));
+const FAQ = lazy(() => import("./docs/FAQ"));
+const Donate = lazy(() => import("./docs/Donate"));
+const DeveloperDoc = lazy(() => import("./docs/DeveloperDoc"));
+
+const wrap = (El: React.ComponentType, article = false) => (
+  <Suspense fallback={<DocsContentSkeleton article={article} />}>
+    <El />
+  </Suspense>
+);
+
+/** One developer docs page from src/data/developer-docs.json. */
+const dev = (route: string) => (
+  <Suspense fallback={<DocsContentSkeleton />}>
+    <DeveloperDoc route={route} />
+  </Suspense>
+);
+
+export default function DocsSurface() {
+  const { t: _copy } = _useCopy();
+  const { theme: appTheme, themeChoice } = useAppTheme();
+  const forcedTheme = getDocsForcedTheme(appTheme, themeChoice);
+
+  // next-themes writes `.dark`/`.light` on <html> and does not clean it up on
+  // unmount. The app itself keys on `data-theme`, not `.dark`, so a stale docs
+  // class must not leak back into the app when navigating docs → app.
+  useEffect(() => {
+    return () => {
+      document.documentElement.classList.remove("dark", "light");
+    };
+  }, []);
+
+  // Pause the persistent WebGL background while this surface is open. Docs
+  // composites heavy backdrop-blur glass over the canvas, so a frozen frame
+  // underneath is imperceptible — but running the fbm/particle shaders at full
+  // rate under that blur is a GPU fill-rate spike that can hang/crash weak
+  // machines. Mark the surface for CSS too.
+  //
+  // On CLOSE, don't resume synchronously: that spike would land right on the
+  // app panels sliding back in and freeze slow PCs. Defer it past the slide-in
+  // (see scheduleBackgroundResume) so the side panels come back fluidly first.
+  useEffect(() => {
+    setBackgroundPaused(true);
+    document.documentElement.dataset.docsOpen = "true";
+    return () => {
+      delete document.documentElement.dataset.docsOpen;
+      scheduleBackgroundResume();
+    };
+  }, []);
+
+  return (
+    <NextThemesProvider attribute="class" defaultTheme="dark" enableSystem={false} storageKey="dehub-docs-theme" forcedTheme={forcedTheme}>
+    <style data-badge-light-artwork="docs">{badgeLightArtworkCss}</style>
+    <LanguageProvider>
+      <SearchProvider>
+
+        {/* The chat bot is fixed-position and mounts outside DocsLayout, so it
+            sat outside .docs-root and missed every docs token and theme rule
+            (navy card on canvas themes, white-on-grey code chips). A
+            display:contents wrapper puts it in scope without creating a box —
+            .docs-root's own position/z-index never apply, so the fixed
+            launcher still stacks above the page. */}
+        <div className="docs-root" style={{ display: 'contents' }}>
+          <DocsChatBot />
+        </div>
+        <Routes>
+          <Route element={<DocsLayout />}>
+            {/* Docs pages */}
+            <Route path="/docs" element={wrap(DocsHome)} />
+            <Route path="/docs/overview" element={wrap(Overview)} />
+            <Route path="/docs/dapps" element={wrap(Dapp)} />
+            <Route path="/docs/games" element={wrap(Games)} />
+            {/* Was a "Coming Soon" stub while six real token pages sat beneath
+                it — a thin, indexable dead end. Send it to the first one. */}
+            <Route path="/docs/token" element={<Navigate to="/docs/token/overview" replace />} />
+            <Route path="/docs/token/overview" element={wrap(TokenOverview)} />
+            <Route path="/docs/token/economics" element={wrap(TokenEconomics)} />
+            <Route path="/docs/token/utility" element={wrap(TokenUtility)} />
+            <Route path="/docs/token/where-to-buy" element={wrap(TokenWhereToBuy)} />
+            <Route path="/docs/token/governance" element={wrap(TokenGovernance)} />
+            <Route path="/docs/token/stake" element={wrap(TokenStake)} />
+            <Route path="/docs/token/bridge" element={wrap(TokenBridge)} />
+            {/* Consolidated into the dApp guide. Slugs stay alive and land on
+                the matching section so existing links and search results work. */}
+            <Route path="/docs/depin" element={<Navigate to="/docs/dapps#depin" replace />} />
+            <Route path="/docs/e2e-encryption" element={<Navigate to="/docs/dapps#encryption" replace />} />
+            <Route path="/docs/ai-toolkits" element={<Navigate to="/docs/dapps#ai-suite" replace />} />
+            <Route path="/docs/advertising" element={wrap(Advertising)} />
+            <Route path="/docs/team" element={wrap(Team)} />
+            <Route path="/docs/security" element={wrap(TokenSecurity)} />
+            <Route path="/docs/roadmap" element={wrap(Roadmap)} />
+            <Route path="/docs/contact" element={wrap(Contact)} />
+            <Route path="/docs/terms" element={wrap(Terms)} />
+            <Route path="/docs/terms-of-service" element={wrap(TermsOfService)} />
+            <Route path="/docs/privacy" element={wrap(PrivacyPolicy)} />
+            <Route path="/docs/guidelines" element={wrap(CommunityGuidelines)} />
+            <Route path="/docs/brand-assets" element={wrap(BrandAssets)} />
+            <Route path="/docs/featured-in" element={wrap(FeaturedIn)} />
+            <Route path="/docs/brand-guidelines" element={wrap(BrandGuidelines)} />
+            <Route path="/docs/quickstart" element={wrap(QuickStart)} />
+            {/* Google indexed the hyphenated typo; it used to soft-404 into the
+                SPA shell. Kept in sync with DOCS_REDIRECTS in the SEO worker. */}
+            <Route path="/docs/quick-start" element={<Navigate to="/docs/quickstart" replace />} />
+            {/* Both were template pages for a made-up API. Installing Riftn
+                means getting the app; API access is the assistant connector.
+                Kept in sync with DOCS_REDIRECTS in the SEO worker. */}
+            <Route path="/docs/installation" element={<Navigate to="/dehub-app" replace />} />
+            <Route path="/docs/developers" element={dev('developers')} />
+            <Route path="/docs/developers/mini-apps" element={dev('developers/mini-apps')} />
+            <Route path="/docs/endpoints" element={dev('endpoints')} />
+            <Route path="/docs/auth" element={dev('auth')} />
+            <Route path="/docs/webhooks" element={dev('webhooks')} />
+            <Route path="/docs/examples" element={dev('examples')} />
+            <Route path="/docs/troubleshooting" element={dev('troubleshooting')} />
+            <Route path="/docs/best-practices" element={<Navigate to="/docs/developers#best-practices" replace />} />
+            <Route path="/docs/configuration" element={<Navigate to="/docs/developers/mini-apps#manifest" replace />} />
+            <Route path="/docs/data-models" element={<Navigate to="/docs/endpoints" replace />} />
+            <Route path="/docs/blog" element={wrap(Blog)} />
+            {/* Blog posts share ONE BlogPost mount across both URLs. The card
+                links use the canonical /guides/<slug>; /docs/blog/<slug> stays
+                a valid in-app alias. Both sit under the same DocsLayout as the
+                /docs/blog list, so list ↔ post never remounts the sidebar. */}
+            <Route path="/docs/blog/:slug" element={wrap(BlogPost, true)} />
+            <Route path="/guides/:slug" element={wrap(BlogPost, true)} />
+            <Route path="/docs/faq" element={wrap(FAQ)} />
+            <Route path="/docs/donate" element={wrap(Donate)} />
+            <Route path="/docs/website" element={<ComingSoonPage title={_copy("copy.b048526ff7d1", { defaultValue: "Website Documentation" })} description={_copy("copy.88324d21e07e", { defaultValue: "Learn about our website features and capabilities." })} />} />
+            <Route path="/docs/app" element={<ComingSoonPage title={_copy("copy.f569d8ad4ccc", { defaultValue: "App Documentation" })} description={_copy("copy.2785ac1adc62", { defaultValue: "Mobile and desktop application guides and features." })} />} />
+            <Route path="/docs/dehub" element={<ComingSoonPage title={_copy("copy.e5e1e25f7f1d", { defaultValue: "Riftn Platform" })} description={_copy("copy.87acb1194366", { defaultValue: "Complete guide to using the Riftn decentralized platform." })} />} />
+            <Route path="/docs/x" element={<ComingSoonPage title={_copy("copy.deace4186d0f", { defaultValue: "X Integration" })} description={_copy("copy.6f5fcdf9e99b", { defaultValue: "Social media integration and X platform features." })} />} />
+            <Route path="/docs/instagram" element={<ComingSoonPage title={_copy("copy.4d10e3879b66", { defaultValue: "Instagram Integration" })} description={_copy("copy.4036f800a55f", { defaultValue: "Instagram connectivity and social features." })} />} />
+            <Route path="/docs/architecture" element={<ComingSoonPage title={_copy("copy.cd74053c5481", { defaultValue: "Architecture" })} description={_copy("copy.b12f30287c18", { defaultValue: "System architecture and technical infrastructure details." })} />} />
+          </Route>
+        </Routes>
+      </SearchProvider>
+    </LanguageProvider>
+    </NextThemesProvider>
+  );
+}

@@ -1,0 +1,3030 @@
+import { stageRoomLabel } from '@/i18n/stage-room-copy';
+import { translateCopy as _translateCopy } from '@/i18n/copy';
+import { newStageChannelName } from '@/lib/stage-radio-show';
+import { useTranslation as _useCopy } from 'react-i18next';
+/**
+ * StageContext - Global context for Stages (audio spaces)
+ * =========================================================
+ * Persists stage state across navigation so users can browse the app
+ * while in a live stage. Similar pattern to RadioPlayerProvider.
+ */
+
+import { createContext, useContext, useState, useEffect, useCallback, useMemo, useRef, useSyncExternalStore, ReactNode } from 'react';
+import { useFrontRow } from '@/hooks/use-superpowers';
+import { supabase } from '@/integrations/supabase/client';
+import { stopStageRecording } from '@/lib/stage-playback';
+// Deliberately the narrow module and not the `@/lib/api/dehub` barrel: this
+// context is mounted app-wide, and the barrel drags the whole API surface in.
+import { getAuthToken } from '@/lib/api/dehub/core';
+import {
+  showRecordingUploading,
+  showRecordingSaved,
+  showRecordingFailed,
+  dismissRecordingToast,
+} from '@/lib/stage-recording-toast';
+import { withWalletHeader, endStageOnExit } from '@/lib/supabase-wallet-client';
+import { holdMicAudioSession } from '@/lib/audio-session';
+import {
+  RECORDING_BITS_PER_SECOND,
+  addMixRemote,
+  closeRecordingMix,
+  createRecordingMix,
+  dropMixRemote,
+  pickRecordingType,
+  recorderMixes,
+  recordingFileFor,
+  setMixLocal,
+  type RecordingMix,
+} from '@/lib/stage-recording-mix';
+import { watchStages, type StageChange } from '@/lib/stage-broadcast';
+import { isChunkLoadError } from '@/lib/lazy-with-retry';
+import { createLogger } from '@/lib/logger';
+import {
+  openStageRadioTap,
+  closeStageRadioTap,
+  playStageRadioStream,
+  stopStageRadioStream,
+  setStageRadioBroadcastLevel,
+  setStageRadioMonitorLevel,
+  pauseStageRadioStream,
+  resumeStageRadioStream,
+  toRadioLabel,
+} from '@/lib/stage-radio';
+import type { StageRadioStation, StageRadioStatus } from '@/lib/stage-radio';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
+import i18n from '@/i18n';
+import { useVoiceEffects } from '@/hooks/use-voice-effects';
+import { useStageCaptionPublisher } from '@/hooks/use-stage-captions';
+import type { VoiceEffectId } from '@/constants/voice-effects.constants';
+import type {
+  AudioSpace,
+  SpaceParticipant,
+  RaiseHandRequest,
+  AgoraTokenResponse,
+  SpaceRole,
+} from '@/types/audio-spaces.types';
+
+import { formatCount } from '@/lib/format-count';
+// ─── Types ───────────────────────────────────────────────────────────────────
+
+/** What the schedule form collects. */
+export interface ScheduleSpaceInput {
+  title: string;
+  description?: string;
+  /** ISO timestamp for the intended start. */
+  scheduledAt: string;
+  /** Public URL of an already-uploaded cover graphic. */
+  coverImageUrl?: string | null;
+  /** A radio show: music first, listed in Explore's Radio row. */
+  radio?: boolean;
+}
+
+interface StageContextType {
+  // State
+  liveSpaces: AudioSpace[];
+  scheduledSpaces: AudioSpace[];
+  currentSpace: AudioSpace | null;
+  participants: SpaceParticipant[];
+  handRequests: RaiseHandRequest[];
+  isLoading: boolean;
+  isConnected: boolean;
+  isMuted: boolean;
+  myRole: SpaceRole | null;
+  hasRaisedHand: boolean;
+  isModalOpen: boolean;
+  /** Current voice effect */
+  voiceEffect: VoiceEffectId;
+  setVoiceEffect: (id: VoiceEffectId) => void;
+
+  // Modal controls
+  openModal: (view?: 'browse' | 'create' | 'live') => void;
+  closeModal: () => void;
+  initialModalView: 'browse' | 'create' | 'live';
+
+  // Actions
+  createSpace: (title: string, description?: string, coverImageUrl?: string | null, options?: { radio?: boolean }) => Promise<AudioSpace | null>;
+  scheduleSpace: (input: ScheduleSpaceInput) => Promise<AudioSpace | null>;
+  startScheduledSpace: (spaceId: string) => Promise<boolean>;
+  cancelScheduledSpace: (spaceId: string) => Promise<void>;
+  /** Move a scheduled stage to a new start. Host only. */
+  rescheduleScheduledSpace: (spaceId: string, at: Date) => Promise<boolean>;
+  refreshScheduledSpaces: () => Promise<void>;
+  joinSpace: (spaceId: string) => Promise<boolean>;
+  /**
+   * Listen-only join for signed-out visitors landing on an invite link:
+   * Agora audience with a subscriber token, no participant row, no counts.
+   * The stage page is the player — there is no mini-player for a guest.
+   */
+  guestListen: (spaceId: string) => Promise<boolean>;
+  guestStopListening: () => Promise<void>;
+  guestSpace: AudioSpace | null;
+  leaveSpace: () => Promise<void>;
+  endSpace: () => Promise<void>;
+  /**
+   * Take a stage you host off the air without being in it — the way out of a
+   * room whose host never managed to connect to it.
+   */
+  endStageById: (spaceId: string) => Promise<boolean>;
+  toggleMute: () => void;
+  raiseHand: () => Promise<void>;
+  lowerHand: () => Promise<void>;
+  approveSpeaker: (walletAddress: string) => Promise<void>;
+  removeSpeaker: (walletAddress: string) => Promise<void>;
+  inviteSpeaker: (walletAddress: string) => Promise<void>;
+  refreshSpaces: () => Promise<void>;
+  injectAudio: (audioBlob: Blob, source?: AudioInjectionSource) => Promise<void>;
+  /** Cut off whatever soundboard/TTS clip is currently playing on the stage. */
+  stopInject: () => void;
+  /** Duck the room (0-100) so a dubbed voice can sit on top of it. */
+  setRoomVolume: (volume: number) => void;
+  /** The screen currently on the room's wall, or null when nobody is sharing. */
+  screenShare: StageScreenShare | null;
+  /** True while THIS client is the one sharing. */
+  isScreenSharing: boolean;
+  /** Whether this device can capture a screen at all — see detectScreenShareSupport. */
+  canScreenShare: boolean;
+  startScreenShare: () => Promise<void>;
+  stopScreenShare: () => Promise<void>;
+  /** The station this host is putting on air, or null when the radio is off. */
+  radioStation: StageRadioStation | null;
+  /** Connection state of that stream — 'live' once audio is actually flowing. */
+  radioStatus: StageRadioStatus;
+  /** Level the room hears the radio at, 0-100. */
+  radioVolume: number;
+  /** Whether the host hears the radio through their own speakers. */
+  radioMonitor: boolean;
+  /** The set the current source belongs to, so it can be walked. Empty for a one-off. */
+  radioQueue: StageRadioStation[];
+  /**
+   * Put something on air. Pass the list it came from to make it a set: a clip
+   * that ends hands over to the next one, and skip walks it.
+   */
+  startRadio: (station: StageRadioStation, queue?: StageRadioStation[]) => Promise<void>;
+  stopRadio: () => Promise<void>;
+  /** Hold the current clip. No-op for a station, which can only buffer. */
+  toggleRadioPause: () => void;
+  radioNext: () => void;
+  radioPrev: () => void;
+  setRadioVolume: (volume: number) => void;
+  setRadioMonitor: (enabled: boolean) => void;
+}
+
+/** The one screen a room can be showing, whoever it belongs to. */
+export interface StageScreenShare {
+  /** Agora video track — our own local track while sharing, else the remote one. */
+  track: any;
+  /** Agora uid of the publisher; null for our own local track. */
+  uid: number | string | null;
+  isLocal: boolean;
+}
+
+/**
+ * Screen capture is a desktop-only affair. No mobile browser implements
+ * `getDisplayMedia` — iOS Safari has no such method at all, and Chrome on
+ * Android does not ship it either — so the control is gated on the capability
+ * plus a pointing device, and a mobile host never sees a button that could
+ * only fail. Watching a share is NOT gated: a phone subscribes to the video
+ * track like any other participant.
+ *
+ * `any-pointer`, not `pointer`: a Surface with its keyboard folded back
+ * reports its *primary* pointer as coarse while still being a desktop browser
+ * that can share perfectly well. Phones and tablets are already excluded by
+ * the capability check above, so the looser query costs nothing.
+ */
+function detectScreenShareSupport(): boolean {
+  if (typeof navigator === 'undefined' || typeof window === 'undefined') return false;
+  if (typeof navigator.mediaDevices?.getDisplayMedia !== 'function') return false;
+  return window.matchMedia?.('(any-pointer: fine)').matches ?? false;
+}
+
+/**
+ * Should this device take the low-resolution copy of a shared screen?
+ *
+ * A phone has no use for a 1920×1080 stream it renders into ~340 CSS pixels,
+ * and on cellular it is the difference between a stage that plays and one that
+ * stutters. Small viewports and touch devices take the small stream; anything
+ * desktop-sized keeps the full one.
+ */
+function prefersLowVideoStream(): boolean {
+  if (typeof window === 'undefined') return false;
+  return window.matchMedia?.('(max-width: 1023px), (pointer: coarse)').matches ?? false;
+}
+
+/**
+ * Describes who/what is producing an audio injection so the post-stage
+ * transcript can label diarized speakers correctly. Used to log entries
+ * into `recordingTimelineRef`.
+ */
+export interface AudioInjectionSource {
+  /** "ai" for TTS / soundboard, "human" for live mic (rarely used here). */
+  kind: 'ai' | 'human';
+  /** "tts", "soundboard", "voice-clone", etc. */
+  source: string;
+  /** Human-readable label, e.g. "AI – Aria", "Soundboard: Air Horn". */
+  label: string;
+  /**
+   * The words the clip says, when they are known without transcribing it —
+   * the TTS prompt, or a soundboard sound's name. Broadcast as a caption so a
+   * clip is subtitled the instant it plays instead of a second later, and
+   * without spending a transcription on text we already had.
+   */
+  caption?: string;
+}
+
+const StageContext = createContext<StageContextType | null>(null);
+
+/** Stages auto-close after 30 silent minutes; a row older than this ended that way. */
+const INACTIVITY_END_MS = 29 * 60_000;
+function endedForInactivity(row: { last_speech_at?: string | null; started_at?: string | null }): boolean {
+  // Silence before the stage went live does not count: a scheduled stage still
+  // carries the last_speech_at it was announced with.
+  const last = Math.max(
+    row.last_speech_at ? new Date(row.last_speech_at).getTime() : 0,
+    row.started_at ? new Date(row.started_at).getTime() : 0,
+  );
+  return last > 0 && Date.now() - last >= INACTIVITY_END_MS;
+}
+function toastInactivityEnd(title: string) {
+  toast.info(i18n.t('stages.autoEnd.title'), {
+    description: i18n.t('stages.autoEnd.description', { title }),
+    duration: 6000,
+  });
+}
+/** Agora level (0-100) above which the local mic counts as someone talking. */
+const SPEECH_LEVEL = 8;
+const SPEECH_TOUCH_MS = 60_000;
+
+// ─── Volume store ────────────────────────────────────────────────────────────
+// Agora's volume-indicator fires ~every 2s while in a stage. Keeping the level
+// OUT of the context value means the ~15 useStage() consumers (sidebar, bottom
+// nav, feed bars) don't re-render on every tick — only the waveform widgets
+// that subscribe via useStageVolumeLevel() do.
+
+let stageVolumeLevel = 0;
+const stageVolumeSubscribers = new Set<() => void>();
+
+function setStageVolumeLevel(level: number) {
+  if (level === stageVolumeLevel) return;
+  stageVolumeLevel = level;
+  stageVolumeSubscribers.forEach(cb => cb());
+}
+
+function subscribeStageVolume(cb: () => void) {
+  stageVolumeSubscribers.add(cb);
+  return () => stageVolumeSubscribers.delete(cb);
+}
+
+/** Aggregate audio volume level 0-1 from all speakers (live-updating). */
+export function useStageVolumeLevel(): number {
+  return useSyncExternalStore(subscribeStageVolume, () => stageVolumeLevel);
+}
+
+/**
+ * Columns the live / upcoming lists actually render. ended_at and
+ * recording_url are always null on a live or scheduled row, so they are left
+ * out rather than shipped on every refresh.
+ */
+const SPACE_LIST_COLUMNS =
+  'id, short_id, channel_name, title, description, host_wallet_address, host_username, host_avatar, status, listener_count, speaker_count, started_at, created_at, total_listens, scheduled_at, cover_image_url, entry_locked, topic';
+
+// ─── Live spaces store ──────────────────────────────────────────────────────
+// StageProvider already keeps the live-spaces list fresh (one fetch at boot +
+// one debounced realtime channel). Sidebar/carousel widgets used to run their
+// OWN queries and realtime channels against audio_spaces — a triple-fetch at
+// boot and duplicate subscriptions. They subscribe here instead; the store
+// updates whenever the provider refreshes, without making subscribers consume
+// the full (churny) stage context value.
+
+let liveSpacesStore: AudioSpace[] = [];
+const liveSpacesSubscribers = new Set<() => void>();
+
+function publishLiveSpaces(spaces: AudioSpace[]) {
+  liveSpacesStore = spaces;
+  liveSpacesSubscribers.forEach(cb => cb());
+}
+
+function subscribeLiveSpaces(cb: () => void) {
+  liveSpacesSubscribers.add(cb);
+  return () => liveSpacesSubscribers.delete(cb);
+}
+
+/**
+ * Live audio spaces list, shared from StageProvider's single fetch+realtime.
+ *
+ * The Front Row sort lives HERE rather than in each rail, and that is the
+ * point: the carousel, What's Happening, the friends bar and the stages modal
+ * all read this one store, so a holder who bought the top of the rail gets it
+ * on every surface instead of on whichever one remembered to implement it.
+ *
+ * Ordering only. Nothing is added to or removed from the list, so a client
+ * that cannot reach the endpoint shows exactly what it showed before.
+ */
+/**
+ * The live stages as the realtime channel last reported them, without the
+ * Front Row reordering. For callers that only ask "is this person on a stage"
+ * and should not pull in the Front Row query to answer it.
+ */
+export function useLiveSpacesUnordered(): AudioSpace[] {
+  return useSyncExternalStore(subscribeLiveSpaces, () => liveSpacesStore);
+}
+
+export function useLiveSpaces(): AudioSpace[] {
+  const spaces = useSyncExternalStore(subscribeLiveSpaces, () => liveSpacesStore);
+  const { data: frontRow } = useFrontRow();
+
+  return useMemo(() => {
+    const id = frontRow?.stageId;
+    if (!id || spaces.length < 2) return spaces;
+    const index = spaces.findIndex(space => space?.id === id);
+    // Already first, or the stage is not in this list at all — a Front Row
+    // bought on a scheduled stage that has not started yet, for instance.
+    if (index < 1) return spaces;
+    return [spaces[index], ...spaces.slice(0, index), ...spaces.slice(index + 1)];
+  }, [spaces, frontRow?.stageId]);
+}
+
+// ─── Scheduled spaces store ─────────────────────────────────────────────────
+// Same shape as the live-spaces store above, for the same reason: the upcoming
+// shelf appears on the stages page, the music carousel and (once scheduled) any
+// card in the feed, and none of those should run their own query.
+
+let scheduledSpacesStore: AudioSpace[] = [];
+const scheduledSpacesSubscribers = new Set<() => void>();
+
+function publishScheduledSpaces(spaces: AudioSpace[]) {
+  scheduledSpacesStore = spaces;
+  scheduledSpacesSubscribers.forEach(cb => cb());
+}
+
+function subscribeScheduledSpaces(cb: () => void) {
+  scheduledSpacesSubscribers.add(cb);
+  return () => scheduledSpacesSubscribers.delete(cb);
+}
+
+/** Upcoming (scheduled) stages, soonest first. */
+export function useScheduledSpaces(): AudioSpace[] {
+  return useSyncExternalStore(subscribeScheduledSpaces, () => scheduledSpacesStore);
+}
+
+/**
+ * How long a scheduled stage stays on the upcoming shelf after its start time
+ * passes. Hosts run late, and a stage vanishing from the list at the exact
+ * minute it was due — while people are still arriving from the link — reads as
+ * the feature being broken.
+ */
+const SCHEDULED_GRACE_MS = 2 * 60 * 60 * 1000;
+
+/**
+ * Wallet equality, the way the rest of the stack does it.
+ *
+ * Every RLS policy on a stage table compares `lower(...)`, and the deep-link
+ * page lowercases before deciding who the host is. The auth layer happens to
+ * hand this context a lowercase address today, so a raw `===` worked — but it
+ * made the host check depend on a normalisation two files away, and a row
+ * written with a checksummed address (a hand-inserted stage, an import, a
+ * future signup path) would silently lock its own host out of starting it and
+ * rejoin them as a listener.
+ */
+function sameWallet(a?: string | null, b?: string | null): boolean {
+  return !!a && !!b && a.toLowerCase() === b.toLowerCase();
+}
+
+/**
+ * The avatar to persist on a row other people will read.
+ *
+ * A profile picture that has just been picked sits in `user.avatarImageUrl` as
+ * a `blob:` URL — an optimistic preview that resolves only inside the tab that
+ * created it. Joining a stage inside that window wrote the preview to the
+ * table: one seat in the 2026-08-19 town hall is stored as
+ * `blob:https://riftn.com/9680…`, a permanently dead image for every other
+ * person in the room. Null is strictly better than a dead URL, because the
+ * readers fall back to the CDN object for the wallet.
+ */
+function persistableAvatar(url?: string | null): string | null {
+  if (!url) return null;
+  if (url.startsWith('blob:') || url.startsWith('data:')) return null;
+  return url;
+}
+
+/**
+ * Recount a stage's headcounts from its participant rows.
+ *
+ * The cast is load-bearing and temporary. `src/integrations/supabase/types.ts`
+ * is generated from the LIVE schema, and `recount_space()` is created by
+ * `20260819180000_stage_write_policies.sql`, which is deliberately not applied
+ * until the mobile release carrying the wallet headers is adopted — so the
+ * generated union of RPC names cannot contain it yet and tsc rejects the
+ * literal. Drop the casts once that migration is applied and the types are
+ * regenerated; nothing else has to change.
+ *
+ * Kept in one place so that is one edit rather than five, and so the reason is
+ * written down once.
+ */
+async function recountSpace(spaceId: string): Promise<void> {
+  const { error } = await supabase.rpc('recount_space' as never, {
+    p_space_id: spaceId,
+  } as never);
+  if (!error) return;
+
+  // The RPC does not exist until the staged migration is applied, and shipping
+  // a client that depends on it ahead of the DB froze every headcount on the
+  // row — the error came back in the result object and nothing read it. Until
+  // the function exists, recount inline exactly the way this code did before
+  // the RPC: three queries, counts derived from the rows. The fallback runs
+  // against today's open policies; once the migration lands, the RPC answers
+  // first and this path never executes again.
+  try {
+    const { count: listeners } = await supabase
+      .from('space_participants')
+      .select('*', { count: 'exact', head: true })
+      .eq('space_id', spaceId)
+      .eq('role', 'listener')
+      .is('left_at', null);
+
+    const { count: speakers } = await supabase
+      .from('space_participants')
+      .select('*', { count: 'exact', head: true })
+      .eq('space_id', spaceId)
+      .in('role', ['host', 'speaker'])
+      .is('left_at', null);
+
+    await supabase
+      .from('audio_spaces')
+      .update({ listener_count: listeners ?? 0, speaker_count: speakers ?? 1 })
+      .eq('id', spaceId);
+  } catch (err) {
+    // A headcount is not worth failing a join or a leave over.
+    console.warn('[Stage] Headcount recount failed:', err);
+  }
+}
+
+// ─── Failure handling ───────────────────────────────────────────────────────
+
+/**
+ * Everything that can stop a stage goes through here, and it goes to
+ * `client_error_logs`, not just the console.
+ *
+ * Every failure in this file used to end at `console.error` behind a toast that
+ * said "Failed to create stage" — so when a launch failed in production there
+ * was no record anywhere of what actually failed. The stage row said `live`,
+ * the edge function logs were clean (the token had been minted fine), and the
+ * only remaining suspects — the microphone, the audio graph, the Agora chunk —
+ * all live in a browser nobody can go back and read. One line of logging is the
+ * difference between answering that question in a minute and not at all.
+ */
+const stageLogger = createLogger('Stage');
+
+/**
+ * Turn whatever went wrong into something the host can act on.
+ *
+ * "Failed to create stage" is true of a denied microphone, a stale bundle and a
+ * dead network alike, and only one of those is worth a retry. The three that
+ * actually happen are named; anything else keeps its own message rather than
+ * being flattened into a generic one.
+ */
+function describeStageFailure(err: unknown): string {
+  // Already worded for the reader (raised in this file, or described once on
+  // the way up), so it is not described a second time.
+  if (err instanceof StageCopyError) return err.message;
+  const e = (err ?? {}) as { name?: string; message?: string };
+  const name = e.name || '';
+  const message = e.message || '';
+
+  if (name === 'NotAllowedError' || name === 'PermissionDeniedError' || /permission denied/i.test(message)) {
+    return _translateCopy("copy.8cf2f5e1ffb4", { defaultValue: "Riftn needs microphone access to put you on air — allow it for riftn.com and try again." });
+  }
+  if (name === 'NotFoundError' || name === 'NotReadableError' || name === 'OverconstrainedError') {
+    return _translateCopy("copy.85494984469a", { defaultValue: "No microphone available. Check nothing else is using it and try again." });
+  }
+  if (isChunkLoadError(err)) {
+    return _translateCopy("copy.a37318c6d6ab", { defaultValue: "The app updated while this page was open. Refresh, then start the stage again." });
+  }
+  // Anything else is a server, SDK or browser message, which is English.
+  const language = i18n.resolvedLanguage || i18n.language || 'en';
+  const readsEnglish = language === 'en' || language.startsWith('en-');
+  return (readsEnglish && message) || _translateCopy("copy.ab827e3fe17d", { defaultValue: "Something went wrong" });
+}
+
+/** A stage failure message already in the reader's language. */
+class StageCopyError extends Error {}
+
+// ─── Abandoned-launch guard ─────────────────────────────────────────────────
+//
+// The row is flipped to `live` BEFORE the host is on air, because the token
+// gate reads the row to decide who may publish. If going live then fails, the
+// client puts the row back — but that put-back is an ordinary fetch, and a host
+// who reads the error and hits refresh takes the document (and the fetch) with
+// them. The row then says `live` forever: it sits on the home rail, the host
+// has a ghost seat in it, and nothing ever ends it, because the auto-end
+// trigger fires on a participant LEAVING and this participant never arrived.
+//
+// So the pending put-back is also armed on `pagehide`, where a keepalive
+// request can still get out. Module scope, not a ref: there is one launch in
+// flight at a time, and it has to survive the provider unmounting under it.
+
+let launchGuard: { spaceId: string; rollbackStatus: 'ended' | 'scheduled'; wallet: string | null } | null = null;
+
+function abandonLaunch() {
+  const guard = launchGuard;
+  if (!guard) return;
+  releaseLaunch();
+  endStageOnExit(guard.spaceId, guard.rollbackStatus, guard.wallet);
+}
+
+function holdLaunch(spaceId: string, rollbackStatus: 'ended' | 'scheduled', wallet: string | null) {
+  launchGuard = { spaceId, rollbackStatus, wallet };
+  window.addEventListener('pagehide', abandonLaunch);
+}
+
+function releaseLaunch() {
+  launchGuard = null;
+  window.removeEventListener('pagehide', abandonLaunch);
+}
+
+// ─── Modal opener (subscription-free) ───────────────────────────────────────
+// Several widely-mounted components (PostActionBar renders once PER POST in
+// the feed) only ever need to OPEN the stages modal. Consuming the full stage
+// context for that re-renders them on every stage state change. This module
+// function routes to the provider without any context subscription.
+
+let stageModalOpener: ((view?: 'browse' | 'create' | 'live') => void) | null = null;
+
+/** Open the stages modal without subscribing to stage context state. */
+export function openStageModal(view: 'browse' | 'create' | 'live' = 'browse') {
+  stageModalOpener?.(view);
+}
+
+let stageCreator: ((title: string, description?: string, coverImageUrl?: string | null) => Promise<AudioSpace | null>) | null = null;
+let stageScheduler: ((input: ScheduleSpaceInput) => Promise<AudioSpace | null>) | null = null;
+
+export function scheduleStage(input: ScheduleSpaceInput): Promise<AudioSpace | null> {
+  return stageScheduler ? stageScheduler(input) : Promise.resolve(null);
+}
+
+/**
+ * Open a stage from outside the stage tree.
+ *
+ * The post composer is the setup form for a stage, and it reaches this through
+ * `await import()` rather than the context: it is on the module graph the entry
+ * bundle is measured against, and a static edge from the composer into the
+ * stage stack drags the whole thing onto the boot path.
+ */
+export function createStageNow(
+  title: string,
+  description?: string,
+  coverImageUrl?: string | null,
+): Promise<AudioSpace | null> {
+  return stageCreator ? stageCreator(title, description, coverImageUrl) : Promise.resolve(null);
+}
+
+// ─── Provider ────────────────────────────────────────────────────────────────
+
+export function StageProvider({ children }: { children: ReactNode }) {
+  const { t: _copy } = _useCopy();
+  const { walletAddress, user } = useAuth();
+
+  // Stage state
+  const [liveSpaces, setLiveSpaces] = useState<AudioSpace[]>([]);
+  const [scheduledSpaces, setScheduledSpaces] = useState<AudioSpace[]>([]);
+  const [currentSpace, setCurrentSpace] = useState<AudioSpace | null>(null);
+  /** Signed-out listen-only session — mutually exclusive with currentSpace. */
+  const [guestSpace, setGuestSpace] = useState<AudioSpace | null>(null);
+  const guestSpaceRef = useRef<AudioSpace | null>(null);
+  guestSpaceRef.current = guestSpace;
+  const [participants, setParticipants] = useState<SpaceParticipant[]>([]);
+  const [handRequests, setHandRequests] = useState<RaiseHandRequest[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isConnected, setIsConnected] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
+  const [myRole, setMyRole] = useState<SpaceRole | null>(null);
+  const [hasRaisedHand, setHasRaisedHand] = useState(false);
+  const [voiceEffect, setVoiceEffectState] = useState<VoiceEffectId>('none');
+  /** Whoever's screen is currently on the wall — ours or a remote publisher's. */
+  const [screenShare, setScreenShare] = useState<StageScreenShare | null>(null);
+  const canScreenShare = useMemo(detectScreenShareSupport, []);
+  /** The station the host currently has on air. Host-local: listeners learn of
+   *  it over the broadcast channel below, not from this state. */
+  const [radioStation, setRadioStation] = useState<StageRadioStation | null>(null);
+  const [radioStatus, setRadioStatus] = useState<StageRadioStatus>('idle');
+  const [radioVolume, setRadioVolumeState] = useState(80);
+  const [radioMonitor, setRadioMonitorState] = useState(true);
+  /** The set the on-air source belongs to — the host's clips, in their order. */
+  const [radioQueue, setRadioQueue] = useState<StageRadioStation[]>([]);
+  const voiceEffectsHook = useVoiceEffects();
+  const voiceEffectsHookRef = useRef(voiceEffectsHook);
+  voiceEffectsHookRef.current = voiceEffectsHook;
+
+  // Modal state
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [initialModalView, setInitialModalView] = useState<'browse' | 'create' | 'live'>('browse');
+
+  // Agora refs
+  const agoraClientRef = useRef<any>(null);
+  const localAudioTrackRef = useRef<any>(null);
+  /** The display capture we publish while sharing, and its optional system audio. */
+  const screenVideoTrackRef = useRef<any>(null);
+  const screenAudioTrackRef = useRef<any>(null);
+  /** The Agora track carrying the radio. One per broadcast session, not per station. */
+  const radioTrackRef = useRef<any>(null);
+  /** Read by the announce heartbeat, which must not restart on every station change. */
+  const radioStationRef = useRef<StageRadioStation | null>(null);
+  radioStationRef.current = radioStation;
+  /** Read by the pause toggle, which only knows the button was pressed. */
+  const radioStatusRef = useRef<StageRadioStatus>(radioStatus);
+  radioStatusRef.current = radioStatus;
+  /** Levels read at start time, so startRadio can stay a stable callback. */
+  const radioVolumeStateRef = useRef(radioVolume);
+  radioVolumeStateRef.current = radioVolume;
+  const radioMonitorRef = useRef(radioMonitor);
+  radioMonitorRef.current = radioMonitor;
+  /** Read when a clip ends, which happens long after startRadio's closure was built. */
+  const radioQueueRef = useRef<StageRadioStation[]>([]);
+  radioQueueRef.current = radioQueue;
+  /** startRadio calls itself to advance a set; a ref keeps it a stable callback. */
+  const startRadioRef = useRef<((station: StageRadioStation, queue?: StageRadioStation[]) => Promise<void>) | null>(null);
+  /** Realtime channel the host announces the current station on. */
+  const radioChannelRef = useRef<any>(null);
+  /**
+   * Bumped by every start and every stop. A start that wakes from an await to
+   * find the number moved on has been overtaken: by a stop (the host pressed
+   * Stop while it was still tuning in) or by a newer start. Without this a stop
+   * pressed mid-connect cleared the panel, then the start carried on and played
+   * the station anyway, with no control left on screen to take it off.
+   */
+  const radioGenRef = useRef(0);
+  /** True from a stop until the next start. */
+  const radioOffRef = useRef(true);
+  /**
+   * The first publish of a session, while it is in flight. Two quick taps both
+   * found no track and each published one, so the room got the station twice
+   * and Stop only took one of them down.
+   */
+  const radioPublishRef = useRef<Promise<any> | null>(null);
+  /**
+   * Every remote speaker's audio track, kept so the room can be turned down.
+   *
+   * Playing a track and forgetting it was fine while nothing needed to change
+   * its level. Live dubbing does: a listener hearing a translation needs the
+   * original ducked underneath it — the interpretation-booth arrangement,
+   * where the room stays audible for laughter and timing rather than being
+   * muted into silence.
+   */
+  const remoteAudioTracksRef = useRef<Map<string | number, any>>(new Map());
+  /** Level the room should sit at, re-applied to tracks that arrive later. */
+  const roomVolumeRef = useRef(100);
+
+  // Recording refs (host only)
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const recordingChunksRef = useRef<Blob[]>([]);
+  const recordingSpaceIdRef = useRef<string | null>(null);
+  /** Wall-clock ms when recording started — used to compute relative timeline timestamps */
+  const recordingStartMsRef = useRef<number>(0);
+  /** Timeline of AI / non-host audio windows captured during recording. */
+  const recordingTimelineRef = useRef<Array<{
+    start: number; end: number; kind: 'ai' | 'human'; source: string; label: string;
+  }>>([]);
+  /** True while the finished recording is being uploaded — read by the unload guard. */
+  const recordingUploadInFlightRef = useRef(false);
+  /** What the recorder listens to: the host's voice plus every remote speaker. */
+  const recordingMixRef = useRef<RecordingMix | null>(null);
+  /** A join or go-live in progress; a second tap must not start another. */
+  const roomSwitchInFlightRef = useRef(false);
+  /** The last leaveSpace's background teardown, so a switch can wait it out. */
+  const leaveTeardownRef = useRef<Promise<void>>(Promise.resolve());
+  /** Gives iPhone Safari its audio session back once this client's mic closes. */
+  const micSessionReleaseRef = useRef<(() => void) | null>(null);
+
+  /** Serialize injectAudio (TTS / soundboard) so tracks don’t overlap on Agora */
+  const injectAudioChainRef = useRef<Promise<void>>(Promise.resolve());
+  /**
+   * Broadcast one caption line. Assigned below, once the caption publisher is
+   * mounted; held as a ref so injectAudio can reach it without taking the
+   * publisher as a dependency and rebuilding on every caption preference flip.
+   */
+  const publishCaptionRef = useRef<((text: string, label: string) => void) | null>(null);
+  /** Guard against concurrent setVoiceEffect calls */
+  const isEffectSwitchingRef = useRef(false);
+  /** Coalesce bursts of audio_spaces realtime events into one list fetch */
+  const liveSpacesRefreshDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Stable refs for realtime callbacks
+  const walletAddressRef = useRef(walletAddress);
+  /** The signed-in profile, read at call time by the long-lived recorder callbacks. */
+  const userRef = useRef(user);
+  userRef.current = user;
+  const myRoleRef = useRef(myRole);
+  const isMutedRef = useRef(isMuted);
+  isMutedRef.current = isMuted;
+  const currentSpaceIdRef = useRef<string | null>(null);
+  currentSpaceIdRef.current = currentSpace?.id ?? null;
+  /** Last time this client reported the local user speaking (throttle: once a minute). */
+  const lastSpeechTouchRef = useRef(0);
+  const hasHandledStageEndRef = useRef(false);
+  /**
+   * Bump the stage's last_speech_at so the 30-minute idle sweep leaves it up.
+   * A query builder only runs once something awaits or `then`s it; this used to
+   * be fired with `void`, which never sent the request, so no stage ever
+   * registered speech and every one was judged by its start time alone.
+   */
+  const touchStageSpeech = (spaceId: string) => {
+    (withWalletHeader(
+      supabase.rpc('touch_stage_speech' as never, { space_id: spaceId } as never) as never,
+      walletAddressRef.current,
+    ) as unknown as PromiseLike<{ error: { message?: string } | null }>).then(
+      ({ error }: { error: { message?: string } | null }) => {
+        if (error) stageLogger.warn('Stage speech touch failed', { spaceId, error: error.message });
+      },
+      () => { /* network blip; the next minute retries */ },
+    );
+  };
+  // Keep refs aligned before effects run (avoids host-only fetches seeing stale role on first mount).
+  walletAddressRef.current = walletAddress;
+  myRoleRef.current = myRole;
+
+  /**
+   * Every stage WRITE goes through this.
+   *
+   * The stage tables' write policies check `get_request_wallet_address()`,
+   * which reads the `x-wallet-address` request header — and the plain supabase
+   * client never sends it. Reads are `USING (true)` and need nothing; writes
+   * that skip this are refused outright once the policies are tightened, and
+   * refused silently, because a policy failure on an un-inspected update
+   * returns no rows rather than throwing.
+   *
+   * Read through the ref, not the closure, so this stays correct in the
+   * background teardown paths that outlive their render.
+   */
+  const signed = useCallback(
+    <T,>(query: T): T => withWalletHeader(query as never, walletAddressRef.current) as T,
+    [],
+  );
+
+  /** Avoid re-subscribing realtime on every currentSpace object change (leaveSpace depends on currentSpace). */
+  const leaveSpaceRef = useRef<() => Promise<void>>(async () => {});
+  const upgradeSpeakerRef = useRef<() => Promise<void>>(async () => {});
+  /** startScheduledSpace falls back to a plain rejoin, and is defined above joinSpace. */
+  const joinSpaceRef = useRef<(spaceId: string) => Promise<boolean>>(async () => false);
+  /** joinSpace tears a guest session down first, and is defined above it. */
+  const guestStopListeningRef = useRef<() => Promise<void>>(async () => {});
+
+  // ─── Modal controls ──────────────────────────────────────────────────────
+
+  const openModal = useCallback((view: 'browse' | 'create' | 'live' = 'browse') => {
+    setInitialModalView(view);
+    setIsModalOpen(true);
+  }, []);
+
+  const closeModal = useCallback(() => {
+    setIsModalOpen(false);
+  }, []);
+
+  // Feed the subscription-free module-level opener (see openStageModal above).
+  useEffect(() => {
+    stageModalOpener = openModal;
+    return () => { stageModalOpener = null; };
+  }, [openModal]);
+
+  // ─── One stage at a time, live or recorded ──────────────────────────────
+  //
+  // A recording plays through a module-level `<audio>` and a live room plays
+  // through Agora, so neither engine knows the other exists. Pressing play on
+  // a recording stops any other recording, and joining a room stops any other
+  // room, but nothing stood between the two — and a popped-out recording is
+  // built to survive its drawer closing, which is exactly the one that was
+  // still going when a room started. Both came out of the speakers at once,
+  // with the live room's own controls giving no way to silence the other.
+  //
+  // Placed on `currentSpace` rather than at each entry point: joining,
+  // creating, starting a scheduled stage and a guest starting to listen all
+  // arrive here, and a fifth way in later gets this for free.
+  useEffect(() => {
+    if (currentSpace) stopStageRecording();
+  }, [currentSpace?.id]);
+
+  // ─── Keep a live host from silently killing their own recording ─────────
+  //
+  // Two windows where closing the tab destroys the recording with no error:
+  // while on air (the recorder's chunks exist only in page memory), and the
+  // minute or two after pressing End, when the UI has already reset but the
+  // upload is still in flight — endSpace deliberately closes the modal before
+  // the upload finishes, which makes leaving feel natural at exactly the
+  // moment it loses the file. The browser's generic leave-site prompt is the
+  // strongest signal a page is allowed to give there. Listeners and guests
+  // never hit this: the handler only arms for a recording host or a pending
+  // upload, and an armed-but-idle handler costs nothing.
+  useEffect(() => {
+    const guard = (e: BeforeUnloadEvent) => {
+      const recording =
+        mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive';
+      if (recording || recordingUploadInFlightRef.current) {
+        e.preventDefault();
+        // Required by Chrome for the dialog to actually appear.
+        e.returnValue = '';
+      }
+    };
+    window.addEventListener('beforeunload', guard);
+    return () => window.removeEventListener('beforeunload', guard);
+  }, []);
+
+  // ─── Recording helpers (host only) ──────────────────────────────────────
+
+  const startRecording = useCallback((spaceId: string) => {
+    try {
+      // The host's voice, with the effect applied: the same audio Agora
+      // publishes. Accessed via ref so this callback stays stable with [] deps.
+      const processedStream = voiceEffectsHookRef.current.getProcessedStream();
+      if (!processedStream) {
+        console.warn('[Stage] Cannot start recording — processed audio stream not ready');
+        return;
+      }
+
+      // The recorder hears the room, not just the host: see RecordingMix.
+      // Speakers already on stage are plugged in now; later ones arrive
+      // through the user-published handler.
+      const mix = createRecordingMix();
+      if (mix) {
+        setMixLocal(mix, processedStream);
+        for (const [uid, track] of remoteAudioTracksRef.current) addMixRemote(mix, uid, track);
+      }
+      const source = mix?.dest.stream ?? processedStream;
+
+      const mimeType = pickRecordingType();
+      const options: MediaRecorderOptions = { audioBitsPerSecond: RECORDING_BITS_PER_SECOND };
+      if (mimeType) options.mimeType = mimeType;
+      const recorder = new MediaRecorder(source, options);
+      recordingChunksRef.current = [];
+      recordingSpaceIdRef.current = spaceId;
+      recordingTimelineRef.current = [];
+      recordingStartMsRef.current = Date.now();
+
+      recorder.ondataavailable = (e) => {
+        if (e.data.size > 0) recordingChunksRef.current.push(e.data);
+      };
+
+      recorder.start(1000); // collect chunks every 1s
+      mediaRecorderRef.current = recorder;
+      if (mix) {
+        recorderMixes.set(recorder, mix);
+        recordingMixRef.current = mix;
+      }
+      console.log(`[Stage] Recording started (${recorder.mimeType || mimeType || 'browser default'}, ${mix ? `host + ${mix.remotes.size} speaker(s)` : 'host only'})`);
+
+      // The host's dubbing voice is NOT taken from here any more.
+      //
+      // It used to be: thirty seconds in, the recorder's buffer was posted to
+      // elevenlabs-clone-voice in the background. That never worked. The
+      // function returns a voice id and nothing wrote it to custom_voices, so
+      // every clone it made was orphaned — a voice slot consumed per page
+      // load, and dubbing still falling back to the stock narrator every time.
+      // It also read custom_voices without a wallet header, so the "already
+      // have one?" check could not see a row even when there was one.
+      //
+      // Cloning is now an explicit, paid step before going live
+      // (StageVoiceSetup → stage-voice-clone), which is where a permanent copy
+      // of somebody's voice belongs.
+    } catch (err) {
+      console.warn('[Stage] Recording setup failed:', err);
+    }
+  }, []); // stable — reads voiceEffectsHookRef.current at call time
+
+  const stopAndUploadRecording = useCallback(async (spaceId: string, recorderArg?: MediaRecorder) => {
+    const recorder = recorderArg ?? mediaRecorderRef.current;
+    if (!recorder || recorder.state === 'inactive') return;
+
+    // Read by the beforeunload guard: from here until the finally below, a
+    // one- to two-hour recording exists ONLY as in-memory chunks and an
+    // in-flight fetch. The End flow deliberately resets the UI before this
+    // finishes, which makes closing the tab feel natural at exactly the moment
+    // it destroys the recording.
+    recordingUploadInFlightRef.current = true;
+    // The unload guard's browser dialog is the last line of defence; this is
+    // the first — a corner card with the app's preloader, so the after-End
+    // wait reads as progress instead of something the host has to guess at.
+    showRecordingUploading();
+
+    const mix = recorderMixes.get(recorder);
+    return new Promise<void>((resolve) => {
+      recorder.onstop = async () => {
+        closeRecordingMix(mix);
+        try {
+          const chunks = recordingChunksRef.current;
+          if (chunks.length === 0) { dismissRecordingToast(); resolve(); return; }
+
+          // MediaRecorder muxes for streaming, not for filing: no Duration in
+          // Info and no Cues index. Browsers hide that by bisecting clusters,
+          // which is why web's scrub bar works — ExoPlayer does not, so on
+          // Android the recording lands with duration 0 and a dead scrubber.
+          // This is the last moment the file is still ours, so finalise it
+          // here; the container, the mime and the path are all unchanged, so
+          // the transcriber and both players see exactly what they saw before,
+          // only seekable. Loaded on demand — it runs once per stage, for
+          // hosts only, and has no business in the main bundle.
+          const file = recordingFileFor(recorder.mimeType || chunks[0]?.type || '');
+          let blob = new Blob(chunks, { type: file.contentType });
+          if (file.ext === 'webm') {
+            try {
+              const { makeWebmSeekable } = await import('@/lib/webm-seekable');
+              const finalised = await makeWebmSeekable(blob);
+              if (finalised.changed) {
+                blob = finalised.blob;
+                console.log(
+                  `[Stage] Recording finalised: ${finalised.durationMs}ms, ${finalised.cuePoints} cue points`, // exact-number
+                );
+              } else {
+                console.warn('[Stage] Recording uploaded as recorded:', finalised.reason);
+              }
+            } catch (err) {
+              // An unseekable recording beats no recording. Nothing this pass
+              // can go wrong with is worth failing the only upload over.
+              console.warn('[Stage] Recording finalise skipped:', err);
+            }
+          }
+
+          const path = `${spaceId}/recording.${file.ext}`;
+
+          // One retry, and a visible failure. This upload is the only copy of
+          // the stage in existence, the finally below wipes the chunks
+          // whatever happens, and until now the only trace of a failed upload
+          // was a console line nobody was looking at — the host walked away
+          // believing the recording existed. A single retry absorbs the
+          // transient blip that is the common failure here; a persistent toast
+          // covers the rest honestly.
+          let uploadErr: { message: string } | null = null;
+          for (let attempt = 0; attempt < 2; attempt++) {
+            const { error } = await supabase.storage
+              .from('stage-recordings')
+              .upload(path, blob, { contentType: file.contentType, upsert: true });
+            uploadErr = error;
+            if (!uploadErr) break;
+            console.warn(`[Stage] Upload attempt ${attempt + 1} failed:`, uploadErr.message);
+          }
+
+          if (uploadErr) {
+            console.error('[Stage] Upload failed:', uploadErr.message);
+            showRecordingFailed();
+            resolve();
+            return;
+          }
+
+          const { data: urlData } = supabase.storage
+            .from('stage-recordings')
+            .getPublicUrl(path);
+
+          if (urlData?.publicUrl) {
+            await signed(
+              supabase
+                .from('audio_spaces')
+                .update({ recording_url: urlData.publicUrl })
+                .eq('id', spaceId),
+            );
+            console.log('[Stage] Recording saved:', urlData.publicUrl);
+            showRecordingSaved();
+
+            // Trigger transcription as soon as the recording is uploaded.
+            // Pass the timeline so the edge function can label diarized speakers
+            // (host vs AI/TTS/soundboard) instead of "Speaker 1/2".
+            const timeline = recordingTimelineRef.current.slice();
+            // A WebM always goes through finalize-stage-recording now, even
+            // when the pass above indexed it: iPhones cannot play WebM at all,
+            // and that function re-files the same Opus packets as an MP4 every
+            // player can use, then chains into transcription itself. Safari's
+            // MP4 needs none of that and goes straight to the transcriber.
+            const next = file.ext === 'webm' ? 'finalize-stage-recording' : 'transcribe-stage';
+            supabase.functions
+              .invoke(next, { body: { stageId: spaceId, timeline } })
+              .catch((err) => console.warn(`[Stage] ${next} trigger failed:`, err));
+          }
+        } catch (err) {
+          console.error('[Stage] Recording upload error:', err);
+          showRecordingFailed();
+        } finally {
+          recordingUploadInFlightRef.current = false;
+          recordingChunksRef.current = [];
+          recordingTimelineRef.current = [];
+          recordingSpaceIdRef.current = null;
+          mediaRecorderRef.current = null;
+          resolve();
+        }
+      };
+
+      // Nothing new reaches this file once it stops, so later speakers stop
+      // being plugged into its mix straight away; the graph itself is closed
+      // once the recorder has handed over its last chunk.
+      if (recordingMixRef.current === mix) recordingMixRef.current = null;
+      recorder.stop();
+    });
+  }, []);
+
+  // ─── Fetch live stages ───────────────────────────────────────────────────
+
+  const refreshSpaces = useCallback(async () => {
+    try {
+      const { data, error } = await supabase
+        .from('audio_spaces')
+        .select(SPACE_LIST_COLUMNS)
+        .eq('status', 'live')
+        .order('started_at', { ascending: false });
+      if (error) throw error;
+      const spaces = (data as AudioSpace[]) || [];
+      setLiveSpaces(spaces);
+      publishLiveSpaces(spaces);
+    } catch (err) {
+      console.error('Error fetching stages:', err);
+    }
+  }, []);
+
+  /**
+   * Upcoming stages, soonest first.
+   *
+   * Stages that came and went without the host ever starting them are dropped
+   * from the list after a grace period rather than deleted — the row stays
+   * reachable by link (so a shared card still resolves) but stops occupying
+   * the upcoming shelf forever.
+   */
+  const refreshScheduledSpaces = useCallback(async () => {
+    try {
+      const cutoff = new Date(Date.now() - SCHEDULED_GRACE_MS).toISOString();
+      const { data, error } = await supabase
+        .from('audio_spaces')
+        .select(SPACE_LIST_COLUMNS)
+        .eq('status', 'scheduled')
+        .gte('scheduled_at', cutoff)
+        .order('scheduled_at', { ascending: true });
+      if (error) throw error;
+      const spaces = (data as AudioSpace[]) || [];
+      setScheduledSpaces(spaces);
+      publishScheduledSpaces(spaces);
+    } catch (err) {
+      console.error('Error fetching scheduled stages:', err);
+    }
+  }, []);
+
+  // ─── Agora helpers ───────────────────────────────────────────────────────
+
+  /**
+   * Take a remote screen off the wall, by publisher. Never touches our own
+   * share: a remote user leaving must not blank the screen we are publishing.
+   */
+  const clearRemoteScreenShare = useCallback((uid: number | string | undefined) => {
+    setScreenShare(prev => (prev && !prev.isLocal && prev.uid === uid ? null : prev));
+  }, []);
+
+  /**
+   * Throws rather than returning null: a caller that has already flipped a row
+   * to `live` must not be able to forget to check, and the reason it failed is
+   * worth more than a boolean. Every call site is inside a try that owns the
+   * put-back.
+   */
+  const getAgoraToken = async (
+    channelName: string,
+    role: 'publisher' | 'subscriber',
+    anonymous = false,
+  ): Promise<AgoraTokenResponse> => {
+    const requestToken = async (withIdentity: boolean): Promise<AgoraTokenResponse> => {
+      const authToken = withIdentity && !anonymous ? getAuthToken() : null;
+      const headers =
+        authToken && walletAddress
+          ? { 'x-dehub-token': authToken, 'x-wallet-address': walletAddress.toLowerCase() }
+          : undefined;
+
+      const { data, error } = await supabase.functions.invoke('agora-token', {
+        body: { channelName, role },
+        ...(headers ? { headers } : {}),
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      const tokenData = data as AgoraTokenResponse;
+      if (!tokenData?.appId || !tokenData?.token) {
+        throw new Error('Agora credentials not configured');
+      }
+      return tokenData;
+    };
+
+    try {
+      try {
+        return await requestToken(true);
+      } catch (err) {
+        // The identity headers are only understood by the redeployed function:
+        // the previous deployment's CORS allow-list predates them, so the
+        // browser's preflight fails and the request never leaves. Shipping the
+        // headers ahead of that redeploy locked every host out of going live.
+        // One bare retry keeps the client working against either deployment —
+        // the old function never gated anything, so a token minted without
+        // identity is exactly what it would have issued anyway, and once the
+        // new function is live the first attempt succeeds and this path goes
+        // dead. It does not mask a real refusal: an enforced 403 stays a 403
+        // with or without headers.
+        if (role !== 'publisher') throw err;
+        console.warn('[Stage] Publisher token with identity failed, retrying bare:', err);
+        return await requestToken(false);
+      }
+    } catch (err) {
+      stageLogger.error('Stage token request failed', { channelName, role }, err);
+      throw new StageCopyError(describeStageFailure(err));
+    }
+  };
+
+  /**
+   * Throws on failure, and takes the half-joined client with it.
+   *
+   * It used to swallow the error, toast "Failed to connect to audio" and return
+   * false — which left `agoraClientRef` pointing at a client that had joined the
+   * channel but published nothing, so the next attempt built a second one on top
+   * of it. The reason for the failure (a denied mic, a stale bundle) never
+   * reached the host or the logs.
+   */
+  const initializeAgora = async (
+    tokenData: AgoraTokenResponse,
+    role: SpaceRole,
+  ): Promise<void> => {
+    try {
+      const AgoraRTC = (await import('agora-rtc-sdk-ng')).default;
+      const client = AgoraRTC.createClient({ mode: 'live', codec: 'vp8' });
+      agoraClientRef.current = client;
+
+      // Enable volume indicator for live waveform
+      client.enableAudioVolumeIndicator();
+      client.on('volume-indicator', (volumes: any[]) => {
+        if (!volumes || volumes.length === 0) {
+          setStageVolumeLevel(0);
+          return;
+        }
+        const maxVol = Math.max(...volumes.map((v: any) => v.level || 0));
+        // Keep the stage alive while the local host/speaker is actually talking.
+        const role = myRoleRef.current;
+        if ((role === 'host' || role === 'speaker') && !isMutedRef.current) {
+          const local = volumes.find((v: any) => v.uid === 0 || v.uid === client.uid);
+          const spaceId = currentSpaceIdRef.current;
+          const now = Date.now();
+          if (local && (local.level || 0) >= SPEECH_LEVEL && spaceId && now - lastSpeechTouchRef.current >= SPEECH_TOUCH_MS) {
+            lastSpeechTouchRef.current = now;
+            touchStageSpeech(spaceId);
+          }
+        }
+        // Agora levels are 0-100, normalize to 0-1
+        setStageVolumeLevel(maxVol / 100);
+      });
+
+      if (role === 'host' || role === 'speaker') {
+        await client.setClientRole('host');
+      } else {
+        await client.setClientRole('audience');
+      }
+
+      client.on('user-published', async (remoteUser: any, mediaType: 'audio' | 'video') => {
+        await client.subscribe(remoteUser, mediaType);
+        if (mediaType === 'audio') {
+          // One remote audio track per user even when the host publishes both a
+          // mic and a screen-audio track — the SDK mixes them before they leave.
+          remoteUser.audioTrack?.play();
+          // Remember it, and start it at whatever level the room is currently
+          // at — a speaker who joins mid-dub must not arrive at full volume.
+          if (remoteUser.audioTrack) {
+            remoteAudioTracksRef.current.set(remoteUser.uid, remoteUser.audioTrack);
+            try { remoteUser.audioTrack.setVolume(roomVolumeRef.current); } catch { /* older SDK */ }
+            // A host's recording takes every voice in the room, not just theirs.
+            if (recordingMixRef.current) addMixRemote(recordingMixRef.current, remoteUser.uid, remoteUser.audioTrack);
+          }
+        } else if (mediaType === 'video' && remoteUser.videoTrack) {
+          // Take the small copy on phones and tablets. Throws when the sharer's
+          // browser refused dual-stream mode, in which case there is only the
+          // one stream to have and everyone takes it.
+          if (prefersLowVideoStream()) {
+            try {
+              await client.setRemoteVideoStreamType(remoteUser.uid, 1);
+            } catch (err) {
+              console.warn('[Stage] Low-quality screen stream unavailable', err);
+            }
+          }
+          // Video only ever means a screen share here; nobody publishes a camera.
+          // Agora replays this for publishers already in the room when we join,
+          // so walking in on a share picks it up without any extra handshake.
+          setScreenShare({ track: remoteUser.videoTrack, uid: remoteUser.uid, isLocal: false });
+        }
+      });
+
+      client.on('user-unpublished', (remoteUser: any, mediaType: 'audio' | 'video') => {
+        // Participant bookkeeping rides realtime DB events; the only thing Agora
+        // has to tell us here is that a screen went away.
+        if (mediaType === 'video') clearRemoteScreenShare(remoteUser?.uid);
+        if (mediaType === 'audio') {
+          remoteAudioTracksRef.current.delete(remoteUser?.uid);
+          if (recordingMixRef.current) dropMixRemote(recordingMixRef.current, remoteUser?.uid);
+        }
+      });
+
+      // A sharer who closes the tab never gets to unpublish.
+      client.on('user-left', (remoteUser: any) => {
+        remoteAudioTracksRef.current.delete(remoteUser?.uid);
+        if (recordingMixRef.current) dropMixRemote(recordingMixRef.current, remoteUser?.uid);
+        clearRemoteScreenShare(remoteUser?.uid);
+      });
+
+      await client.join(tokenData.appId, tokenData.channel, tokenData.token, tokenData.uid);
+
+      if (role === 'host' || role === 'speaker') {
+        micSessionReleaseRef.current?.();
+        micSessionReleaseRef.current = holdMicAudioSession();
+        const rawStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const processedTrack = await voiceEffectsHook.processStream(rawStream, voiceEffect);
+        const AgoraRTC2 = AgoraRTC; // reuse import
+        const customTrack = AgoraRTC2.createCustomAudioTrack({ mediaStreamTrack: processedTrack });
+        localAudioTrackRef.current = customTrack;
+        customTrack.setMuted(true);
+        await client.publish([customTrack]);
+      }
+
+      setIsConnected(true);
+    } catch (err) {
+      // Drop whatever got as far as joining, so a retry starts clean.
+      micSessionReleaseRef.current?.();
+      micSessionReleaseRef.current = null;
+      const client = agoraClientRef.current;
+      agoraClientRef.current = null;
+      if (client) {
+        try { await client.leave(); } catch { /* already gone */ }
+      }
+      stageLogger.error('Stage audio connection failed', { role, channel: tokenData.channel }, err);
+      throw new StageCopyError(describeStageFailure(err));
+    }
+  };
+
+  // ─── Upgrade listener → speaker ──────────────────────────────────────────
+
+  const upgradeSpeaker = useCallback(async () => {
+    if (!agoraClientRef.current) return;
+    try {
+      const AgoraRTC = (await import('agora-rtc-sdk-ng')).default;
+      await agoraClientRef.current.setClientRole('host');
+      micSessionReleaseRef.current?.();
+      micSessionReleaseRef.current = holdMicAudioSession();
+      const rawStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const processedTrack = await voiceEffectsHook.processStream(rawStream, voiceEffect);
+      const customTrack = AgoraRTC.createCustomAudioTrack({ mediaStreamTrack: processedTrack });
+      localAudioTrackRef.current = customTrack;
+      customTrack.setMuted(true);
+      await agoraClientRef.current.publish([customTrack]);
+      setMyRole('speaker');
+      setIsMuted(true);
+      setHasRaisedHand(false);
+      toast.success(_copy("copy.6c2387c827f2", { defaultValue: "You're now a speaker! Unmute to talk." }));
+    } catch (err) {
+      console.error('Error upgrading to speaker:', err);
+      toast.error(_copy("copy.0f62bd716439", { defaultValue: "Failed to enable microphone" }));
+    }
+  }, [voiceEffect, voiceEffectsHook, _copy]);
+
+  // ─── Create stage ────────────────────────────────────────────────────────
+
+  /**
+   * Make way for another room before entering it.
+   *
+   * Every way into a stage (a home rail card, the carousel, a link, the list)
+   * called straight into join with no thought for the room already open. That
+   * built a second Agora client on top of the first: both rooms played at once,
+   * the old seat was never given up, and a host's recorder restarted and threw
+   * away everything recorded so far.
+   *
+   * 'same' when already in `nextSpaceId` (nothing to do), false when the move
+   * is refused, true once the old room is fully torn down. A host is refused
+   * rather than walked out, because leaving ends their stage for everyone.
+   */
+  const vacateCurrentRoom = useCallback(
+    async (nextSpaceId: string | null): Promise<boolean | 'same'> => {
+      const inRoom = currentSpaceIdRef.current;
+      if (!inRoom) return true;
+      if (inRoom === nextSpaceId) return 'same';
+      if (myRoleRef.current === 'host') {
+        toast.error(_translateCopy("copy.4aaeb7f8214b", { defaultValue: "You're hosting a live stage" }), { description: _translateCopy("copy.f4890c2e383b", { defaultValue: "End it before you join or start another." }) });
+        return false;
+      }
+      await leaveSpaceRef.current();
+      // The old client leaves in the background and then closes the voice
+      // effect graph; joining before that lands would have it close the new
+      // room's microphone instead. Capped, so a hung leave cannot block.
+      await Promise.race([leaveTeardownRef.current, new Promise((r) => setTimeout(r, 5000))]);
+      return true;
+    },
+    [],
+  );
+
+  /**
+   * Put the host on the air for a stage row that already exists.
+   *
+   * Shared by "go live now" and "start the stage I scheduled", because from
+   * the Agora side those are the same operation — the only difference is where
+   * the row goes back to if connecting fails. A stage created on the spot is
+   * dead if it never connected, so it rolls back to `ended`; a scheduled one
+   * must go back to `scheduled` or a failed start would quietly destroy an
+   * announcement people are already holding a link to.
+   *
+   * EVERY step between the row saying `live` and the host actually being on air
+   * is inside the try, and the put-back runs for all of them. The host's seat
+   * used to be written above it — so a seat write that failed threw with the row
+   * still advertised as live, which is one of the two ways a stage ended up
+   * stranded on the home rail with nobody in it. The other was the put-back
+   * itself dying with the page; see the launch guard at the top of this file.
+   */
+  const goLiveAsHost = useCallback(
+    async (space: AudioSpace, rollbackStatus: 'ended' | 'scheduled'): Promise<AudioSpace> => {
+      const rollback = async () => {
+        // One retry, and a complaint if it still does not land. This is the
+        // only thing standing between a failed launch and a stage that says
+        // "live on air" until somebody deletes the row by hand.
+        for (let attempt = 0; attempt < 2; attempt++) {
+          const { error } = await signed(
+            supabase
+              .from('audio_spaces')
+              .update({ status: rollbackStatus })
+              .eq('id', space.id),
+          );
+          if (!error) return;
+          if (attempt === 1) {
+            stageLogger.error(
+              'Stage left advertised as live after a failed launch',
+              { spaceId: space.id, rollbackStatus, reason: error.message },
+            );
+          }
+        }
+      };
+
+      holdLaunch(space.id, rollbackStatus, walletAddress ?? null);
+      try {
+        const { error: seatError } = await signed(
+          supabase.from('space_participants').insert({
+            space_id: space.id,
+            wallet_address: walletAddress,
+            username: user?.username || null,
+            avatar: persistableAvatar(user?.avatarImageUrl),
+            role: 'host',
+            is_muted: true,
+          }),
+        );
+        // Not cosmetic: the publisher-token gate reads this row to decide the
+        // caller may speak, so a stage whose host has no seat cannot go live.
+        if (seatError) throw new Error(seatError.message);
+
+        const tokenData = await getAgoraToken(space.channel_name, 'publisher');
+        await initializeAgora(tokenData, 'host');
+      } catch (err) {
+        await rollback();
+        throw err;
+      } finally {
+        releaseLaunch();
+      }
+
+      setCurrentSpace(space);
+      setMyRole('host');
+      hasHandledStageEndRef.current = false;
+      // Start recording (host side — captures all audio they hear)
+      startRecording(space.id);
+      return space;
+    },
+    [walletAddress, user, startRecording, signed],
+  );
+
+  const createSpace = useCallback(
+    async (title: string, description?: string, coverImageUrl?: string | null, options?: { radio?: boolean }): Promise<AudioSpace | null> => {
+      if (!walletAddress) { toast.error(_copy("copy.f6101c84c1c8", { defaultValue: "Please log in first" })); return null; }
+      if (roomSwitchInFlightRef.current) return null;
+      if (!(await vacateCurrentRoom(null))) return null;
+      roomSwitchInFlightRef.current = true;
+      setIsLoading(true);
+      try {
+        const channelName = newStageChannelName(!!options?.radio);
+
+        const { data: space, error } = await signed(
+          supabase
+            .from('audio_spaces')
+            .insert({
+              channel_name: channelName,
+              title,
+              description,
+              host_wallet_address: walletAddress,
+              host_username: user?.username || null,
+              host_avatar: persistableAvatar(user?.avatarImageUrl),
+              status: 'live',
+              // The composer can hand over a cover — the image or clip it was
+              // holding when Go Live was pressed. Scheduled stages already
+              // carried one; a stage opened now had nowhere to put it.
+              cover_image_url: coverImageUrl ?? null,
+              speaker_count: 1,
+              listener_count: 0,
+            })
+            .select()
+            .single(),
+        );
+        if (error) throw error;
+
+        await goLiveAsHost(space as AudioSpace, 'ended');
+        toast.success(_copy("copy.f5bcf2334b45", { defaultValue: "Stage created! You're now live." }));
+        return space as AudioSpace;
+      } catch (err) {
+        // One toast, carrying the actual reason. The old pair of handlers
+        // toasted twice for a token failure and hid the reason for every other
+        // one behind "Failed to create stage".
+        stageLogger.error('Stage launch failed', { title }, err);
+        toast.error(describeStageFailure(err));
+        return null;
+      } finally {
+        roomSwitchInFlightRef.current = false;
+        setIsLoading(false);
+      }
+    },
+    [walletAddress, user, goLiveAsHost, vacateCurrentRoom, signed, _copy],
+  );
+
+  // Feed the module-level opener the composer uses (see createStageNow above).
+  useEffect(() => {
+    stageCreator = createSpace;
+    return () => { stageCreator = null; };
+  }, [createSpace]);
+
+  // ─── Schedule a stage for later ──────────────────────────────────────────
+
+  const scheduleSpace = useCallback(
+    async (input: ScheduleSpaceInput): Promise<AudioSpace | null> => {
+      if (!walletAddress) { toast.error(_copy("copy.f6101c84c1c8", { defaultValue: "Please log in first" })); return null; }
+      setIsLoading(true);
+      try {
+        // The channel name is minted now and kept for the whole life of the
+        // stage, so the link handed out today is the room people walk into.
+        const channelName = newStageChannelName(!!input.radio);
+
+        const { data: space, error } = await signed(
+          supabase
+            .from('audio_spaces')
+            .insert({
+              channel_name: channelName,
+              title: input.title,
+              description: input.description,
+              host_wallet_address: walletAddress,
+              host_username: user?.username || null,
+              host_avatar: persistableAvatar(user?.avatarImageUrl),
+              status: 'scheduled',
+              scheduled_at: input.scheduledAt,
+              cover_image_url: input.coverImageUrl ?? null,
+              speaker_count: 0,
+              listener_count: 0,
+            })
+            .select()
+            .single(),
+        );
+        if (error) throw error;
+
+        await refreshScheduledSpaces();
+        return space as AudioSpace;
+      } catch (err) {
+        console.error('Error scheduling stage:', err);
+        toast.error(_copy("copy.6f7b8b255535", { defaultValue: "Failed to schedule stage" }));
+        return null;
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [walletAddress, user, refreshScheduledSpaces, signed, _copy],
+  );
+
+  useEffect(() => {
+    stageScheduler = scheduleSpace;
+    return () => { stageScheduler = null; };
+  }, [scheduleSpace]);
+
+  /** Take a stage that was scheduled earlier live now. Host only. */
+  const startScheduledSpace = useCallback(
+    async (spaceId: string): Promise<boolean> => {
+      if (!walletAddress) { toast.error(_copy("copy.f6101c84c1c8", { defaultValue: "Please log in first" })); return false; }
+      setIsLoading(true);
+      try {
+        const { data: existing, error: readErr } = await supabase
+          .from('audio_spaces')
+          .select('*')
+          .eq('id', spaceId)
+          .single();
+        if (readErr || !existing) throw new StageCopyError(_translateCopy("copy.166e42a8aa5b", { defaultValue: "Stage not found" }));
+        // Compared case-insensitively, like every other host check (the deep
+        // link page, the RLS policies). The auth layer hands us a lowercase
+        // address today, but a row written by any other route with a
+        // checksummed one would otherwise lock its own host out of starting it.
+        if (!sameWallet(existing.host_wallet_address, walletAddress)) {
+          toast.error(_copy("copy.f60c7be0ca85", { defaultValue: "Only the host can start this stage" }));
+          return false;
+        }
+        if (existing.status === 'live') {
+          // Already running — treat "start" as "rejoin" rather than erroring.
+          return await joinSpaceRef.current(spaceId);
+        }
+        if (existing.status !== 'scheduled') {
+          toast.error(_copy("copy.5d3b3ffaef04", { defaultValue: "This stage has already ended" }));
+          return false;
+        }
+        // Starting your own stage from inside somebody else's room: leave it
+        // first, so the two do not play at once.
+        if (!(await vacateCurrentRoom(spaceId))) return false;
+
+        const { data: space, error } = await signed(
+          supabase
+            .from('audio_spaces')
+            .update({
+              status: 'live',
+              // started_at defaulted to the moment the row was inserted, which
+              // for a scheduled stage is whenever it was announced. Stamp the
+              // real start so duration and the recorded list stay honest.
+              started_at: new Date().toISOString(),
+              // ...and restart the idle clock: last_speech_at was also stamped
+              // at announcement, so the 30-minute sweep ended the stage on its
+              // first run after going live.
+              last_speech_at: new Date().toISOString(),
+              speaker_count: 1,
+            })
+            .eq('id', spaceId)
+            .select()
+            .single(),
+        );
+        if (error) throw error;
+
+        await goLiveAsHost(space as AudioSpace, 'scheduled');
+        await refreshScheduledSpaces();
+        toast.success(_copy("copy.7f66339f6c52", { defaultValue: "You're now live." }));
+        return true;
+      } catch (err) {
+        stageLogger.error('Scheduled stage failed to start', { spaceId }, err);
+        toast.error(describeStageFailure(err));
+        return false;
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [walletAddress, goLiveAsHost, refreshScheduledSpaces, vacateCurrentRoom, signed, _copy],
+  );
+
+  /** Call off a scheduled stage. Host only; the row is removed outright. */
+  const cancelScheduledSpace = useCallback(
+    async (spaceId: string): Promise<void> => {
+      if (!walletAddress) return;
+      try {
+        const { error } = await supabase
+          .from('audio_spaces')
+          .delete()
+          .eq('id', spaceId)
+          .eq('status', 'scheduled')
+          // The delete policy compares the host wallet to this header, and the
+          // plain client never sends it — without this the row silently stays.
+          .setHeader('x-wallet-address', walletAddress.toLowerCase());
+        if (error) throw error;
+        await refreshScheduledSpaces();
+        toast.success(_copy("copy.81e4cd3539c6", { defaultValue: "Stage cancelled" }));
+      } catch (err) {
+        console.error('Error cancelling scheduled stage:', err);
+        toast.error(_copy("copy.6149a8421d78", { defaultValue: "Failed to cancel stage" }));
+      }
+    },
+    [walletAddress, refreshScheduledSpaces, _copy],
+  );
+
+  const rescheduleScheduledSpace = useCallback(
+    async (spaceId: string, at: Date): Promise<boolean> => {
+      if (!walletAddress) return false;
+      try {
+        const { error } = await signed(
+          supabase
+            .from('audio_spaces')
+            .update({ scheduled_at: at.toISOString() })
+            .eq('id', spaceId)
+            .eq('status', 'scheduled')
+            .select('id')
+            .single(),
+        );
+        if (error) throw error;
+        await refreshScheduledSpaces();
+        return true;
+      } catch (err) {
+        stageLogger.error('Scheduled stage failed to move', { spaceId }, err);
+        toast.error(_copy('planned.moveFailed', { defaultValue: 'Could not move it. Try again.' }));
+        return false;
+      }
+    },
+    [walletAddress, signed, refreshScheduledSpaces, _copy],
+  );
+
+  // ─── Join stage ──────────────────────────────────────────────────────────
+
+  const joinSpace = useCallback(
+    async (spaceId: string): Promise<boolean> => {
+      if (!walletAddress) { toast.error(_copy("copy.f6101c84c1c8", { defaultValue: "Please log in first" })); return false; }
+      // Two taps, or two cards, must not race two joins.
+      if (roomSwitchInFlightRef.current) return false;
+      roomSwitchInFlightRef.current = true;
+      // A visitor who was guest-listening and then logged in joins properly —
+      // drop the listen-only session before taking the real one.
+      setIsLoading(true);
+      // Read by the failure handler below, which needs to know whether the
+      // person who could not get in owns the room.
+      let hostWallet: string | null = null;
+      let tookNewSeat = false;
+      try {
+        const { data: space, error: spaceError } = await supabase
+          .from('audio_spaces')
+          .select('*')
+          .eq('id', spaceId)
+          .single();
+        if (spaceError || !space) throw new StageCopyError(_translateCopy("copy.166e42a8aa5b", { defaultValue: "Stage not found" }));
+        hostWallet = space.host_wallet_address ?? null;
+
+        // A stage that is not live has no channel to join. Without this the
+        // invite link for an ended stage opened an Agora connection to an empty
+        // room and sat there looking connected; with scheduled stages it would
+        // also let anyone walk into a room before its host had started it.
+        if (space.status !== 'live') {
+          toast.error(
+            space.status === 'scheduled'
+              ? _translateCopy("copy.a7f251001b75", { defaultValue: "This stage hasn't started yet" })
+              : _translateCopy("copy.52a23af007ea", { defaultValue: "This stage has ended" }),
+          );
+          return false;
+        }
+
+        if (space.entry_locked) {
+          const { data: entry, error: entryError } = await signed(
+            supabase.rpc('request_stage_entry', { p_space_id: spaceId }),
+          );
+          if (entryError) throw new Error(entryError.message);
+          if (entry !== 'allowed') {
+            toast.info(entry === 'pending' ? stageRoomLabel(_copy, 'entryPending') : stageRoomLabel(_copy, 'entryUnavailable'));
+            return false;
+          }
+        }
+
+        const vacated = await vacateCurrentRoom(spaceId);
+        if (vacated === 'same') return true;
+        if (!vacated) return false;
+        if (guestSpaceRef.current) await guestStopListeningRef.current();
+
+        // Determine role: if this user is the host, preserve host/speaker role on rejoin
+        const isHost = sameWallet(space.host_wallet_address, walletAddress);
+
+        // Check if user already has an active participant record (e.g. was speaker before disconnect)
+        const { data: existingParticipant } = await supabase
+          .from('space_participants')
+          .select('role')
+          .eq('space_id', spaceId)
+          .eq('wallet_address', walletAddress)
+          .is('left_at', null)
+          .maybeSingle();
+
+        const rejoiningRole = isHost
+          ? 'host'
+          : existingParticipant?.role === 'speaker' || existingParticipant?.role === 'host'
+            ? 'speaker'
+            : 'listener';
+
+        const isSpeakerRole = rejoiningRole === 'host' || rejoiningRole === 'speaker';
+
+        // Checked, not fired and forgotten: the publisher-token gate reads this
+        // seat, so a host or speaker whose seat write fails is refused the mic a
+        // moment later with no clue why.
+        const { error: seatError } = await signed(
+          supabase.from('space_participants').upsert(
+            {
+              space_id: spaceId,
+              wallet_address: walletAddress,
+              username: user?.username || null,
+              avatar: persistableAvatar(user?.avatarImageUrl),
+              role: rejoiningRole,
+              is_muted: true,
+              left_at: null,
+            },
+            { onConflict: 'space_id,wallet_address' },
+          ),
+        );
+        if (seatError) throw new Error(seatError.message);
+        tookNewSeat = !existingParticipant && !isHost;
+
+        // Recount from the participant rows so a rejoin cannot drift the
+        // figures. Through the RPC rather than three statements here: once
+        // audio_spaces UPDATE is host-only, a listener writing these columns
+        // directly is refused, and a listener arriving is exactly when the
+        // count has to move. recount_space derives both numbers server-side.
+        await recountSpace(spaceId);
+
+        const agoraRole = isSpeakerRole ? 'publisher' : 'subscriber';
+        const tokenData = await getAgoraToken(space.channel_name, agoraRole);
+        await initializeAgora(tokenData, rejoiningRole === 'listener' ? 'listener' : 'speaker');
+
+        setCurrentSpace(space as AudioSpace);
+        setMyRole(rejoiningRole as any);
+        setHasRaisedHand(false);
+        hasHandledStageEndRef.current = false;
+        // A host coming back after a refresh or a network drop is still ON AIR
+        // — but the recorder died with the old page, and the only other
+        // startRecording call is in goLiveAsHost, which a rejoin never passes
+        // through. Without this, everything said after a mid-stage refresh was
+        // silently absent from the recording and the transcript: at End,
+        // mediaRecorderRef was null and stopAndUploadRecording returned
+        // without uploading anything.
+        if (isHost) startRecording(spaceId);
+        toast.success(isHost ? _translateCopy("copy.0b3315d1d765", { defaultValue: "Rejoined as host!" }) : _translateCopy("copy.7c84d6dad54b", { defaultValue: "Joined the stage!" }));
+        return true;
+      } catch (err) {
+        if (tookNewSeat) {
+          await signed(supabase.from('space_participants').update({ left_at: new Date().toISOString() })
+            .eq('space_id', spaceId).eq('wallet_address', walletAddress));
+          await recountSpace(spaceId);
+        }
+        stageLogger.error('Stage join failed', { spaceId }, err);
+        toast.error(describeStageFailure(err), {
+          // A host who cannot get back into their own room is otherwise stuck
+          // with it on air forever: End only exists inside the room.
+          description: sameWallet(hostWallet, walletAddress)
+            ? _translateCopy("copy.f5ed97bf15f1", { defaultValue: "You can close the stage from the End button on its card." })
+            : undefined,
+        });
+        return false;
+      } finally {
+        roomSwitchInFlightRef.current = false;
+        setIsLoading(false);
+      }
+    },
+    [walletAddress, user, startRecording, vacateCurrentRoom, signed, _copy],
+  );
+
+  // ─── Guest listening ─────────────────────────────────────────────────────
+  //
+  // A signed-out visitor holding an invite link can hear the room without an
+  // account: the agora-token function takes only a channel name (verify_jwt is
+  // off), so a subscriber token is mintable with the publishable key alone.
+  // Deliberately no DB writes — no participant row, no listener_count bump —
+  // so a guest can never strand state a wallet-scoped teardown can't reach.
+
+  const guestStopListening = useCallback(async () => {
+    const client = agoraClientRef.current;
+    agoraClientRef.current = null;
+    setGuestSpace(null);
+    setIsConnected(false);
+    setScreenShare(null);
+    if (client) {
+      try { await client.leave(); } catch { /* noop */ }
+    }
+  }, []);
+
+  const guestListen = useCallback(
+    async (spaceId: string): Promise<boolean> => {
+      // The logged-in flow owns the Agora client; never steal it mid-stage.
+      if (currentSpace) return false;
+      if (guestSpaceRef.current?.id === spaceId) return true;
+      if (guestSpaceRef.current) await guestStopListening();
+      setIsLoading(true);
+      try {
+        const { data: space, error } = await supabase
+          .from('audio_spaces')
+          .select('*')
+          .eq('id', spaceId)
+          .single();
+        if (error || !space) throw new StageCopyError(_translateCopy("copy.166e42a8aa5b", { defaultValue: "Stage not found" }));
+        if (space.status !== 'live') {
+          toast.error(
+            space.status === 'scheduled'
+              ? _translateCopy("copy.a7f251001b75", { defaultValue: "This stage hasn't started yet" })
+              : _translateCopy("copy.52a23af007ea", { defaultValue: "This stage has ended" }),
+          );
+          return false;
+        }
+        if (space.entry_locked) {
+          toast.info(stageRoomLabel(_copy, 'entrySignIn'));
+          return false;
+        }
+        const tokenData = await getAgoraToken(space.channel_name, 'subscriber', true);
+        await initializeAgora(tokenData, 'listener');
+        setGuestSpace(space as AudioSpace);
+        return true;
+      } catch (err) {
+        stageLogger.error('Guest listen failed', { spaceId }, err);
+        toast.error(describeStageFailure(err));
+        return false;
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [currentSpace, guestStopListening],
+  );
+
+  // A guest has no participant row, so the normal end-of-stage teardown never
+  // reaches them — watch the row itself and drop the audio when the host ends.
+  useEffect(() => {
+    if (!guestSpace) return;
+    const channel = supabase
+      .channel(`guest_stage_${guestSpace.id}`)
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'audio_spaces', filter: `id=eq.${guestSpace.id}` },
+        (payload) => {
+          const row = payload.new as { status?: string; last_speech_at?: string | null; started_at?: string | null };
+          if (row?.status === 'ended') {
+            if (endedForInactivity(row)) toastInactivityEnd(guestSpace.title);
+            else toast.info(_copy("copy.bb29ba6e76c1", { defaultValue: "Stage ended" }), {
+              description: _translateCopy("copy.f51af26b09ef", { defaultValue: "The host ended \"{{value1}}\".", value1: guestSpace.title }),
+              duration: 6000,
+            });
+            void guestStopListening();
+          }
+        },
+      )
+      .subscribe();
+    return () => { void supabase.removeChannel(channel); };
+  }, [guestSpace?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ─── Leave stage ─────────────────────────────────────────────────────────
+
+  const leaveSpace = useCallback(async () => {
+    const space = currentSpace;
+    const wallet = walletAddress;
+    if (!space || !wallet) return;
+
+    const wasHost = myRoleRef.current === 'host';
+    // Capture the heavy resources, then detach the refs so the UI can reset
+    // instantly and nothing else touches them mid-teardown.
+    const recorder = mediaRecorderRef.current;
+    const client = agoraClientRef.current;
+    const localTrack = localAudioTrackRef.current;
+    const screenVideo = screenVideoTrackRef.current;
+    const screenAudio = screenAudioTrackRef.current;
+    const radioTrack = radioTrackRef.current;
+    const releaseMicSession = micSessionReleaseRef.current;
+    micSessionReleaseRef.current = null;
+    agoraClientRef.current = null;
+    localAudioTrackRef.current = null;
+    screenVideoTrackRef.current = null;
+    screenAudioTrackRef.current = null;
+    radioTrackRef.current = null;
+    mediaRecorderRef.current = null;
+
+    // ── Optimistic UI reset — synchronous, so the mini-player/modal close
+    //    immediately instead of waiting on the recording upload + network. ──
+    setCurrentSpace(null);
+    setIsConnected(false);
+    setMyRole(null);
+    setParticipants([]);
+    setHandRequests([]);
+    setHasRaisedHand(false);
+    setVoiceEffectState('none');
+    setScreenShare(null);
+    // Silence the radio synchronously with the rest of the UI reset. Leaving
+    // the channel would stop the room hearing it, but the host would still be
+    // listening to a station with no control left on screen to stop it.
+    radioGenRef.current += 1;
+    radioOffRef.current = true;
+    setRadioStation(null);
+    setRadioStatus('idle');
+    setRadioQueue([]);
+    stopStageRadioStream();
+    closeStageRadioTap();
+
+    // ── Teardown in the background (recording upload, Agora leave, DB counts).
+    //    Order matters: stop/upload the recording before closing the audio graph. ──
+    leaveTeardownRef.current = (async () => {
+      try {
+        if (wasHost && recorder) {
+          // Ring-fenced: a recording that fails to upload must not carry the
+          // seat release down with it. It used to sit in the same try, so a
+          // throw here skipped `left_at` — and `left_at` is what fires the
+          // auto-end trigger, which is what takes the stage off the air. One
+          // bad upload left the room advertised as live with a ghost in it.
+          try {
+            await stopAndUploadRecording(space.id, recorder);
+          } catch (err) {
+            stageLogger.error('Stage recording upload failed', { spaceId: space.id }, err);
+          }
+        }
+        if (localTrack) {
+          try { localTrack.stop(); localTrack.close(); } catch { /* noop */ }
+        }
+        releaseMicSession?.();
+        // Closing the display capture is what drops the browser's "you are
+        // sharing" bar — leaving the channel alone would leave it up.
+        for (const track of [screenVideo, screenAudio, radioTrack]) {
+          if (track) { try { track.stop(); track.close(); } catch { /* noop */ } }
+        }
+        if (client) {
+          try { await client.leave(); } catch { /* noop */ }
+        }
+        voiceEffectsHook.cleanup();
+
+        await signed(
+          supabase
+            .from('space_participants')
+            .update({ left_at: new Date().toISOString() })
+            .eq('space_id', space.id)
+            .eq('wallet_address', wallet),
+        );
+
+        await recountSpace(space.id);
+      } catch (err) {
+        console.error('Error during stage teardown:', err);
+      }
+    })();
+  }, [currentSpace, walletAddress, signed]);
+
+  leaveSpaceRef.current = leaveSpace;
+  upgradeSpeakerRef.current = upgradeSpeaker;
+  joinSpaceRef.current = joinSpace;
+  guestStopListeningRef.current = guestStopListening;
+
+  // ─── End stage (host) ────────────────────────────────────────────────────
+
+  const endSpace = useCallback(async () => {
+    const space = currentSpace;
+    if (!space || myRole !== 'host' || hasHandledStageEndRef.current) return;
+    hasHandledStageEndRef.current = true;
+
+    // Optimistic: reset the UI now (leaveSpace closes instantly + tears down in
+    // the background) and mark the space ended in the background too, so ending
+    // never looks frozen. If the direct update fails, the DB auto-end trigger covers it.
+    // The room is gone, so the sheet goes with it. Leaving under your own
+    // steam is different — that lands you back on the stage list.
+    setIsModalOpen(false);
+    toast.success(_copy("copy.bb29ba6e76c1", { defaultValue: "Stage ended" }));
+    void leaveSpace();
+    void signed(
+      supabase
+        .from('audio_spaces')
+        .update({ status: 'ended', ended_at: new Date().toISOString() })
+        .eq('id', space.id),
+    ).then(({ error }) => {
+      if (error) console.warn('Direct end failed (will auto-end via trigger):', error.message);
+    });
+  }, [currentSpace, myRole, leaveSpace, signed, _copy]);
+
+  /**
+   * Close a stage you host but are not standing in.
+   *
+   * Until now `endSpace` was the only way to take a room off the air, and it
+   * requires being connected to it as host — so a launch that failed after the
+   * row went live, or a host whose tab died, produced a stage that could never
+   * be ended by anybody. It stayed on the home rail and in the live carousel
+   * with a headcount of one and nobody inside, and the host's only remaining
+   * options were to delete the row by hand or live with it.
+   *
+   * Also clears the host's own seat: the row is what the auto-end trigger keys
+   * off, and leaving it open makes the wallet look like it is still in a room.
+   */
+  const endStageById = useCallback(
+    async (spaceId: string): Promise<boolean> => {
+      if (!walletAddress) { toast.error(_copy("copy.f6101c84c1c8", { defaultValue: "Please log in first" })); return false; }
+      try {
+        const { data: space, error: readError } = await supabase
+          .from('audio_spaces')
+          .select('id, host_wallet_address, status')
+          .eq('id', spaceId)
+          .single();
+        if (readError || !space) throw new StageCopyError(_translateCopy("copy.166e42a8aa5b", { defaultValue: "Stage not found" }));
+        if (!sameWallet(space.host_wallet_address, walletAddress)) {
+          toast.error(_copy("copy.2b8696f5ecf8", { defaultValue: "Only the host can end this stage" }));
+          return false;
+        }
+        if (space.status === 'ended') {
+          await refreshSpaces();
+          return true;
+        }
+
+        const { error } = await signed(
+          supabase
+            .from('audio_spaces')
+            .update({ status: 'ended', ended_at: new Date().toISOString() })
+            .eq('id', spaceId),
+        );
+        if (error) throw new Error(error.message);
+
+        await signed(
+          supabase
+            .from('space_participants')
+            .update({ left_at: new Date().toISOString() })
+            .eq('space_id', spaceId)
+            .is('left_at', null),
+        );
+
+        // If this was the room we thought we were in, stop believing it.
+        if (currentSpace?.id === spaceId) await leaveSpace();
+        await refreshSpaces();
+        toast.success(_copy("copy.bb29ba6e76c1", { defaultValue: "Stage ended" }));
+        return true;
+      } catch (err) {
+        stageLogger.error('Ending a stage from outside it failed', { spaceId }, err);
+        toast.error(describeStageFailure(err));
+        return false;
+      }
+    },
+    [walletAddress, signed, refreshSpaces, currentSpace, leaveSpace, _copy],
+  );
+
+  // ─── Set voice effect ─────────────────────────────────────────────────────
+
+  const setVoiceEffect = useCallback(async (effectId: VoiceEffectId) => {
+    setVoiceEffectState(effectId);
+    if (!agoraClientRef.current || !localAudioTrackRef.current) return;
+    // Prevent concurrent calls from racing against each other
+    if (isEffectSwitchingRef.current) return;
+    isEffectSwitchingRef.current = true;
+    try {
+      // Build a fresh AudioContext + fresh processed track for the new effect.
+      // We use rebuildEffect (not switchEffect) because Agora snapshots the
+      // MediaStreamTrack reference at publish-time; rewiring the Web Audio graph
+      // on the same track is not reliably picked up by the Agora RTC stack.
+      const newTrack = await voiceEffectsHookRef.current.rebuildEffect(effectId);
+      if (!newTrack) {
+        console.warn('[VoiceEffect] rebuildEffect returned null — mic stream not yet captured');
+        return;
+      }
+
+      const AgoraRTC = (await import('agora-rtc-sdk-ng')).default;
+      const wasMuted = localAudioTrackRef.current.muted;
+
+      // Swap: unpublish old track, publish brand-new custom track
+      await agoraClientRef.current.unpublish([localAudioTrackRef.current]);
+      // Don't .close() the old Agora track — it may internally reference the raw stream
+
+      const customTrack = AgoraRTC.createCustomAudioTrack({ mediaStreamTrack: newTrack });
+      customTrack.setMuted(wasMuted);
+      localAudioTrackRef.current = customTrack;
+      await agoraClientRef.current.publish([customTrack]);
+
+      // rebuildEffect closes the old AudioContext and creates a new one, so the
+      // processed stream is brand-new. The recorder keeps running on its own
+      // mix; only the host's input to it is swapped, so the file stays one
+      // continuous stream instead of a second recording glued onto the first.
+      const mix = recordingMixRef.current;
+      if (mix) {
+        setMixLocal(mix, voiceEffectsHookRef.current.getProcessedStream());
+      } else {
+        const activeRecorder = mediaRecorderRef.current;
+        if (activeRecorder && activeRecorder.state !== 'inactive') {
+          // No mix (Web Audio refused one): the recorder is reading the old
+          // processed stream directly and has to follow it to the new one.
+          activeRecorder.addEventListener('stop', () => {
+            const newStream = voiceEffectsHookRef.current.getProcessedStream();
+            if (!newStream) return;
+            const mimeType = pickRecordingType();
+            const options: MediaRecorderOptions = { audioBitsPerSecond: RECORDING_BITS_PER_SECOND };
+            if (mimeType) options.mimeType = mimeType;
+            const newRecorder = new MediaRecorder(newStream, options);
+            newRecorder.ondataavailable = (e) => {
+              if (e.data.size > 0) recordingChunksRef.current.push(e.data);
+            };
+            newRecorder.start(1000);
+            mediaRecorderRef.current = newRecorder;
+          }, { once: true });
+          activeRecorder.stop();
+        }
+      }
+
+      toast.success(`Voice: ${effectId === 'none' ? 'Normal' : effectId}`);
+    } catch (err) {
+      console.error('Error switching voice effect:', err);
+      toast.error(_copy("copy.85e022c71fbe", { defaultValue: "Failed to switch voice effect" }));
+    } finally {
+      isEffectSwitchingRef.current = false;
+    }
+  }, [_copy]); // stable — all Agora and hook state accessed via refs
+
+  // ─── Toggle mute ─────────────────────────────────────────────────────────
+
+  const toggleMute = useCallback(() => {
+    if (localAudioTrackRef.current && (myRole === 'host' || myRole === 'speaker')) {
+      const newMuted = !isMuted;
+      // Mute at Agora SDK level
+      localAudioTrackRef.current.setMuted(newMuted);
+      // Also disable the underlying MediaStreamTrack to truly stop audio
+      try {
+        const mediaTrack = localAudioTrackRef.current.getMediaStreamTrack?.();
+        if (mediaTrack) {
+          mediaTrack.enabled = !newMuted;
+        }
+      } catch (_) { /* fallback: SDK mute is still applied */ }
+      setIsMuted(newMuted);
+      // Optimistically update the local participant's is_muted in state
+      if (walletAddress) {
+        setParticipants(prev => prev.map(p =>
+          sameWallet(p.wallet_address, walletAddress) ? { ...p, is_muted: newMuted } : p
+        ));
+      }
+      if (currentSpace && walletAddress) {
+        // `void`, not bare: a postgrest builder only issues its request inside
+        // then(), so an un-awaited chain here sent nothing at all — every
+        // remote participant stayed at the is_muted: true written on join, so
+        // the room rendered everyone permanently muted and the speaking ring
+        // never appeared for anybody but yourself.
+        void signed(
+          supabase
+            .from('space_participants')
+            .update({ is_muted: newMuted })
+            .eq('space_id', currentSpace.id)
+            .eq('wallet_address', walletAddress),
+        ).then(({ error }) => {
+          if (error) console.warn('[Stage] Failed to persist mute state:', error.message);
+        });
+      }
+    }
+  }, [isMuted, myRole, currentSpace, walletAddress, signed]);
+
+  // ─── Screen share ────────────────────────────────────────────────────────
+  //
+  // The host publishes their display alongside the mic track they already have,
+  // and every other client picks it up through the same `user-published` path
+  // that already carries the audio — listeners stay `audience` and only ever
+  // subscribe, so nothing about their connection changes. An Agora client can
+  // publish exactly one video track, which is also the reason a room shows one
+  // screen at a time: the host's.
+
+  const stopScreenShare = useCallback(async () => {
+    const video = screenVideoTrackRef.current;
+    const audio = screenAudioTrackRef.current;
+    if (!video && !audio) return;
+    screenVideoTrackRef.current = null;
+    screenAudioTrackRef.current = null;
+    // Only clear the wall if what's on it is ours — a remote share must survive
+    // us stopping our own.
+    setScreenShare(prev => (prev?.isLocal ? null : prev));
+
+    const client = agoraClientRef.current;
+    const tracks = [video, audio].filter(Boolean);
+    if (client && tracks.length) {
+      try { await client.unpublish(tracks); } catch { /* already gone */ }
+    }
+    for (const track of tracks) {
+      try { track.stop(); track.close(); } catch { /* noop */ }
+    }
+  }, []);
+
+  /**
+   * Tell the room a newly added audio track is live while the mic is muted.
+   *
+   * The SDK mixes every published audio track into one stream, and muting the
+   * mic while it is the only track in that mix marks the whole stream muted for
+   * the room. Adding a second track to the mix does not lift that, so a host
+   * who starts the radio (or a screen share with audio) while muted hears it
+   * locally and the room hears nothing. Flipping the mic's mute re-evaluates
+   * the mix: unmute announces it live, and the re-mute is kept local because
+   * the new track is still unmuted. The raw mic is held shut across the flip
+   * so nothing the host says leaks in the moment between.
+   */
+  const reannounceMixedAudio = useCallback(async () => {
+    const mic = localAudioTrackRef.current;
+    if (!mic?.muted) return;
+    const outgoing = mic.getMediaStreamTrack?.() as MediaStreamTrack | undefined;
+    voiceEffectsHookRef.current.setRawMicEnabled(false);
+    try {
+      await mic.setMuted(false);
+      await mic.setMuted(true);
+    } catch (err) {
+      console.warn('[Stage] Could not re-announce mixed audio', err);
+    } finally {
+      if (outgoing) outgoing.enabled = false;
+      voiceEffectsHookRef.current.setRawMicEnabled(true);
+    }
+  }, []);
+
+  const startScreenShare = useCallback(async () => {
+    if (!agoraClientRef.current) { toast.error(_copy("copy.6f900045dd16", { defaultValue: "Not connected to a stage" })); return; }
+    if (screenVideoTrackRef.current) return;
+
+    let videoTrack: any = null;
+    let audioTrack: any = null;
+    try {
+      const AgoraRTC = (await import('agora-rtc-sdk-ng')).default;
+      // 'auto' hands back a pair only when the sharer ticked "share tab audio"
+      // in the picker, so a plain window share stays a single track.
+      const created = await AgoraRTC.createScreenVideoTrack(
+        { encoderConfig: '1080p_1', optimizationMode: 'detail' },
+        'auto',
+      );
+      videoTrack = Array.isArray(created) ? created[0] : created;
+      audioTrack = Array.isArray(created) ? created[1] : null;
+
+      // Re-read the client: the picker is modal and the host may have left the
+      // stage while it was open.
+      const client = agoraClientRef.current;
+      if (!client) throw new Error('Left the stage before sharing started');
+
+      screenVideoTrackRef.current = videoTrack;
+      screenAudioTrackRef.current = audioTrack;
+
+      // Send a second, small copy of the screen so phones and weak connections
+      // have something to take. Keeping it at 1/3 of the full resolution (not
+      // the SDK's 160×120 default) both keeps shared text legible on a handset
+      // and stays clear of the ≥1/4 ratio Agora warns about. Subscribers pick
+      // the small stream by device in the `user-published` handler, and Agora
+      // additionally drops anyone to it on a poor network by default.
+      // Best-effort: a browser that refuses simulcast still publishes normally.
+      try {
+        client.setLowStreamParameter({ width: 640, height: 360, framerate: 5, bitrate: 350 });
+        await client.enableDualStream();
+      } catch (err) {
+        console.warn('[Stage] Dual-stream unavailable — everyone takes the full-size screen', err);
+      }
+
+      await client.publish([videoTrack]);
+
+      // Tab/system audio rides as a SECOND published audio track, which the SDK
+      // mixes with the mic on the way out. Deliberately NOT routed through the
+      // voice-effect graph the way TTS and the soundboard are: that graph is
+      // gated shut by the mute button, and a muted host sharing a video should
+      // still be heard. It is also outside the host-side recording for the same
+      // reason — the recorder taps the effect graph, not the channel.
+      if (audioTrack) {
+        try {
+          await client.publish([audioTrack]);
+          await reannounceMixedAudio();
+        } catch (err) {
+          console.warn('[Stage] Screen audio publish failed — sharing video only', err);
+          screenAudioTrackRef.current = null;
+          try { audioTrack.close(); } catch { /* noop */ }
+        }
+      }
+
+      // The browser's own "Stop sharing" bar bypasses our button entirely.
+      videoTrack.on('track-ended', () => { void stopScreenShare(); });
+
+      setScreenShare({ track: videoTrack, uid: null, isLocal: true });
+    } catch (err) {
+      screenVideoTrackRef.current = null;
+      screenAudioTrackRef.current = null;
+      for (const track of [videoTrack, audioTrack]) {
+        if (track) { try { track.close(); } catch { /* noop */ } }
+      }
+      // Dismissing the picker is a normal outcome, not a failure worth a toast.
+      const code = (err as { code?: string } | null)?.code;
+      const name = (err as { name?: string } | null)?.name;
+      if (code === 'PERMISSION_DENIED' || name === 'NotAllowedError' || name === 'AbortError') return;
+      console.error('Error starting screen share:', err);
+      toast.error(_copy("copy.5c70d1026341", { defaultValue: "Failed to share screen" }));
+    }
+  }, [stopScreenShare, reannounceMixedAudio, _copy]);
+
+  // ─── Radio ───────────────────────────────────────────────────────────────
+  //
+  // The host puts a station on air and the room hears it on a second published
+  // audio track, which the SDK mixes with the mic sender-side — so every
+  // listener still sees one `audioTrack` and nothing about their subscription
+  // changes. Same transport as screen audio, and for the same reason: routing
+  // it through the voice-effect graph instead would put the music behind the
+  // mute button and let a voice-effect switch kill it mid-song. See
+  // `lib/stage-radio.ts` for the audio graph and the constraints behind it.
+
+  const stopRadio = useCallback(async () => {
+    radioGenRef.current += 1;
+    radioOffRef.current = true;
+    const track = radioTrackRef.current;
+    radioTrackRef.current = null;
+    setRadioStation(null);
+    setRadioStatus('idle');
+    setRadioQueue([]);
+    stopStageRadioStream();
+    closeStageRadioTap();
+
+    const client = agoraClientRef.current;
+    if (track) {
+      if (client) {
+        try { await client.unpublish([track]); } catch { /* already gone */ }
+      }
+      try { track.close(); } catch { /* noop */ }
+    }
+  }, []);
+
+  /**
+   * Step through the on-air set.
+   *
+   * `wrap` is on only for the automatic handover at the end of a clip: a set
+   * left to run should keep the room in music rather than dropping it into
+   * silence, while a host pressing skip past the last track should hit the end
+   * of the list and stay there. A source that is no longer in the set — its clip
+   * was deleted while it played — restarts the set from the top.
+   */
+  const advanceRadio = useCallback((from: StageRadioStation, step: 1 | -1, wrap: boolean) => {
+    const queue = radioQueueRef.current;
+    if (queue.length === 0) { void stopRadio(); return; }
+
+    const at = queue.findIndex((s) => s.id === from.id);
+    const target = at < 0 ? 0 : at + step;
+    const next = wrap ? queue[(target + queue.length) % queue.length] : queue[target];
+
+    if (!next) { void stopRadio(); return; }
+    void startRadioRef.current?.(next, queue);
+  }, [stopRadio]);
+
+  const startRadio = useCallback(async (station: StageRadioStation, queue?: StageRadioStation[]) => {
+    if (!agoraClientRef.current) { toast.error(_copy("copy.6f900045dd16", { defaultValue: "Not connected to a stage" })); return; }
+    if (myRoleRef.current !== 'host') { toast.error(_copy("copy.bc8a2a418b4d", { defaultValue: "Only the host can put the radio on air" })); return; }
+    if (!station.url) { toast.error(_copy("copy.b47c545f76a1", { defaultValue: "That station has no stream to play" })); return; }
+
+    const gen = ++radioGenRef.current;
+    radioOffRef.current = false;
+    const stale = () => gen !== radioGenRef.current;
+    /** A stop landed while this start was waiting: make sure nothing is left playing. */
+    const settleStopped = () => {
+      if (!radioOffRef.current) return;
+      stopStageRadioStream();
+      closeStageRadioTap();
+      const orphan = radioTrackRef.current;
+      radioTrackRef.current = null;
+      if (orphan) {
+        void agoraClientRef.current?.unpublish([orphan]).catch(() => {});
+        try { orphan.close(); } catch { /* noop */ }
+      }
+    };
+
+    setRadioStation(station);
+    setRadioStatus('connecting');
+    // A set is only replaced when one is handed in — advancing through a queue
+    // re-enters here with the same list, and a one-off station keeps whatever
+    // was queued so the host can fall back into their clips afterwards.
+    if (queue) setRadioQueue(queue);
+
+    try {
+      // Only the first station of a session publishes anything. Every station
+      // after it is an `src` swap on the same element behind the same tap, so
+      // the room hears a cut, not a reconnect.
+      if (!radioTrackRef.current) {
+        if (!radioPublishRef.current) {
+          radioPublishRef.current = (async () => {
+            const mediaStreamTrack = openStageRadioTap();
+            const AgoraRTC = (await import('agora-rtc-sdk-ng')).default;
+            const track = AgoraRTC.createCustomAudioTrack({ mediaStreamTrack });
+            // Re-read the client: importing the SDK is awaited, and the host may
+            // have left the stage while it loaded.
+            const client = agoraClientRef.current;
+            if (!client) {
+              try { track.close(); } catch { /* noop */ }
+              throw new Error('Left the stage before the radio started');
+            }
+            await client.publish([track]);
+            radioTrackRef.current = track;
+            await reannounceMixedAudio();
+            return track;
+          })().finally(() => { radioPublishRef.current = null; });
+        }
+        await radioPublishRef.current;
+      }
+      if (stale()) { settleStopped(); return; }
+
+      setStageRadioBroadcastLevel(radioVolumeStateRef.current / 100);
+      setStageRadioMonitorLevel(radioMonitorRef.current ? 0.6 : 0);
+
+      await playStageRadioStream(station.url, (status, message) => {
+        if (stale()) return;
+        if (status === 'ended') {
+          // The end of the audio means opposite things for the two kinds of
+          // source. A clip finishing is the normal handover to the next one in
+          // the set; a station falling silent is a stream that dropped.
+          if (station.kind === 'track') { advanceRadio(station, 1, true); return; }
+          setRadioStatus('error');
+          toast.error(_translateCopy("copy.27843de49670", { defaultValue: "{{value1}}: stream ended", value1: station.name }));
+          return;
+        }
+        setRadioStatus(status);
+        if (status === 'error') toast.error(`${station.name}: ${message || _translateCopy("copy.a018e81b341d", { defaultValue: "Stream unavailable" })}`);
+      });
+      if (stale()) settleStopped();
+    } catch (err) {
+      if (stale()) { settleStopped(); return; }
+      console.error('[Stage] Radio start failed', err);
+      toast.error(_copy("copy.88be655c6f72", { defaultValue: "Could not put that station on air" }));
+      void stopRadio();
+    }
+  }, [advanceRadio, stopRadio, reannounceMixedAudio, _copy]);
+  startRadioRef.current = startRadio;
+
+  const radioNext = useCallback(() => {
+    const current = radioStationRef.current;
+    if (current) advanceRadio(current, 1, false);
+  }, [advanceRadio]);
+
+  const radioPrev = useCallback(() => {
+    const current = radioStationRef.current;
+    if (current) advanceRadio(current, -1, false);
+  }, [advanceRadio]);
+
+  const toggleRadioPause = useCallback(() => {
+    // A live station has nothing to pause into — holding one only buffers it,
+    // and the room hears the gap on resume. Stop is the honest verb there.
+    if (radioStationRef.current?.kind !== 'track') return;
+    if (radioStatusRef.current === 'paused') void resumeStageRadioStream();
+    else pauseStageRadioStream();
+  }, []);
+
+  const setRadioVolume = useCallback((volume: number) => {
+    const clamped = Math.max(0, Math.min(100, Math.round(volume)));
+    setRadioVolumeState(clamped);
+    setStageRadioBroadcastLevel(clamped / 100);
+  }, []);
+
+  const setRadioMonitor = useCallback((enabled: boolean) => {
+    setRadioMonitorState(enabled);
+    setStageRadioMonitorLevel(enabled ? 0.6 : 0);
+  }, []);
+
+  // Tell the room what is on. A broadcast reaches only whoever is subscribed at
+  // the moment it is sent, so the station is re-sent on a heartbeat as well as
+  // on change — otherwise anyone arriving mid-song would hear music with no
+  // idea what it is. Listeners drop the label after three missed beats, which
+  // is also what covers a host whose tab dies without stopping cleanly.
+  useEffect(() => {
+    const spaceId = currentSpace?.id;
+    if (!spaceId || myRole !== 'host') return;
+
+    const channel = supabase.channel(`stage-radio:${spaceId}`);
+    radioChannelRef.current = channel;
+
+    const announce = () => {
+      const current = radioStationRef.current;
+      channel.send({
+        type: 'broadcast',
+        event: 'now-playing',
+        payload: { station: current ? toRadioLabel(current) : null },
+      }).catch(() => {});
+    };
+
+    channel.subscribe((status) => { if (status === 'SUBSCRIBED') announce(); });
+    const heartbeat = setInterval(announce, 10_000);
+
+    return () => {
+      clearInterval(heartbeat);
+      radioChannelRef.current = null;
+      supabase.removeChannel(channel);
+    };
+  }, [currentSpace?.id, myRole]);
+
+  useEffect(() => {
+    radioChannelRef.current?.send({
+      type: 'broadcast',
+      event: 'now-playing',
+      payload: { station: radioStation ? toRadioLabel(radioStation) : null },
+    }).catch(() => {});
+  }, [radioStation]);
+
+  // Music on air is the room being used, even with every mic muted: keep the
+  // idle clock from ending a stage that is playing to its listeners.
+  const radioOnAir = myRole === 'host' && !!radioStation && radioStatus === 'live';
+  useEffect(() => {
+    const spaceId = currentSpace?.id;
+    if (!radioOnAir || !spaceId) return;
+    touchStageSpeech(spaceId);
+    const timer = setInterval(() => touchStageSpeech(spaceId), SPEECH_TOUCH_MS);
+    return () => clearInterval(timer);
+  }, [radioOnAir, currentSpace?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ─── Raise / lower hand ──────────────────────────────────────────────────
+
+  const raiseHand = useCallback(async () => {
+    if (!currentSpace || !walletAddress || myRole !== 'listener' || hasRaisedHand) return;
+    try {
+      const { error } = await signed(
+        supabase.from('raise_hand_requests').insert({
+          space_id: currentSpace.id,
+          wallet_address: walletAddress,
+          username: user?.username || null,
+          avatar: persistableAvatar(user?.avatarImageUrl),
+          status: 'pending',
+        }),
+      );
+      // Only one pending row per person per stage is allowed, and a pending
+      // row survives a disconnect while the local hasRaisedHand state does
+      // not — so a listener who dropped and rejoined got "Failed to raise
+      // hand" on every press for the rest of the stage. A duplicate pending
+      // row IS the state being asked for; treat it as success.
+      if (error && error.code !== '23505') throw error;
+      setHasRaisedHand(true);
+      toast.success(_copy("copy.548ec41068da", { defaultValue: "Hand raised! Waiting for host approval." }));
+    } catch (err) {
+      console.error('Error raising hand:', err);
+      toast.error(_copy("copy.522ebbcf89da", { defaultValue: "Failed to raise hand" }));
+    }
+  }, [currentSpace, walletAddress, user, myRole, hasRaisedHand, signed, _copy]);
+
+  const lowerHand = useCallback(async () => {
+    if (!currentSpace || !walletAddress) return;
+    try {
+      await signed(
+        supabase
+          .from('raise_hand_requests')
+          .update({ status: 'rejected', resolved_at: new Date().toISOString() })
+          .eq('space_id', currentSpace.id)
+          .eq('wallet_address', walletAddress)
+          .eq('status', 'pending'),
+      );
+      setHasRaisedHand(false);
+    } catch (err) {
+      console.error('Error lowering hand:', err);
+    }
+  }, [currentSpace, walletAddress, signed]);
+
+  // ─── Approve speaker ─────────────────────────────────────────────────────
+
+  const approveSpeaker = useCallback(
+    async (targetWallet: string) => {
+      if (!currentSpace || myRole !== 'host') return;
+      try {
+        await signed(
+          supabase
+            .from('raise_hand_requests')
+            .update({ status: 'approved', resolved_at: new Date().toISOString() })
+            .eq('space_id', currentSpace.id)
+            .eq('wallet_address', targetWallet)
+            .eq('status', 'pending'),
+        );
+
+        await signed(
+          supabase
+            .from('space_participants')
+            .update({ role: 'speaker' })
+            .eq('space_id', currentSpace.id)
+            .eq('wallet_address', targetWallet),
+        );
+
+        // Recount rather than ±1: the arithmetic here assumed the promoted
+        // wallet was a listener sitting in the count, and moved both figures
+        // even when it was not, so a promotion could leave the room reporting
+        // a listener it did not have.
+        await recountSpace(currentSpace.id);
+
+        toast.success(_copy("copy.0000cb98ea19", { defaultValue: "Speaker approved" }));
+      } catch (err) {
+        console.error('Error approving speaker:', err);
+      }
+    },
+    [currentSpace, myRole, signed, _copy],
+  );
+
+  // ─── Remove speaker ──────────────────────────────────────────────────────
+
+  const removeSpeaker = useCallback(
+    async (targetWallet: string) => {
+      if (!currentSpace || myRole !== 'host') return;
+      try {
+        await signed(
+          supabase
+            .from('space_participants')
+            .update({ role: 'listener' })
+            .eq('space_id', currentSpace.id)
+            .eq('wallet_address', targetWallet),
+        );
+
+        await recountSpace(currentSpace.id);
+
+        toast.success(_copy("copy.044443360246", { defaultValue: "Speaker removed" }));
+      } catch (err) {
+        console.error('Error removing speaker:', err);
+      }
+    },
+    [currentSpace, myRole, signed, _copy],
+  );
+
+  // ─── Invite speaker directly ─────────────────────────────────────────────
+
+  const inviteSpeaker = useCallback(
+    async (targetWallet: string) => {
+      if (!currentSpace || myRole !== 'host') return;
+      try {
+        // Directly promote listener to speaker (no hand-raise needed)
+        await signed(
+          supabase
+            .from('space_participants')
+            .update({ role: 'speaker' })
+            .eq('space_id', currentSpace.id)
+            .eq('wallet_address', targetWallet),
+        );
+
+        await recountSpace(currentSpace.id);
+
+        toast.success(_copy("copy.b0ba7f49dd84", { defaultValue: "Invited as speaker" }));
+      } catch (err) {
+        console.error('Error inviting speaker:', err);
+        toast.error(_copy("copy.a0c9cc42d54d", { defaultValue: "Failed to invite speaker" }));
+      }
+    },
+    [currentSpace, myRole, signed, _copy],
+  );
+
+  // ─── Realtime subscriptions ──────────────────────────────────────────────
+
+  useEffect(() => {
+    if (!currentSpace) return;
+
+    const loadParticipants = () => {
+      supabase
+        .from('space_participants')
+        .select('*')
+        .eq('space_id', currentSpace.id)
+        .is('left_at', null)
+        .then(({ data }) => { if (data) setParticipants(data as SpaceParticipant[]); });
+    };
+    const loadHandRequests = () => {
+      if (myRoleRef.current !== 'host') return;
+      supabase
+        .from('raise_hand_requests')
+        .select('*')
+        .eq('space_id', currentSpace.id)
+        .eq('status', 'pending')
+        .then(({ data }) => { if (data) setHandRequests(data as RaiseHandRequest[]); });
+    };
+
+    const participantsChannel = supabase
+      .channel(`participants:${currentSpace.id}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'space_participants', filter: `space_id=eq.${currentSpace.id}` },
+        (payload) => {
+          if (payload.eventType === 'INSERT') {
+            const p = payload.new as SpaceParticipant;
+            if (!p.left_at) {
+              setParticipants(prev => prev.some(x => x.id === p.id) ? prev : [...prev, p]);
+            }
+          } else if (payload.eventType === 'UPDATE') {
+            const updated = payload.new as SpaceParticipant;
+            if (updated.left_at) {
+              setParticipants(prev => prev.filter(p => p.id !== updated.id));
+            } else {
+              setParticipants(prev => prev.map(p => p.id === updated.id ? updated : p));
+              if (
+                sameWallet(updated.wallet_address, walletAddressRef.current) &&
+                updated.role === 'speaker' &&
+                myRoleRef.current === 'listener'
+              ) {
+                void upgradeSpeakerRef.current();
+              }
+            }
+          } else if (payload.eventType === 'DELETE') {
+            setParticipants(prev => prev.filter(p => p.id !== (payload.old as SpaceParticipant).id));
+          }
+        },
+      )
+      // Re-read on every join: Realtime's change feed starts cold when nobody
+      // else is subscribed, and a rejoin after a dropped socket replays nothing.
+      .subscribe((status) => { if (status === 'SUBSCRIBED') loadParticipants(); });
+
+    const handChannel = supabase
+      .channel(`hands:${currentSpace.id}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'raise_hand_requests', filter: `space_id=eq.${currentSpace.id}` },
+        (payload) => {
+          const host = myRoleRef.current === 'host';
+          if (payload.eventType === 'INSERT') {
+            const r = payload.new as RaiseHandRequest;
+            if (host && r.status === 'pending') {
+              setHandRequests(prev => prev.some(x => x.id === r.id) ? prev : [...prev, r]);
+            }
+          } else if (payload.eventType === 'UPDATE') {
+            const updated = payload.new as RaiseHandRequest;
+            if (sameWallet(updated.wallet_address, walletAddressRef.current) && updated.status !== 'pending') {
+              setHasRaisedHand(false);
+            }
+            if (!host) return;
+            if (updated.status !== 'pending') {
+              setHandRequests(prev => prev.filter(r => r.id !== updated.id));
+            } else {
+              setHandRequests(prev => prev.map(r => r.id === updated.id ? updated : r));
+            }
+          } else if (payload.eventType === 'DELETE') {
+            if (!host) return;
+            setHandRequests(prev => prev.filter(r => r.id !== (payload.old as RaiseHandRequest).id));
+          }
+        },
+      )
+      .subscribe((status) => { if (status === 'SUBSCRIBED') loadHandRequests(); });
+
+    const spaceChannel = supabase
+      .channel(`space:${currentSpace.id}`)
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'audio_spaces', filter: `id=eq.${currentSpace.id}` },
+        (payload) => {
+          const updated = payload.new as AudioSpace;
+          if (updated.status === 'ended') {
+            if (hasHandledStageEndRef.current) return;
+            hasHandledStageEndRef.current = true;
+            if (endedForInactivity(updated)) {
+              toastInactivityEnd(updated.title);
+            } else if (myRoleRef.current !== 'host') {
+              // Named and given room to be read: the room vanishing off the
+              // screen is the only other signal a listener gets.
+              toast.info(_copy("copy.bb29ba6e76c1", { defaultValue: "Stage ended" }), {
+                description: _translateCopy("copy.f51af26b09ef", { defaultValue: "The host ended \"{{value1}}\".", value1: updated.title }),
+                duration: 6000,
+              });
+            }
+            // The room ended, so the sheet goes with it rather than sitting
+            // there empty — its live view has nothing left to render.
+            setIsModalOpen(false);
+            void leaveSpaceRef.current();
+          } else {
+            setCurrentSpace(updated);
+          }
+        },
+      )
+      .subscribe();
+
+    // Initial fetch
+    loadParticipants();
+    loadHandRequests();
+
+    return () => {
+      supabase.removeChannel(participantsChannel);
+      supabase.removeChannel(handChannel);
+      supabase.removeChannel(spaceChannel);
+    };
+  }, [currentSpace?.id]);
+
+  // ─── Inject TTS audio into Agora channel ────────────────────────────────
+
+  const injectAudio = useCallback(async (audioBlob: Blob, injectionSource?: AudioInjectionSource) => {
+    // DJ-deck: a new clip cuts off whatever is currently playing. Stopping the
+    // active source resolves its injectSound promise, so the serialized chain
+    // below advances immediately to this clip instead of queueing behind it.
+    voiceEffectsHookRef.current.stopInjectedSound();
+
+    const run = async () => {
+      const track = localAudioTrackRef.current;
+      if (!track) {
+        throw new Error(_translateCopy("copy.6f900045dd16", { defaultValue: "Not connected to a stage" }));
+      }
+
+      // The clip is mixed straight into the effect graph's MediaStreamDestination
+      // (see useVoiceEffects.injectSound). That destination is the exact track this
+      // client already publishes for the mic — so every listener hears the clip on a
+      // track that provably carries audio. No new track, no publish/unpublish, no
+      // second (possibly-suspended) AudioContext. The clip is also captured by the
+      // host-side stage recording, since the recorder reads the same destination.
+      const wasMuted = track.muted;
+      const destTrack = track.getMediaStreamTrack?.() as MediaStreamTrack | undefined;
+
+      // While muted, the outgoing track is gated shut (SDK mute + destTrack.enabled
+      // = false) and would swallow the clip. Open the gate for the clip's duration,
+      // but first silence the raw mic so ONLY the clip goes out — no mic bleed.
+      if (wasMuted) {
+        voiceEffectsHookRef.current.setRawMicEnabled(false);
+        if (destTrack) destTrack.enabled = true;
+        track.setMuted(false);
+      }
+
+      // Record an AI/soundboard window (host-side only) for post-stage diarization.
+      const recStart = recordingStartMsRef.current;
+      const winStart = recStart > 0 ? (Date.now() - recStart) / 1000 : 0;
+
+      try {
+        // Subtitle the clip as it starts rather than when it finishes, and
+        // from the text we were handed — a TTS line does not need transcribing
+        // back out of its own audio.
+        if (injectionSource?.caption) {
+          publishCaptionRef.current?.(injectionSource.caption, injectionSource.label || 'AI voice');
+        }
+        await voiceEffectsHookRef.current.injectSound(audioBlob);
+      } finally {
+        if (recStart > 0) {
+          const winEnd = (Date.now() - recStart) / 1000;
+          recordingTimelineRef.current.push({
+            start: Math.max(0, winStart),
+            end: Math.max(winStart + 0.1, winEnd),
+            kind: injectionSource?.kind ?? 'ai',
+            source: injectionSource?.source ?? 'tts',
+            label: injectionSource?.label ?? 'AI voice',
+          });
+        }
+        // Restore the pre-injection mute state.
+        if (wasMuted) {
+          track.setMuted(true);
+          if (destTrack) destTrack.enabled = false;
+          voiceEffectsHookRef.current.setRawMicEnabled(true);
+        }
+      }
+    };
+
+    const prev = injectAudioChainRef.current;
+    const next = prev.then(() => run(), () => run());
+    injectAudioChainRef.current = next.catch(() => {});
+    await next;
+  }, []);
+
+
+  /**
+   * Turn the room down (0-100) without muting it.
+   *
+   * Ducking rather than muting is deliberate: under a translated voice, the
+   * original still carries laughter, interruption and timing, and a listener
+   * with the room at zero loses every cue about what is actually happening.
+   * Applied to tracks present now and remembered for ones that arrive later.
+   */
+  const setRoomVolume = useCallback((volume: number) => {
+    const clamped = Math.max(0, Math.min(100, Math.round(volume)));
+    roomVolumeRef.current = clamped;
+    for (const track of remoteAudioTracksRef.current.values()) {
+      try { track?.setVolume?.(clamped); } catch { /* older SDK, or track already closed */ }
+    }
+  }, []);
+  const stopInject = useCallback(() => {
+    voiceEffectsHookRef.current.stopInjectedSound();
+  }, []);
+
+  // Live spaces: one fetch on mount + debounced refetch on realtime (avoids N requests per burst)
+  //
+  // The upcoming list rides the same channel and the same debounce. Every event
+  // that changes one can change the other — scheduling inserts a row, starting
+  // one moves it from scheduled to live — and a second subscription on the same
+  // table would just double the traffic to learn the same thing.
+  useEffect(() => {
+    void refreshSpaces();
+    void refreshScheduledSpaces();
+    const mountedAt = Date.now();
+    let joinedOnce = false;
+    const scheduleLiveSpacesRefresh = () => {
+      if (liveSpacesRefreshDebounceRef.current) clearTimeout(liveSpacesRefreshDebounceRef.current);
+      liveSpacesRefreshDebounceRef.current = setTimeout(() => {
+        liveSpacesRefreshDebounceRef.current = null;
+        void refreshSpaces();
+        void refreshScheduledSpaces();
+      }, 2000);
+    };
+    // Most audio_spaces writes are listener_count / speaker_count churn on a
+    // stage that is already listed. Patch those rows in place from the payload
+    // instead of making every connected client re-read both lists. Only a
+    // change in which list a row belongs to (a new stage, a status flip, a
+    // delete) needs the server's ordering and cutoff, so only that refetches.
+    const patchRow = (store: AudioSpace[], row: AudioSpace) => {
+      const index = store.findIndex(space => space.id === row.id);
+      if (index < 0) return null;
+      const next = store.slice();
+      next[index] = { ...store[index], ...row };
+      return next;
+    };
+    const onSpaceChange = (payload: StageChange) => {
+      if (payload.eventType === 'INSERT') {
+        const status = payload.new?.status;
+        if (status === 'live' || status === 'scheduled') scheduleLiveSpacesRefresh();
+        return;
+      }
+      if (payload.eventType === 'DELETE') {
+        const id = payload.old?.id;
+        if (id && (liveSpacesStore.some(s => s.id === id) || scheduledSpacesStore.some(s => s.id === id))) {
+          scheduleLiveSpacesRefresh();
+        }
+        return;
+      }
+      const row = payload.new;
+      if (!row?.id) return;
+      const inLive = liveSpacesStore.find(s => s.id === row.id);
+      const inScheduled = scheduledSpacesStore.find(s => s.id === row.id);
+      const listedStatus = inLive ? 'live' : inScheduled ? 'scheduled' : null;
+      if (listedStatus !== (row.status === 'live' || row.status === 'scheduled' ? row.status : null)) {
+        // Joined, left or moved between lists.
+        scheduleLiveSpacesRefresh();
+        return;
+      }
+      if (inLive) {
+        const next = patchRow(liveSpacesStore, row);
+        if (next) { setLiveSpaces(next); publishLiveSpaces(next); }
+      } else if (inScheduled) {
+        const next = patchRow(scheduledSpacesStore, row);
+        if (next) { setScheduledSpaces(next); publishScheduledSpaces(next); }
+      }
+    };
+    // Re-read on every join as well: a broadcast sent while this client was
+    // not joined is simply gone, so a stage that started during a dropped
+    // socket would otherwise never reach the list.
+    //
+    // Except the first join right after mount: the two lists were read a
+    // moment ago, and reading them again a second later doubled the stage
+    // requests on every page open. A later join (a socket that dropped and
+    // came back) still re-reads.
+    const onJoin = () => {
+      const firstJoin = !joinedOnce;
+      joinedOnce = true;
+      if (firstJoin && Date.now() - mountedAt < 5000) return;
+      scheduleLiveSpacesRefresh();
+    };
+    const stopWatching = watchStages(onSpaceChange, onJoin);
+    return () => {
+      if (liveSpacesRefreshDebounceRef.current) clearTimeout(liveSpacesRefreshDebounceRef.current);
+      stopWatching();
+    };
+  }, [refreshSpaces, refreshScheduledSpaces]);
+
+  // ─── Live captions ──────────────────────────────────────────────────────────
+  //
+  // Mounted here, in the provider, rather than in the room UI: a host who
+  // minimises the stage to browse the app is still talking, and their captions
+  // have to keep flowing to everyone listening. The publisher transcribes only
+  // this client's own microphone — every other speaker's words arrive as text
+  // over the broadcast channel from their own machine, which is what makes
+  // guest speakers captionable at all. They are absent from this client's
+  // audio graph by construction, exactly as they are absent from the host-side
+  // recording, so anything reading the mix could only ever subtitle the host.
+
+  /** Read at call time: an effect switch replaces the graph but keeps this stream. */
+  const getRawMicStream = useCallback(() => voiceEffectsHookRef.current.getRawStream(), []);
+
+  const captionPublisher = useStageCaptionPublisher({
+    spaceId: currentSpace?.id ?? null,
+    isSpeaker: myRole === 'host' || myRole === 'speaker',
+    isMuted,
+    wallet: walletAddress ?? null,
+    name: user?.username || 'Speaker',
+    getRawStream: getRawMicStream,
+  });
+  publishCaptionRef.current = captionPublisher.publishAi;
+
+  // Memoized: the provider re-renders on every participant/realtime event
+  // while a space is live — an inline value object handed every consumer a
+  // fresh reference each time, re-rendering all of them regardless of what
+  // actually changed.
+  const contextValue = useMemo(
+    () => ({
+      liveSpaces,
+      scheduledSpaces,
+      currentSpace,
+      participants,
+      handRequests,
+      isLoading,
+      isConnected,
+      isMuted,
+      myRole,
+      hasRaisedHand,
+      voiceEffect,
+      setVoiceEffect,
+      isModalOpen,
+      openModal,
+      closeModal,
+      initialModalView,
+      createSpace,
+      scheduleSpace,
+      startScheduledSpace,
+      cancelScheduledSpace,
+      rescheduleScheduledSpace,
+      refreshScheduledSpaces,
+      joinSpace,
+      guestListen,
+      guestStopListening,
+      guestSpace,
+      leaveSpace,
+      endSpace,
+      endStageById,
+      toggleMute,
+      raiseHand,
+      lowerHand,
+      approveSpeaker,
+      removeSpeaker,
+      inviteSpeaker,
+      refreshSpaces,
+      injectAudio,
+      stopInject,
+      setRoomVolume,
+      screenShare,
+      isScreenSharing: !!screenShare?.isLocal,
+      canScreenShare,
+      startScreenShare,
+      stopScreenShare,
+      radioStation,
+      radioStatus,
+      radioVolume,
+      radioMonitor,
+      radioQueue,
+      startRadio,
+      stopRadio,
+      toggleRadioPause,
+      radioNext,
+      radioPrev,
+      setRadioVolume,
+      setRadioMonitor,
+    }),
+    [
+      liveSpaces, scheduledSpaces, currentSpace, participants, handRequests, isLoading,
+      isConnected, isMuted, myRole, hasRaisedHand, voiceEffect, setVoiceEffect,
+      isModalOpen, openModal, closeModal, initialModalView, createSpace,
+      scheduleSpace, startScheduledSpace, cancelScheduledSpace, rescheduleScheduledSpace, refreshScheduledSpaces,
+      joinSpace, guestListen, guestStopListening, guestSpace, leaveSpace, endSpace, endStageById,
+      toggleMute, raiseHand, lowerHand,
+      approveSpeaker, removeSpeaker, inviteSpeaker, refreshSpaces, injectAudio,
+      stopInject, setRoomVolume, screenShare, canScreenShare, startScreenShare, stopScreenShare,
+      radioStation, radioStatus, radioVolume, radioMonitor, radioQueue,
+      startRadio, stopRadio, toggleRadioPause, radioNext, radioPrev,
+      setRadioVolume, setRadioMonitor,
+    ],
+  );
+
+  return (
+    <StageContext.Provider value={contextValue}>
+      {children}
+    </StageContext.Provider>
+  );
+}
+
+// ─── Hook ────────────────────────────────────────────────────────────────────
+
+/** The stage, or null outside a StageProvider (a call's subtitles reuse stage hooks). */
+export function useOptionalStage() {
+  return useContext(StageContext);
+}
+
+export function useStage() {
+  const ctx = useContext(StageContext);
+  if (!ctx) throw new Error('useStage must be used within a StageProvider');
+  return ctx;
+}

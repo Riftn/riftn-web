@@ -1,0 +1,279 @@
+/* Only the first feed audio card needs to clear the floating navigation pill. */
+@media (max-width: 1023px) {
+  [data-cinematic-first] [data-audio-volume]:not([data-audio-fullscreen]) {
+    left: 0.25rem;
+    right: auto;
+  }
+}
+/* Keep style selection pills round even in themes with square surface rules. */
+html[data-theme][data-theme] [data-audio-player] [data-audio-style] {
+  border-radius: 9999px !important;
+}
+
+/* Match the APK's bare white glyphs, including a dark outline on bright frames. */
+html[data-theme] body [data-video-card] :is([data-video-topbar], [data-video-inline-tools]) button,
+html[data-theme] body [data-video-card] button[data-video-bare],
+html[data-theme] body [data-audio-player] button[data-audio-bare],
+html[data-theme] body [data-video-caption-control] {
+  color: #fff !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  filter: none !important;
+}
+html[data-theme] body [data-video-card] :is([data-video-topbar], [data-video-inline-tools], [data-video-bare], [data-video-caption-control]) svg,
+html[data-theme] body [data-audio-player] [data-audio-bare] svg {
+  color: #fff !important;
+  width: 18px;
+  height: 18px;
+  opacity: 1;
+  filter: none !important;
+  box-shadow: none !important;
+}
+/* The centre play/pause glyph fills its own 32px box; the 18px control-bar
+   size above left it small and off-centre inside that box. */
+html[data-theme] body [data-video-card] button[data-video-center] [data-video-glyph] svg {
+  width: 100%;
+  height: 100%;
+}
+html[data-theme] body [data-video-card] :is(span[data-video-bare], [data-video-inline-tools] button),
+html[data-theme] body [data-audio-player] span[data-audio-bare] {
+  filter: none !important;
+  color: #fff !important;
+  font-size: 12px;
+  font-weight: 600;
+  text-shadow: none !important;
+  -webkit-text-stroke: 1px rgb(0 0 0 / 0.8);
+  paint-order: stroke fill;
+}
+
+/* Theme rules must preserve both layers, including filled Cut artwork. */
+html[data-theme] body [data-video-card] [data-video-button-row] button {
+  padding: 0;
+  align-items: center;
+  justify-content: center;
+}
+html[data-theme] body [data-video-card] [data-video-inline-tools] button[data-video-speed] {
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 18px;
+}
+html[data-theme] body [data-video-card] button[data-video-speed] > span {
+  display: block;
+  height: 18px;
+  transform: translateY(1px);
+}
+
+html[data-theme] body :is([data-video-card], [data-audio-player], [data-video-caption-control]) [data-video-glyph] svg {
+  color: #fff !important;
+}
+html[data-theme] body :is([data-video-card], [data-audio-player], [data-video-caption-control]) [data-video-glyph] svg[data-video-glyph-outline] {
+  color: rgb(0 0 0 / 0.8) !important;
+}
+html[data-theme] body :is([data-video-card], [data-audio-player], [data-video-caption-control]) [data-video-glyph-active] svg {
+  color: #000 !important;
+}
+html[data-theme] body :is([data-video-card], [data-audio-player], [data-video-caption-control]) [data-video-glyph-active] svg[data-video-glyph-outline] {
+  color: #fff !important;
+}
+[data-video-glyph-outline].cut-icon [fill="currentColor"] {
+  stroke: currentColor;
+  stroke-width: 1px;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+[data-audio-button-row] button[data-audio-bare] {
+  touch-action: pan-y !important;
+  clip-path: inset(0 0 6px);
+}
+
+/* Outline only the 3px line; the 32px seek target stays clear. */
+[data-video-card] [data-video-controls] {
+  transition: opacity 150ms ease;
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-video-card] [data-video-controls] { transition: none; }
+}
+[data-video-card] [data-video-scrubber="line"] [data-scrubber-line] {
+  touch-action: none;
+  background-size: calc(100% - 1px) 2px, 100% 3px !important;
+  background-position: center calc(100% - 0.5px), center bottom !important;
+}
+
+/* The bottom 48px owns drags. Clip only empty button padding so taps below
+   the glyphs seek without changing the row or the glyph positions. */
+[data-video-scrubber="line"] [data-video-button-row] {
+  pointer-events: none;
+}
+[data-video-scrubber="line"] :is([data-scrubber-line], [data-video-scrub-surface]) {
+  pointer-events: auto;
+}
+[data-video-scrubber="line"] [data-video-button-row] :is(button, [role="button"]) {
+  position: relative;
+  z-index: 1;
+  pointer-events: auto;
+  touch-action: pan-y !important;
+  clip-path: inset(0 0 6px);
+}
+[data-video-scrubber="line"][data-controls-hidden="true"] [data-video-button-row] :is(button, [role="button"]) {
+  pointer-events: none;
+}
+/* The hover volume slider sits inside the row, so it inherited the row's
+   pointer-events: none. The pointer fell through to the video, the hover
+   wrapper saw it leave, and the slider closed the moment you reached it. */
+[data-video-scrubber="line"] [data-video-button-row] [data-volume-pop] {
+  pointer-events: auto;
+}
+
+/* Reserve a separate black transport strip; the picture ends above it. */
+[data-feed-video-frame][data-video-split-controls]:not(#_) {
+  max-height: calc(75svh - 47px) !important;
+}
+/* Glass rails size the frame beside their panel, so they keep their own width. */
+html[data-theme] body [data-video-card] [data-video-split-controls]:not([data-wide-rails-frame]) {
+  width: 100% !important;
+  margin-top: 0 !important;
+}
+html[data-theme="immersive"] [data-cinematic] [data-video-card] > [data-video-split-controls]:not([data-feed-video-frame]) {
+  max-height: calc(var(--post-media-max-h, 80dvh) - 47px) !important;
+}
+html[data-theme] body [data-video-card] [data-video-split-controls][data-video-fullscreen] {
+  max-height: none !important;
+}
+html[data-theme] body [data-video-card] [data-video-control-strip] {
+  height: 47px;
+  padding: 0 !important;
+  background: #000 !important;
+  opacity: 1;
+}
+html[data-theme] body [data-video-control-strip] [data-video-button-row] {
+  height: 44px;
+  gap: 4px;
+}
+html[data-theme] body [data-video-control-strip] [data-video-inline-tools] {
+  gap: 2px;
+}
+html[data-theme] body [data-video-control-strip] :is(button, span) {
+  text-shadow: none !important;
+  -webkit-text-stroke: 0 !important;
+}
+html[data-theme] body [data-video-control-strip] button {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+html[data-theme] body [data-video-card] [data-video-control-strip] [data-video-glyph-plain] svg {
+  width: 18px !important;
+  height: 18px !important;
+  color: #fff !important;
+}
+html[data-theme] body [data-video-card] [data-video-control-strip] [data-video-glyph-plain][data-video-glyph-active] svg {
+  color: #b8d5ff !important;
+}
+html[data-theme] body [data-video-control-strip] [data-video-cc] {
+  font: 600 13px/1 Arial, sans-serif;
+  letter-spacing: 0.1px;
+}
+@media (max-width: 359px) {
+  [data-video-control-strip] [data-video-time] { display: none; }
+}
+
+/* Viewer actions float over the picture in every theme. */
+[data-shorts-actions]:not(#_),
+[data-shorts-actions]:not(#_) > button,
+[data-shorts-actions]:not(#_) > span > button {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* The strip under a video stays black with white controls in every theme,
+   light ones included: it belongs to the player, not the page (Requests). */
+html:is([data-theme="light"], [data-system-tone="light"]):not(#_):not(#_):not(#_):not(#_):not(#_) body [data-video-card] [data-video-control-strip] :is(*, svg):not([data-video-glyph-active] svg) {
+  color: #fff !important;
+}
+/* The player frame itself stays black: the light themes repaint every
+   .bg-black as paper, which turned the letterbox beside a narrow video white
+   and hid the white back arrow drawn there. */
+html:is([data-theme="light"], [data-system-tone="light"]):not(#_):not(#_):not(#_):not(#_) body [data-video-card] :is([data-video-split-controls], [data-feed-video-frame]).bg-black { background-color: #000 !important; }
+
+/* System Light paints the audio card as paper (the painters switch to dark
+   ink), so the white style chips, play button and timer vanished there. */
+html[data-theme="system"][data-system-tone="light"]:not(#_):not(#_):not(#_):not(#_):not(#_) [data-audio-player] :is([data-audio-style], [data-audio-style] *, [data-audio-bare], [data-audio-bare] *) {
+  color: #0b0b0d !important;
+  -webkit-text-stroke: 0 !important;
+  text-shadow: none !important;
+}
+html[data-theme="system"][data-system-tone="light"]:not(#_):not(#_):not(#_):not(#_):not(#_) [data-audio-player] [data-audio-style] {
+  background-color: rgba(11, 11, 13, 0.06) !important;
+}
+
+/* Lyrics over an audio post: every line on its own solid block, white on
+   near-black in every theme, so it reads over whatever the animation draws. */
+html[data-theme]:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-audio-lyrics] [data-audio-lyric-line] > span {
+  display: inline;
+  padding: 0.12em 0.45em;
+  border-radius: 4px;
+  background-color: rgba(0, 0, 0, 0.86) !important;
+  color: #fff !important;
+  line-height: 1.75;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+  text-shadow: none !important;
+  -webkit-text-stroke: 0 !important;
+}
+html[data-theme]:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-audio-lyrics] [data-audio-lyric-next] > span {
+  background-color: rgba(0, 0, 0, 0.62) !important;
+  color: rgba(255, 255, 255, 0.78) !important;
+}
+
+/* Multi-photo feed galleries: a thin outline round the photo area, as tall as
+   the tallest photo, so a shorter photo sits in a frame instead of above an
+   empty gap. Two ids keep theme media resets (Jungle, Osaka) from erasing it. */
+html [data-gallery-frame]:not(#_):not(#_) {
+  border: 1px solid var(--gallery-frame-edge, rgba(255, 255, 255, 0.16));
+  background-color: var(--gallery-frame-fill, rgba(255, 255, 255, 0.03));
+}
+html:is([data-theme='light'], [data-system-tone='light']) {
+  --gallery-frame-edge: rgba(11, 11, 13, 0.14);
+  --gallery-frame-fill: rgba(11, 11, 13, 0.025);
+}
+
+/* Wide (collapsed-sidebar) feed: a video card in a row with shorter
+   neighbours crops its frame a little so the row ends level
+   (MasonrySegment). The picture fills the trimmed frame rather than
+   letterboxing inside it. */
+[data-masonry-trim] [data-feed-video-frame]:not(#_):not(#_):not(#_) {
+  max-height: var(--masonry-frame-max) !important;
+}
+[data-masonry-trim] [data-feed-video-frame] :is(video, img):not(#_):not(#_) {
+  object-fit: cover !important;
+  object-position: center !important;
+}
+
+/* Glass rail with comments: a link card shrinks to a short strip of its
+   picture with a small link badge, no words under it, so the comments keep
+   their room. Cards with no picture, and rails with no comments, are left as
+   they are. */
+[data-wide-rail][data-rail-compact-links] :is([data-link-preview-layout="image"], [data-glass-embed]) [data-link-preview-text] { display: none; }
+[data-wide-rail][data-rail-compact-links] [data-link-preview-layout="image"] [data-link-preview-media] { aspect-ratio: 2.4 / 1; }
+[data-wide-rail][data-rail-compact-links] [data-link-preview-badge] { display: flex; }
+
+/* Full screen is a black room on every theme: light themes repainted the
+   frame, leaving white either side of a tall video with white controls on it. */
+html[data-theme] body [data-video-fullscreen]:not([data-audio-frame]):not(#_):not(#_):not(#_):not(#_):not(#_) {
+  background: #000 !important;
+}
+
+/* The pointer leaves with the transport while a full screen video plays. An
+   attribute, not a utility class: the frame's own cursor-pointer won on order. */
+[data-video-fullscreen][data-video-pointer-hidden],
+[data-video-fullscreen][data-video-pointer-hidden] * {
+  cursor: none !important;
+}

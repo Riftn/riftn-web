@@ -1,0 +1,263 @@
+import { useTranslation as _useCopy } from 'react-i18next';
+/**
+ * "Post to Riftn" flow — renders the timeline via the existing export pipeline,
+ * then opens the global PostModal with the resulting video file pre-attached.
+ * If the user isn't authenticated, opens the login modal first and resumes after.
+ */
+import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
+import Share2 from "@/components/ui/cut-icons/feedshare";
+import X from "@/components/ui/cut-icons/close";
+
+import { LiquidGlassBubble2 } from "@/components/ui/liquid-glass-bubble-2";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
+import { PostModal } from "@/features/post";
+import { tokenIdFromPostUrl } from "@/lib/remix/reactions";
+import { useAuth } from "@/contexts/AuthContext";
+import { useEditorStore, selectTimelineDuration } from "@/store/editorStore";
+import { exportProject, isExportSupported } from "@/lib/editor/exporter";
+import { startExportJournal } from "@/lib/editor/exportJournal";
+import { preserveEditorAssets, uploadEditorAsset } from "@/lib/editor/cloudMedia";
+import { editorErrorText } from "@/lib/editor/editorErrorText";
+import { getNFTInfo } from "@/lib/api/dehub";
+import type { DeHubNFT } from "@/lib/api/dehub/types";
+import { checkRemix, recordRemixLink } from "@/lib/remix-links";
+import { duetCaption } from "@/lib/duet";
+import { stitchCaption } from "@/lib/stitch";
+
+
+function filesToFileList(files: File[]): FileList {
+  const dt = new DataTransfer();
+  for (const f of files) dt.items.add(f);
+  return dt.files;
+}
+
+export function PostToDeHub({ iconOnly = false }: { iconOnly?: boolean }) {
+  const { t: _copy } = _useCopy();
+  const auth = useAuth();
+  const isAuthenticated = !!auth?.isAuthenticated;
+  const openLoginModal = auth?.openLoginModal;
+  const walletAddress = auth?.walletAddress ?? null;
+
+  const toSnapshot = useEditorStore((s) => s.toSnapshot);
+  const media = useEditorStore((s) => s.media);
+  const clips = useEditorStore((s) => s.clips);
+  const settings = useEditorStore((s) => s.settings);
+  const duration = useEditorStore(selectTimelineDuration);
+
+
+  const [renderOpen, setRenderOpen] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [label, setLabel] = useState("");
+  const [pending, setPending] = useState(false);
+  const [postOpen, setPostOpen] = useState(false);
+  const [files, setFiles] = useState<FileList | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
+  const wasAuthRef = useRef(isAuthenticated);
+  // A duet posts as a quote of its source, so the backend keeps the link and
+  // applies the creator's quote policy; remix-links records it as a duet.
+  const duet = settings.remixSource?.mode === 'duet' && settings.remixSource.tokenId ? settings.remixSource : null;
+  // A stitch is an ordinary post; remix-links records what it stitched.
+  const stitch = settings.remixSource?.mode === 'stitch' && settings.remixSource.tokenId ? settings.remixSource : null;
+  const [duetSource, setDuetSource] = useState<DeHubNFT | null>(null);
+
+  // If the user signs in after we asked, continue the flow automatically.
+  useEffect(() => {
+    if (!wasAuthRef.current && isAuthenticated && pending) {
+      wasAuthRef.current = true;
+      setPending(false);
+      void startRender();
+    }
+    wasAuthRef.current = isAuthenticated;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated, pending]);
+
+  const onClick = () => {
+    if (duration <= 0) {
+      toast.error(_copy("copy.7a8850b5d8b4", { defaultValue: "Add clips to the timeline first." }));
+      return;
+    }
+    if (!isExportSupported()) {
+      toast.error(_copy("copy.c642972f523a", { defaultValue: "Your browser doesn't support video export. Try Chrome, Edge, Brave, or Arc." }));
+      return;
+    }
+    if (!isAuthenticated) {
+      setPending(true);
+      openLoginModal?.();
+      toast.message(_copy("copy.ca1d8a063770", { defaultValue: "Sign in to post to Riftn. Your video will render after sign-in." }));
+      return;
+    }
+    void startRender();
+  };
+
+  // A reaction is its own post; once it exists it is linked to the original,
+  // which credits it, notifies its creator and shares tips with them.
+  const reactionSourceId = settings.remixSource?.mode === 'react'
+    ? settings.remixSource.tokenId ?? tokenIdFromPostUrl(settings.remixSource.url)
+    : null;
+  /** Re-checked here, right before posting: the creator may have turned duets, stitches or reactions off since recording. */
+  const prepareDuet = async (): Promise<boolean> => {
+    if (reactionSourceId) {
+      const verdict = await checkRemix(reactionSourceId, 'react');
+      if (!verdict.allowed) toast.error(verdict.reason || _copy('remixLinks.react.unavailable', { defaultValue: 'This video is no longer available for reactions.' }));
+      return verdict.allowed;
+    }
+    if (stitch?.tokenId) {
+      const verdict = await checkRemix(stitch.tokenId, 'stitch');
+      if (!verdict.allowed) toast.error(verdict.reason || _copy('remixLinks.stitch.unavailable', { defaultValue: 'This video is no longer available for stitches.' }));
+      return verdict.allowed;
+    }
+    if (!duet?.tokenId) return true;
+    const [verdict, source] = await Promise.all([checkRemix(duet.tokenId, 'duet'), getNFTInfo(duet.tokenId).catch(() => null)]);
+    if (!verdict.allowed || !source) {
+      toast.error(verdict.reason || _copy('duet.unavailable', { defaultValue: 'This video is no longer available for duets.' }));
+      return false;
+    }
+    setDuetSource(source);
+    return true;
+  };
+
+  const linkStitch = (tokenId: string) => {
+    if (!stitch?.tokenId) return;
+    void recordRemixLink({ kind: 'stitch', sourceTokenId: stitch.tokenId, remixTokenId: tokenId })
+      .catch((error: Error & { refused?: boolean }) => {
+        console.warn('[Stitch] link failed', error);
+        toast.error(error.refused ? error.message : _copy('remixLinks.linkFailed', { defaultValue: 'Your post is up, but it could not be linked to the original video.' }));
+      });
+  };
+
+  const linkDuet = (tokenId: string) => {
+    if (!duet?.tokenId) return;
+    void recordRemixLink({ kind: 'duet', sourceTokenId: duet.tokenId, remixTokenId: tokenId, details: duet.layout ? { layout: duet.layout } : undefined })
+      .catch((error: Error & { refused?: boolean }) => {
+        console.warn('[Duet] link failed', error);
+        if (error.refused) toast.error(error.message);
+      });
+  };
+
+  const linkReaction = (tokenId: string) => {
+    if (!reactionSourceId) return;
+    void recordRemixLink({ kind: 'react', sourceTokenId: reactionSourceId, remixTokenId: tokenId })
+      .catch((error: Error & { refused?: boolean }) => {
+        console.warn('[React] link failed', error);
+        if (error.refused) toast.error(error.message);
+      });
+  };
+
+  const startRender = async () => {
+    if (!(await prepareDuet())) return;
+    setRenderOpen(true);
+    setProgress(0);
+    setLabel("Preparing…");
+    const ctl = new AbortController();
+    abortRef.current = ctl;
+    const journal = startExportJournal({ surface: "post", format: "mp4", durationSeconds: duration });
+    try {
+      const result = await exportProject({
+        snapshot: toSnapshot(),
+        media,
+        format: "mp4",
+        scale: 1,
+        videoBitrate: 8_000_000,
+        username: auth.user?.username,
+        onProgress: (p, l) => { setProgress(Math.round(p * 100)); setLabel(l); },
+        signal: ctl.signal,
+      });
+      const { blob, filename } = result;
+      journal.succeeded(result);
+      const file = new File([blob], filename, { type: "video/mp4" });
+      setFiles(filesToFileList([file]));
+      setRenderOpen(false);
+      setPostOpen(true);
+
+      // Preserve all source assets used on the timeline + store the exported MP4.
+      if (walletAddress) {
+        const sourceIds = Array.from(
+          new Set(clips.map((c) => ("mediaId" in c ? c.mediaId : null)).filter((x): x is string => !!x)),
+        );
+        void preserveEditorAssets(walletAddress, sourceIds, `pending-${Date.now()}`).catch((e) =>
+          console.warn("[editor] preserve failed", e),
+        );
+        void uploadEditorAsset({
+          wallet: walletAddress,
+          name: filename,
+          kind: "export",
+          blob,
+          mimeType: "video/mp4",
+          preserved: true,
+        })
+          .then((asset) => { journal.backedUp(asset.id); window.dispatchEvent(new CustomEvent("editor:storage-usage-changed")); })
+          .catch((e) => { journal.backupFailed(e); console.warn("[editor] export upload failed", e); });
+      }
+
+    } catch (e) {
+      journal.failed(e);
+      if ((e as Error).name === "AbortError") {
+        toast.message(_copy("copy.d353a99eb455", { defaultValue: "Cancelled" }));
+      } else {
+        const msg = editorErrorText(e, _copy("copy.b704deeb5e68", { defaultValue: "Render failed" }));
+        toast.error(msg);
+        // eslint-disable-next-line no-console
+        console.error("Post-to-DeHub render failed:", e);
+      }
+      setRenderOpen(false);
+    } finally {
+      abortRef.current = null;
+    }
+  };
+
+  return (
+    <>
+      <LiquidGlassBubble2
+        label={_copy("copy.a5554622c655", { defaultValue: "Post" })}
+        icon={<Share2 className="h-4 w-4" />}
+        onClick={onClick}
+        iconOnly={iconOnly}
+        width={iconOnly ? "40px" : "100px"}
+        height="36px"
+      />
+
+      <Dialog open={renderOpen} onOpenChange={(v) => { if (!v) abortRef.current?.abort(); setRenderOpen(v); }}>
+        <DialogContent className="border-white/10 bg-black/80 text-white backdrop-blur-[24px] sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>{_copy("copy.592b84d727da", { defaultValue: "Rendering your video…" })}</DialogTitle>
+            <DialogDescription className="text-white/60">{_copy("copy.2b10d962095a", { defaultValue: "Once it's ready, the post composer will open with the video attached." })}</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2 py-2">
+            <Progress value={progress} className="h-2 bg-white/10" />
+            <div className="flex items-center justify-between text-xs text-white/70">
+              <span>{label || `${settings.width}×${settings.height} · MP4`}</span>
+              <span className="tabular-nums">{progress}%</span>
+            </div>
+          </div>
+          <div className="flex justify-end">
+            <Button
+              variant="ghost"
+              onClick={() => abortRef.current?.abort()}
+              className="rounded-lg text-white/80 hover:bg-white/10 hover:text-white"
+            >
+              <X className="mr-1 h-4 w-4" />{_copy("copy.24b113e7a0b4", { defaultValue: " Cancel" })}</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <PostModal
+        isOpen={postOpen}
+        onClose={() => { setPostOpen(false); setFiles(null); }}
+        initialFiles={files}
+        initialText={duet ? duetCaption(duet.creator) : stitch ? stitchCaption(stitch.creator) : settings.remixSource ? `${reactionSourceId ? 'Reaction to' : 'Remix of'} ${settings.remixSource.creator ? '@' + settings.remixSource.creator : settings.remixSource.title}\n${settings.remixSource.url}` : undefined}
+        quotedPost={duet ? duetSource : undefined}
+        onPosted={duet ? linkDuet : stitch ? linkStitch : reactionSourceId ? linkReaction : undefined}
+        onFilesProcessed={() => setFiles(null)}
+      />
+    </>
+  );
+}

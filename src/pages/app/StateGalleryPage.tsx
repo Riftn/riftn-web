@@ -1,0 +1,4178 @@
+import { SoundPicker, type SoundCandidate } from '@/features/post/components/SoundPicker';
+import { AssistantActionCard } from '@/components/app/assistant/AssistantActionCard';
+import type { AssistantAction } from '@/lib/api/dehub/assistant-actions';
+import { setCoAuthors, openCoAuthorSheet } from '@/lib/co-author-store';
+import { CoAuthorSheetHost } from '@/components/app/co-authors/CoAuthorSheetHost';
+import { CoAuthorInviteBanner } from '@/components/app/co-authors/CoAuthorInviteBanner';
+import { MessagesNavGlyph } from '@/components/app/navigation/MessagesNavGlyph';
+import { UnreadCountChip } from '@/components/app/chat/UnreadCountChip';
+import { SoundtrackControl } from '@/components/app/cards/SoundtrackControl';
+import { withSoundWindow } from '@/lib/sound-window';
+import { NewGroupChannelSheet, type NewChatKind } from '@/components/app/chat/NewGroupChannelSheet';
+import { ProfileArrangeSheet, type ArrangeRow } from '@/components/app/profile/ProfileArrangeSheet';
+import { OwnAiKeysSetting } from '@/components/app/settings/OwnAiKeysSetting';
+import { ResetWalletSettings, type ResetWalletReadiness } from '@/components/app/settings/ResetWalletSettings';
+import PersonalKeys from '@/components/PersonalKeys';
+import { ProfilePostBgContext, ProfilePostBgMapContext, PostBgLayer, PostBgPicker, postBgHostProps, usePostBgHold } from '@/components/app/profile/PostBackground';
+import { ArticleTilePicker, ProfileArticleTileContext } from '@/components/app/profile/ArticleTile';
+import type { ArticleTileLook } from '@/lib/article-tile';
+import { ProfileMixedGrid, type MixedGridEntry } from '@/components/app/profile/ProfileMixedGrid';
+import { FormatGlyph, type FormatKind } from '@/components/app/profile/FormatMark';
+import { PostCard as GalleryPostCard } from '@/components/app/cards/PostCard';
+import { ContentWarningGate } from '@/components/app/cards/ContentWarningGate';
+import { AuthorThread } from '@/components/app/cards/AuthorThread';
+import { postBgById, withPostBgColors, type PostBg } from '@/lib/post-backgrounds';
+import type { TextPost as GalleryTextPost } from '@/types/feed.types';
+import type { ProviderKeyRow } from '@/lib/api/dehub/provider-keys';
+import { NewMessageSelector } from '@/components/app/chat/NewMessageSelector';
+import { MultiPostSheetView } from '@/features/post/components/MultiPostSheet';
+import { NewMessageDrawer } from '@/components/app/chat/NewMessageDrawer';
+import type { DeHubConversation } from '@/lib/api/dehub';
+import { GroupChatRow } from '@/components/app/chat/GroupChatRow';
+import { CommunityKindChip } from '@/components/app/communities/CommunityKindChip';
+import { translateCopy as _translateCopy } from '@/i18n/copy';
+import { CollectorPanel } from '@/components/app/collect/CollectorPanel';
+import { DropsTab } from '@/components/app/collect/DropsTab';
+import { AuctionBox } from '@/components/app/nft-market/AuctionBox';
+import type { Auction, Drop, MarketStats, Unlockable } from '@/lib/api/dehub/collect';
+import { MintChainSheet } from '@/components/app/mint/MintChainSheet';
+import { CreateNftPanel } from '@/components/app/nft-market/CreateNftPanel';
+import PayWithCoinSheet from '@/components/app/credits/PayWithCoinSheet';
+import { VoiceStripPlayer } from '@/components/app/audio/VoiceStripPlayer';
+import { LiveMicBars } from '@/components/app/audio/LiveMicBars';
+import { DmLockedState, DmUndecryptableRun } from '@/components/app/chat/DmLockedState';
+import { DmSafetyBanner } from '@/components/app/chat/DmSafetyBanner';
+import { useTranslation as _useCopy } from 'react-i18next';
+import { lazy, Suspense, useEffect, useId, useMemo, useRef, useState, type ReactNode } from 'react';
+import type { ChatReactionSummary } from '@/lib/api/dehub/chat-prefs';
+import { POST_LOOK_EVENT, type PostLook } from '@/lib/post-menu';
+import { PostMenuGate } from '@/components/app/post-menu/PostMenuGate';
+import { PostActionBar } from '@/features/post/components/PostActionBar';
+import { TranslatedDraftNote } from '@/features/post/components/TranslatedDraftNote';
+import { createPortal } from 'react-dom';
+import { PenSquare, Cable, ThumbsDown, Undo2 } from 'lucide-react';
+import MenuSearchIcon from "@/components/ui/cut-icons/search";
+import { WindowedFeedItem } from '@/components/app/feeds/WindowedFeedItem';
+import { hideDislikedPost, restoreDislikedPost } from '@/lib/disliked-posts-store';
+import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
+import { showUndoToast } from '@/components/ui/undo-toast';
+import { showUpdateToast } from '@/components/app/NewVersionToast';
+import type { BuildVersion } from '@/lib/version-check';
+import { useSearchParams } from 'react-router-dom';
+import { NotificationRowsGallery } from '@/components/app/notifications/NotificationRowsGallery';
+import { transcriptKey } from '@/hooks/use-transcript';
+import { AppState } from '@/components/app/AppState';
+import { LiveRipple } from '@/components/app/LiveRipple';
+import { LiveNowRow, LiveNowList, type LiveNowItem } from '@/components/app/feeds/LiveNowBar';
+import { CaptureCardSetup } from '@/components/app/live/CaptureCardSetup';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { ThemedIcon, type ThemeIconKey } from '@/components/app/war/WarHudIcon';
+import { useAppTheme } from '@/contexts/ThemeContext';
+import { Button } from '@/components/ui/button';
+import { LiquidGlassBubble2 } from '@/components/ui/liquid-glass-bubble-2';
+import { SeedPhraseBackup } from '@/components/app/wallet-setup/SeedPhraseBackup';
+import { PrivateKeyBackup } from '@/components/app/wallet-setup/PrivateKeyBackup';
+import { BackupReminderCard } from '@/components/app/wallet/BackupReminderBanner';
+import { ArticleFeedCover } from '@/components/app/article/ArticleFeedCover';
+import { ArticleReader } from '@/components/app/article/ArticleReader';
+import { ArticleComposer } from '@/features/post/components/ArticleComposer';
+import { BADGE_ORDER, badgeImage } from '@/lib/staking-badges';
+import { BadgeIcon } from '@/components/app/BadgeIcon';
+import { BadgeMuseumGallery } from '@/components/app/profile/BadgeMuseumGallery';
+import { BadgedName } from '@/components/app/BadgedName';
+import { preloadBadgeShowcase } from '@/lib/badge-showcase';
+import { badgeAnimationStyle } from '@/lib/badge-animation-style';
+import { ActionBar } from '@/components/app/cards/ActionBar';
+import type { PostReaction, ReactionCounts } from '@/lib/reactions';
+import { ReactionEmoji } from '@/components/app/cards/ReactionEmoji';
+import { AuthContext, type AuthContextType } from '@/contexts/AuthContext';
+import { ThreadedComments, type ThreadedCommentsLabels } from '@/components/app/comments/ThreadedComments';
+import { TipWall, TipChip } from '@/components/app/comments/TipWall';
+import type { Comment as GalleryComment } from '@/lib/comment-mapper';
+import { KitButton, PageEmpty, PageSection, PageTabs } from '@/components/app/page-kit/PageKit';
+import { ScheduleSheet, type ScheduleKind } from '@/features/post/components/ScheduleSheet';
+import { POST_SPACING_KEY } from '@/features/post/components/PostSpacingSection';
+import { ChatInput } from '@/components/app/chat/ChatInput';
+import { MessageRequestBarView, MessageRequestsHeader, MessageRequestsRow } from '@/components/app/chat/MessageRequestBar';
+import { PostEditHistoryLineView, PostEditHistoryViewer } from '@/components/app/post-info/PostEditHistory';
+import { ScheduledMessagesDrawer, ScheduledStrip, type ScheduledDmView } from '@/components/app/chat/ScheduledMessages';
+import { FeedTabBarSkeleton } from '@/components/app/PageSkeletons';
+import { FeedCardSkeletonList } from '@/components/app/cards/FeedCardSkeleton';
+import { STREAMER_BADGE_IDS, badgeMaterial, streamerBadgeSvg } from '@/lib/streamer-badge-art';
+import { LinkPreviews } from '@/features/post/components/LinkPreviews';
+import Trophy from '@/components/ui/cut-icons/leaderboard';
+import Star from '@/components/ui/cut-icons/new-members';
+import MessagesSquare from '@/components/ui/cut-icons/chat';
+import MoreVertical from '@/components/ui/cut-icons/morevertical';
+import { FeedLinkPreviews } from '@/components/app/cards/FeedLinkPreviews';
+import { ChatLinkPreviews } from '@/components/app/chat/ChatLinkPreviews';
+import { SpotifyMiniPlayer } from '@/components/app/spotify/SpotifyMiniPlayer';
+import { RadioPlayerProvider } from '@/hooks/use-radio-player';
+import { useSpotifyPlayer } from '@/lib/spotify-player';
+import { AgentWelcomePanel } from './AgentWelcomePanel';
+import { AvatarPromptSheet } from '@/components/app/AvatarPromptSheet';
+import { NonFollowerOfferSheet, type NonFollowerOfferStage } from '@/components/app/NonFollowerOfferSheet';
+import { FollowBackAllButton, FollowBackAllSheet, type FollowBackAllStage } from '@/components/app/profile/FollowBackAllSheet';
+import { playFollowBackChime } from '@/lib/follow-back-chime';
+import { PostStatsSheet } from '@/components/app/post-stats/PostStatsSheet';
+import { PostStatsPanel } from '@/components/app/post-stats/PostStatsPanel';
+import { SAMPLE_BEST_TIMES, SAMPLE_POST_STATS } from '@/components/app/post-stats/sample-stats';
+import { PostMetadata } from '@/components/app/cards/PostMetadata';
+import { useQueryClient } from '@tanstack/react-query';
+import { AppTokensRow, AppTokenSendDialog } from '@/components/app/wallet/AppTokens';
+import { APP_TOKENS_QUERY_KEY } from '@/hooks/use-app-tokens';
+import { AudioVisualizer } from '@/components/app/audio/AudioVisualizer';
+import { PollCard } from '@/components/app/cards/PollCard';
+import { PollEditor } from '@/features/post/components/PollEditor';
+import { AltTextButton } from '@/features/post/components/AltTextEditor';
+import type { PollData } from '@/features/post/types';
+import { LiveClearedLayer } from '@/components/app/live/LiveClearedLayer';
+import { ImmersiveLiveChrome } from '@/components/app/live/ImmersiveLiveChrome';
+import { LivePostChat } from '@/components/app/cards/LivePostChat';
+import { LiveViewerActionsProvider } from '@/components/app/live/live-viewer-actions';
+import { RewardsSheet } from '@/components/app/live/points/RewardsSheet';
+import { RewardsPanel } from '@/components/app/live/studio/RewardsPanel';
+import type { LiveAudience } from '@/lib/api/dehub/livestream';
+import type { DeHubPoll, DmLock, DmLockStatus, DmMessage } from '@/lib/api/dehub';
+import { LockedMediaBubble, lockedMediaKey } from '@/components/app/chat/LockedMediaBubble';
+import { UnlockReveal } from '@/components/app/unlock/UnlockReveal';
+import { UnlockConfirmSheet, type UnlockPhase } from '@/components/app/unlock/UnlockConfirmSheet';
+import type { UnlockRevealKind } from '@/components/app/unlock/unlock-reveal-kind';
+import { LockPriceControl } from '@/components/app/chat/LockPriceControl';
+import { ProfileHeader } from '@/components/app/profile/ProfileHeader';
+import type { ProfileData } from '@/hooks/use-dehub-profile';
+import type { Community, PinnedCommunity } from '@/hooks/use-communities';
+import { holderGateOf } from '@/hooks/use-holder-gate';
+import { HolderGateChip } from '@/components/app/communities/HolderGateChip';
+import { TopHolders } from '@/components/app/communities/TopHolders';
+import { HoldersTab } from '@/components/app/communities/manage/HoldersTab';
+import { DraftVideoProgress } from '@/features/post/components/DraftVideoProgress';
+import { PostProcessingPill } from '@/components/app/PostProcessingDock';
+import type { PostProcessingPhase } from '@/store/postProcessingStore';
+import { ProposalLinkEmbed } from '@/components/app/governance/ProposalLinkEmbed';
+import { DehubLinkEmbeds } from '@/components/app/cards/DehubLinkEmbedsLazy';
+import { UserMentionDropdown } from '@/components/app/mentions';
+import { useMention } from '@/hooks/use-mention';
+import { findDehubLinks } from '@/lib/dehub-links';
+import { ProposalOptions } from '@/components/app/governance/ProposalOptions';
+import { ProposalAnswersEditor } from '@/components/app/governance/ProposalAnswersEditor';
+import type { GovernanceProposal } from '@/hooks/use-governance';
+import { GeneratedStageCover } from '@/components/app/stages/GeneratedStageCover';
+import { PastStageCard } from '@/components/app/stages/PastStageCard';
+import type { AudioSpace } from '@/types/audio-spaces.types';
+import galleryCover from '@/assets/banners/agent-marco_v.png';
+import pillArtA from '@/assets/banners/agent-ellaverse.png';
+import pillArtB from '@/assets/banners/agent-xluna.png';
+import pillArtC from '@/assets/banners/agent-sawyer.png';
+import pillArtD from '@/assets/banners/agent-notmaya.png';
+import pillArtE from '@/assets/banners/agent-jdot.png';
+import pillArtF from '@/assets/banners/agent-riooo.png';
+import galleryAvatar from '@/assets/avatars/marco_v.png';
+import galleryCommunityArt from '@/assets/banners/agent-vrgl.png';
+import galleryCommunityLogo from '@/assets/avatars/vrgl.png';
+import followAvatarEllaverse from '@/assets/avatars/ellaverse.png';
+import followAvatarKai from '@/assets/avatars/0xkai.png';
+import followAvatarLuna from '@/assets/avatars/xluna.png';
+import followAvatarRio from '@/assets/avatars/riooo.png';
+import followCoverEllaverse from '@/assets/banners/agent-ellaverse.png';
+import followCoverLuna from '@/assets/banners/agent-xluna.png';
+import { FollowCoverCard } from '@/components/app/FollowCoverCard';
+import { ConversationItem } from '@/pages/app/MessagesPage';
+import { BulkChatBar } from '@/components/app/chat/BulkChatBar';
+import type { DeHubDMMessage } from '@/lib/api/dehub/dm';
+import { FullScreenChatShell } from '@/components/app/chat/FullScreenChatShell';
+import { DmMessageBubble, CozyDayPill } from '@/components/app/chat/DirectMessageChat';
+import { CatchUpMenu } from '@/components/app/communities/CatchUpMenu';
+import Search from '@/components/ui/cut-icons/search';
+import { ChatReactionArrivalGallery } from './ChatReactionArrivalGallery';
+import { MessageSelectBar } from '@/components/app/chat/MessageSelectBar';
+import { DeleteMessageDialog } from '@/components/app/chat/DeleteMessageDialog';
+import { ImageMarkupDialog } from '@/components/app/features/ImageMarkupDialog';
+import { ChatMessage as LiveChatLine, type Message as LiveChatLineMessage } from '@/components/app/chat/ChatMessage';
+import { UnreadMarker, UnreadJumpButton } from '@/components/app/chat/UnreadJump';
+import { countLinesBelow, glideToBottom } from '@/lib/chat-lines-below';
+import type { DeHubUser } from '@/lib/api/dehub';
+import { GithubLinkSetting } from '@/components/app/settings/GithubLinkSetting';
+import { SignedFollowsSetting } from '@/components/app/settings/SignedFollowsSetting';
+import { ProfileLinksPill } from '@/components/app/profile/ProfileSocialLinks';
+import { ProfileFieldsList } from '@/components/app/profile/ProfileFieldsList';
+import { ProfileFieldsEditor, type FieldRow } from '@/components/app/settings/ProfileFieldsSetting';
+import type { SuggestedAccount } from '@/lib/api/dehub';
+import { NAV_ITEMS } from '@/constants/app.constants';
+import { filterNavItems } from '@/components/app/navigation/nav-search';
+import { MobileMenuLayout, MenuTabs } from '@/components/app/navigation/MobileMenuLayout';
+import { MenuAccountSwitcher } from '@/components/app/navigation/MenuAccountSwitcher';
+import { groupMenuItems } from '@/components/app/navigation/menu-groups';
+import { normaliseMenuLayout, useMenuLayout, writeMenuLayout } from '@/lib/menu-layout';
+import { renderChatTextWithLinks } from '@/components/app/TranslatableText';
+import { BoldText } from '@/lib/bold-markup';
+
+/**
+ * Comic posts: the deck as the feed shows it, the post page with the hand of
+ * pages, and the Comic tab's page list. Public-domain Little Nemo panels.
+ */
+const GALLERY_COMIC_PAGES = [1, 2, 3, 4, 5, 6].map(n => `/state-gallery/comic/nemo-${n}.webp`);
+const GALLERY_COMIC_CAPTIONS = [
+  'Nemo wakes to find his bed has grown legs.',
+  'It strides out of the window and over the rooftops.',
+  'The whole city sleeps below, the moon watching.',
+  'The legs keep growing, taller than the steeples.',
+  'One wrong step over the river...',
+  '...and Nemo tumbles back into his own room.',
+];
+const GALLERY_COMIC_ALTS = GALLERY_COMIC_PAGES.map((_, i) => `Panel ${i + 1}: Nemo's bed walking through the city at night.`);
+/** dehub.io/<free name> for a signed-out visitor: Reserve now, held (1 minute), ended, someone else holding. */
+function UsernameReserveGallery() {
+  const states = [
+    { state: 'avail' as const, label: 'Available' },
+    { state: 'held' as const, label: 'Held for you', secondsLeft: 41 },
+    { state: 'ended' as const, label: 'Hold ended' },
+    { state: 'busy' as const, label: 'Someone else holding', secondsLeft: 23 },
+  ];
+  return (
+    <section data-username-reserve-gallery className="mb-5">
+      <h2 className="mb-3 text-sm font-semibold">Free username: Reserve now</h2>
+      <div className="grid gap-6 sm:grid-cols-2">
+        {states.map((s) => (
+          <div key={s.state} className="flex flex-col items-center gap-2">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">{s.label}</p>
+            <UsernameReserve username="nova" preview={{ state: s.state, secondsLeft: s.secondsLeft }} />
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+const OWN_KEY_ROWS: ProviderKeyRow[] = [
+  { id: 'openai', label: 'OpenAI', powers: 'Builder (GPT models)', keysUrl: '#', saved: { last4: '7f3a', status: 'working', checkedAt: '', lastUsedAt: null } },
+  { id: 'fal', label: 'fal', powers: 'Images, video, 3D and photo tools', keysUrl: '#', saved: null },
+  { id: 'elevenlabs', label: 'ElevenLabs', powers: 'Voice, dubbing, music and sound effects', keysUrl: '#', saved: { last4: '91bc', status: 'no_credit', checkedAt: '', lastUsedAt: null } },
+  { id: 'replicate', label: 'Replicate', powers: 'Images and video', keysUrl: '#', saved: { last4: 'x2Qd', status: 'invalid', checkedAt: '', lastUsedAt: null } },
+  { id: 'openrouter', label: 'OpenRouter', powers: 'Hundreds of chat and text models with one key', keysUrl: '#', saved: null },
+];
+
+function OwnKeysGallery() {
+  return (
+    <section data-own-keys-gallery className="mb-5 grid gap-5 lg:grid-cols-2">
+      <OwnAiKeysSetting preview={OWN_KEY_ROWS.filter(row => row.saved)} />
+      <OwnAiKeysSetting preview={OWN_KEY_ROWS} previewEditing="fal" previewShowAll />
+    </section>
+  );
+}
+
+const MCP_KEY_ROWS = [
+  { id: 'k1', client_name: 'Posting bot', scopes: ['dehub:read', 'dehub:social', 'dehub:agents'], expires_at: Date.UTC(2026, 11, 9), kind: 'key', hint: '7f3a' },
+  { id: 'k2', client_name: 'Cursor', scopes: ['dehub:read'], expires_at: Date.UTC(2026, 11, 2), kind: 'key', hint: 'c0de' },
+];
+
+const ARRANGE_ROWS: ArrangeRow[] = [
+  { tokenId: 6, title: 'Start here: what this channel is about', image: GALLERY_COMIC_PAGES[0], kind: 'video' },
+  { tokenId: 5, title: 'Episode 1, the bed grows legs', image: GALLERY_COMIC_PAGES[1], kind: 'video' },
+  { tokenId: 4, title: 'Episode 2, over the rooftops', image: GALLERY_COMIC_PAGES[2], kind: 'video' },
+  { tokenId: 3, title: 'Behind the pages', image: GALLERY_COMIC_PAGES[3], kind: 'image' },
+  { tokenId: 2, title: 'A note to everyone who has been reading along since the first page went up', kind: 'text' },
+  { tokenId: 1, title: 'Episode 3, the moon', image: GALLERY_COMIC_PAGES[4], kind: 'video' },
+];
+
+/** The sheet a creator drags their posts into order with (profile sort row, own profile). */
+function ProfileArrangeGallery() {
+  const [open, setOpen] = useState(false);
+  return (
+    <section data-profile-arrange-gallery className="mb-5">
+      <button type="button" data-profile-arrange-gallery-open onClick={() => setOpen(true)} className="rounded-xl border border-white/15 px-4 py-2 text-sm font-medium">
+        Arrange posts
+      </button>
+      <ProfileArrangeSheet open={open} onOpenChange={setOpen} address="" hasCustomOrder onSaved={() => {}} preview={ARRANGE_ROWS} />
+    </section>
+  );
+}
+
+function McpKeysGallery() {
+  return (
+    <section data-mcp-keys-gallery className="mb-5 grid gap-5 lg:grid-cols-2">
+      <PersonalKeys preview={{ keys: MCP_KEY_ROWS }} />
+      <PersonalKeys preview={{ keys: [], made: { key: `dhk_${'3f9c'.repeat(16)}`, name: 'Posting bot' } }} />
+    </section>
+  );
+}
+
+function ComicGallery() {
+  const media = GALLERY_COMIC_PAGES.slice(0, 3).map((preview, i) => ({
+    file: new File([], `page-${i + 1}.webp`, { type: 'image/webp' }), preview, type: 'image' as const,
+    caption: GALLERY_COMIC_CAPTIONS[i], description: i === 0 ? GALLERY_COMIC_ALTS[0] : undefined,
+  }));
+  const [pickedBorder, setPickedBorder] = useState<ComicBorder | null>('holographic');
+  const noop = () => {};
+  return (
+    <section data-comic-gallery className="mb-5 space-y-6">
+      <h2 className="text-sm font-semibold">Comic posts</h2>
+      <div>
+        <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">In the feed</p>
+        <ComicDeck images={GALLERY_COMIC_PAGES} captions={GALLERY_COMIC_CAPTIONS} descriptions={GALLERY_COMIC_ALTS} title="The Walking Bed" onOpen={noop} />
+      </div>
+      <div>
+        <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">On the post page</p>
+        <ComicDeck images={GALLERY_COMIC_PAGES} captions={GALLERY_COMIC_CAPTIONS} descriptions={GALLERY_COMIC_ALTS} title="The Walking Bed" full />
+      </div>
+      <div className="rounded-2xl bg-zinc-950 p-3">
+        <p className="mb-1 text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">Comic tab</p>
+        <ComicPagesEditor media={media} limit={50} onAddPages={noop} onRemove={noop} onMove={noop} onCaption={noop} onAlt={noop} />
+        <div className="mt-3"><ComicBorderPicker value={pickedBorder} onChange={setPickedBorder} cover={GALLERY_COMIC_PAGES[0]} title="The Walking Bed" /></div>
+      </div>
+      <div data-comic-borders>
+        <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">Border presets</p>
+        <div className="grid grid-cols-2 gap-x-2 gap-y-1">
+          {COMIC_BORDERS.map(border => (
+            <div key={border} data-comic-border-sample={border}>
+              <p className="text-center text-[11px] text-zinc-400">{border}</p>
+              <ComicDeck images={GALLERY_COMIC_PAGES} captions={GALLERY_COMIC_CAPTIONS} title="The Walking Bed" border={border} onOpen={noop} />
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/**
+ * Who to follow cover cards in every state they ship in: a cover, no cover
+ * (the avatar wash), mutual friends, follows you, no bio, and the moment after
+ * Follow is tapped. Laid out bare, as the feed and Explore carry them, so each
+ * theme's own card surface (or none, in System) is what shows.
+ */
+/**
+ * Messages rows with reactions waiting: bare moving emojis (no pill) where
+ * the unread number sits. "Land a reaction" adds one so the arrival motion
+ * (Settings > Appearance > Reactions in chat) can be seen on the row.
+ */
+function ReactionRowsGallery() {
+  const now = new Date(Date.now() - 2 * 3600_000).toISOString();
+  const [extra, setExtra] = useState(0);
+  const people: Array<Partial<DeHubUser> & { address: string }> = [
+    { address: '0x7777777777777777777777777777777777777771', username: 'ellaverse', displayName: 'Ella Verse' },
+    { address: '0x7777777777777777777777777777777777777772', username: 'xluna', displayName: 'Luna' },
+    { address: '0x7777777777777777777777777777777777777773', username: 'deepwater', displayName: 'Deep Water' },
+  ];
+  const at = new Date().toISOString();
+  const sums: ChatReactionSummary[] = [
+    { total: 1 + extra, emojis: [{ emoji: '💯', count: 1 + extra }], last: { emoji: '💯', by: people[0].address, name: 'Ella Verse', messageId: 'g1', at } },
+    { total: 4, emojis: [{ emoji: '😂', count: 2 }, { emoji: '🔥', count: 1 }, { emoji: '👍', count: 1 }], last: { emoji: '😂', by: people[1].address, name: 'Luna', messageId: 'g2', at } },
+    { total: 3, emojis: [{ emoji: '🔥', count: 3 }], last: { emoji: '🔥', by: people[2].address, name: 'Deep Water', messageId: 'g3', at } },
+  ];
+  const rows = people.map((user, i) => ({
+    id: `gallery-react-${i}`,
+    participants: [user as DeHubUser],
+    otherUser: user as DeHubUser,
+    unreadCount: 0,
+    createdAt: now,
+    updatedAt: now,
+    lastMessage: { id: `gallery-react-msg-${i}`, conversationId: `gallery-react-${i}`, sender: user as DeHubUser, content: 'See you on the stream tonight', createdAt: now } as DeHubDMMessage,
+  }));
+  const noop = () => {};
+  return (
+    <section data-page-bento data-reaction-rows-gallery className="mb-5 max-w-md rounded-3xl border border-white/10 bg-white/[0.04]">
+      <div className="flex items-center justify-between px-4 pt-4">
+        <h2 className="text-sm font-semibold">Messages: new reactions</h2>
+        <button type="button" data-land-row-reaction onClick={() => setExtra((n) => n + 1)} className="rounded-lg border border-white/10 px-3 py-1.5 text-xs">Land a reaction</button>
+      </div>
+      {rows.map((c, i) => (
+        <ConversationItem key={c.id} conversation={c} onClick={noop} isSelected={false} onDelete={noop} onBlock={noop} reactions={sums[i]} />
+      ))}
+    </section>
+  );
+}
+
+/** Name badges in the Messages list: badge on the name's baseline, then the dot. */
+function NameBadgesGallery() {
+  const now = new Date(Date.now() - 2 * 3600_000).toISOString();
+  const people: Array<Partial<DeHubUser> & { address: string }> = [
+    { address: '0x6666666666666666666666666666666666666661', username: 'ellaverse', displayName: 'Ella Verse', badgeBalance: 2_000_000 },
+    { address: '0x6666666666666666666666666666666666666662', username: 'xluna', displayName: 'Luna', badgeBalance: 600_000 },
+    { address: '0x6666666666666666666666666666666666666663', username: 'deepwater', displayName: 'Deep Water', badgeBalance: 120_000_000 },
+    { address: '0x6666666666666666666666666666666666666664', username: 'heldtier', displayName: 'Held Tier', badgeBalance: 60_000, badgeLock: { tier: 'Great White Shark', requirement: 50_000 } },
+  ];
+  const rows = people.map((user, i) => ({
+    id: `gallery-dm-${i}`,
+    participants: [user as DeHubUser],
+    otherUser: user as DeHubUser,
+    unreadCount: i === 0 ? 2 : 0,
+    createdAt: now,
+    updatedAt: now,
+    lastMessage: { id: `gallery-dm-msg-${i}`, conversationId: `gallery-dm-${i}`, sender: user as DeHubUser, content: 'See you on the stream tonight', createdAt: now } as DeHubDMMessage,
+  }));
+  const noop = () => {};
+  return (
+    <section data-page-bento data-name-badges-gallery className="mb-5 max-w-md rounded-3xl border border-white/10 bg-white/[0.04]">
+      <h2 className="px-4 pt-4 text-sm font-semibold">Messages: name badges</h2>
+      {rows.map((c) => (
+        <ConversationItem key={c.id} conversation={c} onClick={noop} isSelected={false} onDelete={noop} onBlock={noop} />
+      ))}
+    </section>
+  );
+}
+
+/**
+ * The full-screen chat at /chat: the list beside a cozy thread (grouped
+ * bubbles, one avatar and one time line per run, a day pill, the wallpaper).
+ * Laid out by hand from the real bubble, since the live chat needs a session.
+ */
+/**
+ * Right-click (computer) or hold (phone) a message: quick reactions, the
+ * actions, and who reacted. Lines here carry reactions so the "N reactions"
+ * row shows; the people come from /api/account_info/batch (DMs) and
+ * /api/livechat/reactors (live chat).
+ */
+function MessageMenuGallery() {
+  const iso = (m: number) => new Date(Date.now() - m * 60_000).toISOString();
+  const me = { _id: 'me', address: '0x0000000000000000000000000000000000000001', username: 'me' };
+  const ella = { _id: 'ella', address: '0x7777777777777777777777777777777777777771', username: 'ellaverse', displayName: 'Ella Verse' };
+  const others = ['0x7777777777777777777777777777777777777772', '0x7777777777777777777777777777777777777773', '0x7777777777777777777777777777777777777774'];
+  const msg = (id: string, mine: boolean, content: string, createdAt: string, reactions?: Record<string, string[]>): DmMessage => ({
+    _id: id, conversation: 'gallery', sender: (mine ? me : ella) as DmMessage['sender'], author: mine ? 'me' : 'other', content,
+    msgType: 'msg', mediaUrls: [], voiceDuration: null, isRead: mine, isEdited: false, editedAt: null, isForwarded: false,
+    replyTo: null, paymentStatus: null, paymentTxHash: null, tipAmount: null, tipSymbol: null, createdAt, reactions,
+  } as unknown as DmMessage);
+  const thread = [
+    { m: msg('mm-a', false, 'the new intro is unreal, who made the music?', iso(30), { '🔥': [me.address, others[0]], '❤️': [others[1]] }), mine: false },
+    { m: msg('mm-b', true, 'a friend of mine, I will send you the full track tonight', iso(24), { '🙏': [ella.address], '💯': [ella.address, others[2]] }), mine: true },
+    { m: msg('mm-c', false, 'deal. pinning this so I remember', iso(20)), mine: false },
+  ];
+  const noop = () => {};
+  // Delete opens the real choice: for me / for both (yours) or for me only (theirs).
+  const [deleting, setDeleting] = useState<{ mine: boolean } | null>(null);
+  const [live, setLive] = useState<LiveChatLineMessage[]>(() => [
+    { id: 'mm-live-1', userId: others[0], userName: 'Luna', userHandle: 'xluna', content: 'gm chat, who is watching the stream tonight?', timestamp: new Date(Date.now() - 6 * 60_000), type: 'text', reactions: { '👍': [others[1], others[2], me.address], '🚀': [others[1]] } },
+    { id: 'mm-live-2', userId: me.address, userName: 'me', userHandle: 'me', content: 'count me in, 8pm UTC', timestamp: new Date(Date.now() - 4 * 60_000), type: 'text', reactions: { '❤️': [others[0], others[2]] } },
+  ]);
+  // Edits land on the line, so the in-place edit can be tried here.
+  const editLive = (id: string, content: string) => { setLive((rows) => rows.map((r) => (r.id === id ? { ...r, content, isEdited: true } : r))); return Promise.resolve(true); };
+  return (
+    <section data-msg-menu-gallery className="mb-5 space-y-3">
+      <h2 className="text-sm font-semibold">Message menu (right-click on a computer, hold on a phone)</h2>
+      <div data-msg-menu-dm className="flex h-[22rem] flex-col overflow-hidden rounded-2xl border border-white/10">
+        <div data-chat-wallpaper className="chat-text-zone min-h-0 flex-1 overflow-y-auto px-4 pb-4 pt-6">
+          {thread.map(({ m, mine }) => (
+            <DmMessageBubble
+              key={m._id}
+              message={m}
+              isOwnMessage={mine}
+              cozy={{ first: true, last: true }}
+              currentUserAddress={me.address}
+              onReply={noop}
+              onReact={noop}
+              onRemoveReaction={noop}
+              onForward={noop}
+              onPin={noop}
+              onEdit={noop}
+              onDelete={() => setDeleting({ mine })}
+              onStartPick={noop}
+              onTogglePick={noop}
+            />
+          ))}
+        </div>
+      </div>
+      <div data-msg-menu-live className="overflow-hidden rounded-2xl border border-white/10 py-2">
+        {live.map((line) => (
+          <LiveChatLine
+            key={line.id}
+            message={line}
+            currentUserAddress={me.address}
+            onReact={noop}
+            onRemoveReaction={noop}
+            onReply={noop}
+            onEdit={editLive}
+            onDelete={noop}
+            showActions
+            onTogglePin={noop}
+            onBan={noop}
+            moderators={[others[0]]}
+          />
+        ))}
+      </div>
+      <DeleteMessageDialog
+        open={!!deleting}
+        onOpenChange={(open) => { if (!open) setDeleting(null); }}
+        canDeleteForEveryone={!!deleting}
+        oneToOne
+        peerName="Ella Verse"
+        onDelete={noop}
+      />
+    </section>
+  );
+}
+
+function FullScreenChatGallery() {
+  const ago = (min: number) => new Date(Date.now() - min * 60_000).toISOString();
+  const yesterday = (h: number) => { const d = new Date(); d.setDate(d.getDate() - 1); d.setHours(h, 12, 0, 0); return d.toISOString(); };
+  const people: Array<Partial<DeHubUser> & { address: string }> = [
+    { address: '0x7777777777777777777777777777777777777771', username: 'ellaverse', displayName: 'Ella Verse', badgeBalance: 2_000_000 },
+    { address: '0x7777777777777777777777777777777777777772', username: 'xluna', displayName: 'Luna', badgeBalance: 600_000 },
+    { address: '0x7777777777777777777777777777777777777773', username: 'deepwater', displayName: 'Deep Water' },
+    { address: '0x7777777777777777777777777777777777777774', username: 'nova', displayName: 'Nova' },
+  ];
+  const lines = ['Sending the cut now', 'See you on the stream tonight', 'haha yes', 'Voice note'];
+  const rows = people.map((user, i) => ({
+    id: `gallery-fsc-${i}`,
+    participants: [user as DeHubUser],
+    otherUser: user as DeHubUser,
+    unreadCount: i === 1 ? 3 : 0,
+    createdAt: ago(10 + i * 50),
+    updatedAt: ago(10 + i * 50),
+    lastMessage: { id: `gallery-fsc-msg-${i}`, conversationId: `gallery-fsc-${i}`, sender: user as DeHubUser, content: lines[i], createdAt: ago(10 + i * 50) } as DeHubDMMessage,
+  }));
+  const me = { _id: 'me', address: '0x0000000000000000000000000000000000000001', username: 'me' };
+  const ella = { _id: 'ella', address: people[0].address, username: 'ellaverse', displayName: 'Ella Verse' };
+  const msg = (id: string, mine: boolean, content: string, createdAt: string): DmMessage => ({
+    _id: id, conversation: 'gallery', sender: (mine ? me : ella) as DmMessage['sender'], author: mine ? 'me' : 'other', content,
+    msgType: 'msg', mediaUrls: [], voiceDuration: null, isRead: mine, isEdited: false, editedAt: null, isForwarded: false,
+    replyTo: null, paymentStatus: null, paymentTxHash: null, tipAmount: null, tipSymbol: null, createdAt,
+  } as unknown as DmMessage);
+  const thread: Array<{ m: DmMessage; mine: boolean; first: boolean; last: boolean; day?: boolean }> = [
+    { m: msg('a', false, 'did you finish the edit?', yesterday(21)), mine: false, first: true, last: true, day: true },
+    { m: msg('b', true, 'almost, colour pass left', yesterday(21)), mine: true, first: true, last: true },
+    { m: msg('c', false, 'morning!', ago(14)), mine: false, first: true, last: false, day: true },
+    { m: msg('d', false, 'the intro is perfect', ago(13)), mine: false, first: false, last: false },
+    { m: msg('e', false, 'can you send the full cut when it is ready?', ago(12)), mine: false, first: false, last: true },
+    { m: msg('f', true, 'yes, rendering now', ago(9)), mine: true, first: true, last: false },
+    { m: msg('g', true, 'Sending the cut now', ago(8)), mine: true, first: false, last: true },
+  ];
+  const noop = () => {};
+  const list = (
+    <div className="flex h-full flex-col">
+      <div className="px-4 pb-2 pt-4 text-base font-semibold">Chat</div>
+      <div className="min-h-0 flex-1 overflow-y-auto">
+        {rows.map((c, i) => (
+          <ConversationItem key={c.id} conversation={c} onClick={noop} isSelected={i === 0} onDelete={noop} onBlock={noop} />
+        ))}
+      </div>
+    </div>
+  );
+  const chat = (
+    <div data-chat-wallpaper className="chat-text-zone h-full overflow-y-auto px-4 pb-4">
+      <div className="mx-auto w-full max-w-[47.5rem]">
+        {thread.map(({ m, mine, first, last, day }) => (
+          <div key={m._id}>
+            {day && <CozyDayPill iso={m.createdAt} />}
+            <DmMessageBubble message={m} isOwnMessage={mine} cozy={{ first, last }} currentUserAddress={me.address} />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+  return (
+    <section data-fullscreen-chat-gallery className="mb-5 space-y-3">
+      <h2 className="text-sm font-semibold">Full-screen chat (/chat)</h2>
+      <FullScreenChatShell inline chatOpen list={list} chat={chat} />
+      <FullScreenChatShell inline chatOpen={false} list={list} chat={null} />
+      <h3 className="text-sm font-semibold">Send in their language (you type Turkish, they read English)</h3>
+      <div data-translate-out-gallery className="grid gap-3 sm:grid-cols-2">
+        {[
+          { label: 'You (Turkish)', rows: [
+            { m: { ...msg('to-a', false, 'Selam! Bu akşam yayına geliyor musun?', ago(6)), original: { content: 'Hey! Are you coming to the stream tonight?', lang: 'tr' } } as DmMessage, mine: false },
+            { m: { ...msg('to-b', true, 'Yes, I will be there at nine', ago(5)), original: { content: 'Evet, dokuzda orada olacağım', lang: 'en' } } as DmMessage, mine: true },
+          ] },
+          { label: 'Them (English)', rows: [
+            { m: { ...msg('to-c', true, 'Selam! Bu akşam yayına geliyor musun?', ago(6)), original: { content: 'Hey! Are you coming to the stream tonight?', lang: 'tr' } } as DmMessage, mine: true },
+            { m: { ...msg('to-d', false, 'Yes, I will be there at nine', ago(5)), original: { content: 'Evet, dokuzda orada olacağım', lang: 'en' } } as DmMessage, mine: false },
+          ] },
+        ].map(side => (
+          <div key={side.label} className="overflow-hidden rounded-2xl border border-white/10">
+            <div className="px-4 pt-3 text-xs text-zinc-400">{side.label}</div>
+            <div data-chat-wallpaper className="chat-text-zone px-4 pb-4">
+              {side.rows.map(({ m, mine }) => (
+                <DmMessageBubble key={m._id} message={m} isOwnMessage={mine} cozy={{ first: true, last: true }} currentUserAddress={me.address} />
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+      <h3 className="text-sm font-semibold">Opened view-once photo (pill + camera reply)</h3>
+      <div data-opened-photo-gallery className="grid gap-3 sm:grid-cols-2">
+        {[
+          { label: 'Got it (camera to reply)', rows: [
+            { m: msg('op-a', false, 'look what I found', ago(7)), mine: false },
+            { m: { ...msg('op-b', false, '', ago(6)), isDeleted: true, destruct: { mode: 'view', marker: true, kind: 'image', openedAt: ago(4) } } as unknown as DmMessage, mine: false },
+            { m: { ...msg('op-c', true, 'haha here is mine', ago(2)), replyTo: { _id: 'op-b', content: '', msgType: 'msg', mediaUrls: [], voiceDuration: null, sender: ella, destruct: { mode: 'view', kind: 'image', openedAt: ago(4), marker: true } } } as unknown as DmMessage, mine: true },
+          ] },
+          { label: 'Sent it (seen)', rows: [
+            { m: { ...msg('op-d', true, '', ago(6)), isDeleted: true, destruct: { mode: 'view', marker: true, kind: 'image', openedAt: ago(4) } } as unknown as DmMessage, mine: true },
+            { m: { ...msg('op-e', true, '', ago(5)), isDeleted: true, destruct: { mode: 'open', marker: true, kind: 'video', openedAt: ago(3) } } as unknown as DmMessage, mine: true },
+          ] },
+        ].map(side => (
+          <div key={side.label} data-msg-phone-b="" className="overflow-hidden rounded-2xl border border-white/10">
+            <div className="px-4 pt-3 text-xs text-zinc-400">{side.label}</div>
+            <div data-chat-wallpaper className="chat-text-zone px-4 pb-4">
+              {side.rows.map(({ m, mine }) => (
+                <DmMessageBubble key={m._id} message={m} isOwnMessage={mine} cozy={{ first: true, last: true }} currentUserAddress={me.address} onCameraReply={noop} />
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+      <h3 className="text-sm font-semibold">Picking messages (Select, then click more)</h3>
+      <div data-msg-select-gallery className="flex h-[30rem] flex-col overflow-hidden rounded-2xl border border-white/10">
+        <div data-chat-wallpaper className="chat-text-zone min-h-0 flex-1 overflow-y-auto px-4 pb-4">
+          {thread.map(({ m, mine, first, last, day }) => (
+            <div key={m._id}>
+              {day && <CozyDayPill iso={m.createdAt} />}
+              <DmMessageBubble message={m} isOwnMessage={mine} cozy={{ first, last }} currentUserAddress={me.address} selecting picked={['c', 'e', 'g'].includes(m._id)} onTogglePick={noop} onStartPick={noop} />
+            </div>
+          ))}
+        </div>
+        <MessageSelectBar count={3} ownCount={1} onCopy={noop} onForward={noop} onDelete={noop} onCancel={noop} />
+      </div>
+      <h3 className="text-sm font-semibold">Messages icon ringing + unread number</h3>
+      <div data-messages-ring-gallery className="flex flex-wrap items-center gap-5 rounded-2xl border border-white/10 p-5">
+        {[0, 1, 3, 8, 20].map(count => (
+          <div key={count} className="flex flex-col items-center gap-3 text-xs text-zinc-400">
+            <MessagesNavGlyph unread={count} className="h-6 w-6 text-white" />
+            <UnreadCountChip count={count} />
+            <span>{formatCount(count)} unread</span>
+          </div>
+        ))}
+      </div>
+      <h3 className="text-sm font-semibold">Unread marker + jump button</h3>
+      <div data-unread-jump-gallery className="grid gap-3 sm:grid-cols-2">
+        {[{ up: true, count: 3 }, { up: false, count: 2 }].map(({ up, count }) => (
+          <div key={String(up)} className="relative h-[26rem] overflow-hidden rounded-2xl border border-white/10">
+            <div data-chat-wallpaper className="chat-text-zone h-full overflow-y-auto px-4 pb-4">
+              {thread.map(({ m, mine, first, last, day }) => (
+                <div key={m._id}>
+                  {day && <CozyDayPill iso={m.createdAt} />}
+                  {m._id === 'c' && <UnreadMarker count={3} />}
+                  <DmMessageBubble message={m} isOwnMessage={mine} cozy={{ first, last }} currentUserAddress={me.address} />
+                </div>
+              ))}
+            </div>
+            <UnreadJumpButton up={up} count={count} onClick={noop} className="absolute bottom-4 right-4 z-10" />
+          </div>
+        ))}
+      </div>
+      <h3 className="text-sm font-semibold">Scroll up: the button counts every line below you</h3>
+      <LinesBelowDemo />
+    </section>
+  );
+}
+
+/** A long chat (1,500 lines) wired to the real scroll-down count and glide. */
+function LinesBelowDemo() {
+  const ref = useRef<HTMLDivElement>(null);
+  const [below, setBelow] = useState(0);
+  const ids = useMemo(() => Array.from({ length: 1500 }, (_, i) => `demo-${i}`), []);
+  const refresh = () => {
+    const el = ref.current;
+    if (el) setBelow(countLinesBelow(el, ids, (id) => el.querySelector(`[data-demo-line="${id}"]`)));
+  };
+  useEffect(() => {
+    const el = ref.current;
+    if (el) el.scrollTop = el.scrollHeight;
+  }, []);
+  return (
+    <div data-lines-below-gallery className="relative h-[26rem] overflow-hidden rounded-2xl border border-white/10">
+      <div ref={ref} onScroll={refresh} data-chat-wallpaper className="chat-text-zone h-full overflow-y-auto px-4 py-2">
+        {ids.map((id, i) => (
+          <div key={id} data-demo-line={id} className="py-1 text-sm text-zinc-300">Line {i + 1}</div>
+        ))}
+      </div>
+      <UnreadJumpButton show={below > 0} up={false} count={below} onClick={() => ref.current && glideToBottom(ref.current)} className="absolute bottom-4 right-4 z-10" />
+    </div>
+  );
+}
+
+/** "Catch me up" in group chats: the button beside Search, and the recap DM it sends. */
+function CatchUpGallery() {
+  const me = { _id: 'me', address: '0x0000000000000000000000000000000000000001', username: 'jules_p' };
+  const bot = { _id: 'assistant', address: '0xea0fe14398b96f3ae97f222a6cf0f933c1ccf61c', username: 'assistant', displayName: 'Riftn Assistant' };
+  const recap = [
+    'Catch up: Riftn Builders\nhttps://riftn.com/app/communities/riftn-builders?tab=chat',
+    'Last 24 hours · 1.2K messages from 38 people',
+    'Main topics\n• @kai_dev walked everyone through the new Moments viewer list\n• @ellaverse asked for feedback on the meetup poster',
+    'Decisions and announcements\n• Meetup moved to Friday 18:00 (pinned by @mal)',
+    'Links shared\n• https://riftn.com/arcade/chestard (@kai_dev)',
+    'For you\n• @ellaverse mentioned you, 14:05: "@jules_p can you check the poster?"',
+  ].join('\n\n');
+  const m = {
+    _id: 'recap', conversation: 'gallery-recap', sender: bot, author: 'other', content: recap,
+    msgType: 'msg', mediaUrls: [], voiceDuration: null, isRead: false, isEdited: false, editedAt: null, isForwarded: false,
+    replyTo: null, paymentStatus: null, paymentTxHash: null, tipAmount: null, tipSymbol: null, createdAt: new Date().toISOString(),
+  } as unknown as DmMessage;
+  return (
+    <section data-catch-up-gallery className="mb-5 space-y-3">
+      <h2 className="text-sm font-semibold">Catch me up (group chats)</h2>
+      <div data-catch-up-toolbar-gallery className="max-w-md rounded-2xl border border-white/10 p-2">
+        <div className="px-1 pb-1 flex items-center gap-1">
+          <CatchUpMenu communityId="00000000-0000-0000-0000-000000000000" walletAddress={me.address} />
+          <button type="button" className="flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] text-zinc-500 hover:text-white hover:bg-white/[0.04] transition-colors">
+            <Search className="w-3.5 h-3.5" />
+            Search
+          </button>
+        </div>
+      </div>
+      <div data-catch-up-dm-gallery className="max-w-md rounded-2xl border border-white/10">
+        <div data-chat-wallpaper className="chat-text-zone px-4 py-4">
+          <DmMessageBubble message={m} isOwnMessage={false} cozy={{ first: true, last: true }} currentUserAddress={me.address} />
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function FollowCardsGallery() {
+  const { t: _copy } = _useCopy();
+  const abs = (src: string) => new URL(src, window.location.origin).href;
+  const users: SuggestedAccount[] = [
+    { address: '0x1111111111111111111111111111111111111111', username: 'ellaverse', displayName: 'Ella Verse', avatarImageUrl: abs(followAvatarEllaverse), coverImageUrl: abs(followCoverEllaverse), aboutMe: 'Film photographer. Golden hour every day, no filters, no regrets.', followers: 12400, badgeBalance: 2_000_000, reason: 'followed_by_people_you_know', mutualConnections: [{ address: '0x2222222222222222222222222222222222222222', displayName: 'Kai', avatarImageUrl: abs(followAvatarKai) }, { address: '0x3333333333333333333333333333333333333333', displayName: 'Luna', avatarImageUrl: abs(followAvatarLuna) }] },
+    { address: '0x2222222222222222222222222222222222222222', username: '0xkai', displayName: '0xKai', avatarImageUrl: abs(followAvatarKai), aboutMe: 'Lo-fi beats and late night streams. Live most Fridays.', followers: 3100, badgeBalance: 0, reason: 'follows_you', followsYou: true },
+    { address: '0x3333333333333333333333333333333333333333', username: 'xluna', displayName: 'Luna', avatarImageUrl: abs(followAvatarLuna), coverImageUrl: abs(followCoverLuna), aboutMe: '', followers: 51200, badgeBalance: 600_000, reason: 'suggested' },
+    { address: '0x4444444444444444444444444444444444444444', username: 'riooo', displayName: 'Rio', avatarImageUrl: abs(followAvatarRio), aboutMe: 'Travel shorts from 40 countries and counting.', followers: 890, badgeBalance: 0, reason: 'engagement_overlap' },
+    { address: '0x5555555555555555555555555555555555555555', username: 'nova', displayName: 'Nova', aboutMe: '', followers: 42, badgeBalance: 0, reason: 'suggested' },
+  ];
+  const noop = () => {};
+  return (
+    <section data-follow-cards-gallery className="mb-5">
+      <h2 className="mb-3 text-sm font-semibold">{_copy("copy.a94bfc8a15e8", { defaultValue: "Follow suggestions" })}</h2>
+      <div data-follow-cards className="-mx-4">
+        <div className="fc-rail flex overflow-x-auto scrollbar-hide px-4 pb-2">
+          {users.map((user, i) => (
+            <FollowCoverCard key={user.address} user={user} phase={i === 3 ? 'following' : undefined} onOpen={noop} onFollow={noop} onDismiss={noop} />
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/** The assistant's confirm cards: react to many posts, follow, chat reading, running and done. */
+function AssistantCardsGallery() {
+  const jules = { address: '0x1111111111111111111111111111111111111111', username: 'jules', displayName: 'Jules', avatar: null };
+  const base = { result: null, confirmBy: new Date(Date.now() + 15 * 60_000).toISOString() };
+  const cards: AssistantAction[] = [
+    { ...base, id: 'aaaaaaaaaaaaaaaaaaaaaaa1', kind: 'react', status: 'pending', preview: { choice: 'love', count: 118, alreadyReacted: 4, totalPosts: 122, author: jules } },
+    { ...base, id: 'aaaaaaaaaaaaaaaaaaaaaaa2', kind: 'react', status: 'running', preview: { choice: 'fitting', count: 118, author: jules }, result: { done: 46, total: 118 } },
+    { ...base, id: 'aaaaaaaaaaaaaaaaaaaaaaa3', kind: 'react', status: 'done', preview: { choice: 'fitting', count: 118, author: jules }, result: { done: 118, total: 118, added: 118, used: { love: 61, like: 40, lol: 17 } } },
+    { ...base, id: 'aaaaaaaaaaaaaaaaaaaaaaa4', kind: 'follow', status: 'pending', preview: { count: 2, people: [jules, { address: '0x2222222222222222222222222222222222222222', username: 'xluna', displayName: 'Luna', avatar: null }] } },
+    { ...base, id: 'aaaaaaaaaaaaaaaaaaaaaaa5', kind: 'chat_access', status: 'pending', preview: { allow: true } },
+    {
+      ...base, id: 'aaaaaaaaaaaaaaaaaaaaaaa6', kind: 'schedule_posts', status: 'pending',
+      preview: {
+        count: 4, gapMinutes: 1440,
+        items: [0, 1, 2, 3].map((i) => ({
+          text: ['Sunday market haul', '', 'Golden hour from the roof', 'Last one from the trip'][i],
+          photo: i === 1 ? null : `https://picsum.photos/seed/plan${i}/120/120`,
+          at: i === 0 ? null : new Date(Date.now() + i * 86_400_000).toISOString(),
+        })),
+      },
+    },
+    { ...base, id: 'aaaaaaaaaaaaaaaaaaaaaaa7', kind: 'schedule_posts', status: 'done', preview: { count: 20 }, result: { done: 20, total: 20, ok: 20, failed: 0 } },
+    { ...base, id: 'aaaaaaaaaaaaaaaaaaaaaaa8', kind: 'post_spacing', status: 'pending', preview: { gapMinutes: 60, before: 0 } },
+  ];
+  return (
+    <section data-assistant-cards-gallery className="mb-5">
+      <h2 className="mb-3 text-sm font-semibold">Assistant cards</h2>
+      <div className="grid gap-3 sm:grid-cols-2">
+        {cards.map((card) => (
+          <AssistantActionCard key={card.id} actionId={card.id} initial={card} />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/** ?sounds=1 — free songs: the picker (list or &soundstep=part) and the credit on posts. */
+function SoundsGallery({ step, library }: { step: string | null; library: string | null }) {
+  const [open, setOpen] = useState(true);
+  const song = 'https://api.audius.co/v1/tracks/ZlwB7/stream?app_name=Riftn';
+  const credited = withSoundWindow(song, { start: 42, end: 72 }, {
+    source: 'audius', license: 'Audius Open Music License',
+    licenseUrl: 'https://audius.org/open-music-license.pdf', page: 'https://audius.co/arly/instrumental-chill',
+  });
+  const picked: SoundCandidate = {
+    key: 'audius:ZlwB7', library: 'audius', url: song, title: 'Instrumental chill', creator: 'Arly',
+    tokenId: '0', duration: 138, pageUrl: 'https://audius.co/arly/instrumental-chill',
+    license: 'Audius Open Music License', licenseUrl: 'https://audius.org/open-music-license.pdf',
+  };
+  const idle = { playing: false, loading: false, error: false, toggle: () => setOpen(true) };
+  return (
+    <section data-sounds-gallery className="mb-5 space-y-4 rounded-2xl border border-white/10 bg-background/80 p-4">
+      <h2 className="text-lg font-semibold">Free songs</h2>
+      <div className="flex flex-wrap items-center gap-3">
+        <SoundtrackControl title="Instrumental chill" creator="Arly" url={credited} layout="inline" {...idle} />
+        <button type="button" onClick={() => setOpen(true)} className="rounded-full bg-white/10 px-3 py-1.5 text-xs">Open picker</button>
+      </div>
+      <div className="relative h-40 max-w-sm overflow-hidden rounded-2xl bg-gradient-to-br from-fuchsia-700 to-sky-700">
+        <div className="absolute inset-x-0 bottom-0">
+          <SoundtrackControl title="Instrumental chill" creator="Arly" url={credited} {...idle} playing />
+        </div>
+      </div>
+      <SoundPicker
+        isOpen={open}
+        onClose={() => setOpen(false)}
+        onSelect={() => {}}
+        initialPicked={step === 'part' ? picked : undefined}
+        initialLibrary={library === 'riftn' || library === 'commons' ? library : 'audius'}
+      />
+    </section>
+  );
+}
+
+/** ?spotify=1 — Spotify cards in a post and a chat, and the corner player. */
+function SpotifyGallery() {
+  const open = useSpotifyPlayer().current !== null;
+  const links = [
+    'https://open.spotify.com/track/4uLU6hMCjMI75M1A2tKUQC',
+    'https://open.spotify.com/album/4LH4d3cOWNNsVw41Gqt2kv',
+    'https://open.spotify.com/episode/4rOoJ6Egrf8K2IrywzwOMk',
+  ];
+  return (
+    <section data-spotify-gallery className="mb-5 space-y-4 rounded-2xl border border-white/10 bg-background/80 p-4">
+      <h2 className="text-lg font-semibold">Spotify</h2>
+      <div className="grid items-start gap-5 lg:grid-cols-2">
+        <div className="min-w-0 space-y-3"><h3>Post</h3>{links.map((url) => <FeedLinkPreviews key={url} text={url} />)}</div>
+        <div className="min-w-0 space-y-3"><h3>Chat</h3>{links.slice(0, 1).map((url) => <ChatLinkPreviews key={url} content={url} />)}</div>
+      </div>
+      <SpotifyGridGallery />
+      {open && <RadioPlayerProvider><SpotifyMiniPlayer /></RadioPlayerProvider>}
+    </section>
+  );
+}
+
+function SpotifyGridGallery() {
+  const qc = useQueryClient();
+  const [ready] = useState(() => {
+    for (const preview of GALLERY_SPOTIFY_PREVIEWS) qc.setQueryData(['grid-link-preview', preview.url], preview);
+    return true;
+  });
+  const entries = [
+    pillText('9116', 'On repeat all week https://open.spotify.com/track/4uLU6hMCjMI75M1A2tKUQC'),
+    pillText('9117', 'Still the best album ever made https://open.spotify.com/album/4LH4d3cOWNNsVw41Gqt2kv'),
+    pillVideo('sp-video', 'Night ride through the city', pillArtB),
+  ] as unknown as MixedGridEntry[];
+  return (
+    <div className="space-y-2" data-spotify-grid-gallery>
+      <h3>Profile grid</h3>
+      <AuthContext.Provider value={GALLERY_AUTH}>
+        {ready && <div className="max-w-[360px]"><ProfileMixedGrid entries={entries} /></div>}
+      </AuthContext.Provider>
+    </div>
+  );
+}
+
+function PredictionGallery() {
+  const { t: _copy } = _useCopy();
+  const [text, setText] = useState('https://polymarket.com/event/will-the-us-confirm-that-aliens-exist-before-2027');
+  return (
+    <section data-prediction-gallery className="mb-5 space-y-4 rounded-2xl border border-white/10 bg-background/80 p-4">
+      <h2 className="text-lg font-semibold">{_copy("copy.7ac5be993252", { defaultValue: "Prediction sharing" })}</h2>
+      <label className="block text-sm">{_copy("copy.ae3e6542a1b6", { defaultValue: "Market link" })}<textarea value={text} onChange={event => setText(event.target.value)} className="mt-2 min-h-20 w-full rounded-lg border border-white/20 bg-transparent p-3" />
+      </label>
+      <div className="grid items-start gap-5 lg:grid-cols-3">
+        <div><h3>{_copy("copy.ebf12ef47cf5", { defaultValue: "Draft" })}</h3><LinkPreviews text={text} /></div>
+        <div><h3>{_copy("copy.396c3cb18f81", { defaultValue: "Feed" })}</h3><FeedLinkPreviews text={text} /></div>
+        <div><h3>{_copy("copy.ccca18175753", { defaultValue: "Conversation" })}</h3><ChatLinkPreviews content={text} /></div>
+      </div>
+    </section>
+  );
+}
+
+/** An author's thread under their post, as the author sees it (Add to thread, Reorder) and as a reader does. */
+const GALLERY_THREAD_AUTHOR = '0x9a11e2y0000000000000000000000000000000a1';
+const GALLERY_THREAD_ROWS = [
+  'First, the why: most creator tools take a cut of every tip. Ours takes none.',
+  'Second, the how: tips settle on chain in seconds, straight to your wallet.',
+  'Third, what is next: tipped comments with a message, already live on Home.',
+].map((content, i) => ({
+  id: String(880001 + i),
+  tokenId: 990001,
+  address: GALLERY_THREAD_AUTHOR,
+  content,
+  imageUrl: null,
+  replyIds: [],
+  parentId: null,
+  createdAt: new Date(Date.now() - (3 - i) * 3_600_000).toISOString(),
+  updatedAt: new Date(Date.now() - (3 - i) * 3_600_000).toISOString(),
+  likeCount: 12 - i * 3,
+  writor: { username: 'marco_v', displayName: 'Marco V' },
+}));
+const GALLERY_THREAD_AUTHOR_AUTH = {
+  isAuthenticated: true,
+  walletAddress: GALLERY_THREAD_AUTHOR,
+  user: null,
+  openLoginModal: () => {},
+} as unknown as AuthContextType;
+
+function AuthorThreadGallery() {
+  const qc = useQueryClient();
+  const [ready] = useState(() => {
+    for (const viewer of [GALLERY_THREAD_AUTHOR.toLowerCase(), '']) {
+      qc.setQueryData(['comments', '990001', 'author-thread', viewer], GALLERY_THREAD_ROWS);
+    }
+    return true;
+  });
+  const post = {
+    ...GALLERY_TEXT_POSTS[0],
+    id: '990001',
+    content: 'Why we built tipping with zero fees. A thread:',
+    author: { ...GALLERY_TEXT_POSTS[0].author, id: GALLERY_THREAD_AUTHOR },
+  } as GalleryTextPost;
+  if (!ready) return null;
+  return (
+    <section data-author-thread-gallery className="mb-5 grid gap-4 md:grid-cols-2">
+      {([['author', GALLERY_THREAD_AUTHOR_AUTH], ['reader', GALLERY_AUTH]] as const).map(([who, auth]) => (
+        <AuthContext.Provider key={who} value={auth}>
+          <div data-author-thread-view={who} className="rounded-xl border border-white/[0.12] bg-white/[0.03] p-3">
+            <h2 className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-zinc-500">{who}</h2>
+            <GalleryPostCard
+              post={post}
+              threadSlot={<AuthorThread tokenId="990001" authorAddress={GALLERY_THREAD_AUTHOR} />}
+            />
+          </div>
+        </AuthContext.Provider>
+      ))}
+    </section>
+  );
+}
+
+// The Requests / proposal comment box, signed in, with an empty thread: type
+// into it to check long text uses the whole width and the buttons drop below.
+function ThreadedComposerGallery() {
+  const labels = useMemo<ThreadedCommentsLabels>(() => ({
+    addComment: 'Add a comment...', writeReply: 'Write a reply...', reply: 'Reply',
+    replyingTo: (name) => `Replying to ${name}`, edited: 'edited', empty: 'No comments yet',
+    showMoreReplies: (count) => `Show ${formatCount(count)} more replies`,
+  }), []);
+  const media = useMemo(() => ({ upload: () => Promise.reject(new Error('gallery')) }), []);
+  const noop = () => Promise.resolve();
+  // One of your own comments with a reply of yours under it: tap the words
+  // to edit in place and check the typing line shows in every theme.
+  const [own, setOwn] = useState(() => {
+    const row = (id: string, content: string, parent: string | null) => ({
+      id, wallet_address: GALLERY_THREAD_AUTHOR, username: 'you', avatar: null, content,
+      created_at: new Date(Date.now() - 20 * 60_000).toISOString(), parent_id: parent, updated_at: null,
+      reactionCounts: {}, likes: 0, dislikes: 0, myReaction: null,
+    });
+    return [{ comment: row('gallery-own-1', 'Can the live chat keep my place when I scroll up?', null), replies: [row('gallery-own-2', 'Same on the app please', 'gallery-own-1')] }];
+  });
+  const editOwn = (comment: { id: string }, content: string) => {
+    setOwn((threads) => threads.map((t) => ({
+      comment: t.comment.id === comment.id ? { ...t.comment, content } : t.comment,
+      replies: t.replies.map((r) => (r.id === comment.id ? { ...r, content } : r)),
+    })));
+    return Promise.resolve();
+  };
+  return (
+    <AuthContext.Provider value={GALLERY_THREAD_AUTHOR_AUTH}>
+      <section data-threaded-own-gallery className="mb-5 max-w-2xl rounded-xl border border-white/[0.12] bg-white/[0.03] p-3">
+        <ThreadedComments
+          draftScope="gallery:threaded-own"
+          threads={own}
+          isLoading={false}
+          isError={false}
+          isFetching={false}
+          onRetry={() => {}}
+          entityAuthorAddress={GALLERY_THREAD_AUTHOR}
+          labels={labels}
+          busy={false}
+          submitting={false}
+          onSubmit={noop}
+          onEdit={editOwn}
+          onDelete={() => {}}
+          onReact={() => {}}
+        />
+      </section>
+      <section data-threaded-composer-gallery className="mb-5 max-w-2xl rounded-xl border border-white/[0.12] bg-white/[0.03] p-3">
+        <ThreadedComments
+          draftScope="gallery:threaded-composer"
+          threads={[]}
+          isLoading={false}
+          isError={false}
+          isFetching={false}
+          onRetry={() => {}}
+          entityAuthorAddress={GALLERY_THREAD_AUTHOR}
+          labels={labels}
+          busy={false}
+          submitting={false}
+          media={media}
+          onSubmit={noop}
+          onEdit={noop}
+          onDelete={() => {}}
+          onReact={() => {}}
+        />
+      </section>
+    </AuthContext.Provider>
+  );
+}
+
+// The gallery sits outside the wallet providers; a signed-out stub is all the
+// action row needs to render.
+const GALLERY_AUTH = {
+  isAuthenticated: false,
+  walletAddress: null,
+  user: null,
+  openLoginModal: () => {},
+} as unknown as AuthContextType;
+
+import { ComicDeck } from '@/components/app/comic/ComicDeck';
+import { PostUtilityMenuItems } from '@/components/app/cards/PostUtilityMenuItems';
+import { FeedPresetsRow } from '@/components/app/feeds/FeedFilterLine';
+import { NamedFeedsRow } from '@/components/app/feeds/NamedFeedsRow';
+import type { HomePostTypeValue } from '@/lib/feed-utils';
+import { NewPostsBead as FeedDrawer } from '@/components/app/navigation/NewPostsBead';
+import { UsernameReserve } from '@/components/app/profile/UsernameReserve';
+import { ComicPagesEditor } from '@/features/post/components/ComicPagesEditor';
+import { ComicBorderPicker } from '@/features/post/components/ComicBorderPicker';
+import { COMIC_BORDERS, type ComicBorder } from '@/lib/comic-borders';
+import { LoginLookSetting } from '@/components/app/settings/LoginLookSetting';
+import { ArrivalLookSetting } from '@/components/app/settings/ArrivalLookSetting';
+import { formatCount } from '@/lib/format-count';
+import { PetCard } from '@/components/app/pet/PetCard';
+import { PetSprite } from '@/components/app/pet/PetSprite';
+import StreamPetCorner from '@/components/app/pet/StreamPetCorner';
+import { PetPanel, PetHatch } from '@/components/app/live/studio/PetPanel';
+import type { StreamPet } from '@/lib/api/dehub/stream-pet';
+import { CoStreamInviteCard } from '@/components/app/live/costream/CoStreamInviteCard';
+import { CoStreamAskButton } from '@/components/app/live/costream/CoStreamAskButton';
+import { coStreamViewerKey } from '@/components/app/live/costream/use-costream-viewer';
+const BadgeShowcase = lazy(() => import('@/components/app/badge-showcase/BadgeShowcase'));
+
+// The standard public BIP-39 test vector: owns nothing, safe to show.
+const SAMPLE_PHRASE = 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about';
+
+const SAMPLE_ARTICLE = {
+  get title() { return _translateCopy("copy.b91b0545d5a2", { defaultValue: "Why we moved our streams on-chain" }); },
+  summary: 'After two years of takedowns and payout freezes, here is what changed when our audience started paying us directly.',
+  cover: '/media/ai-creator-studio-banner-r2.jpg',
+  body: [
+    'The first time a platform froze our payouts, we lost three weeks of income over a copyright claim that turned out to be wrong.',
+    'Moving to Riftn was not about crypto. It was about owning the relationship with the people who watch us every night.',
+    '![Our first night streaming on Riftn, 214 people in chat](/media/fig-athlete-who-owns-the-fan-riftn.jpg#w=1200&h=630)',
+    '# What actually changed',
+    'Tips land in our wallet the moment they are sent. **Subscribers unlock posts with a tier**, not an algorithm.',
+    '> We stopped asking permission to get paid.',
+    '# The numbers after 90 days',
+    '- Revenue per viewer up 34%\n- Churn down for the first time in a year\n- Zero frozen payouts',
+    '![](/media/fig-chains-bignames-riftn.jpg#w=2400&h=1260)',
+    '# What we would do differently',
+    'We would have moved our [back catalogue](https://riftn.com) on day one, instead of waiting to see if the audience followed.',
+  ].join('\n\n'),
+};
+
+function ArticleGallery({ onAction }: { onAction: () => void }) {
+  const { t: _copy } = _useCopy();
+  const [title, setTitle] = useState(SAMPLE_ARTICLE.title);
+  const [summary, setSummary] = useState('');
+  const [body, setBody] = useState(SAMPLE_ARTICLE.body);
+  return (
+    <section data-article-gallery className="mb-5 grid gap-5 lg:grid-cols-2">
+      <div className="space-y-5">
+        <div data-feed-item className="rounded-2xl border border-white/10 bg-white/[0.04] p-3">
+          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">{_copy("copy.572fbffbb7a7", { defaultValue: "Article in the feed" })}</p>
+          <ArticleFeedCover title={SAMPLE_ARTICLE.title} body={SAMPLE_ARTICLE.body} coverUrl={SAMPLE_ARTICLE.cover} onOpen={onAction}>
+            <p className="article-ink-2 text-[15.25px] leading-[22.5px]">{SAMPLE_ARTICLE.summary}</p>
+          </ArticleFeedCover>
+        </div>
+        <div data-feed-item className="rounded-2xl border border-white/10 bg-white/[0.04] p-3">
+          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">{_copy("copy.88bd6a8020c0", { defaultValue: "Article without a cover" })}</p>
+          <ArticleFeedCover title={SAMPLE_ARTICLE.title} body={SAMPLE_ARTICLE.body} onOpen={onAction}>
+            <p className="article-ink-2 text-[15.25px] leading-[22.5px]">{SAMPLE_ARTICLE.summary}</p>
+          </ArticleFeedCover>
+        </div>
+        <div data-feed-item className="flex h-[720px] flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04]">
+          <p className="px-4 pt-3 text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">{_copy("copy.3ab556ac9956", { defaultValue: "Writing an article" })}</p>
+          <ArticleComposer
+            title={title} setTitle={setTitle} summary={summary} setSummary={setSummary} body={body} setBody={setBody}
+            coverPreview={SAMPLE_ARTICLE.cover} onCoverChange={onAction} onOpenFreeImages={onAction} onSaveDraft={onAction} onPublish={onAction}
+            formReady isPosting={false} uploadProgress={0} mintAwaitingWallet={false} onAbandonMint={onAction}
+          />
+        </div>
+      </div>
+      <div data-feed-item className="rounded-2xl border border-white/10 bg-white/[0.04] p-3" data-article-reader-sample>
+        <p className="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">{_copy("copy.fd5dcf90c053", { defaultValue: "Reading an article" })}</p>
+        <ArticleReader
+          title={SAMPLE_ARTICLE.title} body={SAMPLE_ARTICLE.body} coverUrl={SAMPLE_ARTICLE.cover}
+          createdAt="2026-09-28T12:00:00Z" shareUrl="https://riftn.com/app/post/1" onComment={onAction} onTip={onAction}
+        >
+          <p>{SAMPLE_ARTICLE.summary}</p>
+        </ArticleReader>
+      </div>
+    </section>
+  );
+}
+
+const SAMPLE_REACTIONS: ReactionCounts = { like: 19, love: 4, hot: 2, lol: 1, dislike: 3 };
+/** A post whose dislikes outnumber its likes: the thumb shows 👎 and the dislike total. */
+const SAMPLE_DISLIKED_REACTIONS: ReactionCounts = { like: 2, love: 1, dislike: 9 };
+
+/**
+ * A post's action row with its reaction tray: hover (desktop) or hold (touch)
+ * the thumbs-up. One row as a stranger sees it, one as somebody who disliked
+ * the post — the thumb wears their 👎, since there is no thumbs-down button.
+ */
+const SAMPLE_LIVE_NOW: LiveNowItem[] = [
+  { kind: 'stream', id: '1', title: 'Late night beat making', wallet: '0xmaya', username: 'maya', avatar: galleryAvatar, count: '214', followed: true, size: 214, cover: pillArtA, displayName: 'Maya', badgeBalance: 140000 },
+  { kind: 'stage', id: '2', title: 'Tokens weekly AMA', wallet: '0xdehub', username: 'dehub', avatar: null, count: '88', followed: true, size: 88 },
+  { kind: 'stream', id: '3', title: 'Ranked grind to Diamond', wallet: '0xkai', username: 'kai', avatar: null, count: '41', followed: false, size: 41, cover: pillArtB, displayName: 'Kai', badgeBalance: 2500000 },
+  { kind: 'stage', id: '4', title: 'Builders hangout', wallet: '0xsora', username: 'sora', avatar: null, count: '12', followed: false, size: 12 },
+  { kind: 'stream', id: '5', title: 'Painting a city at dusk', wallet: '0xjun', username: 'jun', avatar: null, count: '9', followed: false, size: 9 },
+];
+
+/**
+ * The effects a live person's avatar wears, at the sizes they ship in: feed
+ * header (36), side panel Live tab (32), post page (40), chat list (48) and
+ * profile (112), with a non-live avatar for comparison.
+ */
+function LiveAvatarsGallery() {
+  const { t: _copy } = _useCopy();
+  const face = (className: string, letter: string) => (
+    <Avatar className={className}>
+      <AvatarFallback className={`bg-gradient-to-br from-orange-300 to-violet-700 font-semibold text-white ${className.includes('rounded-md') ? 'rounded-md' : ''}`}>{letter}</AvatarFallback>
+    </Avatar>
+  );
+  return (
+    <section data-page-bento data-live-avatars-gallery className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+      <h2 className="mb-5 text-sm font-semibold">{_copy("copy.7b97685eb19d", { defaultValue: "Live avatars" })}</h2>
+      <div className="flex flex-wrap items-end gap-8 px-3 pb-3">
+        <LiveRipple live size="sm" className="rounded-lg">{face('w-8 h-8', 'K')}</LiveRipple>
+        <LiveRipple live orbit className="rounded-md">{face('w-9 h-9 rounded-md', 'M')}</LiveRipple>
+        <LiveRipple live className="rounded-lg">{face('w-10 h-10', 'D')}</LiveRipple>
+        <LiveRipple live className="rounded-lg">{face('w-12 h-12', 'L')}</LiveRipple>
+        <LiveRipple live size="lg" orbit className="[--profile-avatar-radius:calc(7rem/3)] rounded-[var(--profile-avatar-radius)]">{face('w-28 h-28 rounded-[var(--profile-avatar-radius)] text-3xl', 'S')}</LiveRipple>
+        <div className="flex flex-col items-center gap-2">
+          {face('w-12 h-12', 'T')}
+          <span className="text-[11px] text-zinc-500">{_copy("copy.cf7d0ae846cb", { defaultValue: "Not live" })}</span>
+        </div>
+      </div>
+      {/* Top of Home: one row for everyone live, then the sheet it opens. */}
+      <div data-live-now-gallery className="mt-4 flex flex-col gap-3 max-w-md">
+        <LiveNowRow items={SAMPLE_LIVE_NOW} onOpen={() => {}} onSeeAll={() => {}} />
+        <LiveNowRow items={SAMPLE_LIVE_NOW.slice(0, 1)} onOpen={() => {}} onSeeAll={() => {}} />
+        <LiveNowList items={SAMPLE_LIVE_NOW} onOpen={() => {}} />
+      </div>
+    </section>
+  );
+}
+
+/**
+ * Go Live > Capture card. Behind a button because it opens real devices and
+ * would otherwise ask every gallery visitor for camera access.
+ */
+/**
+ * The phone menu's tile grid, live: hold a tile to lift it and drag it to a
+ * new spot (hooks/use-drag-reorder). Uses this browser's saved order, so
+ * Reset under the grid puts the default back.
+ */
+function MenuReorderGallery() {
+  const { t } = useTranslation();
+  // Type here to see the menu search exactly as the phone menu runs it.
+  const [query, setQuery] = useState('');
+  const [tab, setTab] = useState(0);
+  const layout = useMenuLayout();
+  // ?menuLayout=tabs|sections|folders opens the gallery on that layout.
+  useEffect(() => {
+    const param = new URLSearchParams(window.location.search).get('menuLayout');
+    if (param) writeMenuLayout(normaliseMenuLayout(param));
+    const tabParam = Number(new URLSearchParams(window.location.search).get('menuTab'));
+    if (tabParam > 0) setTab(tabParam);
+  }, []);
+  const items = useMemo(() => filterNavItems(NAV_ITEMS, query, t, false), [query, t]);
+  const groups = useMemo(() => groupMenuItems(filterNavItems(NAV_ITEMS, '', t, false)), [t]);
+  return (
+    <section data-page-bento data-menu-reorder-gallery className="mb-5 max-w-md rounded-3xl border border-white/10 bg-zinc-950 p-4">
+      {/* The menu header: who is signed in, and the quick account switcher. */}
+      <div data-menu-header-gallery className="mb-3 flex items-center gap-3 px-1">
+        <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-zinc-700 text-sm font-medium text-white">M</div>
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-[15px] font-semibold text-white">Mal</p>
+          <p className="truncate text-[13px] text-zinc-400">@maldoteth</p>
+        </div>
+        <MenuAccountSwitcher />
+      </div>
+      <div className="mb-3 flex gap-1.5">
+        {(['tabs', 'sections', 'folders'] as const).map((value) => (
+          <button key={value} type="button" onClick={() => writeMenuLayout(value)} data-menu-layout-pick={value}
+            className={`h-8 rounded-lg border px-3 text-[13px] font-semibold ${layout === value ? 'border-white/30 bg-white/15 text-white' : 'border-white/10 text-zinc-400'}`}>
+            {value}
+          </button>
+        ))}
+      </div>
+      {layout === 'tabs' && !query ? (
+        <div className="mb-3 flex items-stretch gap-1.5">
+          <button type="button" onClick={() => setQuery(' ')} aria-label={t('sidebar.searchMenu')} data-search-surface
+            className="flex w-[42px] flex-none items-center justify-center rounded-xl border border-white/10 bg-white/5 text-zinc-200">
+            <MenuSearchIcon className="h-[18px] w-[18px]" />
+          </button>
+          <MenuTabs groups={groups} activeTab={tab} onTabChange={setTab} />
+        </div>
+      ) : (
+        <input
+          type="text"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder={t('sidebar.searchMenu')}
+          aria-label={t('sidebar.searchMenu')}
+          data-menu-search
+          data-search-surface
+          className="mb-3 w-full h-[42px] px-4 rounded-xl bg-white/5 border border-white/10 text-[15px] text-white placeholder:text-zinc-500 outline-none focus:border-white/30"
+        />
+      )}
+      <MobileMenuLayout layout={layout} groups={groups} flatItems={items} searching={!!query.trim()} activeTab={tab} onTabChange={setTab}
+        currentPath="/app" notificationCount={3} messageCount={12} onNavigate={() => {}} />
+    </section>
+  );
+}
+
+function CaptureCardGallery() {
+  const { t: _copy } = _useCopy();
+  const [open, setOpen] = useState(false);
+  return (
+    <section data-page-bento data-capture-card-gallery className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+      <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold">
+        <Cable className="h-4 w-4" />
+        {_copy("copy.4a1bd4a3aaf3", { defaultValue: "Capture card" })}
+      </h2>
+      <div className="max-w-md">
+        {open ? (
+          <CaptureCardSetup />
+        ) : (
+          <button type="button" onClick={() => setOpen(true)} className="rounded-xl border border-white/10 bg-white/10 px-3 py-2 text-xs">
+            {_copy("copy.1929290e09aa", { defaultValue: "Open the capture card setup (asks for camera access)" })}
+          </button>
+        )}
+      </div>
+    </section>
+  );
+}
+
+/**
+ * Audio post player with its animation style chips: the selected style wears
+ * the profile tabs' "Beam" (glowing line, idle chips dimmed), never a pill.
+ */
+const GALLERY_LYRICS_TRACK = { tokenId: 'state-gallery-lyrics', audioUrl: '', title: 'Late night lo-fi', artist: 'juno' };
+
+/** Composer tool row: the ... sheet holds Poll, then Comic, then the rest. */
+function PostOptionsGallery() {
+  const imageRef = useRef<HTMLInputElement>(null);
+  const videoRef = useRef<HTMLInputElement>(null);
+  const audioRef = useRef<HTMLInputElement>(null);
+  const [poll, setPoll] = useState(false);
+  const [comic, setComic] = useState(false);
+  const [warning, setWarning] = useState(false);
+  const noop = () => {};
+  return (
+    <section data-page-bento data-post-options-gallery className="mb-5 max-w-md rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+      <h2 className="mb-3 text-sm font-semibold">Post options</h2>
+      {/* The gallery has no sign-in; the bar's pickers only read it. */}
+      <AuthContext.Provider value={GALLERY_AUTH}>
+      <PostActionBar
+        imageInputRef={imageRef}
+        videoInputRef={videoRef}
+        audioInputRef={audioRef}
+        onImageSelect={noop}
+        onVideoSelect={noop}
+        onAudioSelect={noop}
+        onStartRecording={noop}
+        liveMode={null}
+        setLiveMode={noop}
+        onInsertFormatting={noop}
+        onInsertEmoji={noop}
+        onInsertGif={noop}
+        onCameraCapture={noop}
+        onEnhanceWithAI={noop}
+        onPost={noop}
+        canPost={false}
+        isEnhancing={false}
+        isPosting={false}
+        hasText={false}
+        onTogglePoll={() => setPoll((v) => !v)}
+        hasPoll={poll}
+        onToggleComic={() => setComic((v) => !v)}
+        isComic={comic}
+        onToggleContentWarning={() => setWarning((v) => !v)}
+        hasContentWarning={warning}
+      />
+      </AuthContext.Provider>
+    </section>
+  );
+}
+
+/** AI menu > Translate on a draft, with the Undo line it leaves (sample text, no translator call). */
+const GALLERY_DRAFT = { tr: 'Bir günde bir yıllık yol ilerliyoruz', en: 'We are covering a year\u2019s worth of road in a single day' };
+const ASK_AUTH = { ...GALLERY_AUTH, isAuthenticated: true, walletAddress: '0xgallery' } as unknown as AuthContextType;
+
+/** Ask to join in the live's own controls: asking, and asked (tap again cancels). */
+function CoStreamAskGallery() {
+  const qc = useQueryClient();
+  const [ready, setReady] = useState(false);
+  useEffect(() => {
+    const room = {
+      id: 'room', host_wallet: '0xhost', host_stream_id: 'gallery', host_username: 'dehu_b', accepting_requests: true,
+      status: 'active', battle_started_at: null, battle_ends_at: null, battle_round: 0, created_at: '',
+    };
+    const later = { updatedAt: Date.now() + 3_600_000 };
+    qc.setQueryData(coStreamViewerKey('gallery-ask', null), { room, seats: [] }, later);
+    qc.setQueryData(coStreamViewerKey('gallery-asked', null), {
+      room,
+      seats: [{ id: 's1', costream_id: 'room', wallet: '0xgallery', stream_id: null, username: 'you', status: 'requested', muted: false, updated_at: '' }],
+    }, later);
+    setReady(true);
+  }, [qc]);
+  if (!ready) return null;
+  return (
+    <AuthContext.Provider value={ASK_AUTH}>
+      <div data-costream-ask-gallery className="mt-3 space-y-3">
+        <div className="flex items-start gap-3 px-1">
+          <p className="min-w-0 flex-1 text-sm">Late night ranked with chat</p>
+          <CoStreamAskButton preview streamId="gallery-ask" className="-mt-1.5" />
+        </div>
+        <div className="flex items-start gap-3 px-1">
+          <p className="min-w-0 flex-1 text-sm">Late night ranked with chat</p>
+          <CoStreamAskButton preview streamId="gallery-asked" className="-mt-1.5" />
+        </div>
+        <div className="flex items-center justify-end gap-2 rounded-2xl p-3" style={{ background: '#1d1a24' }} data-on-media>
+          <CoStreamAskButton preview streamId="gallery-ask" variant="square" />
+          <CoStreamAskButton preview streamId="gallery-asked" variant="square" />
+        </div>
+      </div>
+    </AuthContext.Provider>
+  );
+}
+
+/** The host's invite to come on screen, over a live picture: open, and tucked. */
+function CoStreamInviteGallery() {
+  const [busy, setBusy] = useState(false);
+  const frame = 'relative flex h-[260px] items-start justify-center overflow-hidden rounded-2xl pt-12';
+  const picture = { background: 'radial-gradient(circle at 30% 30%, #6b4f3a, #1d1a24 60%), #111' };
+  return (
+    <section data-page-bento data-costream-invite-gallery className="mb-5 max-w-md rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+      <h2 className="mb-3 text-sm font-semibold">Live invite on screen</h2>
+      <div className={frame} style={picture} data-on-media>
+        <CoStreamInviteCard
+          hostName="@dehu_b"
+          hostAvatar={null}
+          myName="you"
+          busy={busy}
+          onJoin={() => { setBusy(true); window.setTimeout(() => setBusy(false), 1500); }}
+          onDecline={() => {}}
+        />
+      </div>
+      <div className={`${frame} mt-3 h-[120px]`} style={picture} data-on-media>
+        <CoStreamInviteCard hostName="@dehu_b" initiallyTucked onJoin={() => {}} onDecline={() => {}} />
+      </div>
+      <CoStreamAskGallery />
+    </section>
+  );
+}
+
+function PostTranslateGallery() {
+  const imageRef = useRef<HTMLInputElement>(null);
+  const videoRef = useRef<HTMLInputElement>(null);
+  const audioRef = useRef<HTMLInputElement>(null);
+  const [translated, setTranslated] = useState(false);
+  const noop = () => {};
+  return (
+    <section data-page-bento data-post-translate-gallery className="mb-5 max-w-md rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+      <h2 className="mb-3 text-sm font-semibold">Translate a draft</h2>
+      <p className="px-1 pb-3 text-[15px] leading-snug">{translated ? GALLERY_DRAFT.en : GALLERY_DRAFT.tr}</p>
+      <div className="flex min-h-5 items-center px-1 pb-2">
+        {translated && <TranslatedDraftNote from="tr" onUndo={() => setTranslated(false)} />}
+      </div>
+      <AuthContext.Provider value={GALLERY_AUTH}>
+      <PostActionBar
+        imageInputRef={imageRef}
+        videoInputRef={videoRef}
+        audioInputRef={audioRef}
+        onImageSelect={noop}
+        onVideoSelect={noop}
+        onAudioSelect={noop}
+        onStartRecording={noop}
+        liveMode={null}
+        setLiveMode={noop}
+        onInsertFormatting={noop}
+        onInsertEmoji={noop}
+        onInsertGif={noop}
+        onCameraCapture={noop}
+        onEnhanceWithAI={noop}
+        onTranslate={() => setTranslated(true)}
+        onPost={noop}
+        canPost
+        isEnhancing={false}
+        isPosting={false}
+        hasText
+      />
+      </AuthContext.Provider>
+    </section>
+  );
+}
+
+/** Feed drawer under the nav pill: active filters as words, a hashtag with
+ *  Follow, and new posts taking the drawer over until tapped. Plus presets. */
+function FeedFilterLineGallery() {
+  const [labels, setLabels] = useState(['Articles', '1w', 'Most liked', 'PPV']);
+  const [following, setFollowing] = useState(false);
+  const [newCount, setNewCount] = useState(4);
+  const [named, setNamed] = useState<HomePostTypeValue>('motion');
+  const pill = (
+    <div data-feed-nav className="relative z-10 flex h-9 items-center justify-center rounded-xl text-xs text-zinc-400">
+      <span data-nav-glass-backdrop aria-hidden="true" />
+      Nav pill
+    </div>
+  );
+  const slot = (drawer: ReactNode) => (
+    <div className="relative">
+      {pill}
+      <div data-feed-new-posts-slot="gallery" className="pointer-events-none flex justify-center">{drawer}</div>
+    </div>
+  );
+  const filters = (extra?: object) => ({
+    labels,
+    onOpen: () => {},
+    onClearAll: () => setLabels(['Articles', '1w', 'Most liked', 'PPV']),
+    ...extra,
+  });
+  return (
+    <section data-page-bento data-feed-filter-line-gallery className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+      <h2 className="mb-3 text-sm font-semibold">Feed drawer</h2>
+      <div className="flex max-w-[390px] flex-col gap-4">
+        {slot(<FeedDrawer count={0} authors={[]} onShow={() => {}} filters={filters({ onClearAll: () => setLabels((l) => l.slice(1)) })} />)}
+        {slot(<FeedDrawer count={0} authors={[]} onShow={() => {}} filters={{ ...filters(), labels: ['#music'], follow: { following, pending: false, onToggle: () => setFollowing((v) => !v) } }} />)}
+        {slot(<FeedDrawer count={newCount} authors={[]} onShow={() => setNewCount(0)} filters={filters({ presetName: 'Long reads' })} />)}
+        {slot(<FeedDrawer count={0} authors={[]} onShow={() => {}} filters={{ ...filters(), labels: ['Motion · Watch'] }} />)}
+        <div data-named-feeds-gallery className="rounded-2xl border border-white/10 bg-black/60 p-4">
+          <NamedFeedsRow value={named} onSelect={setNamed} />
+        </div>
+        <div className="rounded-2xl border border-white/10 bg-black/60 p-4">
+          <FeedPresetsRow
+            presets={[{ name: 'Long reads' }, { name: 'Music this week' }, { name: 'Bounties' }]}
+            activeName="Long reads"
+            onApply={() => {}}
+            onDelete={() => {}}
+            onSaveCurrent={() => {}}
+            canSaveCurrent
+          />
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/** Composer ALT pill: empty vs saved. Tap a picture's pill to flip it. */
+function AltPillGallery() {
+  const [saved, setSaved] = useState([false, true]);
+  return (
+    <section data-page-bento data-alt-pill-gallery className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+      <h2 className="mb-3 text-sm font-semibold">Alt text pill</h2>
+      <div className="grid max-w-md grid-cols-2 gap-3">
+        {saved.map((on, i) => (
+          <div key={i} className="relative h-36 overflow-hidden rounded-xl bg-cover bg-center" style={{ backgroundImage: `url(${i ? '/og-image.png' : '/dehub-header-logo.png'})`, backgroundColor: i ? '#f4f1ea' : '#1b2a3a' }}>
+            <AltTextButton hasText={on} onClick={() => setSaved((s) => s.map((v, j) => (j === i ? !v : v)))} className="absolute bottom-2 right-2" />
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function VoiceNotesGallery() {
+  const { t: _copy } = _useCopy();
+  return (
+    <section data-page-bento data-voice-notes-gallery className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+      <h2 className="mb-3 text-sm font-semibold">{_copy("copy.5c2e8a1f0b74", { defaultValue: "Voice notes" })}</h2>
+      <div className="grid gap-3 max-w-md">
+        <VoiceStripPlayer src="/sounds/ooh-ahh.mp3" duration={3} />
+        <VoiceStripPlayer src="/sounds/lol.mp3" duration={2} />
+        <div className="flex items-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.08] pl-3 pr-1 h-11 min-w-0">
+          <div className="shrink-0 w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+          <span className="shrink-0 text-[11px] font-mono tabular-nums text-red-400">0:07</span>
+          <LiveMicBars stream={null} className="flex-1" />
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/** App tokens: the wallet's DHB row, its drawer and the send dialog, with a sample history. */
+function AppTokensGallery() {
+  const queryClient = useQueryClient();
+  const [sendOpen, setSendOpen] = useState(false);
+  useState(() => queryClient.setQueryData([APP_TOKENS_QUERY_KEY, undefined], {
+    symbol: 'DHB',
+    balance: '1204500.5',
+    entries: [
+      { kind: 'receive', amount: '2500', purpose: 'tip', note: 'great stream', counterparty: { address: '0x1111111111111111111111111111111111111111', username: 'maya' }, at: '2026-10-27T21:10:00.000Z' },
+      { kind: 'send', amount: '-10000', purpose: 'transfer', counterparty: { address: '0x2222222222222222222222222222222222222222', username: 'oliver' }, at: '2026-10-27T18:42:00.000Z' },
+      { kind: 'opening', amount: '1212000.5', at: '2026-10-27T12:00:00.000Z' },
+    ],
+  }));
+  return (
+    <section data-page-bento data-app-tokens-gallery className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+      <h2 className="mb-3 text-sm font-semibold">App tokens</h2>
+      <AppTokensRow onSend={() => setSendOpen(true)} />
+      <Button variant="glass" className="mt-2" onClick={() => setSendOpen(true)}>Send dialog</Button>
+      <AppTokenSendDialog open={sendOpen} onOpenChange={setSendOpen} />
+    </section>
+  );
+}
+
+function AudioGallery() {
+  const { t: _copy } = _useCopy();
+  const { t } = useTranslation();
+  const [playing, setPlaying] = useState(false);
+  const queryClient = useQueryClient();
+  // A finished transcript for the lyrics tile, so it shows lines without a real post.
+  useState(() => queryClient.setQueryData(transcriptKey('audio', GALLERY_LYRICS_TRACK.tokenId), {
+    id: 'state-gallery-lyrics', source_kind: 'audio', source_ref: GALLERY_LYRICS_TRACK.tokenId, status: 'ready',
+    provider: 'deepgram', source_lang: 'en', duration_seconds: 184,
+    segments: [
+      { start: 0, end: 4, text: 'City lights are fading out tonight' },
+      { start: 4, end: 8, text: 'I keep the radio low and drive' },
+    ],
+    full_text: null, vtt: null, summary: null, summary_status: 'none', chapters: [], speaker_map: {}, speaker_overrides: {},
+    visibility: 'public', attempts: 1, error: null, updated_at: new Date(0).toISOString(),
+  }));
+  return (
+    <section data-page-bento data-audio-gallery className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+      <h2 className="mb-3 text-sm font-semibold">{_copy("copy.bc1b88907d3b", { defaultValue: "Audio" })}</h2>
+      <div className="relative h-56 overflow-hidden rounded-2xl bg-black/60 backdrop-blur-[24px] border border-white/10">
+        <AudioVisualizer
+          audioUrl=""
+          isPlaying={playing}
+          onPlayPause={() => setPlaying((p) => !p)}
+          className="w-full h-full"
+          showStylePicker
+          seed="state-gallery"
+          decodeEnabled={false}
+          durationHint={184}
+        />
+      </div>
+      <p className="mt-4 mb-2 text-xs opacity-70">{t('audioPost.lyrics')}</p>
+      <div className="relative h-56 overflow-hidden rounded-2xl bg-black/60 backdrop-blur-[24px] border border-white/10">
+        <AudioVisualizer
+          audioUrl=""
+          isPlaying={false}
+          onPlayPause={() => undefined}
+          className="w-full h-full"
+          showStylePicker
+          seed="state-gallery-lyrics"
+          decodeEnabled={false}
+          durationHint={184}
+          popoutTrack={GALLERY_LYRICS_TRACK}
+          initialShowLyrics
+        />
+      </div>
+    </section>
+  );
+}
+
+/**
+ * Stage covers: a stage with no uploaded cover gets a poster drawn from its
+ * title, time and host (GeneratedStageCover). Same stage, same poster. The
+ * last tile is a real recorded-stage card without a cover.
+ */
+const GALLERY_STAGES = [
+  { id: 'gallery-stage-1', title: 'Town Hall: what ships next', host_username: 'maldoteth', scheduled_at: '2026-10-23T19:00:00Z' },
+  { id: 'gallery-stage-2', title: 'Late night lo-fi', host_username: 'juno', started_at: '2026-10-24T23:30:00Z', status: 'live' },
+  { id: 'gallery-stage-3', title: 'Creators AMA: growing from zero to your first thousand fans on Riftn', host_username: 'kira', scheduled_at: '2026-11-02T17:00:00Z' },
+  { id: 'gallery-stage-4', title: 'Market open', host_wallet_address: '0x8f3a00000000000000000000000000000000c0de', started_at: '2026-10-30T08:00:00Z', ended_at: '2026-10-30T08:52:00Z', status: 'ended' },
+];
+
+function StageCoversGallery() {
+  const { t: _copy } = _useCopy();
+  const ended = {
+    id: 'gallery-stage-5', short_id: null, channel_name: 'gallery', title: 'Friday night set, requests open',
+    host_wallet_address: '0x00000000000000000000000000000000000000a1', host_username: 'marco_v', status: 'ended',
+    listener_count: 0, speaker_count: 1, started_at: '2026-10-17T21:00:00Z', created_at: '2026-10-17T21:00:00Z',
+    ended_at: '2026-10-17T22:10:00Z', total_listens: 128, cover_image_url: null,
+  } as AudioSpace;
+  return (
+    <section data-page-bento data-stage-covers-gallery className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+      <h2 className="mb-3 text-sm font-semibold">{_copy("copy.3a17aa4e4abb", { defaultValue: "Stages" })}</h2>
+      <div className="grid gap-3 sm:grid-cols-2">
+        {GALLERY_STAGES.map((stage) => (
+          <GeneratedStageCover key={stage.id} stage={stage} className="rounded-2xl" />
+        ))}
+        <div className="flex gap-3 items-start">
+          <GeneratedStageCover stage={GALLERY_STAGES[0]} className="w-44 shrink-0 rounded-xl" />
+          <AuthContext.Provider value={GALLERY_AUTH}>
+            <PastStageCard space={ended} className="max-w-[260px]" />
+          </AuthContext.Provider>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/**
+ * Hover tooltips: every one is liquid glass (styles/glass-surfaces.css). The
+ * pinned labels sit over a bright stripe so the frost and tint floor show; the
+ * icon row below draws the live hover label, as the side panel tabs do.
+ */
+/**
+ * Toasts: raises the real "new version" toast (and a plain one) so its text
+ * and buttons can be checked against every theme's toast glass.
+ */
+const TipModal = lazy(() => import('@/components/app/modals/TipModal').then(m => ({ default: m.TipModal })));
+
+const galleryTipCard = (id: string, name: string, text: string, amount: number, symbol = 'DHB'): GalleryComment => ({
+  id, username: name, displayName: name, text, likes: 0, dislikes: 0, views: 0, timeAgo: '1m', createdAt: new Date(),
+  tip: { amount, symbol, chainId: 8453, txHash: '0x', value: symbol === 'DHB' ? amount : amount * 1000 },
+});
+const GALLERY_TIP_WALL: GalleryComment[] = [
+  galleryTipCard('9001', 'mal', 'This beat goes so hard, more of this', 25000),
+  galleryTipCard('9002', 'r2r', 'Played this on the drive home, perfect.', 5000),
+  galleryTipCard('9003', 'kenji', 'Drop the full set please', 1200),
+  galleryTipCard('9004', 'legouffre', 'merci', 5, 'USDC'),
+];
+
+
+/** Tip with a message: the sheet's message box and the tip wall cards. */
+function TipMessageGallery() {
+  const [open, setOpen] = useState(false);
+  const [openId, setOpenId] = useState<string | null>(null);
+  const [landed, setLanded] = useState<string | null>('9001');
+  const [replay, setReplay] = useState(0);
+  return (
+    <section data-page-bento className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4" data-tip-message-gallery>
+      <h2 className="mb-3 text-sm font-semibold">Tip messages</h2>
+      <div key={replay}>
+        <TipWall rows={GALLERY_TIP_WALL} openId={openId} onToggle={(cid) => setOpenId(c => (c === cid ? null : cid))} landedId={landed} />
+      </div>
+      <div className="mt-3 flex flex-wrap items-center gap-3 text-white">
+        <TipChip tip={{ amount: 5000, symbol: 'DHB' }} />
+        <Button variant="glass" size="sm" data-replay-tip-rail onClick={() => setReplay(r => r + 1)}>Replay rails</Button>
+        <Button variant="glass" size="sm" onClick={() => { setLanded(null); window.setTimeout(() => setLanded('9001'), 30); }}>Replay landing</Button>
+        <Button variant="glass" size="sm" data-open-tip-sheet onClick={() => setOpen(true)}>Open tip sheet</Button>
+      </div>
+      <AuthContext.Provider value={GALLERY_AUTH}>
+        <Suspense fallback={null}>
+          {open ? <TipModal open={open} onOpenChange={setOpen} creatorAddress="0x00000000000000000000000000000000000000aa" creatorName="angela" tokenId="5581" /> : null}
+        </Suspense>
+      </AuthContext.Provider>
+    </section>
+  );
+}
+
+/** Pay-to-unlock DM photos: what each side sees, plus the composer's lock. */
+const GALLERY_LOCK_BLUR = 'data:image/jpeg;base64,/9j/2wBDABIMDRANCxIQDhAUExIVGywdGxgYGzYnKSAsQDlEQz85Pj1HUGZXR0thTT0+WXlaYWltcnNyRVV9hnxvhWZwcm7/2wBDARMUFBsXGzQdHTRuST5Jbm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm7/wAARCAD6AMgDASIAAhEBAxEB/8QAGgABAQEBAQEBAAAAAAAAAAAAAQACAwQFBv/EABoQAQEBAQEBAQAAAAAAAAAAAAABEQISAxP/xAAUAQEAAAAAAAAAAAAAAAAAAAAA/8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAwDAQACEQMRAD8A/FYsaxYDOLGsWAzgxrFgM4sKAYsKALCgGBpAyigAKAIgEkQSSBIoHXDiIDBjSBmxmxus0GQ1QARQApAEUARABFAymsWAycOLACKAIoHZAgkkArNarNAUKgCggJBBJEAGlgM4sawyAzh8tzlqcg5+R5dvIvIONgsdbyxYDCNiB0QQFBAqzSKABAJJASCBSQFIwFI1Io1zAM5anJkbkBnyLHTBYDj1HOx26jn1AcrEbECSQJJAAUDKKBlFAiCBQIExlqA1HTlzjfNB0jcc5WpQbZtWs2gzXPpu1igxUqgSSBJIAigZTQBkNAAiAKCAmVk6DpK1K5Styg6yta5StaDes2jWbQNrNVAJJAljXkzkGMPl0nJnIOXleXbwvAOPkeXbyLyDj5FjteWLAcsTdjNgMg0AiEDUrUrm1KDpKdYlMoNaggSRgLEUDv4M4d/zanzBwnzanDvPm1OAef8ANeHp8C8A814ZvD1XgXgHkvDn1y9fXLl1yDy9cufUenrlx6gONDXTNAJICYyQbhZhgNIECYDAMRiB9fwZw3DAZnB8ugoMYzY2z1QZxmxrVQcuo5dR36c+oDy9xw7j1fSPN3AcOmK6dOdAJIEQQMajMagGGCNQE0IYBiMQPrc9tzp5Ofo3PoD1ehenH9Gb2DremOunO9sXsHb0fTz+2vQOl6Y6rN6F6Bnt5u3buuHYOPTnXTpzoBJAiCBjUZjUBqEQg0WSDSCB15+jfP0eSdNzsHr/AEV+jze17B3vbN7cfa9A7TtqdPPOmvQO3oXpy9L0DXXTl1TenO0GemK1WaASQJIgo1BGoBhBAlkgUkDhrU6YQOnpenPVoOvpenPToOkrWuUp0HTVrGrQatZtWgBQQASQJJA1DBDAJCAoatBpM6gckkCSQIggSyQaQQEJAgQCBQApAYWSBWhAtWgaDWpnUAKILEUDKIBIIGtTJAoIGkCCBQBEAkkCSAIJAkkBaZOgUNWgqKrQCQQFMkCgtBrTrKBpDVoFDVoELQBCQJBAkkB1aEDWjQgOjUASCAoICtCA6dZIHVoQNatZQNaNCA6ggSQAoIH/2Q==';
+function lockedGalleryMessage(id: string, author: 'me' | 'other', kind: 'image' | 'video' = 'image'): DmMessage {
+  return {
+    _id: id, conversation: 'gallery', content: '', msgType: 'media', author,
+    sender: { _id: author === 'me' ? 'me' : 'them', username: '', address: '', displayName: '', avatarImageUrl: '' },
+    mediaUrls: [{ url: GALLERY_LOCK_BLUR, type: 'image', mimeType: 'image/jpeg' }],
+    uploadStatus: 'success', voiceDuration: null, isRead: false, isEdited: false, editedAt: null, isForwarded: false,
+    replyTo: null, paymentStatus: null, paymentTxHash: null, tipAmount: null, tipSymbol: null, isDeleted: false,
+    createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(),
+    lock: { price: 5000, priceUsd: 5, symbol: 'DHB', kind, previewUrl: GALLERY_LOCK_BLUR, unlocked: author === 'me', mine: author === 'me', ready: true },
+  };
+}
+function LockedDmGallery() {
+  const queryClient = useQueryClient();
+  const [price, setPrice] = useState<number | null>(5);
+  const real = `${window.location.origin}/og/agents.jpg`;
+  const status = (id: string, over: Partial<DmLock>, pendingTxHash?: string): DmLockStatus => ({
+    messageId: id, conversationId: 'gallery', payTo: '0x00000000000000000000000000000000000000aa',
+    lock: { price: 5000, priceUsd: 5, dhbPriceUsd: 0.001, symbol: 'DHB', kind: 'image', previewUrl: GALLERY_LOCK_BLUR, unlocked: false, ready: true, ...over },
+    ...(pendingTxHash ? { pendingTxHash } : {}),
+  });
+  // Seeded before the bubbles mount, so nothing here asks the API.
+  useState(() => {
+    queryClient.setQueryData(lockedMediaKey('g-lock-closed'), status('g-lock-closed', {}));
+    queryClient.setQueryData(lockedMediaKey('g-lock-video'), status('g-lock-video', { kind: 'video' }));
+    queryClient.setQueryData(lockedMediaKey('g-lock-pending'), status('g-lock-pending', {}, '0xpending'));
+    queryClient.setQueryData(lockedMediaKey('g-lock-bought'), status('g-lock-bought', { unlocked: true, mediaUrl: real }));
+    queryClient.setQueryData(lockedMediaKey('g-lock-mine'), status('g-lock-mine', { unlocked: true, mine: true, unlockCount: 0, mediaUrl: real }));
+    queryClient.setQueryData(lockedMediaKey('g-lock-mine-sold'), status('g-lock-mine-sold', { unlocked: true, mine: true, unlockCount: 1, mediaUrl: real }));
+    return null;
+  });
+  const cell = (label: string, node: ReactNode) => (
+    <div className="flex flex-col gap-1.5">
+      <span className="text-[11px] uppercase tracking-wide text-zinc-500">{label}</span>
+      {node}
+    </div>
+  );
+  return (
+    <section data-page-bento className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4" data-locked-dm-gallery>
+      <h2 className="mb-3 text-sm font-semibold">Locked DM photos</h2>
+      <div className="flex flex-wrap items-start gap-4 text-white">
+        {cell('Them: locked', <LockedMediaBubble message={lockedGalleryMessage('g-lock-closed', 'other')} />)}
+        {cell('Them: video', <LockedMediaBubble message={lockedGalleryMessage('g-lock-video', 'other', 'video')} />)}
+        {cell('Them: paying', <LockedMediaBubble message={lockedGalleryMessage('g-lock-pending', 'other')} />)}
+        {cell('Them: unlocked', <div className="w-[240px]"><LockedMediaBubble message={lockedGalleryMessage('g-lock-bought', 'other')} /></div>)}
+        {cell('You: not yet', <div className="w-[240px]"><LockedMediaBubble message={lockedGalleryMessage('g-lock-mine', 'me')} /></div>)}
+        {cell('You: unlocked', <div className="w-[240px]"><LockedMediaBubble message={lockedGalleryMessage('g-lock-mine-sold', 'me')} /></div>)}
+        {cell('Composer', <div className="w-[260px] rounded-2xl bg-black/30 p-3"><img src={real} alt="" className="h-20 rounded-lg object-cover" /><LockPriceControl value={price} onChange={setPrice} kind="image" /></div>)}
+      </div>
+    </section>
+  );
+}
+
+/** Paid unlock: the confirm sheet's steps and the three reveals that take turns after paying. */
+function UnlockRevealGallery() {
+  const real = `${window.location.origin}/og/agents.jpg`;
+  const [plays, setPlays] = useState<Record<UnlockRevealKind, number>>({ coin: 0, confetti: 0, foil: 0 });
+  const [phase, setPhase] = useState<UnlockPhase | null>(null);
+  const tile = (kind: UnlockRevealKind, label: string) => (
+    <div className="flex flex-col gap-1.5" key={kind}>
+      <span className="text-[11px] uppercase tracking-wide text-zinc-500">{label}</span>
+      <div data-reveal-tile={kind} className="relative w-[200px] overflow-hidden rounded-lg" style={{ aspectRatio: '4 / 5' }}>
+        <img src={real} alt="" className="h-full w-full object-cover" />
+        {plays[kind] > 0 && (
+          <UnlockReveal
+            key={plays[kind]}
+            kind={kind}
+            cover={<img src={GALLERY_LOCK_BLUR} alt="" className="scale-125 blur-xl" />}
+            onDone={() => undefined}
+          />
+        )}
+      </div>
+      <Button variant="glass" size="sm" data-play-reveal={kind} onClick={() => setPlays(p => ({ ...p, [kind]: p[kind] + 1 }))}>Play</Button>
+    </div>
+  );
+  return (
+    <section data-page-bento className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4" data-unlock-reveal-gallery>
+      <h2 className="mb-3 text-sm font-semibold">Paid unlock reveal</h2>
+      <div className="flex flex-wrap items-start gap-4 text-white">
+        {tile('coin', 'Coin drop')}
+        {tile('confetti', 'Confetti')}
+        {tile('foil', 'Foil peel')}
+      </div>
+      <div className="mt-3 flex flex-wrap gap-2">
+        {(['idle', 'paying', 'confirming', 'done'] as UnlockPhase[]).map(ph => (
+          <Button key={ph} variant="glass" size="sm" data-unlock-phase={ph} onClick={() => setPhase(ph)}>Sheet: {ph}</Button>
+        ))}
+      </div>
+      <UnlockConfirmSheet
+        open={phase !== null}
+        onOpenChange={o => { if (!o) setPhase(null); }}
+        title="Unlock photo"
+        who="From angela"
+        sub="All of it goes to angela"
+        previewUrl={GALLERY_LOCK_BLUR}
+        priceLabel="$5"
+        dhbLabel="≈ 5,000 tokens"
+        phase={phase ?? 'idle'}
+        doneLabel="Opening your photo…"
+        onPay={() => setPhase('paying')}
+      />
+    </section>
+  );
+}
+
+const GALLERY_COINS = [
+  { symbol: 'USDT', chainId: 56, address: '0x55d398326f99059ff775485246999027b3197955', decimals: 18, priceUsd: 1, treasuryAddress: '0x0' },
+  { symbol: 'USDC', chainId: 56, address: '0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d', decimals: 18, priceUsd: 1, treasuryAddress: '0x0' },
+  { symbol: 'BNB', chainId: 56, address: null, decimals: 18, priceUsd: 626, treasuryAddress: '0x0' },
+  { symbol: 'USDC', chainId: 8453, address: '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913', decimals: 6, priceUsd: 1, treasuryAddress: '0x0' },
+  { symbol: 'ETH', chainId: 8453, address: null, decimals: 18, priceUsd: 3100, treasuryAddress: '0x0' },
+  { symbol: 'USDFC', chainId: 314, address: '0x80b98d3aa09ffff255c3ba4a241111ff1262f045', decimals: 18, priceUsd: 1, treasuryAddress: '0x0' },
+] as const;
+
+/** Not enough tokens: Create pressed short of DHB, pay the same amount in another coin. */
+const GALLERY_ANY_COINS = [
+  { assetId: 'nep141:btc.omft.near', symbol: 'BTC', blockchain: 'btc', decimals: 8, price: 101200 },
+  { assetId: 'nep141:sol.omft.near', symbol: 'SOL', blockchain: 'sol', decimals: 9, price: 88 },
+  { assetId: 'nep141:eth.omft.near', symbol: 'ETH', blockchain: 'eth', decimals: 18, price: 3100 },
+  { assetId: 'nep141:sol-usdc', symbol: 'USDC', blockchain: 'sol', decimals: 6, price: 1 },
+  { assetId: 'nep141:tron-usdt', symbol: 'USDT', blockchain: 'tron', decimals: 6, price: 1 },
+  { assetId: 'nep141:doge.omft.near', symbol: 'DOGE', blockchain: 'doge', decimals: 8, price: 0.17 },
+  { assetId: 'nep141:xrp.omft.near', symbol: 'XRP', blockchain: 'xrp', decimals: 6, price: 2.3 },
+  { assetId: 'nep141:ltc.omft.near', symbol: 'LTC', blockchain: 'ltc', decimals: 8, price: 92 },
+];
+
+const GALLERY_ANY_INTENT = {
+  id: 'gallery', originAsset: 'nep141:sol.omft.near', originSymbol: 'SOL', originBlockchain: 'sol',
+  depositAddress: '7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU', depositMemo: null,
+  amountInFormatted: '0.0215', timeEstimateSeconds: 24, refundTo: '9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM',
+  usd: 1.89, expiresAt: 4102444800, settlement: 'PENDING_DEPOSIT', credited: false,
+};
+
+function CoinPayGallery() {
+  const [open, setOpen] = useState(false);
+  const [anyView, setAnyView] = useState<null | 'list' | 'send'>(null);
+  return (
+    <section data-page-bento className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4" data-coin-pay-gallery>
+      <h2 className="mb-3 text-sm font-semibold">Not enough tokens</h2>
+      <Button variant="glass" size="sm" data-open-coin-pay onClick={() => setOpen(true)}>Create (1,890 tokens)</Button>
+      <PayWithCoinSheet
+        open={open}
+        onOpenChange={setOpen}
+        costDhb={1890}
+        walletDhb={520}
+        onFunded={() => setOpen(false)}
+        preview={{
+          coins: GALLERY_COINS.map((c) => ({ ...c })),
+          balances: { 'USDT:56': 42.1, 'USDC:56': 0, 'BNB:56': 0.41, 'USDC:8453': 12, 'ETH:8453': 0.02, 'USDFC:314': 0 },
+          anyCoins: GALLERY_ANY_COINS,
+        }}
+      />
+      <div className="mt-3 flex gap-2">
+        <Button variant="glass" size="sm" data-open-any-coin="list" onClick={() => setAnyView('list')}>Any coin</Button>
+        <Button variant="glass" size="sm" data-open-any-coin="send" onClick={() => setAnyView('send')}>Any coin: send</Button>
+      </div>
+      <PayWithCoinSheet
+        key={anyView || 'closed'}
+        open={anyView !== null}
+        onOpenChange={(o) => { if (!o) setAnyView(null); }}
+        costDhb={1890}
+        walletDhb={0}
+        onFunded={() => setAnyView(null)}
+        preview={{
+          coins: [],
+          balances: {},
+          view: 'any',
+          anyCoins: GALLERY_ANY_COINS,
+          anyIntent: anyView === 'send' ? GALLERY_ANY_INTENT : undefined,
+        }}
+      />
+    </section>
+  );
+}
+
+/** Mint chain picker: Mint on an off-chain post, with each chain's live price. */
+const GALLERY_IMG = 'https://picsum.photos/seed/riftn-drop';
+const galleryUnlockable = (isCreator: boolean, canOpen: boolean): Unlockable => ({
+  has: true,
+  isCreator,
+  canOpen,
+  summary: { files: 3, kinds: ['image', 'audio', 'file'], hasText: true },
+  text: canOpen ? 'Thanks for collecting. Full-size artwork, the song stem and the project file are below.' : null,
+  files: canOpen
+    ? [
+        { id: 'a', name: 'artwork-4k.png', kind: 'image', size: 8_400_000, mimeType: 'image/png', url: `${GALLERY_IMG}-1/200/200` },
+        { id: 'b', name: 'stem-vocals.mp3', kind: 'audio', size: 5_100_000, mimeType: 'audio/mpeg', url: '#' },
+        { id: 'c', name: 'project.zip', kind: 'file', size: 42_000_000, mimeType: 'application/zip', url: '#' },
+      ]
+    : [],
+});
+const galleryAuction = (topBid: boolean): Auction => ({
+  id: 'g1', chainId: 8453, contract: '0x9f8012074d27f8596c0e5038477acb52057bc934', tokenId: '1201', amount: '1',
+  seller: '0x' + 'a'.repeat(40), currency: '0x' + 'd'.repeat(40), currencySymbol: 'DHB', currencyDecimals: 18,
+  startPrice: '100000000000000000000', startsAt: new Date(Date.now() - 3_600_000).toISOString(),
+  endsAt: new Date(Date.now() + 2 * 86_400_000 + 4 * 3_600_000).toISOString(), status: 'live', buyNowOrderHash: null,
+  winner: null, soldPrice: null, nftName: 'Neon harbour', nftImage: `${GALLERY_IMG}-2/400/400`,
+  bidCount: topBid ? 4 : 0, topBid: topBid ? '260000000000000000000' : null, minimumBid: topBid ? '273000000000000000000' : '100000000000000000000',
+});
+const galleryDrop: Drop = {
+  number: 1, title: "This week's drop", startsAt: new Date().toISOString(), endsAt: new Date(Date.now() + 5 * 86_400_000).toISOString(),
+  items: [1, 2, 3, 4, 5, 6].map((i) => ({
+    tokenId: 1200 + i, chainId: 8453, contract: null, name: ['Neon harbour', 'Quiet field', 'Night bus', 'Paper moon', 'Glass city', 'Low tide'][i - 1],
+    image: `${GALLERY_IMG}-${i}/400/400`, creator: null, creatorProfile: { username: ['mal', 'aaron', 'arnoud', 'destan', 'araf', 'jesse'][i - 1], displayName: null, avatarImageUrl: null },
+    supply: i === 2 ? 1 : 1000 * i, minted: true, note: null,
+    floor: i % 2 ? { price: String(25n * 10n ** 18n * BigInt(i)), currencySymbol: 'DHB', currencyDecimals: 18, orderHash: 'x' } : null,
+    auctionId: i === 1 ? 'g1' : null,
+  })),
+};
+const galleryStats: MarketStats = {
+  sales: 1243, volume: [{ symbol: 'DHB', amount: 182450 }, { symbol: 'BNB', amount: 3.25 }], activeListings: 380, liveAuctions: 12, minted: 5600, collectors: 2870,
+  topSellers: [{ address: '0x' + 'b'.repeat(40), profile: { username: 'aaron', displayName: null, avatarImageUrl: null }, sales: 1500, volume: [] }],
+};
+
+function CollectGallery() {
+  return (
+    <section data-page-bento className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4" data-collect-gallery>
+      <h2 className="mb-3 text-sm font-semibold">Collector extras, auctions and drops</h2>
+      <div className="grid gap-4 lg:grid-cols-3">
+        <div data-collect-state="creator"><CollectorPanel tokenId={1201} chainId={8453} preview={{ unlockable: galleryUnlockable(true, true), supply: 25000, royaltyBps: 750 }} /></div>
+        <div data-collect-state="owner"><CollectorPanel tokenId={1202} chainId={8453} preview={{ unlockable: galleryUnlockable(false, true), supply: 1, royaltyBps: 500 }} /></div>
+        <div data-collect-state="locked"><CollectorPanel tokenId={1203} chainId={8453} preview={{ unlockable: galleryUnlockable(false, false), supply: 1000, royaltyBps: 1000 }} /></div>
+      </div>
+      <div className="mt-4 grid gap-4 lg:grid-cols-2">
+        <div data-collect-state="auction">
+          <AuctionBox target={{ chainId: 8453, contract: '0x9f8012074d27f8596c0e5038477acb52057bc934', tokenId: '1201' }} me={'0x' + 'c'.repeat(40)} isAuthenticated held={0n} standard="erc1155" dhb={undefined} offers={[]} name="Neon harbour" image={null} preview={galleryAuction(true)} />
+        </div>
+        <div data-collect-state="auction-new">
+          <AuctionBox target={{ chainId: 8453, contract: '0x9f8012074d27f8596c0e5038477acb52057bc934', tokenId: '1202' }} me={'0x' + 'c'.repeat(40)} isAuthenticated held={0n} standard="erc1155" dhb={undefined} offers={[]} name="Quiet field" image={null} preview={galleryAuction(false)} />
+        </div>
+      </div>
+      <div className="mt-4" data-collect-state="create-making">
+        <CreateNftPanel
+          onOpen={() => undefined}
+          preview={{
+            creations: [],
+            making: true,
+            art: `${GALLERY_IMG}-1/600/600`,
+            quotes: Object.fromEntries([[8453, 24.67], [56, 35.42], [1, 312], [4663, 18.1]].map(([id, amount]) => [id, { chainId: id, amount, symbol: 'DHB', tokenAddress: '0x0', chargeable: true, decimals: 18, isNative: false, ttlSeconds: 60, retailUsd: amount / 1000 }])),
+          }}
+        />
+      </div>
+      <div className="mt-4" data-collect-state="create">
+        <CreateNftPanel
+          onOpen={() => undefined}
+          preview={{
+            creations: [
+              { tokenId: 1301, chainId: 8453, contract: '0x9f8012074d27f8596c0e5038477acb52057bc934', name: 'Neon harbour', image: `${GALLERY_IMG}-1/400/400`, postType: 'feed-images', minted: true, minting: false, supply: 25000, royaltyBps: 750, createdAt: null },
+              { tokenId: 1302, chainId: 56, contract: '0x1065f5922a336c75623b55d22c4a0c760efce947', name: 'Quiet field', image: `${GALLERY_IMG}-3/400/400`, postType: 'feed-images', minted: true, minting: false, supply: 1, royaltyBps: 1000, createdAt: null },
+              { tokenId: 1303, chainId: 8453, contract: '0x9f8012074d27f8596c0e5038477acb52057bc934', name: 'Glass tide', image: `${GALLERY_IMG}-2/400/400`, postType: 'feed-images', minted: false, minting: true, supply: 100, royaltyBps: 500, createdAt: null },
+              { tokenId: 1304, chainId: 8453, contract: '0x9f8012074d27f8596c0e5038477acb52057bc934', name: 'Paper moon', image: `${GALLERY_IMG}-4/400/400`, postType: 'feed-images', minted: false, minting: false, supply: 1000, royaltyBps: 0, createdAt: null },
+            ],
+          }}
+        />
+      </div>
+      <div className="mt-4" data-collect-state="drops">
+        <DropsTab preview={{ drop: galleryDrop, stats: galleryStats, auctions: [galleryAuction(true), { ...galleryAuction(false), id: 'g2', nftName: 'Quiet field', nftImage: `${GALLERY_IMG}-3/400/400` }] }} />
+      </div>
+    </section>
+  );
+}
+
+function MintChainGallery() {
+  const [open, setOpen] = useState<null | 'dehub' | 'own'>(null);
+  return (
+    <section data-page-bento className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4" data-mint-chain-gallery>
+      <h2 className="mb-3 text-sm font-semibold">Mint chain picker</h2>
+      <div className="flex flex-wrap gap-3">
+        <Button variant="glass" size="sm" data-open-mint-sheet="dehub" onClick={() => setOpen('dehub')}>Riftn wallet</Button>
+        <Button variant="glass" size="sm" data-open-mint-sheet="own" onClick={() => setOpen('own')}>Own wallet</Button>
+      </div>
+      <MintChainSheet editionOpen open={open !== null} onOpenChange={(o) => { if (!o) setOpen(null); }} defaultChainId={8453} sponsored={open === 'dehub'} homeAllowance={{ mintsPerDay: 3, homeMintsRemaining: 2 }} onConfirm={() => setOpen(null)} />
+    </section>
+  );
+}
+
+/** Signed in as a stand-in wallet, so Space my posts shows (it hides when signed out). */
+const SPACING_AUTH = { ...GALLERY_AUTH, walletAddress: '0x0000000000000000000000000000000000000001' } as AuthContextType;
+
+function WhenSheetGallery() {
+  const { t } = useTranslation();
+  const [kind, setKind] = useState<ScheduleKind | null>(null);
+  const qc = useQueryClient();
+  // Space my posts, as an account with it on and two posts waiting.
+  useState(() => qc.setQueryData([POST_SPACING_KEY, SPACING_AUTH.walletAddress], { gapMinutes: 60, nextAt: new Date(Date.now() + 2 * 3_600_000).toISOString(), waiting: 2 }));
+  const [dripGap, setDripGap] = useState<number | null>(1440);
+  return (
+    <AuthContext.Provider value={SPACING_AUTH}>
+    <section data-page-bento data-when-sheet-gallery className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+      <h2 className="mb-3 text-sm font-semibold">{t('whenSheet.title', { defaultValue: 'When?' })}</h2>
+      <div className="flex flex-wrap gap-2">
+        {(['post', 'live', 'stage', 'message'] as const).map(k => (
+          <button key={k} type="button" data-kit-button="quiet" data-when-open={k} onClick={() => setKind(k)}>{k}</button>
+        ))}
+      </div>
+      <ScheduleSheet isOpen={!!kind} onClose={() => setKind(null)} scheduledDate={null} onSchedule={() => {}} kind={kind ?? 'post'} minimumMinutes={kind === 'live' ? 30 : 0} dripCount={12} dripGap={dripGap} onDripChange={setDripGap} />
+    </section>
+    </AuthContext.Provider>
+  );
+}
+
+/** Schedule a DM: the clock beside the tip gem, the strip above the composer, and the list. */
+function ScheduledDmGallery() {
+  const { t } = useTranslation();
+  const at = (hours: number) => new Date(Date.now() + hours * 3_600_000).toISOString();
+  const row = (id: string, text: string, hours: number, extra: Partial<ScheduledDmView> = {}): ScheduledDmView => ({
+    _id: id, dmId: 'gallery', content: text, text, unreadable: false, replyTo: null, sendAt: at(hours), timeZone: null,
+    status: 'scheduled', failureCode: null, failureReason: null, createdAt: null, ...extra,
+  });
+  const [items, setItems] = useState<ScheduledDmView[]>(() => [
+    row('a', 'Morning! Are we still on for lunch today?', 20),
+    row('b', 'Happy birthday 🎉 hope it is a great one', 70),
+    row('c', 'Sent you the files', -1, { status: 'failed', failureCode: 'BLOCKED', failureReason: 'You cannot message this user.' }),
+  ]);
+  const [list, setList] = useState(false);
+  const [draft, setDraft] = useState<{ text: string; clear: () => void } | null>(null);
+  // "When they're next online": sent lines in the thread. The hourglass stays
+  // beside the one tick until the message is read, then two ticks.
+  const me = { _id: 'me', address: '0x0000000000000000000000000000000000000001', username: 'me' };
+  const sent = (id: string, content: string, minsAgo: number, extra: Partial<DmMessage> = {}): DmMessage => ({
+    _id: id, conversation: 'gallery', sender: me as DmMessage['sender'], author: 'me', content, msgType: 'msg', mediaUrls: [],
+    voiceDuration: null, isRead: false, isEdited: false, editedAt: null, isForwarded: false, replyTo: null, paymentStatus: null,
+    paymentTxHash: null, tipAmount: null, tipSymbol: null, isDeleted: false, createdAt: new Date(Date.now() - minsAgo * 60_000).toISOString(),
+    updatedAt: new Date().toISOString(), ...extra,
+  } as DmMessage);
+  const [thread, setThread] = useState<DmMessage[]>(() => [
+    sent('w1', 'Sent normally', 42),
+    sent('w2', 'Sent for when they are next online, read', 30, { whenOnline: true, isRead: true }),
+    sent('w3', 'Sent for when they are next online, not read yet', 12, { whenOnline: true }),
+  ]);
+  return (
+    <section data-page-bento data-scheduled-dm-gallery className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+      <h2 className="mb-3 text-sm font-semibold">{t('dmSchedule.title', { defaultValue: 'Scheduled messages' })}</h2>
+      <AuthContext.Provider value={GALLERY_AUTH}>
+        <div className="mx-auto max-w-[640px] overflow-hidden rounded-2xl border border-white/10">
+          <div data-when-online-gallery data-chat-wallpaper className="chat-text-zone px-4 pb-2 pt-3">
+            {thread.map((m) => (
+              <DmMessageBubble key={m._id} message={m} isOwnMessage cozy={{ first: true, last: true }} currentUserAddress={me.address} />
+            ))}
+          </div>
+          <ScheduledStrip items={items} onOpen={() => setList(true)} />
+          <ChatInput
+            onSendMessage={async () => true}
+            onTipClick={() => {}}
+            onPollClick={() => {}}
+            scheduledCount={items.length}
+            onScheduleClick={({ text, clear }) => (text ? setDraft({ text, clear }) : setList(true))}
+          />
+        </div>
+        <ScheduleSheet
+          isOpen={!!draft}
+          onClose={() => setDraft(null)}
+          scheduledDate={null}
+          onSchedule={(date) => {
+            if (!date || !draft) return;
+            setItems(prev => [...prev, row(String(Date.now()), draft.text, (date.getTime() - Date.now()) / 3_600_000)].sort((x, y) => x.sendAt.localeCompare(y.sendAt)));
+            draft.clear();
+          }}
+          onWhenOnline={() => {
+            if (!draft) return;
+            setThread(prev => [...prev, sent(String(Date.now()), draft.text, 0, { whenOnline: true })]);
+            draft.clear();
+          }}
+          kind="message"
+          moving
+          title={t('dmSchedule.whenTitle', { defaultValue: 'Send when?' })}
+        />
+        <ScheduledMessagesDrawer open={list} onOpenChange={setList} dmId="gallery" peerName="Ava" items={items} />
+      </AuthContext.Provider>
+    </section>
+  );
+}
+
+/** Messages on a phone: hold a chat to pick it, tap others, then act on all of them. */
+function ChatBulkGallery() {
+  const now = new Date(Date.now() - 2 * 3600_000).toISOString();
+  const names = ['Ava', 'Noah', 'Kai', 'Mina', 'Theo'];
+  const rows = names.map((name, i) => {
+    const user = { address: `0x77777777777777777777777777777777777777${70 + i}`, username: name.toLowerCase(), displayName: name } as DeHubUser;
+    return {
+      id: `gallery-bulk-${i}`,
+      participants: [user],
+      otherUser: user,
+      unreadCount: i === 1 ? 2 : 0,
+      createdAt: now,
+      updatedAt: now,
+      lastMessage: { id: `gallery-bulk-msg-${i}`, conversationId: `gallery-bulk-${i}`, sender: user, content: ['See you at eight then', 'Sent the files over', 'Loved your last video!', 'Are you open to a collab?', 'gm'][i], createdAt: now } as DeHubDMMessage,
+    };
+  });
+  const picked = new Set([1, 2]);
+  const noop = () => {};
+  return (
+    <section data-page-bento data-chat-bulk-gallery className="mb-5 max-w-md overflow-hidden rounded-3xl border border-white/10 bg-white/[0.04]">
+      <h2 className="px-4 pt-4 text-sm font-semibold">Messages: picking chats on a phone</h2>
+      {rows.map((c, i) => (
+        <ConversationItem key={c.id} conversation={c} onClick={noop} isSelected={false} onDelete={noop} onBlock={noop} selecting checked={picked.has(i)} />
+      ))}
+      <BulkChatBar count={picked.size} chatIds={[]} allUnread={false} onToggleUnread={noop} onDelete={noop} onReply={async () => 0} onCancel={noop} touch />
+    </section>
+  );
+}
+
+function MessageRequestsGallery() {
+  const { t } = useTranslation();
+  const person = (name: string, text: string, unread: number) => (
+    <div key={name} className="flex w-full items-center gap-3 border-t border-white/[0.07] p-4">
+      <span className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg bg-zinc-700 font-medium text-white">{name.charAt(0)}</span>
+      <span className="min-w-0 flex-1">
+        <span className="block truncate font-semibold text-white">{name}</span>
+        <span className={`block truncate text-sm text-white ${unread ? 'font-bold' : 'font-normal'}`}>{text}</span>
+      </span>
+      <UnreadCountChip count={unread} className="ml-0.5" />
+    </div>
+  );
+  return (
+    <section data-page-bento data-message-requests-gallery className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+      <h2 className="mb-3 text-sm font-semibold">{t('dmRequests.title', { defaultValue: 'Requests' })}</h2>
+      <div className="mx-auto grid max-w-[960px] gap-3 md:grid-cols-3">
+        <div data-requests-inbox className="overflow-hidden rounded-2xl border border-white/10">
+          <MessageRequestsRow count={3} unread={2} onClick={() => {}} />
+          {person('Ava', 'See you at eight then', 0)}
+          {person('Noah', 'Sent the files over', 1)}
+        </div>
+        <div data-requests-list className="overflow-hidden rounded-2xl border border-white/10">
+          <MessageRequestsHeader onBack={() => {}} />
+          {person('Kai', 'Hey, loved your last video!', 1)}
+          {person('Mina', 'Are you open to a collab?', 1)}
+          {person('Theo', 'gm', 0)}
+        </div>
+        <div data-requests-thread className="overflow-hidden rounded-2xl border border-white/10 pb-3">
+          <MessageRequestBarView name="Kai" onAccept={() => {}} onDelete={() => {}} onBlock={() => {}} />
+          <div className="mx-3 mt-3 w-fit rounded-2xl bg-white/[0.08] px-3 py-2 text-sm text-white">Hey, loved your last video!</div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+const EDIT_HISTORY_SAMPLE = [
+  { name: 'Morning run', description: '5 km before work. Legs are done.', at: '2026-11-14T07:02:00Z', current: false },
+  { name: 'Morning run', description: '6 km before work. Legs are done.', at: '2026-11-14T07:10:00Z', current: false },
+  { name: 'Sunrise run by the harbour', description: '6 km before work. Legs are done.', at: '2026-11-14T09:41:00Z', current: false },
+  { name: 'Sunrise run by the harbour', description: '6 km before work. Legs are done but the view was worth it.', at: '2026-11-17T04:15:00Z', current: true },
+];
+
+function PostEditHistoryGallery() {
+  const { t } = useTranslation();
+  const now = EDIT_HISTORY_SAMPLE[EDIT_HISTORY_SAMPLE.length - 1];
+  return (
+    <section data-page-bento data-post-edit-history-gallery className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+      <h2 className="mb-3 text-sm font-semibold">{t('postEditHistory.title', { defaultValue: 'Edit history' })}</h2>
+      <div className="mx-auto grid max-w-[760px] gap-3 md:grid-cols-2">
+        <section className="bg-white/5 rounded-xl p-4 border border-white/10">
+          <h2 className="text-sm font-medium text-white/60 mb-3">{t('postInfo.content')}</h2>
+          <p className="text-white font-medium mb-2">{now.name}</p>
+          <p className="text-sm text-white/70">{now.description}</p>
+          <PostEditHistoryLineView editCount={3} versions={EDIT_HISTORY_SAMPLE} />
+        </section>
+        <div className="rounded-xl border border-white/10 bg-white/5 p-4">
+          <PostEditHistoryViewer versions={EDIT_HISTORY_SAMPLE} />
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function ToastsGallery() {
+  const { t } = useTranslation();
+  const showUpdate = () => {
+    showUpdateToast({ id: 'gallery', note: t('toasts.refresh_to_pick_up_the_latest_changes'), url: 'https://riftn.com' } as BuildVersion,
+      t('toasts.refresh_to_pick_up_the_latest_changes'), false, () => {});
+    toast.success(t('toasts.rewards_claimed'), { description: t('toasts.rewards_sent_to_wallet') });
+  };
+  return (
+    <section data-page-bento data-toasts-gallery className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+      <h2 className="mb-3 text-sm font-semibold">{t('toasts.new_version_available')}</h2>
+      <button type="button" data-kit-button="primary" onClick={showUpdate} className="rounded-xl px-4 py-2 text-sm font-medium">
+        {t('toasts.refresh')}
+      </button>
+      <button
+        type="button"
+        data-kit-button="quiet"
+        data-undo-toast
+        onClick={() => showUndoToast(t('toasts.conversation_deleted'), { id: 'gallery-undo', duration: 60_000, undoLabel: t('common.undo'), closeLabel: t('common.close'), onUndo: () => {} })}
+        className="ml-2 rounded-xl px-4 py-2 text-sm font-medium"
+      >
+        {t('common.undo')}
+      </button>
+    </section>
+  );
+}
+
+function TooltipsGallery() {
+  const { t: _copy } = _useCopy();
+  const tabs = [
+    { icon: Trophy, label: _copy("copy.d05e07b7c14e", { defaultValue: "Balance" }) },
+    { icon: Star, label: _copy("copy.18fdd549b2ed", { defaultValue: "New" }) },
+    { icon: MessagesSquare, label: _copy("copy.460b3a7da007", { defaultValue: "Chat" }) },
+  ];
+  return (
+    <section data-page-bento data-tooltips-gallery className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+      <h2 className="mb-3 text-sm font-semibold">{_copy("copy.1cfb0bd9a2d1", { defaultValue: "Tooltips" })}</h2>
+      <div
+        className="relative flex h-24 items-center justify-around overflow-hidden rounded-2xl"
+        style={{ backgroundImage: 'repeating-linear-gradient(115deg, #f43f5e 0 14px, #facc15 14px 28px, #22d3ee 28px 42px, #ffffff 42px 56px)' }}
+      >
+        {tabs.map(({ label }) => (
+          <span key={label} data-glass-tooltip className="rounded-md px-2 py-1 text-[11px] font-medium leading-tight">
+            {label}
+          </span>
+        ))}
+      </div>
+      <div data-tooltips-hover-row className="mt-3 flex">
+        {tabs.map(({ icon: Icon, label }) => (
+          <button key={label} type="button" title={label} aria-label={label} className="flex flex-1 items-center justify-center py-2.5 text-zinc-400 hover:text-white">
+            <Icon className="h-4 w-4" />
+          </button>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/**
+ * Floating menus: the reaction tray and the hand-rolled in-page menus
+ * ([data-glass-menu]) share the portalled menus' liquid glass
+ * (styles/glass-surfaces.css). Drawn over a bright stripe so the frost shows.
+ */
+function MenusGallery() {
+  const { t: _copy } = _useCopy();
+  const items = [
+    _copy("copy.d05e07b7c14e", { defaultValue: "Balance" }),
+    _copy("copy.18fdd549b2ed", { defaultValue: "New" }),
+    _copy("copy.460b3a7da007", { defaultValue: "Chat" }),
+  ];
+  return (
+    <section data-page-bento data-menus-gallery className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+      <h2 className="mb-3 text-sm font-semibold">{_copy("copy.93534e3e8a8d", { defaultValue: "Menus" })}</h2>
+      <div
+        className="relative flex flex-wrap items-center justify-around gap-4 overflow-hidden rounded-2xl p-5"
+        style={{ backgroundImage: 'repeating-linear-gradient(115deg, #f43f5e 0 14px, #facc15 14px 28px, #22d3ee 28px 42px, #ffffff 42px 56px)' }}
+      >
+        <div data-reaction-tray className="flex items-center gap-0.5 rounded-2xl border border-white/15 px-1.5 py-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.10),0_8px_32px_rgba(0,0,0,0.45)]">
+          {['like', 'love', 'hot', 'lol', 'sad', 'dislike'].map((key) => (
+            <span key={key} className="flex h-9 w-9 items-center justify-center text-[22px] leading-none">
+              <ReactionEmoji reaction={key as PostReaction} />
+            </span>
+          ))}
+        </div>
+        <div data-glass-menu className="w-40 overflow-hidden rounded-xl border border-white/10 bg-zinc-800 py-1 shadow-xl">
+          {items.map((label) => (
+            <div key={label} className="px-3 py-2 text-sm text-white">{label}</div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function ReactionsGallery() {
+  const { t: _copy } = _useCopy();
+  const rows = [
+    { id: '990001', label: _copy("copy.5735e3593d23", { defaultValue: "No reaction yet" }), myReaction: null },
+    { id: '990002', label: _copy("copy.bf74a035bfa2", { defaultValue: "You disliked it" }), myReaction: 'dislike' as const },
+    { id: '990003', label: '👍 3 · 👎 9', myReaction: null, counts: SAMPLE_DISLIKED_REACTIONS, likes: 3, dislikes: 9 },
+    { id: '990004', label: '👍', myReaction: 'like' as const, counts: { like: 26 } },
+  ];
+  return (
+    <AuthContext.Provider value={GALLERY_AUTH}>
+    <section data-page-bento data-reactions-gallery className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+      <h2 className="mb-3 text-sm font-semibold">{_copy("copy.8a7ede6b5f07", { defaultValue: "Reactions" })}</h2>
+      <div className="grid gap-4 lg:grid-cols-2">
+        {rows.map((row) => (
+          <div key={row.id} data-reactions-row={row.id} className="rounded-2xl border border-white/10 bg-black/30 pt-3">
+            <p className="px-3 text-xs text-zinc-500">{row.label}</p>
+            <ActionBar
+              postId={row.id}
+              likeCount={'likes' in row ? row.likes : 26}
+              dislikeCount={'dislikes' in row ? row.dislikes : 3}
+              commentCount={5}
+              repostCount={2}
+              reactionCounts={'counts' in row ? row.counts : SAMPLE_REACTIONS}
+              myReaction={row.myReaction}
+              isDisliked={row.myReaction === 'dislike'}
+              isLiked={row.myReaction === 'like'}
+              hideUtility
+            />
+          </div>
+        ))}
+      </div>
+    </section>
+    </AuthContext.Provider>
+  );
+}
+
+/**
+ * The live viewer's Share button over a broadcast: it opens the post's share
+ * drawer (repost, quote, send in a message, copy link, and the device's own
+ * sheet as "Share link").
+ */
+function LiveShareGallery() {
+  const { t: _copy } = _useCopy();
+  return (
+    <AuthContext.Provider value={GALLERY_AUTH}>
+    <section data-page-bento data-live-share-gallery className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+      <h2 className="mb-3 text-sm font-semibold">LIVE · {_copy("copy.29887a5ff984", { defaultValue: "Share" })}</h2>
+      <div className="relative overflow-hidden rounded-2xl">
+        <img src={galleryCover} alt="" className="aspect-video w-full object-cover" />
+        <div className="absolute bottom-3 right-3" data-keep-dark>
+          <ActionBar compact postId="990020" tokenId={990020} likeCount={12} dislikeCount={0} commentCount={0}
+            reactionCounts={SAMPLE_REACTIONS} myReaction={null} tipCount={3} onTip={() => {}}
+            nativeShare={{ title: 'Live now' }} />
+        </div>
+      </div>
+    </section>
+    </AuthContext.Provider>
+  );
+}
+
+/**
+ * "Share to Moment" (Build 407651da): the row in your own photo/video post's
+ * menu. Tapping it opens the Moment editor on the post.
+ */
+function ShareToMomentGallery() {
+  const { t } = useTranslation();
+  return (
+    <AuthContext.Provider value={GALLERY_AUTH}>
+    <section data-page-bento data-share-to-moment-gallery className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+      <h2 className="mb-3 text-sm font-semibold">MOMENTS · {t('stories.shareToMoment', 'Share to Moment')}</h2>
+      {/* Your own post, and someone else's public post: both offer the row. */}
+      <div className="flex flex-wrap gap-3">
+        <div data-keep-dark data-share-to-moment-own className="w-full max-w-[360px] rounded-2xl bg-zinc-900/90 p-2 flex flex-col gap-1">
+          <PostUtilityMenuItems postId="990030" tokenId={990030} isOwnPost canShareToMoment />
+        </div>
+        <div data-keep-dark data-share-to-moment-other className="w-full max-w-[360px] rounded-2xl bg-zinc-900/90 p-2 flex flex-col gap-1">
+          <PostUtilityMenuItems postId="990031" tokenId={990031} canShareToMoment />
+        </div>
+      </div>
+    </section>
+    </AuthContext.Provider>
+  );
+}
+
+/**
+ * Disliking a post folds it out of the feed (the 👎 button below plays that
+ * without casting a real vote; ↺ brings it back), and the profile Dislikes
+ * tab's empty and private states.
+ */
+function DislikesGallery() {
+  const { t } = useTranslation();
+  const postId = '990010';
+  return (
+    <AuthContext.Provider value={GALLERY_AUTH}>
+    <section data-page-bento data-dislikes-gallery className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+      <div className="mb-3 flex items-center gap-2">
+        <h2 className="text-sm font-semibold">{t('profile.tabs.dislikes')}</h2>
+        <button type="button" data-dislikes-play aria-label={t('profile.tabs.dislikes')} onClick={() => hideDislikedPost(postId)}
+          className="ml-auto rounded-full border border-white/15 bg-white/5 p-2"><ThumbsDown className="h-4 w-4" /></button>
+        <button type="button" data-dislikes-undo aria-label={t('common.undo', 'Undo')} onClick={() => restoreDislikedPost(postId)}
+          className="rounded-full border border-white/15 bg-white/5 p-2"><Undo2 className="h-4 w-4" /></button>
+      </div>
+      <div data-feed-root className="space-y-3">
+        <WindowedFeedItem data-feed-item eager estimatedHeight={160} vanishOnDislike={postId}
+          className="rounded-2xl border border-white/[0.12] bg-white/[0.03] p-3">
+          <img src={galleryCover} alt="" className="aspect-video w-full max-w-md rounded-xl object-cover" />
+          <ActionBar postId={postId} likeCount={4} dislikeCount={1} commentCount={2} repostCount={0}
+            reactionCounts={SAMPLE_REACTIONS} myReaction={null} hideUtility />
+        </WindowedFeedItem>
+        <div data-feed-item className="rounded-2xl border border-white/[0.12] bg-white/[0.03] p-3 text-xs text-zinc-400">
+          {t('profile.dislikes.emptyOwn')}
+        </div>
+      </div>
+      <div className="mt-4 grid gap-4 sm:grid-cols-2">
+        <div className="rounded-2xl border border-white/10 bg-black/30"><AppState icon="posts" title={t('profile.dislikes.emptyTitle')} description={t('profile.dislikes.emptyOwn')} size="compact" /></div>
+        <div className="rounded-2xl border border-white/10 bg-black/30"><AppState icon="lock" title={t('profile.dislikes.privateTitle')} description={t('profile.dislikes.privateDesc')} size="compact" /></div>
+      </div>
+    </section>
+    </AuthContext.Provider>
+  );
+}
+
+/**
+ * A new video's way to playable: the composer's bar under the attached video
+ * while it uploads early (lib/draft-video), and the glass dock pill that
+ * follows the post's transcode after Post. `?dock=processing|done|failed`
+ * also pins the pill where the app docks it, above the phone bottom nav.
+ */
+function VideoProcessingGallery({ docked }: { docked: PostProcessingPhase | null }) {
+  const { t } = useTranslation();
+  const drafts = [
+    { phase: 'uploading', uploadPercent: 40, processPercent: 0, draftId: null },
+    { phase: 'processing', uploadPercent: 100, processPercent: 62, draftId: 'gallery' },
+    { phase: 'ready', uploadPercent: 100, processPercent: 100, draftId: 'gallery' },
+  ] as const;
+  return (
+    <section data-page-bento data-video-processing-gallery className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+      <h2 className="mb-3 text-sm font-semibold">{t('postProcessing.preparingVideo')}</h2>
+      <div className="flex flex-wrap gap-5" data-draft-progress-samples>
+        {drafts.map((draft) => (
+          <div key={draft.phase} data-draft-sample={draft.phase} className="flex flex-col gap-3">
+            <img src={galleryCover} alt="" className="aspect-video w-[280px] rounded-2xl object-cover sm:w-[320px] md:w-[380px]" />
+            <DraftVideoProgress draft={{ ...draft }} />
+          </div>
+        ))}
+      </div>
+      <div
+        data-dock-samples
+        className="mt-5 flex flex-wrap items-center gap-3 rounded-2xl p-4"
+        style={{ backgroundImage: `url(${galleryCover})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
+      >
+        <PostProcessingPill phase="processing" progress={62} thumbnail={galleryCover} />
+        <PostProcessingPill phase="done" progress={100} thumbnail={galleryCover} onPress={() => undefined} />
+        <PostProcessingPill phase="failed" progress={0} thumbnail={galleryCover} onPress={() => undefined} />
+      </div>
+      {/* Portalled: the bento's backdrop filter would otherwise pin a fixed
+          child to the section instead of the viewport. */}
+      {docked && createPortal(
+        <div data-processing-dock-anchor>
+          <PostProcessingPill phase={docked} progress={docked === 'processing' ? 62 : 100} thumbnail={galleryCover} onPress={docked === 'processing' ? undefined : () => undefined} />
+        </div>,
+        document.body,
+      )}
+    </section>
+  );
+}
+
+const THEMES = [
+  'system', 'system-light', 'minimal', 'light', 'glass', 'cosmic', 'hazy', 'swarms',
+  'lavalamp', 'winter', 'war', 'osaka', 'jungle', 'island', 'hacker', 'horror',
+] as const;
+
+const ICONS: ThemeIconKey[] = [
+  'accounts', 'ads', 'arcade', 'assistant', 'audio', 'bookmarks', 'boost', 'bounties',
+  'bridge', 'buy', 'careers', 'command', 'comment-anchor', 'communities', 'dao', 'deep-current',
+  'email', 'events', 'features', 'flak-jacket', 'fractions', 'front-row', 'glossary', 'governance',
+  'harpoon', 'home', 'images', 'live', 'lock', 'messages', 'notifications', 'pinned',
+  'posts', 'precision-strike', 'profile', 'search', 'second-wind', 'settings', 'signal-flare', 'stages',
+  'staking', 'stats', 'stores', 'subscriptions', 'superpowers', 'team-up', 'timeline-bomber', 'trend-jacker',
+  'trophy', 'tv', 'usernames', 'videos', 'wallet', 'wand', 'paint',
+];
+
+/** Post stats: the Quick Peek sheet (tap the view pill) and the full Post Info panel, on example numbers. */
+function PostStatsGallery({ initiallyOpen }: { initiallyOpen: boolean }) {
+  const queryClient = useQueryClient();
+  const [seeded] = useState(() => {
+    queryClient.setQueryData(['post-stats', '777'], SAMPLE_POST_STATS);
+    queryClient.setQueryData(['post-stats-best-times'], SAMPLE_BEST_TIMES);
+    return true;
+  });
+  const [open, setOpen] = useState(initiallyOpen);
+  if (!seeded) return null;
+  return (
+    <section data-post-stats-gallery className="mb-5 max-w-xl">
+      <h2 className="mb-3 text-sm font-semibold">Post stats</h2>
+      <PostMetadata timestamp="2d" viewCount="1.2K" tokenId="777" isOwnPost />
+      <Button className="mt-3" onClick={() => setOpen(true)}>Quick Peek</Button>
+      <PostStatsSheet open={open} onOpenChange={setOpen} tokenId="777" />
+      <div className="mt-4" data-post-stats-gallery-panel>
+        <PostStatsPanel tokenId="777" />
+      </div>
+    </section>
+  );
+}
+
+/** Multi-post set up opened from the composer; ?sheet=multipost, &mp=empty for a first-time poster. */
+function MultiPostSheetGallery({ initiallyOpen, empty }: { initiallyOpen: boolean; empty: boolean }) {
+  const [open, setOpen] = useState(initiallyOpen);
+  const [selected, setSelected] = useState<string[]>(['g-x']);
+  const [connecting, setConnecting] = useState<string | null>(null);
+  const accounts = empty ? [] : [
+    { id: 'g-x', platform: 'twitter', username: 'riftn_com' },
+    { id: 'g-ig', platform: 'instagram', username: 'riftn.app' },
+    { id: 'g-fc', platform: 'farcaster', username: '', pending: true, approvalUrl: 'https://farcaster.xyz' },
+  ];
+  return (
+    <section data-multipost-gallery className="mb-5">
+      <Button onClick={() => setOpen(true)}>Multi-posting sheet</Button>
+      <MultiPostSheetView
+        open={open}
+        onOpenChange={setOpen}
+        accounts={accounts}
+        balance={empty ? 0 : 42}
+        selected={selected}
+        onToggle={(id) => setSelected((s) => (s.includes(id) ? s.filter((x) => x !== id) : [...s, id]))}
+        connecting={connecting}
+        onConnect={(p) => { setConnecting(p); setTimeout(() => setConnecting(null), 1500); }}
+        buying={false}
+        onBuy={() => {}}
+      />
+    </section>
+  );
+}
+
+/** The "Add a profile photo" ask; saving here only waits, nothing uploads. */
+function AvatarPromptGallery({ initiallyOpen }: { initiallyOpen: boolean }) {
+  const [open, setOpen] = useState(initiallyOpen);
+  return (
+    <section data-avatar-prompt-gallery className="mb-5">
+      <Button onClick={() => setOpen(true)}>Profile photo prompt</Button>
+      <AvatarPromptSheet
+        open={open}
+        onOpenChange={setOpen}
+        name="Nova"
+        onSave={() => new Promise((resolve) => window.setTimeout(resolve, 800))}
+      />
+    </section>
+  );
+}
+
+/** "Unfollow all N not following you back": every stage, nothing is unfollowed. */
+function NonFollowerOfferGallery({ initialStage }: { initialStage: NonFollowerOfferStage | null }) {
+  const [open, setOpen] = useState(!!initialStage);
+  const [stage, setStage] = useState<NonFollowerOfferStage>(initialStage ?? 'offer');
+  const [done, setDone] = useState(stage === 'done' ? 47 : stage === 'working' ? 18 : 0);
+  const confirm = () => {
+    setStage('working');
+    setDone(0);
+    let n = 0;
+    const tick = window.setInterval(() => {
+      n = Math.min(47, n + 6);
+      setDone(n);
+      if (n >= 47) { window.clearInterval(tick); setStage('done'); }
+    }, 400);
+  };
+  return (
+    <section data-non-follower-gallery className="mb-5">
+      <Button onClick={() => { setStage('offer'); setDone(0); setOpen(true); }}>Unfollow non-followers prompt</Button>
+      <NonFollowerOfferSheet
+        open={open}
+        onOpenChange={setOpen}
+        stage={stage}
+        count={47}
+        done={done}
+        failed={0}
+        onAsk={() => setStage('confirm')}
+        onConfirm={confirm}
+        onBack={() => setStage('offer')}
+        onNotNow={() => setOpen(false)}
+      />
+    </section>
+  );
+}
+
+/**
+ * "Follow back all": the button arriving (shake + chime), the phone confirm
+ * sheet in every stage, and the desktop toast. Nothing is followed.
+ */
+function FollowBackAllGallery({ initialStage }: { initialStage: FollowBackAllStage | 'button' | null }) {
+  const [stage, setStage] = useState<FollowBackAllStage | null>(initialStage && initialStage !== 'button' ? initialStage : null);
+  const [completed, setCompleted] = useState(stage === 'working' ? 14 : 0);
+  const [nudge, setNudge] = useState(false);
+  const { t } = useTranslation();
+  const total = 23;
+  const confirm = () => {
+    setStage('working');
+    setCompleted(0);
+    let n = 0;
+    const tick = window.setInterval(() => {
+      n = Math.min(total, n + 4);
+      setCompleted(n);
+      if (n >= total) { window.clearInterval(tick); setStage('done'); }
+    }, 350);
+  };
+  const arrive = () => { setNudge(true); playFollowBackChime(); };
+  if (!initialStage) {
+    return (
+      <section data-follow-back-gallery className="mb-5">
+        <a className="text-sm underline" href="?sheet=follow-back&stage=button">Follow back all</a>
+      </section>
+    );
+  }
+  return (
+    <section data-follow-back-gallery className="mb-5 space-y-3">
+      <div className="relative mx-auto h-[560px] max-w-md overflow-hidden rounded-[28px] border border-white/10 bg-black/30 backdrop-blur-2xl">
+        <div className="px-4 pt-5 pb-3 text-lg font-semibold text-white">Followers (128)</div>
+        <div className="px-4 pb-3">
+          <FollowBackAllButton
+            onClick={() => setStage('confirm')}
+            finding={false}
+            working={stage === 'working'}
+            completed={completed}
+            total={total}
+            nudge={nudge}
+            onNudgeEnd={() => setNudge(false)}
+          />
+        </div>
+        <div className="space-y-2 px-4">
+          {['ana', 'kofi', 'lena', 'mika', 'sol'].map((name) => (
+            <div key={name} className="flex items-center gap-3 rounded-xl bg-white/5 p-3">
+              <div className="h-12 w-12 rounded-xl bg-white/10" />
+              <div className="flex-1 text-sm text-white">@{name}</div>
+              <div className="h-8 w-24 rounded-lg bg-white/10" />
+            </div>
+          ))}
+        </div>
+        {stage && (
+          <FollowBackAllSheet
+            stage={stage}
+            count={total}
+            completed={completed}
+            followed={total}
+            failed={0}
+            onConfirm={confirm}
+            onClose={() => setStage(null)}
+          />
+        )}
+      </div>
+      <div className="flex flex-wrap justify-center gap-2">
+        <Button size="sm" variant="glass" onClick={arrive}>Replay arrival</Button>
+        <Button
+          size="sm"
+          variant="glass"
+          data-follow-back-desktop-toast
+          onClick={() => toast(t('follow.followBackConfirmTitle', { count: total }), {
+            id: 'follow-back-all',
+            description: t('follow.followBackConfirmBody'),
+            duration: 12000,
+            action: { label: t('follow.followBackConfirm'), onClick: () => toast.success(t('follow.followedBackCount', { count: total }), { id: 'follow-back-all' }) },
+            cancel: { label: t('follow.followBackNotNow'), onClick: () => {} },
+          })}
+        >
+          Desktop toast
+        </Button>
+      </div>
+    </section>
+  );
+}
+
+export default function StateGalleryPage() {
+  const { t: _copy } = _useCopy();
+  const { t } = useTranslation();
+  const { theme, themeChoice, setTheme } = useAppTheme();
+  const [params, setParams] = useSearchParams();
+  const requestedTheme = params.get('theme');
+  const [presses, setPresses] = useState(0);
+  const [badge, setBadge] = useState<{ anchor: HTMLElement | null; promote: boolean; first?: boolean } | null>(null);
+  const [badgeTier, setBadgeTier] = useState(1);
+  const warmBadge = () => { void preloadBadgeShowcase(badgeAnimationStyle(theme) === 'metallic' ? BADGE_ORDER[badgeTier] : undefined).catch(() => {}); };
+  const press = () => setPresses((count) => count + 1);
+
+  useEffect(() => {
+    if (requestedTheme && THEMES.includes(requestedTheme as typeof THEMES[number]) && requestedTheme !== themeChoice) {
+      setTheme(requestedTheme);
+    }
+  }, [requestedTheme, setTheme, themeChoice]);
+
+  const chooseTheme = (nextTheme: typeof THEMES[number]) => {
+    setTheme(nextTheme);
+    setParams({ theme: nextTheme }, { replace: true });
+  };
+
+  return (
+    <main
+      id="app-root"
+      data-theme-gallery={theme}
+      data-glass-page
+      className="relative z-10 min-h-screen px-5 py-8 text-white sm:px-8"
+      style={theme === 'cosmic' ? {
+        backgroundColor: '#03030a',
+        backgroundImage: 'radial-gradient(circle at 75% 5%, rgb(77 47 145 / 0.28), transparent 42%), radial-gradient(circle at 10% 80%, rgb(21 89 123 / 0.22), transparent 38%)',
+      } : undefined}
+    >
+      <div className="mx-auto max-w-6xl">
+        <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-zinc-500">{_copy("copy.fa03600217af", { defaultValue: "Universal app states" })}</p>
+            <h1 className="mt-2 text-3xl font-semibold capitalize">{themeChoice.replace('-', ' ')}{_copy("copy.ac06016aec14", { defaultValue: " theme" })}</h1>
+            <p className="mt-2 max-w-xl text-sm text-zinc-500">{_copy("copy.b061895ebdc1", { defaultValue: "One semantic system, with the icon material owned by the active theme." })}</p>
+          </div>
+          <div className="flex max-w-2xl flex-wrap justify-end gap-2">
+            {THEMES.map((item) => (
+              <button
+                key={item}
+                type="button"
+                onClick={() => chooseTheme(item)}
+                className={`rounded-full border px-3 py-1.5 text-xs capitalize backdrop-blur-xl transition ${
+                  item === themeChoice ? 'border-white/35 bg-white/15' : 'border-white/10 bg-white/5 text-zinc-500'
+                }`}
+              >
+                {item}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {params.get('predictions') === '1' && <PredictionGallery />}
+        {params.get('spotify') === '1' && <SpotifyGallery />}
+        {params.get('resetwallet') && (
+          <section data-reset-wallet-gallery className="mb-5 max-w-xl">
+            <ResetWalletSettings preview={(['ready', 'no-login', 'signed-in-with-wallet', 'done'] as const).find((s) => s === params.get('resetwallet')) ?? ('ready' as ResetWalletReadiness)} />
+          </section>
+        )}
+        {params.get('sounds') === '1' && <SoundsGallery step={params.get('soundstep')} library={params.get('library')} />}
+        {params.get('thread') === '1' && <AuthorThreadGallery />}
+        {params.get('coauthors') && <CoAuthorsGallery mode={params.get('coauthors')} />}
+        {params.get('bold') && <BoldTextGallery />}
+        {params.get('composer') === '1' && <ThreadedComposerGallery />}
+        {params.get('notifs') === '1' && <NotificationRowsGallery />}
+        {params.get('links') === '1' && <LinkCardsGallery mention={params.get('mention')} />}
+        {params.get('museum') && <BadgeMuseumGallery sheet={params.get('museum') === 'sheet'} />}
+
+        <AvatarPromptGallery initiallyOpen={params.get('sheet') === 'avatar-prompt'} />
+
+        <NonFollowerOfferGallery
+          initialStage={params.get('sheet') === 'non-followers'
+            ? ((['offer', 'confirm', 'working', 'done', 'error'] as const).find((s) => s === params.get('stage')) ?? 'offer')
+            : null}
+        />
+
+        <FollowBackAllGallery
+          initialStage={params.get('sheet') === 'follow-back'
+            ? ((['button', 'confirm', 'working', 'done'] as const).find((s) => s === params.get('stage')) ?? 'button')
+            : null}
+        />
+
+        <VideoProcessingGallery
+          docked={(['processing', 'done', 'failed'] as const).find((phase) => phase === params.get('dock')) ?? null}
+        />
+
+        <OwnKeysGallery />
+        <McpKeysGallery />
+        <ProfileArrangeGallery />
+        <ComicGallery />
+        <UsernameReserveGallery />
+
+        <ReactionRowsGallery />
+        <NameBadgesGallery />
+        <FullScreenChatGallery />
+        <CatchUpGallery />
+        <MessageMenuGallery />
+        <ChatReactionArrivalGallery />
+        <FollowCardsGallery />
+        <AssistantCardsGallery />
+
+        <StreamerArtworkGallery />
+
+        <section data-page-bento data-login-look-gallery className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+          <LoginLookSetting />
+        </section>
+        <section data-page-bento data-arrival-look-gallery className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+          <ArrivalLookSetting />
+        </section>
+        <PinnedProfileGallery />
+        <ProfileImageMenuGallery />
+        <ContentWarningGallery />
+        <PostBackgroundsGallery initialBg={params.get('pbg')} initiallyOpen={params.get('sheet') === 'post-bg'} />
+        <TextTilesGallery />
+        <ArticleTilesGallery initialLook={params.get('atile')} initiallyOpen={params.get('sheet') === 'article-tile'} />
+        <FormatIconsGallery />
+        <GridCardsGallery />
+        <GridReorderGallery />
+
+        <PollGallery />
+        <LockedChatGallery />
+        <ProposalCardGallery />
+        <AgentWelcomeGallery />
+        <LiveViewerGallery />
+        <LivePointsGallery initiallyOpen={params.get('sheet') === 'rewards'} />
+        <StreamPetGallery />
+        <HolderGroupGallery />
+        <GroupsChannelsGallery />
+        <NewMessageDrawerGallery />
+
+        <section data-page-bento data-badge-gallery className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+          <h2 className="mb-3 text-sm font-semibold">{_copy("copy.43a84f7c2297", { defaultValue: "Badge animations" })}</h2>
+          <div className="flex flex-wrap items-center gap-3">
+            <select aria-label={_copy("copy.ec7ae81278ad", { defaultValue: "Badge tier" })} value={badgeTier} onChange={event => setBadgeTier(Number(event.target.value))}
+              className="rounded-lg border border-white/15 bg-background p-2 text-sm">
+              {BADGE_ORDER.map((tier, index) => <option key={tier} value={index}>{index + 1}. {tier}</option>)}
+            </select>
+            <button className="flex items-center gap-2 p-2" onPointerEnter={warmBadge} onFocus={warmBadge} onTouchStart={warmBadge} onClick={event => setBadge({ anchor: event.currentTarget.querySelector('img'), promote: false })}>
+              <img src={badgeImage(BADGE_ORDER[badgeTier]) ?? ''} alt="" className="h-10 w-10" />{_copy("copy.a698decd6fbd", { defaultValue: " Open badge" })}</button>
+            <button className="flex items-center gap-2 p-2" onClick={event => setBadge({ anchor: event.currentTarget.querySelector('img'), promote: true })}>
+              <img src={badgeImage(BADGE_ORDER[Math.max(0, badgeTier - 1)]) ?? ''} alt="" className="h-10 w-10" />{_copy("copy.a1fde35ae1b6", { defaultValue: " Promote badge" })}</button>
+            <button className="p-2" onClick={() => setBadge({ anchor: null, promote: true, first: true })}>{_copy("copy.7805d3b61e8f", { defaultValue: "First badge" })}</button>
+          </div>
+          <div data-inline-badge-gallery className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {[12, 14, 16, 24].map(size => (
+              <div key={size} data-badge-font-size={size} className="space-y-3">
+                <p className="text-xs text-zinc-500">{size}{_copy("copy.6bd019c9ce73", { defaultValue: "px names" })}</p>
+                {BADGE_ORDER.map(tier => (
+                  <span key={tier} data-badge-sample={tier} className="flex items-baseline gap-1" style={{ fontSize: size, lineHeight: 1.4 }}>
+                    <span className="font-semibold">H {tier}</span>
+                    <BadgeIcon src={badgeImage(tier)} />
+                  </span>
+                ))}
+              </div>
+            ))}
+          </div>
+          <div className="mt-4 flex flex-wrap gap-4" data-badge-font-inheritance>
+            <BadgedName badgeBalance={50_000_000} className="text-xs font-semibold">{_copy("copy.dbbdf8b3a103", { defaultValue: "H Compact name" })}</BadgedName>
+            <BadgedName badgeBalance={50_000_000} className="text-2xl font-bold">{_copy("copy.5331015e914e", { defaultValue: "H Profile name" })}</BadgedName>
+          </div>
+        </section>
+        {badge && <Suspense fallback={null}>
+          <BadgeShowcase tier={badge.first ? 'Crab' : BADGE_ORDER[badgeTier]} anchor={badge.anchor}
+            promotedFrom={badge.promote ? badge.first || badgeTier === 0 ? null : BADGE_ORDER[badgeTier - 1] : undefined} onClose={() => setBadge(null)} />
+        </Suspense>}
+
+        <section data-page-bento className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4 backdrop-blur-xl">
+          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">{_copy("copy.d08726f3e653", { defaultValue: "Semantic icon family" })}</p>
+          <div className="grid grid-cols-4 gap-3 sm:grid-cols-8" data-theme-icon-grid>
+            {ICONS.map((icon) => (
+              <div key={icon} className="flex min-w-0 flex-col items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.04] p-3">
+                <ThemedIcon icon={icon} alt="" className="h-12 w-12 object-contain" />
+                <span className="max-w-full truncate text-[10px] capitalize text-zinc-500">{icon}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section data-home-loading-gallery className="mb-5">
+          <h2 className="mb-3 text-sm font-semibold">{_copy("copy.b644f52adc76", { defaultValue: "Home loading" })}</h2>
+          <div className="max-w-2xl mx-auto">
+            <FeedTabBarSkeleton />
+            <div data-feed-root className="p-2 sm:p-3 pt-0 sm:pt-0">
+              <FeedCardSkeletonList count={3} columns={1} />
+            </div>
+          </div>
+        </section>
+
+        <PageKitGallery />
+        <GithubLinkGallery />
+        <section data-page-bento data-signed-follows-gallery className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+          <SignedFollowsSetting />
+        </section>
+        <ProfileFieldsGallery />
+
+        <section data-page-bento className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+          <h2 className="mb-3 text-sm font-semibold">{_copy("copy.64392c53237a", { defaultValue: "Theme controls" })}</h2>
+          <div className="flex flex-wrap items-center gap-3" data-theme-control-grid>
+            <Button onClick={press}>{_copy("copy.efe10c80ec8a", { defaultValue: "Primary" })}</Button>
+            <Button variant="secondary" onClick={press}>{_copy("copy.62f2ccfffcc5", { defaultValue: "Secondary" })}</Button>
+            <Button variant="outline" onClick={press}>{_copy("copy.eabbf3abaf8d", { defaultValue: "Outline" })}</Button>
+            <Button variant="glass" onClick={press}>{_copy("copy.82c268188cd6", { defaultValue: "Glass" })}</Button>
+            <Button variant="ghost" onClick={press}>{_copy("copy.df1bc4984a05", { defaultValue: "Ghost" })}</Button>
+            <Button variant="destructive" onClick={press}>{_copy("copy.c3e58a73609d", { defaultValue: "Destructive" })}</Button>
+            <Button disabled>{_copy("copy.75081b593d15", { defaultValue: "Disabled" })}</Button>
+            <button className="rounded-xl bg-white px-4 py-2 text-black" onClick={press}>{_copy("copy.71420ed6d983", { defaultValue: "Neutral white" })}</button>
+            <button className="rounded-xl bg-zinc-800 px-4 py-2 text-white" onClick={press}>{_copy("copy.6ad68ee9fcc1", { defaultValue: "Neutral zinc" })}</button>
+            <button className="rounded-xl bg-gradient-to-br from-white/20 via-white/10 to-white/5 border border-white/30 px-4 py-2 text-white" onClick={press}>{_copy("copy.d7b9e99fbc88", { defaultValue: "Neutral gradient" })}</button>
+            <button data-primary-cta data-nav-create className="rounded-2xl bg-zinc-900/90 border border-white/30 px-4 py-3" onClick={press}>
+              <div className="flex items-center justify-center gap-2 font-semibold text-white">
+                <PenSquare className="h-[18px] w-[18px]" />
+                <span>{t('nav.create')}</span>
+              </div>
+            </button>
+            <LiquidGlassBubble2 label={_copy("copy.fc922b564311", { defaultValue: "Bubble action" })} onClick={press} />
+            <LiquidGlassBubble2 label={_copy("copy.d2f3799012c3", { defaultValue: "Active bubble" })} active onClick={press} />
+            <LiquidGlassBubble2 label={_copy("copy.b8d66477ae02", { defaultValue: "Disabled bubble" })} disabled onClick={press} />
+            <button className="rounded-xl bg-red-600 px-4 py-2 text-white" onClick={press}>{_copy("copy.c2ca38f2ffc5", { defaultValue: "Semantic red" })}</button>
+            <button className="rounded-xl px-4 py-2 hover:bg-white/10" onClick={press}>{_copy("copy.8ab32717132c", { defaultValue: "Bare action" })}</button>
+          </div>
+          <output aria-live="polite" className="mt-3 block text-xs">{_copy("copy.c9098dc7451d", { defaultValue: "Actions fired: " })}{presses}</output>
+        </section>
+
+        <section data-page-bento className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4" data-wallet-backup-gallery>
+          <h2 className="mb-3 text-sm font-semibold">{_copy("copy.3c00e7b75264", { defaultValue: "Wallet backup" })}</h2>
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="rounded-2xl border border-white/10 bg-black/40 p-4">
+              <SeedPhraseBackup phrase={SAMPLE_PHRASE} variant="signup" onFinished={press} />
+            </div>
+            <div className="rounded-2xl border border-white/10 bg-black/40 p-4">
+              <SeedPhraseBackup phrase={SAMPLE_PHRASE} variant="settings" onFinished={press} />
+            </div>
+            <div className="rounded-2xl border border-white/10 bg-black/40 p-4">
+              <SeedPhraseBackup phrase={SAMPLE_PHRASE} variant="signup" initialStage="check" onFinished={press} />
+            </div>
+            <div className="rounded-2xl border border-white/10 bg-black/40 p-4">
+              <PrivateKeyBackup privateKey={`0x${'01'.repeat(32)}`} hasPhrase={false} onFinished={press} />
+            </div>
+          </div>
+          <div className="mt-5 max-w-xl">
+            <BackupReminderCard onBackUp={press} onLater={press} />
+          </div>
+        </section>
+
+        <TipMessageGallery />
+        <LockedDmGallery />
+        <UnlockRevealGallery />
+        <MintChainGallery />
+        <CollectGallery />
+        <CoinPayGallery />
+        <WhenSheetGallery />
+        <ScheduledDmGallery />
+        <MessageRequestsGallery />
+        <ChatBulkGallery />
+        <PostEditHistoryGallery />
+        <PostStatsGallery initiallyOpen={params.get('open') === 'post-stats'} />
+        <MultiPostSheetGallery initiallyOpen={params.get('sheet') === 'multipost'} empty={params.get('mp') === 'empty'} />
+        <ToastsGallery />
+        <TooltipsGallery />
+        <AppTokensGallery />
+        <AudioGallery />
+        <PostOptionsGallery />
+        <PostTranslateGallery />
+        <CoStreamInviteGallery />
+        <FeedFilterLineGallery />
+        <AltPillGallery />
+        <VoiceNotesGallery />
+        <StageCoversGallery />
+        <CaptureCardGallery />
+        <MenuReorderGallery />
+        <LiveAvatarsGallery />
+        <ReactionsGallery />
+        <LiveShareGallery />
+        <ShareToMomentGallery />
+        <DislikesGallery />
+        <MenusGallery />
+
+        <ArticleGallery onAction={press} />
+
+        <section className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          <div data-page-bento className="overflow-hidden rounded-3xl border border-white/10 bg-white/[0.04] backdrop-blur-xl">
+            <AppState
+              icon="communities"
+              title={_copy("copy.46ff381b91e6", { defaultValue: "No communities yet" })}
+              description={_copy("copy.f88ed969d454", { defaultValue: "Communities you join will appear here." })}
+              size="section"
+              primaryAction={{ label: _copy("copy.9ee9a4e1de2e", { defaultValue: "Explore communities" }), onClick: () => undefined }}
+            />
+          </div>
+          <div data-page-bento className="overflow-hidden rounded-3xl border border-white/10 bg-white/[0.04] backdrop-blur-xl">
+            <AppState
+              icon="search"
+              title={_copy("copy.7d7e36058609", { defaultValue: "No results found" })}
+              description={_copy("copy.6a4877d51d2d", { defaultValue: "Try a different search or remove a filter." })}
+              kind="search-empty"
+              size="section"
+            />
+          </div>
+          <div data-page-bento className="overflow-hidden rounded-3xl border border-white/10 bg-white/[0.04] backdrop-blur-xl">
+            <AppState
+              icon="notifications"
+              title={_copy("copy.7b9e7606e550", { defaultValue: "Content could not load" })}
+              description={_copy("copy.481859b689b0", { defaultValue: "Check your connection and try again." })}
+              kind="error"
+              size="section"
+              primaryAction={{ label: _copy("copy.d8b8392e2c54", { defaultValue: "Try again" }), onClick: () => undefined }}
+            />
+          </div>
+          <div data-page-bento className="overflow-hidden rounded-3xl border border-white/10 bg-white/[0.04] backdrop-blur-xl">
+            <AppState
+              icon="lock"
+              title={_copy("copy.e16b1a168ac5", { defaultValue: "Approval pending" })}
+              description={_copy("copy.1e5d5c1a7ee7", { defaultValue: "This content appears after your request is approved." })}
+              kind="restricted"
+              size="section"
+            />
+          </div>
+        </section>
+      </div>
+    </main>
+  );
+}
+
+// A made-up wallet, so the seeded pin never collides with a real profile.
+const GALLERY_PROFILE_WALLET = '0x00000000000000000000000000000000000000aa';
+const GALLERY_PROFILE = {
+  id: 'gallery-profile', name: 'Marco V', handle: '@marco_v', verified: false,
+  bio: 'Night photographer chasing neon and rain. Shooting the city after midnight, one street at a time.',
+  avatarUrl: galleryAvatar, coverUrl: galleryCover, joinedDate: 'March 2024',
+  following: 312, followers: 18700, postsCount: 120, walletAddress: GALLERY_PROFILE_WALLET,
+} as ProfileData;
+const GALLERY_COMMUNITY = {
+  id: 'gallery-community', name: 'Synthwave City', slug: 'synthwave-city',
+  get description() { return _translateCopy("copy.03a664b256d4", { defaultValue: "Neon nights, retro drives and late-night beats." }); },
+  avatar_url: galleryCommunityLogo, banner_url: galleryCommunityArt,
+  creator_wallet_address: GALLERY_PROFILE_WALLET, is_private: false, member_count: 12421,
+} as Community;
+const noop = () => {};
+
+const GALLERY_STREAM_ID = 'gallery-live-stream';
+const minutesAgo = (m: number) => new Date(Date.now() - m * 60_000).toISOString();
+const GALLERY_AUDIENCE: LiveAudience = {
+  host: { address: '0x00000000000000000000000000000000000000a1', username: 'marco_v', displayName: 'Marco', startedAt: minutesAgo(24) },
+  watching: 216,
+  here: [
+    { address: '0x00000000000000000000000000000000000000b1', username: 'kira', displayName: 'Kira', joinedAt: minutesAgo(1) },
+    { address: '0x00000000000000000000000000000000000000b2', username: 'dex', displayName: 'Dex', joinedAt: minutesAgo(2) },
+    { address: '0x00000000000000000000000000000000000000b3', username: 'juno', displayName: 'Juno', joinedAt: minutesAgo(4) },
+    { address: '0x00000000000000000000000000000000000000b4', username: 'oto', displayName: 'Oto', joinedAt: minutesAgo(7) },
+  ],
+  topTippers: [
+    { address: '0x00000000000000000000000000000000000000b2', username: 'dex', displayName: 'Dex', total: 350, count: 3 },
+    { address: '0x00000000000000000000000000000000000000b1', username: 'kira', displayName: 'Kira', total: 120, count: 1 },
+    { address: '0x00000000000000000000000000000000000000b4', username: 'oto', displayName: 'Oto', total: 80, count: 2 },
+  ],
+  mostActive: [
+    { address: '0x00000000000000000000000000000000000000b3', username: 'juno', displayName: 'Juno', messages: 42 },
+    { address: '0x00000000000000000000000000000000000000b1', username: 'kira', displayName: 'Kira', messages: 19 },
+  ],
+};
+
+const GALLERY_HOLDER_COMMUNITY = {
+  ...GALLERY_COMMUNITY,
+  id: 'gallery-holder-community',
+  ticker_symbol: 'DHB', ticker_chain_id: '56',
+  holder_gate_chain_id: 56,
+  holder_gate_token: '0x680d3113caf77b61b510f332d5ef4cf5b41a761d',
+  holder_gate_min: 1000, holder_gate_symbol: 'DHB', holder_gate_decimals: 18,
+} as Community;
+
+const GALLERY_GROUP = { ...GALLERY_COMMUNITY, id: 'gallery-group', slug: 'night-owls', name: 'Night Owls', kind: 'group', is_private: true, member_count: 38, avatar_url: null } as Community;
+const GALLERY_CHANNEL = { ...GALLERY_COMMUNITY, id: 'gallery-channel', slug: 'alpha-calls', name: 'Alpha Calls', kind: 'channel', entry_price: 1000, member_count: 1204, avatar_url: null } as Community;
+
+/** The + in Messages: what it offers, the New channel sheet, and the list rows. */
+/** A made-up phone screenshot for the Requests crop editor. */
+function galleryScreenshotFile(): File {
+  const c = document.createElement('canvas');
+  c.width = 390; c.height = 844;
+  const g = c.getContext('2d');
+  if (g) {
+    const grad = g.createLinearGradient(0, 0, 0, 844);
+    grad.addColorStop(0, '#4b6cb7'); grad.addColorStop(1, '#182848');
+    g.fillStyle = grad; g.fillRect(0, 0, 390, 844);
+    g.fillStyle = '#fff'; g.font = 'bold 72px sans-serif'; g.fillText('22:18', 100, 200);
+    g.fillStyle = 'rgba(255,255,255,0.85)'; g.fillRect(20, 560, 350, 90);
+  }
+  const bytes = atob(c.toDataURL('image/png').split(',')[1]);
+  const arr = new Uint8Array(bytes.length);
+  for (let i = 0; i < bytes.length; i += 1) arr[i] = bytes.charCodeAt(i);
+  return new File([arr], 'screenshot.png', { type: 'image/png' });
+}
+
+function GroupsChannelsGallery() {
+  const [chatDelete, setChatDelete] = useState(false);
+  const [markupFile, setMarkupFile] = useState<File | null>(null);
+  const [selector, setSelector] = useState(false);
+  const [sheet, setSheet] = useState<NewChatKind | null>(null);
+  return (
+    <section data-page-bento data-groups-channels-gallery className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+      <h2 className="mb-3 text-sm font-semibold">Groups and channels</h2>
+      <div className="flex flex-wrap gap-2 mb-3">
+        <button type="button" data-open-selector onClick={() => setSelector(true)} className="rounded-lg border border-white/10 px-3 py-1.5 text-xs">+ menu</button>
+        <button type="button" data-open-group-sheet onClick={() => setSheet('group')} className="rounded-lg border border-white/10 px-3 py-1.5 text-xs">New group</button>
+        <button type="button" data-open-channel-sheet onClick={() => setSheet('channel')} className="rounded-lg border border-white/10 px-3 py-1.5 text-xs">New channel</button>
+      </div>
+      <div data-groups-channels-rows className="rounded-2xl border border-white/10 overflow-hidden">
+        <GroupChatRow community={GALLERY_GROUP} onClick={noop} />
+        <GroupChatRow community={GALLERY_CHANNEL} onClick={noop} />
+      </div>
+      {/* Newest line, time and unread number on a group row. */}
+      <div data-group-rows-summary className="mt-3 rounded-2xl border border-white/10 overflow-hidden">
+        <GroupChatRow community={GALLERY_GROUP} onClick={noop} me="0xme" summary={{ unread: 3, last: { content: 'Who is going live tonight?', display_name: 'Ella Verse', wallet_address: '0xella', created_at: new Date(Date.now() - 4 * 60_000).toISOString() } }} />
+        <GroupChatRow community={GALLERY_CHANNEL} onClick={noop} me="0xme" summary={{ unread: 0, last: { content: '', message_type: 'image', image_url: 'x.jpg', wallet_address: '0xme', created_at: new Date(Date.now() - 3 * 3600_000).toISOString() } }} />
+      </div>
+      <div className="flex flex-wrap gap-2 mt-3">
+        <button type="button" data-open-chat-delete onClick={() => setChatDelete(true)} className="rounded-lg border border-white/10 px-3 py-1.5 text-xs">Delete chat</button>
+        <button type="button" data-open-markup onClick={() => setMarkupFile(galleryScreenshotFile())} className="rounded-lg border border-white/10 px-3 py-1.5 text-xs">Requests crop</button>
+      </div>
+      <DeleteMessageDialog subject="chat" open={chatDelete} onOpenChange={setChatDelete} canDeleteForEveryone oneToOne peerName="Ella Verse" onDelete={noop} />
+      <ImageMarkupDialog file={markupFile} onClose={() => setMarkupFile(null)} onSave={() => setMarkupFile(null)} />
+      <div className="mt-3">
+        <CommunityKindChip community={GALLERY_GROUP} />
+        <CommunityKindChip community={GALLERY_CHANNEL} />
+      </div>
+      <NewMessageSelector open={selector} onOpenChange={setSelector} onSelectDM={noop} onSelectGroup={noop} onSelectChannel={noop} />
+      <AuthContext.Provider value={GALLERY_AUTH}>
+        <NewGroupChannelSheet kind={sheet ?? 'group'} open={!!sheet} onOpenChange={(open) => { if (!open) setSheet(null); }} />
+      </AuthContext.Provider>
+    </section>
+  );
+}
+
+const GALLERY_DM_PEOPLE = [
+  ['juno', 'Juno', 'b3'], ['kira', 'Kira', 'b1'], ['dexdoes', 'Dex', 'b2'], ['oto', 'Oto', 'b4'], ['tadpole', 'Tad', 'b5'], ['mira', 'Mira', 'b6'],
+].map(([username, displayName, tail]) => ({
+  id: `gallery-dm-${username}`,
+  participants: [],
+  otherUser: { address: `0x00000000000000000000000000000000000000${tail}`, username, displayName },
+  unreadCount: 0,
+  createdAt: '2026-11-06T00:00:00.000Z',
+  updatedAt: '2026-11-06T00:00:00.000Z',
+})) as unknown as DeHubConversation[];
+
+/** The phone + in Messages: New message drawer with recents, and the empty first-run state. */
+function NewMessageDrawerGallery() {
+  const [open, setOpen] = useState<'recents' | 'empty' | null>(null);
+  return (
+    <section data-page-bento data-new-message-drawer-gallery className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+      <h2 className="mb-3 text-sm font-semibold">New message drawer</h2>
+      <div className="flex flex-wrap gap-2">
+        <button type="button" data-open-new-message="recents" onClick={() => setOpen('recents')} className="rounded-lg border border-white/10 px-3 py-1.5 text-xs">With recent chats</button>
+        <button type="button" data-open-new-message="empty" onClick={() => setOpen('empty')} className="rounded-lg border border-white/10 px-3 py-1.5 text-xs">First chat</button>
+      </div>
+      <AuthContext.Provider value={GALLERY_AUTH}>
+        <NewMessageDrawer
+          open={!!open}
+          onOpenChange={(o) => { if (!o) setOpen(null); }}
+          conversations={open === 'empty' ? [] : GALLERY_DM_PEOPLE}
+          onPick={() => setOpen(null)}
+          onGroup={() => setOpen(null)}
+          onChannel={() => setOpen(null)}
+        />
+      </AuthContext.Provider>
+    </section>
+  );
+}
+
+/** A holder group: the header tag, the owner's Holders tab and Top holders. */
+function HolderGroupGallery() {
+  const queryClient = useQueryClient();
+  useState(() => {
+    const holders = [
+      ['0x00000000000000000000000000000000000000b2', 2_450_000],
+      ['0x00000000000000000000000000000000000000b1', 812_300],
+      ['0x00000000000000000000000000000000000000b3', 120_000],
+      ['0x00000000000000000000000000000000000000b4', 18_750],
+      ['0x00000000000000000000000000000000000000b5', 1_200],
+    ].map(([wallet_address, balance]) => ({ wallet_address, balance, checked_at: minutesAgo(3) }));
+    queryClient.setQueryData(['communities', 'holders', GALLERY_HOLDER_COMMUNITY.id], holders);
+    queryClient.setQueryData(['wallet-profiles', holders.map(h => h.wallet_address).sort().join(',')], {
+      '0x00000000000000000000000000000000000000b1': { address: '0x00000000000000000000000000000000000000b1', displayName: 'Kira' },
+      '0x00000000000000000000000000000000000000b2': { address: '0x00000000000000000000000000000000000000b2', displayName: 'Dex' },
+      '0x00000000000000000000000000000000000000b3': { address: '0x00000000000000000000000000000000000000b3', displayName: 'Juno' },
+      '0x00000000000000000000000000000000000000b4': { address: '0x00000000000000000000000000000000000000b4', displayName: 'Oto' },
+    });
+  });
+  const gate = holderGateOf(GALLERY_HOLDER_COMMUNITY)!;
+  return (
+    <section data-page-bento data-holder-group-gallery className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+      <h2 className="mb-3 text-sm font-semibold">Holder groups</h2>
+      <AuthContext.Provider value={GALLERY_AUTH}>
+        <div className="grid gap-4 md:grid-cols-2">
+          <div>
+            <p className="text-white text-lg font-bold">{GALLERY_HOLDER_COMMUNITY.name}</p>
+            <p className="text-white text-sm">{formatCount(GALLERY_HOLDER_COMMUNITY.member_count)} members</p>
+            <HolderGateChip gate={gate} />
+            <div className="mt-4"><TopHolders community={GALLERY_HOLDER_COMMUNITY} /></div>
+          </div>
+          <div data-holders-tab-frame className="rounded-2xl border border-white/10 p-3.5">
+            <HoldersTab community={GALLERY_HOLDER_COMMUNITY} membership={null} />
+          </div>
+        </div>
+      </AuthContext.Provider>
+    </section>
+  );
+}
+
+/** The phone live viewer's chrome over a stand-in picture, with a seeded Who's here. */
+const GALLERY_POINTS_VIEWER = '0x00000000000000000000000000000000000000b2';
+const GALLERY_POINTS_AUTH = {
+  isAuthenticated: true,
+  walletAddress: GALLERY_POINTS_VIEWER,
+  user: null,
+  openLoginModal: () => {},
+} as unknown as AuthContextType;
+const GALLERY_POINTS_BALANCE = { creator: '0x00000000000000000000000000000000000000a1', live: true, earned: 1640, spent: 400, balance: 1240 };
+const GALLERY_REWARDS = [
+  { id: 'g-hi', title: 'Say hi to me on stream', cost: 100, needsText: false, enabled: true },
+  { id: 'g-hydrate', title: 'Hydrate!', cost: 250, needsText: false, enabled: true },
+  { id: 'g-song', title: 'Pick the next song', cost: 500, needsText: true, enabled: true },
+  { id: 'g-voice', title: 'Do the voice for one minute', cost: 2500, needsText: false, enabled: true },
+];
+const GALLERY_REDEMPTIONS = [
+  { id: 'r1', rewardId: 'g-song', title: 'Pick the next song', cost: 500, text: 'Anything by Fred again..', status: 'pending', createdAt: new Date().toISOString(), viewer: { address: '0x00000000000000000000000000000000000000c3', username: 'nova', displayName: 'Nova' } },
+  { id: 'r2', rewardId: 'g-hydrate', title: 'Hydrate!', cost: 250, text: '', status: 'pending', createdAt: new Date().toISOString(), viewer: { address: '0x00000000000000000000000000000000000000c4', username: 'kai' } },
+  { id: 'r3', rewardId: 'g-hi', title: 'Say hi to me on stream', cost: 100, text: '', status: 'done', createdAt: new Date().toISOString(), viewer: { address: '0x00000000000000000000000000000000000000c5', username: 'mira' } },
+];
+
+/** Channel points: the button in both chats, the rewards sheet, and Live Studio's panel. */
+function LivePointsGallery({ initiallyOpen = false }: { initiallyOpen?: boolean }) {
+  const queryClient = useQueryClient();
+  const [open, setOpen] = useState(initiallyOpen);
+  useState(() => {
+    queryClient.setQueryData(['live-points', GALLERY_STREAM_ID], GALLERY_POINTS_BALANCE);
+    queryClient.setQueryData(['live-rewards', GALLERY_STREAM_ID], { creator: GALLERY_POINTS_BALANCE.creator, live: true, rewards: GALLERY_REWARDS, recentRedemptions: GALLERY_REDEMPTIONS.map(({ id, title }) => ({ id, title })) });
+    queryClient.setQueryData(['my-live-rewards'], GALLERY_REWARDS.slice(0, 3));
+    queryClient.setQueryData(['my-live-redemptions'], GALLERY_REDEMPTIONS);
+  });
+  return (
+    <section data-page-bento data-live-points-gallery className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+      <h2 className="mb-3 text-sm font-semibold">Channel points</h2>
+      <AuthContext.Provider value={GALLERY_POINTS_AUTH}>
+        <div className="flex flex-wrap items-start justify-center gap-4">
+          <div
+            data-live-points-phone
+            className="relative flex h-[520px] w-[390px] max-w-full flex-col justify-end overflow-hidden rounded-[28px] px-3 pb-3"
+            style={{ background: 'radial-gradient(60% 30% at 50% 26%, rgba(255,170,90,.55), transparent 70%), radial-gradient(40% 25% at 85% 12%, rgba(80,120,255,.55), transparent 70%), linear-gradient(180deg, #2a1240 0%, #3b1d4f 40%, #120a1c 100%)' }}
+          >
+            {/* The full-bleed row: message box, then gift, share and thumb. */}
+            <LiveViewerActionsProvider
+              value={
+                <div className="flex items-center gap-2">
+                  <ActionBar compact postId="gallery-live" likeCount={26} dislikeCount={0} commentCount={0} tipCount={3} onTip={() => {}} nativeShare={{ title: 'Live' }} />
+                </div>
+              }
+            >
+              <LivePostChat tokenId="0" streamId={GALLERY_STREAM_ID} overlay />
+            </LiveViewerActionsProvider>
+          </div>
+          <div data-live-points-desktop className="w-[380px] max-w-full rounded-2xl border border-white/10 bg-black/40 p-4">
+            <LivePostChat tokenId="0" streamId={GALLERY_STREAM_ID} />
+          </div>
+        </div>
+        <button type="button" data-kit-button="quiet" data-open-rewards onClick={() => setOpen(true)} className="mt-4">
+          Open rewards sheet
+        </button>
+        <RewardsSheet open={open} onOpenChange={setOpen} streamId={GALLERY_STREAM_ID} balance={GALLERY_POINTS_BALANCE} rewards={GALLERY_REWARDS} />
+        <div data-live-points-studio className="mx-auto mt-4 max-w-xl">
+          <RewardsPanel />
+        </div>
+      </AuthContext.Provider>
+    </section>
+  );
+}
+
+const GALLERY_PET: StreamPet = {
+  owner: '0x00000000000000000000000000000000000000a1',
+  name: 'Mochi',
+  color: 'violet',
+  hatchedAt: '2026-11-01T12:00:00.000Z',
+  stage: 'teen',
+  stageIndex: 3,
+  food: 96,
+  streamFood: 86,
+  viewerFood: 8,
+  requestFood: 2,
+  requestFoodToday: 2,
+  requestsWaiting: 2,
+  stageFood: 60,
+  nextStageFood: 240,
+  progress: 36 / 180,
+  mood: 'happy',
+  lastFedAt: new Date().toISOString(),
+  sleepsAt: new Date(Date.now() + 20 * 3_600_000).toISOString(),
+  streamingNow: true,
+  streamedMinutes: 440,
+  showOnProfile: true,
+  showOnStream: true,
+  feeding: { enabled: true, cost: 100 },
+};
+
+/** Stream pets: every stage and mood, the profile card, the stream corner, and Live Studio. */
+function StreamPetGallery() {
+  const queryClient = useQueryClient();
+  useState(() => {
+    queryClient.setQueryData(['stream-pet', GALLERY_STREAM_ID], GALLERY_PET);
+    queryClient.setQueryData(['live-points', GALLERY_STREAM_ID], GALLERY_POINTS_BALANCE);
+    queryClient.setQueryData(['my-stream-pet'], {
+      pet: { ...GALLERY_PET, streamingNow: false },
+      feeders: [
+        { address: '0x00000000000000000000000000000000000000c3', username: 'nova', displayName: 'Nova', snacks: 14 },
+        { address: '0x00000000000000000000000000000000000000c4', username: 'kai', snacks: 6 },
+      ],
+    });
+  });
+  const stages = ['egg', 'baby', 'kid', 'teen', 'grown', 'legend'] as const;
+  const colors = ['violet', 'pink', 'mint', 'sky', 'sun', 'coral'] as const;
+  return (
+    <section data-page-bento data-stream-pet-gallery className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+      <h2 className="mb-3 text-sm font-semibold">Stream pet</h2>
+      <div data-stream-pet-stages className="flex flex-wrap items-end justify-center gap-3">
+        {stages.map((stage, i) => (
+          <div key={stage} className="flex flex-col items-center gap-1">
+            <PetSprite color={colors[i]} stage={stage} mood={stage === 'egg' ? 'egg' : 'happy'} size={84} />
+            <span className="text-[11px] text-white/60">{stage}</span>
+          </div>
+        ))}
+        {(['happy', 'hungry', 'asleep'] as const).map((mood) => (
+          <div key={mood} className="flex flex-col items-center gap-1">
+            <PetSprite color="mint" stage="grown" mood={mood} size={84} />
+            <span className="text-[11px] text-white/60">{mood}</span>
+          </div>
+        ))}
+      </div>
+      <div className="mt-4 grid gap-3 sm:grid-cols-2">
+        <div data-stream-pet-profile>
+          <PetCard pet={{ ...GALLERY_PET, streamingNow: false }} />
+        </div>
+        <div data-stream-pet-profile-asleep>
+          <PetCard pet={{ ...GALLERY_PET, name: 'Pip', color: 'coral', stage: 'kid', stageIndex: 2, food: 30, stageFood: 12, nextStageFood: 60, progress: 18 / 48, mood: 'asleep', streamingNow: false, sleepsAt: null, requestFoodToday: 0, requestsWaiting: 1 }} own />
+        </div>
+      </div>
+      <AuthContext.Provider value={GALLERY_POINTS_AUTH}>
+        <div className="mt-4 flex flex-wrap items-start justify-center gap-4">
+          <div
+            data-stream-pet-phone
+            className="relative h-[520px] w-[390px] max-w-full overflow-hidden rounded-[28px]"
+            style={{ background: 'radial-gradient(60% 30% at 50% 26%, rgba(255,170,90,.55), transparent 70%), radial-gradient(40% 25% at 85% 12%, rgba(80,120,255,.55), transparent 70%), linear-gradient(180deg, #2a1240 0%, #3b1d4f 40%, #120a1c 100%)' }}
+          >
+            <StreamPetCorner streamId={GALLERY_STREAM_ID} signedIn initiallyOpen className="absolute bottom-6 right-3 z-20" />
+          </div>
+          <div data-stream-pet-studio className="w-[420px] max-w-full space-y-4">
+            <PetPanel />
+            <PetHatch onHatched={() => undefined} />
+          </div>
+        </div>
+      </AuthContext.Provider>
+    </section>
+  );
+}
+
+function LiveViewerGallery() {
+  const { t } = useTranslation();
+  const queryClient = useQueryClient();
+  useState(() => {
+    queryClient.setQueryData(['live-audience', GALLERY_STREAM_ID], GALLERY_AUDIENCE);
+    // The desktop chat's "N watching" reads this before the socket answers.
+    queryClient.setQueryData(['stream-audience', GALLERY_STREAM_ID], { result: { viewerCount: GALLERY_AUDIENCE.watching } });
+  });
+  return (
+    <section data-page-bento data-live-viewer-gallery className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+      <h2 className="mb-3 text-sm font-semibold">{t('liveAudience.whosHere')}</h2>
+      <AuthContext.Provider value={GALLERY_AUTH}>
+        <div
+          data-live-viewer-frame
+          className="relative mx-auto h-[720px] w-[390px] max-w-full overflow-hidden rounded-[28px] bg-black"
+          style={{ background: 'radial-gradient(60% 30% at 50% 26%, rgba(255,170,90,.55), transparent 70%), radial-gradient(40% 25% at 20% 10%, rgba(255,60,160,.5), transparent 70%), radial-gradient(40% 25% at 85% 12%, rgba(80,120,255,.55), transparent 70%), linear-gradient(180deg, #2a1240 0%, #3b1d4f 40%, #120a1c 100%)' }}
+        >
+          <ImmersiveLiveChrome
+            streamerName="Marco"
+            creatorUsername="marco_v"
+            creatorId="0x00000000000000000000000000000000000000a1"
+            avatar={galleryAvatar}
+            title="Friday night set, requests open"
+            isLive
+            isEnded={false}
+            viewers={216}
+            giftTotal={3100}
+            startedAt={minutesAgo(24)}
+            isMuted
+            onToggleMute={noop}
+            optionsSlot={
+              <button type="button" aria-label="Post options" className="flex h-10 w-10 items-center justify-center text-white [filter:drop-shadow(0_1px_2px_rgb(0_0_0/0.7))]">
+                <MoreVertical className="h-[23.5px] w-[23.5px]" />
+              </button>
+            }
+            hidden={false}
+            streamId={GALLERY_STREAM_ID}
+            onMinimise={noop}
+          />
+        </div>
+        <div
+          data-live-viewer-cleared-frame
+          className="relative mx-auto mt-4 h-[720px] w-[390px] max-w-full overflow-hidden rounded-[28px] bg-black"
+          style={{ background: 'radial-gradient(60% 30% at 50% 26%, rgba(255,170,90,.55), transparent 70%), radial-gradient(40% 25% at 20% 10%, rgba(255,60,160,.5), transparent 70%), radial-gradient(40% 25% at 85% 12%, rgba(80,120,255,.55), transparent 70%), linear-gradient(180deg, #2a1240 0%, #3b1d4f 40%, #120a1c 100%)' }}
+        >
+          <ImmersiveLiveChrome
+            streamerName="Marco"
+            creatorUsername="marco_v"
+            creatorId="0x00000000000000000000000000000000000000a1"
+            avatar={galleryAvatar}
+            title="Friday night set, requests open"
+            isLive
+            isEnded={false}
+            viewers={216}
+            giftTotal={3100}
+            startedAt={minutesAgo(24)}
+            isMuted
+            onToggleMute={noop}
+            hidden
+            streamId={GALLERY_STREAM_ID}
+          />
+          <LiveClearedLayer onRestore={noop} onRotate={noop} />
+        </div>
+        {/* Desktop: the chat beside the stream. Its "N watching" opens Who's here. */}
+        <div data-live-chat-desktop-frame className="mx-auto mt-4 w-[380px] max-w-full rounded-2xl border border-white/10 bg-black/40 p-4">
+          <LivePostChat tokenId="0" streamId={GALLERY_STREAM_ID} />
+        </div>
+      </AuthContext.Provider>
+    </section>
+  );
+}
+
+const GALLERY_TEXT_POSTS: GalleryTextPost[] = [
+  'Shot the whole city in the rain last night. Uploading the best twelve tomorrow.',
+  'Hot take: night photos look better slightly underexposed.',
+  'Who is coming to the meetup on Friday?',
+  'New lens arrived. First walk tonight at 11.',
+  'Thank you for 18k. Every one of you made this real.',
+  'Sunday reset. Coffee, long walk, no notifications.',
+].map((content, i) => ({
+  id: `gallery-text-${i}`, type: 'post', content, createdAt: new Date(Date.now() - (i + 1) * 3_600_000).toISOString(),
+  author: { id: 'gallery-profile', name: 'Marco V', handle: '@marco_v', verified: false },
+  stats: { comments: 12 + i * 7, reposts: i, likes: 140 + i * 53, dislikes: 0 },
+}) as GalleryTextPost);
+
+/** `**bold**` in a post, a chat line and a Note (?bold=1). The typed text sits above each. */
+const GALLERY_BOLD_POST = 'Stage opens **tonight at 9** with @ellaverse. **Bring #music** and see **riftn.com/build** 2**3 stays as typed';
+const GALLERY_BOLD_CHAT = 'are you coming? **doors at 9** @kai, tickets at **riftn.com**';
+const GALLERY_BOLD_NOTE = 'gym then **studio**';
+function BoldTextGallery() {
+  const post = { ...GALLERY_TEXT_POSTS[0], id: '990201', content: GALLERY_BOLD_POST } as GalleryTextPost;
+  const typed = (text: string) => <p data-bold-typed className="mb-2 font-mono text-[11px] text-zinc-500">{text}</p>;
+  return (
+    <AuthContext.Provider value={GALLERY_AUTH}>
+      <section data-page-bento data-bold-text-gallery className="mb-5 grid gap-4 rounded-3xl border border-white/10 bg-white/[0.04] p-4 md:grid-cols-3">
+        <div data-feed-item className="rounded-xl border border-white/[0.12] bg-white/[0.03] p-3">
+          {typed(GALLERY_BOLD_POST)}
+          <GalleryPostCard post={post} />
+        </div>
+        <div className="rounded-xl border border-white/[0.12] bg-white/[0.03] p-3">
+          {typed(GALLERY_BOLD_CHAT)}
+          <p className="chat-body whitespace-pre-wrap break-words rounded-2xl bg-white/10 px-3 py-2 text-sm text-white">{renderChatTextWithLinks(GALLERY_BOLD_CHAT)}</p>
+        </div>
+        <div className="rounded-xl border border-white/[0.12] bg-white/[0.03] p-3">
+          {typed(GALLERY_BOLD_NOTE)}
+          <p className="text-center text-[31px] font-extrabold leading-[1.18] text-white"><BoldText text={GALLERY_BOLD_NOTE} /></p>
+        </div>
+      </section>
+    </AuthContext.Provider>
+  );
+}
+
+/** Co-authored posts: both names on the header, the invite card, and the sheet (?coauthors=sheet opens it). */
+const GALLERY_CO_AUTHORS = [
+  { address: '0x7777777777777777777777777777777777777771', username: 'ellaverse', displayName: 'Ella Verse' },
+  { address: '0x7777777777777777777777777777777777777772', username: 'kai', displayName: 'Kai' },
+  { address: '0x7777777777777777777777777777777777777773', username: 'juno', displayName: 'Juno' },
+];
+function CoAuthorsGallery({ mode }: { mode: string | null }) {
+  const [ready] = useState(() => {
+    setCoAuthors('990101', { users: [GALLERY_CO_AUTHORS[0]] });
+    setCoAuthors('990102', { users: GALLERY_CO_AUTHORS });
+    setCoAuthors('990103', { users: [], invited: true });
+    return true;
+  });
+  useEffect(() => {
+    if (mode === 'sheet') openCoAuthorSheet('990101');
+  }, [mode]);
+  const posts = [
+    { ...GALLERY_TEXT_POSTS[0], id: '990101', content: 'Shot the whole city in the rain last night with @ellaverse. Our best twelve go up tomorrow.' },
+    { ...GALLERY_TEXT_POSTS[2], id: '990102', content: 'Four of us, one track, made in a weekend. Headphones on.' },
+  ] as GalleryTextPost[];
+  if (!ready) return null;
+  return (
+    <AuthContext.Provider value={GALLERY_AUTH}>
+    <section data-page-bento data-co-authors-gallery className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+      <h2 className="mb-3 text-sm font-semibold">Co-authored posts</h2>
+      <div className="space-y-3">
+        {posts.map((post) => (
+          <div key={post.id} data-feed-item className="rounded-xl border border-white/[0.12] bg-white/[0.03] p-3">
+            <GalleryPostCard post={post} />
+          </div>
+        ))}
+      </div>
+      {mode === 'invite' && <CoAuthorInviteBanner tokenId="990103" creatorName="Marco V" />}
+      {mode === 'sheet' && <CoAuthorSheetHost />}
+    </section>
+    </AuthContext.Provider>
+  );
+}
+
+/** Content warning cover: the creator's own line, and the stock notice when a warning has none. */
+function ContentWarningGallery() {
+  return (
+    <section data-page-bento data-content-warning-gallery className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+      <h2 className="mb-3 text-sm font-semibold">Content warning</h2>
+      <div className="grid gap-4 md:grid-cols-2">
+        <div data-cw-own><ContentWarningGate text="Flashing lights and loud sound in the first 10 seconds" preview={galleryAvatar} onReveal={() => {}} /></div>
+        <div data-cw-fallback><ContentWarningGate onReveal={() => {}} /></div>
+      </div>
+    </section>
+  );
+}
+
+/** Profile text-post backgrounds: the owner's hold-to-pick picker, phone grid tiles and a desktop card. */
+function PostBackgroundsGallery({ initialBg, initiallyOpen }: { initialBg: string | null; initiallyOpen: boolean }) {
+  const [bg, setBg] = useState<PostBg | null>(postBgById(initialBg) ?? postBgById('aurora'));
+  const [open, setOpen] = useState(initiallyOpen);
+  // One post can carry its own backdrop: hold it and pick "This post".
+  const [target, setTarget] = useState<string | null>(null);
+  const [own, setOwn] = useState<Map<string, PostBg | null>>(() => new Map());
+  const hold = usePostBgHold(true, () => { setTarget(null); setOpen(true); });
+  const postHold = usePostBgHold(true, (held) => { setTarget(held?.dataset.pbgPost || null); setOpen(true); }, '[data-pbg-text]');
+  // Right-click opens the post menu; its "Post background" row lands here.
+  useEffect(() => {
+    const onLook = (event: Event) => {
+      const look = (event as CustomEvent<PostLook>).detail;
+      if (look?.kind !== 'background') return;
+      setTarget(look.el.dataset.pbgPost || null);
+      setOpen(true);
+    };
+    window.addEventListener(POST_LOOK_EVENT, onLook);
+    return () => window.removeEventListener(POST_LOOK_EVENT, onLook);
+  }, []);
+  const entries: MixedGridEntry[] = GALLERY_TEXT_POSTS.map((p) => ({ key: p.id, type: 'post', data: p }) as MixedGridEntry);
+  return (
+    <section data-page-bento data-post-bg-gallery className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+      <h2 className="mb-3 text-sm font-semibold">Profile post backgrounds</h2>
+      <AuthContext.Provider value={GALLERY_AUTH}>
+        {/* The gallery sits outside the app shell, so it brings its own right-click menu. */}
+        <PostMenuGate />
+        <div
+          ref={(el) => { hold.hostRef.current = el; }}
+          {...hold.handlers}
+          className="relative mb-3 flex items-center gap-3 rounded-2xl border border-white/10 p-3 select-none"
+          data-post-bg-hold
+        >
+          {hold.ringEl}
+          <img src={galleryAvatar} alt="" className="h-12 w-12 rounded-full object-cover" />
+          <div><p className="font-bold text-white">Marco V</p><p className="text-xs text-zinc-400">Hold here to choose a background</p></div>
+        </div>
+        <ProfilePostBgContext.Provider value={bg}>
+          <ProfilePostBgMapContext.Provider value={own}>
+          <div ref={postHold.hostRef} {...postHold.handlers} className="relative grid gap-4 md:grid-cols-[minmax(0,360px)_minmax(0,1fr)]">
+            {postHold.ringEl}
+            <div data-post-bg-phone-grid><ProfileMixedGrid entries={entries} /></div>
+            <div data-post-bg-desktop className="space-y-3">
+              {GALLERY_TEXT_POSTS.slice(0, 2).map((post) => (
+                <div key={post.id} data-feed-item data-cinematic="post" className="rounded-xl border border-white/[0.12] bg-white/[0.03] p-3" {...postBgHostProps(own.get(post.id) || bg, post.id)}>
+                  <PostBgLayer bg={own.get(post.id) || bg} seed={post.id} />
+                  <GalleryPostCard post={post} />
+                </div>
+              ))}
+            </div>
+          </div>
+          </ProfilePostBgMapContext.Provider>
+        </ProfilePostBgContext.Provider>
+        <PostBgPicker
+          open={open}
+          current={bg}
+          name="Marco V"
+          handle="@marco_v"
+          avatarUrl={galleryAvatar}
+          sampleText={GALLERY_TEXT_POSTS[0].content}
+          postId={target}
+          postCurrent={target ? own.get(target) ?? bg : undefined}
+          onCancel={() => setOpen(false)}
+          onSave={({ id, colors, file, scope }) => {
+            const def = postBgById(id);
+            const next = !def ? null : def.kind === 'photo' ? (file ? { ...def, image: URL.createObjectURL(file) } : null) : withPostBgColors(def, colors);
+            if (scope === 'post' && target) setOwn((m) => new Map(m).set(target, next));
+            else { setBg(next); setOwn(new Map()); }
+            setOpen(false);
+          }}
+        />
+      </AuthContext.Provider>
+    </section>
+  );
+}
+
+const PILL_AUTHOR = { id: 'gallery-profile', name: 'Marco V', handle: '@marco_v', verified: false };
+const pillAgo = (h: number) => new Date(Date.now() - h * 3_600_000).toISOString();
+const pillAbs = (src: string) => (typeof window === 'undefined' ? src : new URL(src, window.location.origin).href);
+const pillText = (id: string, content: string, extra: Record<string, unknown> = {}) => ({
+  key: id, type: 'post' as const,
+  data: { id, type: 'post', content, createdAt: pillAgo(1), author: PILL_AUTHOR, stats: { comments: 14, reposts: 2, likes: 181, dislikes: 0 }, ...extra },
+});
+const pillVideo = (id: string, title: string, thumbnail: string, extra: Record<string, unknown> = {}) => ({
+  key: id, type: 'video' as const,
+  data: { id, type: 'video', title, thumbnail, duration: '0:42', views: '2.4K', createdAt: pillAgo(2), author: PILL_AUTHOR, ...extra },
+});
+const pillImage = (id: string, image: string, extra: Record<string, unknown> = {}) => ({
+  key: id, type: 'image' as const,
+  data: { id, type: 'image', image, imageUrls: [image], caption: '', createdAt: pillAgo(3), author: PILL_AUTHOR, ...extra },
+});
+const PILL_STORE = '3f2a9c1e-77aa-4c1b-9d2e-1a2b3c4d5e6f';
+const PILL_LISTING = '9a8b7c6d-5e4f-4a3b-2c1d-0e9f8a7b6c5d';
+/** One of every grid post that carries a card in the feed, plus plain ones beside them. */
+const GRID_CARD_ENTRIES = [
+  pillText('9101', 'Town Hall inbound! Set your reminders and join us live. https://riftn.com/stages/1'),
+  pillVideo('gc-video', 'Night ride through the city', pillArtB),
+  pillText('9103', 'Which theme should we drop next?'),
+  pillVideo('gc-short', 'POV: first ride', pillArtC, { isShort: true }),
+  pillText('9105', 'This is exactly what I meant yesterday', {
+    isQuotePost: true,
+    quotedPost: { tokenId: 77, name: 'Night shots look better underexposed', description: '', minterDisplayName: 'Ella', imageUrls: [pillAbs(pillArtA)], postType: 'feed-images' },
+  }),
+  pillText('9106', 'Meetup Friday, rooftop, bring a camera https://riftn.com/app/events/12'),
+  pillText('9107', 'The best breakdown of the new lens I have seen https://www.youtube.com/watch?v=gallery'),
+  pillImage('gc-photo', pillArtF),
+  pillText('9109', 'Join the crew, we post every night https://riftn.com/communities/night-shooters'),
+  pillImage('gc-comic', pillArtA, { layout: 'comic', imageUrls: [pillArtA, pillArtB, pillArtC] }),
+  pillVideo('gc-earn', 'Watch to the end and earn', pillArtD, { bountyAmount: 1000 }),
+  pillText('9112', `Prints are back in stock https://riftn.com/app/stores/${PILL_STORE}?listing=${PILL_LISTING}`),
+  pillText('9113', 'We are on right now, pull up https://riftn.com/stages/2'),
+  pillText('gc-plain', 'Sunday reset. Coffee, long walk, no notifications.'),
+  pillText('9115', 'Read this before you buy anything https://riftn.com/app/post/5162'),
+  pillText('9116', 'On repeat all week https://open.spotify.com/track/4uLU6hMCjMI75M1A2tKUQC'),
+  pillText('9117', 'Still the best album ever made https://open.spotify.com/album/4LH4d3cOWNNsVw41Gqt2kv'),
+] as unknown as MixedGridEntry[];
+
+/** Spotify previews the gallery draws with no network (grid + Spotify section). */
+const GALLERY_SPOTIFY_PREVIEWS = [
+  { url: 'https://open.spotify.com/track/4uLU6hMCjMI75M1A2tKUQC', title: 'Never Gonna Give You Up', description: 'Rick Astley · Song · 1987', image: 'https://image-cdn-fa.spotifycdn.com/image/ab67616d00001e02255e131abc1410833be95673', siteName: 'Spotify' },
+  { url: 'https://open.spotify.com/album/4LH4d3cOWNNsVw41Gqt2kv', title: 'The Dark Side of the Moon', description: 'Pink Floyd · Album · 1973', image: 'https://image-cdn-ak.spotifycdn.com/image/ab67616d00001e02db216ca805faf5fe35df4ee6', siteName: 'Spotify' },
+];
+
+/** What the cards above read, so the gallery draws them with no network. */
+function seedGridCards(qc: ReturnType<typeof useQueryClient>) {
+  const soon = new Date(Date.now() + 2 * 86_400_000);
+  soon.setHours(20, 0, 0, 0);
+  qc.setQueryData(['stage-by-id', 'short:1'], { id: 'gallery-stage-1', short_id: 1, title: 'Town Hall & AMA', status: 'scheduled', scheduled_at: soon.toISOString(), host_username: 'marco_v', cover_image_url: null });
+  qc.setQueryData(['stage-by-id', 'short:2'], { id: 'gallery-stage-2', short_id: 2, title: 'Late night radio', status: 'live', started_at: pillAgo(1), host_username: 'marco_v', speaker_count: 3, listener_count: 35, cover_image_url: null });
+  qc.setQueryData(['polls', 9103], { _id: 'p', tokenId: 9103, address: '0x', question: 'Which theme should we drop next?', options: [{ index: 0, text: 'Neon', voteCount: 58 }, { index: 1, text: 'Paper', voteCount: 27 }, { index: 2, text: 'Forest', voteCount: 15 }], totalVotes: 100, isActive: true, isMultipleChoice: false, createdAt: pillAgo(5) });
+  qc.setQueryData(['event-by-number', 12], { title: 'Rooftop photo walk', starts_at: new Date(Date.now() + 3 * 86_400_000).toISOString(), cover_image_url: pillAbs(pillArtD) });
+  qc.setQueryData(['grid-link-preview', 'https://www.youtube.com/watch?v=gallery'], { url: 'https://www.youtube.com/watch?v=gallery', title: 'Full review: the 35mm that does it all', description: '', image: 'https://dehubcdn.ams3.cdn.digitaloceanspaces.com/feed-images/7389-article-1.jpg', siteName: 'YouTube' });
+  qc.setQueryData(['communities', 'slug', 'night-shooters'], { id: 'c1', slug: 'night-shooters', name: 'Night Shooters', banner_url: pillAbs(galleryCommunityArt), avatar_url: null, member_count: 1240 });
+  qc.setQueryData(['store-listing', PILL_LISTING], { id: PILL_LISTING, store_id: PILL_STORE, title: 'A3 print: Rain City', price: 25, images: [pillAbs(pillArtB)], stores: { name: 'Marco prints' } });
+  for (const preview of GALLERY_SPOTIFY_PREVIEWS) qc.setQueryData(['grid-link-preview', preview.url], preview);
+  qc.setQueryData(['single-post', '5162'], { tokenId: 5162, name: 'Ready to rock', description: '', minterDisplayName: 'Riftn', imageUrls: [pillAbs(pillArtE)], postType: 'feed-images' });
+}
+
+/** Own profile grid: a grip in each tile's corner moves it. Drops reorder this list only. */
+function GridReorderGallery() {
+  const [entries, setEntries] = useState<MixedGridEntry[]>(() => [
+    pillVideo('gr-video', 'Night ride through the city', pillArtB),
+    pillText('9201', 'gm. shipping all day again'),
+    pillImage('gr-photo-a', pillArtF),
+    pillVideo('gr-short', 'POV: first ride', pillArtC, { isShort: true, views: '12.4K' }),
+    pillImage('gr-photo-b', pillArtA),
+    pillText('9202', 'Own everything you post'),
+    pillImage('gr-photo-c', pillArtD),
+    pillVideo('gr-video-b', 'Rooftop set, full hour', pillArtE, { duration: '58:10', views: '880' }),
+    pillImage('gr-photo-d', pillArtC),
+  ] as unknown as MixedGridEntry[]);
+  const onMove = async (movedId: string, beforeIds: string[]) => {
+    setEntries((current) => {
+      const moved = current.find((entry) => entry.data.id === movedId);
+      if (!moved) return current;
+      const rest = current.filter((entry) => entry !== moved);
+      const at = beforeIds.length ? rest.findIndex((entry) => entry.data.id === beforeIds[0]) + 1 : 0;
+      rest.splice(at, 0, moved);
+      return rest;
+    });
+  };
+  return (
+    <section data-page-bento data-grid-reorder-gallery className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+      <h2 className="mb-3 text-sm font-semibold">Profile grid: move a post by its grip</h2>
+      <AuthContext.Provider value={GALLERY_AUTH}>
+        <div className="max-w-[720px]"><ProfileMixedGrid entries={entries} onMove={onMove} /></div>
+      </AuthContext.Provider>
+    </section>
+  );
+}
+
+/** Profile grid posts that carry a card: each tile is a small copy of its card (GridCardTile). */
+function GridCardsGallery() {
+  const qc = useQueryClient();
+  const [ready] = useState(() => { seedGridCards(qc); return true; });
+  return (
+    <section data-page-bento data-grid-cards-gallery className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+      <h2 className="mb-3 text-sm font-semibold">Profile grid: posts with cards</h2>
+      <AuthContext.Provider value={GALLERY_AUTH}>
+        {ready && <div className="max-w-[360px]"><ProfileMixedGrid entries={GRID_CARD_ENTRIES} /></div>}
+      </AuthContext.Provider>
+    </section>
+  );
+}
+
+const FORMAT_KINDS: FormatKind[] = ['photo', 'photos', 'video', 'short', 'replay', 'audio', 'article', 'text', 'comic', 'earn', 'stage', 'event', 'poll', 'quote', 'sharedPost', 'link', 'community', 'shop', 'profile', 'film', 'bounty', 'app', 'proposal', 'spotify'];
+
+/** Every post format's custom icon, on real grid tiles and as a key. */
+function FormatIconsGallery() {
+  const qc = useQueryClient();
+  const [ready] = useState(() => { seedGridCards(qc); return true; });
+  const media = [
+    pillImage('fi-photo', pillArtF),
+    pillImage('fi-photos', pillArtB, { imageUrls: [pillArtB, pillArtC] }),
+    pillVideo('fi-video', 'Night ride through the city', pillArtB),
+    pillVideo('fi-short', 'POV: first ride', pillArtC, { isShort: true }),
+    pillVideo('fi-replay', 'Friday night stream', pillArtE, { isLivePost: true, duration: '1:12:04' }),
+    pillVideo('fi-audio', 'Midnight drive', pillArtD, { isAudio: true }),
+    pillText('fi-article', 'How we shoot at night', { title: 'How we shoot at night', articleBody: GALLERY_ARTICLE_BODY, articleImageUrl: pillAbs(pillArtE) }),
+    pillImage('fi-comic', pillArtA, { layout: 'comic', imageUrls: [pillArtA, pillArtB, pillArtC] }),
+    pillVideo('fi-earn', 'Watch to the end and earn', pillArtD, { bountyAmount: 1000 }),
+    pillText('fi-plain', 'Sunday reset. Coffee, long walk, no notifications.'),
+  ];
+  const cards = GRID_CARD_ENTRIES.filter((e) => e.type === 'post' && e.key !== 'gc-plain');
+  const entries = [...media, ...cards] as unknown as MixedGridEntry[];
+  return (
+    <section data-page-bento data-format-icons-gallery className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+      <h2 className="mb-3 text-sm font-semibold">Profile grid: format icons</h2>
+      <AuthContext.Provider value={GALLERY_AUTH}>
+        {ready && <div className="max-w-[360px]" data-format-icons-grid><ProfileMixedGrid entries={entries} /></div>}
+      </AuthContext.Provider>
+      <div data-format-icons-key className="mt-4 grid max-w-[360px] grid-cols-4 gap-2 text-[10px]">
+        {FORMAT_KINDS.map((kind) => (
+          <div key={kind} className="flex flex-col items-center gap-1 rounded-xl border border-white/10 bg-white/[0.05] p-2">
+            <FormatGlyph kind={kind} className="h-6 w-6 [&_.fmt-wash]:opacity-0" />
+            <span className="opacity-70">{kind === 'sharedPost' ? 'shared' : kind}</span>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/** Plain text posts in the profile grid: Soft Light with no backdrop chosen, then the three backdrops that differ per post. */
+function TextTilesGallery() {
+  const entries: MixedGridEntry[] = GALLERY_TEXT_POSTS.slice(0, 3).map((p) => ({ key: p.id, type: 'post', data: p }) as MixedGridEntry);
+  return (
+    <section data-page-bento data-text-tiles-gallery className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+      <h2 className="mb-3 text-sm font-semibold">Text tiles in the profile grid</h2>
+      <AuthContext.Provider value={GALLERY_AUTH}>
+        <div className="flex flex-wrap gap-4">
+          {[null, 'echo', 'cards', 'deck'].map((id) => (
+            <div key={id ?? 'soft'} className="w-full max-w-[360px]">
+              <p className="mb-1 text-xs opacity-60">{postBgById(id)?.name ?? 'Soft Light (default)'}</p>
+              <ProfilePostBgContext.Provider value={postBgById(id)}>
+                <ProfileMixedGrid entries={entries} />
+              </ProfilePostBgContext.Provider>
+            </div>
+          ))}
+        </div>
+      </AuthContext.Provider>
+    </section>
+  );
+}
+
+const GALLERY_ARTICLE_BODY = Array.from({ length: 460 }, () => 'word').join(' ');
+const GALLERY_ARTICLES: GalleryTextPost[] = [
+  { title: 'Open Letter For Pioneer Burn', cover: 'https://dehubcdn.ams3.cdn.digitaloceanspaces.com/feed-images/7389-article-1.jpg', views: '541' },
+  { title: 'Why we shoot on film again in 2026', cover: undefined, views: '1.2K' },
+].map((a, i) => ({
+  id: `gallery-article-${i}`, type: 'post', title: a.title, content: 'A short summary of the article.', articleBody: GALLERY_ARTICLE_BODY,
+  articleImageUrl: a.cover, views: a.views, createdAt: new Date(Date.now() - (i + 1) * 7_200_000).toISOString(),
+  author: { id: 'gallery-profile', name: 'Marco V', handle: '@marco_v', verified: false },
+  stats: { comments: 4, reposts: 0, likes: 90, dislikes: 0 },
+}) as GalleryTextPost);
+
+/** Article tiles in the profile grid: Cover (default) or Drop cap, picked by holding one of your articles. */
+function ArticleTilesGallery({ initialLook, initiallyOpen }: { initialLook: string | null; initiallyOpen: boolean }) {
+  const [look, setLook] = useState<ArticleTileLook>(initialLook === 'dropcap' ? 'dropcap' : 'cover');
+  const [open, setOpen] = useState(initiallyOpen);
+  const hold = usePostBgHold(true, () => setOpen(true), '[data-tile="article"]');
+  const entries: MixedGridEntry[] = [GALLERY_ARTICLES[0], GALLERY_TEXT_POSTS[0], GALLERY_ARTICLES[1]]
+    .map((p) => ({ key: p.id, type: 'post', data: p }) as MixedGridEntry);
+  return (
+    <section data-page-bento data-article-tile-gallery className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+      <h2 className="mb-3 text-sm font-semibold">Article tiles (hold an article to choose)</h2>
+      <AuthContext.Provider value={GALLERY_AUTH}>
+        <ProfileArticleTileContext.Provider value={look}>
+          <div ref={hold.hostRef} {...hold.handlers} className="relative max-w-[360px]">
+            {hold.ringEl}
+            <ProfileMixedGrid entries={entries} />
+          </div>
+        </ProfileArticleTileContext.Provider>
+        <ArticleTilePicker
+          open={open}
+          current={look}
+          sample={{ cover: GALLERY_ARTICLES[0].articleImageUrl, title: GALLERY_ARTICLES[0].title || '', minutes: 2, views: '541' }}
+          onCancel={() => setOpen(false)}
+          onSave={(next) => { setLook(next); setOpen(false); }}
+        />
+      </AuthContext.Provider>
+    </section>
+  );
+}
+
+/** The desktop profile header wearing a pinned community (lg and up; phones keep the card). */
+function PinnedProfileGallery() {
+  const { t: _copy } = _useCopy();
+  const queryClient = useQueryClient();
+  useState(() => queryClient.setQueryData(['communities', 'pinned', GALLERY_PROFILE_WALLET], [
+    { id: 'gallery-pin', community_id: GALLERY_COMMUNITY.id, display_order: 0, communities: GALLERY_COMMUNITY } as unknown as PinnedCommunity,
+  ]));
+  return (
+    <section data-page-bento data-pinned-profile-gallery className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+      <h2 className="mb-3 text-sm font-semibold">{_copy("copy.d57ba2d3adb3", { defaultValue: "Profile with a pinned community" })}</h2>
+      <AuthContext.Provider value={GALLERY_AUTH}>
+        <div className="max-w-[680px]">
+          <ProfileHeader
+            profile={GALLERY_PROFILE}
+            apiProfile={GALLERY_PROFILE}
+            isViewingOwnProfile={false}
+            isAuthenticated={false}
+            badgeUrl={null}
+            isFollowing
+            isPending={false}
+            isTargetPrivate={false}
+            isFollowLoading={false}
+            handleFollow={noop}
+            handleUnfollow={noop}
+            isSubscribed={false}
+            hasPlans={false}
+            setFullscreenImage={noop}
+            setActiveTab={noop}
+            shareSheetOpen={false}
+            setShareSheetOpen={noop}
+            setLoginModalOpen={noop}
+            ShareOptions={() => null}
+            showFollowersFollowing
+            hideFollowerCounts={false}
+            setFollowListType={noop}
+            setFollowListDrawerOpen={noop}
+            translatedBio={null}
+            setTranslatedBio={noop}
+          />
+        </div>
+      </AuthContext.Provider>
+    </section>
+  );
+}
+
+/**
+ * The owner's own header: right-click (or hold) the picture or banner for
+ * Change, Paste, Copy, Delete. Nothing saves here (no signed-in user).
+ */
+function ProfileImageMenuGallery() {
+  return (
+    <section data-page-bento data-profile-image-menu-gallery className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+      <h2 className="mb-3 text-sm font-semibold">Profile picture and banner menu</h2>
+      <AuthContext.Provider value={GALLERY_AUTH}>
+        <div className="max-w-[680px]">
+          <ProfileHeader
+            profile={GALLERY_PROFILE}
+            apiProfile={GALLERY_PROFILE}
+            isViewingOwnProfile
+            isAuthenticated
+            badgeUrl={null}
+            isFollowing={false}
+            isPending={false}
+            isTargetPrivate={false}
+            isFollowLoading={false}
+            handleFollow={noop}
+            handleUnfollow={noop}
+            isSubscribed={false}
+            hasPlans={false}
+            setFullscreenImage={noop}
+            setActiveTab={noop}
+            shareSheetOpen={false}
+            setShareSheetOpen={noop}
+            setLoginModalOpen={noop}
+            ShareOptions={() => null}
+            showFollowersFollowing
+            hideFollowerCounts={false}
+            setFollowListType={noop}
+            setFollowListDrawerOpen={noop}
+            translatedBio={null}
+            setTranslatedBio={noop}
+          />
+        </div>
+      </AuthContext.Provider>
+    </section>
+  );
+}
+
+// Ids far above any real post, so the seeded answers never collide with one.
+const GALLERY_POLLS: Array<{ label: string; poll: DeHubPoll }> = (() => {
+  const _copy = _translateCopy;
+  const day = 24 * 60 * 60 * 1000;
+  const base = {
+    _id: 'gallery', address: '0x0000000000000000000000000000000000000000',
+    question: 'Which feature should ship next?', isMultipleChoice: false, createdAt: new Date(Date.now() - 3 * day).toISOString(),
+  };
+  const options = (counts: number[]) => ['Live co-streams', 'Creator tips', 'Music charts'].map((text, index) => ({ index, text, voteCount: counts[index] }));
+  return [
+    { label: _copy("copy.ed077f3d8125", { defaultValue: "Open" }), poll: { ...base, tokenId: 990000001, options: options([12, 30, 8]), totalVotes: 50, isActive: true, expiresAt: new Date(Date.now() + day).toISOString() } },
+    { label: _copy("copy.7cdc804e6996", { defaultValue: "Ended" }), poll: { ...base, tokenId: 990000002, options: options([12, 30, 8]), totalVotes: 50, isActive: true, isExpired: true, expiresAt: new Date(Date.now() - day).toISOString() } },
+    { label: _copy("copy.668b01f4c6f1", { defaultValue: "Ended, you voted" }), poll: { ...base, tokenId: 990000003, options: options([12, 30, 8]), totalVotes: 50, isActive: false, expiresAt: new Date(Date.now() - day).toISOString(), userVote: { optionIndexes: [0], votedAt: base.createdAt } } },
+  ];
+})();
+
+function PollGallery() {
+  const { t: _copy } = _useCopy();
+  const queryClient = useQueryClient();
+  // Seed before the cards mount so they render the sample polls, never fetch.
+  useState(() => GALLERY_POLLS.forEach(({ poll }) => queryClient.setQueryData(['polls', poll.tokenId], poll)));
+  return (
+    <section data-page-bento data-poll-gallery className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+      <h2 className="mb-3 text-sm font-semibold">{_copy("copy.996729458535", { defaultValue: "Polls" })}</h2>
+      <AuthContext.Provider value={GALLERY_AUTH}>
+        <div className="grid gap-4 md:grid-cols-3">
+          {GALLERY_POLLS.map(({ label, poll }) => (
+            <div key={poll.tokenId}>
+              <p className="mb-1 text-xs text-zinc-500">{label}</p>
+              <PollCard tokenId={poll.tokenId} />
+            </div>
+          ))}
+        </div>
+        <PollEditorGallery />
+      </AuthContext.Provider>
+    </section>
+  );
+}
+
+function PollEditorGallery() {
+  const [poll, setPoll] = useState<PollData>({
+    question: 'Best time to stream?',
+    options: [{ id: 'a', text: 'Morning' }, { id: 'b', text: 'Night' }],
+    duration: 72,
+    isMultipleChoice: false,
+  });
+  return (
+    <div data-poll-editor-gallery className="mt-4 max-w-md">
+      <PollEditor poll={poll} onChange={setPoll} onRemove={() => {}} />
+    </div>
+  );
+}
+
+function LockedChatGallery() {
+  const { t } = useTranslation();
+  return (
+    <section data-page-bento data-locked-chat-gallery className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+      <h2 className="mb-3 text-sm font-semibold">{t('messages.title', 'Messages')}</h2>
+      <div className="grid gap-4 md:grid-cols-2">
+        <div className="flex min-h-[420px] flex-col rounded-2xl border border-white/10">
+          <DmLockedState status="locked" needsWalletConnection={false} peerName="Tad" onUnlock={() => {}} />
+        </div>
+        <div className="flex flex-col justify-center rounded-2xl border border-white/10 px-4">
+          <DmUndecryptableRun count={3} />
+        </div>
+      </div>
+      <div data-dm-safety-gallery className="mt-4 grid gap-2 pb-2 md:grid-cols-2">
+        <DmSafetyBanner peer={{ address: '0x1111111111111111111111111111111111111111', displayName: 'Mal | Riftn Founder' }} />
+      </div>
+    </section>
+  );
+}
+
+function StreamerArtworkGallery() {
+  const { theme, themeChoice } = useAppTheme();
+  const { t } = useTranslation();
+  const instance = useId();
+  const material = badgeMaterial(themeChoice === 'system-light' ? themeChoice : theme);
+  return (
+    <section data-page-bento data-streamer-gallery className="mb-5 rounded-3xl border p-4" style={{ background: material.panel, color: material.text, borderColor: material.edge }}>
+      <h2 className="mb-3 text-sm font-semibold">{t('live.progress.cardsTitle')}</h2>
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-5">
+        {STREAMER_BADGE_IDS.map(id => (
+          <div key={id} data-streamer-art={id} className="flex flex-col items-center gap-2 text-center">
+            <div aria-hidden className="h-24 w-24 [&>svg]:h-full [&>svg]:w-full" dangerouslySetInnerHTML={{ __html: streamerBadgeSvg(id, themeChoice === 'system-light' ? themeChoice : theme, true, instance) }} />
+            <span className="text-xs font-medium">{t(`live.progress.card.${id}.name`)}</span>
+            <div className="flex items-center gap-3" aria-hidden>
+              <span className="h-4 w-4 [&>svg]:h-full [&>svg]:w-full" dangerouslySetInnerHTML={{ __html: streamerBadgeSvg(id, themeChoice === 'system-light' ? themeChoice : theme, true, `${instance}-inline`, 'compact') }} />
+              <span className="h-8 w-8 [&>svg]:h-full [&>svg]:w-full" dangerouslySetInnerHTML={{ __html: streamerBadgeSvg(id, themeChoice === 'system-light' ? themeChoice : theme, false, `${instance}-locked`) }} />
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/** Verified GitHub: the Settings row both ways, and the profile's links with it. */
+function GithubLinkGallery() {
+  const queryClient = useQueryClient();
+  // Seeded once, before the rows mount, so neither asks the API.
+  useState(() => {
+    queryClient.setQueryData(['github-link', '0xgallery-github-off'], { available: true, connected: false, login: null, verifiedAt: null });
+    queryClient.setQueryData(['github-link', '0xgallery-github-on'], { available: true, connected: true, login: 'octocat', verifiedAt: '2026-11-02T00:00:00Z' });
+    return true;
+  });
+  return (
+    <section data-page-bento data-github-link-gallery className="mb-5 space-y-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+      <h2 className="text-sm font-semibold">GitHub</h2>
+      <GithubLinkSetting address="0xgallery-github-off" />
+      <GithubLinkSetting address="0xgallery-github-on" />
+      <div className="flex justify-end" data-github-links-pill>
+        <ProfileLinksPill githubLogin="octocat" customs={{ twitterLink: 'x.com/dehub', youtubeLink: 'youtube.com/@dehub' }} />
+      </div>
+    </section>
+  );
+}
+
+const GALLERY_FIELDS = [
+  { name: 'Website', value: 'https://riftn.com', verifiedAt: '2026-11-02T00:00:00Z' },
+  { name: 'Pronouns', value: 'they/them' },
+  { name: 'Location', value: 'Lisbon, Portugal' },
+  { name: 'Favourite DJ', value: 'Four Tet' },
+];
+
+/** Profile fields: the editor (presets + delete) and how they read on a profile. */
+function ProfileFieldsGallery() {
+  const [rows, setRows] = useState<FieldRow[]>([
+    { key: -1, preset: 'website', name: 'Website', value: 'dehub.io', verifiedAt: '2026-11-02T00:00:00Z' },
+    { key: -2, preset: 'pronouns', name: 'Pronouns', value: 'they/them' },
+    { key: -3, preset: 'custom', name: 'Favourite DJ', value: 'Four Tet' },
+  ]);
+  return (
+    <section data-page-bento data-profile-fields-gallery className="mb-5 space-y-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+      <h2 className="text-sm font-semibold">Profile fields</h2>
+      <ProfileFieldsEditor rows={rows} onChange={setRows} username="dehub" />
+      <div>
+        <p className="mt-1 text-white/90">Bio goes here.</p>
+        <ProfileFieldsList fields={GALLERY_FIELDS} />
+        <div className="mt-2 flex justify-end" data-profile-fields-links>
+          <ProfileLinksPill fields={GALLERY_FIELDS} customs={{ twitterLink: 'x.com/dehub', youtubeLink: 'youtube.com/@dehub' }} />
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/** The shared page kit (components/app/page-kit) in the active theme. */
+function PageKitGallery() {
+  const { t: _copy } = _useCopy();
+  const [tab, setTab] = useState<'browse' | 'mine' | 'sell'>('browse');
+  return (
+    <section data-page-bento data-page-kit-gallery className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+      <h2 className="mb-3 text-sm font-semibold">{_copy("copy.483f6431de87", { defaultValue: "Page kit" })}</h2>
+      <div className="space-y-3">
+        <PageTabs
+          value={tab}
+          onChange={setTab}
+          tabs={[
+            { id: 'browse', label: _copy("copy.3227aa966625", { defaultValue: "Browse" }), icon: 'search' },
+            { id: 'mine', label: _copy("copy.f57afb7d275a", { defaultValue: "Mine" }), icon: 'usernames' },
+            { id: 'sell', label: _copy("copy.2ec1e2815946", { defaultValue: "Sell" }), icon: 'stores' },
+          ]}
+        />
+        <PageSection eyebrow="Treasury balance" title={_copy("copy.13666ca7642b", { defaultValue: "Section title" })}>
+          <p className="text-sm text-zinc-400">{_copy("copy.2a6ac5a48e62", { defaultValue: "Sections are rounded bentos on canvas themes and full width between hairlines on System phones." })}</p>
+        </PageSection>
+        <div className="flex gap-2">
+          <KitButton>{_copy("copy.efe10c80ec8a", { defaultValue: "Primary" })}</KitButton>
+          <KitButton variant="quiet">{_copy("copy.c0ebb7d6b693", { defaultValue: "Quiet" })}</KitButton>
+        </div>
+        <PageEmpty icon="stores" title={_copy("copy.38975ad4e835", { defaultValue: "No listings yet" })} body="Be the first to sell something." />
+      </div>
+    </section>
+  );
+}
+
+/** Sample proposals for the proposal card a quoted or reposted proposal shows as. */
+const GALLERY_PROPOSALS: GovernanceProposal[] = (() => {
+  const day = 86_400_000;
+  const base = {
+    author_wallet_address: '0x1111111111111111111111111111111111111111',
+    author_username: 'marco_v',
+    author_avatar: null,
+    vote_count: 0,
+    comment_count: 4,
+    created_at: new Date(Date.now() - 2 * day).toISOString(),
+    updated_at: new Date(Date.now() - day).toISOString(),
+  };
+  return [
+    { ...base, id: '00000000-0000-4000-8000-000000000001', status: 'open', title: 'Add a creator fund paid from 1% of tips', description: 'Each month, 1% of all tips goes into a pool split between the ten most-watched new creators.', like_count: 4200, dislike_count: 1300, voting_ends_at: new Date(Date.now() + 3 * day).toISOString() },
+    { ...base, id: '00000000-0000-4000-8000-000000000002', status: 'passed', title: 'Weekly community stage for governance Q&A', description: 'A recorded stage every Friday where proposers answer questions before votes close.', like_count: 9100, dislike_count: 700, voting_ends_at: new Date(Date.now() - day).toISOString() },
+    { ...base, id: '00000000-0000-4000-8000-000000000003', status: 'rejected', title: 'Remove mature content from search', description: '', like_count: 900, dislike_count: 5600, voting_ends_at: new Date(Date.now() - day).toISOString() },
+    { ...base, id: '00000000-0000-4000-8000-000000000004', status: 'open', title: 'Which chain should the next token drop launch on?', description: 'Pick one. The winner gets the first drop next month.', like_count: 640, dislike_count: 0, voting_ends_at: new Date(Date.now() + 2 * day).toISOString(),
+      options: ['Base', 'BNB Chain', 'Ethereum', 'Solana'], option_tallies: [{ weight: 310, voters: 41 }, { weight: 180, voters: 22 }, { weight: 40, voters: 6 }, { weight: 110, voters: 15 }] },
+    { ...base, id: '00000000-0000-4000-8000-000000000005', status: 'passed', title: 'Theme for the December town hall', description: '', like_count: 820, dislike_count: 0, voting_ends_at: new Date(Date.now() - day).toISOString(),
+      options: ['Creator tools', 'Token roadmap', 'Moderation'], option_tallies: [{ weight: 470, voters: 52 }, { weight: 230, voters: 28 }, { weight: 120, voters: 13 }] },
+  ] as GovernanceProposal[];
+})();
+
+/**
+ * Links to our own things as cards (`?links=1`): a Requests board link, a
+ * community, and pages, the way a DM, a comment or a live chat line shows
+ * them. `&mention=lead` opens the @ list on that word, live.
+ */
+const GALLERY_REQUEST_ID = '00000000-0000-4000-8000-0000000000aa';
+const GALLERY_LINK_TEXT = [
+  `https://riftn.com/features?feature=${GALLERY_REQUEST_ID}`,
+  'https://riftn.com/app/communities/gallery-builders',
+  'https://riftn.com/app/leaderboard',
+  'https://riftn.com/shorts',
+  'https://riftn.com/arcade/kings-gambit',
+  'https://riftn.com/features',
+];
+
+const ARCADE_CARD_TEXT = [
+  'https://riftn.com/arcade/chestard?by=c0chraniz3r',
+  'https://riftn.com/arcade/sillycoin?by=c0chraniz3r',
+  'https://riftn.com/arcade/chestard?by=c0chraniz3r&snap=1',
+];
+
+function LinkCardsGallery({ mention }: { mention: string | null }) {
+  const queryClient = useQueryClient();
+  const [selected, setSelected] = useState(0);
+  const [open, setOpen] = useState(!!mention);
+  useState(() => {
+    const now = new Date().toISOString();
+    queryClient.setQueryData(['feature-request', GALLERY_REQUEST_ID], {
+      id: GALLERY_REQUEST_ID, title: 'Tag communities and pages with @ in messages', status: 'in_progress',
+      description: 'Typing @ should find communities and pages too, and drop a link that opens in the app.',
+      category: 'new_feature', author_wallet_address: '0x1111111111111111111111111111111111111111',
+      author_username: 'marco_v', author_avatar: null, image_url: null, image_urls: null,
+      vote_count: 128, like_count: 128, dislike_count: 3, comment_count: 14, created_at: now, updated_at: now,
+    });
+    queryClient.setQueryData(['communities', 'slug', 'gallery-builders'], {
+      id: 'gallery-community', name: 'Riftn Builders', slug: 'gallery-builders',
+      description: 'Ship ideas, find testers, show what you made.', avatar_url: null, banner_url: null,
+      creator_wallet_address: '0x1111111111111111111111111111111111111111', is_private: false, member_count: 2480,
+      rules: [], ticker_symbol: null, ticker_contract_address: null, ticker_chain_id: null, ticker_pair_address: null,
+      slow_mode_seconds: 0, default_permissions: null, created_at: now, updated_at: now,
+    });
+  });
+  useState(() => {
+    // Arcade score cards: a shared game naming its sharer.
+    const player = { address: '0x1111111111111111111111111111111111111111', username: 'c0chraniz3r', displayName: 'Jesse', avatarImageUrl: null };
+    queryClient.setQueryData(['arcade-card', 'chestard', 'c0chraniz3r'], { game: 'chestard', player, best: 1240, rank: 3, unit: 'points' });
+    queryClient.setQueryData(['arcade-card', 'sillycoin', 'c0chraniz3r'], { game: 'sillycoin', player, best: 48200, rank: 12, unit: 'coins' });
+  });
+  const pairs = [GALLERY_LINK_TEXT.slice(0, 2), GALLERY_LINK_TEXT.slice(2, 4), GALLERY_LINK_TEXT.slice(4, 6)];
+  return (
+    <section data-page-bento data-link-cards-gallery className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+      <h2 className="mb-3 text-sm font-semibold">Link cards</h2>
+      <div className="grid gap-4 md:grid-cols-3">
+        {pairs.map((pair, i) => (
+          <div key={i} className="max-w-[340px] rounded-2xl border border-white/[0.08] bg-white/[0.03] p-3">
+            <p className="text-sm text-white/80">{i === 0 ? 'have a look at these' : i === 1 ? 'top of the board today' : 'play this one'}</p>
+            <DehubLinkEmbeds links={findDehubLinks(pair.join(' '))} compact />
+          </div>
+        ))}
+      </div>
+      <div data-arcade-cards-gallery className="mt-4 grid gap-4 md:grid-cols-3">
+        {ARCADE_CARD_TEXT.map((text) => (
+          <div key={text} className="max-w-[340px] rounded-2xl border border-white/[0.08] bg-white/[0.03] p-3">
+            <p className="text-sm text-white/80">beat my score</p>
+            <DehubLinkEmbeds links={findDehubLinks(text)} compact />
+          </div>
+        ))}
+      </div>
+      <button type="button" data-open-mention onClick={() => setOpen(true)} className="mt-3 rounded-xl border border-white/10 px-3 py-2 text-sm">
+        @ list
+      </button>
+      <UserMentionDropdown
+        query={mention || 'lead'}
+        isOpen={open}
+        position={{ top: 0, left: 0 }}
+        selectedIndex={selected}
+        onSelectedIndexChange={setSelected}
+        onSelect={() => setOpen(false)}
+        onClose={() => setOpen(false)}
+      />
+      <MentionComposerDemo />
+    </section>
+  );
+}
+
+/**
+ * A message box wired the way every composer is, so the whole @ flow (type,
+ * list opens, pick, text lands) can be tried and timed without an account.
+ */
+function MentionComposerDemo() {
+  const ref = useRef<HTMLTextAreaElement>(null);
+  const [text, setText] = useState('');
+  const mention = useMention({ inputRef: ref, onMentionInsert: (_user, next) => setText(next) });
+  return (
+    <div className="mt-3 max-w-[340px]">
+      <textarea
+        ref={ref}
+        data-mention-composer
+        value={text}
+        rows={2}
+        placeholder="Type @ and a letter"
+        onChange={(e) => {
+          setText(e.target.value);
+          mention.handleInput(e.target.value, e.target.selectionStart);
+        }}
+        className="w-full resize-none rounded-xl border border-white/10 bg-transparent px-3 py-2 text-sm outline-none"
+      />
+      <UserMentionDropdown
+        query={mention.query}
+        isOpen={mention.isOpen}
+        position={mention.position}
+        armed={mention.armed}
+        selectedIndex={mention.selectedIndex}
+        onSelectedIndexChange={mention.setSelectedIndex}
+        onSelect={mention.handleSelect}
+        onClose={mention.handleClose}
+      />
+    </div>
+  );
+}
+
+function ProposalCardGallery() {
+  const { t } = useTranslation();
+  const queryClient = useQueryClient();
+  // Multiple choice: the answer list as the board shows it, and the editor
+  // the propose drawer opens, both live so a theme check can click them.
+  const [myOption, setMyOption] = useState<number | null>(0);
+  const [answerType, setAnswerType] = useState<'yesno' | 'multiple'>('multiple');
+  const [answers, setAnswers] = useState<string[]>(['Base', 'BNB Chain', '']);
+  // Seed before the cards mount so they render the samples, never fetch.
+  useState(() => GALLERY_PROPOSALS.forEach((p) => queryClient.setQueryData(['governance-proposal', p.id], p)));
+  return (
+    <section data-page-bento data-proposal-gallery className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+      <h2 className="mb-3 text-sm font-semibold">{t('governance.title', 'Governance')}</h2>
+      <div className="grid gap-4 md:grid-cols-3">
+        {GALLERY_PROPOSALS.map((p) => (
+          <ProposalLinkEmbed key={p.id} proposalId={p.id} path="/app/state-gallery" />
+        ))}
+      </div>
+      <div data-proposal-options-gallery className="mt-4 grid gap-4 md:grid-cols-3">
+        <div className="rounded-xl border border-white/[0.12] bg-white/[0.03] p-3">
+          <p className="mb-2 text-sm font-semibold text-white">{GALLERY_PROPOSALS[3].title}</p>
+          <ProposalOptions
+            proposal={GALLERY_PROPOSALS[3]}
+            myOption={myOption}
+            onVote={(i) => setMyOption((cur) => (cur === i ? null : i))}
+          />
+        </div>
+        <div className="rounded-xl border border-white/[0.12] bg-white/[0.03] p-3">
+          <p className="mb-2 text-sm font-semibold text-white">{GALLERY_PROPOSALS[4].title}</p>
+          <ProposalOptions proposal={GALLERY_PROPOSALS[4]} myOption={1} disabled />
+        </div>
+        <div className="rounded-xl border border-white/[0.12] bg-white/[0.03] p-3">
+          <ProposalAnswersEditor
+            answerType={answerType}
+            onAnswerTypeChange={setAnswerType}
+            options={answers}
+            onOptionsChange={setAnswers}
+          />
+        </div>
+      </div>
+    </section>
+  );
+}
+
+const GALLERY_AGENT = '0x00000000000000000000000000000000000a6e17';
+function AgentWelcomeGallery() {
+  const { t } = useTranslation();
+  const queryClient = useQueryClient();
+  // Seed before the panel mounts so it renders the sample, never fetches.
+  useState(() => {
+    queryClient.setQueryData(['agent-welcomes'], {
+      limits: { maxPerDay: 10, defaultPerDay: 3, ownerMessagesPerDay: 20, maxText: 500 },
+      agents: [{ address: GALLERY_AGENT, username: 'welcomebot', displayName: 'Welcome Bot', avatarImageUrl: null, follow: true, message: true,
+        text: 'Hey {name}, welcome to Riftn! 👋 Shout if you need a hand finding your people.', perDay: 3, today: { follows: 2, messages: 1 } }],
+    });
+    const at = (m: number) => new Date(Date.now() - m * 60_000).toISOString();
+    const target = (n: string) => ({ address: `0x${n.padStart(40, '0')}`, username: n, displayName: n, avatarImageUrl: null });
+    queryClient.setQueryData(['agent-welcome-log', GALLERY_AGENT], [
+      { kind: 'message', status: 'done', reason: '', content: '', at: at(4), target: target('sunnyreels') },
+      { kind: 'follow', status: 'done', reason: '', content: '', at: at(5), target: target('sunnyreels') },
+      { kind: 'follow', status: 'done', reason: '', content: '', at: at(48), target: target('beatsbyjo') },
+      { kind: 'message', status: 'skipped', reason: 'They do not take new messages.', content: '', at: at(49), target: target('beatsbyjo') },
+    ]);
+  });
+  return (
+    <section data-page-bento data-agent-welcome-gallery className="mb-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+      <h2 className="mb-3 text-sm font-semibold">{t('agents.welcome.title')}</h2>
+      <div className="max-w-xl"><AgentWelcomePanel agentName="welcomebot" /></div>
+    </section>
+  );
+}

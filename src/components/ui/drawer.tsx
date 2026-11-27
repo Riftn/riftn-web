@@ -1,0 +1,481 @@
+import * as React from "react";
+import { overlayRoot } from "@/lib/overlay-root";
+import { Drawer as DrawerPrimitive } from "vaul";
+
+import { useTranslation } from "react-i18next";
+import X from "@/components/ui/cut-icons/close";
+import { cn } from "@/lib/utils";
+import { OverlayOpenTracker } from "@/lib/overlay-open";
+import { guardOutsideDismiss } from "@/lib/overlay-dismiss";
+import { useWalletUnlockPrompt } from '@/lib/wallet-unlock-flow';
+import { settleAfterOverlayClose } from '@/lib/scroll-freeze-watchdog';
+import { OverlayContentPresent, useOverlayLifetime } from '@/hooks/use-overlay-lifetime';
+import { OverlayExit, useOverlayExitRef } from '@/components/ui/overlay-exit';
+
+// Shared guard against the vaul "ghost click": dismissing a sheet — tapping the
+// scrim, or an outside tap on a non-modal drawer — fires a synthesized click on
+// whatever sits beneath once the sheet unmounts. On a feed card that click lands
+// on the card root and navigates to the post the user was only trying to dismiss
+// past. Every Drawer stamps the moment it closes here; feed cards check
+// wasDrawerJustDismissed() before navigating.
+let lastDrawerDismissAt = 0;
+export function wasDrawerJustDismissed(withinMs = 400) {
+  return Date.now() - lastDrawerDismissAt < withinMs;
+}
+
+/**
+ * Is a vaul Root actually above us? False inside a dormant sheet, so
+ * `DrawerContent` can withhold itself instead of portalling into nothing.
+ *
+ * The JSX walk below only ever sees the literal children written at the call
+ * site, so it cannot know that a component renders a `DrawerContent` — and a
+ * sheet body reached through a wrapper (`<Drawer><PPVDrawerContent /></Drawer>`)
+ * used to survive `withoutContent`, render with no Root above it, and throw
+ * "`DialogPortal` must be used within `Dialog`" out of vaul's Portal. That took
+ * out the whole subtree: every video post page rendered its error boundary,
+ * because the immersive creator bar mounts that sheet unconditionally.
+ *
+ * Guarding at `DrawerContent` closes the hole wherever the content is written,
+ * literal or wrapped, rather than trying to spot the wrappers from outside.
+ */
+const DrawerRootMounted = React.createContext(false);
+
+/**
+ * vaul parts that only work inside a Root, because they read its context. If a
+ * sheet puts any of these outside its `DrawerContent`, its Root has to stay
+ * mounted; `DrawerContent` itself is exempt because a closed Root renders none
+ * of it anyway.
+ *
+ * Only the literal children are walked, so a part reached through a wrapper
+ * component still escapes this check — `DrawerContent` is safe either way via
+ * `DrawerRootMounted`, the rest are written literally at every call site.
+ */
+const CONTEXT_BOUND_PARTS: ReadonlySet<unknown> = new Set([
+  DrawerPrimitive.Trigger,
+  DrawerPrimitive.Close,
+  DrawerPrimitive.Title,
+  DrawerPrimitive.Description,
+  DrawerPrimitive.Portal,
+  DrawerPrimitive.Overlay,
+]);
+
+/**
+ * Can this sheet be left unmounted until it first opens? Only if nothing outside
+ * its content needs the Root's context — most commonly a `DrawerTrigger`, which
+ * is the sheet's own opener and would vanish with it. Walks the literal JSX
+ * children (where every such part in this codebase is written), pruning at
+ * `DrawerContent` since that subtree is withheld anyway.
+ */
+function isDeferrable(node: React.ReactNode, DrawerContentType: unknown): boolean {
+  let ok = true;
+  React.Children.forEach(node, (child) => {
+    if (!ok || !React.isValidElement(child)) return;
+    if (child.type === DrawerContentType) return;
+    if (CONTEXT_BOUND_PARTS.has(child.type)) {
+      ok = false;
+      return;
+    }
+    const kids = (child.props as { children?: React.ReactNode } | null)?.children;
+    if (kids && !isDeferrable(kids, DrawerContentType)) ok = false;
+  });
+  return ok;
+}
+
+/** The children a closed, dormant sheet still has to render: everything but the sheet body. */
+function withoutContent(node: React.ReactNode, DrawerContentType: unknown): React.ReactNode {
+  return React.Children.map(node, (child) =>
+    React.isValidElement(child) && child.type === DrawerContentType ? null : child,
+  );
+}
+
+/**
+ * Warm requests let a deferred sheet mount out of dormancy BEFORE the
+ * interaction that opens it — a hover or pointerdown on its opener calls
+ * `warmDeferredSheets()`, and any listening dormant sheet does its
+ * dormant→mounting→live dance right there instead of on the click.
+ *
+ * Why this matters: the first open of a deferred sheet costs two commits and a
+ * requestAnimationFrame before `open` can even flip true (see the phase machine
+ * below). On a loaded main thread that is visible dead time between tap and
+ * slide-up. Warming moves it into the hover gap where nobody can see it, and
+ * after that first mount the Root stays mounted anyway — so warming is exactly
+ * "do now what the first click would have done", never extra ongoing cost.
+ *
+ * Opt-in per sheet via the `warmable` prop, and deliberately so: warming is
+ * "mount every dormant Root", and the feed mounts dozens of dormant sheets per
+ * card. If every one of them listened, one stray hover would recreate the
+ * scroll-listener pile-up this whole deferral exists to prevent. Only sheets
+ * whose opener is a primary CTA — the login sheet — opt in.
+ */
+const warmRequests = new Set<() => void>();
+
+export function warmDeferredSheets(): void {
+  warmRequests.forEach((warm) => {
+    try {
+      warm();
+    } catch {
+      /* a throwing subscriber must not block the others */
+    }
+  });
+}
+
+/**
+ * Every mounted vaul Root registers a `window` scroll listener for the lifetime
+ * of the component — `usePositionFixed` does it with an empty dep array, so it
+ * happens whether or not the sheet is open, and the handler reads
+ * `window.scrollY` (a layout-flushing read) on every scroll event. It exists
+ * only to restore position on iOS Safari; everywhere else it is pure cost.
+ *
+ * That cost is per sheet, and the feed mounts a handful of sheets per card:
+ * 20 posts on screen meant 185 window scroll listeners, 40 posts meant 365, and
+ * it kept climbing as the infinite feed grew — every one of them running on
+ * every scroll frame. It was the largest single JS cost while scrolling the feed.
+ *
+ * So keep the Root out of the tree until a sheet first opens, rendering its
+ * non-content children (openers and other markup) exactly as a closed Root
+ * would. Mounting then happens in two steps — Root closed first, real `open` on
+ * the next frame — because vaul renders an already-open Root at its final
+ * position with no transition, and a sheet that teleports in instead of sliding
+ * up would be a worse trade than the listener. Once live the Root stays mounted,
+ * so this costs one frame on a sheet's first open and nothing afterwards.
+ */
+/** Our additions on top of vaul's Root props. */
+type CustomDrawerProps = React.ComponentProps<typeof DrawerPrimitive.Root> & {
+  /** Opt this deferred sheet in to `warmDeferredSheets()` — see the note there. */
+  warmable?: boolean;
+  /**
+   * Mount this one sheet out of dormancy now, closed, because its opener is a
+   * keystroke away (the @ list, once an @ is typed). Same early mount as
+   * `warmable`, but for this sheet alone rather than every listening one.
+   */
+  warm?: boolean;
+  walletPrompt?: boolean;
+  /** Let this sheet complete Vaul's 500ms exit; other sheets close immediately. */
+  animatedExit?: boolean;
+};
+
+const Drawer = ({ shouldScaleBackground = false, modal = true, onOpenChange, warmable = false, warm = false, walletPrompt = false, animatedExit = false, children, ...props }: CustomDrawerProps) => {
+  const unlockOpen = useWalletUnlockPrompt();
+  const lifetime = useOverlayLifetime(props.open, props.defaultOpen, onOpenChange, animatedExit ? 550 : 0);
+  const canDeferRef = React.useRef<boolean | null>(null);
+  if (canDeferRef.current === null) {
+    canDeferRef.current =
+      !props.open && !props.defaultOpen && isDeferrable(children, DrawerContent);
+  }
+
+  const [phase, setPhase] = React.useState<"dormant" | "mounting" | "live">(
+    canDeferRef.current ? "dormant" : "live",
+  );
+
+  React.useEffect(() => {
+    if (phase === "dormant" && (lifetime.open || warm)) setPhase("mounting");
+  }, [phase, lifetime.open, warm]);
+
+  // Same transition the open path runs, just early: a warm request mounts the
+  // Root closed now so the real `open` flip later is same-frame. Once live the
+  // subscription is gone — warming twice does nothing.
+  React.useEffect(() => {
+    if (!canDeferRef.current || !warmable || phase !== "dormant") return;
+    const warm = () => setPhase("mounting");
+    warmRequests.add(warm);
+    return () => {
+      warmRequests.delete(warm);
+    };
+  }, [phase, warmable]);
+
+  // Every close, however it happened (scrim, swipe, a parent flipping `open`),
+  // checks the page was handed back scrollable. See settleAfterOverlayClose.
+  const wasOpenRef = React.useRef(false);
+  React.useEffect(() => {
+    if (wasOpenRef.current && !lifetime.open) settleAfterOverlayClose();
+    wasOpenRef.current = lifetime.open;
+  }, [lifetime.open]);
+
+  React.useEffect(() => {
+    if (phase !== "mounting") return;
+    const raf = requestAnimationFrame(() => setPhase("live"));
+    return () => cancelAnimationFrame(raf);
+  }, [phase]);
+
+  if (phase === "dormant") {
+    // Explicitly false, not just the default: a dormant sheet nested inside a
+    // live one would otherwise inherit the outer Root's `true`.
+    return (
+      <DrawerRootMounted.Provider value={false}>
+        {withoutContent(children, DrawerContent)}
+      </DrawerRootMounted.Provider>
+    );
+  }
+
+  return (
+    <OverlayContentPresent.Provider value={lifetime.present}>
+    <OverlayExit present={lifetime.present}>
+    <DrawerPrimitive.Root
+      shouldScaleBackground={shouldScaleBackground}
+      modal={modal}
+      /**
+       * Never let vaul touch `document.body`'s position.
+       *
+       * On iOS — vaul's `isSafari()` is true for every browser there — an open
+       * sheet pins the page with `position: fixed !important; top: -scrollY;
+       * height: auto`. Both halves of that are wrong here:
+       *
+       * - The offset is read from `window.scrollY` and put back with
+       *   `window.scrollTo`. **Body** is this app's scrolling element, so both
+       *   are silent no-ops (see lib/document-scroll.ts): the offset is always
+       *   0, so opening a sheet throws the reader's place away and closing it
+       *   cannot put it back.
+       * - `height: auto` on the scroller collapses it to content height, so
+       *   nothing scrolls at all while it is set — and vaul only removes it on
+       *   the close path. `usePositionFixed` has no unmount cleanup and its
+       *   `previousBodyPosition` is a module-level singleton, so a Root that
+       *   unmounts while open (a card leaving the feed, a sheet whose action
+       *   navigates, an ErrorBoundary catching underneath it) leaves the page
+       *   permanently unscrollable with a refresh the only way out.
+       *
+       * Nothing is lost by switching it off. Every sheet in this app renders a
+       * `DrawerOverlay`, and Radix's modal Dialog wraps that in `RemoveScroll`,
+       * which holds the background with `body { overflow: hidden }` — right for
+       * a body scroller, scroll position preserved, ref-counted and removed
+       * with the component. Vaul's iOS `touchmove` guard (`usePreventScroll`)
+       * does not read this flag and still runs.
+       */
+      noBodyStyles
+      onOpenChange={(open) => {
+        if (!open && unlockOpen && !walletPrompt) return;
+        if (!open) lastDrawerDismissAt = Date.now();
+        lifetime.onChange(open);
+      }}
+      {...props}
+      open={phase === "mounting" ? false : lifetime.open}
+    >
+      <DrawerRootMounted.Provider value={true}>
+        {children}
+      </DrawerRootMounted.Provider>
+    </DrawerPrimitive.Root>
+    </OverlayExit>
+    </OverlayContentPresent.Provider>
+  );
+};
+Drawer.displayName = "Drawer";
+
+const DrawerTrigger = DrawerPrimitive.Trigger;
+
+/* A `container` on the Portal, not on the Root: the Root's one also flips
+   vaul into its "custom container" layout (absolute instead of fixed). */
+const DrawerPortal = (props: React.ComponentProps<typeof DrawerPrimitive.Portal>) => (
+  <DrawerPrimitive.Portal container={overlayRoot()} {...props} />
+);
+
+const DrawerClose = DrawerPrimitive.Close;
+
+const DrawerOverlay = React.forwardRef<
+  React.ElementRef<typeof DrawerPrimitive.Overlay>,
+  React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Overlay>
+>(({ className, ...props }, ref) => (
+  <DrawerPrimitive.Overlay 
+    ref={useOverlayExitRef(ref)} 
+    className={cn("fixed inset-0 z-[100] bg-black/80", className)} 
+    {...props} 
+  />
+));
+DrawerOverlay.displayName = DrawerPrimitive.Overlay.displayName;
+
+/**
+ * Desktop: clip a sheet to the middle panel instead of the viewport.
+ *
+ * `DrawerContent` ships `fixed inset-x-0` with no cap, so by default every sheet
+ * stretches edge to edge — under both sidebars — while the content it belongs to
+ * sits in the ~1300px middle column. These vars are the live bounds of that
+ * column, measured off `<main>` in AppLayout, so an opted-in sheet reads as part
+ * of the page it opened from. Below `md` it stays a full-width bottom sheet.
+ *
+ * Positioned with left/width and never a transform: vaul writes
+ * `transform: translate3d(...)` **inline** to drive the slide-up and drag, and an
+ * inline transform beats a class, so centring this with `-translate-x-1/2` makes
+ * the sheet jump for the length of every animation.
+ *
+ * A 360px viewport-centred column was tried instead (PRs #700/#702) and reverted
+ * the same day — a third of the surrounding column reads as a different app.
+ */
+const COLUMN_CLASS =
+  "md:left-[var(--app-main-left,0px)] md:right-auto md:w-[var(--app-main-width,100vw)]";
+
+/** How a sheet's own close control is recognised: the close glyph, or an explicit mark. */
+const OWN_CLOSE = '[data-cut-icon="CutClose"], .lucide-x, [data-drawer-close], [aria-label="Close"]';
+
+/**
+ * Every sheet can be closed from the sheet itself.
+ *
+ * Tapping the backdrop and dragging down both work, but neither is visible, and
+ * a tall sheet leaves almost no backdrop to tap. Most sheets draw their own X
+ * in their header; this supplies one, in the same corner, to the ones that do
+ * not, so no sheet is left without it and none ends up with two.
+ *
+ * It looks for the sheet's own X in the DOM rather than taking a prop, because
+ * a sheet body is often a component of its own and a prop at the call site
+ * cannot see into it. The check re-runs as the body changes, since a header
+ * that arrives with loaded data brings its X with it.
+ *
+ * 12px in from the top and from the side, on an 8-unit square, so the glyph
+ * sits the same distance from both edges of the corner.
+ */
+function DrawerAutoClose() {
+  const { t } = useTranslation();
+  const probe = React.useRef<HTMLSpanElement>(null);
+  const [needed, setNeeded] = React.useState(false);
+
+  React.useLayoutEffect(() => {
+    const sheet = probe.current?.closest("[data-vaul-drawer]");
+    if (!sheet) return;
+    const check = () => {
+      const own = Array.from(sheet.querySelectorAll(OWN_CLOSE)).some(
+        (el) => !el.closest("[data-drawer-auto-close]") && el.closest("[data-vaul-drawer]") === sheet,
+      );
+      setNeeded(!own);
+    };
+    check();
+    if (typeof MutationObserver === "undefined") return;
+    const observer = new MutationObserver(check);
+    observer.observe(sheet, { childList: true, subtree: true });
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <>
+      <span ref={probe} hidden />
+      {needed && (
+        <DrawerPrimitive.Close
+          data-drawer-auto-close
+          aria-label={t("copy.7d9eb7acb13e", { defaultValue: "Close" })}
+          className="absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-lg text-current opacity-70 transition-opacity hover:opacity-100 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+        >
+          <X className="h-5 w-5" />
+        </DrawerPrimitive.Close>
+      )}
+    </>
+  );
+}
+
+const DrawerContent = React.forwardRef<
+  React.ElementRef<typeof DrawerPrimitive.Content>,
+  React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Content> & { glass?: boolean; hideHandle?: boolean; handleClassName?: string; noOverlay?: boolean; overlayClassName?: string; column?: boolean; scrollable?: boolean; /** Opt out of the corner X for a sheet that must be answered, not closed. */ hideClose?: boolean }
+>(({ className, children, glass = false, hideHandle = true, handleClassName, noOverlay = false, overlayClassName, column = false, scrollable = false, hideClose = false, onPointerDownOutside, ...props }, ref) => {
+  const rootMounted = React.useContext(DrawerRootMounted);
+  const present = React.useContext(OverlayContentPresent);
+  const surfaceRef = useOverlayExitRef(ref);
+  // No Root above us — this sheet is dormant (or the content escaped its
+  // Drawer entirely). Render nothing rather than portalling into no Dialog.
+  if (!rootMounted || !present) return null;
+
+  return (
+  <DrawerPortal>
+    {/* Registers this sheet in the global overlay count while open, so the
+        sticky feed navs / mobile header get out of the way (lib/overlay-open). */}
+    <OverlayOpenTracker />
+    {!noOverlay && <DrawerOverlay className={cn(glass ? "bg-black/20 backdrop-blur-md" : undefined, overlayClassName)} />}
+    {/* A modal sheet with no backdrop still has to keep the page behind it
+        from taking the press that dismisses it. Shown only while Radix has the
+        page marked modal (index.css), so a non-modal sheet is unaffected. */}
+    {noOverlay && <div data-overlay-shield aria-hidden className="fixed inset-0 z-[100]" />}
+    <DrawerPrimitive.Content
+      ref={surfaceRef}
+      className={cn(
+        "fixed inset-x-0 bottom-0 z-[100] mt-24 flex h-auto flex-col rounded-t-[20px]",
+        /* Ceiling for a sheet that names no height of its own, in the unit that
+           matches what the reader can see. `vh` is the LARGE viewport — measured
+           as if the browser chrome were hidden — while the sheet is pinned to the
+           bottom of the visible area. On iOS Safari the two differ by the height
+           of the address bar, so a sheet sized in `vh` can put its top edge off
+           screen and whatever sits there (a search field, a title, a close
+           button) out of reach. Sheets cap themselves in `dvh` for that reason,
+           and so does this.
+
+           A class and not an inline style, because `cn` runs twMerge and a later
+           `max-h-*` from the call site replaces this one. An inline cap wins over
+           every class instead, which is how this started overriding the height
+           each sheet was designed at: share, save-to-folder, the mobile menu and
+           the delete/report dialogs all ask for half or three-quarters of the
+           screen, and all of them grew to fill it.
+
+           The cap stops short of the full height: a sheet that reached the top
+           left no backdrop to tap, and once scrolled, no way to drag it shut. */
+        "max-h-[calc(92dvh_-_env(safe-area-inset-top))]",
+        glass
+          ? "bg-black/60 backdrop-blur-[24px] border border-white/10 shadow-2xl"
+          : "border bg-background",
+        "focus:outline-none focus-visible:outline-none",
+        column && COLUMN_CLASS,
+        className,
+      )}
+      onClick={(e) => e.stopPropagation()}
+      {...props}
+      /* After the spread: a sheet that opens another sheet, a Select, a menu or
+         a toast must not read that surface's own clicks as "clicked off me"
+         (lib/overlay-dismiss). vaul composes this handler ahead of its own and
+         honours defaultPrevented, so guarding here is enough. */
+      onPointerDownOutside={guardOutsideDismiss(onPointerDownOutside)}
+    >
+      {!hideHandle && (
+        <div data-drawer-handle className={cn(
+          "mx-auto mt-3 mb-2 h-1 w-10 rounded-full shrink-0",
+          glass ? "bg-white/40" : "bg-muted",
+          handleClassName,
+        )} />
+      )}
+      {scrollable ? (
+        /* Scroll inside the drawer: vaul's root has touch-action:none and an
+           offscreen ::after background, neither belongs in a native scroller. */
+        <div data-drawer-scroll className="min-h-0 flex-auto overflow-y-auto [touch-action:pan-y]">
+          {children}
+        </div>
+      ) : children}
+      {!hideClose && <DrawerAutoClose />}
+    </DrawerPrimitive.Content>
+  </DrawerPortal>
+  );
+});
+DrawerContent.displayName = "DrawerContent";
+
+const DrawerHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
+  <div className={cn("grid gap-1.5 p-4 text-center sm:text-left", className)} {...props} />
+);
+DrawerHeader.displayName = "DrawerHeader";
+
+const DrawerFooter = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
+  <div className={cn("mt-auto flex flex-col gap-2 p-4", className)} {...props} />
+);
+DrawerFooter.displayName = "DrawerFooter";
+
+const DrawerTitle = React.forwardRef<
+  React.ElementRef<typeof DrawerPrimitive.Title>,
+  React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Title>
+>(({ className, ...props }, ref) => (
+  <DrawerPrimitive.Title
+    ref={ref}
+    className={cn("text-lg font-semibold leading-none tracking-tight", className)}
+    {...props}
+  />
+));
+DrawerTitle.displayName = DrawerPrimitive.Title.displayName;
+
+const DrawerDescription = React.forwardRef<
+  React.ElementRef<typeof DrawerPrimitive.Description>,
+  React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Description>
+>(({ className, ...props }, ref) => (
+  <DrawerPrimitive.Description ref={ref} className={cn("text-sm text-muted-foreground", className)} {...props} />
+));
+DrawerDescription.displayName = DrawerPrimitive.Description.displayName;
+
+export {
+  Drawer,
+  DrawerPortal,
+  DrawerOverlay,
+  DrawerTrigger,
+  DrawerClose,
+  DrawerContent,
+  DrawerHeader,
+  DrawerFooter,
+  DrawerTitle,
+  DrawerDescription,
+};

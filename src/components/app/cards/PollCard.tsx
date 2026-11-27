@@ -1,0 +1,223 @@
+import { useTranslation as _useCopy } from 'react-i18next';
+import { pollHasEnded, pollVotePercent, pollOptionWins } from '@/lib/poll-results';
+import { useEffect, useRef, useState } from 'react';
+import { formatPostDate, parsePostTimestamp } from '@/i18n/post-timestamp';
+import Check from "@/components/ui/cut-icons/check";
+
+import X from "@/components/ui/cut-icons/close";
+
+import { cn } from '@/lib/utils';
+import { usePoll, useVoteOnPoll, useRemovePollVote, useClosePoll } from '@/hooks/use-polls';
+import { useAuth } from '@/contexts/AuthContext';
+import { usePollTranslation } from './usePollTranslation';
+
+interface PollCardProps {
+  tokenId: number;
+  /** Translate the question and options into the reader's language. Off for private (direct message) polls. */
+  autoTranslate?: boolean;
+}
+
+export function PollCard(props: PollCardProps) {
+  const { walletAddress } = useAuth();
+  const viewer = walletAddress?.toLowerCase() ?? '';
+  return <ViewerPollCard key={`${viewer}:${props.tokenId}`} {...props} viewer={viewer} />;
+}
+
+function ViewerPollCard({ tokenId, autoTranslate = true, viewer }: PollCardProps & { viewer: string }) {
+  const { t: _copy, i18n } = _useCopy();
+  // Defer the poll probe until the card nears the viewport — the feed API has
+  // no "has poll" flag, so without this every card fires a request on mount.
+  const observerRef = useRef<HTMLDivElement>(null);
+  const [nearViewport, setNearViewport] = useState(false);
+  useEffect(() => {
+    if (nearViewport) return;
+    const el = observerRef.current;
+    if (!el || typeof IntersectionObserver === 'undefined') {
+      setNearViewport(true);
+      return;
+    }
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setNearViewport(true);
+          io.disconnect();
+        }
+      },
+      { rootMargin: '600px' }
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [nearViewport]);
+
+  const { data: poll, isLoading } = usePoll(tokenId, nearViewport);
+  const voteMutation = useVoteOnPoll();
+  const removeVoteMutation = useRemovePollVote();
+  const closePollMutation = useClosePoll();
+  const translatedPoll = usePollTranslation(poll?.question, poll?.options, autoTranslate && !!poll);
+
+  const [selectedIndexes, setSelectedIndexes] = useState<number[]>([]);
+  // Zero-height sentinel keeps the IntersectionObserver anchored while the
+  // probe is deferred or the post simply has no poll. `absolute` takes it out
+  // of flow so parent space-y-* utilities don't count it as a child and add a
+  // phantom gap to every poll-less post — while staying intersectable.
+  if (isLoading || !poll) return <div ref={observerRef} className="absolute" aria-hidden="true" />;
+  const expiresAt = parsePostTimestamp(poll.expiresAt);
+  const expiresLabel = expiresAt ? formatPostDate(expiresAt, i18n.language, { dateStyle: 'medium', timeStyle: 'short' }) : null;
+
+  // A poll whose end time has passed is over even while the stored isActive
+  // flag still says true — only "Close Poll" flips that flag. Treating it as
+  // open showed a vote button the server then rejected as expired.
+  const isEnded = pollHasEnded(poll);
+  const isOpen = !isEnded;
+  const hasVoted = !!poll.userVote;
+  // The poll's creator always sees how it is going (a creator asking their
+  // audience often doesn't vote). Everyone else sees results once they've
+  // voted, and everyone once the poll is over.
+  const isOwner = !!viewer && poll.address.toLowerCase() === viewer;
+  const showResults = hasVoted || isEnded || isOwner;
+  const votedIndexes = poll.userVote?.optionIndexes ?? [];
+
+  const getCount = (index: number) => poll.options.find(o => o.index === index)?.voteCount ?? 0;
+  const totalVotes = poll.totalVotes;
+
+  const getBarWidth = (index: number) => {
+    return pollVotePercent(getCount(index), totalVotes);
+  };
+
+  const topCount = Math.max(0, ...poll.options.map(o => getCount(o.index)));
+  const isWinner = (index: number) => pollOptionWins(getCount(index), topCount, isEnded);
+
+  const handleOptionClick = (idx: number) => {
+    if (hasVoted || isEnded || voteMutation.isPending) return;
+    if (poll.isMultipleChoice) {
+      setSelectedIndexes(prev =>
+        prev.includes(idx) ? prev.filter(i => i !== idx) : [...prev, idx]
+      );
+    } else {
+      voteMutation.mutate({ tokenId, optionIndexes: [idx] });
+    }
+  };
+
+  const handleMultipleChoiceVote = () => {
+    if (selectedIndexes.length === 0) return;
+    voteMutation.mutate({ tokenId, optionIndexes: selectedIndexes });
+    setSelectedIndexes([]);
+  };
+
+  const handleRemoveVote = () => {
+    removeVoteMutation.mutate(tokenId);
+  };
+
+  const endedByTime = !!poll.expiresAt && new Date(poll.expiresAt).getTime() <= Date.now();
+
+  return (
+    <div data-poll-card className="rounded-xl bg-white/5 border border-white/10 p-4 space-y-3 mt-2" data-no-navigate onClick={e => e.stopPropagation()}>
+      <div className="flex items-start justify-between gap-2">
+        <p className="text-white font-medium text-sm leading-snug">
+          {translatedPoll?.question ?? poll.question}
+          {/* Phones: the footer already says "Ended 1 day ago", so the title
+              does not say it twice. Kept when the poll was closed early. */}
+          {isEnded && <span className={cn('ml-2 text-zinc-500 text-xs font-normal', endedByTime && 'max-md:hidden')}>{_copy("copy.813c8951972c", { defaultValue: "(Closed)" })}</span>}
+        </p>
+        {isOwner && isOpen && (
+          <button
+            onClick={() => closePollMutation.mutate(tokenId)}
+            disabled={closePollMutation.isPending}
+            className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors shrink-0 disabled:opacity-50"
+          >{_copy("copy.4ec3bcbd2739", { defaultValue: "Close Poll" })}</button>
+        )}
+      </div>
+
+      <div className="space-y-2">
+        {poll.options.map(option => {
+          const pct = getBarWidth(option.index);
+          const isVoted = votedIndexes.includes(option.index);
+          const isSelected = selectedIndexes.includes(option.index);
+          const won = isWinner(option.index);
+          const canClick = !hasVoted && isOpen && !voteMutation.isPending;
+
+          return (
+            <button
+              key={option.index}
+              onClick={() => handleOptionClick(option.index)}
+              disabled={!canClick}
+              className={cn(
+                'relative w-full text-left rounded-lg overflow-hidden transition-colors',
+                canClick ? 'cursor-pointer hover:bg-white/5' : 'cursor-default',
+              )}
+            >
+              <div className="relative z-10 flex items-center justify-between px-3 py-2">
+                <div className="flex items-center gap-2 min-w-0">
+                  {poll.isMultipleChoice && !hasVoted && isOpen && (
+                    <span className={cn(
+                      'w-4 h-4 shrink-0 rounded border flex items-center justify-center',
+                      isSelected ? 'bg-white border-white' : 'border-white/30',
+                    )}>
+                      {isSelected && <span data-keep-dark data-keep-square className="block w-2 h-2 rounded-sm bg-black" />}
+                    </span>
+                  )}
+                  {!poll.isMultipleChoice && !hasVoted && isOpen && (
+                    <span className={cn(
+                      'w-4 h-4 shrink-0 rounded-full border flex items-center justify-center',
+                      'border-white/30',
+                    )}>
+                      <span className="block w-2 h-2 rounded-full bg-transparent" />
+                    </span>
+                  )}
+                  <span className={cn('text-sm truncate', isVoted || won ? 'text-white font-medium' : 'text-zinc-300')}>
+                    {translatedPoll ? translatedPoll.option(option.index, option.text) : option.text}
+                  </span>
+                  {won && <Check className="w-3.5 h-3.5 shrink-0 text-white" aria-label={_copy("copy.105dc74a45e3", { defaultValue: "Winner" })} />}
+                </div>
+                {showResults && (
+                  <span className={cn('text-xs shrink-0 ml-2', won ? 'text-white font-medium' : 'text-zinc-400')}>{pct}%</span>
+                )}
+              </div>
+              <div className="absolute inset-0 rounded-lg bg-white/10" />
+              {showResults && (
+                <div
+                  className={cn(
+                    'absolute inset-y-0 left-0 rounded-lg transition-all duration-500',
+                    isVoted || won ? 'bg-white/40' : 'bg-white/20',
+                  )}
+                  style={{ width: `${pct}%` }}
+                />
+              )}
+            </button>
+          );
+        })}
+      </div>
+
+      {poll.isMultipleChoice && !hasVoted && isOpen && selectedIndexes.length > 0 && (
+        <button
+          onClick={handleMultipleChoiceVote}
+          disabled={voteMutation.isPending}
+          className="w-full py-2 rounded-lg bg-white/10 hover:bg-white/20 text-white text-sm font-medium transition-colors disabled:opacity-50"
+        >
+          {voteMutation.isPending ? _copy("copy.41795881c984", { defaultValue: "Voting..." }) : _copy("copy.cd5588db6fc6", { defaultValue: "Vote" })}
+        </button>
+      )}
+
+      <div className="flex items-center justify-between text-xs text-zinc-500">
+        <span>{_copy("copy.8ce57030b104", { defaultValue: "{{count}} votes", count: totalVotes })}</span>
+        <div className="flex items-center gap-3">
+          {expiresLabel && (
+            <span>
+              {isOpen
+                ? _copy("copy.ce89f7f6696e", { defaultValue: "Ends {{value1}}", value1: expiresLabel })
+                : _copy("copy.caeb37121e94", { defaultValue: "Ended {{value1}}", value1: expiresLabel })}
+            </span>
+          )}
+          {hasVoted && isOpen && (
+            <button
+              onClick={handleRemoveVote}
+              disabled={removeVoteMutation.isPending}
+              className="flex items-center gap-1 text-zinc-400 hover:text-white transition-colors disabled:opacity-50"
+            >
+              <X className="w-3 h-3" />{_copy("copy.7468f894907a", { defaultValue: "Remove vote" })}</button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}

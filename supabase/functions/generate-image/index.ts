@@ -1,0 +1,900 @@
+
+import {
+  compositeDeHubBranding,
+  extractQuotedHeadline,
+  pickLayoutForFormat,
+} from '../_shared/dehub-brand-composite.ts';
+import { DEHUB_LOGO_DATA_URI } from '../_shared/dehub-logo.ts';
+import { recordGeneration } from '../_shared/generation-jobs.ts';
+import { publishFreePoster } from '../_shared/creator-gallery.ts';
+import { chargeForJob } from '../_shared/ai-payment-guard.ts';
+import { aiChat } from '../_shared/ai-chat.ts';
+import { gatewayImage, resilientImage, ImageProviderError, IMAGE_UNAVAILABLE } from '../_shared/image-provider-fallback.ts';
+import { CREATOR_FAL_IMAGE_MODELS } from '../_shared/creator-fal-catalog.ts';
+import { buildCreatorFalImageRequest, creatorFalImageResult } from '../_shared/creator-fal-input.ts';
+// The shared list — the only one that names x-wallet-address and x-dehub-token,
+// which chargeForJob requires and the browser will not send unless the preflight
+// says they are allowed. A local copy silently drops them; see auth.ts.
+import { corsHeaders, serviceClient } from '../_shared/auth.ts';
+import { buildSpecFromPrompt, renderTemplateBanner, formatFromPosterSize } from '../_shared/dehub-template-banner.ts';
+import { kieKey, kieUsableUrl, kieCreateTask, kieWaitForResult } from '../_shared/kie.ts';
+import { isVeniceImage } from '../_shared/venice-catalog.ts';
+import { generateVeniceImage, quoteVenice, VeniceError } from '../_shared/venice.ts';
+import { isStoreAppRequest, WEB_ONLY_MODEL_CODE, WEB_ONLY_MODEL_MESSAGE } from '../_shared/client-surface.ts';
+
+const serve = (handler: (req: Request) => Response | Promise<Response>) => Deno.serve(handler);
+
+interface ConversationMessage {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
+interface GenerateImageRequest {
+  prompt: string;
+  sourceImage?: string;
+  referenceImageUrls?: string[];
+  logoImage?: string; // Explicit brand-logo channel (Poster Studio). Triggers two-step: GPT scene → Gemini logo composite.
+  headline?: string; // Explicit headline channel (Poster Studio tagline). Empty string = user chose no headline.
+  conversationHistory?: ConversationMessage[];
+  model?: string;
+  // Explicit renderer choice from the client — wins over English keyword heuristics.
+  // 'template' = deterministic SM Template 2.0 banner (the blog-banner look);
+  // 'scene' = the diffusion "cinematic scene" pipeline. Needed because the client
+  // brand wrapper injects the word "cinematic", which would otherwise mis-route
+  // every poster to the scene pipeline.
+  bannerRenderer?: 'template' | 'scene';
+  bannerFormat?: 'landscape' | 'square' | 'portrait';
+  /** Requested framing, e.g. '16:9'. See ASPECT_FRAMING. */
+  aspectRatio?: string;
+}
+
+/**
+ * Riftn banner requests are free — the SM Template 2.0 renderer is our own code
+ * plus one small text call, not a generation anyone has to be billed for.
+ *
+ * The wrapper prices the job before the handler has picked a renderer, so both
+ * sides have to agree on what "free" means from the raw body alone, and the
+ * handler must then honour it exactly: a request that was not charged may never
+ * reach a paid model. `sourceImage` disqualifies because the template cannot
+ * edit a supplied image, so those fall through to diffusion by design.
+ */
+function isFreeTemplateRequest(body: Partial<GenerateImageRequest>): boolean {
+  return !CREATOR_FAL_IMAGE_MODELS[body.model || '']?.requiresImage && body.bannerRenderer === 'template' && !body.sourceImage && !body.referenceImageUrls?.length;
+}
+
+// ─── fal.ai image catalogue ──────────────────────────────────────────────────
+//
+// Unlike the Gemini and Grok paths above, these models DO take a real size
+// parameter — but the families disagree on how. Some take an `image_size` enum,
+// some an `aspect_ratio` string, and the edit endpoints split further between a
+// singular `image_url` and a plural `image_urls`. An unrecognised key is a 422,
+// not a silently ignored field, so each model declares its own shape.
+
+interface FalImageModel {
+  /** Endpoint for text-to-image. */
+  text: string;
+  /** Endpoint for image editing, when the family has one. */
+  edit?: string;
+  /** How this family expresses framing. */
+  sizing: 'image_size' | 'aspect_ratio';
+  /** Whether the edit endpoint takes `image_urls` (plural) rather than `image_url`. */
+  editUsesPlural?: boolean;
+  /** Fixed fields merged into every request for this model. */
+  extra?: Record<string, unknown>;
+}
+
+const FAL_IMAGE_MODELS: Record<string, FalImageModel> = {
+  ...CREATOR_FAL_IMAGE_MODELS,
+  'nano-banana-pro': {
+    text: 'fal-ai/nano-banana-pro',
+    edit: 'fal-ai/nano-banana-pro/edit',
+    sizing: 'aspect_ratio',
+    editUsesPlural: true,
+    extra: { resolution: '2K' },
+  },
+  'nano-banana-2': {
+    text: 'fal-ai/nano-banana-2',
+    edit: 'fal-ai/nano-banana-2/edit',
+    sizing: 'aspect_ratio',
+    editUsesPlural: true,
+    extra: { resolution: '2K' },
+  },
+  'seedream-v4.5': {
+    text: 'fal-ai/bytedance/seedream/v4.5/text-to-image',
+    edit: 'fal-ai/bytedance/seedream/v4.5/edit',
+    sizing: 'image_size',
+    editUsesPlural: true,
+  },
+  'flux-2-pro': {
+    text: 'fal-ai/flux-2-pro',
+    edit: 'fal-ai/flux-2-pro/edit',
+    sizing: 'image_size',
+  },
+  'flux-kontext-max': {
+    // Kontext is primarily an editor; text-to-image is a separate endpoint.
+    text: 'fal-ai/flux-pro/kontext/max/text-to-image',
+    edit: 'fal-ai/flux-pro/kontext/max',
+    sizing: 'aspect_ratio',
+  },
+  // No edit endpoint on either of these two — generateWithFal rejects a
+  // reference image before it reaches fal, and the composer greys them out
+  // while one is attached.
+  'flux-2-flex': {
+    text: 'fal-ai/flux-2-flex',
+    sizing: 'image_size',
+  },
+  'z-image-turbo': {
+    text: 'fal-ai/z-image/turbo',
+    sizing: 'image_size',
+  },
+  'recraft-v4.1': {
+    text: 'fal-ai/recraft/v4.1/text-to-image',
+    sizing: 'image_size',
+  },
+  'recraft-v4.1-vector': {
+    text: 'fal-ai/recraft/v4.1/text-to-vector',
+    sizing: 'image_size',
+  },
+  'ideogram-v3': {
+    text: 'fal-ai/ideogram/v3',
+    edit: 'fal-ai/ideogram/v3/remix',
+    sizing: 'image_size',
+    extra: { rendering_speed: 'BALANCED' },
+  },
+  'qwen-image': {
+    text: 'fal-ai/qwen-image',
+    edit: 'fal-ai/qwen-image-edit-plus',
+    sizing: 'image_size',
+  },
+  'grok-imagine': {
+    text: 'xai/grok-imagine-image',
+    edit: 'xai/grok-imagine-image/edit',
+    sizing: 'aspect_ratio',
+  },
+};
+
+// ─── kie.ai image catalogue ──────────────────────────────────────────────────
+//
+// The models fal also serves but kie sells cheaper (the cost tables in
+// _shared/ai-pricing.ts are the kie rates for these four). kie's jobs API is
+// async even for images, so generateWithKie polls it to completion to keep
+// this function's one-call contract. Like fal, every family names its edit
+// input differently, so each declares its field rather than sharing a spread.
+
+interface KieImageModel {
+  /** jobs-API model id for text-to-image. */
+  text: string;
+  /** jobs-API model id for edits, when the family has one. */
+  edit?: string;
+  /** Which field carries the source image on the edit model. */
+  editField?: 'image_input' | 'image_urls' | 'input_urls';
+  /** Aspect ratios the model accepts. Anything else maps to a close cousin. */
+  aspects: string[];
+  /** 'auto' keeps the source framing on an edit, for the models that take it. */
+  supportsAutoAspect?: boolean;
+  /** Fixed fields merged into every request — the tier the price table assumes. */
+  extra?: Record<string, unknown>;
+}
+
+const KIE_IMAGE_MODELS: Record<string, KieImageModel> = {
+  'nano-banana-pro': {
+    text: 'nano-banana-pro',
+    edit: 'nano-banana-pro',
+    editField: 'image_input',
+    aspects: ['1:1', '2:3', '3:2', '3:4', '4:3', '4:5', '5:4', '9:16', '16:9', '21:9'],
+    supportsAutoAspect: true,
+    extra: { resolution: '2K', output_format: 'png' },
+  },
+  'nano-banana-2': {
+    text: 'nano-banana-2',
+    edit: 'nano-banana-2',
+    editField: 'image_input',
+    aspects: ['1:1', '2:3', '3:2', '3:4', '4:3', '4:5', '5:4', '9:16', '16:9', '21:9'],
+    supportsAutoAspect: true,
+    extra: { resolution: '2K', output_format: 'png' },
+  },
+  'seedream-v4.5': {
+    text: 'seedream/4.5-text-to-image',
+    edit: 'seedream/4.5-edit',
+    editField: 'image_urls',
+    aspects: ['1:1', '4:3', '3:4', '16:9', '9:16', '2:3', '3:2', '21:9'],
+    extra: { quality: 'basic' },
+  },
+  'flux-2-pro': {
+    text: 'flux-2/pro-text-to-image',
+    edit: 'flux-2/pro-image-to-image',
+    editField: 'input_urls',
+    aspects: ['1:1', '4:3', '3:4', '16:9', '9:16', '3:2', '2:3'],
+    extra: { resolution: '1K' },
+  },
+};
+
+/** Best aspect a kie model can honour for what was asked. */
+function toKieAspect(
+  config: KieImageModel,
+  editing: boolean,
+  aspect?: string,
+  bannerFormat?: string,
+): string {
+  const requested =
+    aspect ??
+    (bannerFormat === 'landscape' ? '16:9' : bannerFormat === 'portrait' ? '9:16' : undefined);
+  // An edit with no explicit framing should keep the source's, matching what
+  // 'auto' means on the fal path.
+  if (!requested) return editing && config.supportsAutoAspect ? 'auto' : '1:1';
+  if (config.aspects.includes(requested)) return requested;
+  if (requested === '4:5') return config.aspects.includes('3:4') ? '3:4' : '1:1';
+  if (requested === '21:9') return '16:9';
+  return '1:1';
+}
+
+/** Run a kie image model to completion and return the finished image URL. */
+async function generateWithKie(
+  model: string,
+  prompt: string,
+  sourceImage?: string,
+  bannerFormat?: string,
+  aspectRatio?: string,
+): Promise<string> {
+  const key = kieKey();
+  if (!key) throw new Error('KIE_API_KEY is not configured');
+
+  const config = KIE_IMAGE_MODELS[model];
+  if (!config) throw new Error(`Unknown kie image model: ${model}`);
+
+  const editing = !!sourceImage;
+  if (editing && !config.edit) {
+    throw new Error(`${model} cannot edit an existing image on kie`);
+  }
+
+  const input: Record<string, unknown> = {
+    prompt,
+    aspect_ratio: toKieAspect(config, editing, aspectRatio, bannerFormat),
+    ...(config.extra ?? {}),
+  };
+  if (editing) input[config.editField!] = [sourceImage];
+
+  const modelId = editing ? config.edit! : config.text;
+  console.log(`[kie-image] ${modelId}`, JSON.stringify(input).substring(0, 300));
+
+  const taskId = await kieCreateTask(key, modelId, input);
+  // Stay inside the function's wall clock with room for the response to make
+  // it back out; images typically land in well under thirty seconds.
+  return await kieWaitForResult(key, taskId, { timeoutMs: 110_000 });
+}
+
+/** Riftn's aspect strings mapped onto fal's `image_size` enum. */
+function toFalImageSize(aspect?: string, bannerFormat?: string): string {
+  const a =
+    aspect ??
+    (bannerFormat === 'landscape' ? '16:9' : bannerFormat === 'portrait' ? '9:16' : '1:1');
+  switch (a) {
+    case '16:9':
+    case '21:9':
+      return 'landscape_16_9';
+    case '4:3':
+    case '3:2':
+      return 'landscape_4_3';
+    case '9:16':
+      return 'portrait_16_9';
+    case '3:4':
+    case '2:3':
+    case '4:5':
+      return 'portrait_4_3';
+    default:
+      return 'square_hd';
+  }
+}
+
+/**
+ * Run a fal image model and return the finished image URL.
+ *
+ * Uses fal.run (synchronous) rather than queue.fal.run. An image lands in
+ * seconds, so blocking here preserves this function's one-call contract instead
+ * of pushing the whole image path onto the polled flow the video models use.
+ */
+async function generateWithFal(
+  model: string,
+  prompt: string,
+  sourceImage?: string,
+  bannerFormat?: string,
+  aspectRatio?: string,
+  referenceImageUrls?: string[],
+  signal?: AbortSignal,
+): Promise<string> {
+  const FAL_KEY = Deno.env.get('FAL_KEY');
+  if (!FAL_KEY) throw new ImageProviderError(503, 'Fal not configured', true);
+
+  const config = FAL_IMAGE_MODELS[model];
+  if (!config) throw new Error(`Unknown fal image model: ${model}`);
+
+  if (sourceImage && !config.edit) {
+    throw new Error(`${model} cannot edit an existing image. Pick another model.`);
+  }
+  const editing = !!sourceImage;
+  const prepared = CREATOR_FAL_IMAGE_MODELS[model]
+    ? buildCreatorFalImageRequest(model, prompt, sourceImage, aspectRatio ?? (bannerFormat === 'landscape' ? '16:9' : bannerFormat === 'portrait' ? '9:16' : undefined), referenceImageUrls)
+    : undefined;
+  const appId = prepared?.appId ?? (editing ? config.edit! : config.text);
+
+  const input: Record<string, unknown> = {
+    prompt,
+    num_images: 1,
+    ...(config.extra ?? {}),
+  };
+
+  if (config.sizing === 'aspect_ratio') {
+    // 'auto' on an edit keeps the source framing, which is almost always what
+    // someone editing a picture wants.
+    input.aspect_ratio = editing ? (aspectRatio ?? 'auto') : (aspectRatio ?? '1:1');
+  } else {
+    input.image_size = toFalImageSize(aspectRatio, bannerFormat);
+  }
+
+  if (editing) {
+    if (config.editUsesPlural) input.image_urls = [sourceImage];
+    else input.image_url = sourceImage;
+  }
+
+  console.log(`[fal-image] ${appId}`, JSON.stringify(input).substring(0, 300));
+
+  const res = await fetch(`https://fal.run/${appId}`, {
+    method: 'POST',
+    headers: { Authorization: `Key ${FAL_KEY}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(prepared?.input ?? input),
+    signal,
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    console.error('[fal-image] error', res.status, text.substring(0, 500));
+    throw new ImageProviderError(res.status, text);
+  }
+
+  return creatorFalImageResult(model, await res.json());
+}
+
+/**
+ * Neither the Gemini image models nor Grok Aurora expose an output-size
+ * parameter through this gateway, so framing is steered in the prompt. These
+ * are real instructions the models follow, which is what lets the studio's
+ * aspect control do something rather than sit there decoratively.
+ */
+const ASPECT_FRAMING: Record<string, string> = {
+  '1:1': 'Compose for a square 1:1 frame.',
+  '16:9': 'Compose for a wide 16:9 landscape frame, cinematic horizontal composition.',
+  '9:16': 'Compose for a tall 9:16 vertical frame, full-height mobile composition.',
+  '4:5': 'Compose for a 4:5 portrait frame, the standard social feed crop.',
+  '4:3': 'Compose for a 4:3 landscape frame.',
+  '3:4': 'Compose for a 3:4 portrait frame.',
+  '3:2': 'Compose for a 3:2 landscape frame, classic photographic proportions.',
+  '2:3': 'Compose for a 2:3 portrait frame, classic photographic proportions.',
+  '21:9': 'Compose for an ultra-wide 21:9 cinemascope frame.',
+};
+
+const handleGenerateImage = async (req: Request): Promise<Response> => {
+  try {
+    let { prompt, sourceImage, referenceImageUrls, logoImage, headline: requestHeadline, conversationHistory = [], model = 'gemini-2.5-flash', bannerRenderer, bannerFormat, aspectRatio } = await req.json() as GenerateImageRequest;
+
+    const outpaint = !!CREATOR_FAL_IMAGE_MODELS[model]?.outpaint;
+    const sourceTransform = outpaint || !!CREATOR_FAL_IMAGE_MODELS[model]?.relight;
+    if (outpaint && prompt == null) prompt = '';
+    if (!prompt && !outpaint) {
+      throw new Error('Prompt is required');
+    }
+
+    if (isVeniceImage(model)) {
+      if (isStoreAppRequest(req)) throw new VeniceError(WEB_ONLY_MODEL_MESSAGE, 403);
+      const result = await generateVeniceImage(model, prompt, aspectRatio);
+      return new Response(JSON.stringify({ ...result, success: true }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
+
+    // Read before the sourceImage → logoImage promotion below mutates it, so
+    // this matches exactly what the wrapper priced from the raw body.
+    const freeTemplate = isFreeTemplateRequest({ model, bannerRenderer, sourceImage, referenceImageUrls });
+
+    const lovableApiKey = Deno.env.get('LOVABLE_API_KEY');
+    const xaiApiKey = Deno.env.get('XAI_API_KEY');
+    
+    // Determine which API to use based on model
+    let isGrokModel = model.startsWith('grok-');
+    
+    console.log('Generating image with prompt:', prompt.substring(0, 100), '| Model:', model, '| Has source image:', !!sourceImage, '| Conversation history length:', conversationHistory.length);
+
+    // Build context from conversation history
+    let contextualPrompt = prompt;
+    if (conversationHistory.length > 0 && !sourceTransform) {
+      const recentHistory = conversationHistory.slice(-6);
+      const contextSummary = recentHistory
+        .map(m => `${m.role === 'user' ? 'User' : 'AI'}: ${m.content}`)
+        .join('\n');
+      
+      contextualPrompt = `CONVERSATION CONTEXT (use this to understand references like "him", "it", "that", etc.):\n${contextSummary}\n\nCURRENT REQUEST: ${prompt}`;
+    }
+
+    // ── Riftn brand skill: auto-detect requests for DeHub-branded imagery and
+    //    force logo-attached, brand-compliant generation. Also triggers when the
+    //    Poster Studio passes an explicit `logoImage` (two-step composite path).
+    //    If the caller sent the Riftn logo in `sourceImage` (older client path
+    //    from GeneralAIChat), promote it to `logoImage` so the brand pipeline runs
+    //    and composites correctly instead of being bypassed as a generic edit.
+    const brandKeywordHit = /\bde\s*hub\b/i.test(prompt) && /\b(posters?|banners?|thumbnails?|content|cards?|announc(?:e|ement|ements?)|flyers?|artworks?|social|covers?|graphics?|ads?|adverts?|images?|logos?|wallpapers?|memes?|promos?|campaigns?)\b/i.test(prompt);
+    if (!sourceTransform && brandKeywordHit && sourceImage && !logoImage && !referenceImageUrls?.length) {
+      logoImage = sourceImage;
+      sourceImage = undefined;
+      console.log('[dehub-poster] Promoted sourceImage → logoImage for brand pipeline');
+    }
+    const brandIntent = !sourceTransform && (brandKeywordHit || !!logoImage);
+    let brandPromptOverride: string | null = null;
+    // Brand intent ALWAYS runs the brand pipeline. Previously we bypassed it when
+    // a sourceImage was present without an explicit logoImage — that dropped every
+    // brand rule and returned a generic Gemini edit of the logo. No more.
+    // `freeTemplate` also enters here: the wrapper waived the charge on the
+    // strength of the template running, so the template has to actually get its
+    // turn even when nothing in the prompt reads as brand intent.
+    if ((brandIntent || freeTemplate) && !referenceImageUrls?.length) {
+
+
+      // ── Format detection: pick the right aspect ratio from the user's wording.
+      //    GPT-image-2 supports 1024x1024, 1024x1536 (portrait), 1536x1024 (landscape).
+      const p = prompt.toLowerCase();
+      let posterSize: '1024x1024' | '1024x1536' | '1536x1024' = '1024x1536'; // default: portrait poster
+      let formatHint = 'vertical poster (2:3), think movie poster / concert flyer / Instagram story';
+      if (/\b(banner|cover|header|hero|billboard|landscape|wide|1920|16:?9|youtube thumb|thumbnail)\b/.test(p)) {
+        posterSize = '1536x1024';
+        formatHint = 'landscape banner (3:2, close to 16:9), think YouTube cover / web hero / OOH billboard';
+      } else if (/\b(square|1:1|instagram post|feed post)\b/.test(p)) {
+        posterSize = '1024x1024';
+        formatHint = 'square social post (1:1), think Instagram feed / album cover';
+      }
+
+      // ── SM Template 2.0 path (DEFAULT for brand requests): renders the official
+      //    banner template deterministically from the brand kit at /brand-kit/ —
+      //    silk bg + chrome 3D icon hero + silver Exo headline + HUD chrome. The
+      //    LLM only fills a small validated spec, so output is always exactly
+      //    on-brand. The diffusion "scene" archetypes below remain for Poster
+      //    Studio (explicit logoImage) and requests that ask for a photo/scene.
+      // Keyword heuristic is only a fallback for organic requests with no explicit
+      // client signal. NOTE: the client brand wrapper injects "cinematic", so we do
+      // NOT let that alone force a scene — an explicit bannerRenderer always wins.
+      const sceneKeywordHit = /\b(photo|photoreal|realistic|scene|3d|render(?:ed|ing)?|mockup|monolith|obsidian|product shot|people|person|human|character|silhouette)\b/i.test(prompt);
+      const useTemplate = bannerRenderer === 'template'
+        || (bannerRenderer !== 'scene' && !sourceImage && !sceneKeywordHit);
+      if (useTemplate && !sourceImage) {
+        const format = bannerFormat ?? formatFromPosterSize(posterSize);
+        let lastFailure = '';
+        // Two attempts. Everything that fails here is transient by nature — a
+        // brand-kit fetch that lost a race, or a resvg render that overran the
+        // edge CPU slice — and the retry is nearly free whenever the first pass
+        // got far enough to warm the module-level asset caches.
+        for (let attempt = 1; attempt <= 2; attempt++) {
+          try {
+            const spec = await buildSpecFromPrompt({
+              prompt,
+              headlineOverride: typeof requestHeadline === 'string' && requestHeadline.trim() ? requestHeadline.trim() : undefined,
+              history: conversationHistory,
+              apiKey: lovableApiKey ?? '',
+              format,
+            });
+            const templUrl = await renderTemplateBanner(spec);
+            console.log('[dehub-template] SM Template 2.0 render success', { format, icon: spec.icon, layout: spec.layout, attempt });
+            return new Response(
+              JSON.stringify({ imageUrl: templUrl, text: '', success: true, renderer: 'template' }),
+              { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+            );
+          } catch (e) {
+            lastFailure = (e as Error).message;
+            console.error(`[dehub-template] render attempt ${attempt}/2 failed:`, lastFailure);
+          }
+        }
+        // Reaching here is a degradation, not a routing decision: the caller
+        // asked for the deterministic banner and did not get it. Logged at
+        // error level because it used to be a console.warn, which left this
+        // indistinguishable from a healthy render — so "is the template
+        // actually serving users" had no answer in the logs.
+        console.error('[dehub-template] EXHAUSTED', {
+          explicitlyRequested: bannerRenderer === 'template',
+          free: freeTemplate,
+          format,
+          reason: lastFailure,
+        });
+        // A free request stops here. Falling through would run a paid image
+        // model on a job nobody was charged for, and would hand back a
+        // diffusion scene to someone who picked "Riftn Banner" — wrong on both
+        // counts. Charged requests keep the old degrade-to-scene behaviour.
+        if (freeTemplate) {
+          return new Response(
+            JSON.stringify({
+              error: 'The Riftn banner renderer could not draw this one. Try again, or pick a cinematic style to use the image model instead.',
+              code: 'TEMPLATE_RENDER_FAILED',
+            }),
+            { status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+      }
+
+      // ── Riftn brand archetype library: all strictly monochrome, all material-first,
+      //    all built around a real physical LOGO HOST SURFACE the wordmark can be
+      //    engraved / embossed / backlit / projected into. No cyberpunk/rave/vaporwave
+      //    clichés — those produced colored, chaotic posters. One is picked per request
+      //    so outputs feel like real campaign work, on-brand every time.
+      const TEMPLATES = [
+        'Monolithic obsidian pavilion floating over a mirror-black lake in charcoal mist, cool silver rim light from upper-left; its centered vertical face is a polished obsidian slab with a subtly recessed rectangular panel — the LOGO HOST SURFACE.',
+        'Cantilevered brushed-steel platform in volumetric charcoal fog, cool key light raking from upper-right; a large brushed-aluminum plaque tilted on the platform catches the light — the LOGO HOST SURFACE.',
+        'Backlit smoked-glass gateway suspended in cold mist, faint cool-white internal glow, deep shadow falloff; a frosted-glass panel at eye level with a soft internal luminance — the LOGO HOST SURFACE.',
+        'Chrome monolith rising from a black marble floor, top-down cool key light and long cast shadow; the mirror-chrome vertical face oriented squarely toward camera — the LOGO HOST SURFACE.',
+        'Liquid mercury pool on polished obsidian, silver rim highlight rippling across the surface; a raised mercury relief zone waits mid-frame — the LOGO HOST SURFACE.',
+        'Weightless silver ring hovering over a chrome disc in charcoal atmosphere, soft caustic reflections; the disc face oriented to camera — the LOGO HOST SURFACE.',
+        'A single smoked-crystal card levitating in cold fog, cool rim light catching its bevelled edges; the card face reads camera-forward — the LOGO HOST SURFACE.',
+        'Monochrome mountain range under cold moonlight, mist rolling through the valley; a floating volumetric slab of cool-white light hovers in the middle distance — the LOGO HOST SURFACE (a light projection panel).',
+        'Endless mirror-black lake with faint silver mist and a single obsidian shard rising vertically; the shard\'s polished face turned to camera — the LOGO HOST SURFACE.',
+        'Lone hooded silhouette (no visible face) facing a floating brushed-steel monolith in charcoal mist, cool silver rim light; the monolith face oriented to camera — the LOGO HOST SURFACE.',
+      ];
+      const templatePick = TEMPLATES[Math.floor(Math.random() * TEMPLATES.length)];
+      console.log('[dehub-poster] Template pick:', templatePick.substring(0, 60), '| Size:', posterSize);
+
+
+      // ── Auto-enhance: rewrite the short user brief into a senior-marketing-director
+      //    grade visual prompt. Silent, server-side, hard timeout + fallback.
+      let enhancedUserRequest = prompt;
+      if (lovableApiKey) {
+        try {
+          const directorSystem = `You are a senior creative director writing the visual brief for a STUNNING promotional poster for Riftn (a decentralized creator platform). Output ONE dense paragraph, 120–180 words, no lists, no preamble, no quotes.
+
+This is CAMPAIGN artwork — cinematic, editorial, premium (Apple keynote × A24 × Zaha Hadid × Blade Runner 2049 interiors). Never a "brand-guidelines diagram", never generic AI stock.
+
+FORMAT: ${formatHint}. Compose for this shape.
+
+SCENE ARCHETYPE (adapt the user's subject into THIS scene — don't just describe the archetype generically): ${templatePick}
+
+Rules (non-negotiable):
+- STRICT MONOCHROME: blacks, charcoals, silvers, chromes, brushed steels, cool off-whites, pure white. NO color hues at all — no red, orange, yellow, magenta, purple, violet, green, blue, teal, pastel, neon glow. Any ambient light must be a cool near-white (saturation under 10%). The ONLY exception is if the user's brief literally names a color; if it does, honor it as a restrained accent while keeping the scene mostly monochrome. If in doubt, kill the color.
+- MATERIALS: liquid glass, frosted glass, polished chrome, brushed aluminum, obsidian, mercury, smoked crystal, wet volcanic stone. Real reflections, refractions, subsurface scattering, subtle caustics. Backgrounds must have texture/depth (mist, marble veining, brushed metal, silk drapery) — NEVER flat black.
+- LIGHTING: one cinematic key light with named direction (upper-left / upper-right / rim / backlight / god-ray), soft rim on subject edges, deep shadow falloff into negative space.
+- LOGO HOST SURFACE: describe it explicitly — its material, position, orientation, and that its face is CURRENTLY BLANK. This is where the real Riftn wordmark gets composited afterward. Do NOT draw the wordmark, letters, or the word "Riftn".
+- No emoji. No purple/indigo gradients. No rainbow. No lens flares. No cyberpunk neon. No "hero with arms up". No motion-blur action shots. No hooded figures unless the archetype names one.
+- If the user asked for a headline, name it in one short display phrase (max 5 words). If not, say "no headline".
+- End with: "Shot on Hasselblad, 85mm, f/2.8, gallery quality, campaign polish."`;
+
+          const ctrl = new AbortController();
+          const timer = setTimeout(() => ctrl.abort(), 4000);
+          const rewriteRes = await aiChat({
+            model: 'google/gemini-2.5-flash',
+            messages: [
+              { role: 'system', content: directorSystem },
+              { role: 'user', content: `User brief: ${prompt}` },
+            ],
+          }, { signal: ctrl.signal, label: 'poster-rewrite' });
+          clearTimeout(timer);
+          if (rewriteRes.ok) {
+            const rj = await rewriteRes.json();
+            const rewritten = rj.choices?.[0]?.message?.content?.trim();
+            if (rewritten && rewritten.length > 40) {
+              enhancedUserRequest = rewritten;
+              console.log('[dehub-poster] Prompt enhanced:', prompt.substring(0, 80), '→', rewritten.substring(0, 140));
+            } else {
+              console.log('[dehub-poster] Rewrite empty/short, using original prompt');
+            }
+          } else {
+            console.warn('[dehub-poster] Rewrite failed', rewriteRes.status, '— using original prompt');
+          }
+        } catch (e) {
+          console.warn('[dehub-poster] Rewrite error/timeout — using original prompt:', (e as Error).message);
+        }
+      }
+
+      brandPromptOverride = `Create a STUNNING promotional marketing poster for Riftn (a decentralized social platform). This is campaign artwork — cinematic, editorial, premium.
+
+Format: ${formatHint}. Compose for this aspect ratio.
+
+Non-negotiable brand rules (violating these ruins the piece):
+- STRICT MONOCHROME PALETTE: blacks, charcoals, silvers, chromes, brushed steels, cool off-whites, pure white ONLY. ABSOLUTELY NO color hues — no red, orange, yellow, magenta, purple, violet, green, blue, teal, indigo, cyan, pastel, neon glow. Any ambient light must be a cool near-white (saturation under 10%). If the ART DIRECTION below literally names a color, honor it as a restrained accent; otherwise, kill every hue.
+- BACKGROUND MUST HAVE DEPTH: silk drapery, brushed metal, black marble veining, volumetric mist, obsidian, mercury — never a flat #000 wall.
+- MATERIALS: liquid glass, frosted crystal, polished chrome, brushed aluminum, obsidian, smoked crystal, mercury. Real reflections, refractions, subsurface scattering, subtle caustics.
+- LOGO HOST SURFACE: the scene MUST include the specific physical surface named in the ART DIRECTION (e.g. an obsidian slab, brushed-aluminum plaque, backlit smoked-glass panel, chrome monolith face). That surface must be a real object in the scene, angled/lit to match, and its face must be perfectly BLANK — do NOT draw a logo, the word "Riftn", letters, glyphs, placeholder marks, icons, or any text on it. The real Riftn wordmark will be composited onto that exact blank surface afterward. Size the blank area for a wordmark lockup roughly 20-30% of canvas width with min 8% clear space on every side.
+- TYPOGRAPHY: only if the ART DIRECTION names a short display headline, render it in Exo / Exo 2 geometric technical sans-serif, thin uniform strokes, sharp corners, wide letter-spacing, pure white. Never serifs, script, humanist sans (Inter, Poppins, DM Sans, Helvetica Neue).
+- NO emoji. NO purple/indigo gradients. NO rainbow. NO cyberpunk neon. NO glossy 3D blobs. NO generic AI clichés (hero-with-arms-up, purple gradient on white, floating chrome spheres in empty voids). NO motion-blur action shots.
+
+ART DIRECTION: ${enhancedUserRequest}`;
+
+
+
+
+      // Client-supplied logo (from Chat / Poster Studio) takes precedence;
+      // otherwise the deterministic composite function will fall back to
+      // its hardcoded canonical Riftn wordmark data URI. We no longer fetch
+      // dehub.io/__l5e/... here because that path returns SPA HTML in
+      // production and silently broke the composite step.
+      // Reject non-image "logos" outright: the dehub.io /__l5e/assets-v1 paths
+      // 200 with SPA HTML in production, and clients that fetched them sent us
+      // data:text/html blobs that silently killed every composite path.
+      const compositeLogo: string | undefined =
+        logoImage && logoImage.startsWith('data:image/') ? logoImage : undefined;
+      if (compositeLogo) console.log('[dehub-poster] Using client-supplied logo image');
+      else if (logoImage) console.warn('[dehub-poster] Client logoImage is not an image data URL (SPA HTML fallback?) — using hardcoded canonical wordmark');
+      else console.log('[dehub-poster] No client logo — composite will use hardcoded canonical wordmark');
+
+      // Try GPT-image-2 (medium) first — dramatically better typography than Gemini
+      // for the Riftn wordmark and brand text. Falls through to Gemini path below on failure.
+      if (lovableApiKey) {
+        try {
+
+          console.log('[dehub-poster] Trying openai/gpt-image-2 (medium) for brand request');
+          const gptRes = await fetch('https://ai.gateway.lovable.dev/v1/images/generations', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${lovableApiKey}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              model: 'openai/gpt-image-2',
+              prompt: brandPromptOverride,
+              quality: 'medium',
+              size: posterSize,
+              n: 1,
+            }),
+          });
+
+          if (gptRes.ok) {
+            const gptData = await gptRes.json();
+            const b64 = gptData.data?.[0]?.b64_json;
+            if (b64) {
+              const sceneDataUrl = `data:image/png;base64,${b64}`;
+
+              // ── Step 2 (PRIMARY): deterministic SVG overlay of the real
+              //    Riftn wordmark via resvg-wasm — mirrors the pattern used
+              //    by affiliate-share-image / blog-share-image so the logo
+              //    is ALWAYS pixel-perfect, correctly-typeset, and never
+              //    hallucinated by a diffusion model. Also renders a
+              //    crisp headline when the user explicitly quoted one.
+              const [posterW, posterH] = posterSize.split('x').map(Number);
+              // Explicit headline from the Poster Studio wins; an empty string
+              // means the user chose no headline, so never regex-mine the prompt
+              // in that case (that's how "WITH SOCIALS" ended up on posters).
+              const explicitHeadline = typeof requestHeadline === 'string' ? requestHeadline.trim() : undefined;
+              const headline = explicitHeadline !== undefined
+                ? (explicitHeadline || null)
+                : extractQuotedHeadline(prompt);
+              const layout = pickLayoutForFormat(posterSize);
+              try {
+                console.log('[dehub-poster] GPT scene ok — deterministic SVG composite (logo + headline)', { headline, layout });
+                const brandedUrl = await compositeDeHubBranding({
+                  sceneDataUrl,
+                  width: posterW,
+                  height: posterH,
+                  headline: headline || undefined,
+                  layout,
+                  logoDataUrl: compositeLogo,
+                });
+                if (brandedUrl) {
+                  console.log('[dehub-poster] Deterministic composite success');
+                  return new Response(
+                    JSON.stringify({ imageUrl: brandedUrl, text: '', success: true }),
+                    { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+                  );
+                }
+                console.warn('[dehub-poster] Deterministic composite returned null — falling back to Gemini composite');
+              } catch (e) {
+                console.warn('[dehub-poster] Deterministic composite threw — falling back to Gemini:', (e as Error).message);
+              }
+
+              // ── Step 2b (FALLBACK): if resvg fails for any reason, try
+              //    the Gemini image-edit composite. Kept only as a safety
+              //    net; the deterministic path above is the source of
+              //    truth for brand-accurate logos.
+              const geminiCompositeLogo = compositeLogo ?? DEHUB_LOGO_DATA_URI;
+              if (geminiCompositeLogo) {
+                try {
+                  const compositePrompt = `Take the first image (a finished Riftn marketing scene) and place the second image (the official Riftn white wordmark, transparent PNG) onto it as a logo lockup.
+- Position the wordmark in the pre-reserved empty area of the scene. Do not cover the hero subject.
+- Size it so its width is roughly 18-26% of the canvas width. Keep min 8% clear space on every side.
+- Keep the wordmark PURE WHITE, crisp, sharp, perfectly horizontal, unaltered. Use the attached pixels as-is.
+- Do NOT modify any other part of the scene. Output the composited image.`;
+                  const compRes = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${lovableApiKey}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      model: 'google/gemini-3.1-flash-image',
+                      messages: [{
+                        role: 'user',
+                        content: [
+                          { type: 'image_url', image_url: { url: sceneDataUrl } },
+                          { type: 'image_url', image_url: { url: geminiCompositeLogo } },
+                          { type: 'text', text: compositePrompt },
+                        ],
+                      }],
+                      modalities: ['image', 'text'],
+                    }),
+                  });
+                  if (compRes.ok) {
+                    const compData = await compRes.json();
+                    const compUrl = compData.choices?.[0]?.message?.images?.[0]?.image_url?.url;
+                    if (compUrl) {
+                      console.log('[dehub-poster] Gemini composite fallback success');
+                      return new Response(
+                        JSON.stringify({ imageUrl: compUrl, text: '', success: true }),
+                        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+                      );
+                    }
+                  }
+                } catch (e) {
+                  console.warn('[dehub-poster] Gemini composite fallback error:', (e as Error).message);
+                }
+              }
+
+              console.warn('[dehub-poster] All composite paths failed — returning bare scene');
+              return new Response(
+                JSON.stringify({ imageUrl: sceneDataUrl, text: '', success: true }),
+                { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+              );
+            }
+            console.warn('[dehub-poster] GPT-image-2 returned no image; falling back to Gemini');
+          } else {
+            const errText = await gptRes.text().catch(() => '');
+            console.warn('[dehub-poster] GPT-image-2 failed', gptRes.status, errText.substring(0, 200), '— falling back to Gemini');
+          }
+        } catch (e) {
+          console.warn('[dehub-poster] GPT-image-2 error, falling back to Gemini:', e);
+        }
+      }
+
+      // Gemini fallback: use the validated client logo, else the hardcoded canonical wordmark
+      try {
+        const logoDataUrl = compositeLogo ?? DEHUB_LOGO_DATA_URI;
+        if (logoDataUrl) {
+
+          sourceImage = logoDataUrl;
+          model = 'gemini-3.1-flash-image';
+          isGrokModel = false;
+          contextualPrompt = `RIFTN BRAND SYSTEM (mandatory):
+- The attached image is the official Riftn wordmark. Composite it PROMINENTLY, UNALTERED, PURE WHITE into the final image with clear space around it (min 8% of canvas), integrated into the physical logo-host surface described in the ART DIRECTION (engraved / embossed / backlit / projected — not floating flat). Do NOT recolor, gradient-fill, distort, or redraw the logo — use the attached pixels.
+- STRICT MONOCHROME palette: blacks, charcoals, silvers, chromes, brushed steels, cool off-whites, pure white ONLY. NO color hues — no red, orange, yellow, magenta, purple, violet, green, blue, teal, cyan, indigo, pastel, neon glow. Any ambient light must be cool near-white (saturation under 10%). Only exception: if the ART DIRECTION literally names a color, honor it as a restrained accent.
+- Aesthetic: liquid glass, frosted blur, obsidian, mercury, brushed metal, cinematic, premium, Apple keynote × A24. Backgrounds must have texture/depth — never flat black.
+- Typography (only if the ART DIRECTION names a short display headline): Exo / Exo 2 geometric technical sans-serif, pure white, generous letter-spacing. No emoji. No generic AI clichés.
+
+ART DIRECTION: ${enhancedUserRequest}`;
+        }
+      } catch (e) {
+        console.warn('[dehub-poster] Logo fetch error:', e);
+      }
+    }
+
+
+    if (!sourceTransform && aspectRatio && ASPECT_FRAMING[aspectRatio]) {
+      contextualPrompt = `${contextualPrompt}\n\nFRAMING: ${ASPECT_FRAMING[aspectRatio]}`;
+    }
+
+    const imageRequest = {
+      requestedModel: model, prompt: contextualPrompt, sourceImage, referenceImageUrls,
+      aspectRatio: aspectRatio ?? (bannerFormat === 'landscape' ? '16:9' : bannerFormat === 'portrait' ? '9:16' : undefined),
+      vector: model.includes('vector'),
+    };
+    const success = (result: Record<string, unknown>) => new Response(
+      JSON.stringify({ ...result, text: result.text ?? '', success: true }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+    );
+
+    // Keep the cheaper configured route, without dropping multi-image inputs.
+    if (KIE_IMAGE_MODELS[model] && kieKey() && kieUsableUrl(sourceImage) && !referenceImageUrls?.length) {
+      try {
+        const imageUrl = await generateWithKie(model, contextualPrompt, sourceImage, bannerFormat, aspectRatio);
+        return success({ imageUrl, provider: 'kie', model, requestedModel: model });
+      } catch (error) {
+        const rejection = new ImageProviderError(502, String(error));
+        if (rejection.safetyBlocked) throw rejection;
+        // A timeout may leave an accepted job running; do not submit twice.
+        if (/timed out|fetch failed|network/i.test(String(error))) throw rejection;
+        console.warn('[kie-image] rejected, trying compatible backup');
+      }
+    }
+
+    if (FAL_IMAGE_MODELS[model]) {
+      const appId = sourceImage ? FAL_IMAGE_MODELS[model].edit! : FAL_IMAGE_MODELS[model].text;
+      if (outpaint || CREATOR_FAL_IMAGE_MODELS[model]?.relight) return success({ imageUrl: await generateWithFal(model, prompt, sourceImage, bannerFormat, aspectRatio, referenceImageUrls), provider: 'fal', model: appId });
+      return success(await resilientImage(imageRequest, {
+        provider: 'fal', model: appId,
+        generate: async signal => ({ imageUrl: await generateWithFal(model, contextualPrompt, sourceImage,
+          bannerFormat, aspectRatio, referenceImageUrls, signal), provider: 'fal', model: appId }),
+      }));
+    }
+
+    if (isGrokModel && !sourceImage && !referenceImageUrls?.length) {
+      return success(await resilientImage(imageRequest, {
+        provider: 'xai', model: 'grok-2-image',
+        generate: async signal => {
+          if (!xaiApiKey) throw new ImageProviderError(503, 'xAI not configured', true);
+          const response = await fetch('https://api.x.ai/v1/images/generations', {
+            method: 'POST', signal,
+            headers: { Authorization: `Bearer ${xaiApiKey}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ model: 'grok-2-image', prompt: contextualPrompt, n: 1, response_format: 'url' }),
+          });
+          if (!response.ok) throw new ImageProviderError(response.status, await response.text());
+          const data = await response.json();
+          const imageUrl = data.data?.[0]?.url;
+          if (!imageUrl) throw new ImageProviderError(502, 'No image returned');
+          return { imageUrl, provider: 'xai', model: 'grok-2-image' };
+        },
+      }));
+    }
+
+    const apiModel = model === 'gemini-3-pro-image' ? 'google/gemini-3-pro-image-preview'
+      : model === 'gpt-5' ? 'openai/gpt-5' : 'google/gemini-3.1-flash-image';
+    return success(await resilientImage(imageRequest, {
+      provider: 'lovable', model: apiModel,
+      generate: signal => gatewayImage(imageRequest, signal, apiModel),
+    }));
+  } catch (error) {
+    console.error('Error in generate-image:', error);
+    if (error instanceof VeniceError) return new Response(JSON.stringify({ error: error.message, code: error.uncertain ? 'SUBMISSION_UNCONFIRMED' : 'VENICE_UNAVAILABLE' }), { status: error.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    const providerFailure = error instanceof ImageProviderError;
+    const errorMessage = providerFailure ? error.message : (error instanceof Error ? error.message : IMAGE_UNAVAILABLE);
+    return new Response(
+      JSON.stringify({ error: errorMessage, ...(providerFailure ? { code: error.safetyBlocked ? 'IMAGE_SAFETY_BLOCKED' : 'IMAGE_PROVIDER_UNAVAILABLE', safetyBlocked: error.safetyBlocked } : {}) }),
+      { status: providerFailure ? (error.safetyBlocked ? 400 : 503) : 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  }
+};
+
+serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  // Peek at the payload to price the job. The clone leaves the original body
+  // readable by the handler, so nothing below this point had to change.
+  const peek = await req.clone().json().catch(() => ({})) as Partial<GenerateImageRequest>;
+  let providerPriceDhb: number | undefined;
+  if (peek.model && isVeniceImage(peek.model)) {
+    // Venice models are web only: the store apps must not be able to make adult images.
+    if (isStoreAppRequest(req)) {
+      return new Response(JSON.stringify({ error: WEB_ONLY_MODEL_MESSAGE, code: WEB_ONLY_MODEL_CODE }), { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
+    if (!peek.prompt?.trim() || peek.sourceImage || peek.referenceImageUrls?.length || peek.bannerRenderer) {
+      return new Response(JSON.stringify({ error: 'Venice image models require a text prompt without attached images.' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
+    const maxLength = peek.model === 'venice-qwen-image' ? 2048 : 7500;
+    if (peek.prompt.length > maxLength) return new Response(JSON.stringify({ error: `This model accepts up to ${maxLength} prompt characters.` }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    try { providerPriceDhb = (await quoteVenice(peek.model)).priceDhb; }
+    catch (error) { return new Response(JSON.stringify({ error: (error as Error).message }), { status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }); }
+  }
+  if (peek.referenceImageUrls?.length && (!peek.model || !CREATOR_FAL_IMAGE_MODELS[peek.model]?.editUsesPlural)) {
+    return new Response(JSON.stringify({ error: 'Choose a model supporting multiple image references' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+  }
+
+  if (peek.model && CREATOR_FAL_IMAGE_MODELS[peek.model] && !isFreeTemplateRequest(peek)) {
+    try {
+      buildCreatorFalImageRequest(peek.model, peek.prompt ?? '', peek.sourceImage, peek.aspectRatio, peek.referenceImageUrls);
+    } catch (error) {
+      return new Response(JSON.stringify({ error: (error as Error).message }), {
+        status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+  }
+
+  const charged = await chargeForJob(req, {
+    providerPriceDhb,
+    kind: 'image',
+    modelId: peek.model || 'gemini-2.5-flash',
+    body: peek as Record<string, unknown>,
+    actionType: 'generate-image',
+    rateLimit: { limit: 60, windowMs: 60 * 60 * 1000 },
+    // Riftn banners cost nothing. Still authenticated and still rate-limited —
+    // free is a price, not an open door.
+    free: isFreeTemplateRequest(peek),
+  });
+  if (!charged.ok) return charged.response;
+
+  const response = await handleGenerateImage(req);
+  if (isFreeTemplateRequest(peek) && charged.priceDhb === 0) {
+    await publishFreePoster(peek, charged.priceDhb, charged.jobId, response, charged.wallet);
+  }
+  // Anything short of a success hands the credit back — a refusal or a provider
+  // outage must not be billable.
+  if (!response.ok) {
+    const failure = await response.clone().json().catch(() => ({}));
+    if (failure.code === 'SUBMISSION_UNCONFIRMED') {
+      await serviceClient().from('ai_generation_jobs').update({ provider: 'venice', result: { error: failure.error, submissionUnconfirmed: true }, updated_at: new Date().toISOString() }).eq('id', charged.jobId).eq('status', 'submitting');
+    } else await charged.refund();
+  }
+  return await recordGeneration(charged, response);
+});

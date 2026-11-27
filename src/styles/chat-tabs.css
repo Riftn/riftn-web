@@ -1,0 +1,100 @@
+/* Chat tabs on /chat and /app/messages: plain labels, the open one lit with
+   a glowing underline in the theme's accent (same look as the Messages
+   page's tabs). */
+[data-chat-tabs] {
+  --ct-accent: color-mix(in srgb, var(--tint-accent, rgb(161 161 170)) 62%, white);
+  --ct-accent-ink: #fff;
+  --ct-soft: rgb(255 255 255 / 0.09);
+  --ct-ink: #fff;
+  --ct-idle: rgb(161 161 170);
+}
+html[data-theme='system'] [data-chat-tabs] { --ct-accent: #fff; --ct-accent-ink: #0b0b0c; }
+html:is([data-system-tone='light'], [data-theme='light'], [data-theme='minimal']) [data-chat-tabs] {
+  --ct-accent: #0b0b0c;
+  --ct-accent-ink: #fff;
+  --ct-soft: rgb(11 11 13 / 0.06);
+  --ct-ink: #0b0b0c;
+}
+/* Light themes: zinc-400 on white was 2.6:1. */
+html:is([data-system-tone='light'], [data-theme='light']) [data-chat-tabs] { --ct-idle: rgb(11 11 13 / 0.7); }
+html[data-theme='osaka'] [data-chat-tabs] { --ct-accent: #ff6fb5; }
+
+[data-chat-tabs] [data-chat-tab] {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  color: var(--ct-idle);
+  background: transparent;
+  user-select: none;
+  transition: color 0.15s ease;
+}
+@media (hover: hover) { [data-chat-tabs] [data-chat-tab]:hover { color: var(--ct-ink); } }
+[data-chat-tabs] [data-chat-tab][aria-selected='true'] { color: var(--ct-ink); }
+[data-chat-tabs] [data-chat-tab][aria-selected='true']::after {
+  content: '';
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: -1px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--ct-accent);
+  box-shadow: 0 0 10px var(--ct-accent);
+}
+html:is([data-system-tone='light'], [data-theme='light']) [data-chat-tabs] [data-chat-tab][aria-selected='true']::after {
+  box-shadow: 0 0 3px var(--ct-accent);
+}
+html:is([data-system-tone='light'], [data-theme='light']) [data-status-row] {
+  --status-cloud-shadow: 0 1px 4px rgb(0 0 0 / 0.09);
+}
+/* A chat dragged over a custom tab. */
+[data-chat-tabs] [data-chat-tab][data-drop] { color: var(--ct-ink); box-shadow: inset 0 0 0 1.5px var(--ct-accent); }
+[data-chat-tabs] [data-chat-tab-unread] {
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 6px;
+  background: var(--ct-accent);
+  color: var(--ct-accent-ink);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 18px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+[data-chat-tabs] [data-chat-tab-unread][data-quiet] { background: var(--ct-soft); color: inherit; }
+
+/* The standalone chat list uses one continuous divider and hover-only controls. */
+html:is([data-theme='light'], [data-system-tone='light']) [data-fullscreen-chat] [data-fsc-list] {
+  border-inline-end-color: rgb(11 11 13 / 0.09);
+}
+html:is([data-theme='light'], [data-system-tone='light']):not(#_):not(#_):not(#_):not(#_)
+  [data-fullscreen-chat] [data-fsc-list] :is([data-phone-chat-tool]:not([data-phone-chat-tool='search']), [data-chat-list-row]):not([data-selected], [data-bulk-checked='true'], [aria-expanded='true']) {
+  background: transparent !important;
+}
+@media (hover: hover) {
+  html:is([data-theme='light'], [data-system-tone='light']):not(#_):not(#_):not(#_):not(#_)
+    [data-fullscreen-chat] [data-fsc-list] :is([data-phone-chat-tool]:not([data-phone-chat-tool='search']), [data-chat-list-row]):not([data-selected], [data-bulk-checked='true'], [aria-expanded='true']):hover {
+    background: rgb(11 11 13 / 0.045) !important;
+  }
+}
+[data-fullscreen-chat] [data-fsc-list] [data-chat-tabs] [data-chat-tab][aria-selected='true']::after {
+  bottom: 0;
+}
+
+/* Search is the only wide Public Chat header button with a resting surface. */
+html[data-theme]:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_)
+  [data-fullscreen-chat] [data-chat-header]:has([data-public-chat-wide-tools])
+  button:not([data-chat-search-open], [data-group-call-join]) {
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}

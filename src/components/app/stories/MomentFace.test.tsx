@@ -1,0 +1,78 @@
+import { fireEvent, render, waitFor } from '@testing-library/react';
+import { beforeEach, expect, it, vi } from 'vitest';
+import { MomentFace } from './MomentFace';
+import { useStoriesStore } from '@/store/storiesStore';
+import { getStoryRings, getUserStories } from '@/lib/api/dehub/stories';
+
+const ELLA = '0x6666666666666666666666666666666666666661';
+const NOBODY = '0x6666666666666666666666666666666666666664';
+
+vi.mock('@/hooks/use-stories-enabled', () => ({ useStoriesEnabled: () => ({ storiesEnabled: true }) }));
+vi.mock('@/lib/api/dehub/stories', () => ({
+  getStoryRings: vi.fn(async (addresses: string[]) => ({
+    rings: {},
+    peeks: Object.fromEntries(addresses.filter(a => a === ELLA).map(a => [a, { state: 'unseen', count: 2, cover: '/cover.jpg' }])),
+  })),
+  getUserStories: vi.fn(async () => ({
+    author: { address: ELLA, username: 'ellaverse', displayName: 'Ella Verse', avatarImageUrl: null },
+    items: [
+      { id: 'a', status: 'ready', type: 'photo', mediaUrl: '/a.jpg', posterUrl: '/a.jpg', viewed: true, createdAt: '2026-11-23T10:00:00Z' },
+      { id: 'b', status: 'ready', type: 'photo', mediaUrl: '/b.jpg', posterUrl: '/b.jpg', viewed: false, createdAt: '2026-11-23T11:00:00Z' },
+    ],
+  })),
+}));
+
+beforeEach(() => {
+  useStoriesStore.setState({ viewer: null });
+  vi.mocked(getUserStories).mockClear();
+});
+
+it('marks the avatar without showing Moment art and opens the viewer on tap', async () => {
+  const onRow = vi.fn();
+  const { container } = render(
+    <button type="button" onClick={onRow}>
+      <MomentFace address={ELLA} name="Ella"><span>face</span></MomentFace>
+    </button>,
+  );
+  await waitFor(() => expect(container.querySelector('[data-moment-face="unseen"] > [data-moment-outline]')).not.toBeNull());
+  expect(container.querySelector('img[src="/cover.jpg"]')).toBeNull();
+  fireEvent.click(container.querySelector('[data-moment-face]')!);
+  await waitFor(() => expect(useStoriesStore.getState().viewer?.entries[0].items).toHaveLength(2));
+  expect(getUserStories).toHaveBeenCalledWith(ELLA, false);
+  expect(onRow).not.toHaveBeenCalled();
+});
+
+it('leaves faces with nothing up alone, in one request for the whole list', async () => {
+  vi.mocked(getStoryRings).mockClear();
+  const onRow = vi.fn();
+  const { container } = render(
+    <>
+      <button type="button" onClick={onRow}><MomentFace address={NOBODY}><span>face</span></MomentFace></button>
+      <MomentFace address="0x6666666666666666666666666666666666666665"><span>face</span></MomentFace>
+    </>,
+  );
+  await waitFor(() => expect(getStoryRings).toHaveBeenCalledTimes(1));
+  expect(container.querySelector('[data-moment-peek]')).toBeNull();
+  expect(container.querySelector('[data-moment-outline]')).toBeNull();
+  fireEvent.click(container.querySelector('button span span')!);
+  expect(onRow).toHaveBeenCalled();
+  expect(getUserStories).not.toHaveBeenCalled();
+});
+
+it('outlines the avatar and opens Moments without triggering the conversation row', async () => {
+  const onRow = vi.fn();
+  const { container, getByText } = render(
+    <button type="button" onClick={onRow}>
+      <MomentFace address={ELLA} name="Ella"><span>face</span></MomentFace>
+      <span>conversation</span>
+    </button>,
+  );
+  await waitFor(() => expect(container.querySelector('[data-moment-outline]')).not.toBeNull());
+  expect(container.querySelector('[data-moment-peek]')).toBeNull();
+  expect(container.querySelector('[data-moment-count]')).toBeNull();
+  fireEvent.click(getByText('face'));
+  await waitFor(() => expect(useStoriesStore.getState().viewer?.entries[0].items).toHaveLength(2));
+  expect(onRow).not.toHaveBeenCalled();
+  fireEvent.click(getByText('conversation'));
+  expect(onRow).toHaveBeenCalledOnce();
+});

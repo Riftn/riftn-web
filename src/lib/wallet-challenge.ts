@@ -1,0 +1,59 @@
+import { requestSession } from '@/lib/api/dehub/session-request';
+import { translateCopy as _translateCopy } from '@/i18n/copy';
+
+export async function fetchWalletChallenge(address: string, chainId: number, purpose: WalletProofPurpose): Promise<WalletChallenge> {
+    const response = await requestSession('/api/auth/wallet-challenge', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ address: address.toLowerCase(), chainId, purpose, brand: 'riftn' }),
+    });
+    if (!response.ok) throw new Error(_translateCopy('copy.2015edac19e5', { defaultValue: 'Could not start wallet verification. Please try again.' }));
+    return validateWalletChallenge(await response.json(), address, chainId, purpose);
+}
+export type WalletProofPurpose = 'login-web' | 'login-mobile' | 'rotate-wallet';
+export interface WalletChallenge {
+  challengeId: string;
+  address: string;
+  chainId: number;
+  purpose: WalletProofPurpose;
+  timestamp: number;
+  message: string;
+}
+
+export function validateWalletChallenge(value: WalletChallenge, address: string, chainId: number, purpose: WalletProofPurpose): WalletChallenge {
+  if (!value || typeof value.challengeId !== 'string' || !/^[a-f0-9]{64}$/.test(value.challengeId)
+    || value.address !== address.toLowerCase() || value.chainId !== chainId || value.purpose !== purpose
+    || !Number.isSafeInteger(value.timestamp) || value.timestamp <= 0 || value.timestamp > 8_640_000_000_000 - 600) {
+    throw new Error(_translateCopy('copy.ed28e276e275', { defaultValue: 'Invalid wallet verification request' }));
+  }
+  // The API answers in Riftn's name when asked (brand: 'riftn'); a server that
+  // predates the rename still answers in DeHub's. Either text is accepted,
+  // nothing else.
+  const expected = (host: string) => [
+    host + ' requests wallet verification.',
+    '',
+    'URI: https://' + host,
+    'Version: 2',
+    'Address: ' + value.address,
+    'Chain ID: ' + chainId,
+    'Purpose: ' + purpose,
+    'Nonce: ' + value.challengeId,
+    'Issued At: ' + new Date(value.timestamp * 1000).toISOString(),
+    'Expiration Time: ' + new Date((value.timestamp + 600) * 1000).toISOString(),
+    '',
+    'This request is single-use. It does not authorize a blockchain transaction.',
+  ].join('\n');
+  if (value.message !== expected('riftn.com') && value.message !== expected('dehub.io')) throw new Error(_translateCopy('copy.efcb7683c740', { defaultValue: 'Invalid wallet verification message' }));
+  return value;
+}
+
+/** A dropped first response can leave the proof consumed. Retry once with a new signature. */
+export async function submitWalletProof<P, R>(
+  initial: P, renew: () => Promise<P>, submit: (proof: P) => Promise<R>,
+): Promise<R> {
+  try { return await submit(initial); }
+  catch (error) {
+    if ((error as { code?: string })?.code !== 'WALLET_CHALLENGE_UNAVAILABLE') throw error;
+    return submit(await renew());
+  }
+}
+

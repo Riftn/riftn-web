@@ -1,0 +1,909 @@
+import { translateCopy as _translateCopy } from '@/i18n/copy';
+import { useTranslation as _useCopy } from 'react-i18next';
+import { useSurfaceDraft } from '@/hooks/use-surface-draft';
+import { MediaControlIcon } from './MediaControlIcon';
+/**
+ * VideoSubtitleOverlay
+ * ====================
+ * Optional CC button + caption renderer for any HTMLVideoElement.
+ *
+ * Mount inside the video's positioned container, pass the videoRef and a
+ * numeric tokenId. The overlay no-ops when tokenId is missing.
+ *
+ * - On phones, the CC button opens settings after the finger is released.
+ *   Desktop clicks toggle subtitles on/off (persisted in localStorage).
+ * - Dropdown lets the user pick any language; a language nobody has asked for
+ *   yet is translated once and cached in `transcript_translations`, so every
+ *   viewer after the first reads a row.
+ * - Transcripts are produced by the sweeper, not by this button. Tapping it on
+ *   a video the sweeper has not reached yet still starts one, which is why the
+ *   attempt budget is respected here rather than spinning forever.
+ */
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { useTranslation } from 'react-i18next';
+import { Loader2, Minus } from "lucide-react";
+import Check from "@/components/ui/cut-icons/check";
+
+import Search from "@/components/ui/cut-icons/search";
+import Settings2 from "@/components/ui/cut-icons/settings";
+import Plus from "@/components/ui/cut-icons/add";
+
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Drawer, DrawerContent, DrawerTitle } from '@/components/ui/drawer';
+import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
+import {
+  useVideoTranscript,
+  useTranslatedSegments,
+  type TranscriptSegment,
+} from '@/hooks/use-video-transcript';
+import { applyCorrections, useTranscriptCorrections } from '@/hooks/use-transcript-corrections';
+import { SUBTITLE_LANGUAGES } from '@/lib/subtitle-languages';
+import { splitSegmentsIntoLines, rechunkVtt } from '@/lib/transcript-format';
+import { useIsTouchDevice } from '@/hooks/use-touch-device';
+import { useMediaVolume } from '@/lib/video-preferences';
+import { useDubPreference, useSpeechVoices, pickVoice, primeSpeech } from '@/hooks/dub-preference';
+import { hasCachedDubLanguage } from '@/lib/cached-dub-languages';
+import { useCachedVideoDub } from '@/hooks/use-cached-video-dub';
+import { useDubDiscovery } from '@/hooks/use-dub-discovery';
+
+// The speech engine only matters once a dub is playing; keep it off the boot path.
+const VoiceDubEngine = lazy(() => import('./VoiceDubEngine'));
+
+
+const LS_ENABLED = 'video-subs:enabled';
+const LS_LANG = 'video-subs:lang';
+const LS_SIZE = 'video-subs:size';
+
+const SIZE_PRESETS = [
+  { key: 'xs', get label() { return _translateCopy("copy.4e12aed95e4c", { defaultValue: "XS" }); }, px: 11 },
+  { key: 'sm', get label() { return _translateCopy("copy.8de0b3c47f11", { defaultValue: "S" }); }, px: 13 },
+  { key: 'md', get label() { return _translateCopy("copy.08f271887ce9", { defaultValue: "M" }); }, px: 15 },
+  { key: 'lg', get label() { return _translateCopy("copy.72dfcfb0c470", { defaultValue: "L" }); }, px: 18 },
+  { key: 'xl', get label() { return _translateCopy("copy.f365705bb061", { defaultValue: "XL" }); }, px: 22 },
+  { key: '2xl', get label() { return _translateCopy("copy.0a783b9b8a7d", { defaultValue: "XXL" }); }, px: 28 },
+] as const;
+type SizeKey = typeof SIZE_PRESETS[number]['key'];
+
+/** `creator-voice`: the device voice is playing while the shared creator-voice track is still being made. */
+type DubHint = 'preparing' | 'unavailable' | 'creator-voice' | null;
+
+interface Props {
+  /** Numeric NFT/post id. Overlay is a no-op when undefined or 0. */
+  tokenId?: number | string | null;
+  /** Ref to the underlying <video> element. */
+  videoRef: React.RefObject<HTMLVideoElement>;
+  /** Optional className overrides for the button position. Defaults bottom-left. */
+  buttonClassName?: string;
+  /** When false, the CC button is faded out (captions still render). Defaults true. */
+  buttonVisible?: boolean;
+  plainButton?: boolean;
+  /**
+   * Render the CC button into this element instead of positioning it against
+   * the video. The player's control row is a flex row: portalling into it puts
+   * this button through the same mount as every other control, so it appears
+   * and disappears on the same frame instead of fading in on its own timer.
+   */
+  buttonPortalTarget?: HTMLElement | null;
+  /** Fires when the language menu opens or closes, so the player can hold its controls up. */
+  onMenuOpenChange?: (open: boolean) => void;
+  onDubAvailableChange?: (available: boolean) => void;
+}
+
+function readEnabled(): boolean {
+  try { return localStorage.getItem(LS_ENABLED) === '1'; } catch { return false; }
+}
+function readLang(): string {
+  // Default to 'original' — only translate when the user explicitly picks
+  // a non-English language. Avoids junk en→en AI "translations".
+  try { return localStorage.getItem(LS_LANG) || 'original'; } catch { return 'original'; }
+}
+function readSize(): SizeKey {
+  try {
+    const v = localStorage.getItem(LS_SIZE) as SizeKey | null;
+    if (v && SIZE_PRESETS.some((s) => s.key === v)) return v;
+  } catch { /* noop */ }
+  return 'xs';
+}
+
+export function VideoSubtitleOverlay({ tokenId, videoRef, buttonClassName, buttonVisible = true, plainButton = false, buttonPortalTarget, onMenuOpenChange, onDubAvailableChange }: Props) {
+  const { i18n } = useTranslation();
+  const { t: _copy } = _useCopy();
+  const numericId = useMemo(() => {
+    const n = typeof tokenId === 'string' ? parseInt(tokenId, 10) : tokenId ?? 0;
+    return Number.isFinite(n) && n > 0 ? Number(n) : 0;
+  }, [tokenId]);
+
+  const [enabled, setEnabled] = useState<boolean>(readEnabled);
+  const [lang, setLang] = useState<string>(readLang);
+  const [size, setSize] = useState<SizeKey>(readSize);
+  const { on: dubOn, lang: dubPick, setDub } = useDubPreference();
+  const voices = useSpeechVoices();
+  const [showSettings, setShowSettings] = useState(false);
+  const [query, setQuery] = useSurfaceDraft("components/app/video/VideoSubtitleOverlay.tsx:query", '');
+  const [open, setOpen] = useState(false);
+  const [currentText, setCurrentText] = useState('');
+
+  // Preparation only looks up the video the viewer is listening to.
+  const [audible, setAudible] = useState(false);
+  const masterVolume = useMediaVolume();
+  useEffect(() => {
+    const v = videoRef.current;
+    if (!v) return;
+    const update = () => setAudible(!v.paused && !v.muted && masterVolume > 0);
+    update();
+    v.addEventListener('play', update);
+    v.addEventListener('pause', update);
+    v.addEventListener('volumechange', update);
+    return () => {
+      v.removeEventListener('play', update);
+      v.removeEventListener('pause', update);
+      v.removeEventListener('volumechange', update);
+    };
+  }, [videoRef, masterVolume]);
+
+  useEffect(() => { onMenuOpenChange?.(open); }, [open, onMenuOpenChange]);
+
+  // Listening prepares a dub without playing it. Opening captions also reads
+  // the transcript; automatic preparation never starts a missing transcript.
+  const wantTranscript = enabled || open || audible;
+
+  const { transcript, status: rowStatus, inFlight, canRetry, start, isLoading: transcriptLoading } =
+    useVideoTranscript(numericId || null, !!numericId && wantTranscript);
+
+  const isReady = rowStatus === 'ready';
+  const isWorking = inFlight;
+  // A run that finished with nothing said, and one that gave up. Both used to
+  // be stored as 'ready', so the button sat switched on over silence.
+  const isEmpty = rowStatus === 'empty';
+  const isFailed = rowStatus === 'failed';
+
+  // Treat english variants as "original" — the underlying transcripts are
+  // produced in the spoken language (usually English) so translating en→en
+  // just produces garbled duplicate segments.
+  const sourceLang = (transcript?.source_lang || '').toLowerCase().split('-')[0];
+  const normalizedLang = useMemo(() => {
+    const l = (lang || '').toLowerCase();
+    if (!l || l === 'original') return 'original';
+    const base = l.split('-')[0];
+    // If user picked the same language as the source, treat as original.
+    if (sourceLang && base === sourceLang) return 'original';
+    // Legacy: when source_lang is unknown, treat english as original.
+    if (!sourceLang && (base === 'en')) return 'original';
+    return l;
+  }, [lang, sourceLang]);
+
+  const {
+    segments: translatedSegments,
+    status: translationStatus,
+    isFetching: translating,
+    request: requestTranslation,
+  } = useTranslatedSegments(
+    transcript?.id ?? null,
+    normalizedLang,
+    !!numericId && enabled && isReady && normalizedLang !== 'original',
+  );
+
+  // Only ask for a language nobody has cached. Everyone after the first viewer
+  // of that language reads the row the first one paid for.
+  useEffect(() => {
+    if (!enabled || !isReady || normalizedLang === 'original') return;
+    if (translationStatus === 'ready' || translationStatus === 'processing') return;
+    void requestTranslation();
+  }, [enabled, isReady, normalizedLang, translationStatus, requestTranslation]);
+
+  // ── Dubbed audio ──
+  // The dub follows the subtitle language: pick Spanish captions and "Dubbed"
+  // speaks the Spanish lines with a Spanish voice on this device. The post
+  // menu can point it at the app language instead (`dubPick`).
+  const sameAsSource = (l: string) => {
+    const base = l.toLowerCase().split('-')[0];
+    return sourceLang ? base === sourceLang : base === 'en';
+  };
+  const dubLang =
+    !sourceLang ? null
+    : dubPick ? (sameAsSource(dubPick) ? null : dubPick)
+    : normalizedLang !== 'original' ? normalizedLang
+    : sourceLang && !sameAsSource(i18n?.resolvedLanguage || i18n?.language || 'en')
+      ? (i18n?.resolvedLanguage || i18n?.language || 'en') : null;
+  const dubVoice = useMemo(() => pickVoice(voices, dubLang), [voices, dubLang]);
+
+  // With captions on Original there is no language to dub into yet, so the
+  // toggle borrows the viewer's own — but only when that differs from what is
+  // already being spoken. An English viewer on an English video has nowhere to
+  // go, and the pill has to say so by staying disabled: switching on and then
+  // doing nothing, with no hint, is how this looked broken.
+  const autoDubLang = useMemo(() => {
+    if (normalizedLang !== 'original') return null;
+    const guess = i18n?.resolvedLanguage || i18n?.language || 'en';
+    if (guess === 'original' || sameAsSource(guess)) return null;
+    return hasCachedDubLanguage(guess) || pickVoice(voices, guess) ? guess : null;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [normalizedLang, sourceLang, voices, i18n?.resolvedLanguage, i18n?.language]);
+
+  // The browser refused to speak (iOS Safari without a gesture, a dead voice).
+  const [dubFailed, setDubFailed] = useState(false);
+  useEffect(() => { setDubFailed(false); }, [dubOn, dubLang]);
+
+  const wantDub = dubOn && !dubFailed && isReady && !!dubLang && (hasCachedDubLanguage(dubLang) || !!dubVoice);
+  const prepareDub = audible && isReady && !!dubLang && (hasCachedDubLanguage(dubLang) || !!dubVoice);
+  // Let viewers set both levels while a selected dub is loading or muted.
+  const dubControlsAvailable = !!numericId && dubOn && (!sourceLang || !!dubLang);
+  useEffect(() => { onDubAvailableChange?.(dubControlsAvailable); }, [dubControlsAvailable, onDubAvailableChange]);
+  useEffect(() => () => { onDubAvailableChange?.(false); }, [onDubAvailableChange]);
+  const {
+    segments: dubSegments,
+    status: dubTranslationStatus,
+    isFetching: dubLookupPending,
+    isError: dubLookupFailed,
+    request: requestDubTranslation,
+  } = useTranslatedSegments(transcript?.id ?? null, dubLang ?? 'original', !!numericId && prepareDub);
+
+  // Same shared translation cache as the captions. When the captions are
+  // already asking for this language, leave the request to them.
+  const askedDubRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!prepareDub || !transcript?.id || !dubLang) return;
+    if (enabled && dubLang === normalizedLang) return;
+    if (dubTranslationStatus === 'ready' || dubTranslationStatus === 'processing') return;
+    // Status is empty until the stored translation has been looked up; asking
+    // before then calls translate-transcript for rows that already exist.
+    if (dubLookupPending || dubLookupFailed || dubTranslationStatus === 'failed') return;
+    const token = `${transcript.id}:${dubLang}`;
+    if (askedDubRef.current === token) return;
+    askedDubRef.current = token;
+    requestDubTranslation().catch(() => undefined);
+  }, [prepareDub, transcript?.id, dubLang, enabled, normalizedLang, dubTranslationStatus, dubLookupPending, dubLookupFailed, requestDubTranslation]);
+
+  // Prepare/cache audio independently of the playback switch. Mounting a
+  // playback engine still requires the viewer's explicit opt-in.
+  const cachedDub = useCachedVideoDub(transcript?.id ?? null, dubLang, prepareDub && dubTranslationStatus === 'ready');
+  const preferredLanguage = i18n?.resolvedLanguage || i18n?.language;
+  const tipVoice = pickVoice(voices, preferredLanguage ?? null);
+  useDubDiscovery(videoRef, numericId, sourceLang, preferredLanguage,
+    isReady && (hasCachedDubLanguage(preferredLanguage) || !!tipVoice), dubOn,
+    () => { setShowSettings(true); setOpen(true); });
+
+
+  const dubHint: DubHint =
+    !dubOn || !isReady || !dubLang ? null
+    // Voices load a moment after the page; an empty list is not a "no".
+    : !dubVoice && !hasCachedDubLanguage(dubLang) ? (voices.length ? 'unavailable' : 'preparing')
+    : dubFailed || dubTranslationStatus === 'failed' ? 'unavailable'
+    : !dubSegments ? 'preparing'
+    // The device is reading the lines until the creator-voice track lands;
+    // with no device voice there is only the wait.
+    : !cachedDub?.audioUrl && (cachedDub?.status === 'pending' || cachedDub?.status === 'processing') ? (dubVoice ? 'creator-voice' : 'preparing')
+    : null;
+
+  // Viewer corrections to the original-language lines. Only fetched once
+  // captions are actually wanted, and only applied to the original: a
+  // correction is a fix to what was said, and the translations were made from
+  // the uncorrected text.
+  const { accepted: acceptedCorrections } = useTranscriptCorrections(
+    transcript?.id ?? null,
+    wantTranscript && isReady,
+  );
+
+  const activeSegments: TranscriptSegment[] = useMemo(() => {
+    if (!isReady) return [];
+    const base = (normalizedLang === 'original' || !translatedSegments)
+      ? applyCorrections(transcript?.segments ?? [], acceptedCorrections)
+      : translatedSegments;
+    return splitSegmentsIntoLines(base, 38);
+  }, [isReady, normalizedLang, translatedSegments, transcript, acceptedCorrections]);
+
+  // ── Native <track> mounting for original-language captions ──
+  // When VTT is available and user picked original, mount a native track
+  // on the <video> element — the browser handles perfect timestamp sync.
+  const vttBlobUrl = useMemo(() => {
+    const vtt = transcript?.vtt;
+    if (!vtt) return null;
+    const rechunked = rechunkVtt(vtt, 38);
+    const blob = new Blob([rechunked], { type: 'text/vtt' });
+    return URL.createObjectURL(blob);
+  }, [transcript?.vtt]);
+
+  useEffect(() => {
+    return () => {
+      if (vttBlobUrl) URL.revokeObjectURL(vttBlobUrl);
+    };
+  }, [vttBlobUrl]);
+
+  // The native track is built from the stored VTT, which predates any
+  // correction — so once a line has been fixed, fall back to the JS renderer
+  // that reads the corrected segments. Captions people fixed have to be the
+  // captions people see.
+  const useNativeTrack =
+    enabled && normalizedLang === 'original' && !!vttBlobUrl && acceptedCorrections.size === 0;
+
+  useEffect(() => {
+    const v = videoRef.current;
+    if (!v) return;
+    // Remove any prior subtitle tracks we added
+    Array.from(v.querySelectorAll('track[data-dh-subtitle]')).forEach((n) => n.remove());
+
+    if (!useNativeTrack || !vttBlobUrl) {
+      // Disable any text tracks we previously toggled on
+      for (let i = 0; i < v.textTracks.length; i++) {
+        const tt = v.textTracks[i];
+        if (tt.kind === 'subtitles' || tt.kind === 'captions') tt.mode = 'disabled';
+      }
+      return;
+    }
+
+    const track = document.createElement('track');
+    track.kind = 'subtitles';
+    track.label = 'Original';
+    track.srclang = sourceLang || 'en';
+    track.src = vttBlobUrl;
+    track.default = true;
+    track.setAttribute('data-dh-subtitle', '1');
+    v.appendChild(track);
+
+    // Force-show the track once it loads
+    const showTrack = () => {
+      for (let i = 0; i < v.textTracks.length; i++) {
+        const tt = v.textTracks[i];
+        if (tt.label === 'Original') tt.mode = 'showing';
+      }
+    };
+    track.addEventListener('load', showTrack);
+    // Some browsers don't fire 'load' reliably — set immediately too.
+    showTrack();
+    const t = setTimeout(showTrack, 200);
+
+    return () => {
+      clearTimeout(t);
+      track.removeEventListener('load', showTrack);
+      try { v.removeChild(track); } catch { /* noop */ }
+    };
+  }, [videoRef, useNativeTrack, vttBlobUrl, sourceLang]);
+
+  // Inject ::cue size styles globally (only once per size change)
+  // applies to all native <track> renders in the document.
+
+  // Custom overlay timing — only used when NOT using native track (translations)
+  const indexRef = useRef(0);
+  useEffect(() => {
+    const v = videoRef.current;
+    if (!v || !enabled || useNativeTrack || !activeSegments.length) {
+      setCurrentText('');
+      return;
+    }
+    indexRef.current = 0;
+
+    let raf = 0;
+    let lastTick = 0;
+    const tick = (ts: number) => {
+      if (ts - lastTick > 50) {
+        lastTick = ts;
+        const t = v.currentTime;
+        while (
+          indexRef.current < activeSegments.length - 1 &&
+          activeSegments[indexRef.current].end <= t
+        ) indexRef.current++;
+        while (
+          indexRef.current > 0 &&
+          activeSegments[indexRef.current].start > t
+        ) indexRef.current--;
+        const seg = activeSegments[indexRef.current];
+        const inRange = seg && t >= seg.start && t < seg.end;
+        setCurrentText(inRange ? seg.text : '');
+      }
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+
+    const onSeek = () => { indexRef.current = 0; };
+    v.addEventListener('seeked', onSeek);
+
+    return () => {
+      cancelAnimationFrame(raf);
+      v.removeEventListener('seeked', onSeek);
+    };
+  }, [videoRef, enabled, activeSegments, useNativeTrack]);
+
+  // Persist preferences
+  useEffect(() => {
+    try { localStorage.setItem(LS_ENABLED, enabled ? '1' : '0'); } catch { /* noop */ }
+  }, [enabled]);
+  useEffect(() => {
+    try { localStorage.setItem(LS_LANG, lang); } catch { /* noop */ }
+  }, [lang]);
+  useEffect(() => {
+    try { localStorage.setItem(LS_SIZE, size); } catch { /* noop */ }
+  }, [size]);
+
+  // "Dubbed" with captions still on Original: switch to the viewer's own
+  // language if it can be voiced, otherwise there is nothing to dub into.
+  // Either way the dub follows the captions from here on.
+  const handleDubToggle = (next: boolean) => {
+    if (next && autoDubLang) setLang(autoDubLang);
+    setDub(next, null);
+  };
+
+  // Picking a language is picking what you hear too: a language the video
+  // was not spoken in switches the dubbed audio on in that language, and
+  // Original (or the spoken language) goes back to the original audio. Runs
+  // inside the tap, so iOS Safari lets the voice speak.
+  const handleLangPick = (code: string) => {
+    setLang(code);
+    const l = code.toLowerCase();
+    if (l === 'original' || sameAsSource(l)) {
+      if (dubOn || dubPick) setDub(false, null);
+      return;
+    }
+    // Voices load a moment after the page; an empty list is not a "no".
+    const voiceable = hasCachedDubLanguage(l) || !voices.length || !!pickVoice(voices, l);
+    if (voiceable) {
+      primeSpeech();
+      setDub(true, null);
+    } else if (dubPick) {
+      setDub(dubOn, null);
+    }
+  };
+
+  // Inject ::cue size styles for native <track> rendering
+  const sizePxValue = SIZE_PRESETS.find((s) => s.key === size)?.px ?? 15;
+  useEffect(() => {
+    const id = 'dh-cue-size-style';
+    let el = document.getElementById(id) as HTMLStyleElement | null;
+    if (!el) {
+      el = document.createElement('style');
+      el.id = id;
+      document.head.appendChild(el);
+    }
+    el.textContent = `video::cue { font-size: ${sizePxValue}px; background: rgba(0,0,0,0.4); color: #fff; line-height: 1.3; }`;
+  }, [sizePxValue]);
+
+  const filteredLangs = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return SUBTITLE_LANGUAGES;
+    return SUBTITLE_LANGUAGES.filter(
+      (l) => l.name.toLowerCase().includes(q) || l.code.toLowerCase().includes(q),
+    );
+  }, [query]);
+
+  if (!numericId) return null;
+
+  const buttonState: 'off' | 'on' | 'working' | 'loading' =
+    isWorking || translating || transcriptLoading
+      ? 'working'
+      : enabled
+      ? 'on'
+      : 'off';
+
+  const handleToggle = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!isReady && !isWorking) {
+      // Nothing to switch on yet. Asking again is only worth it while the run
+      // has attempts left — an exhausted one would just spin the spinner.
+      if (canRetry) start.mutate();
+      setEnabled(true);
+      return;
+    }
+    setEnabled((v) => !v);
+  };
+
+  const langLabel =
+    SUBTITLE_LANGUAGES.find((l) => l.code === lang)?.name ?? _copy("copy.88d759ea02ce", { defaultValue: "Original" });
+
+  const sizePx = SIZE_PRESETS.find((s) => s.key === size)?.px ?? 15;
+
+  return (
+    <>
+      {wantDub && (
+        <Suspense fallback={null}>
+          <VoiceDubEngine
+            videoRef={videoRef}
+            segments={dubSegments ?? null}
+            voice={dubVoice}
+            transcriptId={transcript?.id ?? null}
+            language={dubLang}
+            audible={audible}
+            cached={cachedDub}
+            onFailed={() => setDubFailed(true)}
+          />
+        </Suspense>
+      )}
+      {/* Caption text */}
+      {enabled && currentText && (
+        <div
+          className="absolute left-0 right-0 z-20 pointer-events-none px-3 text-center"
+          style={{ bottom: `${48 + Math.max(0, sizePx - 11) * 2}px` }}
+        >
+          <span
+            className="inline-block max-w-[90%] bg-black/40 backdrop-blur-[24px] backdrop-saturate-[180%] border border-white/10 text-white px-1.5 py-0.5 rounded"
+            style={{ textShadow: '0 1px 2px rgba(0,0,0,0.8)', fontSize: `${sizePx}px`, lineHeight: 1.3 }}
+          >
+            {currentText}
+          </span>
+        </div>
+      )}
+
+      {/* CC button + language menu */}
+      <SubtitleMenu
+        open={open}
+        setOpen={setOpen}
+        handleToggle={handleToggle}
+        buttonVisible={buttonVisible}
+        plainButton={plainButton}
+        buttonClassName={buttonClassName}
+        buttonPortalTarget={buttonPortalTarget}
+        buttonState={buttonState}
+        enabled={enabled}
+        setEnabled={setEnabled}
+        showSettings={showSettings}
+        setShowSettings={setShowSettings}
+        size={size}
+        setSize={setSize}
+        sizePx={sizePx}
+        isReady={isReady}
+        isWorking={isWorking}
+        isEmpty={isEmpty}
+        isFailed={isFailed}
+        langLabel={langLabel}
+        query={query}
+        setQuery={setQuery}
+        filteredLangs={filteredLangs}
+        lang={lang}
+        setLang={handleLangPick}
+        dubOn={dubOn}
+        setDubOn={handleDubToggle}
+        dubHint={dubHint}
+        dubPossible={!!dubVoice || !!autoDubLang}
+      />
+    </>
+  );
+}
+
+interface SubtitleMenuProps {
+  open: boolean;
+  setOpen: (v: boolean) => void;
+  handleToggle: (e: React.MouseEvent) => void;
+  buttonVisible: boolean;
+  plainButton: boolean;
+  buttonClassName?: string;
+  buttonPortalTarget?: HTMLElement | null;
+  buttonState: 'off' | 'on' | 'working' | 'loading';
+  enabled: boolean;
+  setEnabled: React.Dispatch<React.SetStateAction<boolean>>;
+  showSettings: boolean;
+  setShowSettings: React.Dispatch<React.SetStateAction<boolean>>;
+  size: SizeKey;
+  setSize: React.Dispatch<React.SetStateAction<SizeKey>>;
+  sizePx: number;
+  isReady: boolean;
+  isWorking: boolean;
+  isEmpty: boolean;
+  isFailed: boolean;
+  langLabel: string;
+  query: string;
+  setQuery: React.Dispatch<React.SetStateAction<string>>;
+  filteredLangs: typeof SUBTITLE_LANGUAGES;
+  lang: string;
+  setLang: (code: string) => void;
+  dubOn: boolean;
+  setDubOn: (next: boolean) => void;
+  dubHint: DubHint;
+  /** False when the chosen caption language has no voice. */
+  dubPossible: boolean;
+}
+
+function SubtitleMenu(props: SubtitleMenuProps) {
+  const { t: _copy } = _useCopy();
+  const {
+    open, setOpen, handleToggle, buttonVisible, plainButton, buttonClassName, buttonPortalTarget, buttonState,
+    enabled, setEnabled, showSettings, setShowSettings, size, setSize, sizePx,
+    isReady, isWorking, isEmpty, isFailed, langLabel, query, setQuery, filteredLangs, lang, setLang,
+    dubOn, setDubOn, dubHint, dubPossible,
+  } = props;
+  const isTouch = useIsTouchDevice();
+  const { t } = useTranslation();
+  const touchOrigin = useRef<{ x: number; y: number } | null>(null);
+
+  const dubHintText =
+    dubHint === 'unavailable' ? t('dub.unavailable', 'Dubbed audio is not available for this video.')
+    : dubHint === 'preparing' ? t('dub.preparing', 'Preparing dubbed audio…')
+    : dubHint === 'creator-voice' ? t('dub.creatorVoiceSoon', "Your device's voice for now. The creator's own voice is being prepared.")
+    : null;
+
+  // Inside the control row the button is a sibling of the speed/loop/PiP/mute
+  // buttons and wears exactly their chrome; standalone it keeps the older
+  // bottom-left placement and its own fade.
+  const inRow = !!buttonPortalTarget;
+
+  const triggerButton = (
+    <button
+      type="button"
+      onClick={(e) => {
+        if (!isTouch) { handleToggle(e); return; }
+        e.stopPropagation();
+        setOpen(true);
+      }}
+      onTouchStart={(e) => {
+        e.stopPropagation();
+        const touch = e.touches[0];
+        touchOrigin.current = e.touches.length === 1 ? { x: touch.clientX, y: touch.clientY } : null;
+      }}
+      onTouchMove={(e) => {
+        e.stopPropagation();
+        const start = touchOrigin.current;
+        const touch = e.touches[0];
+        if (!touch || e.touches.length !== 1 || (start && Math.hypot(touch.clientX - start.x, touch.clientY - start.y) > 14)) {
+          touchOrigin.current = null;
+        }
+      }}
+      onTouchCancel={() => { touchOrigin.current = null; }}
+      onTouchEnd={(e) => {
+        e.stopPropagation();
+        const start = touchOrigin.current;
+        touchOrigin.current = null;
+        const touch = e.changedTouches[0];
+        if (!isTouch || !start || !touch || Math.hypot(touch.clientX - start.x, touch.clientY - start.y) > 14) return;
+        // Open after release: a sheet opened by contextmenu while the finger
+        // is down can receive that same gesture as an outside dismissal.
+        e.preventDefault();
+        setOpen(true);
+      }}
+      onContextMenu={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (!isTouch) setOpen(true);
+      }}
+      data-video-caption-control
+      data-on-media
+      aria-busy={buttonState === 'working'}
+      aria-label={enabled ? _copy("copy.ea577b10b85f", { defaultValue: "Subtitles on" }) : _copy("copy.6a5216300cb9", { defaultValue: "Subtitles off" })}
+      className={cn(
+        'z-20 h-8 w-8 flex items-center justify-center',
+        inRow
+          ? 'relative text-white'
+          : [
+              'text-white transition-opacity duration-200',
+              buttonVisible || open ? 'opacity-80 hover:opacity-100' : 'opacity-0 pointer-events-none',
+              buttonState === 'off' && 'text-white/60',
+              buttonState === 'on' && 'text-white',
+              buttonState === 'working' && 'text-white/80',
+            ],
+        buttonClassName ?? (inRow ? undefined : 'absolute bottom-12 left-2'),
+      )}
+    >
+      <MediaControlIcon captions plain={plainButton} active={plainButton && enabled} />
+    </button>
+  );
+
+  const header = (
+    <div className="p-2 border-b border-white/10">
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-white text-xs font-semibold">{_copy("copy.0ee695bdeb26", { defaultValue: "Subtitles" })}</span>
+        <div className="flex items-center gap-1.5">
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); setEnabled((v) => !v); }}
+            className={cn(
+              'text-[10px] px-2 py-0.5 rounded-md border',
+              enabled
+                ? 'bg-white/15 text-white border-white/20'
+                : 'bg-transparent text-white/60 border-white/10',
+            )}
+          >
+            {enabled ? _copy("copy.130011756125", { defaultValue: "On" }) : _copy("copy.ca7981b46ecf", { defaultValue: "Off" })}
+          </button>
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); setShowSettings((v) => !v); }}
+            aria-label={_copy("copy.b3ad333bebc8", { defaultValue: "Subtitle settings" })}
+            className={cn(
+              'h-5 w-5 rounded-md border flex items-center justify-center',
+              showSettings
+                ? 'bg-white/15 text-white border-white/20'
+                : 'bg-transparent text-white/60 border-white/10 hover:text-white hover:bg-white/10',
+            )}
+          >
+            <Settings2 className="w-3 h-3" />
+          </button>
+        </div>
+      </div>
+      {!isReady && (
+        <p className="text-[11px] text-white/50">
+          {isWorking
+            ? _copy("copy.108752399735", { defaultValue: "Generating subtitles…" })
+            : isEmpty
+            ? _copy("copy.38dc207d4510", { defaultValue: "No speech found in this video." })
+            : isFailed
+            ? _copy("copy.8f4d4e8f9bed", { defaultValue: "Subtitles could not be generated." })
+            : _copy("copy.54135ae2031f", { defaultValue: "Subtitles are being prepared." })}
+        </p>
+      )}
+      {isReady && (
+        <p className="text-[11px] text-white/50">{_copy("copy.a6e6ee702c2c", { defaultValue: "Language: " })}<span className="text-white/80">{langLabel}</span>
+        </p>
+      )}
+      {/* Audio: the original track, or the same lines spoken in the caption
+          language by a voice on this device. */}
+      <div className="mt-2 flex items-center justify-between">
+        <span className="text-[11px] text-white/60">{t('dub.audio', 'Audio')}</span>
+        <div className="flex items-center gap-1">
+          <button
+            type="button"
+            aria-pressed={!dubOn}
+            onClick={(e) => { e.stopPropagation(); setDubOn(false); }}
+            className={cn(
+              'text-[10px] px-2 py-0.5 rounded-md border',
+              !dubOn
+                ? 'bg-white/15 text-white border-white/20'
+                : 'bg-transparent text-white/60 border-white/10',
+            )}
+          >
+            {t('dub.original', 'Original audio')}
+          </button>
+          <button
+            type="button"
+            disabled={!dubPossible}
+            aria-pressed={dubOn}
+            onClick={(e) => { e.stopPropagation(); primeSpeech(); setDubOn(true); }}
+            className={cn(
+              'text-[10px] px-2 py-0.5 rounded-md border disabled:opacity-40',
+              dubOn
+                ? 'bg-white/15 text-white border-white/20'
+                : 'bg-transparent text-white/60 border-white/10',
+            )}
+          >
+            {t('dub.dubbed', 'Dubbed audio')}
+          </button>
+        </div>
+      </div>
+      {dubOn && dubHintText && (
+        <p className="mt-1 text-[11px] text-white/50 flex items-center gap-1">
+          {dubHint !== 'unavailable' && <Loader2 className="w-3 h-3 shrink-0 animate-spin" />}
+          {dubHintText}
+        </p>
+      )}
+    </div>
+  );
+
+  const settingsBlock = showSettings && (
+    <div className="p-2 border-b border-white/10">
+      <div className="flex items-center justify-between mb-1.5">
+        <span className="text-[11px] text-white/60">{_copy("copy.d68761cc1eb2", { defaultValue: "Text size" })}</span>
+        <span className="text-[11px] text-white/80">
+          {SIZE_PRESETS.find((s) => s.key === size)?.label}
+        </span>
+      </div>
+      <div className="flex items-center gap-1">
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            const idx = SIZE_PRESETS.findIndex((s) => s.key === size);
+            if (idx > 0) setSize(SIZE_PRESETS[idx - 1].key);
+          }}
+          className="h-6 w-6 rounded-md border border-white/10 bg-white/5 text-white/70 hover:text-white hover:bg-white/10 flex items-center justify-center"
+          aria-label={_copy("copy.00417195b1e2", { defaultValue: "Smaller" })}
+        >
+          <Minus className="w-3 h-3" />
+        </button>
+        <div className="flex-1 flex items-center gap-1">
+          {SIZE_PRESETS.map((s) => (
+            <button
+              key={s.key}
+              type="button"
+              onClick={(e) => { e.stopPropagation(); setSize(s.key); }}
+              className={cn(
+                'flex-1 h-6 rounded-md border text-[10px] font-medium transition',
+                size === s.key
+                  ? 'bg-white/20 text-white border-white/30'
+                  : 'bg-transparent text-white/60 border-white/10 hover:bg-white/5',
+              )}
+            >
+              {s.label}
+            </button>
+          ))}
+        </div>
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            const idx = SIZE_PRESETS.findIndex((s) => s.key === size);
+            if (idx < SIZE_PRESETS.length - 1) setSize(SIZE_PRESETS[idx + 1].key);
+          }}
+          className="h-6 w-6 rounded-md border border-white/10 bg-white/5 text-white/70 hover:text-white hover:bg-white/10 flex items-center justify-center"
+          aria-label={_copy("copy.b05e2520a37f", { defaultValue: "Larger" })}
+        >
+          <Plus className="w-3 h-3" />
+        </button>
+      </div>
+      <div className="mt-2 rounded-md bg-black/50 border border-white/10 px-2 py-1.5 text-center">
+        <span
+          className="text-white font-medium"
+          style={{ fontSize: `${sizePx}px`, textShadow: '0 1px 2px rgba(0,0,0,0.8)' }}
+        >{_copy("copy.324b134f57c7", { defaultValue: "Preview" })}</span>
+      </div>
+    </div>
+  );
+
+  const searchBlock = (
+    <div className="p-2 border-b border-white/10">
+      <div className="relative">
+        <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-white/40" />
+        <Input
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder={_copy("copy.bd16bde755d6", { defaultValue: "Search language" })}
+          className="h-7 pl-7 text-xs bg-white/5 border-white/10 text-white placeholder:text-white/30"
+        />
+      </div>
+    </div>
+  );
+
+  const langList = (
+    <div className={cn('overflow-y-auto', isTouch ? 'max-h-[50vh]' : 'max-h-64')}>
+      {filteredLangs.map((l) => (
+        <button
+          key={l.code}
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            setLang(l.code);
+            if (!enabled) setEnabled(true);
+          }}
+          className={cn(
+            'w-full flex items-center justify-between px-3 py-2 text-xs hover:bg-white/5 transition',
+            lang === l.code ? 'text-white' : 'text-white/70',
+          )}
+        >
+          <span>{l.name}</span>
+          {lang === l.code && <Check className="w-3 h-3" />}
+        </button>
+      ))}
+      {filteredLangs.length === 0 && (
+        <p className="px-3 py-3 text-[11px] text-white/40 text-center">{_copy("copy.cd8d844d2c3d", { defaultValue: "No match" })}</p>
+      )}
+    </div>
+  );
+
+  // The trigger goes wherever the caller asked; the menu itself is portalled
+  // to the body by Radix either way, so moving the root costs nothing.
+  const mount = (node: React.ReactNode) =>
+    buttonPortalTarget ? createPortal(node, buttonPortalTarget) : node;
+
+  if (isTouch) {
+    return mount(
+      <>
+        {triggerButton}
+        <Drawer open={open} onOpenChange={setOpen}>
+          <DrawerContent glass hideHandle={false} className="px-0 pb-4 max-h-[85dvh]">
+            <DrawerTitle className="sr-only">{_copy("copy.0ee695bdeb26", { defaultValue: "Subtitles" })}</DrawerTitle>
+            <div onClick={(e) => e.stopPropagation()}>
+              {header}
+              {settingsBlock}
+              {searchBlock}
+              {langList}
+            </div>
+          </DrawerContent>
+        </Drawer>
+      </>
+    );
+  }
+
+  return mount(
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>{triggerButton}</PopoverTrigger>
+      <PopoverContent
+        align="start"
+        side="top"
+        sideOffset={6}
+        className="w-64 p-0 bg-black/80 backdrop-blur-[24px] border-white/10"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {header}
+        {settingsBlock}
+        {searchBlock}
+        {langList}
+      </PopoverContent>
+    </Popover>
+  );
+}

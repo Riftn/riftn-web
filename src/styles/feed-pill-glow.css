@@ -1,0 +1,98 @@
+/* Pull-to-refresh glow under the feed tab pill (FeedPillGlow).
+
+   A lit rim along the pill's bottom edge and a soft halo spilling into the gap
+   opened by the pull. --pull-glow (0 to 1) follows the pull; while the
+   feed refreshes, opacity keeps a slow, quiet pulse until the new posts land.
+   Each theme lights it in its own colour (--tint-accent). */
+
+html {
+  --pill-glow-color: color-mix(in srgb, var(--tint-accent) 60%, rgb(240 246 255));
+  --pill-glow-gain: 1;
+}
+html[data-theme='system'] { --pill-glow-color: rgb(228 240 255); }
+html[data-theme='minimal'] { --pill-glow-color: rgb(255 255 255); --pill-glow-gain: 0.6; }
+/* White light vanishes on a light page, so the light themes cast an ink shade. */
+html[data-theme='light'] { --pill-glow-color: rgb(11 11 13); --pill-glow-gain: 0.7; }
+html[data-system-tone="light"] { --pill-glow-color: rgb(11 11 13); --pill-glow-gain: 0.7; }
+
+[data-feed-pill-glow] {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  opacity: calc(var(--pill-glow-gain) * var(--pull-glow, 0));
+  will-change: opacity;
+  transition: opacity 420ms ease-out;
+}
+[data-feed-pill-glow][data-pulling] { transition: none; }
+[data-feed-pill-glow-light] {
+  position: absolute;
+  inset: 0;
+  animation: feed-pill-glow-breath 1.8s ease-in-out infinite alternate;
+  animation-play-state: paused;
+}
+[data-feed-pill-glow][data-refreshing] [data-feed-pill-glow-light] {
+  animation-play-state: running;
+}
+@keyframes feed-pill-glow-breath {
+  from { opacity: 1; }
+  to { opacity: .78; }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-feed-pill-glow] { transition: none; }
+  [data-feed-pill-glow-light] { animation: none; }
+}
+
+[data-feed-pill-glow-rim] {
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  top: -1.5px;
+  height: 1.5px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, transparent, var(--pill-glow-color) 22%, var(--pill-glow-color) 78%, transparent);
+  box-shadow: 0 1px 8px color-mix(in srgb, var(--pill-glow-color) 70%, transparent);
+}
+
+[data-feed-pill-glow-halo] {
+  position: absolute;
+  left: 4%;
+  right: 4%;
+  top: 0;
+  height: 34px;
+  background: radial-gradient(60% 100% at 50% 0%,
+    color-mix(in srgb, var(--pill-glow-color) 34%, transparent),
+    color-mix(in srgb, var(--pill-glow-color) 12%, transparent) 45%,
+    color-mix(in srgb, var(--pill-glow-color) 3%, transparent) 70%,
+    transparent 100%);
+}
+/* Light themes: the shade hangs from the pill's bottom line and only falls
+   downward, so none of it climbs onto the pill itself. */
+html[data-theme='light'] [data-feed-pill-glow-rim],
+html[data-system-tone="light"] [data-feed-pill-glow-rim] {
+  top: 0;
+  box-shadow: 0 2px 6px -1px color-mix(in srgb, var(--pill-glow-color) 45%, transparent);
+}
+html[data-theme='light'] [data-feed-pill-glow-halo],
+html[data-system-tone="light"] [data-feed-pill-glow-halo] {
+  top: 1.5px;
+}
+
+[data-feed-pull-rim] {
+  will-change: opacity;
+  transition: opacity 420ms ease-out;
+}
+[data-feed-pull-rim][data-pulling] { transition: none; }
+[data-feed-pull-echo] {
+  animation: feed-pull-echo 3571ms linear infinite;
+  animation-play-state: paused;
+}
+[data-feed-pull-echo][data-active] { animation-play-state: running; }
+@keyframes feed-pull-echo {
+  from { transform: translateY(0); opacity: 1; }
+  to { transform: translateY(var(--pull-echo-offset, 0px)); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-feed-pull-rim] { transition: none; }
+  [data-feed-pull-echo] { animation: none; }
+}

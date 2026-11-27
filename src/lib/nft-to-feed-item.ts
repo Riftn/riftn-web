@@ -1,0 +1,230 @@
+/**
+ * Shared NFT → FeedItem mapper
+ * Used by bookmarks, notifications, and anywhere we need to convert raw DeHubNFT to renderable feed cards.
+ */
+import { buildAvatarUrl, buildImageUrl, buildVideoUrl, buildHlsUrl, buildFeedImageUrls } from '@/lib/media-url';
+import { duetOfPost } from '@/lib/duet';
+import { formatDuration, formatViews, formatTimeAgo } from '@/lib/feed-utils';
+import type { DeHubNFT } from '@/lib/api/dehub';
+import { resolveDislikeCount, resolveLikeCount, resolveMyReaction, resolveReactionCounts, resolveViewCount } from '@/lib/engagement';
+import type { VideoItem, ImagePost, TextPost, FeedItem } from '@/types/feed.types';
+import { toStoryboard } from '@/lib/storyboard';
+import { storedVideoAspect, storedVideoSizeShown } from '@/lib/video-aspect';
+import { translateCopy as _translateCopy } from '@/i18n/copy';
+
+function detectPostType(nft: DeHubNFT): 'video' | 'image' | 'text' {
+  const postType = (nft.postType || nft.media_type) as string | undefined;
+  if (postType === 'video' || postType === 'feed-video' || nft.videoUrl) return 'video';
+  if (postType === 'image' || postType === 'feed-images' || nft.imageUrl || nft.imageUrls?.length) return 'image';
+  if (postType === 'feed-simple' || postType === 'feed-all' || postType === 'text') return 'text';
+  return 'text';
+}
+
+function mapNFTToVideoItem(nft: DeHubNFT): VideoItem {
+  const id = String(nft.tokenId);
+  const thumbnail = buildImageUrl(nft.tokenId, nft.imageUrl || nft.thumbnail_url);
+  const videoUrl = buildVideoUrl(nft.tokenId);
+  const channelAvatar = nft.minterAvatarUrl
+    ? buildAvatarUrl(nft.minter, nft.minterAvatarUrl) || 'user'
+    : 'user';
+
+  return {
+    id,
+    type: 'video',
+    articleSlug: (nft as any).articleSlug,
+    contentRating: nft.contentRating,
+    mediaDescriptions: nft.mediaDescriptions,
+    layout: nft.layout,
+    mediaCaptions: nft.mediaCaptions,
+    comicBorder: nft.comicBorder,
+    hideAssetCards: nft.hideAssetCards,
+    hiddenLinkPreviews: nft.hiddenLinkPreviews,
+    spoilerText: nft.spoilerText,
+    quotePolicy: nft.quotePolicy,
+    duetOf: duetOfPost(nft as any),
+    visibility: nft.visibility,
+    quoteRevoked: nft.quoteRevoked,
+    replyPolicy: nft.replyPolicy,
+    shopLinks: (nft as any).shopLinks,
+    shopListingCount: (nft as any).shopListingCount,
+    thumbnail,
+    videoUrl: videoUrl || nft.videoUrl || undefined,
+    hlsUrl: buildHlsUrl(nft.hlsUrl),
+    transcodingStatus: nft.transcodingStatus,
+    storyboard: toStoryboard(nft.storyboard),
+    storedAspect: storedVideoAspect(nft.videoInfo),
+    storedAspectShown: storedVideoSizeShown(nft.videoInfo),
+    duration: formatDuration(nft.videoDuration || nft.duration),
+    title: nft.name || nft.title || nft.description?.split('\n')[0] || '',
+    description: nft.description || undefined,
+    channel: nft.minterDisplayName || nft.minterUsername || nft.mintername || 'Unknown Creator',
+    channelAvatar,
+    verified: false,
+    views: formatViews(resolveViewCount(nft)),
+    uploadedAgo: formatTimeAgo(nft.createdAt || nft.created_at),
+    creatorId: nft.minter,
+    creatorUsername: nft.minterUsername || nft.mintername,
+    isLiked: nft.isLiked ?? false,
+    myReaction: resolveMyReaction(nft),
+    reactionCounts: resolveReactionCounts(nft),
+    likeCount: resolveLikeCount(nft),
+    dislikeCount: resolveDislikeCount(nft),
+    commentCount: nft.commentCount || nft.comment_count || 0,
+    isPPV: nft.is_ppv ?? false,
+    ppvPrice: nft.ppv_price,
+    ppvPreviewReady: nft.ppvPreview?.ready === true,
+    ppvCurrency: nft.ppv_currency || nft.streamInfo?.payPerViewTokenSymbol || 'DHB',
+    isW2E: nft.is_w2e ?? false,
+    isLocked: nft.is_locked ?? false,
+    lockedPrice: nft.locked_price,
+    lockedCurrency: nft.locked_currency || 'DHB',
+    lockedTokenAddress: nft.streamInfo?.lockContentContractAddress,
+    lockedChainId: nft.streamInfo?.lockContentChainIds?.[0],
+    subscriberPlans: (nft as any).plansDetails,
+    isOwner: nft.isOwner ?? false,
+    isUnlocked: nft.isUnlocked ?? false,
+    chainId: nft.chainId,
+    repostCount: (nft.totalReposts || nft.reposts || 0) + (nft.quotes || 0),
+    isReposted: nft.isReposted ?? false,
+    totalTips: nft.totalTips ?? 0,
+  };
+}
+
+function mapNFTToImagePost(nft: DeHubNFT): ImagePost {
+  const id = String(nft.tokenId);
+  const imageUrls = buildFeedImageUrls(nft.imageUrls, undefined, (nft as { imageSizes?: unknown }).imageSizes);
+  const image = imageUrls?.[0] || buildImageUrl(nft.tokenId, nft.imageUrl || nft.thumbnail_url);
+  const avatar = nft.minterAvatarUrl
+    ? buildAvatarUrl(nft.minter, nft.minterAvatarUrl) || 'user'
+    : 'user';
+
+  return {
+    id,
+    type: 'image',
+    articleSlug: (nft as any).articleSlug,
+    contentRating: nft.contentRating,
+    mediaDescriptions: nft.mediaDescriptions,
+    layout: nft.layout,
+    mediaCaptions: nft.mediaCaptions,
+    comicBorder: nft.comicBorder,
+    hideAssetCards: nft.hideAssetCards,
+    hiddenLinkPreviews: nft.hiddenLinkPreviews,
+    spoilerText: nft.spoilerText,
+    quotePolicy: nft.quotePolicy,
+    visibility: nft.visibility,
+    quoteRevoked: nft.quoteRevoked,
+    replyPolicy: nft.replyPolicy,
+    shopLinks: (nft as any).shopLinks,
+    shopListingCount: (nft as any).shopListingCount,
+    username: nft.minterDisplayName || nft.minterUsername || nft.mintername || 'unknown',
+    verified: false,
+    avatar,
+    image,
+    imageUrls,
+    title: nft.name || nft.title,
+    description: nft.description,
+    likes: resolveLikeCount(nft),
+    dislikes: resolveDislikeCount(nft),
+    caption: nft.description || nft.name || '',
+    comments: nft.commentCount || nft.comment_count || 0,
+    views: formatViews(resolveViewCount(nft)).replace(' views', ''),
+    timeAgo: formatTimeAgo(nft.createdAt || nft.created_at),
+    creatorId: nft.minter,
+    creatorUsername: nft.minterUsername || nft.mintername,
+    isLiked: nft.isLiked ?? false,
+    myReaction: resolveMyReaction(nft),
+    reactionCounts: resolveReactionCounts(nft),
+    isPPV: nft.is_ppv || nft.streamInfo?.isPayPerView || false,
+    ppvPrice: nft.ppv_price || nft.streamInfo?.payPerViewAmount,
+    ppvCurrency: nft.ppv_currency || nft.streamInfo?.payPerViewTokenSymbol || 'DHB',
+    isW2E: nft.is_w2e || nft.streamInfo?.isAddBounty || false,
+    isLocked: nft.is_locked || nft.streamInfo?.isLockContent || false,
+    lockedPrice: nft.locked_price || nft.streamInfo?.lockContentAmount,
+    lockedCurrency: nft.locked_currency || nft.streamInfo?.lockContentTokenSymbol || 'DHB',
+    lockedTokenAddress: nft.streamInfo?.lockContentContractAddress,
+    lockedChainId: nft.streamInfo?.lockContentChainIds?.[0],
+    subscriberPlans: (nft as any).plansDetails,
+    bountyViews: nft.streamInfo?.addBountyFirstXViewers != null ? Number(nft.streamInfo.addBountyFirstXViewers) : undefined,
+    bountyComments: nft.streamInfo?.addBountyFirstXComments != null ? Number(nft.streamInfo.addBountyFirstXComments) : undefined,
+    bountyAmount: nft.streamInfo?.addBountyAmount,
+    bountyCurrency: nft.streamInfo?.addBountyTokenSymbol || 'DHB',
+    isOwner: nft.isOwner ?? false,
+    isUnlocked: nft.isUnlocked ?? false,
+    chainId: nft.chainId,
+    repostCount: (nft.totalReposts || nft.reposts || 0) + (nft.quotes || 0),
+    isReposted: nft.isReposted ?? false,
+    totalTips: nft.totalTips ?? 0,
+  };
+}
+
+function mapNFTToTextPost(nft: DeHubNFT): TextPost {
+  const id = String(nft.tokenId);
+  const avatarUrl = nft.minterAvatarUrl
+    ? buildAvatarUrl(nft.minter, nft.minterAvatarUrl) || nft.minter
+    : nft.minter;
+
+  return {
+    id,
+    type: 'post',
+    articleBody: nft.articleBody,
+    title: nft.articleBody ? (nft.name || '').trim() || undefined : undefined,
+    articleSlug: (nft as any).articleSlug,
+    articleImageUrl: nft.articleImageUrl ? buildFeedImageUrls([nft.articleImageUrl])?.[0] : undefined,
+    contentRating: nft.contentRating,
+    mediaDescriptions: nft.mediaDescriptions,
+    layout: nft.layout,
+    mediaCaptions: nft.mediaCaptions,
+    comicBorder: nft.comicBorder,
+    hideAssetCards: nft.hideAssetCards,
+    hiddenLinkPreviews: nft.hiddenLinkPreviews,
+    spoilerText: nft.spoilerText,
+    quotePolicy: nft.quotePolicy,
+    visibility: nft.visibility,
+    quoteRevoked: nft.quoteRevoked,
+    replyPolicy: nft.replyPolicy,
+    shopLinks: (nft as any).shopLinks,
+    shopListingCount: (nft as any).shopListingCount,
+    author: {
+      id: nft.minter,
+      name: nft.minterDisplayName || nft.minterUsername || nft.mintername || _translateCopy('copy.b764cdc0eab7', { defaultValue: 'Unknown' }),
+      handle: nft.minterUsername || nft.mintername || nft.minter,
+      avatarSeed: avatarUrl,
+      verified: false,
+    },
+    content: nft.articleBody ? (nft.description || '').trim() : nft.description || nft.name || '',
+    createdAt: nft.createdAt || nft.created_at || (nft as any).mintedAt || (nft as any).minted_at || (nft as any).updatedAt || (nft as any).updated_at || '',
+    views: formatViews(resolveViewCount(nft)).replace(' views', ''),
+    stats: {
+      comments: nft.commentCount || nft.comment_count || 0,
+      reposts: (nft.totalReposts || nft.reposts || 0) + (nft.quotes || 0),
+      likes: resolveLikeCount(nft),
+      dislikes: resolveDislikeCount(nft),
+    },
+    isLiked: nft.isLiked ?? false,
+    isDisliked: nft.isDisliked ?? false,
+    myReaction: resolveMyReaction(nft),
+    reactionCounts: resolveReactionCounts(nft),
+    isReposted: nft.isReposted ?? false,
+    isLocked: nft.is_locked ?? false,
+    lockedPrice: nft.locked_price,
+    lockedCurrency: nft.locked_currency || 'DHB',
+    lockedTokenAddress: nft.streamInfo?.lockContentContractAddress,
+    lockedChainId: nft.streamInfo?.lockContentChainIds?.[0],
+    subscriberPlans: (nft as any).plansDetails,
+    isOwner: nft.isOwner ?? false,
+    isUnlocked: nft.isUnlocked ?? false,
+    totalTips: nft.totalTips ?? 0,
+  };
+}
+
+export function mapNFTToFeedItem(nft: DeHubNFT): FeedItem {
+  const contentType = detectPostType(nft);
+  switch (contentType) {
+    case 'video':
+      return mapNFTToVideoItem(nft);
+    case 'image':
+      return mapNFTToImagePost(nft);
+    default:
+      return mapNFTToTextPost(nft);
+  }
+}

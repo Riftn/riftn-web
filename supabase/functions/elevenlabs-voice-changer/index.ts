@@ -1,0 +1,114 @@
+/**
+ * Voice changer (speech to speech).
+ *
+ * Re-performs an uploaded recording in a different voice, keeping the original
+ * delivery, timing and emotion. Multipart in, raw audio out.
+ *
+ * Paid: the client settles DHB before calling this, so an upload the provider
+ * would reject has to be caught in the composer while it is still free.
+ *
+ * The settlement is not yet verified here — see the guard below.
+ */
+import {
+  audioResponse,
+  corsHeaders,
+  errorResponse,
+  getApiKey,
+  num,
+  readProviderError,
+  readUpload, ownElevenLabsFailure } from '../_shared/elevenlabs.ts';
+import { chargeForJob } from '../_shared/ai-payment-guard.ts';
+import { refuseForeignVoice } from '../_shared/voice-ownership.ts';
+
+const MAX_UPLOAD_BYTES = 100 * 1024 * 1024;
+
+Deno.serve(async (req) => {
+  if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
+
+  // Authenticated and rate-limited, not yet priced. What this bills for is the
+  // DURATION of the upload, and the duration is the one thing that cannot be
+  // established here: a caller-declared length is worth nothing, and file size
+  // does not bound it either, because a low-bitrate recording is long and small
+  // at the same time. Charging on either would price a two-hour job as a
+  // one-minute one.
+  //
+  // So the door closes now and the meter follows. TOOL_COST_USD already carries
+  // the per-minute basis, so pricing this is deleting `free` and passing a
+  // server-measured `quantity`.
+  const charged = await chargeForJob(req, {
+    kind: 'tool',
+    ownKeyProvider: 'elevenlabs',
+    modelId: 'elevenlabs-voice-changer',
+    actionType: 'elevenlabs-voice-changer',
+    rateLimit: { limit: 15, windowMs: 60 * 60 * 1000 },
+    free: true,
+  });
+  if (!charged.ok) return charged.response;
+
+  try {
+    const apiKey = charged.ownKey ?? getApiKey();
+    if (!apiKey) return errorResponse('ElevenLabs API key not configured', 500);
+
+    const upload = await readUpload(req);
+    if (!upload) return errorResponse('An audio file is required');
+    const { file, form } = upload;
+
+    if (file.size > MAX_UPLOAD_BYTES) {
+      return errorResponse('That recording is over 100 MB. Use a shorter or smaller file.');
+    }
+
+    const voiceId = form.get('voiceId');
+    if (!voiceId || typeof voiceId !== 'string') {
+      return errorResponse('voiceId is required');
+    }
+
+    // The sharpest of the three: this re-performs a real recording in the
+    // chosen voice, so a borrowed clone here produces someone saying whatever
+    // was uploaded, in their own delivery.
+    const foreign = await refuseForeignVoice([voiceId], charged.wallet);
+    if (foreign) return foreign;
+
+    const outbound = new FormData();
+    outbound.append('audio', file, file.name || 'input.mp3');
+    outbound.append('model_id', 'eleven_multilingual_sts_v2');
+    // Noise removal defaults ON. A phone recording with room tone behind it is
+    // the common case, and the tone is otherwise re-performed as part of the
+    // take rather than stripped.
+    outbound.append('remove_background_noise', String(form.get('removeNoise') !== 'false'));
+
+    const settings = {
+      stability: num(form.get('stability'), 0, 1, 0.5),
+      similarity_boost: num(form.get('similarity'), 0, 1, 0.75),
+      style: num(form.get('style'), 0, 1, 0),
+      use_speaker_boost: form.get('speakerBoost') !== 'false',
+    };
+    outbound.append('voice_settings', JSON.stringify(settings));
+
+    const format = form.get('outputFormat') === 'pcm_44100' ? 'pcm_44100' : 'mp3_44100_128';
+
+    const response = await fetch(
+      `https://api.elevenlabs.io/v1/speech-to-speech/${voiceId}?output_format=${format}`,
+      {
+        method: 'POST',
+        headers: { 'xi-api-key': apiKey },
+        body: outbound,
+      },
+    );
+
+    if (!response.ok) {
+
+      if (charged.ownKey) { const own = await ownElevenLabsFailure(charged.wallet, response); if (own) return own; }
+      const errText = await response.text();
+      console.error('ElevenLabs voice-changer error:', response.status, errText);
+      return errorResponse(readProviderError(errText, 'Voice conversion failed'), 502);
+    }
+
+    return audioResponse(
+      await response.arrayBuffer(),
+      format === 'pcm_44100' ? 'audio/wav' : 'audio/mpeg',
+    );
+  } catch (err) {
+    console.error('elevenlabs-voice-changer error:', err);
+    return errorResponse('Internal server error', 500);
+  }
+});

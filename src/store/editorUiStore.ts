@@ -1,0 +1,76 @@
+import { DEFAULT_PEN, type PenSettings } from "@/lib/editor/freehand";
+/**
+ * Editor shell state.
+ * ===================
+ * Which side panel is open, and whether the inspector is showing. Kept out of
+ * editorStore so opening a panel never lands in the undo history.
+ */
+import { create } from 'zustand';
+import type { GenerationDraft } from '@/lib/editor/generationDraft';
+
+export type EditorPanel = 'agent' | 'design' | 'elements' | 'layers' | 'assets' | 'media' | 'text' | 'captions' | 'generate' | 'library' | 'inspector';
+
+/** A generation the AI agent prepared; the Generate panel shows it for the user to confirm. */
+export type GeneratePrefill = GenerationDraft;
+
+interface EditorUiState {
+  /** Open panel, or null when the rail is collapsed to give the canvas room. */
+  panel: EditorPanel | null;
+  /** Inspector visibility on wide screens. It opens itself on selection. */
+  inspectorOpen: boolean;
+  setPanel: (panel: EditorPanel | null) => void;
+  togglePanel: (panel: EditorPanel) => void;
+  setInspectorOpen: (open: boolean) => void;
+  /** Timeline visibility. Photo and graphic designs rarely need it. */
+  timelineOpen: boolean;
+  setTimelineOpen: (open: boolean) => void;
+  /**
+   * True after the last click landed on the canvas. Arrow keys then nudge the
+   * selected layer instead of moving the playhead.
+   */
+  canvasFocus: boolean;
+  setCanvasFocus: (focus: boolean) => void;
+  generatePrefill: GeneratePrefill | null;
+  setGeneratePrefill: (prefill: GeneratePrefill | null) => void;
+  generatorWindow: 'closed' | 'open' | 'minimized';
+  setGeneratorWindow: (state: 'closed' | 'open' | 'minimized') => void;
+  /** Freehand drawing: while set, dragging on the canvas draws instead of selecting. */
+  draw: PenSettings | null;
+  lastPen: PenSettings;
+  setDraw: (draw: PenSettings | null) => void;
+  /** Which inspector tab shows for a selected layer. */
+  inspectorTab: 'layer' | 'motion';
+  setInspectorTab: (tab: 'layer' | 'motion') => void;
+  /**
+   * Record mode: while on, changing a layer's placement with the playhead
+   * inside it creates keyframes instead of a new static value.
+   */
+  recordMotion: boolean;
+  setRecordMotion: (on: boolean) => void;
+}
+
+export const useEditorUiStore = create<EditorUiState>((set) => ({
+  panel: 'design',
+  inspectorOpen: true,
+  timelineOpen: false,
+  setTimelineOpen: (timelineOpen) => set({ timelineOpen }),
+  canvasFocus: false,
+  setCanvasFocus: (canvasFocus) => set({ canvasFocus }),
+  draw: null,
+  lastPen: { ...DEFAULT_PEN },
+  setDraw: (draw) => set(draw ? { draw, lastPen: { ...draw, dash: draw.dash ? [...draw.dash] : undefined } } : { draw }),
+  inspectorTab: 'layer',
+  setInspectorTab: (inspectorTab) => set({ inspectorTab }),
+  recordMotion: false,
+  setRecordMotion: (recordMotion) => set({ recordMotion }),
+  generatePrefill: null,
+  generatorWindow: 'closed',
+  setGeneratorWindow: (generatorWindow) => set({ generatorWindow }),
+  setGeneratePrefill: (generatePrefill) => set({ generatePrefill }),
+  setPanel: (panel) => set({ panel }),
+  togglePanel: (panel) => set((s) => ({ panel: s.panel === panel ? null : panel })),
+  setInspectorOpen: (inspectorOpen) => set({ inspectorOpen }),
+}));
+
+/** Options for placementPatchAt that honour record mode. */
+export const recordOpts = () => ({ record: useEditorUiStore.getState().recordMotion });

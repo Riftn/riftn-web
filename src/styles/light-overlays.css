@@ -1,0 +1,93 @@
+/* Light themes (System Light and Minimal Light): sheets, drawers, dialogs and
+   the dim behind them.
+
+   The shared float glass is thin enough on light that a dark video or photo
+   under a sheet smeared through it as grey blobs and streaks, and the dim
+   behind a sheet was a 5% wash, so sheets had no edge against the page. On
+   light these large surfaces get a heavier pale tint with less colour pulled
+   through, a real dim behind them, and a soft upward shadow. Bars, pills,
+   toasts and menus keep the shared glass. Dark themes are not touched. */
+
+html:is([data-theme='light'], [data-system-tone='light']) {
+  --light-sheet: rgb(255 255 255 / 0.94);
+  --light-sheet-blur: blur(30px) saturate(115%);
+  --light-scrim: rgb(17 17 20 / 0.2);
+  --light-scrim-strong: rgb(17 17 20 / 0.28);
+  --light-sheet-shadow: 0 -1px 0 rgb(17 17 20 / 0.06), 0 -14px 44px rgb(17 17 20 / 0.12);
+  --light-card-shadow: 0 0 0 1px rgb(17 17 20 / 0.06), 0 24px 64px rgb(17 17 20 / 0.18);
+}
+html[data-theme='light'] {
+  --light-sheet: rgb(249 248 244 / 0.95);
+}
+@media (prefers-reduced-transparency: reduce) {
+  html:is([data-theme='light'], [data-system-tone='light']) { --light-sheet: rgb(255 255 255); }
+  html[data-theme='light'] { --light-sheet: rgb(249 248 244); }
+}
+
+/* Bottom sheets and side drawers. */
+html:is([data-theme='light'], [data-system-tone='light']):not(#_):not(#_):not(#_) [data-vaul-drawer]:not([data-keep-dark]):not(.bg-transparent),
+html:is([data-theme='light'], [data-system-tone='light']):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-vaul-drawer][data-notifications-drawer] {
+  background-color: var(--light-sheet) !important;
+  backdrop-filter: var(--light-sheet-blur) !important;
+}
+html:is([data-theme='light'], [data-system-tone='light']):not(#_):not(#_):not(#_) [data-vaul-drawer][data-vaul-drawer-direction='bottom']:not([data-keep-dark]):not(.bg-transparent) {
+  box-shadow: var(--light-sheet-shadow) !important;
+}
+/* Light drawer actions use their fill and text without a resting outline. */
+html:is([data-theme='light'], [data-system-tone='light']) [data-vaul-drawer]
+  :is(button, [role='button']):not([data-keep-dark], [data-keep-dark] *, [role='switch'], [role='checkbox'], [role='radio']):not(#_):not(#_):not(#_):not(#_):not(:focus-visible) {
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+/* The comments half-sheet has no dim behind it (the post stays in view above),
+   so on a white feed its edge has to carry it: a firmer hairline and a tight
+   lift that stays within a few pixels of the sheet, far below the top pill. */
+html:is([data-theme='light'], [data-system-tone='light']) [data-comments-split] {
+  background: var(--light-sheet);
+  backdrop-filter: var(--light-sheet-blur);
+  border-top-color: rgb(17 17 20 / 0.14);
+  box-shadow: 0 -6px 18px rgb(17 17 20 / 0.08);
+}
+
+/* Dialog cards. */
+html:is([data-theme='light'], [data-system-tone='light']):not(#_):not(#_)
+  :is([role='dialog'], [role='alertdialog'])[class*='bg-']:not(.bg-transparent):not([data-keep-dark]):not([data-vaul-drawer]):not([data-login-modal]):not([data-ai-chat]) {
+  background-color: var(--light-sheet) !important;
+  backdrop-filter: var(--light-sheet-blur) !important;
+}
+
+/* The dim behind sheets and dialogs. */
+html:is([data-theme='light'], [data-system-tone='light']):not(#_):not(#_) [data-vaul-overlay]:not(:has(+ [data-notifications-drawer])):not(:has(+ [data-keep-dark])) {
+  background-color: var(--light-scrim) !important;
+  background-image: none !important;
+  backdrop-filter: none !important;
+}
+html:is([data-theme='light'], [data-system-tone='light']):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-vaul-overlay]:has(+ [data-notifications-drawer]) {
+  background-color: rgb(17 17 20 / 0.12) !important;
+}
+html:is([data-theme='light'], [data-system-tone='light']):not(#_):not(#_) body > [data-state][class~='fixed'][class~='inset-0'][class*='bg-black/']:not([role]):not([data-vaul-overlay]):not([data-keep-dark]):not(.login-modal-overlay) {
+  background-color: var(--light-scrim-strong) !important;
+  backdrop-filter: blur(6px) !important;
+}
+
+/* Hand-built pop-ups (survey, what's new, group call, drop zone...): the dark
+   scrim was repainted as a solid white page on System Light and a 5% wash on
+   Minimal Light. Same dim as the dialogs; their card gets an edge. Photo
+   viewers (/90 and up) keep their own room. */
+html:is([data-theme='light'], [data-system-tone='light']):not(#_):not(#_):not(#_):not(#_)
+  [class~='fixed'][class~='inset-0']:is([class~='bg-black/50'], [class~='bg-black/55'], [class~='bg-black/60'], [class~='bg-black/70'], [class~='bg-black/80']):not([data-state]):not([data-keep-dark]):not([data-media-full]):not([data-vaul-overlay]) {
+  background-color: var(--light-scrim-strong) !important;
+  backdrop-filter: blur(6px) !important;
+}
+html:is([data-theme='light'], [data-system-tone='light']):not(#_):not(#_):not(#_):not(#_)
+  [class~='fixed'][class~='inset-0']:is([class~='bg-black/50'], [class~='bg-black/55'], [class~='bg-black/60'], [class~='bg-black/70'], [class~='bg-black/80']):not([data-state]):not([data-keep-dark]):not([data-media-full]) > :is([class*='bg-zinc-9'], [class*='bg-black'], [class*='bg-background'], [class*='bg-card']):not([data-keep-dark]) {
+  box-shadow: var(--light-card-shadow) !important;
+}
+
+/* Settings > Appearance > After you sign in: the cards play each arrival on
+   their own dark preview well, so the marks stay drawn there (the full-screen
+   arrival hides them on light). */
+html:is([data-theme='light'], [data-system-tone='light']) .arrival-look-preview .signin-rift__stage {
+  visibility: visible;
+}

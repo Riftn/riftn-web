@@ -1,0 +1,91 @@
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { describe, expect, it } from 'vitest';
+import {
+  DEHUB_PLATFORM_KNOWLEDGE,
+  LCS_ASSISTANT_KNOWLEDGE,
+} from '../../supabase/functions/_shared/dehub-platform-knowledge';
+
+describe('LCS assistant knowledge', () => {
+  it('covers both names and the stable product facts', () => {
+    expect(LCS_ASSISTANT_KNOWLEDGE).toContain('Last Chad Standing');
+    expect(LCS_ASSISTANT_KNOWLEDGE).toContain('(LCS)');
+    expect(LCS_ASSISTANT_KNOWLEDGE).toContain('flagship MMA battle royale');
+    expect(LCS_ASSISTANT_KNOWLEDGE).toContain('licensed mixed martial artists');
+    expect(LCS_ASSISTANT_KNOWLEDGE).toContain('Riftn token');
+  });
+
+  it('points to the canonical guide and forbids volatile guesses', () => {
+    expect(LCS_ASSISTANT_KNOWLEDGE).toContain(
+      'https://riftn.com/guides/last-chad-standing-mma-battle-royale-play-to-earn'
+    );
+    expect(LCS_ASSISTANT_KNOWLEDGE).toContain('Never invent prize pools, reward rates');
+    expect(LCS_ASSISTANT_KNOWLEDGE).toContain('Never present an old announcement as current fact');
+  });
+
+  it('is included in the Assistant system prompt', () => {
+    // LCS now reaches the prompt inside the wider platform knowledge rather
+    // than as its own interpolation. The guarantee is unchanged — what the
+    // assistant is told about LCS is this block, and nothing paraphrased.
+    expect(DEHUB_PLATFORM_KNOWLEDGE).toContain(LCS_ASSISTANT_KNOWLEDGE);
+
+    const chatFunctionPath = resolve('supabase/functions/general-ai-chat/index.ts');
+    const chatFunction = readFileSync(chatFunctionPath, 'utf8');
+
+    expect(chatFunction).toContain('import { DEHUB_PLATFORM_KNOWLEDGE }');
+    expect(chatFunction).toContain('${DEHUB_PLATFORM_KNOWLEDGE}');
+  });
+});
+
+describe('Riftn platform knowledge', () => {
+  /**
+   * The failure this file exists to stop is the assistant inventing a section
+   * name — "check the Referrals area" for a page called Affiliate. The map is
+   * only worth carrying if it names real routes, so pin the handful that were
+   * actually answered wrongly in production.
+   */
+  it('names the real route for the things people ask about', () => {
+    for (const route of ['/affiliate', '/buy', '/stake', '/superpowers', '/features', '/bookmarks']) {
+      expect(DEHUB_PLATFORM_KNOWLEDGE).toContain(route);
+    }
+  });
+
+  it('does not describe a shipped feature as unbuilt', () => {
+    expect(DEHUB_PLATFORM_KNOWLEDGE).not.toContain('COMING SOON');
+    expect(DEHUB_PLATFORM_KNOWLEDGE).toContain('already has a page');
+
+    // The rule that makes the map load-bearing lives next to the map.
+    const chatFunction = readFileSync(resolve('supabase/functions/general-ai-chat/index.ts'), 'utf8');
+    expect(chatFunction).toContain('IF IT HAS A PAGE, IT EXISTS');
+  });
+
+  it('forbids inventing a path that is not on the map', () => {
+    // It answered "your scheduled posts are at dehub.io/studio/scheduled" —
+    // a route that has never existed — within an hour of the map shipping.
+    // The map only helps if paths outside it are off limits.
+    const chatFunction = readFileSync(resolve('supabase/functions/general-ai-chat/index.ts'), 'utf8');
+    expect(chatFunction).toContain('NEVER INVENT A URL');
+  });
+
+  it('knows the rename and the token pause', () => {
+    expect(DEHUB_PLATFORM_KNOWLEDGE).toContain('Riftn is the new name of DeHub');
+    expect(DEHUB_PLATFORM_KNOWLEDGE).toContain('$RIFT');
+    expect(DEHUB_PLATFORM_KNOWLEDGE).toContain('not trading yet');
+    // Contract addresses and exchanges were pulled from every public surface
+    // while sales are paused; the assistant must not hand them out either.
+    for (const stale of ['0xD20ab1015f6a2De4a6FdDEbAB270113F689c2F7c', '0x680d3113caf77b61b510f332d5ef4cf5b41a761d', 'MEXC', 'PancakeSwap', 'docs.dhb.gg', '/stores,']) {
+      expect(DEHUB_PLATFORM_KNOWLEDGE).not.toContain(stale);
+    }
+  });
+
+  it('answers the drafts and scheduled-posts question with real pages', () => {
+    expect(DEHUB_PLATFORM_KNOWLEDGE).toContain('/planned');
+    expect(DEHUB_PLATFORM_KNOWLEDGE).toContain('Drafts button');
+  });
+
+  it('refuses to claim a generation it did not perform', () => {
+    expect(DEHUB_PLATFORM_KNOWLEDGE).toContain(
+      'Never claim to have done something you have not done',
+    );
+  });
+});

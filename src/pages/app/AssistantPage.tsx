@@ -1,0 +1,3631 @@
+import { translateCopy as _translateCopy } from '@/i18n/copy';
+import { useAssistantPrefs } from '@/hooks/use-assistant-prefs';
+import { useTranslation as _useCopy } from 'react-i18next';
+import { useAccountDraftKey, useDraftState } from '@/hooks/use-draft-state';
+import { withWalletHeader } from '@/lib/supabase-wallet-client';
+import { useVideoDownload } from "@/hooks/use-video-download";
+import { lockBodyScroll } from '@/lib/body-scroll-lock';
+/**
+ * AI Assistant Page
+ * =================
+ * Dedicated page for the AI assistant with side panels.
+ * Auto-detects when to search the web for live content.
+ * Supports image generation and video generation with model selection.
+ * 
+ * RULE: All AI responses MUST be rendered through MarkdownText
+ * to ensure proper formatting (bold, italic, lists, etc.)
+ */
+
+import { BrandIcon, ThemedIcon, type ThemeIconKey } from '@/components/app/war/WarHudIcon';
+import { LiquidOrb, type LiquidOrbMode } from '@/components/app/assistant/LiquidOrb';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { PILL_ACTION_CLASS, PILL_LEAD_ICON, PILL_ROW, PILL_TEXT, usePhonePill } from '@/components/app/page-kit/PageKit';
+import { useState, useRef, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
+import { useTranslation as useI18n } from 'react-i18next';
+import { Loader2, ChevronDown, ImageIcon, XCircle, Zap, AudioLines, LifeBuoy, ArrowDown } from "lucide-react";
+import Sparkles from "@/components/ui/cut-icons/assistant";
+import Copy from "@/components/ui/cut-icons/copy";
+import Paperclip from "@/components/ui/cut-icons/attach";
+import Video from "@/components/ui/cut-icons/video";
+import Volume2 from "@/components/ui/cut-icons/volume";
+import VolumeX from "@/components/ui/cut-icons/mute";
+import LayoutDashboard from "@/components/ui/cut-icons/command";
+import Check from "@/components/ui/cut-icons/check";
+import Lock from "@/components/ui/cut-icons/privacy";
+import History from "@/components/ui/cut-icons/history";
+
+import Send from "@/components/ui/cut-icons/send";
+import X from "@/components/ui/cut-icons/close";
+import More from "@/components/ui/cut-icons/more";
+import Plus from "@/components/ui/cut-icons/add";
+import Settings from "@/components/ui/cut-icons/settings";
+import Download from "@/components/ui/cut-icons/download";
+
+import { useLocation, useNavigate } from 'react-router-dom';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { toast } from 'sonner';
+import { useVoiceChat } from '@/hooks/use-voice-chat';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { useUserLanguage } from '@/hooks/use-user-language';
+import { useMention } from '@/hooks/use-mention';
+import { useAuth } from '@/contexts/AuthContext';
+import { useAppTheme } from '@/contexts/ThemeContext';
+import { cn } from '@/lib/utils';
+import dehubLogo from '@/assets/riftn-logo-white.png';
+import dehubLogoCompact from '@/assets/dehub-logo-compact.png';
+import { ASSISTANT_AVATAR as assistantAvatar } from '@/lib/assistant';
+import aiSparkleIcon from '@/assets/icons/ai-sparkle-icon.png';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
+import { supabase } from '@/integrations/supabase/client';
+import { invokeAi, dehubAuthHeaders } from '@/lib/ai-invoke';
+import { isImageProviderUnavailable } from '@/lib/image-provider-error';
+import { createLogger } from '@/lib/logger';
+import { fetchJobQuote, formatDhb } from '@/hooks/use-ai-quote';
+import { payForJob } from '@/lib/ai-payment';
+import {
+  detectAiToolRequest,
+  isDeHubBrandedImageRequest,
+  requiresImageGeneration,
+  requiresLogoAsset,
+  requiresVideoGeneration,
+} from '@/lib/ai-intent';
+import { SEOHead } from '@/components/SEOHead';
+import { MarkdownText } from '@/lib/markdown';
+import { AssistantActionCard } from '@/components/app/assistant/AssistantActionCard';
+import { assistantActionIds, withoutAssistantActionLinks } from '@/lib/assistant-action-links';
+import { isRequestBoardCommand } from '@/lib/feature-prompt';
+
+import { AI_ASSISTANT_STYLE_OPTIONS } from '@/constants/ai-styles.constants';
+import { VIDEO_MODELS, VIDEO_MODEL_OPTIONS, type VideoModelKey, type VideoModel } from '@/constants/video-models.constants';
+import { IMAGE_MODELS, IMAGE_MODEL_OPTIONS, type ImageModelKey } from '@/constants/image-models.constants';
+import { VOICE_PREFERENCES, VOICE_PREFERENCE_OPTIONS, type VoicePreferenceKey } from '@/constants/voice-models.constants';
+import { ElevenLabsVoicePicker } from '@/components/app/shared/ElevenLabsVoicePicker';
+import { VoiceTrainingDrawer } from '@/components/app/shared/VoiceTrainingDrawer';
+import { CHAT_MODEL_OPTIONS, type ChatModelKey } from '@/constants/chat-models.constants';
+import { PostModal } from '@/features/post';
+import { getBadgeName } from '@/lib/staking-badges';
+import { VideoPaywallModal, type VideoGenerationOptions } from '@/components/app/video/VideoPaywallModal';
+import { ImagePaywallModal } from '@/components/app/image/ImagePaywallModal';
+import { AiToolPaywallModal } from '@/components/app/ai-tools/AiToolPaywallModal';
+import { AI_TOOL_MODELS, type AiToolCategory, type AiToolModel } from '@/constants/ai-tools.constants';
+import { OverviewTab } from '@/components/app/command-centre';
+import { AuthPrompt } from '@/components/app/AuthPrompt';
+import { useUserSkills, incrementSkillUsage, type UserSkill } from '@/hooks/use-user-skills';
+import { matchSkill, extractSlashSkill } from '@/lib/skills/matchTriggerPhrases';
+import { SlashSkillDropdown, filterSkills } from '@/components/app/skills/SlashSkillDropdown';
+import { SkillsBrowserModal } from '@/components/app/skills/SkillsBrowserModal';
+import { useUserCharacters, incrementCharacterUsage } from '@/hooks/use-user-characters';
+import { parseCharacterMentions, buildCharacterPersonaBlock } from '@/lib/characters/parseCharacterMentions';
+import { AuthGate } from '@/components/app/AuthGate';
+import { UserMentionDropdown, type MentionUser } from '@/components/app/mentions';
+import { ConversationHistoryDrawer } from '@/components/app/assistant/ConversationHistoryDrawer';
+import { GeneratedAudioPlayer } from '@/components/app/assistant/GeneratedAudioPlayer';
+import { MusicConfirmDialog, type MusicParams } from '@/components/app/assistant/MusicConfirmDialog';
+import { PosterConfigDialog, type PosterConfig } from '@/components/app/assistant/PosterConfigDialog';
+import { SkillsHubModal } from '@/components/app/assistant/SkillsHubModal';
+import { SupportTicketDrawer, useMySupportTickets } from '@/components/app/assistant/SupportTicketDrawer';
+import { SwapActionCard } from '@/components/app/chat/SwapActionCard';
+import { useAIConversation } from '@/hooks/use-ai-conversation';
+import { streamChat } from '@/lib/stream-chat';
+import { useVoiceAssistant } from '@/hooks/use-voice-assistant';
+import { AiToolProcessingSkeleton } from '@/components/app/assistant/AiToolProcessingSkeleton';
+import { useAssistantUserContext } from '@/hooks/use-assistant-user-context';
+import { LiquidGlassBubble } from '@/components/ui/liquid-glass-bubble';
+import { LiquidGlassBubble2 } from '@/components/ui/liquid-glass-bubble-2';
+import { speechText } from '@/lib/speech-text';
+
+import { formatCount } from '@/lib/format-count';
+const imageGenLogger = createLogger('AssistantPage.imageGen');
+
+const DEHUB_BRAND_IMAGE_MODEL: ImageModelKey = 'gemini-3.1-flash-image';
+
+// Simulation data for token transactions
+interface SimulationData {
+  txHash: string;
+  amount: string;
+  recipient?: string;
+  token: string;
+  timestamp: string;
+}
+
+interface SwapAction {
+  tokenIn: string;
+  tokenOut: string;
+  tokenInSymbol: string;
+  tokenOutSymbol: string;
+  amount: string;
+  amountType: 'input' | 'output';
+}
+
+interface Message {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  imageUrl?: string;       // For generated/edited images in responses
+  videoUrl?: string;       // For generated videos
+  audioUrl?: string;       // For generated audio (music/TTS)
+  attachedImage?: string;  // For user-attached images to edit
+  isVideoGenerating?: boolean;
+  videoPredictionId?: string;
+  isToolProcessing?: boolean;   // For async AI tool processing
+  toolRequestId?: string;       // fal.ai request ID for polling
+  toolAppId?: string;           // fal.ai app ID for polling
+  toolType?: string;            // tool identifier
+  isSimulation?: boolean;  // For transaction simulations
+  simulationType?: 'transfer' | 'purchase';
+  simulationData?: SimulationData;
+  simulationStatus?: 'pending' | 'approved' | 'rejected';
+  isError?: boolean;
+  swapAction?: SwapAction;
+}
+
+function buildDeHubBrandPrompt(userRequest: string): string {
+  return `RIFTN BRAND SYSTEM — "SM Template 2.0" (mandatory):
+- The attached image is the official Riftn wordmark. Composite it prominently, crisp, unaltered, pure white, with clear space around it. Do not redraw, recolor, gradient-fill, warp, or replace it.
+- Palette: STRICTLY monochrome. Black and charcoal grounds, brushed-steel and polished-chrome greys, cool off-whites, pure white highlights. NO colour hues at all — no red, orange, yellow, magenta, purple, green, blue, teal — and no neon or tinted ambient glow. Any ambient tint must read as cool near-white, under 10% saturation.
+- Ground: never flat black. Silk / brushed texture with a soft radial vignette, faint starfield dust, and a very faint dotted lattice that rakes across the frame — strongest at the upper-left light catch, gone by the lower-right.
+- Hero: ONE large photoreal chrome or black-metal object matched to the subject matter, lit from the upper-left, radial white glow behind it, deep drop shadow, bleeding off the RIGHT and BOTTOM edges of the frame. Never centred and contained, never clipped at the top, never a generic coin unless the subject really is money.
+- Logo placement: the plain white Riftn logo sits bottom-left, straight on the art with only a soft dark halo. No pill, no white box, no black logo on white.
+- Chrome furniture: a mono "// type =" annotation stamp top-right and a QR bottom-right. Any box around them is four short CORNER BRACKETS (crop marks), never a dashed or solid rectangle. No "//dehub.io" mark; the only site is riftn.com.
+- Typography if any: use the Exo / Exo 2 typeface family (geometric technical sans-serif) for ALL rendered text — Light/Regular for body and links, Medium/SemiBold for headings, Bold only for short display words. Display headlines are UPPERCASE with a horizontal grey-to-white sweep across the whole block, brightest nearest the hero's light. Pure white, generous letter-spacing. Never Inter, Poppins, DM Sans, serifs, or script. Fallbacks: Eurostile, Michroma, Rajdhani. No emoji. No generic AI clichés.
+
+OFFICIAL RIFTN LINKS (render ONLY if the user explicitly asks for socials, links, website, QR, or contact info — otherwise omit entirely):
+- Website: riftn.com
+- X / Twitter: x.com/riftn_com
+- Telegram (main): t.me/riftn_com
+- Discord: discord.gg/dehub
+- Regional Telegrams: Turkish t.me/Riftn_Turkish · Arabic t.me/Riftn_Arabic · Hindi t.me/riftn_hindi · China t.me/riftn_china · Indonesia t.me/riftn_indonesia · Germany t.me/riftn_dach · Vietnam t.me/riftn_vietnam · Philippines t.me/Riftn_Philippines
+When rendering links: pure white, Exo / Exo 2 (Light or Regular), small size, bottom of composition, generous letter-spacing, no icons unless requested. Only include the specific links the user asked for (socials means X + Telegram + Discord + Website; website means just riftn.com).
+
+USER REQUEST: ${userRequest}`;
+}
+
+// Check if logo request also wants something creative (not just "show me the logo")
+function isCreativeLogoRequest(message: string): boolean {
+  const lower = message.toLowerCase();
+  // If it's just asking to see/show the logo without creative context, return false
+  const simpleShowPatterns = [
+    /^show\s*(me\s*)?(the\s*)?(riftn|dehub|ftv|your|official|brand|company)?\s*logo\.?$/,
+    /^(riftn|dehub|ftv)\s*logo\.?$/,
+    /^(the\s*)?(riftn|dehub|ftv|official)\s*logo\.?$/,
+    /^display\s*(the\s*)?(riftn|dehub|ftv)?\s*logo\.?$/
+  ];
+  
+  if (simpleShowPatterns.some(pattern => pattern.test(lower.trim()))) {
+    return false;
+  }
+  
+  // If it has additional context beyond just the logo, it's creative
+  return true;
+}
+
+// Convert an image URL to base64 data URL
+async function imageUrlToBase64(url: string): Promise<string> {
+  const response = await fetch(url);
+  const blob = await response.blob();
+  // CDN pointer paths can 200 with the SPA HTML fallback; passing that through
+  // as a data URL silently breaks the logo composite downstream.
+  if (!response.ok || !blob.type.startsWith('image/')) {
+    throw new Error(`Expected an image from ${url}, got ${blob.type || 'unknown content type'}`);
+  }
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
+const DEFAULT_TOOL_FOR_CATEGORY: Record<AiToolCategory, string> = {
+  'music': 'minimax-music',
+  'tts': 'dia-tts',
+  'background-removal': 'birefnet',
+  'upscale': 'creative-upscaler',
+  'speech-to-text': 'whisper',
+};
+
+function ImageGenerationLoader({ startTime }: { startTime: number }) {
+  const { t: _copy } = _useCopy();
+  const [phase, setPhase] = useState<'spinner' | 'skeleton'>('spinner');
+  const [progress, setProgress] = useState(0);
+  
+  useEffect(() => {
+    // Switch to skeleton phase after 2 seconds
+    const phaseTimer = setTimeout(() => {
+      setPhase('skeleton');
+    }, 2000);
+    
+    return () => clearTimeout(phaseTimer);
+  }, []);
+  
+  // This page never unmounts (PersistentPageCache) — a generation stuck in
+  // skeleton phase would otherwise animate at 10Hz forever, even hidden.
+  const { pathname: skeletonPathname } = useLocation();
+  const isAssistantVisible = skeletonPathname === '/app/assistant';
+
+  useEffect(() => {
+    if (phase === 'skeleton' && isAssistantVisible) {
+      // Continuously animate - never stops until component unmounts
+      const interval = setInterval(() => {
+        setProgress(prev => {
+          // Keep cycling - when it reaches 100, slow down dramatically but never fully stop
+          // This creates an infinite growing effect
+          if (prev >= 95) {
+            // Very slow increment after 95% - gives illusion of "almost there"
+            return Math.min(99.5, prev + 0.05);
+          }
+          // Normal pace growth
+          const increment = Math.max(0.5, (100 - prev) / 30);
+          return prev + increment;
+        });
+      }, 100);
+      
+      return () => clearInterval(interval);
+    }
+  }, [phase, isAssistantVisible]);
+  
+  if (phase === 'spinner') {
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="flex justify-start"
+      >
+        <div className="bg-white/10 rounded-2xl px-4 py-3 flex items-center gap-2">
+          <Loader2 className="w-4 h-4 animate-spin text-white/60" />
+          <span className="text-sm text-white/60">{_copy("copy.ed9620daafe8", { defaultValue: "Generating image..." })}</span>
+        </div>
+      </motion.div>
+    );
+  }
+  
+  // Calculate skeleton size - starts small, grows toward full available width
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 640;
+  const isTablet = typeof window !== 'undefined' && window.innerWidth < 1024;
+  const maxSize = isMobile ? 320 : isTablet ? 650 : 800;
+  const minSize = 60;
+  const currentScale = progress / 100;
+  // Use easeOutQuint (power of 5) for very slow deceleration - keeps growing much longer
+  const easedScale = 1 - Math.pow(1 - currentScale, 5);
+  const size = Math.round(minSize + (maxSize - minSize) * easedScale);
+  
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="flex justify-start"
+    >
+      {/* Growing skeleton — metallic silver on matte black liquid glass */}
+      <motion.div
+        animate={{ width: size, height: size }}
+        transition={{ type: 'spring', stiffness: 100, damping: 20 }}
+        className="relative overflow-hidden rounded-2xl border border-white/10 backdrop-blur-[24px]"
+        style={{
+          background: 'linear-gradient(135deg, rgba(20,20,22,0.85) 0%, rgba(0,0,0,0.75) 100%)',
+          boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.08), inset 0 -1px 0 rgba(0,0,0,0.4)',
+        }}
+      >
+        {/* Base matte black wash */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background: 'radial-gradient(ellipse at 30% 30%, rgba(255,255,255,0.05) 0%, transparent 60%), radial-gradient(ellipse at 70% 70%, rgba(255,255,255,0.03) 0%, transparent 55%)',
+          }}
+        />
+
+        {/* Brushed metal sheen — slow drift */}
+        <motion.div
+          className="absolute inset-0"
+          animate={{ opacity: [0.15, 0.28, 0.15], scale: [1, 1.05, 1] }}
+          transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+          style={{
+            background: 'linear-gradient(120deg, rgba(255,255,255,0.12) 0%, rgba(180,180,190,0.06) 30%, transparent 55%, rgba(220,220,230,0.08) 80%, rgba(255,255,255,0.04) 100%)',
+            filter: 'blur(14px)',
+          }}
+        />
+
+        {/* Secondary silver highlight — counter drift */}
+        <motion.div
+          className="absolute inset-0"
+          animate={{ opacity: [0.08, 0.2, 0.08], x: [0, 8, -4, 0], y: [0, -6, 4, 0] }}
+          transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut', delay: 0.8 }}
+          style={{
+            background: 'radial-gradient(ellipse at 65% 40%, rgba(255,255,255,0.18) 0%, transparent 55%)',
+            filter: 'blur(22px)',
+          }}
+        />
+
+        {/* Traveling chrome shimmer */}
+        <motion.div
+          className="absolute inset-0"
+          animate={{ x: ['-100%', '200%'] }}
+          transition={{ duration: 2.8, repeat: Infinity, ease: 'easeInOut' }}
+          style={{
+            background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.06) 40%, rgba(255,255,255,0.22) 50%, rgba(255,255,255,0.06) 60%, transparent 100%)',
+            width: '60%',
+          }}
+        />
+
+        {/* Subtle progress indicator at bottom */}
+        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-white/5">
+          <motion.div
+            className="h-full"
+            style={{
+              background: 'linear-gradient(90deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.7) 50%, rgba(180,180,190,0.3) 100%)',
+            }}
+            animate={{ width: `${progress}%` }}
+            transition={{ ease: 'linear' }}
+          />
+        </div>
+      </motion.div>
+
+    </motion.div>
+  );
+}
+
+/**
+ * Human-readable status for the tools the agent is running.
+ * Falls back to the raw tool name so a newly added backend tool still reads
+ * sensibly here without a matching web release.
+ */
+const TOOL_LABELS: Record<string, string> = {
+  get lookup_user() { return _translateCopy("copy.f159c06178be", { defaultValue: "Looking up that profile" }); },
+  get user_posts() { return _translateCopy("copy.5cc6ab9e7e37", { defaultValue: "Reading their posts" }); },
+  get search() { return _translateCopy("copy.4af83339a6f1", { defaultValue: "Searching Riftn" }); },
+  get get_feed() { return _translateCopy("copy.38e888a3984e", { defaultValue: "Checking the feed" }); },
+  get get_post() { return _translateCopy("copy.7a075dd38cf7", { defaultValue: "Opening that post" }); },
+  get get_followers() { return _translateCopy("copy.44612f2b9571", { defaultValue: "Checking followers" }); },
+  get get_leaderboard() { return _translateCopy("copy.985497b3df2b", { defaultValue: "Checking the leaderboard" }); },
+  get get_live_streams() { return _translateCopy("copy.7029fea5b78f", { defaultValue: "Checking who is live" }); },
+  get get_platform_stats() { return _translateCopy("copy.a01190768ce6", { defaultValue: "Checking platform stats" }); },
+  get get_chat_history() { return _translateCopy("copy.fd3b0226be07", { defaultValue: "Reading recent chat" }); },
+  get get_top_categories() { return _translateCopy("copy.a775fbb0a832", { defaultValue: "Checking trending categories" }); },
+  get my_wallet() { return _translateCopy("copy.6c9f1bd00a37", { defaultValue: "Checking your wallet" }); },
+  get my_earnings() { return _translateCopy("copy.bfdf678e86b0", { defaultValue: "Adding up your earnings" }); },
+  get my_stats() { return _translateCopy("copy.221173c89094", { defaultValue: "Checking your stats" }); },
+  get my_notifications() { return _translateCopy("copy.90f7144eff9c", { defaultValue: "Checking your notifications" }); },
+  get my_library() { return _translateCopy("copy.eef1c394932f", { defaultValue: "Checking your library" }); },
+  get my_settings() { return _translateCopy("copy.6f60d3260ac2", { defaultValue: "Checking your settings" }); },
+  get my_engagement_history() { return _translateCopy("copy.32476cbf27ea", { defaultValue: "Checking who you engage with" }); },
+  get web_search() { return _translateCopy("copy.87d2f3386f90", { defaultValue: "Searching the web" }); },
+};
+
+function describeTools(tools: string[]): string {
+  if (!tools.length) return '';
+  const label = TOOL_LABELS[tools[0]] || _translateCopy("copy.5cd951f76ade", { defaultValue: "Running {{value1}}", value1: tools[0].replace(/_/g, ' ') });
+  return tools.length > 1 ? _translateCopy("copy.e8b87fe35732", { defaultValue: "{{value1}} (+{{count}} more)…", value1: label, count: tools.length - 1 }) : _translateCopy("copy.0ddb74a93b79", { defaultValue: "{{value1}}…", value1: label });
+}
+
+function AssistantPageForAccount() {
+  const { t: _copy } = _useCopy();
+  // Conversation persistence hook
+  const { 
+    conversationId, draftScope, 
+    isSaving, 
+    queueMessage, 
+    startNewConversation, 
+    loadConversation 
+  } = useAIConversation();
+  
+
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [input, setInput] = useDraftState(`assistant:${draftScope}:input`, '');
+  const { theme, themeChoice } = useAppTheme();
+  const isLightTheme = (theme === 'light' || themeChoice === 'system-light');
+  const actionBubbleClass = cn(
+    "shrink-0 [&>div]:!py-1 [&>div]:!px-3 [&>div]:before:from-transparent [&>div]:after:from-transparent [&_span]:!text-xs",
+    isLightTheme
+      ? "[&>div]:!bg-white/90 [&>div]:!bg-none [&>div]:!border-black/10 [&>div]:!shadow-[0_2px_8px_rgba(0,0,0,0.08)] [&_span]:!text-black"
+      : "[&>div]:from-zinc-900/90 [&>div]:to-white/5"
+  );
+  // Slash-command skill picker
+  const [slashOpen, setSlashOpen] = useState(false);
+  const [slashQuery, setSlashQuery] = useState('');
+  const [slashRange, setSlashRange] = useState<{ start: number; end: number }>({ start: 0, end: 0 });
+  const [slashSelected, setSlashSelected] = useState(0);
+  const [skillsBrowserOpen, setSkillsBrowserOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  /** Tools the agent is running right now — shown in place of "Thinking…". */
+  const [activeTools, setActiveTools] = useState<string[]>([]);
+  /** True once the answer's first words are on screen: the thinking row gives way to the text. */
+  const [streamingReply, setStreamingReply] = useState(false);
+  const [lightboxImage, setLightboxImage] = useState<string | null>(null);
+  useEffect(() => {
+    if (!lightboxImage) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setLightboxImage(null); };
+    window.addEventListener('keydown', onKey);
+    const releaseScroll = lockBodyScroll('AssistantPage');
+    return () => { window.removeEventListener('keydown', onKey); releaseScroll(); };
+  }, [lightboxImage]);
+  const { data: userSkills = [] } = useUserSkills();
+  const { data: userCharacters = [] } = useUserCharacters();
+  // Prefill input from ?skill=slug (deep-link from Skills library)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const slug = params.get('skill');
+    if (slug) {
+      setInput.initialize((prev) => prev || `/${slug} `);
+      // clean URL so it doesn't re-trigger
+      const url = new URL(window.location.href);
+      url.searchParams.delete('skill');
+      window.history.replaceState({}, '', url.toString());
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [setInput]);
+  // A card the assistant offered somewhere else (a DM with
+  // @assistant, a shared link). Shown here so it can be confirmed.
+  const [linkedAction, setLinkedAction] = useState<string | null>(null);
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get('requestDraft') ?? params.get('action');
+    if (id && /^[a-f0-9]{24}$/i.test(id)) setLinkedAction(id.toLowerCase());
+  }, []);
+  const [isImageLoading, setIsImageLoading] = useState(false);
+  const [isVideoLoading, setIsVideoLoading] = useState(false);
+  const [imageLoadStartTime, setImageLoadStartTime] = useState<number>(0);
+  // Shared with the @assistant DM: one personality and chat model everywhere.
+  const { style: selectedStyle, setStyle: setSelectedStyle, model: selectedChatModel, setModel: setSelectedChatModel } = useAssistantPrefs();
+  const [selectedVideoModel, setSelectedVideoModel] = useState<VideoModelKey>('kling-2.6-pro');
+  const [selectedImageModel, setSelectedImageModel] = useState<ImageModelKey>('gemini-2.5-flash');
+  // Which "what's on your mind" line greets this visit; a new one each time.
+  const [greetingIndex] = useState(() => Math.floor(Math.random() * 8));
+  const [selectedVoice, setSelectedVoice] = useState<VoicePreferenceKey>('female');
+  // ElevenLabs voice selection: { type: 'browser', preset } or { type: 'elevenlabs', voiceId }
+  const [elevenLabsVoiceId, setElevenLabsVoiceId] = useState<string>(() => {
+    try {
+      const saved = localStorage.getItem('dehub-assistant-voice');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.type === 'elevenlabs') return parsed.voiceId;
+      }
+    } catch {}
+    return '';
+  });
+  const [voiceTrainingOpen, setVoiceTrainingOpen] = useState(false);
+  const [showApiKeyPrompt, setShowApiKeyPrompt] = useState(false);
+  const [customElevenLabsKey, setCustomElevenLabsKey] = useState(() => {
+    try { return localStorage.getItem('dehub-custom-elevenlabs-key') || ''; } catch { return ''; }
+  });
+  const [apiKeyInput, setApiKeyInput] = useState('');
+  const [settingsSheetOpen, setSettingsSheetOpen] = useState(false);
+  const [styleSheetOpen, setStyleSheetOpen] = useState(false);
+  const [attachedImage, setAttachedImage] = useState<string | null>(null);
+  const [postModalOpen, setPostModalOpen] = useState(false);
+  const [postModalFiles, setPostModalFiles] = useState<FileList | null>(null);
+  const [paywallOpen, setPaywallOpen] = useState(false);
+  const [pendingVideoRequest, setPendingVideoRequest] = useState<{
+    prompt: string;
+    model: VideoModelKey;
+    sourceImage?: string;
+  } | null>(null);
+  const [imagePaywallOpen, setImagePaywallOpen] = useState(false);
+  const [pendingImageRequest, setPendingImageRequest] = useState<{
+    prompt: string;
+    model: ImageModelKey;
+    sourceImage?: string;
+  } | null>(null);
+  // Prompt handed over by a link (#preset=chat&send=1&prompt=…), sent once ready.
+  const [autoSendPrompt, setAutoSendPrompt] = useState<string | null>(null);
+  // Riftn poster config drawer
+  const [posterConfigOpen, setPosterConfigOpen] = useState(false);
+  const [pendingPosterPrompt, setPendingPosterPrompt] = useState<string>('');
+  // Skills hub modal
+  const [skillsHubOpen, setSkillsHubOpen] = useState(false);
+
+  // Handle preset hash (?/# from /creator tiles): e.g. #preset=image | poster | skills | video | song | edit | chat
+  useEffect(() => {
+    const applyPreset = () => {
+      const hash = typeof window !== 'undefined' ? window.location.hash : '';
+      const match = hash.match(/preset=([a-z]+)/i);
+      if (!match) return;
+      const preset = match[1].toLowerCase();
+      // Optional ?prompt=... pre-fill from /creator composer
+      const promptMatch = hash.match(/prompt=([^&]+)/i);
+      const prefill = promptMatch ? decodeURIComponent(promptMatch[1]) : '';
+      // &send=1 (the profile menu's Ask AI): start a fresh chat and send the
+      // prompt straight away, so its confirm cards are the first thing seen.
+      if (prefill && /(?:^|[#&])send=1(?:&|$)/.test(hash)) {
+        if (typeof window !== 'undefined' && window.history.replaceState) {
+          window.history.replaceState(null, '', window.location.pathname + window.location.search);
+        }
+        startNewConversation();
+        setMessages([]);
+        setAutoSendPrompt(prefill);
+        return;
+      }
+      // Clear hash so re-navigation re-triggers cleanly
+      if (typeof window !== 'undefined' && window.history.replaceState) {
+        window.history.replaceState(null, '', window.location.pathname + window.location.search);
+      }
+      switch (preset) {
+        case 'skills':
+          setSkillsHubOpen(true);
+          break;
+        case 'poster':
+          setPendingPosterPrompt(prefill || '');
+          setPosterConfigOpen(true);
+          break;
+        case 'song':
+          setPendingMusicPrompt(prefill || '');
+          setMusicConfirmOpen(true);
+          break;
+        case 'edit':
+          fileInputRef.current?.click();
+          break;
+        case 'image':
+          setInput.initialize(prefill || t('assistant.generateImageOf'));
+          inputRef.current?.focus();
+          setInputGlow(true);
+          setTimeout(() => setInputGlow(false), 2000);
+          break;
+        case 'video':
+          setInput.initialize(prefill || t('assistant.generateVideoOf'));
+          inputRef.current?.focus();
+          setInputGlow(true);
+          setTimeout(() => setInputGlow(false), 2000);
+          break;
+        case 'voice':
+        case 'chat':
+        default:
+          if (prefill) {
+            setInput.initialize(prefill);
+            setInputGlow(true);
+            setTimeout(() => setInputGlow(false), 2000);
+          }
+          inputRef.current?.focus();
+          break;
+      }
+    };
+    applyPreset();
+    window.addEventListener('hashchange', applyPreset);
+    return () => window.removeEventListener('hashchange', applyPreset);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [setInput]);
+  // AI Tools state
+  const [aiToolPaywallOpen, setAiToolPaywallOpen] = useState(false);
+  const [selectedAiToolId, setSelectedAiToolId] = useState<string>('minimax-music');
+  const [aiToolCategory, setAiToolCategory] = useState<AiToolCategory>('music');
+  const [isAiToolProcessing, setIsAiToolProcessing] = useState(false);
+  const [pendingAiToolRequest, setPendingAiToolRequest] = useState<{
+    prompt: string;
+    tool: string;
+    category: AiToolCategory;
+    sourceImage?: string;
+    audioUrl?: string;
+  } | null>(null);
+  const [musicConfirmOpen, setMusicConfirmOpen] = useState(false);
+  const [pendingMusicPrompt, setPendingMusicPrompt] = useState('');
+
+  const [voiceAutoReply, setVoiceAutoReply] = useState(true); // Auto-speak AI replies when using voice
+  const [alwaysSpeakReplies, setAlwaysSpeakReplies] = useState(false); // Speak ALL AI replies, not just voice responses
+  const [inputGlow, setInputGlow] = useState(false); // Glow effect for input focus hint
+  const [showCommandCentre, setShowCommandCentre] = useState(false); // Toggle between chat and command centre
+  const [showAuthPrompt, setShowAuthPrompt] = useState(false); // Auth prompt for simulation approval
+  const [transferPin, setTransferPin] = useState<string | null>(null); // PIN for transfer approval
+  const [autoApproveMode, setAutoApproveMode] = useState(false); // Auto-approve transfers without confirmation
+  const [showPinModal, setShowPinModal] = useState(false); // PIN setup modal
+  const [pinInput, setPinInput] = useState(''); // PIN input value
+  const [historyDrawerOpen, setHistoryDrawerOpen] = useState(false); // History drawer state
+  const [supportDrawerOpen, setSupportDrawerOpen] = useState(false); // Support ticket drawer state
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const pollingRef = useRef<Record<string, NodeJS.Timeout>>({});
+
+  /**
+   * How long a generation is given before we stop asking about it.
+   *
+   * Every poller here ran on a bare setInterval with no cap and a catch that
+   * only logged, so a job that never reached a terminal status — a 429, a 500,
+   * an expired prediction id — was asked about every five seconds forever.
+   * PersistentPageCache keeps this page mounted, so the unmount cleanup never
+   * ran, and the pending keys in localStorage restarted the same loop on every
+   * later page load. One dead job became a permanent background request.
+   *
+   * Fifteen minutes is well past the slowest of these (video), so a job that
+   * has not finished by then is not going to.
+   */
+  const POLL_DEADLINE_MS = 15 * 60 * 1000;
+
+  /**
+   * Poll `tick` every 5s until something clears it or the deadline passes.
+   *
+   * Giving up clears the stored interval and calls `onTimeout`, which is where
+   * the pending key gets dropped — otherwise the next page load starts it again
+   * and the deadline buys nothing.
+   */
+  const startBoundedPoll = useCallback(
+    (key: string, tick: () => void, onTimeout: () => void) => {
+      if (pollingRef.current[key]) return;
+      const startedAt = Date.now();
+      pollingRef.current[key] = setInterval(() => {
+        if (Date.now() - startedAt > POLL_DEADLINE_MS) {
+          clearInterval(pollingRef.current[key]);
+          delete pollingRef.current[key];
+          onTimeout();
+          return;
+        }
+        tick();
+      }, 5000);
+    },
+    [],
+  );
+
+  // Persist/restore pending AI tool requests across reloads
+  const PENDING_TOOL_KEY = 'dehub-pending-ai-tool';
+  const savePendingTool = useCallback((data: {
+    requestId: string; appId: string; messageId: string; toolKey: string;
+    statusUrl?: string; responseUrl?: string; content: string;
+  }) => {
+    try { localStorage.setItem(PENDING_TOOL_KEY, JSON.stringify(data)); } catch {}
+  }, []);
+  const clearPendingTool = useCallback(() => {
+    try { localStorage.removeItem(PENDING_TOOL_KEY); } catch {}
+  }, []);
+
+  // Persist/restore pending video generation across reloads
+  const PENDING_VIDEO_KEY = 'dehub-pending-video';
+  const savePendingVideo = useCallback((data: {
+    predictionId: string; messageId: string; provider?: string; falAppId?: string; content: string;
+  }) => {
+    try { localStorage.setItem(PENDING_VIDEO_KEY, JSON.stringify(data)); } catch {}
+  }, []);
+  const clearPendingVideo = useCallback(() => {
+    try { localStorage.removeItem(PENDING_VIDEO_KEY); } catch {}
+  }, []);
+
+  /**
+   * Stop waiting on a job and say so.
+   *
+   * Reached only from the poll deadline. Dropping the pending key is the part
+   * that matters as much as the message: leaving it means the next page load
+   * restores the job and starts polling it all over again, which is how one
+   * dead request became a permanent background loop.
+   */
+  const giveUpOnTool = useCallback((messageId: string) => {
+    clearPendingTool();
+    setIsAiToolProcessing(false);
+    setMessages(prev => prev.map(m =>
+      m.id === messageId
+        ? { ...m, isToolProcessing: false, content: _translateCopy("copy.b3bec679ec25", { defaultValue: "❌ Gave up waiting on this one. Nothing was charged twice — try again." }) }
+        : m,
+    ));
+  }, [clearPendingTool]);
+
+  const giveUpOnVideo = useCallback((messageId: string) => {
+    clearPendingVideo();
+    setMessages(prev => prev.map(m =>
+      m.id === messageId
+        ? { ...m, isVideoGenerating: false, content: _translateCopy("copy.67872752c00c", { defaultValue: "❌ Gave up waiting on this video. Nothing was charged twice — try again." }) }
+        : m,
+    ));
+  }, [clearPendingVideo]);
+
+  const pendingVoiceRef = useRef(false); // Track if last input was voice
+
+  const { isAuthenticated, walletAddress, user } = useAuth();
+  const downloadVideo = useVideoDownload();
+  // Read once for the header badge. The drawer runs the same query, so opening
+  // it costs no second request — and the badge is the point: somebody with an
+  // open ticket should see that without clicking anything.
+  const { data: supportTickets } = useMySupportTickets(isAuthenticated);
+  const navigate = useNavigate();
+  const isMobile = useIsMobile();
+  const phonePill = usePhonePill();
+  const { language: userLanguage } = useUserLanguage();
+  const { t } = useI18n();
+  
+  const [restoringConversation, setRestoringConversation] = useState(!!conversationId);
+  const pendingDraftCompletion = useRef<() => void>(() => {});
+  const initialConversation = useRef(conversationId);
+  const visibleConversation = useRef(conversationId);
+  visibleConversation.current = conversationId;
+  useEffect(() => {
+    const id = initialConversation.current;
+    if (!id || !walletAddress) return;
+    let cancelled = false;
+    void Promise.resolve(withWalletHeader(supabase.from('ai_messages').select('*').eq('conversation_id', id).order('created_at', { ascending: true }), walletAddress))
+      .then(({ data, error }) => {
+        if (cancelled || error || visibleConversation.current !== id) return;
+        setMessages(previous => previous.length ? previous : (data || []).map(message => ({ id: message.id, role: message.role as 'user' | 'assistant', content: message.content,
+          imageUrl: message.image_url || undefined, videoUrl: message.video_url || undefined, attachedImage: message.attached_image || undefined })));
+      }).finally(() => { if (!cancelled) setRestoringConversation(false); });
+    return () => { cancelled = true; };
+  }, [walletAddress]);
+
+  // User context for AI assistant personalization
+  const userContext = useAssistantUserContext();
+
+  /**
+   * Voice is bought as a session, not per exchange.
+   *
+   * Whisper 60 + Dia 80 = 140 DHB an exchange, and a wallet signature between
+   * every sentence is not a conversation — so one transfer up front covers a
+   * block of exchanges and the backend counts them down against it. The hook
+   * owns that payment; this only has to handle it running out.
+   */
+  const voiceStopRef = useRef<(() => void) | null>(null);
+
+  // Voice Assistant hook (Whisper STT + Dia TTS via fal.ai)
+  const voiceAssistant = useVoiceAssistant({
+    onTranscript: (text) => {
+      voiceTranscriptHandlerRef.current?.(text);
+    },
+    onPaymentRequired: () => {
+      // The session is used up. Stop rather than let the mic keep listening
+      // into a conversation that cannot answer.
+      voiceStopRef.current?.();
+      toast.error(_copy("copy.cf69d7e172fd", { defaultValue: "Voice session used up — start voice mode again to buy another." }));
+    },
+    isChatLoading: isLoading,
+  });
+  const voiceTranscriptHandlerRef = useRef<((text: string) => void) | null>(null);
+  voiceStopRef.current = voiceAssistant.stopVoiceMode;
+
+  // Auth gate is rendered in JSX below (do NOT early-return here — it changes
+  // hook count between renders and triggers React error #310 on login/logout).
+
+
+  
+  // Mention hook for @mentions in input
+  const mention = useMention({
+    inputRef,
+    onMentionInsert: (user, newText) => {
+      setInput(newText);
+    },
+  });
+  
+  const currentStyle = AI_ASSISTANT_STYLE_OPTIONS.find(s => s.id === selectedStyle) || AI_ASSISTANT_STYLE_OPTIONS[0];
+  const currentVideoModel = VIDEO_MODEL_OPTIONS.find(m => m.id === selectedVideoModel) || VIDEO_MODEL_OPTIONS[0];
+  const currentImageModel = IMAGE_MODEL_OPTIONS.find(m => m.id === selectedImageModel) || IMAGE_MODEL_OPTIONS[0];
+  const currentVoice = VOICE_PREFERENCE_OPTIONS.find(v => v.id === selectedVoice) || VOICE_PREFERENCE_OPTIONS[0];
+  const currentChatModel = CHAT_MODEL_OPTIONS.find(m => m.id === selectedChatModel) || CHAT_MODEL_OPTIONS[0];
+
+  // Voice chat hook - handles speech recognition and text-to-speech
+  const {
+    isRecording,
+    isSpeaking,
+    transcript,
+    speak,
+    stopSpeaking,
+  } = useVoiceChat({
+    voicePreference: selectedVoice as 'female' | 'male' | 'neutral',
+    onTranscript: (text) => {
+      // When user finishes speaking, set the input and auto-send
+      if (text.trim()) {
+        setInput(text);
+        pendingVoiceRef.current = true;
+        // Auto-send after a small delay to allow UI to update
+        setTimeout(() => {
+          handleVoiceSend(text);
+        }, 100);
+      }
+    },
+    onError: (error) => {
+      toast.error(error);
+    },
+  });
+
+  // ElevenLabs TTS speak function - routes through edge function when an ElevenLabs voice is selected
+  const elevenLabsSpeak = useCallback(async (text: string) => {
+    if (!elevenLabsVoiceId) {
+      // Fallback to browser TTS
+      speak(text);
+      return;
+    }
+    try {
+      // Clean text for TTS
+      // The voice takes up to 5,000 characters; this used to stop at 500,
+      // mid-sentence. A longer reply now ends on its last whole sentence.
+      const cleanText = speechText(text, 5000);
+      if (!cleanText) return;
+
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-tts`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+            // elevenlabs-tts authenticates on the Riftn token, not this one.
+            ...dehubAuthHeaders(),
+          },
+          body: JSON.stringify({ text: cleanText, voiceId: elevenLabsVoiceId }),
+        }
+      );
+      if (!response.ok) throw new Error('TTS failed');
+      const audioBlob = await response.blob();
+      const audioUrl = URL.createObjectURL(audioBlob);
+      const audio = new Audio(audioUrl);
+      const release = () => URL.revokeObjectURL(audioUrl);
+      audio.addEventListener('ended', release, { once: true });
+      audio.addEventListener('error', release, { once: true });
+      try {
+        await audio.play();
+      } catch (playErr) {
+        release();
+        throw playErr;
+      }
+    } catch (err) {
+      console.error('ElevenLabs TTS error:', err);
+      // Fallback to browser TTS
+      speak(text);
+    }
+  }, [elevenLabsVoiceId, speak]);
+
+
+  const handleVoiceSend = async (voiceText: string) => {
+    if (!voiceText.trim() || isLoading) return;
+    pendingVoiceRef.current = true;
+    
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      role: 'user',
+      content: voiceText.trim(),
+      attachedImage: attachedImage || undefined
+    };
+
+    setMessages(prev => [...prev, userMessage]);
+    setAttachedImage(null);
+    setIsLoading(true);
+
+    try {
+      // Regular chat for voice - use general-ai-chat endpoint
+      const { data, error } = await supabase.functions.invoke('general-ai-chat', {
+        body: {
+          messages: [...messages, userMessage].map(m => ({
+            role: m.role,
+            content: m.content
+          })),
+          style: selectedStyle,
+          model: selectedChatModel,
+          userLanguage,
+          userContext,
+          dehubToken: localStorage.getItem('dehub_token') || undefined,
+        }
+      });
+
+      if (error) throw error;
+
+      // Show fallback toast if Grok was requested but not available
+      if (data.fallbackUsed) {
+        toast.info(t('assistant.fallbackGrokNotConfigured'));
+      }
+
+      const responseText = data.response || t('assistant.noResponse');
+      const assistantMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: responseText
+      };
+
+      setMessages(prev => [...prev, assistantMessage]);
+
+      // Auto-speak the response if voice auto-reply is enabled OR always speak replies is on
+      if (voiceAutoReply || alwaysSpeakReplies) {
+        // Small delay to let the message render first
+        setTimeout(() => {
+          elevenLabsSpeak(responseText);
+        }, 300);
+      }
+    } catch (error: any) {
+      console.error('AI chat error (voice):', error);
+      const errorCode = error?.errorCode || 'UNKNOWN';
+      let msg = errorCode === 'RATE_LIMIT' ? t('assistant.errorRateLimit')
+        : errorCode === 'TIMEOUT' ? t('assistant.errorTimeout')
+        : `❌ ${error?.message || t('assistant.errorGeneric')}`;
+      setMessages(prev => [...prev, {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: msg,
+        isError: true,
+      }]);
+    } finally {
+      setIsLoading(false);
+      pendingVoiceRef.current = false;
+    }
+  };
+
+  // Wire up voice assistant transcript handler
+  // When voice assistant gets a transcript, send it through the regular chat flow
+  // and then speak the response with Dia TTS
+  voiceTranscriptHandlerRef.current = useCallback(async (text: string) => {
+    if (!text.trim() || isLoading) return;
+
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      role: 'user',
+      content: text.trim(),
+    };
+
+    setMessages(prev => [...prev, userMessage]);
+    queueMessage(userMessage);
+    setIsLoading(true);
+
+    try {
+      const chatBody = {
+        messages: [...messages, userMessage].map(m => ({
+          role: m.role,
+          content: m.content,
+        })),
+        style: selectedStyle,
+        model: selectedChatModel,
+        isAuthenticated,
+        userLanguage,
+        userContext,
+        dehubToken: localStorage.getItem('dehub_token') || undefined,
+        surface: 'assistant' as const,
+        callerAddress: walletAddress || undefined,
+      };
+
+      const streamingMsgId = (Date.now() + 1).toString();
+      let streamedContent = '';
+      let isFirstToken = true;
+
+      await streamChat({
+        body: chatBody,
+        onTool: ({ status, tools }) => setActiveTools(status === 'running' ? tools : []),
+        onDelta: (delta) => {
+          streamedContent += delta;
+          if (isFirstToken) {
+            isFirstToken = false;
+            setMessages(prev => [...prev, {
+              id: streamingMsgId,
+              role: 'assistant',
+              content: streamedContent,
+            }]);
+          } else {
+            setMessages(prev => {
+              const updated = [...prev];
+              const lastIdx = updated.length - 1;
+              if (lastIdx >= 0 && updated[lastIdx].id === streamingMsgId) {
+                updated[lastIdx] = { ...updated[lastIdx], content: streamedContent };
+              }
+              return updated;
+            });
+          }
+        },
+        onDone: () => {
+          const finalMessage: Message = {
+            id: streamingMsgId,
+            role: 'assistant',
+            content: streamedContent || _translateCopy("copy.961136f9207a", { defaultValue: "No response" }),
+          };
+          queueMessage(finalMessage);
+          setActiveTools([]);
+          setIsLoading(false);
+
+          // Speak the response via Dia TTS
+          if (streamedContent && voiceAssistant.isVoiceMode) {
+            voiceAssistant.speakResponse(streamedContent);
+          }
+        },
+        onError: (err) => {
+          setMessages(prev => [...prev, {
+            id: (Date.now() + 2).toString(),
+            role: 'assistant',
+            content: `❌ ${err?.message || _translateCopy("copy.90b7d951bb29", { defaultValue: "Voice chat error" })}`,
+            isError: true,
+          }]);
+          setActiveTools([]);
+          setIsLoading(false);
+          // Restart listening even on error
+          if (voiceAssistant.isVoiceMode) {
+            voiceAssistant.speakResponse(_translateCopy("copy.6248fa921adb", { defaultValue: "Sorry, I encountered an error. Please try again." }));
+          }
+        },
+      });
+    } catch (error: any) {
+      console.error('[VoiceAssistant] Chat error:', error);
+      setMessages(prev => [...prev, {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: `❌ ${error?.message || _translateCopy("copy.27c2ccd962c2", { defaultValue: "Unknown error" })}`,
+        isError: true,
+      }]);
+      setIsLoading(false);
+    }
+  }, [messages, selectedStyle, selectedChatModel, isAuthenticated, userLanguage, userContext, isLoading, voiceAssistant]);
+
+
+  useEffect(() => {
+    setMessages([]);
+  }, []);
+
+  // Scroll to top on initial mount - ensures header is visible on mobile
+  useEffect(() => {
+    // Use a small delay to ensure the scroll area is rendered
+    const timer = setTimeout(() => {
+      if (scrollRef.current) {
+        // ScrollArea uses a viewport div inside - scroll that to top
+        const viewport = scrollRef.current.querySelector('[data-radix-scroll-area-viewport]');
+        if (viewport) {
+          viewport.scrollTop = 0;
+        }
+      }
+    }, 50);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Follow the newest text only while the reader is at the bottom. Scrolling
+  // up while an answer streams leaves them where they are, with a
+  // "Jump to latest" button instead.
+  const followBottom = useRef(true);
+  const [showJump, setShowJump] = useState(false);
+  const lastScrollTop = useRef(0);
+  const chatViewport = () => scrollRef.current?.querySelector<HTMLElement>('[data-radix-scroll-area-viewport]') ?? null;
+  const scrollToBottom = (force = false) => {
+    if (force) { followBottom.current = true; setShowJump(false); }
+    if (!followBottom.current) return;
+    messagesEndRef.current?.scrollIntoView({ behavior: force ? 'smooth' : 'auto', block: 'end' });
+  };
+  useEffect(() => {
+    const viewport = chatViewport();
+    if (!viewport) return;
+    const onScroll = () => {
+      const top = viewport.scrollTop;
+      const fromBottom = viewport.scrollHeight - viewport.clientHeight - top;
+      if (fromBottom < 48) {
+        if (!followBottom.current) { followBottom.current = true; setShowJump(false); }
+      } else if (top < lastScrollTop.current - 2) {
+        // Only the reader moves the page up; following only ever scrolls down.
+        followBottom.current = false;
+      }
+      lastScrollTop.current = top;
+    };
+    viewport.addEventListener('scroll', onScroll, { passive: true });
+    return () => viewport.removeEventListener('scroll', onScroll);
+  });
+
+  // Auto-scroll to bottom on messages change or loading state
+  // Skip scrolling on initial welcome message so header stays visible
+  useEffect(() => {
+    if (messages.length > 1 || isLoading) {
+      if (followBottom.current) scrollToBottom();
+      else if (isLoading) setShowJump(true);
+    }
+  }, [messages, isLoading]);
+
+  // Focus input on mount - only on desktop to prevent mobile keyboard from pushing screen down
+  useEffect(() => {
+    if (!isMobile) {
+      setTimeout(() => inputRef.current?.focus(), 100);
+    }
+  }, [isMobile]);
+
+  // Restore pending AI tool request on mount (survives reload)
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(PENDING_TOOL_KEY);
+      if (!raw) return;
+      const pending = JSON.parse(raw) as {
+        requestId: string; appId: string; messageId: string; toolKey: string;
+        statusUrl?: string; responseUrl?: string; content: string;
+      };
+      // Re-inject the processing message
+      const restoredMessage: Message = {
+        id: pending.messageId,
+        role: 'assistant',
+        content: pending.content || _translateCopy("copy.ca1c93c8986f", { defaultValue: "⏳ Resuming processing..." }),
+        isToolProcessing: true,
+        toolRequestId: pending.requestId,
+        toolAppId: pending.appId,
+        toolType: pending.toolKey,
+      };
+      setMessages(prev => {
+        // Avoid duplicates
+        if (prev.some(m => m.id === pending.messageId)) return prev;
+        return [...prev, restoredMessage];
+      });
+      setIsAiToolProcessing(true);
+
+      // Resume polling
+      if (!pollingRef.current[pending.requestId]) {
+        startBoundedPoll(
+          pending.requestId,
+          () => pollAiToolStatus(pending.requestId, pending.appId, pending.messageId, pending.toolKey, pending.statusUrl, pending.responseUrl),
+          () => giveUpOnTool(pending.messageId),
+        );
+        // Fire one immediately
+        pollAiToolStatus(pending.requestId, pending.appId, pending.messageId, pending.toolKey, pending.statusUrl, pending.responseUrl);
+      }
+      console.log('[AI Tool] Restored pending request from localStorage:', pending.requestId);
+    } catch {}
+
+    // Restore pending video generation
+    try {
+      const rawVideo = localStorage.getItem(PENDING_VIDEO_KEY);
+      if (rawVideo) {
+        const pending = JSON.parse(rawVideo) as {
+          predictionId: string; messageId: string; provider?: string; falAppId?: string; content: string;
+        };
+        const restoredMsg: Message = {
+          id: pending.messageId,
+          role: 'assistant',
+          content: pending.content || _translateCopy("copy.e30bd852819d", { defaultValue: "🎬 Resuming video generation..." }),
+          isVideoGenerating: true,
+          videoPredictionId: pending.predictionId,
+        };
+        setMessages(prev => {
+          if (prev.some(m => m.id === pending.messageId)) return prev;
+          return [...prev, restoredMsg];
+        });
+        setIsVideoLoading(true);
+
+        if (!pollingRef.current[pending.predictionId]) {
+          startBoundedPoll(
+            pending.predictionId,
+            () => pollVideoStatus(pending.predictionId, pending.messageId, pending.provider, pending.falAppId),
+            () => giveUpOnVideo(pending.messageId),
+          );
+          pollVideoStatus(pending.predictionId, pending.messageId, pending.provider, pending.falAppId);
+        }
+        console.log('[Video] Restored pending video from localStorage:', pending.predictionId);
+      }
+    } catch {}
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+
+  // Process image file helper
+  const processImageFile = (file: File) => {
+    if (!file.type.startsWith('image/')) return;
+    
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      setAttachedImage(event.target?.result as string);
+      toast.success(_copy("copy.0e0c8f0dde70", { defaultValue: "Image attached" }));
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    processImageFile(file);
+    // Reset input
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  // Handle paste event for images
+  const handlePaste = (e: React.ClipboardEvent) => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+    
+    for (const item of Array.from(items)) {
+      if (item.type.startsWith('image/')) {
+        e.preventDefault();
+        const file = item.getAsFile();
+        if (file) processImageFile(file);
+        return;
+      }
+    }
+  };
+
+  // Drag and drop state
+  const [isDragging, setIsDragging] = useState(false);
+  
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+  
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    // Only set to false if leaving the container
+    if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+      setIsDragging(false);
+    }
+  };
+  
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    
+    const files = e.dataTransfer?.files;
+    if (!files?.length) return;
+    
+    const imageFile = Array.from(files).find(f => f.type.startsWith('image/'));
+    if (imageFile) processImageFile(imageFile);
+  };
+
+  // Poll for video generation status
+  const pollVideoStatus = useCallback(async (predictionId: string, messageId: string, provider?: string, falAppId?: string) => {
+    try {
+      const { data, error } = await invokeAi('generate-video', {
+        body: { predictionId, provider, falAppId }
+      });
+
+      if (error) throw error;
+
+      if (data.status === 'succeeded' && data.videoUrl) {
+        // Clear polling
+        if (pollingRef.current[predictionId]) {
+          clearInterval(pollingRef.current[predictionId]);
+          delete pollingRef.current[predictionId];
+        }
+
+        // Update message with video URL
+        setMessages(prev => prev.map(m => 
+          m.id === messageId 
+            ? { ...m, videoUrl: data.videoUrl, isVideoGenerating: false }
+            : m
+        ));
+        setIsVideoLoading(false);
+        clearPendingVideo();
+        toast.success(_copy("copy.01d9dc4caf8f", { defaultValue: "Video generated!" }));
+      } else if (data.status === 'failed') {
+        // Clear polling
+        if (pollingRef.current[predictionId]) {
+          clearInterval(pollingRef.current[predictionId]);
+          delete pollingRef.current[predictionId];
+        }
+
+        // Update message with error
+        setMessages(prev => prev.map(m => 
+          m.id === messageId 
+            ? { ...m, content: t('assistant.videoGenFailedDetail', { error: data.error || 'Unknown error' }), isVideoGenerating: false }
+            : m
+        ));
+        setIsVideoLoading(false);
+        clearPendingVideo();
+        toast.error(t('assistant.errorVideoGenFailed'));
+      }
+      // If still processing, keep polling
+    } catch (err) {
+      console.error('Polling error:', err);
+    }
+  }, [clearPendingVideo, _copy]);
+
+  // Handle video generation after payment confirmation
+  const handleVideoGenerationConfirm = async (options: VideoGenerationOptions | undefined, txHash: string) => {
+    const finishDraft = pendingDraftCompletion.current;
+    if (!pendingVideoRequest) return;
+
+    const { prompt, model, sourceImage } = pendingVideoRequest;
+    const videoModel = VIDEO_MODELS[model];
+
+    // User message was already added by handleSend before paywall opened
+    // Don't add it again
+
+    setPaywallOpen(false);
+    setIsVideoLoading(true);
+
+    try {
+      const { data, error } = await invokeAi('generate-video', {
+        body: {
+          prompt,
+          model,
+          sourceImage,
+          duration: options?.duration ? `${options.duration}s` : '5s',
+          aspectRatio: '16:9',
+          ...(options?.negativePrompt && { negativePrompt: options.negativePrompt }),
+          ...(options?.resolution && { resolution: options.resolution }),
+          ...(options?.referenceImageUrls && options.referenceImageUrls.length > 0 && { referenceImageUrls: options.referenceImageUrls }),
+          ...(options?.endFrameUrl && { endFrameUrl: options.endFrameUrl }),
+          ...(options?.audioUrls && options.audioUrls.length > 0 && { audioUrls: options.audioUrls }),
+          ...(options?.videoUrls && options.videoUrls.length > 0 && { videoUrls: options.videoUrls }),
+          ...(options?.seed !== undefined && { seed: options.seed }),
+          ...(options?.avatar ? { avatar: options.avatar, clientJobId: options.avatar.clientJobId, prompt: options.avatar.prompt ?? prompt, sourceImage: undefined, duration: undefined, aspectRatio: '1:1' } : {}),
+          txHash,
+        }
+      });
+
+      if (error) throw error;
+
+      if (data.error) {
+        setMessages(prev => [...prev, {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: _translateCopy("copy.a64e8f4a14b6", { defaultValue: "Video generation failed: {{value1}}", value1: data.error })
+        }]);
+        setIsVideoLoading(false);
+        setPendingVideoRequest(null);
+        return;
+      }
+
+      // Create placeholder message for video
+      const messageId = (Date.now() + 1).toString();
+      const assistantMessage: Message = {
+        id: messageId,
+        role: 'assistant',
+        content: `${_translateCopy("copy.acce6b5b88e4", { defaultValue: "🎬 Generating video with **{{value1}}**...", value1: videoModel.name })}\n\n_${_translateCopy("copy.6945e5fa7a6a", { defaultValue: "This may take 1-3 minutes" })}_`,
+        isVideoGenerating: true,
+        videoPredictionId: data.predictionId
+      };
+
+      setMessages(prev => [...prev, assistantMessage]);
+
+      // Start polling for video status
+      startBoundedPoll(
+        data.predictionId,
+        () => pollVideoStatus(data.predictionId, messageId, data.provider, data.falAppId),
+        () => giveUpOnVideo(messageId),
+      );
+
+      // Persist so it survives reloads
+      savePendingVideo({
+        predictionId: data.predictionId,
+        messageId,
+        provider: data.provider,
+        falAppId: data.falAppId,
+        content: `${_translateCopy("copy.acce6b5b88e4", { defaultValue: "🎬 Generating video with **{{value1}}**...", value1: videoModel.name })}\n\n_${_translateCopy("copy.6945e5fa7a6a", { defaultValue: "This may take 1-3 minutes" })}_`,
+      });
+
+      finishDraft();
+      toast.success(t('assistant.paymentSuccessGenerating'));
+    } catch (err) {
+      console.error('Video generation error:', err);
+      // The function says why it could not start and whether the payment went
+      // back on the transfer. Without that, a refused start read as "paid and
+      // got nothing" even though the next generation would have been free.
+      const context = (err as { context?: unknown })?.context;
+      let reason = '';
+      let restoredDhb = 0;
+      if (context instanceof Response) {
+        try {
+          const body = await context.clone().json() as { error?: string; paymentRestored?: boolean; restoredDhb?: number };
+          reason = body.error || '';
+          if (body.paymentRestored) restoredDhb = Number(body.restoredDhb) || 0;
+        } catch {
+          // Not JSON. Keep the generic message.
+        }
+      }
+      const kept = restoredDhb > 0
+        ? t('assistant.videoGenPaymentKept', { amount: restoredDhb.toLocaleString() })
+        : '';
+      setMessages(prev => [...prev, {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: [t('assistant.videoGenFailedDetail', { error: reason || t('assistant.errorVideoGenStart') }), kept].filter(Boolean).join('\n\n'),
+      }]);
+      toast.error(kept || t('assistant.errorVideoGenStart'));
+      setIsVideoLoading(false);
+    }
+
+    setPendingVideoRequest(null);
+  };
+
+  // Handle image generation after payment confirmation
+  const handleImageGenerationConfirm = async (txHash: string, override?: { prompt: string; model: string; sourceImage?: string; logoImage?: string; headline?: string; bannerRenderer?: 'template' | 'scene'; bannerFormat?: 'landscape' | 'square' | 'portrait' }) => {
+    const finishDraft = pendingDraftCompletion.current;
+    const req = override ?? pendingImageRequest;
+    // Reaching here with nothing to generate used to return in silence — but
+    // the paywall has already signed the transfer by then, so that was money
+    // gone with no request, no error and no line in any log. The hash stays
+    // reusable for the next job either way; say so instead of vanishing.
+    if (!req) {
+      imageGenLogger.error('Paid for an image with no pending request', { hasTxHash: !!txHash });
+      if (txHash) toast.error(t('assistant.errorImageGenFailed'));
+      return;
+    }
+
+    const { prompt, model, sourceImage } = req;
+    const logoImage = override?.logoImage;
+    const headline = override?.headline;
+    const bannerRenderer = override?.bannerRenderer;
+    const bannerFormat = override?.bannerFormat;
+    const imageModel = IMAGE_MODELS[model];
+
+    // User message was already added by handleSend before paywall opened
+    // Don't add it again
+
+    setImagePaywallOpen(false);
+    setIsImageLoading(true);
+    setImageLoadStartTime(Date.now());
+
+    try {
+      const conversationHistory = messages
+        .filter(m => m.id !== 'initial')
+        .map(m => ({ role: m.role, content: m.content }));
+
+      const { data, error } = await invokeAi('generate-image', {
+        body: {
+          prompt,
+          sourceImage: sourceImage || undefined,
+          logoImage: logoImage || undefined,
+          // Explicit headline channel (Poster Studio tagline). Empty string means
+          // "user chose no headline" — the server must not regex-mine one from the prompt.
+          headline,
+          // Explicit renderer + format from the Poster dialog. 'template' forces the
+          // on-brand SM Template banner (blog-banner look) even though the brand
+          // wrapper prose contains "cinematic". Undefined = let the server decide.
+          bannerRenderer,
+          bannerFormat,
+          conversationHistory,
+          model,
+          txHash,
+        }
+      });
+
+      if (error) throw error;
+
+      if (data.error) {
+        const errorMessage = data.safetyBlocked
+          ? t('assistant.safetyBlocked')
+          : isImageProviderUnavailable(data.error, data.code) ? t('assistant.errorGeneric') : data.error;
+
+        if (data.clearHistory) {
+          setMessages([
+            { id: (Date.now() + 1).toString(), role: 'assistant', content: errorMessage }
+          ]);
+        } else {
+          setMessages(prev => [...prev, {
+            id: (Date.now() + 1).toString(),
+            role: 'assistant',
+            content: errorMessage
+          }]);
+        }
+        setPendingImageRequest(null);
+        return;
+      }
+
+      const assistantMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: '',
+        imageUrl: data.imageUrl
+      };
+
+      setMessages(prev => [...prev, assistantMessage]);
+      queueMessage(assistantMessage);
+      if (data.imageUrl) finishDraft();
+      toast.success(t('assistant.imageGenerated'));
+    } catch (err) {
+      console.error('Image generation error:', err);
+      // A non-2xx response (e.g. the template renderer's 503) surfaces here as
+      // a generic FunctionsHttpError — `data` is never parsed, so the server's
+      // actual `{ error, code }` body would otherwise be lost. Read it off the
+      // raw Response the client stashes on `context` so the user (and the logs)
+      // see the real reason instead of a one-size-fits-all failure toast.
+      let friendlyMessage = t('assistant.errorImageGenFailed');
+      let errorCode: string | undefined;
+      const context = (err as { context?: Response })?.context;
+      if (context && typeof context.json === 'function') {
+        try {
+          const body = await context.json();
+          if (body?.error) friendlyMessage = isImageProviderUnavailable(body.error, body.code)
+            ? t('assistant.errorGeneric') : body.error;
+          errorCode = body?.code;
+        } catch {
+          // Non-JSON error body — fall back to the generic message.
+        }
+      }
+      imageGenLogger.error('Image generation failed', { code: errorCode, model, bannerRenderer }, err);
+      toast.error(friendlyMessage);
+    } finally {
+      setIsImageLoading(false);
+      setPendingImageRequest(null);
+    }
+  };
+
+  // ─── AI Tool Handlers ───
+
+  const pollAiToolStatus = useCallback(async (requestId: string, appId: string, messageId: string, toolKey: string, statusUrl?: string, responseUrl?: string) => {
+    try {
+      const { data, error } = await invokeAi('fal-ai-tools', {
+        body: { requestId, appId, statusUrl, responseUrl }
+      });
+
+      if (error) throw error;
+
+      if (data.status === 'succeeded') {
+        clearInterval(pollingRef.current[requestId]);
+        delete pollingRef.current[requestId];
+        clearPendingTool();
+
+        const toolModel = AI_TOOL_MODELS[toolKey];
+
+        // Regular completion
+        const completedMessage: Message = {
+          id: messageId,
+          role: 'assistant',
+          content: '',
+          isToolProcessing: false,
+        };
+        if (data.audioUrl) {
+          completedMessage.audioUrl = data.audioUrl;
+        } else if (data.imageUrl) {
+          completedMessage.imageUrl = data.imageUrl;
+        }
+        if (data.text) completedMessage.content = `📝 **Transcription:**\n\n${data.text}`;
+        if (!data.audioUrl && !data.imageUrl && !data.text) {
+          completedMessage.content = `✅ ${toolModel?.name || 'Tool'} completed successfully.`;
+        }
+
+        setMessages(prev => prev.map(m => m.id !== messageId ? m : completedMessage));
+
+        // Persist to conversation history
+        queueMessage(completedMessage);
+
+        setIsAiToolProcessing(false);
+        toast.success(_translateCopy("copy.647b71499b5f", { defaultValue: "{{value1}} completed!", value1: toolModel?.name || _translateCopy("copy.e515e4369dcc", { defaultValue: "AI Tool" }) }));
+      } else if (data.status === 'failed') {
+        clearInterval(pollingRef.current[requestId]);
+        delete pollingRef.current[requestId];
+        clearPendingTool();
+
+        setMessages(prev => prev.map(m =>
+          m.id === messageId ? { ...m, isToolProcessing: false, content: _translateCopy("copy.eb8a221f3e69", { defaultValue: "❌ Processing failed: {{value1}}", value1: data.error || _translateCopy("copy.27c2ccd962c2", { defaultValue: "Unknown error" }) }) } : m
+        ));
+        setIsAiToolProcessing(false);
+      }
+    } catch (err) {
+      console.error('[AI Tool] Polling error:', err);
+    }
+  }, [pollVideoStatus, clearPendingTool, clearPendingVideo, savePendingVideo, queueMessage]);
+
+  const handleAiToolConfirm = async (txHash: string) => {
+    const finishDraft = pendingDraftCompletion.current;
+    if (!pendingAiToolRequest) return;
+
+    const { prompt, tool, category, sourceImage } = pendingAiToolRequest;
+    const toolModel = AI_TOOL_MODELS[tool];
+
+    setAiToolPaywallOpen(false);
+    setIsAiToolProcessing(true);
+
+    try {
+      const actualTool = tool;
+      const body: Record<string, unknown> = { tool: actualTool, prompt, txHash };
+      if (sourceImage) body.image_url = sourceImage;
+      if (category === 'tts') body.text = prompt;
+      // Pass lyrics separately for music tools
+      if ((pendingAiToolRequest as any)?.lyrics) {
+        body.lyrics = (pendingAiToolRequest as any).lyrics;
+      }
+
+      const { data, error } = await invokeAi('fal-ai-tools', { body });
+
+      if (error) throw error;
+
+      if (data.error) {
+        setMessages(prev => [...prev, {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: `❌ ${data.error}`
+        }]);
+        setIsAiToolProcessing(false);
+        setPendingAiToolRequest(null);
+        return;
+      }
+
+      if (data.status === 'succeeded') {
+        // Synchronous tool — result is ready
+        const assistantMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: '',
+          ...(data.audioUrl ? { audioUrl: data.audioUrl } : data.imageUrl ? { imageUrl: data.imageUrl } : {}),
+          ...(data.text && { content: `${_translateCopy("copy.0a66a5f0f8ba", { defaultValue: "📝 **Transcription:**" })}\n\n${data.text}` }),
+        };
+        if (!assistantMessage.audioUrl && !assistantMessage.imageUrl && !assistantMessage.content) {
+          assistantMessage.content = `✅ ${toolModel.name} completed.`;
+        }
+        setMessages(prev => [...prev, assistantMessage]);
+        queueMessage(assistantMessage);
+        finishDraft();
+        setIsAiToolProcessing(false);
+        toast.success(`${toolModel.name} completed!`);
+      } else {
+        // Async tool — start polling
+        const messageId = (Date.now() + 1).toString();
+        const label = toolModel.name;
+        const desc = _translateCopy("copy.0dbd749f0550", { defaultValue: "This may take a minute" });
+        const assistantMessage: Message = {
+          id: messageId,
+          role: 'assistant',
+          content: `${toolModel.emoji} ${_translateCopy("copy.e5010bd7c215", { defaultValue: "Processing with **{{value1}}**...", value1: label })}\n\n_${desc}_`,
+          isToolProcessing: true,
+          toolRequestId: data.requestId,
+          toolAppId: data.appId,
+          toolType: tool,
+        };
+        setMessages(prev => [...prev, assistantMessage]);
+
+
+        // Persist pending request for reload recovery
+        savePendingTool({
+          requestId: data.requestId, appId: data.appId, messageId,
+          toolKey: tool,
+          statusUrl: data.statusUrl, responseUrl: data.responseUrl,
+          content: assistantMessage.content,
+        });
+
+        if (data.requestId) finishDraft();
+        startBoundedPoll(
+          data.requestId,
+          () => pollAiToolStatus(data.requestId, data.appId, messageId, tool, data.statusUrl, data.responseUrl),
+          () => giveUpOnTool(messageId),
+        );
+      }
+    } catch (err) {
+      console.error('[AI Tool] Error:', err);
+      toast.error(_copy("copy.7498d4bdff6d", { defaultValue: "AI tool processing failed." }));
+      setIsAiToolProcessing(false);
+    }
+
+    setPendingAiToolRequest(null);
+  };
+
+  // Cleanup polling on unmount
+  useEffect(() => {
+    return () => {
+      Object.values(pollingRef.current).forEach(clearInterval);
+    };
+  }, []);
+
+  const handleSend = async (overrideMessage?: string, opts?: { noSkillMatch?: boolean }) => {
+    const messageToSend = overrideMessage || input.trim();
+    if (!messageToSend || isLoading || restoringConversation) return;
+    pendingDraftCompletion.current = () => { if (!overrideMessage) setInput.complete(input, ""); };
+
+    // ── Skill matching: slash command wins, otherwise auto-trigger ──
+    const slash = extractSlashSkill(messageToSend, userSkills);
+    const boardCommand = !slash.skill && isRequestBoardCommand(messageToSend);
+    const matchedSkill: UserSkill | null = slash.skill ?? (opts?.noSkillMatch || boardCommand ? null : matchSkill(messageToSend, userSkills));
+    const skillCleanedInput = slash.skill ? slash.cleaned : messageToSend;
+    let skillSourceImage: string | null = null;
+    if (matchedSkill) {
+      // Use first asset as reference image when generating an image skill
+      if (matchedSkill.kind === 'image' && matchedSkill.asset_urls.length > 0) {
+        try {
+          skillSourceImage = await imageUrlToBase64(matchedSkill.asset_urls[0]);
+        } catch {
+          // non-fatal
+        }
+      }
+      void incrementSkillUsage(matchedSkill.id);
+      toast.message(_translateCopy("copy.dea7dbdf2bed", { defaultValue: "Using skill: {{value1}}", value1: matchedSkill.name }), { duration: 2000 });
+    }
+
+    // ── Character mention matching ──
+    const charMatch = parseCharacterMentions(skillCleanedInput, boardCommand ? [] : userCharacters);
+    let characterSourceImage: string | null = null;
+    if (charMatch.hasMentions) {
+      const primary = charMatch.characters[0].primary_image_url
+        ?? charMatch.characters[0].reference_image_urls[0];
+      if (primary) {
+        try { characterSourceImage = await imageUrlToBase64(primary); } catch { /* non-fatal */ }
+      }
+      charMatch.characters.forEach((c) => void incrementCharacterUsage(c.id));
+      const names = charMatch.characters.map((c) => c.name).join(', ');
+      toast.message(_translateCopy("copy.b1eb6280b281", { defaultValue: "Using characters: {{value1}}", value1: names, count: charMatch.characters.length }), { duration: 2000 });
+    }
+
+    const personaBlock = buildCharacterPersonaBlock(charMatch.characters);
+    const promptCore = charMatch.cleanedPrompt;
+    const effectiveInput = matchedSkill
+      ? `${matchedSkill.system_prompt}${personaBlock ? `\n\n${personaBlock}` : ''}\n\nUser request: ${promptCore}`
+      : personaBlock
+        ? `${personaBlock}\n\nUser request: ${promptCore}`
+        : messageToSend;
+
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      role: 'user',
+      content: messageToSend,
+      attachedImage: attachedImage || undefined
+    };
+
+    setMessages(prev => [...prev, userMessage]);
+    scrollToBottom(true);
+    // Save user message to conversation
+    queueMessage(userMessage);
+    
+    const currentInput = effectiveInput;
+    const currentAttachedImage = attachedImage || skillSourceImage || characterSourceImage;
+    setIsLoading(true);
+    
+    // Reset textarea height to default
+    if (inputRef.current) {
+      inputRef.current.style.height = 'auto';
+    }
+
+    try {
+      // Check if user wants to use the official logo in their image
+      const wantsDeHubBrand = !boardCommand && (matchedSkill?.slug === 'dehub-poster' || isDeHubBrandedImageRequest(messageToSend) || isDeHubBrandedImageRequest(currentInput));
+      const wantsLogo = !boardCommand && (wantsDeHubBrand || requiresLogoAsset(currentInput));
+      const isCreativeLogo = wantsLogo && isCreativeLogoRequest(currentInput);
+      
+      // If just asking "show me the logo" without creative context, display it directly
+      if (wantsLogo && !isCreativeLogo) {
+        const assistantMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: t('assistant.officialLogo'),
+          imageUrl: dehubLogo
+        };
+        setMessages(prev => [...prev, assistantMessage]);
+        queueMessage(assistantMessage);
+        if (!overrideMessage && setInput.complete(input, '')) setAttachedImage(null);
+        setIsLoading(false);
+        
+        if (alwaysSpeakReplies) {
+          setTimeout(() => elevenLabsSpeak(_translateCopy("copy.4cef372919b2", { defaultValue: "Here's the official Riftn logo!" })), 300);
+        }
+        return;
+      }
+      
+      // If creative logo request, convert logo to base64 and use as source image
+      let effectiveSourceImage = currentAttachedImage;
+      if (wantsDeHubBrand || isCreativeLogo) {
+        effectiveSourceImage = await imageUrlToBase64(dehubLogo);
+      }
+
+      // Check request type — AI tools first, then video/image
+      const aiToolCategory = boardCommand ? null : detectAiToolRequest(currentInput, !!currentAttachedImage);
+      const isVideoRequest = !boardCommand && !aiToolCategory && requiresVideoGeneration(currentInput);
+      // `conversational` opts this surface into the looser phrasing ("show me",
+      // "what does … look like"). It is safe here and not in the chat bubble
+      // because the paywall below asks before anything is signed.
+      const isImageRequest = !boardCommand && !aiToolCategory && (isCreativeLogo || matchedSkill?.kind === 'image' || charMatch.hasMentions || requiresImageGeneration(currentInput, !!currentAttachedImage, { conversational: true }));
+      
+      if (aiToolCategory) {
+        // For music requests, show confirm dialog first
+        if (aiToolCategory === 'music') {
+          setPendingMusicPrompt(currentInput);
+          setAiToolCategory(aiToolCategory);
+          setIsAiToolProcessing(false); // Reset in case previous request got stuck
+          setMusicConfirmOpen(true);
+          setIsLoading(false);
+          return;
+        }
+        const defaultTool = DEFAULT_TOOL_FOR_CATEGORY[aiToolCategory];
+        setPendingAiToolRequest({
+          prompt: currentInput,
+          tool: defaultTool,
+          category: aiToolCategory,
+          sourceImage: currentAttachedImage || undefined,
+        });
+        setSelectedAiToolId(defaultTool);
+        setAiToolCategory(aiToolCategory);
+        setIsAiToolProcessing(false); // Reset in case previous request got stuck
+        setAiToolPaywallOpen(true);
+        return;
+      } else if (isVideoRequest) {
+        // Validate Runway requires an image
+        if (selectedVideoModel === 'runway-gen4' && !currentAttachedImage) {
+          toast.error(_copy("copy.b26e58f90d58", { defaultValue: "Runway Gen-4 requires an image to animate. Please attach an image or select a different model." }));
+          setIsLoading(false);
+          return;
+        }
+        
+        // Show paywall instead of generating directly
+        setPendingVideoRequest({
+          prompt: currentInput,
+          model: selectedVideoModel,
+          sourceImage: currentAttachedImage || undefined,
+        });
+        setPaywallOpen(true);
+        setIsLoading(false);
+        return;
+        setIsLoading(false);
+        
+      } else if (isImageRequest) {
+        // DeHub-branded posters get the poster studio drawer first
+        // (dimensions, style archetype, roadmap feature spotlight, tagline, links).
+        if (wantsDeHubBrand) {
+          setPendingPosterPrompt(messageToSend);
+          setPosterConfigOpen(true);
+          setIsLoading(false);
+          return;
+        }
+        const imgReq = {
+          prompt: currentInput,
+          model: selectedImageModel,
+          sourceImage: effectiveSourceImage || currentAttachedImage || undefined,
+        };
+        // Show image paywall instead of generating directly
+        setPendingImageRequest(imgReq);
+        setImagePaywallOpen(true);
+        setIsLoading(false);
+        return;
+      } else {
+        // Regular chat - use streaming for token-by-token rendering
+        const chatBody = {
+          messages: [...messages, userMessage].map(m => ({
+            role: m.role,
+            content: m.content
+          })),
+          style: selectedStyle,
+          model: selectedChatModel,
+          isAuthenticated,
+          userLanguage,
+          userContext,
+          dehubToken: localStorage.getItem('dehub_token') || undefined,
+          // Full assistant surface: the agent gets the personal-data tools as
+          // well as the public ones, and answers at length.
+          surface: 'assistant' as const,
+          callerAddress: walletAddress || undefined,
+        };
+
+        const streamingMsgId = (Date.now() + 1).toString();
+        let streamedContent = '';
+        let isFirstToken = true;
+        // Empty the box the moment the message goes; it comes back only if the answer fails.
+        const sentDraft = !overrideMessage ? { text: input, image: attachedImage } : null;
+        if (sentDraft && setInput.complete(sentDraft.text, '')) setAttachedImage(null);
+        const restoreDraft = () => {
+          if (!sentDraft) return;
+          setInput((previous) => (previous.trim() ? previous : sentDraft.text));
+          if (sentDraft.image) setAttachedImage((previous) => previous ?? sentDraft.image);
+        };
+
+        await streamChat({
+          body: chatBody,
+          onTool: ({ status, tools }) => {
+            // Lookups happen before any text arrives, so name what is being
+            // checked instead of leaving a bare spinner on screen.
+            setActiveTools(status === 'running' ? tools : []);
+          },
+          onDelta: (text) => {
+            streamedContent += text;
+            if (isFirstToken) {
+              // Create the assistant message on first token
+              isFirstToken = false;
+              setStreamingReply(true);
+              setMessages(prev => [...prev, {
+                id: streamingMsgId,
+                role: 'assistant',
+                content: streamedContent,
+              }]);
+            } else {
+              // Update the last assistant message content
+              setMessages(prev => {
+                const updated = [...prev];
+                const lastIdx = updated.length - 1;
+                if (lastIdx >= 0 && updated[lastIdx].id === streamingMsgId) {
+                  updated[lastIdx] = { ...updated[lastIdx], content: streamedContent };
+                }
+                return updated;
+              });
+            }
+          },
+          onMeta: (meta) => {
+            if (meta.fallbackUsed) {
+              toast.info(t('assistant.fallbackGrokNotConfigured'));
+            }
+          },
+          onDone: () => {
+            setStreamingReply(false);
+            setActiveTools([]);
+            // Save to conversation history
+            const finalMessage: Message = {
+              id: streamingMsgId,
+              role: 'assistant',
+              content: streamedContent || t('assistant.noResponse'),
+            };
+            queueMessage(finalMessage);
+
+            // Auto-speak if enabled
+            if (alwaysSpeakReplies && streamedContent) {
+              setTimeout(() => {
+                elevenLabsSpeak(streamedContent);
+              }, 300);
+            }
+          },
+          onError: (err) => {
+            setStreamingReply(false);
+            restoreDraft();
+            // Surface error to the UI
+            const errorCode = (err as any)?.errorCode || 'UNKNOWN';
+            let userErrorMessage: string;
+            switch (errorCode) {
+              case 'RATE_LIMIT':
+                userErrorMessage = t('assistant.errorRateLimit');
+                break;
+              case 'CREDITS_EXHAUSTED':
+                userErrorMessage = t('assistant.errorCreditsExhausted');
+                break;
+              case 'TIMEOUT':
+                userErrorMessage = t('assistant.errorTimeout');
+                break;
+              default:
+                userErrorMessage = t('assistant.errorUnknown', { message: err?.message || 'Unknown error' });
+                break;
+            }
+            const errorId = (Date.now() + 2).toString();
+            setMessages(prev => [...prev, {
+              id: errorId,
+              role: 'assistant',
+              content: userErrorMessage,
+              isError: true,
+            }]);
+            setActiveTools([]);
+            setIsLoading(false);
+          },
+        });
+      }
+    } catch (error: any) {
+      console.error('AI chat error:', error);
+      const errorCode = error?.errorCode || 'UNKNOWN';
+      const statusCode = error?.statusCode;
+      
+      // Build user-facing error message based on error type
+      let userErrorMessage: string;
+      switch (errorCode) {
+        case 'RATE_LIMIT':
+          userErrorMessage = t('assistant.errorRateLimit');
+          break;
+        case 'CREDITS_EXHAUSTED':
+          userErrorMessage = t('assistant.errorCreditsExhausted');
+          break;
+        case 'TIMEOUT':
+          userErrorMessage = t('assistant.errorTimeout');
+          break;
+        case 'UPSTREAM_ERROR':
+          userErrorMessage = t('assistant.errorUpstream', { status: statusCode || 'unknown' });
+          break;
+        default:
+          userErrorMessage = t('assistant.errorUnknown', { message: error?.message || 'Unknown error' });
+          break;
+      }
+      
+      // Log error details to backend for diagnostics
+      try {
+        await supabase.functions.invoke('client-logs', {
+          body: {
+            logs: [{
+              level: 'error',
+              message: `Assistant error [${errorCode}]: ${error?.message || 'Unknown error'}`,
+              component: 'AssistantPage',
+              metadata: {
+                userMessage: currentInput?.substring(0, 100),
+                model: selectedChatModel,
+                errorCode,
+                statusCode,
+                errorName: error?.name,
+                errorStack: error?.stack?.substring(0, 500),
+              },
+            }],
+          },
+        });
+      } catch (logErr) {
+        console.warn('[Assistant] Failed to log error:', logErr);
+      }
+      const errorId = (Date.now() + 1).toString();
+      setMessages(prev => [...prev, {
+        id: errorId,
+        role: 'assistant',
+        content: userErrorMessage,
+        isError: true,
+      }]);
+    } finally {
+      setIsLoading(false);
+      setIsImageLoading(false);
+      setStreamingReply(false);
+    }
+  };
+  useEffect(() => {
+    if (!autoSendPrompt || !isAuthenticated || isLoading || restoringConversation) return;
+    const prompt = autoSendPrompt;
+    setAutoSendPrompt(null);
+    // A handed-over ask (e.g. "…posts by @riftn") must not trip a skill's auto-match.
+    void handleSend(prompt, { noSkillMatch: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoSendPrompt, isAuthenticated, isLoading, restoringConversation]);
+
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  };
+
+  // Helper function to abbreviate transaction hash for mobile display
+  const abbreviateHash = (hash: string) => {
+    if (hash.length <= 20) return hash;
+    return `${hash.slice(0, 10)}...${hash.slice(-8)}`;
+  };
+
+  // Handle simulation approval - simulate successful transaction
+  const handleSimulationApprove = (messageId: string) => {
+    // Update the simulation status
+    setMessages(prev => prev.map(m => 
+      m.id === messageId ? { ...m, simulationStatus: 'approved' as const } : m
+    ));
+    
+    toast.success(t('assistant.transferComplete'));
+  };
+
+  // Handle simulation rejection
+  const handleSimulationReject = (messageId: string) => {
+    setMessages(prev => prev.map(m => 
+      m.id === messageId ? { ...m, simulationStatus: 'rejected' as const } : m
+    ));
+    toast.info(_copy("copy.feee6f4ba750", { defaultValue: "Transaction rejected" }));
+  };
+
+  const handleStyleSelect = (styleId: string) => {
+    setSelectedStyle(styleId);
+    setStyleSheetOpen(false);
+  };
+
+  const handleVideoModelSelect = (modelId: VideoModelKey) => {
+    setSelectedVideoModel(modelId);
+  };
+
+  const handleImageModelSelect = (modelId: ImageModelKey) => {
+    setSelectedImageModel(modelId);
+  };
+
+  const handleVoiceSelect = (voiceId: VoicePreferenceKey) => {
+    setSelectedVoice(voiceId);
+  };
+
+  const handleChatModelSelect = (modelId: string) => {
+    setSelectedChatModel(modelId);
+  };
+
+  // Convert base64 image to FileList for PostModal
+  const handlePostImage = async (imageUrl: string) => {
+    try {
+      // Extract base64 data
+      const response = await fetch(imageUrl);
+      const blob = await response.blob();
+      const file = new File([blob], 'ai-generated-image.png', { type: 'image/png' });
+      
+      // Create a DataTransfer to build FileList
+      const dataTransfer = new DataTransfer();
+      dataTransfer.items.add(file);
+      
+      setPostModalFiles(dataTransfer.files);
+      setPostModalOpen(true);
+    } catch (error) {
+      console.error('Error preparing image for post:', error);
+    }
+  };
+
+  // Convert video URL to FileList for PostModal
+  const handlePostVideo = async (videoUrl: string) => {
+    try {
+      const response = await fetch(videoUrl);
+      const blob = await response.blob();
+      const file = new File([blob], 'ai-generated-video.mp4', { type: 'video/mp4' });
+      
+      const dataTransfer = new DataTransfer();
+      dataTransfer.items.add(file);
+      
+      setPostModalFiles(dataTransfer.files);
+      setPostModalOpen(true);
+    } catch (error) {
+      console.error('Error preparing video for post:', error);
+    }
+  };
+
+  // Style options content
+  const styleMenuContent = (
+    <div className="h-[50vh] overflow-y-auto">
+      <div className="flex flex-col pb-4">
+        {AI_ASSISTANT_STYLE_OPTIONS.map((style) => (
+          <button
+            key={style.id}
+            type="button"
+            onClick={() => handleStyleSelect(style.id)}
+            className={`flex items-center gap-3 px-4 py-3 text-sm text-white hover:bg-white/10 transition-colors ${
+              selectedStyle === style.id ? 'bg-white/10' : ''
+            }`}
+          >
+            <span className="text-lg">{style.emoji}</span>
+            {t(`aiStyles.${style.id}`)}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+
+  // A fresh chat opens on the ball; voice chat stays on it so the ball can
+  // follow the whole conversation, reply included.
+  const isEmptyChat = messages.length === 0 && !isLoading && !isImageLoading && !isVideoLoading && !restoringConversation;
+  const showVoiceStage = isEmptyChat || voiceAssistant.isVoiceMode;
+  const toggleVoiceMode = () => {
+    if (voiceAssistant.isVoiceMode) voiceAssistant.stopVoiceMode();
+    else void voiceAssistant.startVoiceMode();
+  };
+  // The ball works like a record button: tap to start, tap again to send what
+  // you said, tap while it talks to skip. Stop Voice Chat under it ends it.
+  const handleOrbTap = () => {
+    if (!voiceAssistant.isVoiceMode) { void voiceAssistant.startVoiceMode(); return; }
+    if (voiceAssistant.status === 'listening') void voiceAssistant.finishTurn();
+    else if (voiceAssistant.status === 'speaking') voiceAssistant.stopSpeaking();
+  };
+
+  // One message box for both spots: the middle of the empty screen, and the
+  // bottom once a chat is going. Only one is ever mounted, so the refs hold.
+  const composerIconBtn = "h-9 w-9 shrink-0 rounded-full flex items-center justify-center text-white/65 hover:text-white hover:bg-white/10 transition-colors disabled:opacity-30 disabled:hover:bg-transparent";
+  const composer = (
+    <div>
+      {attachedImage && (
+        <div className="mb-2 relative inline-block">
+          <img
+            src={attachedImage}
+            alt={_copy("copy.ac6d9b76a141", { defaultValue: "Attached" })}
+            className="max-h-20 rounded-lg object-contain"
+          />
+          <button
+            onClick={() => setAttachedImage(null)}
+            className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500/90 rounded-full flex items-center justify-center"
+          >
+            <X className="w-3 h-3 text-white" />
+          </button>
+        </div>
+      )}
+      <div
+        data-assistant-input
+        className={`relative flex flex-col gap-1 rounded-[24px] border bg-white/[0.06] backdrop-blur-2xl px-2.5 pt-2.5 pb-2 shadow-[0_10px_40px_rgba(0,0,0,0.35)] transition-all duration-500 ${
+          inputGlow
+            ? 'border-white/60 shadow-[0_0_20px_rgba(255,255,255,0.3)]'
+            : 'border-white/12'
+        }`}
+      >
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleImageSelect}
+          className="hidden"
+        />
+
+        {/* Auto-expanding textarea */}
+        <textarea
+          ref={inputRef}
+          value={isRecording ? transcript : input}
+          onChange={(e) => {
+            if (!isRecording) {
+              const newValue = e.target.value;
+              const caret = e.target.selectionStart ?? newValue.length;
+              setInput(newValue);
+              mention.handleInput(newValue, caret);
+              // Slash-skill detection: `/` at start or after whitespace, followed by [a-z0-9-]*
+              const before = newValue.slice(0, caret);
+              const m = before.match(/(?:^|\s)\/([a-z0-9-]{0,32})$/i);
+              if (m) {
+                const tokenStart = caret - m[1].length - 1; // include the `/`
+                setSlashRange({ start: tokenStart, end: caret });
+                setSlashQuery(m[1]);
+                // Auto-open once user types >=2 chars after `/`
+                setSlashOpen(m[1].length >= 2);
+              } else {
+                setSlashOpen(false);
+              }
+              const t = e.target;
+              requestAnimationFrame(() => {
+                t.style.height = 'auto';
+                const maxHeight = window.innerHeight * 0.45;
+                t.style.height = `${Math.min(t.scrollHeight, maxHeight)}px`;
+              });
+            }
+          }}
+          onKeyDown={(e) => {
+            if (slashOpen) {
+              const results = filterSkills(slashQuery, userSkills);
+              if (e.key === 'ArrowDown') { e.preventDefault(); setSlashSelected((i) => Math.min(i + 1, Math.max(0, results.length - 1))); return; }
+              if (e.key === 'ArrowUp') { e.preventDefault(); setSlashSelected((i) => Math.max(i - 1, 0)); return; }
+              if (e.key === 'Escape') { e.preventDefault(); setSlashOpen(false); return; }
+              if ((e.key === 'Enter' || e.key === 'Tab') && results[slashSelected]) {
+                e.preventDefault();
+                const skill = results[slashSelected];
+                const before = input.slice(0, slashRange.start);
+                const after = input.slice(slashRange.end);
+                const insert = `/${skill.slug} `;
+                const next = before + insert + after;
+                setInput(next);
+                setSlashOpen(false);
+                requestAnimationFrame(() => {
+                  const pos = (before + insert).length;
+                  inputRef.current?.focus();
+                  inputRef.current?.setSelectionRange(pos, pos);
+                });
+                return;
+              }
+            }
+            if (mention.isOpen) {
+              const handled = mention.handleKeyDown(e);
+              if (handled) {
+                if (e.key === 'Enter' || e.key === 'Tab') {
+                  e.preventDefault();
+                  const liveResults = (window as any).__mentionResults || [];
+                  if (liveResults[mention.selectedIndex]) {
+                    mention.handleSelect(liveResults[mention.selectedIndex]);
+                  }
+                }
+                return;
+              }
+            }
+            if (e.key === 'Enter' && !e.shiftKey) {
+              e.preventDefault();
+              handleSend();
+            }
+          }}
+          onPaste={handlePaste}
+          placeholder={isRecording ? t('assistant.listening') : attachedImage ? t('assistant.describeEdits') : t('assistant.askAnything')}
+          className={`w-full bg-transparent text-[15px] text-white placeholder:text-white/45 focus:outline-none min-w-0 resize-none overflow-y-auto leading-relaxed px-1 pt-1 ${
+            isRecording ? 'text-white/60 italic' : ''
+          }`}
+          style={{ 
+            minHeight: isEmptyChat ? '52px' : '26px',
+            maxHeight: '45vh'
+          }}
+          rows={isEmptyChat ? 2 : 1}
+          readOnly={isRecording}
+        />
+
+        {/* Slash Skill Dropdown */}
+        <SlashSkillDropdown
+          isOpen={slashOpen}
+          query={slashQuery}
+          skills={userSkills}
+          selectedIndex={slashSelected}
+          onSelectedIndexChange={setSlashSelected}
+          onSelect={(skill) => {
+            const before = input.slice(0, slashRange.start);
+            const after = input.slice(slashRange.end);
+            const insert = `/${skill.slug} `;
+            const next = before + insert + after;
+            setInput(next);
+            setSlashOpen(false);
+            requestAnimationFrame(() => {
+              const pos = (before + insert).length;
+              inputRef.current?.focus();
+              inputRef.current?.setSelectionRange(pos, pos);
+            });
+          }}
+          onOpenAll={() => { setSlashOpen(false); setSkillsBrowserOpen(true); }}
+          onClose={() => setSlashOpen(false)}
+        />
+
+        {/* User Mention Dropdown */}
+        <UserMentionDropdown
+          query={mention.query}
+          isOpen={mention.isOpen}
+          position={mention.position}
+          armed={mention.armed}
+          selectedIndex={mention.selectedIndex}
+          onSelectedIndexChange={mention.setSelectedIndex}
+          onSelect={mention.handleSelect}
+          onClose={mention.handleClose}
+        />
+
+        
+        <div className="flex items-center gap-0.5">
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            className={composerIconBtn}
+            aria-label={t('assistant.attachFile')}
+            title={t('assistant.attachFile')}
+          >
+            <Paperclip className="w-[18px] h-[18px]" />
+          </button>
+          {/* On the start screen the ball is the voice button; once a chat is
+              going this is the way back to it. */}
+          {!showVoiceStage && <button
+            type="button"
+            onClick={toggleVoiceMode}
+            disabled={isLoading && !voiceAssistant.isVoiceMode}
+            className={cn(composerIconBtn, voiceAssistant.isVoiceMode && 'text-white bg-white/10')}
+            aria-label={voiceAssistant.isVoiceMode ? _copy("copy.dd2108f1cda8", { defaultValue: "Stop Voice Chat" }) : _copy("copy.70438fbf1234", { defaultValue: "Voice Chat (AI)" })}
+            title={voiceAssistant.isVoiceMode ? _copy("copy.dd2108f1cda8", { defaultValue: "Stop Voice Chat" }) : _copy("copy.70438fbf1234", { defaultValue: "Voice Chat (AI)" })}
+          >
+            <AudioLines className="w-[18px] h-[18px]" />
+          </button>}
+          <span className="flex-1" />
+          {isSpeaking && (
+            <button
+              type="button"
+              onClick={stopSpeaking}
+              className={composerIconBtn}
+              aria-label={t('assistant.stopSpeaking')}
+              title={t('assistant.stopSpeaking')}
+            >
+              <VolumeX className="w-[18px] h-[18px]" />
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => handleSend()}
+            disabled={(!input.trim() && !isRecording) || isLoading}
+            className="h-9 w-9 shrink-0 rounded-full flex items-center justify-center bg-white text-black transition-opacity disabled:opacity-25 disabled:cursor-not-allowed"
+            aria-label={_copy("copy.f6f4688ff23d", { defaultValue: "Send" })}
+          >
+            <Send className="w-[17px] h-[17px]" />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
+  // The ball is the voice button. It reads the live level every frame, so it
+  // swells with the mic and moves the most while the reply plays.
+  const orbMode: LiquidOrbMode = !voiceAssistant.isVoiceMode ? 'idle'
+    : voiceAssistant.status === 'listening' ? 'listening'
+    : voiceAssistant.status === 'speaking' ? 'speaking'
+    : 'thinking';
+  const voiceStatusLine: Record<LiquidOrbMode, string> = {
+    idle: _copy("copy.1607715e45ed", { defaultValue: "Tap the ball to talk, or type below" }),
+    listening: _copy("copy.c9f2a4e7d1b5", { defaultValue: "Listening... tap the ball to send" }),
+    thinking: _copy("copy.b4739a4f0865", { defaultValue: "Thinking..." }),
+    speaking: _copy("copy.f2ef1cac7f88", { defaultValue: "Speaking..." }),
+  };
+  const greetings = [
+    _copy("copy.d1a0c7e2f301", { defaultValue: "What's on your mind today?" }),
+    _copy("copy.d1a0c7e2f302", { defaultValue: "What are you thinking about today?" }),
+    _copy("copy.d1a0c7e2f303", { defaultValue: "What's on your mind?" }),
+    _copy("copy.d1a0c7e2f304", { defaultValue: "Got something on your mind?" }),
+    _copy("copy.d1a0c7e2f305", { defaultValue: "What's on your mind right now?" }),
+    _copy("copy.d1a0c7e2f306", { defaultValue: "What are we thinking today?" }),
+    _copy("copy.d1a0c7e2f307", { defaultValue: "Anything on your mind today?" }),
+    _copy("copy.d1a0c7e2f308", { defaultValue: "What's on your mind this time?" }),
+  ];
+  const lastReply = [...messages].reverse().find((m) => m.role === 'assistant' && m.content)?.content ?? '';
+  const startTiles: Array<{ icon: ThemeIconKey; label: string; onClick: () => void }> = [
+    { icon: 'images', label: _copy("copy.1aa4cb0bcca7", { defaultValue: "Image" }), onClick: () => {
+      setInput(t('assistant.generateImageOf'));
+      inputRef.current?.focus();
+      setInputGlow(true);
+      setTimeout(() => setInputGlow(false), 2000);
+    } },
+    { icon: 'videos', label: _copy("copy.d534be829e32", { defaultValue: "Video" }), onClick: () => {
+      setInput(t('assistant.generateVideoOf'));
+      inputRef.current?.focus();
+      setInputGlow(true);
+      setTimeout(() => setInputGlow(false), 2000);
+    } },
+    { icon: 'audio', label: t('feed.music'), onClick: () => {
+      setPendingMusicPrompt('');
+      setMusicConfirmOpen(true);
+    } },
+    { icon: 'paint', label: _copy("copy.1ba76ea7e3d9", { defaultValue: "Poster" }), onClick: () => {
+      setPendingPosterPrompt('');
+      setPosterConfigOpen(true);
+    } },
+    { icon: 'wand', label: t('assistant.editImage'), onClick: () => fileInputRef.current?.click() },
+    { icon: 'command', label: t('affiliateLanding.presets.build'), onClick: () => navigate('/builder') },
+  ];
+
+  if (!isAuthenticated) {
+    return <AuthGate description={t('assistant.loginRequired')} />;
+  }
+
+  return (
+    <div 
+      data-assistant-page
+      // h-full can't resolve against <main>, which only has a min-height
+      // floor — so it computed as auto and let the shell grow past the
+      // viewport, scrolling into dead space below short content. dvh is
+      // viewport-relative instead, sized to clear <main>'s pt-11 (the top bar, --app-top-bar) + pb-16
+      // (dropped at the same lg breakpoint this switches to h-screen).
+      className="flex flex-col h-[calc(100dvh_-_64px_-_var(--app-top-bar))] lg:h-screen relative overflow-hidden"
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+    >
+      <SEOHead title={_copy("copy.3a1695a9f5a0", { defaultValue: "AI Assistant: Chat, Generate Images & Video" })} description={_copy("copy.f5653f103a71", { defaultValue: "Chat with Riftn's AI assistant. Generate images, create videos, get web search results, and explore AI capabilities — all in one place." })} url="https://riftn.com/app/assistant" jsonLd={{ '@context': 'https://schema.org', '@type': 'SoftwareApplication', name: 'Riftn AI Assistant', url: 'https://riftn.com/app/assistant', applicationCategory: 'UtilitiesApplication', description: _copy("copy.7798213b19b5", { defaultValue: "AI assistant for chat, image generation, video creation and web search." }), operatingSystem: 'Web', offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' } }} />
+      <h1 className="sr-only">{_copy("copy.5d34a491a342", { defaultValue: "Riftn AI Assistant — Decentralised Social Media, Censorship Resistant & Freedom of Speech" })}</h1>
+      {/* Drag overlay */}
+      <AnimatePresence>
+        {isDragging && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center pointer-events-none"
+          >
+            <div className="flex flex-col items-center gap-3 p-8 rounded-2xl bg-white/10 border border-white/20">
+              <ImageIcon className="w-12 h-12 text-white/80" />
+              <p className="text-white text-lg font-medium">{t('assistant.dropImageHere')}</p>
+              <p className="text-white/50 text-sm">{t('assistant.toAttachForEditing')}</p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      {/* Header. Phones draw it as every page's top pill (Home's size: 36px
+          row, 18px icon, 14px title); desktop keeps the open header. */}
+      <div
+        data-feed-nav-outer={phonePill ? '' : undefined}
+        data-kit-pill-outer={phonePill ? '' : undefined}
+        className={phonePill ? 'relative z-50 shrink-0 px-2 pt-1 pb-2' : 'flex items-center justify-between p-4'}
+      >
+        <div
+          data-feed-nav={phonePill ? '' : undefined}
+          data-kit-pill={phonePill ? '' : undefined}
+          className={phonePill ? 'relative flex flex-col rounded-xl bg-zinc-900' : 'contents'}
+          style={phonePill ? { overflowX: 'clip', overflowClipMargin: '8px' } : undefined}
+        >
+        {phonePill ? <span data-nav-glass-backdrop aria-hidden="true" /> : null}
+        <div className={phonePill ? cn('relative z-20 flex min-w-0 items-center justify-between', PILL_ROW) : 'contents'}>
+        {/* Wrapped so themes that mark the pill's first button (Home's
+            settings divider) leave the title alone. */}
+        <div className={phonePill ? 'flex min-w-0' : 'contents'}>
+        <button
+          onClick={() => {
+            startNewConversation();
+            setMessages([]);
+                    setAttachedImage(null);
+          }}
+          className={phonePill ? 'flex min-w-0 items-center gap-2 pl-3' : 'flex items-center gap-3 group'}
+        >
+          {phonePill ? (
+            <ThemedIcon icon="assistant" alt="" className={cn(PILL_LEAD_ICON, 'shrink-0 object-contain')} />
+          ) : (
+            <BrandIcon src={aiSparkleIcon} alt={_copy("copy.391e40515277", { defaultValue: "Assistant" })} className="w-10 h-10 object-contain group-hover:scale-110 transition-transform" />
+          )}
+          <h1 className={phonePill ? cn('truncate text-white', PILL_TEXT) : 'text-lg font-semibold text-white leading-none mt-0.5'}>{t('assistant.title')}</h1>
+        </button>
+        </div>
+
+        <div className={phonePill ? 'flex shrink-0 items-center' : 'flex items-center gap-1'}>
+          <button
+            onClick={() => setHistoryDrawerOpen(true)}
+            className={phonePill ? PILL_ACTION_CLASS : 'p-2 rounded-xl text-white/60 hover:text-white transition-colors'}
+            aria-label={t('bookmarks.history')}
+          >
+            <History className="w-5 h-5" />
+          </button>
+
+          {/* One menu for everything that used to crowd the header. Drawers
+              open on the next tick so the menu has let go of focus first. */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                className={phonePill ? PILL_ACTION_CLASS : 'relative p-2 rounded-xl text-white/60 hover:text-white transition-colors'}
+                aria-label={t('postStage.more')}
+              >
+                <More className="w-5 h-5" />
+                {!!supportTickets?.openCount && (
+                  <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-white" />
+                )}
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="min-w-[210px]">
+              <DropdownMenuItem
+                onSelect={() => {
+                  startNewConversation();
+                  setMessages([]);
+                  setAttachedImage(null);
+                }}
+                className="gap-2.5"
+              >
+                <Plus className="w-4 h-4" />
+                {_copy("copy.db18382a249e", { defaultValue: "New chat" })}
+              </DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => setTimeout(() => setStyleSheetOpen(true), 0)} className="gap-2.5">
+                <span className="w-4 text-center leading-none">{currentStyle.emoji}</span>
+                {t('assistant.aiPersonality')}
+                <span className="ml-auto text-xs opacity-60">{currentStyle.label}</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => setTimeout(() => setSkillsHubOpen(true), 0)} className="gap-2.5">
+                <Sparkles className="w-4 h-4" />
+                {t('skills.skills')}
+              </DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => setTimeout(() => setSettingsSheetOpen(true), 0)} className="gap-2.5">
+                <Settings className="w-4 h-4" />
+                {t('assistant.aiSettings')}
+              </DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => setTimeout(() => setSupportDrawerOpen(true), 0)} className="gap-2.5">
+                <LifeBuoy className="w-4 h-4" />
+                {t('support.title')}
+                {!!supportTickets?.openCount && (
+                  <span className="ml-auto min-w-[18px] h-[18px] px-1 rounded-full bg-white text-black text-[10px] font-semibold flex items-center justify-center">
+                    {formatCount(supportTickets.openCount)}
+                  </span>
+                )}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+        </div>
+        </div>
+
+        {/* Style Drawer */}
+        <Drawer open={styleSheetOpen} onOpenChange={setStyleSheetOpen}>
+          <DrawerContent column glass className="border-t border-white/10">
+            <DrawerHeader className="border-b border-white/10">
+              <DrawerTitle className="text-white flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-white" />
+                {t('assistant.aiPersonality')}
+              </DrawerTitle>
+            </DrawerHeader>
+            {styleMenuContent}
+          </DrawerContent>
+        </Drawer>
+
+        {/* Unified Settings Drawer */}
+        <Drawer open={settingsSheetOpen} onOpenChange={setSettingsSheetOpen}>
+          <DrawerContent column glass className="border-t border-white/10">
+            <DrawerHeader className="border-b border-white/10">
+              <DrawerTitle className="text-white flex items-center gap-2">
+                <Settings className="w-5 h-5 text-white" />
+                {t('assistant.aiSettings')}
+              </DrawerTitle>
+            </DrawerHeader>
+            <div className="h-[70vh] overflow-y-auto">
+              {/* Chat Model Section */}
+              <div className="border-b border-white/10 pb-4">
+                <div className="px-4 py-3 text-sm text-white/60 flex items-center gap-2">
+                  <Sparkles className="w-4 h-4" />
+                  {t('assistant.chatModel')}
+                </div>
+                {CHAT_MODEL_OPTIONS.map((model) => (
+                  <button
+                    key={model.id}
+                    type="button"
+                    onClick={() => handleChatModelSelect(model.id)}
+                    className={`w-full flex items-start gap-3 px-4 py-3 text-sm text-white hover:bg-white/10 transition-colors ${
+                      selectedChatModel === model.id ? 'bg-white/10' : ''
+                    }`}
+                  >
+                    <span className="text-lg">{model.emoji}</span>
+                    <div className="flex flex-col items-start">
+                      <span className="font-medium">{model.name}</span>
+                      <span className="text-xs text-white/50">{model.description}</span>
+                    </div>
+                  </button>
+                ))}
+              </div>
+
+              {/* Image Model Section */}
+              <div className="border-b border-white/10 pb-4">
+                <div className="px-4 py-3 text-sm text-white/60 flex items-center gap-2">
+                  <ImageIcon className="w-4 h-4" />
+                  {t('assistant.imageModel')}
+                </div>
+                {IMAGE_MODEL_OPTIONS.map((model) => (
+                  <button
+                    key={model.id}
+                    type="button"
+                    onClick={() => handleImageModelSelect(model.id as ImageModelKey)}
+                    className={`w-full flex items-start gap-3 px-4 py-3 text-sm text-white hover:bg-white/10 transition-colors ${
+                      selectedImageModel === model.id ? 'bg-white/10' : ''
+                    }`}
+                  >
+                    <span className="text-lg">{model.emoji}</span>
+                    <div className="flex flex-col items-start">
+                      <span className="font-medium">{model.name}</span>
+                      <span className="text-xs text-white/50">{model.description}</span>
+                    </div>
+                  </button>
+                ))}
+              </div>
+
+              {/* Video Model Section */}
+              <div className="border-b border-white/10 pb-4">
+                <div className="px-4 py-3 text-sm text-white/60 flex items-center gap-2">
+                  <Video className="w-4 h-4" />
+                  {t('assistant.videoModel')}
+                </div>
+                {/* Premium tier */}
+                <div className="px-4 py-1 text-xs text-white/40 uppercase tracking-wider">{t('assistant.premium')}</div>
+                {VIDEO_MODEL_OPTIONS.filter(m => m.tier === 'premium').map((model) => (
+                  <button
+                    key={model.id}
+                    type="button"
+                    onClick={() => handleVideoModelSelect(model.id as VideoModelKey)}
+                    className={`w-full flex items-start gap-3 px-4 py-3 text-sm text-white hover:bg-white/10 transition-colors ${
+                      selectedVideoModel === model.id ? 'bg-white/10' : ''
+                    }`}
+                  >
+                    <span className="text-lg">{model.emoji}</span>
+                    <div className="flex flex-col items-start">
+                      <span className="font-medium">{model.name}</span>
+                      <span className="text-xs text-white/50">{model.description}</span>
+                    </div>
+                  </button>
+                ))}
+                {/* Standard tier */}
+                <div className="px-4 py-1 text-xs text-white/40 uppercase tracking-wider mt-2">{t('assistant.standard')}</div>
+                {VIDEO_MODEL_OPTIONS.filter(m => m.tier === 'standard').map((model) => (
+                  <button
+                    key={model.id}
+                    type="button"
+                    onClick={() => handleVideoModelSelect(model.id as VideoModelKey)}
+                    className={`w-full flex items-start gap-3 px-4 py-3 text-sm text-white hover:bg-white/10 transition-colors ${
+                      selectedVideoModel === model.id ? 'bg-white/10' : ''
+                    }`}
+                  >
+                    <span className="text-lg">{model.emoji}</span>
+                    <div className="flex flex-col items-start">
+                      <span className="font-medium">{model.name}</span>
+                      <span className="text-xs text-white/50">{model.description}</span>
+                    </div>
+                  </button>
+                ))}
+                {/* Fast tier */}
+                <div className="px-4 py-1 text-xs text-white/40 uppercase tracking-wider mt-2">{t('assistant.fast')}</div>
+                {VIDEO_MODEL_OPTIONS.filter(m => m.tier === 'fast').map((model) => (
+                  <button
+                    key={model.id}
+                    type="button"
+                    onClick={() => handleVideoModelSelect(model.id as VideoModelKey)}
+                    className={`w-full flex items-start gap-3 px-4 py-3 text-sm text-white hover:bg-white/10 transition-colors ${
+                      selectedVideoModel === model.id ? 'bg-white/10' : ''
+                    }`}
+                  >
+                    <span className="text-lg">{model.emoji}</span>
+                    <div className="flex flex-col items-start">
+                      <span className="font-medium">{model.name}</span>
+                      <span className="text-xs text-white/50">{model.description}</span>
+                    </div>
+                  </button>
+                ))}
+              </div>
+
+              {/* Voice Section */}
+              <div className="pb-4">
+                <div className="px-4 py-3 text-sm text-white/60 flex items-center gap-2">
+                  <Volume2 className="w-4 h-4" />
+                  {t('assistant.aiVoice')}
+                </div>
+                
+                {/* System default voice option */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setElevenLabsVoiceId('');
+                    localStorage.setItem('dehub-assistant-voice', JSON.stringify({ type: 'browser', preset: selectedVoice }));
+                  }}
+                  className={`w-full flex items-start gap-3 px-4 py-3 text-sm text-white hover:bg-white/10 transition-colors ${
+                    !elevenLabsVoiceId ? 'bg-white/10' : ''
+                  }`}
+                >
+                  <span className="text-lg">🤖</span>
+                  <div className="flex flex-col items-start">
+                    <span className="font-medium">{_copy("copy.d8081c667c73", { defaultValue: "System Default" })}</span>
+                    <span className="text-xs text-white/50">{_copy("copy.15dddfe5fd36", { defaultValue: "Browser built-in voice" })}</span>
+                  </div>
+                </button>
+
+                {/* ElevenLabs Voice Picker */}
+                <div className="px-4 py-2">
+                  <ElevenLabsVoicePicker
+                    selectedVoiceId={elevenLabsVoiceId}
+                    onSelect={(voiceId) => {
+                      setElevenLabsVoiceId(voiceId);
+                      localStorage.setItem('dehub-assistant-voice', JSON.stringify({ type: 'elevenlabs', voiceId }));
+                    }}
+                    onTrainVoice={() => {
+                      const badgeName = getBadgeName(user?.badgeBalance, user?.username);
+                      const allowed = badgeName === 'Megalodon' || badgeName === 'Blue Whale';
+
+                      setSettingsSheetOpen(false);
+
+                      if (!allowed) {
+                        // Check if user already has a saved custom key
+                        if (customElevenLabsKey) {
+                          setVoiceTrainingOpen(true);
+                        } else {
+                          setApiKeyInput('');
+                          setShowApiKeyPrompt(true);
+                        }
+                        return;
+                      }
+
+                      setVoiceTrainingOpen(true);
+                    }}
+                  />
+                </div>
+                
+                {/* Always Speak Toggle */}
+                <div className="px-4 py-3 flex items-center justify-between">
+                  <div className="flex flex-col">
+                    <span className="text-sm text-white">{t('assistant.alwaysSpeakReplies')}</span>
+                    <span className="text-xs text-white/50">{t('assistant.alwaysSpeakRepliesDesc')}</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setAlwaysSpeakReplies(!alwaysSpeakReplies)}
+                    className={`relative w-11 h-6 rounded-lg transition-colors ${
+                      alwaysSpeakReplies ? 'bg-white/50' : 'bg-white/20'
+                    }`}
+                  >
+                    <span
+                      className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-lg bg-white transition-transform ${
+                        alwaysSpeakReplies ? 'translate-x-5' : 'translate-x-0'
+                      }`}
+                    />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </DrawerContent>
+        </Drawer>
+      </div>
+
+      {/* Voice Training Drawer */}
+      <VoiceTrainingDrawer
+        open={voiceTrainingOpen}
+        onOpenChange={setVoiceTrainingOpen}
+        onSuccess={() => {
+          // Picker will refetch custom voices automatically
+        }}
+        customApiKey={(() => {
+          const badgeName = getBadgeName(user?.badgeBalance, user?.username);
+          const isWhale = badgeName === 'Megalodon' || badgeName === 'Blue Whale';
+          return isWhale ? undefined : customElevenLabsKey || undefined;
+        })()}
+      />
+
+      {/* API Key Prompt for non-whale users */}
+      {showApiKeyPrompt && createPortal(
+        <div 
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-sm"
+          onClick={() => setShowApiKeyPrompt(false)}
+        >
+          <div 
+            className="w-[90%] max-w-md rounded-2xl bg-black/95 border border-white/10 p-6 space-y-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="space-y-2">
+              <h3 className="text-lg font-semibold text-white">{_copy("copy.ac70778414c8", { defaultValue: "Voice Cloning Access" })}</h3>
+              <p className="text-sm text-white/60">{_copy("copy.e3d5d00285f0", { defaultValue: "Voice cloning is free for " })}<span className="font-bold text-white">{_copy("copy.1479c63f37eb", { defaultValue: "Blue Whale" })}</span>{_copy("copy.e3ee915a8e8c", { defaultValue: " and " })}<span className="font-bold text-white">{_copy("copy.9580bdc9c3aa", { defaultValue: "Megalodon" })}</span>{_copy("copy.88fa2998e06a", { defaultValue: " badge holders." })}</p>
+              <p className="text-sm text-white/60">{_copy("copy.ac20a028137d", { defaultValue: "You can still clone voices by providing your own ElevenLabs API key. Get one free at" })}{' '}
+                <a href="https://elevenlabs.io" target="_blank" rel="noopener noreferrer" className="text-white/80 underline hover:text-white">{_copy("copy.e2d214894af7", { defaultValue: "elevenlabs.io" })}</a>
+              </p>
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-xs text-white/50">{_copy("copy.d4275d91cc0b", { defaultValue: "ElevenLabs API Key" })}</label>
+              <Input
+                value={apiKeyInput}
+                onChange={(e) => setApiKeyInput(e.target.value)}
+                placeholder={_copy("copy.0d026bd69022", { defaultValue: "xi_..." })}
+                type="password"
+                className="bg-white/10 border-white/10 text-white placeholder:text-white/30 font-mono text-sm"
+              />
+            </div>
+
+            <div className="flex gap-2">
+              <Button
+                onClick={() => setShowApiKeyPrompt(false)}
+                variant="outline"
+                className="flex-1 bg-white/5 border-white/10 text-white/70 hover:bg-white/10 hover:text-white"
+              >{_copy("copy.19766ed6ccb2", { defaultValue: "Cancel" })}</Button>
+              <LiquidGlassBubble
+                shimmer
+                noBorder
+                onClick={() => {
+                  if (!apiKeyInput.trim()) {
+                    toast.error(_copy("copy.7c84390d76b4", { defaultValue: "Please enter your ElevenLabs API key" }));
+                    return;
+                  }
+                  setCustomElevenLabsKey(apiKeyInput.trim());
+                  localStorage.setItem('dehub-custom-elevenlabs-key', apiKeyInput.trim());
+                  setShowApiKeyPrompt(false);
+                  setVoiceTrainingOpen(true);
+                }}
+                className="flex-1 cursor-pointer [&>div]:!rounded-xl [&>div]:!h-full [&>div]:before:!rounded-xl [&>div]:after:!rounded-xl"
+                style={{ height: '40px' }}
+              >
+                <span className="flex items-center justify-center text-white text-sm font-medium h-full">{_copy("copy.31fbef162594", { defaultValue: "Continue" })}</span>
+              </LiquidGlassBubble>
+            </div>
+
+            <p className="text-[10px] text-white/25 text-center">{_copy("copy.ce9fd2753391", { defaultValue: "Your key is stored locally and never shared. It's only used for voice cloning requests." })}</p>
+          </div>
+        </div>,
+        document.body
+      )}
+
+
+      {showCommandCentre ? (
+        /* Command Centre View */
+        <ScrollArea className="flex-1 px-4 pb-24 lg:pb-4">
+          <OverviewTab />
+        </ScrollArea>
+      ) : (
+        showVoiceStage ? (
+          <div className="flex-1 min-h-0 overflow-y-auto scrollbar-hide px-4 pb-24 lg:pb-6">
+            <div className="mx-auto flex min-h-full w-full max-w-[640px] flex-col items-center justify-center gap-5 lg:gap-6 py-6">
+              <LiquidOrb
+                size={isMobile ? 136 : 176}
+                mode={orbMode}
+                getLevel={voiceAssistant.getLevel}
+                onClick={handleOrbTap}
+                disabled={isLoading && !voiceAssistant.isVoiceMode}
+                label={orbMode === 'listening' ? _copy("copy.b3e8d1c6f0a2", { defaultValue: "Tap to send" })
+                  : orbMode === 'speaking' ? _copy("copy.28d03596d24e", { defaultValue: "Skip" })
+                  : orbMode === 'thinking' ? _copy("copy.b4739a4f0865", { defaultValue: "Thinking..." })
+                  : _copy("copy.a7c1e0f4b2d9", { defaultValue: "Tap to talk" })}
+              />
+              {voiceAssistant.isVoiceMode ? (
+                <div className="flex w-full flex-col items-center gap-3 text-center px-2">
+                  <h2 className="text-[22px] lg:text-[28px] font-extrabold leading-tight text-white">{voiceStatusLine[orbMode]}</h2>
+                  {lastReply && (
+                    <p className="max-w-[520px] text-sm text-white/60 leading-relaxed line-clamp-3">{lastReply.replace(/[*#`_>]/g, '')}</p>
+                  )}
+                  <div className="mt-1 flex items-center gap-2">
+                    {voiceAssistant.status === 'speaking' && (
+                      <button
+                        type="button"
+                        onClick={voiceAssistant.stopSpeaking}
+                        className="h-9 px-4 rounded-full border border-white/12 bg-white/[0.06] text-sm font-semibold text-white hover:bg-white/10 transition-colors"
+                      >
+                        {_copy("copy.28d03596d24e", { defaultValue: "Skip" })}
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={voiceAssistant.stopVoiceMode}
+                      className="h-9 px-4 rounded-full bg-white text-black text-sm font-semibold"
+                    >
+                      {_copy("copy.dd2108f1cda8", { defaultValue: "Stop Voice Chat" })}
+                    </button>
+                  </div>
+                  {voiceAssistant.exchangesLeft !== undefined && (
+                    <span className="text-xs text-white/45 tabular-nums">
+                      {voiceAssistant.exchangesLeft}{_copy("copy.bce319cfa7b7", { defaultValue: " left" })}
+                    </span>
+                  )}
+                </div>
+              ) : (
+                <>
+                  <div className="text-center px-2">
+                    <h2 className="text-[22px] lg:text-[28px] font-extrabold leading-tight text-white [text-wrap:balance]">
+                      {greetings[greetingIndex]}
+                    </h2>
+                    <p className="mt-1.5 text-sm text-white/55">{voiceStatusLine.idle}</p>
+                  </div>
+                  {linkedAction && <AssistantActionCard actionId={linkedAction} />}
+                  <div className="w-full">{composer}</div>
+                  <div className="grid w-full grid-cols-3 lg:grid-cols-6 gap-2 lg:gap-2.5">
+                    {startTiles.map((tile) => (
+                      <button
+                        key={tile.icon}
+                        type="button"
+                        onClick={tile.onClick}
+                        className="flex flex-col items-center gap-1.5 rounded-2xl border border-white/10 bg-white/[0.04] px-1 py-3 text-xs font-semibold text-white hover:bg-white/[0.08] transition-colors"
+                      >
+                        <ThemedIcon icon={tile.icon} className="w-8 h-8 object-contain" />
+                        {tile.label}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        ) : (
+        <>
+            {/* Messages */}
+            <ScrollArea className="flex-1 px-4 pb-24 sm:pb-0 [&>div>div]:!block [&_[data-radix-scroll-area-scrollbar]]:hidden scrollbar-hide [&_*]:scrollbar-hide" ref={scrollRef}>
+              <div className="py-4 space-y-4">
+                {linkedAction && <AssistantActionCard actionId={linkedAction} />}
+                <AnimatePresence mode="popLayout">
+                  {messages.map((message) => (
+                    <motion.div
+                      key={message.id}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0 }}
+                      className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start gap-2'}`}
+                    >
+                      {/* AI Avatar for assistant messages - hide for initial welcome message */}
+                      {message.role === 'assistant' && message.id !== 'initial' && (
+                        <img 
+                          src={assistantAvatar} 
+                          alt="" 
+                          className="w-7 h-7 rounded-lg shrink-0 mt-0.5"
+                        />
+                      )}
+                      {message.role === 'assistant' && message.audioUrl ? (
+                        /* Audio messages (music/TTS) */
+                        <div className="w-full min-w-0 flex-1 flex flex-col gap-2">
+                          {message.content && (
+                            <div className="rounded-2xl border border-white/[0.12] bg-white/[0.03] backdrop-blur-[24px] px-4 py-2.5 text-white">
+                              <MarkdownText content={withoutAssistantActionLinks(message.content)} className="text-sm" />
+                              {assistantActionIds(message.content).map((id) => (
+                                <AssistantActionCard key={id} actionId={id} />
+                              ))}
+                            </div>
+                          )}
+                          <GeneratedAudioPlayer audioUrl={message.audioUrl} />
+                        </div>
+                      ) : message.role === 'assistant' && message.isToolProcessing ? (
+                        /* AI tool processing skeleton */
+                        <AiToolProcessingSkeleton content={message.content} />
+                      ) : message.role === 'assistant' && message.videoUrl ? (
+                        /* Video messages */
+                        <div className="max-w-[85%] flex flex-col gap-2">
+                          <div className="relative rounded-lg overflow-hidden">
+                            <video 
+                              src={message.videoUrl}
+                              controls
+                              autoPlay
+                              loop
+                              muted
+                              playsInline
+                              {...{"webkit-playsinline": ""}}
+                              className="max-w-full rounded-lg"
+                            />
+                            {/* Action buttons */}
+                            <div className="absolute bottom-12 right-3 flex items-center gap-2">
+                              {/* Download button */}
+                              <button
+                                onClick={() => { if (message.videoUrl) void downloadVideo({ url: message.videoUrl, title: "dehub-video", username: user?.username }); }}
+                                aria-label={t("postOptions.download")}
+                                className="flex items-center justify-center w-10 h-10 rounded-xl text-white transition-all duration-300 hover:scale-110 active:scale-95
+                                  bg-gradient-to-br from-white/25 via-white/15 to-white/5
+                                  backdrop-blur-xl border border-white/30
+                                  shadow-[0_8px_32px_rgba(0,0,0,0.4),inset_0_2px_0_rgba(255,255,255,0.3),0_0_0_1px_rgba(0,0,0,0.1)]
+                                  hover:shadow-[0_12px_40px_rgba(59,130,246,0.4),inset_0_2px_0_rgba(255,255,255,0.4)]
+                                  hover:border-blue-400/50 hover:from-blue-500/30 hover:via-blue-400/15 hover:to-transparent"
+                              >
+                                <Download className="w-5 h-5" />
+                              </button>
+                              {/* Post button */}
+                              <button
+                                onClick={() => handlePostVideo(message.videoUrl!)}
+                                className="flex items-center justify-center w-10 h-10 rounded-xl text-white transition-all duration-300 hover:scale-110 active:scale-95
+                                  bg-gradient-to-br from-white/25 via-white/15 to-white/5
+                                  backdrop-blur-xl border border-white/30
+                                  shadow-[0_8px_32px_rgba(0,0,0,0.4),inset_0_2px_0_rgba(255,255,255,0.3),0_0_0_1px_rgba(0,0,0,0.1)]
+                                  hover:shadow-[0_12px_40px_rgba(59,130,246,0.4),inset_0_2px_0_rgba(255,255,255,0.4)]
+                                  hover:border-blue-400/50 hover:from-blue-500/30 hover:via-blue-400/15 hover:to-transparent"
+                              >
+                                <Plus className="w-5 h-5" />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      ) : message.role === 'assistant' && message.isVideoGenerating ? (
+                        /* Video generating placeholder */
+                        <div className="max-w-[85%] flex flex-col gap-2">
+                          <div className="bg-white/10 text-white rounded-2xl px-4 py-2.5">
+                            <MarkdownText content={message.content} className="text-sm" />
+                          </div>
+                          {/* Video generation loader */}
+                          <div className="relative w-full aspect-video max-w-md rounded-lg overflow-hidden bg-gradient-to-br from-gray-900/80 to-gray-800/60">
+                            {/* Animated gradient background */}
+                            <motion.div 
+                              className="absolute inset-0"
+                              animate={{ 
+                                background: [
+                                  'linear-gradient(45deg, rgba(139,92,246,0.3) 0%, rgba(59,130,246,0.3) 50%, rgba(236,72,153,0.3) 100%)',
+                                  'linear-gradient(45deg, rgba(236,72,153,0.3) 0%, rgba(139,92,246,0.3) 50%, rgba(59,130,246,0.3) 100%)',
+                                  'linear-gradient(45deg, rgba(59,130,246,0.3) 0%, rgba(236,72,153,0.3) 50%, rgba(139,92,246,0.3) 100%)',
+                                ]
+                              }}
+                              transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+                            />
+                            {/* Progress bar at bottom */}
+                            <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/10">
+                              <motion.div 
+                                className="h-full bg-gradient-to-r from-violet-500 via-cyan-400 to-pink-500"
+                                animate={{ width: ['0%', '100%'] }}
+                                transition={{ duration: 60, ease: 'linear' }}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      ) : message.role === 'assistant' && message.imageUrl ? (
+                        /* Image-only messages - no bubble wrapper */
+                        <div className="max-w-[85%] flex flex-col gap-2">
+                          {message.content && (
+                            <div className="bg-white/10 text-white rounded-2xl px-4 py-2.5">
+                              <MarkdownText content={message.content} className="text-sm" />
+                            </div>
+                          )}
+                          {/* Image container with button overlay */}
+                          <div className="relative">
+                            <img 
+                              src={message.imageUrl} 
+                              alt={_copy("copy.827ec8d9f99d", { defaultValue: "Generated" })} 
+                              className="max-w-full rounded-lg cursor-zoom-in"
+                              onClick={() => setLightboxImage(message.imageUrl!)}
+                            />
+
+                            {/* Action buttons row */}
+                            <div className="absolute bottom-3 right-3 flex items-center gap-2">
+                              {/* Attach to edit button */}
+                              <button
+                                onClick={() => {
+                                  setAttachedImage(message.imageUrl!);
+                                  inputRef.current?.focus();
+                                  toast.success(t('assistant.imageAttached'));
+                                }}
+                                className="flex items-center justify-center w-10 h-10 rounded-xl text-white transition-all duration-300 hover:scale-110 active:scale-95
+                                  bg-gradient-to-br from-white/25 via-white/15 to-white/5
+                                  backdrop-blur-xl border border-white/30
+                                  shadow-[0_8px_32px_rgba(0,0,0,0.4),inset_0_2px_0_rgba(255,255,255,0.3),0_0_0_1px_rgba(0,0,0,0.1)]
+                                  hover:shadow-[0_12px_40px_rgba(168,85,247,0.4),inset_0_2px_0_rgba(255,255,255,0.4)]
+                                  hover:border-purple-400/50 hover:from-purple-500/30 hover:via-purple-400/15 hover:to-transparent"
+                              >
+                                <Paperclip className="w-5 h-5" />
+                              </button>
+                              {/* Copy button */}
+                              <button
+                                onClick={async () => {
+                                  try {
+                                    const response = await fetch(message.imageUrl!);
+                                    const blob = await response.blob();
+                                    await navigator.clipboard.write([
+                                      new ClipboardItem({ [blob.type]: blob })
+                                    ]);
+                                    toast.success(t('assistant.imageCopied'));
+                                  } catch (err) {
+                                    toast.error(t('assistant.imageCopyFailed'));
+                                  }
+                                }}
+                                className="flex items-center justify-center w-10 h-10 rounded-xl text-white transition-all duration-300 hover:scale-110 active:scale-95
+                                  bg-gradient-to-br from-white/25 via-white/15 to-white/5
+                                  backdrop-blur-xl border border-white/30
+                                  shadow-[0_8px_32px_rgba(0,0,0,0.4),inset_0_2px_0_rgba(255,255,255,0.3),0_0_0_1px_rgba(0,0,0,0.1)]
+                                  hover:shadow-[0_12px_40px_rgba(34,197,94,0.4),inset_0_2px_0_rgba(255,255,255,0.4)]
+                                  hover:border-green-400/50 hover:from-green-500/30 hover:via-green-400/15 hover:to-transparent"
+                              >
+                                <Copy className="w-5 h-5" />
+                              </button>
+                              {/* Post button */}
+                              <button
+                                onClick={() => handlePostImage(message.imageUrl!)}
+                                className="flex items-center justify-center w-10 h-10 rounded-xl text-white transition-all duration-300 hover:scale-110 active:scale-95
+                                  bg-gradient-to-br from-white/25 via-white/15 to-white/5
+                                  backdrop-blur-xl border border-white/30
+                                  shadow-[0_8px_32px_rgba(0,0,0,0.4),inset_0_2px_0_rgba(255,255,255,0.3),0_0_0_1px_rgba(0,0,0,0.1)]
+                                  hover:shadow-[0_12px_40px_rgba(59,130,246,0.4),inset_0_2px_0_rgba(255,255,255,0.4)]
+                                  hover:border-blue-400/50 hover:from-blue-500/30 hover:via-blue-400/15 hover:to-transparent"
+                              >
+                                <Plus className="w-5 h-5" />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      ) : message.isSimulation ? (
+                        /* Transaction simulation card */
+                        <div className="max-w-[85%] flex flex-col gap-2">
+                          {/* Simulation content with markdown */}
+                          <div className="bg-white/5 border border-white/10 rounded-2xl p-4">
+                            <MarkdownText content={message.content} className="text-sm text-white" />
+                          
+                            {/* Approve/Reject buttons - only show if pending */}
+                            {message.simulationStatus === 'pending' && (
+                              <div className="flex items-center gap-3 mt-4 pt-4 border-t border-white/10">
+                                <button
+                                  onClick={() => handleSimulationApprove(message.id)}
+                                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl
+                                    bg-white/10 hover:bg-white/20
+                                    border border-white/20 hover:border-white/40
+                                    text-white font-medium text-sm transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                                >
+                                  <Check className="w-4 h-4" />
+                                  {t('assistant.approve')}
+                                </button>
+                                <button
+                                  onClick={() => handleSimulationReject(message.id)}
+                                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl
+                                    bg-white/5 hover:bg-white/10
+                                    border border-white/10 hover:border-white/20
+                                    text-white/70 hover:text-white font-medium text-sm transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                                >
+                                  <XCircle className="w-4 h-4" />
+                                  {t('assistant.reject')}
+                                </button>
+                              </div>
+                            )}
+                          
+                            {/* Status badge for approved/rejected */}
+                            {message.simulationStatus === 'approved' && message.simulationData && (
+                              <div className="flex flex-col gap-3 mt-4 pt-4 border-t border-white/10">
+                                <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/10 border border-white/20 w-fit">
+                                  <Check className="w-4 h-4 text-white" />
+                                  <span className="text-sm text-white">{t('assistant.transferComplete')}</span>
+                                </div>
+                                <div className="text-xs text-white/60">
+                                  <span className="text-white/40">{t('assistant.hash')}: </span>
+                                  <code className="font-mono text-white/70">{abbreviateHash(message.simulationData.txHash)}</code>
+                                </div>
+                              </div>
+                            )}
+                          
+                            {message.simulationStatus === 'rejected' && (
+                              <div className="flex items-center gap-2 mt-4 pt-4 border-t border-white/10">
+                                <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/10 border border-white/20">
+                                  <XCircle className="w-4 h-4 text-white/70" />
+                                  <span className="text-sm text-white/70">{t('assistant.transferCancelled')}</span>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        
+                          {/* Action buttons below the card - only show for pending */}
+                          {message.simulationStatus === 'pending' && (
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={() => setShowPinModal(true)}
+                                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all
+                                  ${transferPin 
+                                    ? 'bg-white/10 text-white border border-white/20' 
+                                    : 'bg-white/5 text-white/60 border border-white/10 hover:bg-white/10 hover:text-white'
+                                  }`}
+                              >
+                                <Lock className="w-3.5 h-3.5" />
+                                {transferPin ? t('assistant.pinSet') : t('assistant.setPin')}
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setAutoApproveMode(!autoApproveMode);
+                                  toast.success(autoApproveMode ? t('assistant.autoModeDisabled') : t('assistant.autoModeEnabled'));
+                                }}
+                                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all
+                                  ${autoApproveMode 
+                                    ? 'bg-white/15 text-white border border-white/30' 
+                                    : 'bg-white/5 text-white/60 border border-white/10 hover:bg-white/10 hover:text-white'
+                                  }`}
+                              >
+                                <Zap className="w-3.5 h-3.5" />
+                                {t('assistant.autoMode')} {autoApproveMode ? t('assistant.on') : t('assistant.off')}
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        /* Text messages */
+                        <div className={`max-w-[85%] flex flex-col gap-2 ${message.role === 'user' ? 'items-end' : 'items-start'}`}>
+                          {/* Show attached image for user messages */}
+                          {message.attachedImage && (
+                            <img 
+                              src={message.attachedImage} 
+                              alt={_copy("copy.ac6d9b76a141", { defaultValue: "Attached" })} 
+                              className="max-w-full rounded-lg"
+                            />
+                          )}
+                          {message.role === 'user' ? (
+                            /* User message with liquid glass bubble */
+                            <LiquidGlassBubble tail="right">
+                              <p className="text-sm whitespace-pre-wrap text-white">{message.content}</p>
+                            </LiquidGlassBubble>
+                          ) : (
+                            /* Assistant message - no bubble */
+                            <div className="text-white select-text">
+                              <MarkdownText content={withoutAssistantActionLinks(message.content)} className="text-sm" />
+                              {/* "React ❤️ to every post by @x", "follow @x": the reply's confirm card, under the text */}
+                              {!(streamingReply && message.id === messages[messages.length - 1]?.id) && assistantActionIds(message.content).map((id) => (
+                                <AssistantActionCard key={id} actionId={id} />
+                              ))}
+                              {message.content && !message.isError && message.id !== 'initial' && !(streamingReply && message.id === messages[messages.length - 1]?.id) && (
+                                <AssistantCopyButton text={message.content} label={t('comments.copyText')} copiedLabel={t('common.copied')} />
+                              )}
+                              {/* Swap action card */}
+                              {message.swapAction && (
+                                <SwapActionCard action={message.swapAction} autoQuote />
+                              )}
+                              {message.isError && (
+                                <button
+                                  onClick={() => {
+                                    const idx = messages.indexOf(message);
+                                    const lastUserMsg = messages.slice(0, idx).reverse().find(m => m.role === 'user');
+                                    if (lastUserMsg) {
+                                      setMessages(prev => prev.filter(m => m.id !== message.id));
+                                      handleSend(lastUserMsg.content);
+                                    }
+                                  }}
+                                  className="mt-2 text-xs text-white/60 hover:text-white/90 underline transition-colors"
+                                >
+                                  {t('assistant.retry', 'Retry')}
+                                </button>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              
+                {isImageLoading && (
+                  <ImageGenerationLoader startTime={imageLoadStartTime} />
+                )}
+                {isLoading && !isImageLoading && !streamingReply && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="flex justify-start gap-2"
+                  >
+                    <img 
+                      src={assistantAvatar} 
+                      alt="" 
+                      className="w-7 h-7 rounded-lg shrink-0"
+                    />
+                    <div className="bg-white/10 rounded-2xl px-4 py-3 flex items-center gap-2">
+                      <Loader2 className="w-4 h-4 animate-spin text-white/60" />
+                      <span className="text-sm text-white/60">
+                        {activeTools.length > 0
+                          ? describeTools(activeTools)
+                          : t('assistant.thinking')}
+                      </span>
+                    </div>
+                  </motion.div>
+                )}
+                {/* Scroll anchor */}
+                <div ref={messagesEndRef} />
+              </div>
+            </ScrollArea>
+            <AnimatePresence>
+              {showJump && (
+                <div className="pointer-events-none fixed inset-x-0 bottom-[160px] md:bottom-[170px] z-40 flex justify-center lg:absolute lg:bottom-28">
+                <motion.button
+                  type="button"
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 6 }}
+                  transition={{ duration: 0.15 }}
+                  onClick={() => scrollToBottom(true)}
+                  className="pointer-events-auto flex items-center gap-1.5 h-9 px-4 rounded-full bg-zinc-800/95 border border-white/15 text-sm font-semibold text-zinc-100 shadow-lg"
+                  aria-label={_copy("copy.867524581f01", { defaultValue: "Jump to latest" })}
+                >
+                  <ArrowDown className="w-4 h-4" />
+                  {_copy("copy.867524581f01", { defaultValue: "Jump to latest" })}
+                </motion.button>
+                </div>
+              )}
+            </AnimatePresence>
+
+          {/* Message box: above the bottom nav on phones, in the page on desktop */}
+          <div className="fixed bottom-[69px] md:bottom-[75px] left-0 right-0 px-3 z-40 lg:bottom-4 lg:left-auto lg:right-auto lg:px-4 lg:w-full lg:max-w-4xl lg:mx-auto lg:relative lg:z-auto lg:-translate-y-[5.3px]">
+            <div className="mx-auto w-full max-w-[680px] lg:max-w-none">
+              {composer}
+            </div>
+          </div>
+        </>
+        )
+      )}
+
+      <PostModal
+        isOpen={postModalOpen}
+        onClose={() => setPostModalOpen(false)}
+        initialFiles={postModalFiles}
+        onFilesProcessed={() => setPostModalFiles(null)}
+      />
+
+      {/* Video Paywall Modal */}
+      {pendingVideoRequest && (
+        <VideoPaywallModal
+          open={paywallOpen}
+          onOpenChange={(open) => {
+            setPaywallOpen(open);
+            if (!open) setPendingVideoRequest(null);
+          }}
+          model={VIDEO_MODELS[pendingVideoRequest.model]}
+          selectedModelKey={pendingVideoRequest.model}
+          onModelChange={(modelKey) => {
+            setPendingVideoRequest(prev => prev ? { ...prev, model: modelKey } : null);
+          }}
+          onConfirm={handleVideoGenerationConfirm} avatarPrompt={pendingVideoRequest.prompt}
+          isGenerating={isVideoLoading}
+        />
+      )}
+
+      {/* Image Paywall Modal */}
+      {pendingImageRequest && (
+        <ImagePaywallModal
+          open={imagePaywallOpen}
+          onOpenChange={(open) => {
+            setImagePaywallOpen(open);
+            if (!open) setPendingImageRequest(null);
+          }}
+          model={IMAGE_MODELS[pendingImageRequest.model]}
+          selectedModelKey={pendingImageRequest.model}
+          onModelChange={(modelKey) => {
+            setPendingImageRequest(prev => prev ? { ...prev, model: modelKey as ImageModelKey } : null);
+          }}
+          onConfirm={handleImageGenerationConfirm}
+          isGenerating={isImageLoading}
+        />
+      )}
+
+      {/* Skills library */}
+      <SupportTicketDrawer
+        open={supportDrawerOpen}
+        onOpenChange={setSupportDrawerOpen}
+        enabled={isAuthenticated}
+      />
+
+      <SkillsHubModal
+        open={skillsHubOpen}
+        onOpenChange={setSkillsHubOpen}
+        onUseSkill={(skill) => {
+          const seed = skill.trigger_phrases[0] || skill.name.toLowerCase();
+          setInput(`/${seed} `);
+          inputRef.current?.focus();
+          setInputGlow(true);
+          setTimeout(() => setInputGlow(false), 2000);
+          incrementSkillUsage(skill.id).catch(() => {});
+          toast.success(_translateCopy("copy.9d78863486f3", { defaultValue: "Loaded skill: {{value1}}", value1: skill.name }));
+        }}
+      />
+
+      {/* Riftn Poster Studio */}
+      <PosterConfigDialog
+        open={posterConfigOpen}
+        onOpenChange={(open) => {
+          setPosterConfigOpen(open);
+          if (!open) setPendingPosterPrompt('');
+        }}
+        userPrompt={pendingPosterPrompt}
+        onConfirm={async (cfg: PosterConfig) => {
+          setPosterConfigOpen(false);
+          try {
+            // Pick the right source logo based on user's variant choice.
+            // Bundled assets only — the CDN pointer paths (__l5e/assets-v1)
+            // return SPA HTML in production, not the PNG.
+            const logoUrl = cfg.logoVariant === 'icon' ? dehubLogoCompact : dehubLogo;
+            const logoBase64 = await imageUrlToBase64(logoUrl).catch(() => imageUrlToBase64(dehubLogo));
+            // Renderer choice: the on-brand SM Template banner (like our blog banners)
+            // is the default; an explicit cinematic style archetype opts into the
+            // diffusion "scene" pipeline instead.
+            const bannerRenderer: 'template' | 'scene' =
+              cfg.style === 'dehub-template' || cfg.style === 'auto' ? 'template' : 'scene';
+            const bannerFormat: 'landscape' | 'square' | 'portrait' =
+              cfg.dimension === 'landscape' ? 'landscape'
+              : cfg.dimension === 'square' ? 'square'
+              : 'portrait';
+            // The template renderer is our own code and costs nothing, so it
+            // runs unpaid. The scene renderer is a metered model like any
+            // other and has to be paid for before it will run — this dialog is
+            // its paywall, so it quotes and signs here rather than handing the
+            // user off to another modal mid-flow.
+            let txHash = '';
+            if (bannerRenderer === 'scene') {
+              const { priceDhb } = await fetchJobQuote({ kind: 'image', modelId: DEHUB_BRAND_IMAGE_MODEL });
+              toast.loading(t('assistant.payingTokens', { amount: formatDhb(priceDhb) }), { id: 'poster-payment' });
+              txHash = await payForJob(priceDhb);
+              toast.dismiss('poster-payment');
+            }
+            await handleImageGenerationConfirm(txHash, {
+              prompt: buildDeHubBrandPrompt(cfg.finalPrompt),
+              model: DEHUB_BRAND_IMAGE_MODEL,
+              logoImage: logoBase64,
+              headline: cfg.tagline.trim(),
+              bannerRenderer,
+              bannerFormat,
+            });
+          } catch (err) {
+            toast.dismiss('poster-payment');
+            console.error('Poster generation error:', err);
+            toast.error(_copy("copy.aafb702d12cc", { defaultValue: "Failed to start poster generation" }));
+          } finally {
+            setPendingPosterPrompt('');
+          }
+        }}
+      />
+
+      {/* Music Confirm Dialog */}
+      <MusicConfirmDialog
+        open={musicConfirmOpen}
+        onOpenChange={(open) => {
+          setMusicConfirmOpen(open);
+          if (!open) setPendingMusicPrompt('');
+        }}
+        userPrompt={pendingMusicPrompt}
+        onConfirm={(params: MusicParams) => {
+          setMusicConfirmOpen(false);
+          // Build a structured prompt from the confirmed params
+          const parts: string[] = [];
+          if (params.title) parts.push(`Title: ${params.title}`);
+          if (params.style) parts.push(`Style: ${params.style}`);
+          if (params.voiceGender !== 'auto') parts.push(`Voice: ${params.voiceGender}`);
+          const structuredPrompt = parts.join('. ') || pendingMusicPrompt;
+          const lyricsValue = params.lyrics || '';
+
+          const defaultTool = DEFAULT_TOOL_FOR_CATEGORY[aiToolCategory];
+          setPendingAiToolRequest({
+            prompt: structuredPrompt,
+            tool: defaultTool,
+            category: aiToolCategory,
+            // Pass lyrics separately so edge function uses them correctly
+            ...(lyricsValue && { lyrics: lyricsValue }),
+          } as any);
+          setSelectedAiToolId(defaultTool);
+          setAiToolPaywallOpen(true);
+        }}
+      />
+
+      {/* AI Tool Paywall Modal */}
+      {pendingAiToolRequest && (
+        <AiToolPaywallModal
+          open={aiToolPaywallOpen}
+          onOpenChange={(open) => {
+            setAiToolPaywallOpen(open);
+            if (!open) setPendingAiToolRequest(null);
+          }}
+          model={AI_TOOL_MODELS[selectedAiToolId]}
+          selectedModelId={selectedAiToolId}
+          onModelChange={(modelId) => {
+            setSelectedAiToolId(modelId);
+            setPendingAiToolRequest(prev => prev ? { ...prev, tool: modelId } : null);
+          }}
+          onConfirm={handleAiToolConfirm}
+          isProcessing={isAiToolProcessing}
+          category={aiToolCategory}
+        />
+      )}
+
+      {/* Conversation History Drawer */}
+      <ConversationHistoryDrawer
+        open={historyDrawerOpen}
+        onOpenChange={setHistoryDrawerOpen}
+        onLoadConversation={(id, loadedMessages) => {
+          loadConversation(id);
+          setMessages(loadedMessages);
+        }}
+        currentConversationId={conversationId}
+      />
+
+      {/* Skills Browser Modal (from slash `/` menu "Show all") */}
+      <SkillsBrowserModal open={skillsBrowserOpen} onOpenChange={setSkillsBrowserOpen} />
+
+      {/* Fullscreen image lightbox for AI-generated images */}
+      <AnimatePresence>
+        {lightboxImage && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            onClick={() => setLightboxImage(null)}
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-xl p-4 cursor-zoom-out"
+          >
+            <button
+              onClick={(e) => { e.stopPropagation(); setLightboxImage(null); }}
+              aria-label={_copy("copy.7d9eb7acb13e", { defaultValue: "Close" })}
+              data-keep-dark
+              className="absolute top-4 right-4 flex items-center justify-center w-11 h-11 rounded-xl text-white bg-white/10 hover:bg-white/20 backdrop-blur-xl border border-white/20 transition-all"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            <motion.img
+              initial={{ scale: 0.95 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.95 }}
+              transition={{ duration: 0.2 }}
+              src={lightboxImage}
+              alt={_copy("copy.4f92f22f54f1", { defaultValue: "Generated (fullscreen)" })}
+              onClick={(e) => e.stopPropagation()}
+              className="max-w-full max-h-full object-contain rounded-lg cursor-default"
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+
+
+
+      {/* Auth Prompt for transaction simulation */}
+      <AuthPrompt 
+        isOpen={showAuthPrompt} 
+        onClose={() => setShowAuthPrompt(false)} 
+      />
+
+      {/* PIN Setup Modal */}
+      <AnimatePresence>
+        {showPinModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+            onClick={() => setShowPinModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-sm bg-zinc-900 border border-white/10 rounded-2xl p-6"
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center">
+                  <Lock className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-white">{t('assistant.setTransferPin')}</h3>
+                  <p className="text-sm text-white/60">{t('assistant.requiredBeforeApproving')}</p>
+                </div>
+              </div>
+              
+              <input
+                type="password"
+                inputMode="numeric"
+                maxLength={6}
+                placeholder={t('assistant.enterPin')}
+                value={pinInput}
+                onChange={(e) => setPinInput(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white text-center text-xl tracking-[0.5em] placeholder:text-white/30 placeholder:tracking-normal focus:outline-none focus:border-white/30 mb-4"
+              />
+              
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {
+                    setShowPinModal(false);
+                    setPinInput('');
+                  }}
+                  className="flex-1 px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white/70 font-medium text-sm hover:bg-white/10 transition-all"
+                >
+                  {t('common.cancel')}
+                </button>
+                <button
+                  onClick={() => {
+                    if (pinInput.length >= 4) {
+                      setTransferPin(pinInput);
+                      setShowPinModal(false);
+                      setPinInput('');
+                      toast.success(t('assistant.pinSetSuccess'));
+                    } else {
+                      toast.error(t('assistant.pinTooShort'));
+                    }
+                  }}
+                  disabled={pinInput.length < 4}
+                  className="flex-1 px-4 py-2.5 rounded-xl bg-white/10 border border-white/20 text-white font-medium text-sm hover:bg-white/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {t('assistant.setPinButton')}
+                </button>
+              </div>
+              
+              {transferPin && (
+                <button
+                  onClick={() => {
+                    setTransferPin(null);
+                    setShowPinModal(false);
+                    setPinInput('');
+                    toast.success(t('assistant.pinRemoved'));
+                  }}
+                  className="w-full mt-3 px-4 py-2 rounded-xl text-white/50 text-sm hover:text-white/70 transition-colors"
+                >
+                  {t('assistant.removeExistingPin')}
+                </button>
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+export default function AssistantPage() {
+  const account = useAccountDraftKey('assistant');
+  return <AssistantPageForAccount key={account ?? 'guest'} />;
+}
+
+/** Copy button under an assistant text reply (Requests 1a783503). */
+function AssistantCopyButton({ text, label, copiedLabel }: { text: string; label: string; copiedLabel: string }) {
+  const [copied, setCopied] = useState(false);
+  const onCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch {
+      const area = document.createElement('textarea');
+      area.value = text;
+      area.setAttribute('readonly', '');
+      area.style.position = 'fixed';
+      area.style.opacity = '0';
+      document.body.appendChild(area);
+      area.select();
+      try { document.execCommand('copy'); } finally { area.remove(); }
+    }
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), 1500);
+  };
+  return (
+    <button
+      type="button"
+      onClick={() => void onCopy()}
+      aria-label={label}
+      className="mt-1.5 inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-xs text-white/55 hover:text-white hover:bg-white/10 active:scale-95 transition-all"
+    >
+      {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+      <span>{copied ? copiedLabel : label}</span>
+    </button>
+  );
+}

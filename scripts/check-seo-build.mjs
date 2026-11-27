@@ -1,0 +1,43 @@
+// Fail a deployment if Vite copied a sitemap that lost translated URLs.
+import { readFileSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { hrefLanguage, SITEMAP_ALTERNATE_LIMIT } from './build-seo-i18n.mjs';
+
+const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+const sitemap = readFileSync(resolve(root, 'dist/sitemap-static.xml'), 'utf8');
+const pages = JSON.parse(readFileSync(resolve(root, 'dist/seo-i18n.json'), 'utf8'));
+const blocks = [...sitemap.matchAll(/<url>\s*<loc>([^<]+)<\/loc>([\s\S]*?)<\/url>/g)];
+const byUrl = new Map(blocks.map(([, url, content]) => [url.replaceAll('&amp;', '&'), content]));
+const excluded = new Set(['/events', '/launchpad']);
+let variants = 0;
+
+for (const [route, languages] of Object.entries(pages)) {
+  if (excluded.has(route)) continue;
+  const served = Object.keys(languages).filter((language) => language !== 'en');
+  if (!served.length) continue;
+  const urls = [...served, 'en'].map((language) =>
+    `https://riftn.com${route}${language === 'en' ? '' : `?hl=${language}`}`,
+  );
+  for (const url of urls) {
+    const content = byUrl.get(url);
+    if (!content) throw new Error(`Missing translated sitemap URL: ${url}`);
+    variants += 1;
+    if (served.length > SITEMAP_ALTERNATE_LIMIT) continue;
+    for (const [index, language] of [...served, 'en'].entries()) {
+      const alternate = `<xhtml:link rel="alternate" hreflang="${hrefLanguage(language)}" href="${urls[index].replaceAll('&', '&amp;')}"/>`;
+      if (!content.includes(alternate)) throw new Error(`Missing ${language} alternate on ${url}`);
+    }
+    if (!content.includes(`<xhtml:link rel="alternate" hreflang="x-default" href="https://riftn.com${route}"/>`)) {
+      throw new Error(`Missing x-default alternate on ${url}`);
+    }
+  }
+}
+
+for (const route of excluded) {
+  if (byUrl.has(`https://riftn.com${route}`) || [...byUrl.keys()].some((url) => url.startsWith(`https://riftn.com${route}?hl=`))) {
+    throw new Error(`Noindex route appears in sitemap: ${route}`);
+  }
+}
+
+console.log(`SEO build contains ${variants} language URLs across ${Object.keys(pages).length - excluded.size} indexable routes`);

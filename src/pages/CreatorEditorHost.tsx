@@ -1,0 +1,137 @@
+import { useTranslation as _useCopy } from 'react-i18next';
+/**
+ * CreatorEditorHost
+ * =================
+ * Mounts /creator and /editor together and toggles visibility based on the
+ * current pathname. First visit lazy-loads the chunk; subsequent switches are
+ * instant with full state preserved (timeline, gallery scroll, etc.).
+ *
+ * This host owns the page metadata for BOTH routes. Because both pages stay
+ * mounted, a Helmet inside either one keeps applying while it is hidden, and
+ * whichever mounted last wins: /editor was serving the Creator Studio title.
+ * The individual pages therefore declare no metadata of their own.
+ */
+import React, { Suspense, useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
+import { lazyWithRetry } from "@/lib/lazy-with-retry";
+import { SEOHead } from "@/components/SEOHead";
+import { emitSurfaceSwitch } from "@/hooks/use-surface-switch";
+import { useGenerationStore } from "@/store/generationStore";
+import { useCreatorFolderStore } from "@/store/creatorFolderStore";
+import { useAuth } from "@/contexts/AuthContext";
+
+const CreatorPage = lazyWithRetry(() => import("@/pages/app/CreatorPage"));
+const EditorPage = lazyWithRetry(() => import("@/pages/Editor"));
+
+function PageLoader() {
+  const { t: _copy } = _useCopy();
+  return (
+    <div className="fixed inset-0 flex items-center justify-center bg-black text-white/60 text-sm">{_copy("copy.ba3bbbe10d8b", { defaultValue: "Loading…" })}</div>
+  );
+}
+
+export default function CreatorEditorHost() {
+  const { t: _copy } = _useCopy();
+  const { pathname } = useLocation();
+  const { walletAddress } = useAuth() as { walletAddress: string | null };
+  const isEditor = pathname.startsWith("/editor");
+  const isCreator = pathname.startsWith("/creator");
+
+  const [mounted, setMounted] = useState<{ creator: boolean; editor: boolean }>(() => ({
+    creator: isCreator,
+    editor: isEditor,
+  }));
+
+  useEffect(() => {
+    setMounted((prev) => {
+      const next = { ...prev };
+      if (isCreator) next.creator = true;
+      if (isEditor) next.editor = true;
+      return next;
+    });
+  }, [isCreator, isEditor]);
+
+  /**
+   * Tell both sides to close their overlays when the visible surface changes.
+   * Radix portals escape the `display: none` wrapper, so a model picker left
+   * open on /creator would otherwise hang over the editor canvas. See
+   * use-surface-switch for the full explanation.
+   */
+  useEffect(() => {
+    emitSurfaceSwitch();
+  }, [isCreator, isEditor]);
+
+  /**
+   * Point the generation library at the signed-in wallet, and rejoin anything
+   * that wallet had still rendering when the tab was last closed. The DHB is
+   * already spent on those, so dropping them costs the creator real money.
+   *
+   * setScope also covers disconnect: it moves the library back to the anonymous
+   * key, so one person's prompts and results are not left on the page for
+   * whoever connects next on a shared machine.
+   *
+   * Runs here rather than in either page because both share the queue and
+   * either can be the one that loads first.
+   */
+  useEffect(() => {
+    useGenerationStore.getState().setScope(walletAddress ?? null);
+    // Library folders follow the wallet too: pull the account's folders and
+    // memberships so the "Your generations" chips match across devices.
+    if (walletAddress) void useCreatorFolderStore.getState().loadFromServer();
+  }, [walletAddress]);
+
+  useEffect(() => {
+    useGenerationStore.getState().resumeInterrupted();
+    void useGenerationStore.getState().syncLibrary();
+  }, []);
+
+  // Preload the other side after first idle so the first switch is instant.
+  useEffect(() => {
+    // requestIdleCallback is still missing from Safari's lib.dom typings.
+    const ric = (window as Window & {
+      requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
+    }).requestIdleCallback;
+    const idle = (cb: () => void) =>
+      ric ? ric(cb, { timeout: 2000 }) : window.setTimeout(cb, 800);
+    idle(() => setMounted({ creator: true, editor: true }));
+  }, []);
+
+  return (
+    <>
+      {isCreator ? (
+        <SEOHead
+          title={_copy("copy.266c57b5eb4e", { defaultValue: "Riftn Creator: AI Studio, Agents & Video Tools" })}
+          description={_copy("copy.34bc1a3f12ae", { defaultValue: "Generate images and videos, edit with AI, and publish to Riftn. A complete AI creator studio with metallic liquid glass design." })}
+          url="https://riftn.com/creator"
+          jsonLd={{
+            "@context": "https://schema.org",
+            "@type": "SoftwareApplication",
+            name: "Riftn Creator Studio",
+            url: "https://riftn.com/creator",
+            applicationCategory: "MultimediaApplication",
+            operatingSystem: "Web",
+            description:
+              _copy("copy.644b6364b6d1", { defaultValue: "Native AI creator studio for Riftn image, video, music, posters, skills and agents." }),
+            offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+          }}
+        />
+      ) : (
+        <SEOHead title={_copy("copy.002f6e549556", { defaultValue: "Riftn Editor: In-Browser Video Editor" })} description={_copy("copy.909dd646a63c", { defaultValue: "Cut, trim, and export videos in your browser. Multi-track timeline, audio waveforms, effects, and one-click publish to Riftn." })} url="https://riftn.com/editor" />
+      )}
+      {mounted.creator && (
+        <div style={isCreator ? undefined : { display: "none" }}>
+          <Suspense fallback={isCreator ? <PageLoader /> : null}>
+            <CreatorPage />
+          </Suspense>
+        </div>
+      )}
+      {mounted.editor && (
+        <div style={isEditor ? undefined : { display: "none" }}>
+          <Suspense fallback={isEditor ? <PageLoader /> : null}>
+            <EditorPage />
+          </Suspense>
+        </div>
+      )}
+    </>
+  );
+}

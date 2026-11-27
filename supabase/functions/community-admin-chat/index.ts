@@ -1,0 +1,183 @@
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.89.0";
+import { rateLimitByIp } from "../_shared/auth.ts";
+import { aiChat } from "../_shared/ai-chat.ts";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type, x-wallet-address, x-dehub-token, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version, x-request-id, prefer",
+};
+
+// Reserved bot identity for the AI Admin
+const BOT_WALLET = "0x000000000000000000000000000000000000a1de";
+const BOT_USERNAME = "ai-admin";
+const BOT_DISPLAY_NAME = "AI Admin";
+
+serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return new Response("ok", { headers: corsHeaders });
+  }
+
+  const limited = await rateLimitByIp(req, 'community-admin-chat', { limit: 20, windowMs: 60 * 60 * 1000 });
+  if (limited) return limited;
+
+  try {
+    const { communityId, prompt, askerName } = await req.json();
+
+    if (!communityId || !prompt || typeof prompt !== "string") {
+      return new Response(
+        JSON.stringify({ error: "communityId and prompt are required" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
+    const AI_KEY = Deno.env.get("GEMINI_API_KEY") ?? Deno.env.get("LOVABLE_API_KEY");
+    const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+    const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+
+    if (!AI_KEY) {
+      return new Response(JSON.stringify({ error: "AI not configured" }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const admin = createClient(SUPABASE_URL, SERVICE_ROLE);
+
+    // Fetch community context
+    const { data: community } = await admin
+      .from("communities")
+      .select("name, description")
+      .eq("id", communityId)
+      .maybeSingle();
+
+    // Fetch recent chat history for context
+    const { data: recent } = await admin
+      .from("community_chat_messages")
+      .select("display_name, username, content, message_type, created_at")
+      .eq("community_id", communityId)
+      .order("created_at", { ascending: false })
+      .limit(15);
+
+    // The AI Admin only ever answers a question somebody actually put to it
+    // in this chat. The app saves the member's "/admin ..." line first and
+    // calls here second, so that line has to be there: recent, and not yet
+    // answered. Without it this endpoint would post under the admin's name
+    // for anyone who called it, in any community, with nothing in the chat
+    // to show who asked.
+    const wanted = prompt.trim();
+    const cutoff = Date.now() - 3 * 60_000;
+    let answeredSince = false;
+    type Asker = { display_name?: string | null; username?: string | null };
+    let question: Asker | null = null;
+    let fallback: Asker | null = null;
+    for (const m of recent || []) {
+      if (Date.parse(m.created_at) < cutoff) break;
+      if (m.message_type === "admin_response") { answeredSince = true; continue; }
+      if (m.message_type !== "text") continue;
+      const asked = /^\/admin\b\s*(.*)$/is.exec(String(m.content ?? "").trim());
+      if (!asked) continue;
+      if (asked[1].trim() === wanted) { question = m; break; }
+      if (!answeredSince && !fallback) fallback = m;
+    }
+    question = question ?? fallback;
+    if (!question) {
+      return new Response(JSON.stringify({ error: "Ask the AI Admin with /admin in the chat." }), {
+        status: 403,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const asker = String(question.display_name || question.username || askerName || "Member").slice(0, 60);
+
+    const history = (recent || [])
+      .reverse()
+      .filter((m) => m.message_type === "text" || m.message_type === "admin_response")
+      .map((m) => `${m.display_name || m.username || "User"}: ${m.content}`)
+      .join("\n");
+
+    const systemPrompt = `You are "AI Admin", the live AI moderator and helper for the "${community?.name || "this"}" community on Riftn (a decentralized social platform).
+
+Community description: ${community?.description || "(no description)"}
+
+Your role:
+- Answer questions live for community members in chat.
+- Be helpful, friendly, and concise (2-4 sentences when possible).
+- Stay relevant to the community's topic and Riftn.
+- When unsure, say so honestly. Never invent facts about specific members.
+- Use markdown sparingly. No emojis spam.
+
+Recent chat (for context):
+${history || "(no recent messages)"}
+
+A member asked you the following with /admin. Reply directly to them.`;
+
+    const aiResp = await aiChat({
+      model: "google/gemini-3-flash-preview",
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: `${asker}: ${prompt.slice(0, 2000)}` },
+      ],
+    }, { label: "community-admin-chat" });
+
+    if (!aiResp.ok) {
+      const errText = await aiResp.text();
+      console.error("AI gateway error", aiResp.status, errText);
+      if (aiResp.status === 429) {
+        return new Response(JSON.stringify({ error: "Rate limit, try again shortly." }), {
+          status: 429,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      if (aiResp.status === 402) {
+        return new Response(JSON.stringify({ error: "AI credits exhausted." }), {
+          status: 402,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      return new Response(JSON.stringify({ error: "AI gateway error" }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const aiJson = await aiResp.json();
+    const reply =
+      aiJson?.choices?.[0]?.message?.content?.toString().trim() ||
+      "Sorry, I couldn't generate a response.";
+
+    // Insert as admin_response message
+    const { error: insertErr } = await admin
+      .from("community_chat_messages")
+      .insert({
+        community_id: communityId,
+        wallet_address: BOT_WALLET,
+        username: BOT_USERNAME,
+        display_name: BOT_DISPLAY_NAME,
+        avatar_url: null,
+        content: reply,
+        message_type: "admin_response",
+        image_url: null,
+        reply_to_id: null,
+        reactions: {},
+      });
+
+    if (insertErr) {
+      console.error("Insert error", insertErr);
+      return new Response(JSON.stringify({ error: insertErr.message }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    return new Response(JSON.stringify({ ok: true, reply }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  } catch (e: any) {
+    console.error("community-admin-chat error", e);
+    return new Response(JSON.stringify({ error: e?.message || "Unknown error" }), {
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+});

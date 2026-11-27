@@ -1,0 +1,300 @@
+/*
+ * Riftn service worker — offline app shell + immutable asset/media cache.
+ * =====================================================================
+ * Hand-written (no Workbox) to keep the build dependency-free.
+ *
+ * Strategy summary:
+ *   1. Navigations (HTML)      → NetworkFirst. Online users ALWAYS get a fresh
+ *                                index.html (correct hashed-chunk refs); the
+ *                                cached shell is served only when the network
+ *                                fails/stalls. This is the guard against the
+ *                                classic "stale shell references dead chunk" bug.
+ *   2. /assets/* build chunks  → CacheFirst. Filenames are content-hashed and
+ *                                served `immutable`, so cached === correct. This
+ *                                is what makes the ~1.5MB wallet chunk + app JS
+ *                                instant on repeat/slow visits instead of a slow
+ *                                HTTP revalidation.
+ *   3. Immutable CDN media     → CacheFirst with an entry cap. images / avatars /
+ *      (NOT videos)             covers / feed-images only. Videos are excluded —
+ *                                they're ~50MB progressive MP4s and would blow the
+ *                                cache quota; the browser HTTP range cache handles
+ *                                those.
+ *   4. Everything else         → pass through (auth'd /api/feed JSON, RPCs, etc.).
+ *
+ * Bump VERSION to invalidate every cache on the next activate.
+ */
+
+// v3 flushed asset entries poisoned by an SPA-fallback bug (see isRealAsset).
+// v4 drops the unbounded v3 asset cache: it kept every chunk of every deploy
+// (over 1GB on a regular visitor), which made each cache lookup slow enough to
+// hold page chunks for several seconds behind the worker.
+// v5 drops media entries stored as opaque responses: an opaque error looks
+// exactly like an opaque photo, so one failed fetch broke that photo for good.
+const VERSION = 'dehub-sw-v5';
+const SHELL_CACHE = `${VERSION}-shell`;
+const ASSET_CACHE = `${VERSION}-assets`;
+const MEDIA_CACHE = `${VERSION}-media`;
+const CONTENT_CACHE = `${VERSION}-content`;
+// Roughly two deploys' worth of chunks; older builds' files are never asked for again.
+const ASSET_MAX_ENTRIES = 1500;
+const MEDIA_MAX_ENTRIES = 250;
+const CONTENT_MAX_ENTRIES = 60;
+
+const CDN_HOST = 'dehubcdn.ams3.cdn.digitaloceanspaces.com';
+// Immutable image folders only. `videos/` is deliberately absent.
+const MEDIA_PATH_RE = /\/(images|feed-images|avatars|covers|nfts)\//;
+
+self.addEventListener('install', (event) => {
+  // Activate immediately so the cache is available on this visit, not the next.
+  self.skipWaiting();
+  event.waitUntil(
+    caches.open(SHELL_CACHE).then((c) => c.add('/').catch(() => {}))
+  );
+});
+
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches
+      .keys()
+      .then((keys) =>
+        Promise.all(
+          keys.filter((k) => !k.startsWith(VERSION)).map((k) => caches.delete(k))
+        )
+      )
+      .then(() => self.clients.claim())
+  );
+});
+
+// FIFO eviction keeps each cache bounded (oldest inserted go first). One trim
+// per cache at a time, a few seconds after the last write: a page load stores
+// hundreds of chunks, and a full keys() walk per stored file starved the very
+// fetches the cache exists to speed up.
+const trimTimers = new Map();
+function trimCache(name, max) {
+  clearTimeout(trimTimers.get(name));
+  trimTimers.set(name, setTimeout(() => {
+    trimTimers.delete(name);
+    runTrim(name, max).catch(() => {});
+  }, 5000));
+}
+async function runTrim(name, max) {
+  const cache = await caches.open(name);
+  const keys = await cache.keys();
+  const overflow = keys.length - max;
+  for (let i = 0; i < overflow; i++) {
+    await cache.delete(keys[i]);
+  }
+}
+
+/**
+ * `isCacheable` is an extra guard applied on top of the status check, for
+ * responses that are "successful" but still wrong to store. See the /assets/
+ * branch: a 200 is not proof the thing we asked for exists.
+ */
+async function cacheFirst(req, cacheName, maxEntries, isCacheable) {
+  const cache = await caches.open(cacheName);
+  const hit = await cache.match(req);
+  if (hit) return hit;
+  try {
+    const res = await fetch(req);
+    // Cache both CORS-ok and opaque (no-cors <img>) responses. Opaque is fine to
+    // store & replay for image/poster paints.
+    if (res && (res.ok || res.type === 'opaque') && (!isCacheable || isCacheable(res))) {
+      cache.put(req, res.clone());
+      if (maxEntries) trimCache(cacheName, maxEntries);
+    }
+    return res;
+  } catch (err) {
+    return hit || Response.error();
+  }
+}
+
+/**
+ * The Spaces CDN answers dehub.io with CORS headers, so the photo is fetched
+ * in cors mode and only a real 200 is stored. The page's own no-cors request
+ * would come back opaque, and an opaque 403 or 5xx cached here never retried.
+ * Any other origin, or a CORS failure, goes to the network uncached.
+ */
+async function mediaCacheFirst(req) {
+  const cache = await caches.open(MEDIA_CACHE);
+  const hit = await cache.match(req, { ignoreVary: true });
+  if (hit) return hit;
+  try {
+    const res = await fetch(req.url, { mode: 'cors', credentials: 'omit' });
+    if (res.ok) {
+      cache.put(req, res.clone());
+      trimCache(MEDIA_CACHE, MEDIA_MAX_ENTRIES);
+    }
+    return res;
+  } catch {
+    return fetch(req);
+  }
+}
+
+/**
+ * Nothing under /assets/ is ever an HTML document — it holds content-hashed JS,
+ * CSS, fonts and images. An HTML body there means the request missed and the
+ * SPA catch-all answered in its place, which the origin serves as 200 with
+ * `immutable, max-age=31536000`. Storing that is how a single stale-deploy miss
+ * became permanent: CacheFirst never revalidates, so if a later build re-emits
+ * the same content hash (a revert does exactly that) the shell would be served
+ * for a chunk that exists, and no amount of refreshing would fix it.
+ */
+function isRealAsset(res) {
+  return !(res.headers.get('Content-Type') || '').toLowerCase().startsWith('text/html');
+}
+
+/** A successful, same-origin (or CORS), non-redirected HTML page. */
+function isShellResponse(res) {
+  return (
+    res.ok &&
+    !res.redirected &&
+    (res.type === 'basic' || res.type === 'cors') &&
+    (res.headers.get('Content-Type') || '').toLowerCase().startsWith('text/html')
+  );
+}
+
+self.addEventListener('fetch', (event) => {
+  const req = event.request;
+  if (req.method !== 'GET') return;
+
+  let url;
+  try {
+    url = new URL(req.url);
+  } catch {
+    return;
+  }
+
+  // 1. Navigations → NetworkFirst (keep the shell fresh online).
+  if (req.mode === 'navigate') {
+    event.respondWith(
+      fetch(req)
+        .then((res) => {
+          // Only a real page may become the offline shell. Storing every
+          // response let an edge error page, a 404 or an opaque redirect be
+          // what an offline visitor got for every route from then on.
+          if (isShellResponse(res)) {
+            const copy = res.clone();
+            caches.open(SHELL_CACHE).then((c) => c.put('/', copy)).catch(() => {});
+          }
+          return res;
+        })
+        .catch(() =>
+          caches.match('/', { cacheName: SHELL_CACHE }).then((r) => r || fetch('/'))
+        )
+    );
+    return;
+  }
+
+  // 2. Hashed build assets → CacheFirst, never storing an SPA-fallback shell.
+  if (url.origin === self.location.origin && url.pathname.startsWith('/assets/')) {
+    event.respondWith(cacheFirst(req, ASSET_CACHE, ASSET_MAX_ENTRIES, isRealAsset));
+    return;
+  }
+
+  // 3. Immutable CDN images (never videos) → CacheFirst, capped.
+  if (url.hostname === CDN_HOST && MEDIA_PATH_RE.test(url.pathname)) {
+    event.respondWith(mediaCacheFirst(req));
+    return;
+  }
+
+  // 4. Blog article bodies (/blog-content/<slug>.json) → StaleWhileRevalidate.
+  //    Fetched on demand by the SPA since the bodies left the JS bundle;
+  //    articles change only on deploys, so serve cached instantly and refresh
+  //    in the background.
+  if (url.origin === self.location.origin && url.pathname.startsWith('/blog-content/')) {
+    event.respondWith(
+      caches.open(CONTENT_CACHE).then(async (cache) => {
+        const hit = await cache.match(req);
+        const network = fetch(req)
+          .then((res) => {
+            if (res && res.ok) {
+              cache.put(req, res.clone());
+              trimCache(CONTENT_CACHE, CONTENT_MAX_ENTRIES);
+            }
+            return res;
+          })
+          .catch(() => null);
+        return hit || network.then((res) => res || Response.error());
+      })
+    );
+    return;
+  }
+
+  // 5. Everything else falls through to the network untouched.
+});
+
+// Allow the page to trigger an immediate activation after an update.
+self.addEventListener('message', (event) => {
+  if (event.data === 'SKIP_WAITING') self.skipWaiting();
+});
+
+// ── Push ────────────────────────────────────────────────────────────────────
+// The whole point of a service worker for notifications: this runs with every
+// tab closed, which is the difference between a notification and a thing you
+// find later in the app.
+//
+// The payload is written by the backend (buildWebPushPayload) and is
+// deliberately small — a push payload is capped at 4 KB once encrypted, and
+// everything except the deep link is re-fetchable the moment the tab opens.
+self.addEventListener('push', (event) => {
+  let payload = {};
+  try {
+    payload = event.data ? event.data.json() : {};
+  } catch {
+    // A push with no body, or a body that is not ours, still means something
+    // happened — showing a generic line beats showing nothing, and on Chrome
+    // a push event that displays no notification eventually costs the site
+    // its permission.
+    payload = {};
+  }
+
+  const title = payload.title || 'Riftn';
+  const options = {
+    body: payload.body || 'Something happened on Riftn',
+    icon: payload.icon || '/icon-192.png',
+    badge: '/icon-192.png',
+    // Same tag replaces rather than stacks, so ten likes on one post are one
+    // line in the tray instead of ten.
+    ...(payload.tag ? { tag: payload.tag } : {}),
+    data: { url: payload.url || '/app/notifications' },
+  };
+
+  // An open tab has its own copy of the notification list, fetched minutes ago
+  // and with nothing on the server that tells it otherwise — the backend has no
+  // socket event for this. Tell every tab a push landed, so the list matches the
+  // tray card the reader just tapped past instead of waiting for the five-minute
+  // poll or a manual refresh.
+  const tell = self.clients
+    .matchAll({ type: 'window', includeUncontrolled: true })
+    .then((clientList) => {
+      for (const client of clientList) {
+        client.postMessage({ type: 'dehub:notification-push' });
+      }
+    })
+    .catch(() => {});
+
+  event.waitUntil(Promise.all([self.registration.showNotification(title, options), tell]));
+});
+
+// Focus an open tab rather than opening a second copy of the app — a reader
+// with Riftn already open does not want two of it, and the tab they have is
+// the one holding their scroll position and their session.
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const target = (event.notification.data && event.notification.data.url) || '/app/notifications';
+
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+      for (const client of clientList) {
+        if ('focus' in client) {
+          // navigate() is not on every browser's WindowClient; focusing and
+          // letting the page route itself is the version that works everywhere.
+          client.postMessage({ type: 'dehub:notification-click', url: target });
+          return client.focus();
+        }
+      }
+      return self.clients.openWindow(target);
+    })
+  );
+});

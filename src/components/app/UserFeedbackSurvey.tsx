@@ -1,0 +1,328 @@
+import { translateCopy as _translateCopy } from '@/i18n/copy';
+import { useTranslation as _useCopy } from 'react-i18next';
+import { useSurfaceDraft, draftIdentity } from '@/hooks/use-surface-draft';
+/**
+ * User Feedback Survey
+ * ====================
+ * Multi-step survey modal shown once per ROUND to returning users on login.
+ * Stores responses in `user_feedback_surveys`.
+ *
+ * Rounds, not one survey forever. Round 1 ran March–August 2026 and collected
+ * 89 answers to a fixed set of five questions, one table column each — which
+ * meant asking anything new needed a migration, and there was no way to tell a
+ * second round's answers from the first's.
+ *
+ * Running a new round is now: write a new QUESTIONS array, bump SURVEY_VERSION.
+ * Nothing else. The version scopes the "have they already answered?" check and
+ * the localStorage key, so everyone who did a previous round is asked the new
+ * one exactly once, and earlier rounds' rows stay untouched under their own
+ * `survey_version`.
+ *
+ * Query a round with:
+ *   select answers->>'join_reason' q, count(*)
+ *   from user_feedback_surveys where survey_version = 3 group by 1 order by 2 desc;
+ */
+
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import Check from "@/components/ui/cut-icons/check";
+
+import X from "@/components/ui/cut-icons/close";
+import ChevronRight from "@/components/ui/cut-icons/next";
+
+import { cn } from '@/lib/utils';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import { withWalletHeader } from '@/lib/supabase-wallet-client';
+import { toast } from 'sonner';
+import { OverlayOpenTracker } from '@/lib/overlay-open';
+
+/** Bump to run a new round. Round 1 = the original five questions. */
+const SURVEY_VERSION = 3;
+
+/** Per-round, so a completed earlier round does not suppress this one. */
+const SURVEY_DISMISSED_KEY = `dehub_survey_completed_v${SURVEY_VERSION}`;
+
+interface SurveyOption {
+  /** Stored in `answers` as-is, so it stays English whatever the reader's language. */
+  value: string;
+  /** What the reader sees. */
+  readonly label: string;
+}
+
+interface SurveyQuestion {
+  key: string;
+  readonly question: string;
+  /** 'select' renders the button list; 'text' renders a free-text textarea. */
+  type: 'select' | 'text';
+  options?: SurveyOption[];
+  readonly placeholder?: string;
+}
+
+/**
+ * Round 3 — testimonial-gathering. The first two are free text so answers
+ * read as real quotes rather than picked options; the consent question is
+ * genuinely no-pressure, so "no" is a first-class, equally-styled answer, not
+ * a dead end — declining it still lets join_reason/favourite_thing submit.
+ */
+const QUESTIONS: SurveyQuestion[] = [
+  {
+    key: 'join_reason',
+    get question() { return _translateCopy("copy.3fbc836e15fd", { defaultValue: "What made you join Riftn?" }); },
+    type: 'text',
+    get placeholder() { return _translateCopy("copy.2c82d66bf91b", { defaultValue: "In your own words…" }); },
+  },
+  {
+    key: 'favourite_thing',
+    get question() { return _translateCopy("copy.b31b23496638", { defaultValue: "What do you like most about Riftn?" }); },
+    type: 'text',
+    get placeholder() { return _translateCopy("copy.2c82d66bf91b", { defaultValue: "In your own words…" }); },
+  },
+  {
+    key: 'consent_share',
+    get question() { return _translateCopy("copy.6e154f84f8e5", { defaultValue: "Are you ok if we shared your name and answers above in promotional materials, tweets, etc? No pressure if not." }); },
+    type: 'select',
+    options: [
+      { value: 'Yes, go ahead', get label() { return _translateCopy("copy.a61850c5c40a", { defaultValue: "Yes, go ahead" }); } },
+      { value: 'No, keep it private', get label() { return _translateCopy("copy.682e42ec9ed4", { defaultValue: "No, keep it private" }); } },
+    ],
+  },
+  {
+    key: 'video_interview_interest',
+    get question() { return _translateCopy("copy.69f6ce417f90", { defaultValue: "Would you be open to a short video interview about why you joined / love Riftn, for us to share in promo videos?" }); },
+    type: 'select',
+    options: [
+      { value: "Yes, I'm interested", get label() { return _translateCopy("copy.e1da388d3206", { defaultValue: "Yes, I'm interested" }); } },
+      { value: 'No, not for me', get label() { return _translateCopy("copy.9499fb27b37a", { defaultValue: "No, not for me" }); } },
+    ],
+  },
+];
+
+export function UserFeedbackSurvey() {
+  const { t: _copy } = _useCopy();
+  const { walletAddress, isAuthenticated } = useAuth();
+  const [show, setShow] = useState(false);
+  const [step, setStep] = useState(0);
+  const [answers, setAnswers] = useSurfaceDraft<Record<string, string>>("src/components/app/UserFeedbackSurvey.tsx:answers", {});
+  const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (!isAuthenticated || !walletAddress) return;
+
+    // Quick local check first
+    const completed = localStorage.getItem(SURVEY_DISMISSED_KEY);
+    if (completed) return;
+
+    const isNewAccount = sessionStorage.getItem('dehub_is_new_account');
+    if (isNewAccount === 'true') return;
+
+    // Check DB to ensure they haven't already submitted (handles cross-device).
+    // The wallet header is required now: the read policy on this table was
+    // `USING (true)` — wallet address next to gender next to age range, legible
+    // to anyone holding the publishable key — and is now scoped to your own
+    // rows. Without the header this query returns 0 and the modal reappears on
+    // every login.
+    let cancelled = false;
+    (async () => {
+      try {
+        const { count } = await withWalletHeader(
+          supabase
+            .from('user_feedback_surveys')
+            .select('id', { count: 'exact', head: true })
+            .eq('wallet_address', walletAddress.toLowerCase())
+            .eq('survey_version', SURVEY_VERSION),
+          walletAddress,
+        );
+
+        if (cancelled) return;
+        if (count && count > 0) {
+          // Already submitted — persist locally so we never check again
+          localStorage.setItem(SURVEY_DISMISSED_KEY, 'true');
+          return;
+        }
+        // Small delay so login flow completes first
+        setTimeout(() => { if (!cancelled) setShow(true); }, 2000);
+      } catch {
+        // On error, don't show survey
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [isAuthenticated, walletAddress]);
+
+  const currentQuestion = QUESTIONS[step];
+  const isLastStep = step === QUESTIONS.length - 1;
+  const hasAnswer = !!answers[currentQuestion?.key]?.trim();
+
+  const handleAnswer = (value: string) => {
+    setAnswers(prev => ({ ...prev, [currentQuestion.key]: value }));
+  };
+
+  const handleNext = async () => {
+    if (!hasAnswer) return;
+
+    if (isLastStep) {
+      await handleSubmit();
+    } else {
+      setStep(s => s + 1);
+    }
+  };
+
+  const handleSubmit = async () => {
+    if (!walletAddress) return;
+    setSubmitting(true);
+
+    try {
+      // Every round's answers go in `answers`, keyed by question. The five
+      // round-1 columns are left alone rather than reused: a column called
+      // `signup_experience` holding an answer to a differently worded question
+      // is how a dataset quietly stops meaning anything.
+      const { error } = await supabase.from('user_feedback_surveys').insert({
+        wallet_address: walletAddress.toLowerCase(),
+        survey_version: SURVEY_VERSION,
+        answers,
+      });
+
+      if (error) throw error;
+
+      localStorage.setItem(SURVEY_DISMISSED_KEY, 'true');
+      toast.success(_copy("copy.f2082eaee365", { defaultValue: "Thanks for your feedback!" }));
+      setShow(false);
+    } catch (err) {
+      console.error('[Survey] Submit error:', err);
+      toast.error(_copy("copy.1f293aa8b15c", { defaultValue: "Failed to submit, try again" }));
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleDismiss = () => {
+    localStorage.setItem(SURVEY_DISMISSED_KEY, 'true');
+    setShow(false);
+  };
+
+  if (!show) return null;
+
+  return (
+    <AnimatePresence>
+      <OverlayOpenTracker />
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+        onClick={handleDismiss}
+      >
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.95, y: 20 }}
+          transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+          className="w-full max-w-md bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden shadow-2xl"
+          onClick={e => e.stopPropagation()}
+        >
+          {/* Header */}
+          <div className="flex items-center justify-between px-5 pt-5 pb-2">
+            <div>
+              <h2 className="text-white font-bold text-lg">{_copy("copy.b1bfab35b286", { defaultValue: "Quick Feedback" })}</h2>
+              <p className="text-zinc-500 text-xs mt-0.5">{_copy("copy.ed9f6630d4b5", { defaultValue: "Question {{value1}} of {{value2}}", value1: step + 1, value2: QUESTIONS.length })}
+              </p>
+            </div>
+            <button
+              onClick={handleDismiss}
+              className="text-zinc-500 hover:text-white transition-colors p-1"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+
+          {/* Progress bar */}
+          <div className="px-5 pt-2 pb-4">
+            <div className="h-1 bg-zinc-800 rounded-full overflow-hidden">
+              <motion.div
+                className="h-full bg-white rounded-full"
+                initial={{ width: 0 }}
+                animate={{ width: `${((step + 1) / QUESTIONS.length) * 100}%` }}
+                transition={{ duration: 0.3 }}
+              />
+            </div>
+          </div>
+
+          {/* Question */}
+          <div className="px-5 pb-5">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={step}
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.2 }}
+              >
+                <p className="text-white font-medium text-base mb-4">
+                  {currentQuestion.question}
+                </p>
+                {currentQuestion.type === 'text' ? (
+                  <textarea
+                    value={answers[currentQuestion.key] ?? ''}
+                    onChange={e => handleAnswer(e.target.value)}
+                    placeholder={currentQuestion.placeholder}
+                    rows={4}
+                    autoFocus
+                    className="w-full resize-none px-4 py-3 rounded-xl border bg-zinc-800/50 text-white text-sm border-zinc-700/50 placeholder:text-zinc-500 focus:outline-none focus:border-zinc-500"
+                  />
+                ) : (
+                  <div className="flex flex-col gap-2">
+                    {currentQuestion.options!.map(option => {
+                      const isSelected = answers[currentQuestion.key] === option.value;
+                      return (
+                        <button
+                          key={option.value}
+                          onClick={() => handleAnswer(option.value)}
+                          className={cn(
+                            "w-full text-left px-4 py-3 rounded-xl border transition-all text-sm font-medium",
+                            isSelected
+                              ? "bg-white text-black border-white"
+                              : "bg-zinc-800/50 text-zinc-300 border-zinc-700/50 hover:bg-zinc-800 hover:border-zinc-600"
+                          )}
+                        >
+                          {option.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </motion.div>
+            </AnimatePresence>
+          </div>
+
+          {/* Footer */}
+          <div className="px-5 pb-5 flex items-center justify-between">
+            <button
+              onClick={handleDismiss}
+              className="text-zinc-500 text-sm hover:text-white transition-colors"
+            >{_copy("copy.28d03596d24e", { defaultValue: "Skip" })}</button>
+            <button
+              onClick={handleNext}
+              disabled={!hasAnswer || submitting}
+              className={cn(
+                "flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all",
+                hasAnswer
+                  ? "bg-white text-black hover:bg-zinc-200"
+                  : "bg-white text-black opacity-45 cursor-not-allowed"
+              )}
+            >
+              {submitting ? (
+                _copy("copy.64115d5b9c79", { defaultValue: "Submitting..." })
+              ) : isLastStep ? (
+                <>{_copy("copy.1d5c2a48642c", { defaultValue: "Submit " })}<Check className="w-4 h-4" />
+                </>
+              ) : (
+                <>{_copy("copy.cd447acb4270", { defaultValue: "Next " })}<ChevronRight className="w-4 h-4" />
+                </>
+              )}
+            </button>
+          </div>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
+  );
+}

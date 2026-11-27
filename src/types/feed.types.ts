@@ -1,0 +1,628 @@
+/**
+ * Feed Types
+ * ===========
+ * Centralized type definitions for all feed-related content.
+ * These types ensure consistency across all feed components.
+ * 
+ * @module types/feed
+ */
+
+import type { User } from './app.types';
+import type { PostReaction, ReactionCounts } from '@/lib/reactions';
+import type { ContentRating, ShopLink } from '@/lib/api/dehub/types';
+import type { SubscriberPlan } from '@/lib/content-gate';
+import type { Storyboard } from '@/lib/storyboard';
+
+/**
+ * Content type badge variants for universal card headers
+ */
+export type ContentType = 'post' | 'video' | 'image' | 'live' | 'short';
+
+/**
+ * Badge configuration for content type labels
+ */
+export interface ContentBadge {
+  label: string;
+  className: string;
+}
+
+/**
+ * Base interface for all feed content items
+ */
+export interface BaseFeedItem {
+  id: string;
+  /** The original video, when this post is a duet of it (lib/duet). */
+  duetOf?: import('@/lib/duet').DuetOf;
+  createdAt?: string;
+  /** Whether this is an optimistic (processing) post not yet minted */
+  isOptimistic?: boolean;
+  /**
+   * Where the post is allowed to appear. Absent means safe, which is every
+   * post made before ratings existed.
+   *
+   * The public feeds are already filtered on this server-side; what the cards
+   * do with it is put a content warning over a 'mature' post on the surfaces
+   * where one is still served on purpose — a profile, the Following feed, a
+   * shared link.
+   */
+  contentRating?: ContentRating;
+  /** Alt text, one per piece of media in display order (gallery images by position, a video first). */
+  mediaDescriptions?: string[];
+  /** 'comic' shows the gallery as collector cards. */
+  layout?: 'comic';
+  /** Comic captions, one per page in display order. */
+  mediaCaptions?: string[];
+  /** The comic's border preset; absent is the theme foil. */
+  comicBorder?: string;
+  /** The poster closed the market card for the $TICKER / address in the text, so no surface draws one. */
+  hideAssetCards?: boolean;
+  /** Links in the text whose preview card the poster closed, so no surface draws one. */
+  hiddenLinkPreviews?: string[];
+  /** People tagged on the photos. */
+  imageTags?: { address?: string; username: string; i: number; x: number; y: number }[];
+  /** A quiz hangs off this post (GET /quiz/:tokenId). */
+  hasQuiz?: boolean;
+  /** Content warning: the post opens collapsed behind this one line. */
+  spoilerText?: string;
+  /** Who may quote it; absent means anyone. */
+  quotePolicy?: 'public' | 'followers' | 'nobody';
+  /** A quote whose quoted author took their post back out of it. */
+  quoteRevoked?: boolean;
+  /** Who may reply; absent means anyone. */
+  replyPolicy?: 'public' | 'followers' | 'following' | 'mentioned';
+  /** Who may see it; absent means everyone. */
+  visibility?: 'public' | 'followers' | 'direct';
+  /**
+   * The creator published this for children — the Kids Mode allowlist.
+   *
+   * Absent means NOT for kids, so a post that predates the field is invisible
+   * in Kids Mode rather than defaulting into it. Cards only meet one outside
+   * Kids Mode on a profile, in search or through a shared link — the feeds
+   * drop it — and there the comment box reads as open-to-Kids-Mode-only.
+   */
+  forKids?: boolean;
+  /** Backend-computed total DHB tipped on this post — see usePostTipCount,
+   *  which uses this as a floor so a client-side recording gap never shows
+   *  fewer tips than the backend actually knows about. */
+  totalTips?: number;
+  /**
+   * The creator's Shop board — affiliate and shop links attached to this post.
+   * Absent or empty means no Shop button draws.
+   *
+   * On BaseFeedItem rather than on LiveStream alone: the board is a property
+   * of the post, and a video or an image card is as good a place to offer it
+   * as a stream. Live is simply where it ships first.
+   */
+  shopLinks?: ShopLink[];
+  /**
+   * How many of the creator's own store listings are on this post's Shop
+   * board. A render hint from the feed payload, so a card can draw the button
+   * without querying Supabase; the rows themselves come from stream_products
+   * when the board opens.
+   */
+  shopListingCount?: number;
+}
+
+/**
+ * Text post content
+ */
+export interface TextPost extends BaseFeedItem {
+  articleBody?: string;
+  /** An article's readable URL: /app/post/<articleSlug> (first ten words of its title). */
+  articleSlug?: string;
+  articleImageUrl?: string;
+  type: 'post';
+  author: User;
+  /** Post title (from API `name` field) — may be empty/whitespace for untitled posts */
+  title?: string;
+  content: string;
+  /** Raw API name field for edit modal */
+  rawName?: string;
+  /** Raw API description field for edit modal */
+  rawDescription?: string;
+  /** Formatted view count string (e.g., "1.2K") */
+  views?: string;
+  /** Mint status: 'minted' | 'signed' (pending) */
+  status?: 'minted' | 'signed' | string;
+  /** Off-chain slug — the post presents as /newpost/<newPostId> until minted. */
+  newPostId?: number;
+  /** Chain the post was created on — needed to mint one published off-chain. */
+  chainId?: number;
+  stats: {
+    comments: number;
+    reposts: number;
+    likes: number;
+    dislikes: number;
+  };
+  /** Whether the current user has liked this item */
+  isLiked?: boolean;
+  /** Whether the current user has disliked this item */
+  isDisliked?: boolean;
+  /** Which of the nine reactions the current user holds. isLiked/isDisliked are its polarity. */
+  myReaction?: PostReaction | null;
+  /** Per-reaction totals — the most-used one leads on the card. */
+  reactionCounts?: ReactionCounts | null;
+  /** Whether the current user has reposted this item */
+  isReposted?: boolean;
+  /** Whether this is a quote post */
+  isQuotePost?: boolean;
+  /** The quoted post data (for rendering embedded quote) */
+  quotedPost?: import('@/lib/api/dehub/types').DeHubNFT | null;
+  /** Post categories */
+  categories?: string[];
+  /** Community Alert tripped — border the link in the text, don't outline the whole card. */
+  communityAlertPending?: boolean;
+  /** Whether content is subscriber-only locked */
+  isLocked?: boolean;
+  /** Locked: price to unlock */
+  lockedPrice?: number;
+  /** Locked: currency (DHB, USDC) */
+  lockedCurrency?: string;
+  /** Locked: ERC-20 the hold is measured in. Absent means DHB. */
+  lockedTokenAddress?: string;
+  /** Locked: chain the hold token lives on. Absent means Base. */
+  lockedChainId?: number;
+  /**
+   * The creator's subscription plans that unlock this post. Empty or absent
+   * means the post is not subscriber-gated — see lib/content-gate.
+   */
+  subscriberPlans?: SubscriberPlan[];
+  /** Whether the current viewer is the content owner */
+  isOwner?: boolean;
+  /** Whether the content has been unlocked for the current viewer (purchased/earned) */
+  isUnlocked?: boolean;
+}
+
+/**
+ * Video content item
+ */
+export interface VideoItem extends BaseFeedItem {
+  type: 'video';
+  ppvPreviewReady?: boolean;
+  thumbnail: string;
+  videoUrl?: string;
+  /** Full HLS master playlist URL; plays instead of videoUrl where it can (lib/hls-vod). */
+  hlsUrl?: string;
+  /** Formatted duration string (e.g., "1:23") */
+  duration: string;
+  /** Raw duration in seconds for caching/filtering */
+  durationSeconds?: number;
+  title: string;
+  /** Video description/body text */
+  description?: string;
+  channel: string;
+  channelAvatar: string;
+  verified: boolean;
+  views: string;
+  uploadedAgo: string;
+  /** Mint status: 'minted' | 'signed' (pending) */
+  status?: 'minted' | 'signed' | string;
+  /** Async video transcode state, written optimistically before the CDN file
+   *  exists. Absent on posts predating this field — treat as 'done'. */
+  transcodingStatus?: 'pending' | 'on' | 'done' | 'failed';
+  /** Seek-preview sprite sheet — see lib/storyboard. */
+  storyboard?: Storyboard;
+  /** Width/height stored at upload — see lib/video-aspect. */
+  storedAspect?: number;
+  /** The stored size is the shape as shown (rotation applied), so it outranks the poster. */
+  storedAspectShown?: boolean;
+  /** Off-chain slug — the post presents as /newpost/<newPostId> until minted. */
+  newPostId?: number;
+  /** Readable URL: /app/post/<articleSlug> (first ten words of title or description). */
+  articleSlug?: string;
+  /** Creator's user ID for navigation */
+  creatorId?: string;
+  /** Creator's username for URL-based navigation */
+  creatorUsername?: string;
+  /** Creator's badge balance from API (avoids edge function call) */
+  creatorBadgeBalance?: number;
+  creatorPaymentsDisabled?: boolean;
+  /** Whether the current user has liked this item */
+  isLiked?: boolean;
+  /** Whether the current user has disliked this item */
+  isDisliked?: boolean;
+  /** Which of the nine reactions the current user holds. isLiked/isDisliked are its polarity. */
+  myReaction?: PostReaction | null;
+  /** Per-reaction totals — the most-used one leads on the card. */
+  reactionCounts?: ReactionCounts | null;
+  /** Number of likes */
+  likeCount?: number;
+  /** Number of dislikes */
+  dislikeCount?: number;
+  /** Number of comments */
+  commentCount?: number;
+  /** Number of PPV buyers */
+  ppvBuyerCount?: number;
+  /** Whether content is pay-per-view */
+  isPPV?: boolean;
+  /** PPV price amount */
+  ppvPrice?: number;
+  /** PPV currency (e.g., "USDC", "DHB") */
+  ppvCurrency?: string;
+  /** Whether content is watch-to-earn/bounty */
+  isW2E?: boolean;
+  /** Whether content is subscriber-only locked */
+  isLocked?: boolean;
+  /** Locked: price to unlock */
+  lockedPrice?: number;
+  /** Locked: currency (DHB, USDC) */
+  lockedCurrency?: string;
+  /** Locked: ERC-20 the hold is measured in. Absent means DHB. */
+  lockedTokenAddress?: string;
+  /** Locked: chain the hold token lives on. Absent means Base. */
+  lockedChainId?: number;
+  /**
+   * The creator's subscription plans that unlock this post. Empty or absent
+   * means the post is not subscriber-gated — see lib/content-gate.
+   */
+  subscriberPlans?: SubscriberPlan[];
+  /** Bounty: number of viewers to reward */
+  bountyViews?: number;
+  /** Bounty: number of commenters to reward */
+  bountyComments?: number;
+  /** Bounty: total reward amount */
+  bountyAmount?: number;
+  /** Bounty: reward currency (DHB, USDC) */
+  bountyCurrency?: string;
+  /** Number of reposts + quotes */
+  repostCount?: number;
+  /** Whether the current user has reposted this item */
+  isReposted?: boolean;
+  /** Whether this is an ad/sponsored post */
+  isAd?: boolean;
+  /** Whether the current viewer is the content owner */
+  isOwner?: boolean;
+  /** Whether the content has been unlocked for the current viewer (purchased/earned) */
+  isUnlocked?: boolean;
+  /** Chain ID the content was minted on (e.g., 8453 for Base, 56 for BNB) */
+  chainId?: number;
+  /** Audio URL for audio posts */
+  audioUrl?: string;
+  /** Audio duration in seconds */
+  audioDuration?: number;
+  /** Whether this is an audio post */
+  isAudio?: boolean;
+  /** Post categories */
+  categories?: string[];
+  /** Whether this video card actually represents a live post */
+  isLivePost?: boolean;
+  /** Posted as a short (vertical, Shorts feed) rather than a long video. */
+  isShort?: boolean;
+  /** Cached live status from feed navigation */
+  liveStatus?: string;
+  /** Cached stream active flag from feed navigation */
+  liveIsActive?: boolean;
+  /** Cached playback ID for live post navigation */
+  livePlaybackId?: string;
+  /** Cached playback URL for live post navigation */
+  livePlaybackUrl?: string;
+  /** HLS ladder for the in-feed live preview. */
+  livePlaybackUrls?: string[];
+  /** Whether the stream is on air right now — the feed only plays a live one. */
+  isLiveNow?: boolean;
+  /** Cached MongoDB stream ID for live post navigation */
+  liveStreamId?: string;
+  /** Soundtrack URL (plays over the video via synced audio overlay) */
+  soundtrackUrl?: string;
+  /** Soundtrack display title */
+  soundtrackTitle?: string;
+  /** Soundtrack creator name */
+  soundtrackCreator?: string;
+  /** Soundtrack token ID (source audio post) */
+  soundtrackTokenId?: string;
+}
+
+/**
+ * Image post content
+ */
+export interface ImagePost extends BaseFeedItem {
+  type: 'image';
+  username: string;
+  verified: boolean;
+  avatar: string;
+  /** Primary image URL (first image or legacy single image) */
+  image: string;
+  /** Array of image URLs for multi-image posts (1-4 images) */
+  imageUrls?: string[];
+  /** Post title */
+  title?: string;
+  /** Post description */
+  description?: string;
+  likes: number;
+  dislikes?: number;
+  /** @deprecated Use title/description instead */
+  caption: string;
+  comments: number;
+  /** Mint status: 'minted' | 'signed' (pending) */
+  status?: 'minted' | 'signed' | string;
+  /** Off-chain slug — the post presents as /newpost/<newPostId> until minted. */
+  newPostId?: number;
+  /** Readable URL: /app/post/<articleSlug> (first ten words of title or description). */
+  articleSlug?: string;
+  /** Formatted view count string (e.g., "1.2K") */
+  views: string;
+  timeAgo: string;
+  /** Creator's user ID for navigation */
+  creatorId?: string;
+  /** Creator's username for URL-based navigation */
+  creatorUsername?: string;
+  /** Creator's badge balance from API (avoids edge function call) */
+  creatorBadgeBalance?: number;
+  creatorPaymentsDisabled?: boolean;
+  /** Whether the current user has liked this item */
+  isLiked?: boolean;
+  /** Whether the current user has disliked this item */
+  isDisliked?: boolean;
+  /** Which of the nine reactions the current user holds. isLiked/isDisliked are its polarity. */
+  myReaction?: PostReaction | null;
+  /** Per-reaction totals — the most-used one leads on the card. */
+  reactionCounts?: ReactionCounts | null;
+  /** Number of PPV buyers */
+  ppvBuyerCount?: number;
+  /** Whether content is pay-per-view */
+  isPPV?: boolean;
+  /** PPV price amount */
+  ppvPrice?: number;
+  /** PPV currency (e.g., "USDC", "DHB") */
+  ppvCurrency?: string;
+  /** Whether content is watch-to-earn/bounty */
+  isW2E?: boolean;
+  /** Whether content is subscriber-only locked */
+  isLocked?: boolean;
+  /** Locked: price to unlock */
+  lockedPrice?: number;
+  /** Locked: currency (DHB, USDC) */
+  lockedCurrency?: string;
+  /** Locked: ERC-20 the hold is measured in. Absent means DHB. */
+  lockedTokenAddress?: string;
+  /** Locked: chain the hold token lives on. Absent means Base. */
+  lockedChainId?: number;
+  /**
+   * The creator's subscription plans that unlock this post. Empty or absent
+   * means the post is not subscriber-gated — see lib/content-gate.
+   */
+  subscriberPlans?: SubscriberPlan[];
+  /** Bounty: number of viewers to reward */
+  bountyViews?: number;
+  /** Bounty: number of commenters to reward */
+  bountyComments?: number;
+  /** Bounty: total reward amount */
+  bountyAmount?: number;
+  /** Bounty: reward currency (DHB, USDC) */
+  bountyCurrency?: string;
+  /** Number of reposts + quotes */
+  repostCount?: number;
+  /** Whether the current user has reposted this item */
+  isReposted?: boolean;
+  /** Whether the current viewer is the content owner */
+  isOwner?: boolean;
+  /** Whether the content has been unlocked for the current viewer (purchased/earned) */
+  isUnlocked?: boolean;
+  /** Chain ID the content was minted on (e.g., 8453 for Base, 56 for BNB) */
+  chainId?: number;
+  /** Post categories */
+  categories?: string[];
+  /** Whether this is a quote post */
+  isQuotePost?: boolean;
+  /** The quoted post data (for rendering embedded quote) */
+  quotedPost?: import('@/lib/api/dehub/types').DeHubNFT | null;
+  /** Soundtrack URL (plays while the image is in view) */
+  soundtrackUrl?: string;
+  /** Soundtrack display title */
+  soundtrackTitle?: string;
+  /** Soundtrack creator name */
+  soundtrackCreator?: string;
+}
+
+/**
+ * Live stream content
+ */
+export interface LiveStream extends BaseFeedItem {
+  liveStatus?: string;
+  type: 'live';
+  streamer: string;
+  avatar: string;
+  title: string;
+  game: string;
+  /** All-time joins ("tuned in"), never the room right now. */
+  viewers: string;
+  /**
+   * How many are watching right now, ready to show ("8"), or empty when the
+   * live list did not say. This is the number for anything beside LIVE:
+   * `viewers` counts every join, so a room of 8 read 32 there.
+   */
+  watching?: string;
+  thumbnail: string;
+  tags: string[];
+  isLive: boolean;
+  /** HLS playback URL (.m3u8) */
+  playbackUrl?: string;
+  /** Fallback URLs to try if primary fails (e.g. alternate Livepeer CDN) */
+  playbackUrls?: string[];
+  /**
+   * The recorded replay, once the backend has moved it off Livepeer into our
+   * own bucket. A plain mp4, not HLS — set only when the capture is `ready`,
+   * so its presence is what turns an ended stream from a dead card into
+   * something watchable.
+   */
+  replayUrl?: string;
+  /** True when the replay is only the opening stretch of the broadcast. */
+  replayTruncated?: boolean;
+  /**
+   * When the broadcast actually went on air — the stream row's own field,
+   * not the post's createdAt, which for a stream announced in advance can
+   * be days earlier. Drives the running clock on the phone viewer's pills.
+   */
+  startedAt?: string;
+  /** DHB tipped to this stream, all told — the gift figure on the viewer. */
+  totalTips?: number;
+  /** Creator's user ID for navigation */
+  creatorId?: string;
+  /** Creator's username for URL-based navigation */
+  creatorUsername?: string;
+  /** Creator's badge balance from API (avoids edge function call) */
+  creatorBadgeBalance?: number;
+  creatorPaymentsDisabled?: boolean;
+  /** Number of likes */
+  likeCount?: number;
+  dislikeCount?: number;
+  /** Reaction state, exactly as a video post carries it — the live card renders the same ActionBar. */
+  isLiked?: boolean;
+  isDisliked?: boolean;
+  myReaction?: PostReaction | null;
+  reactionCounts?: ReactionCounts | null;
+  /** Number of comments */
+  commentCount?: number;
+  /** MongoDB ObjectId of the stream (needed for /api/live/{id}/settings API calls) */
+  streamId?: string;
+  /**
+   * The post's tokenId. On the NFT feed path `id` already is it; on the
+   * /api/live path `id` is the stream's ObjectId, and a PPV payment has to be
+   * recorded against the post, so it is carried explicitly.
+   */
+  tokenId?: string;
+
+  /*
+   * Access, exactly as a video post carries it. A live post is minted through
+   * the same endpoint and stores the same `streamInfo`, so a stream can be sold
+   * per view, gated behind the creator's plans or behind a token holding.
+   * Resolved through lib/content-gate, never by reading these flags raw.
+   */
+  isPPV?: boolean;
+  ppvPrice?: number;
+  ppvCurrency?: string;
+  /** Chain the PPV payment settles on. */
+  ppvChainId?: number;
+  /** Hold gate. Means nothing without `lockedPrice` — see isHoldGated. */
+  isLocked?: boolean;
+  lockedPrice?: number;
+  lockedCurrency?: string;
+  lockedTokenAddress?: string;
+  lockedChainId?: number;
+  /** Plans that open this stream; empty is not a gate. */
+  subscriberPlans?: SubscriberPlan[];
+  /** The viewer is the creator — every gate is open to them. */
+  isOwner?: boolean;
+  /** The viewer has already paid for this one. */
+  isUnlocked?: boolean;
+}
+
+/**
+ * Short-form video content
+ */
+/**
+ * A non-video post shown as a slide in the profile reel (lib/profile-reel).
+ * Drawn by PostSwipeSlide instead of a video player.
+ */
+export interface ReelPost {
+  kind: 'text' | 'photo' | 'comic' | 'article' | 'locked' | 'mature';
+  text?: string;
+  title?: string;
+  images?: string[];
+  captions?: string[];
+  alts?: string[];
+  border?: string;
+  cover?: string;
+  /** The creator's profile post background (lib/post-backgrounds). */
+  bgId?: string;
+}
+
+export interface ShortVideo extends BaseFeedItem {
+  /** Set on profile-reel slides that are not videos. */
+  reelPost?: ReelPost;
+  imageUrls?: string[];
+  soundtrackUrl?: string;
+  soundtrackTitle?: string;
+  soundtrackCreator?: string;
+  /** Readable URL: /app/post/<articleSlug>. */
+  articleSlug?: string;
+  type: 'short';
+  username: string;
+  verified: boolean;
+  /** Creator's avatar URL */
+  avatar?: string;
+  /** Formatted like count (e.g., "1.2K") */
+  likes: string;
+  /** Raw dislike count — the shorts viewer prints it beside the thumbs-down */
+  dislikes?: number;
+  thumbnail: string;
+  videoUrl: string;
+  /**
+   * Pay-per-view, hold-gated or subscriber-only. The file is private, so the
+   * viewer plays a signed URL from the access endpoint instead of `videoUrl`.
+   */
+  gated?: boolean;
+  /** Full HLS master playlist URL; plays instead of videoUrl where it can (lib/hls-vod). */
+  hlsUrl?: string;
+  /** Async video transcode state, written optimistically before the CDN file
+   *  exists. Absent on posts predating this field — treat as 'done'. */
+  transcodingStatus?: 'pending' | 'on' | 'done' | 'failed';
+  /** Seek-preview sprite sheet — see lib/storyboard. */
+  storyboard?: Storyboard;
+  /** Width/height stored at upload — see lib/video-aspect. */
+  storedAspect?: number;
+  /**
+   * The post's own title, kept apart from `description`.
+   *
+   * The composer writes the caption into the title and leaves the description
+   * empty on most shorts, so the two used to be collapsed into one field to
+   * make sure something showed. That cost every short that has both: only the
+   * description drew, and the title was silently dropped.
+   */
+  title?: string;
+  description?: string;
+  sound?: string;
+  comments?: string;
+  shares?: string;
+  /** Number of reposts + quotes (raw count from the API) */
+  repostCount?: number;
+  /** Formatted view count string (e.g., "1.2K") */
+  views?: string;
+  /** Creator's user ID for navigation */
+  creatorId?: string;
+  /** Creator's username for URL-based navigation */
+  creatorUsername?: string;
+  /** Creator's display name */
+  displayName?: string;
+  /** Whether the current user has liked this item */
+  isLiked?: boolean;
+  /** Whether the current user has disliked this item */
+  isDisliked?: boolean;
+  /** Which of the nine reactions the current user holds. isLiked/isDisliked are its polarity. */
+  myReaction?: PostReaction | null;
+  /** Per-reaction totals — the most-used one leads on the card. */
+  reactionCounts?: ReactionCounts | null;
+  /**
+   * Set when this slide is a stream that is live right now rather than a
+   * short (dual-format live). The swipe viewer draws it as a live slide.
+   */
+  live?: LiveStream;
+}
+
+/**
+ * Union type for all feed content
+ */
+export type FeedItem = TextPost | VideoItem | ImagePost | LiveStream | ShortVideo;
+
+/**
+ * Props for the universal card header component
+ */
+export interface CardHeaderProps {
+  username: string;
+  avatarSeed: string;
+  verified?: boolean;
+  contentType: ContentType;
+  isLive?: boolean;
+}
+
+/**
+ * Props for the universal action bar component
+ */
+export interface ActionBarProps {
+  onLike?: () => void;
+  onDislike?: () => void;
+  onComment?: () => void;
+  onShare?: () => void;
+  onBookmark?: () => void;
+  className?: string;
+}

@@ -1,0 +1,231 @@
+/**
+ * The arithmetic behind finance-stats, kept free of Deno and network calls so
+ * the same file is unit-tested from vitest (src/test/finance-ledger.test.ts).
+ *
+ * Everything is reduced to one shape — an amount in USD on a UTC day against a
+ * named source — and the series is built from that alone. A source that cannot
+ * be read contributes nothing and is reported as unavailable; it is never
+ * filled with an estimate.
+ */
+
+import { DHB_USD_PEG, MARKUP, MARKUP_OVERRIDES, providerCostUsd, type JobKind } from '../_shared/ai-pricing.ts';
+
+export type FinanceKind = 'revenue' | 'cost';
+
+export interface LedgerEntry {
+  /** UTC calendar day, `YYYY-MM-DD`. */
+  date: string;
+  source: string;
+  usd: number;
+}
+
+export interface FixedCostItem {
+  id: string;
+  label: string;
+  group: string;
+  usdMonthly: number;
+  since: string;
+  until?: string;
+}
+
+export interface FinanceDay {
+  date: string;
+  revenue: Record<string, number>;
+  costs: Record<string, number>;
+}
+
+const DAY_MS = 86_400_000;
+
+export function dayKey(value: Date | string | number): string {
+  return new Date(value).toISOString().slice(0, 10);
+}
+
+export function addDays(day: string, days: number): string {
+  return dayKey(Date.parse(`${day}T00:00:00Z`) + days * DAY_MS);
+}
+
+/** Every day from `from` to `to`, inclusive. Empty when `from` is after `to`. */
+export function daysBetween(from: string, to: string): string[] {
+  const out: string[] = [];
+  for (let d = from; d <= to; d = addDays(d, 1)) out.push(d);
+  return out;
+}
+
+export function daysInMonth(month: string): number {
+  const [y, m] = month.split('-').map(Number);
+  return new Date(Date.UTC(y, m, 0)).getUTCDate();
+}
+
+/**
+ * A monthly bill spread over its days: each day carries the share of the
+ * month it belongs to, so a 30-day month and a 31-day month both add up to
+ * exactly one month's price.
+ */
+export function spreadFixedCost(item: FixedCostItem, today: string): LedgerEntry[] {
+  const end = item.until && item.until < today ? item.until : today;
+  return daysBetween(item.since, end).map((date) => ({
+    date,
+    source: item.id,
+    usd: item.usdMonthly / daysInMonth(date.slice(0, 7)),
+  }));
+}
+
+/**
+ * One invoice for a calendar month, spread evenly across it. For the month
+ * still running, pass `throughDay`: the month-to-date amount is spread over
+ * the days that have actually elapsed instead of the whole month.
+ */
+export function spreadMonthAmount(source: string, month: string, usd: number, throughDay?: string): LedgerEntry[] {
+  const first = `${month}-01`;
+  const last = `${month}-${String(daysInMonth(month)).padStart(2, '0')}`;
+  const end = throughDay && throughDay < last ? throughDay : last;
+  const days = daysBetween(first, end);
+  if (!days.length || !Number.isFinite(usd)) return [];
+  return days.map((date) => ({ date, source, usd: usd / days.length }));
+}
+
+/**
+ * What the provider charged for one paid generation, recovered from what the
+ * creator was charged for it.
+ *
+ * Retail is provider cost x (1 + markup) converted at the gateway peg and
+ * rounded up to whole DHB (see _shared/ai-pricing.ts), so dividing the markup
+ * back out gives the provider cost to within that rounding. Using the price
+ * the job actually paid, rather than today's table, keeps an old job at the
+ * cost it had on the day it ran.
+ */
+export function jobProviderCostUsd(priceDhb: number, model: string): number {
+  if (!Number.isFinite(priceDhb) || priceDhb <= 0) return 0;
+  const markup = MARKUP_OVERRIDES[model] ?? MARKUP;
+  return (priceDhb * DHB_USD_PEG) / (1 + markup);
+}
+
+/** Provider cost of a free generation, which has no price to work back from. */
+export function freeJobProviderCostUsd(model: string): number | null {
+  for (const kind of ['image', 'video', 'model3d', 'tool'] as JobKind[]) {
+    const cost = providerCostUsd(kind, model);
+    if (cost != null) return cost;
+  }
+  return null;
+}
+
+/**
+ * List price per million tokens for the models the text router pays for.
+ *
+ * Route names do not prove a zero bill. Unknown models remain unpriced.
+ */
+export const TOKEN_PRICES_PER_M: Record<string, { input: number; output: number; perRequest?: number }> = {
+  // Official list prices checked 2026-10-27: ai.google.dev/gemini-api/docs/pricing
+  'gemini-3.1-flash-lite': { input: 0.25, output: 1.50 },
+  'gemini-3.1-flash-lite-preview': { input: 0.25, output: 1.50 },
+  // developers.cloudflare.com/workers-ai/models/llama-3.1-8b-instruct-fp8/
+  'llama-3.1-8b-instruct-fp8': { input: 0.152, output: 0.287 },
+  'gemini-2.5-flash': { input: 0.3, output: 2.5 },
+  'gemini-2.5-flash-lite': { input: 0.1, output: 0.4 },
+  'gemini-2.5-pro': { input: 1.25, output: 10 },
+  sonar: { input: 1, output: 1, perRequest: 0.005 },
+  'sonar-pro': { input: 3, output: 15, perRequest: 0.006 },
+};
+
+export interface UsageRow {
+  provider?: string;
+  day: string;
+  route: string;
+  served_model: string | null;
+  requested_model: string | null;
+  attempts: number;
+  input_tokens: number;
+  output_tokens: number;
+  usage_missing?: number;
+}
+
+export function cloudflareUsage(row: UsageRow): boolean {
+  return (row.provider ?? '').startsWith('cloudflare') || (row.requested_model ?? '').startsWith('@cf/') || (row.served_model ?? '').startsWith('@cf/');
+}
+
+/** List-price subtotal for reported tokens; null means unknown, never zero. */
+export function usageCostUsd(row: UsageRow): number | null {
+  const raw = (row.served_model || row.requested_model || '').toLowerCase();
+  const model = raw.includes('/') ? raw.slice(raw.lastIndexOf('/') + 1) : raw;
+  const price = TOKEN_PRICES_PER_M[model];
+  if (!price) return null;
+  return (
+    (Number(row.input_tokens) / 1e6) * price.input +
+    (Number(row.output_tokens) / 1e6) * price.output +
+    (price.perRequest ?? 0) * (Number(row.attempts) || 0)
+  );
+}
+
+/**
+ * Fold ledger entries into a gap-filled daily series running from the first
+ * entry to `today`. Values keep four decimals rather than cents: a day of
+ * metered tokens is often a fraction of a cent, and rounding every day to zero
+ * would lose a month of it.
+ */
+export function buildSeries(
+  entries: { kind: FinanceKind; entry: LedgerEntry }[],
+  today: string,
+): FinanceDay[] {
+  const real = entries.filter(({ entry }) => Number.isFinite(entry.usd) && entry.usd !== 0 && entry.date <= today);
+  if (!real.length) return [];
+  const first = real.reduce((min, { entry }) => (entry.date < min ? entry.date : min), today);
+
+  const byDay = new Map<string, FinanceDay>(
+    daysBetween(first, today).map((date) => [date, { date, revenue: {}, costs: {} }]),
+  );
+  for (const { kind, entry } of real) {
+    const day = byDay.get(entry.date);
+    if (!day) continue;
+    const bucket = kind === 'revenue' ? day.revenue : day.costs;
+    bucket[entry.source] = (bucket[entry.source] ?? 0) + entry.usd;
+  }
+
+  const days = [...byDay.values()];
+  for (const day of days) {
+    for (const bucket of [day.revenue, day.costs]) {
+      for (const key of Object.keys(bucket)) bucket[key] = Math.round(bucket[key] * 10_000) / 10_000;
+    }
+  }
+  return days;
+}
+
+// ---------------------------------------------------------------------------
+// The revenue ledger
+// ---------------------------------------------------------------------------
+
+export type ProofChain = 'bsc' | 'base';
+
+/**
+ * One line of the public revenue ledger: a single payment where the source
+ * records payments one by one, or a day's total where it only reports totals.
+ */
+export interface LedgerItem {
+  date: string;
+  source: string;
+  usd: number;
+  /** What was actually paid, in the unit it was paid in. */
+  amount?: number;
+  unit?: string;
+  /** How many payments a daily total covers, for sources that only report totals. */
+  count?: number;
+  /**
+   * The on-chain evidence: the transaction itself, or — for a day's total of
+   * many on-chain events — the contract whose event log holds every one.
+   */
+  ref?: { chain: ProofChain; tx?: string; address?: string };
+  /** A short qualifier, such as "refund". */
+  note?: string;
+}
+
+/** The chains the page can link a transaction on, from however a table spells them. */
+export function proofChain(chain: string | number | null | undefined): ProofChain | null {
+  const c = String(chain ?? '').trim().toLowerCase();
+  if (c === 'base' || c === '8453') return 'base';
+  if (c === 'bnb' || c === 'bsc' || c === '56') return 'bsc';
+  return null;
+}
+
+/** Newest first; within a day, the larger amount first. */
+export function sortLedger(items: LedgerItem[]): LedgerItem[] {
+  return [...items].sort((a, b) => (a.date === b.date ? b.usd - a.usd : a.date < b.date ? 1 : -1));
+}

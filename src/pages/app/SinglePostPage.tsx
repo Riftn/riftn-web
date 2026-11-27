@@ -1,0 +1,2095 @@
+import { canShareToMoment } from '@/lib/moment-share';
+import { useTranslation as _useCopy } from 'react-i18next';
+import { CoAuthorInviteBanner } from '@/components/app/co-authors/CoAuthorInviteBanner';
+import { useRouteContentReady } from '@/hooks/use-route-content-ready';
+import { bindRetainedComments } from '@/lib/retained-post-surface';
+import More from '@/components/ui/cut-icons/more';
+import { QuietPostLoading } from '@/components/app/QuietPostLoading';
+/**
+ * Single Post Page
+ * ================
+ * Displays a single post/video/image as a standalone page with sidebars.
+ * Auto-detects content type and renders the appropriate card component.
+ * 
+ * Routes:
+ * - /app/post/:postId - Any post type (auto-detected)
+ * - /app/video/:tokenId - Alias for video posts
+ * 
+ * @module pages/app/SinglePostPage
+ */
+
+import { Navigate, useParams, useNavigate, useLocation } from 'react-router-dom';
+import { getVoteCache } from '@/lib/vote-cache';
+import { scrollDocumentTo } from '@/lib/document-scroll';
+import { markBody } from '@/lib/body-mark';
+import { cn } from '@/lib/utils';
+import {
+  resolveLikeCount,
+  resolveDislikeCount,
+  resolveMyReaction,
+  resolveReactionCounts,
+  resolveViewCount,
+  applyVoteStateToNFT,
+  mergeViewerState,
+} from '@/lib/engagement';
+import { SEOHead } from '@/components/SEOHead';
+import { Loader2 } from 'lucide-react';
+import { getAiScrapingPreference } from '@/lib/ai-scraping';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { CachedPageActiveContext } from '@/contexts/CachedPageActiveContext';
+import { useShortsEnabled } from '@/contexts/ShortsEnabledContext';
+import { closeBrainrotFeed, isBrainrotPlayable, openBrainrotFeed, useBrainrotSession } from '@/lib/brainrot-feed';
+import { videoItemToShort } from '@/lib/short-video';
+import { hasSharedVideoLanding, holdBackForViewer, takeSharedVideoLanding } from '@/lib/shared-video-landing';
+import { useLayoutEffect, useEffect, useState, useRef, useCallback, useMemo, useContext, Suspense, type ReactNode } from 'react';
+import { lazyWithRetry } from '@/lib/lazy-with-retry';
+import { useOpenedOnce } from '@/hooks/use-opened-once';
+import { takePrefetchedPost } from '@/lib/post-prefetch';
+import { loadPostData } from '@/lib/post-warm';
+import { Clock, Code } from "lucide-react";
+import { copyPostEmbedCode } from '@/lib/post-embed-code';
+import Sparkles from "@/components/ui/cut-icons/assistant";
+import Flag from "@/components/ui/cut-icons/report";
+import Link2 from "@/components/ui/cut-icons/link";
+import Pencil from "@/components/ui/cut-icons/edit";
+import Trash2 from "@/components/ui/cut-icons/delete";
+
+import ArrowLeft from "@/components/ui/cut-icons/back";
+import Gem from "@/components/ui/cut-icons/diamond";
+
+import { ThemedIcon } from '@/components/app/war/WarHudIcon';
+import { useTranslation as useI18n } from 'react-i18next';
+import { formatPostAge, parsePostTimestamp } from '@/i18n/post-timestamp';
+import { AnimatePresence, motion } from 'framer-motion';
+import { toast } from 'sonner';
+import dehubCoin from '@/assets/dehub-coin.png';
+import { getNFTInfo, getLiveStream, resolveArticleSlug, type DeHubNFT } from '@/lib/api/dehub';
+import { parseSoundtrackTag, findCachedFeedPost } from '@/hooks/use-unified-feed';
+import { PollCard } from '@/components/app/cards/PollCard';
+import { LazyQuizCard } from '@/components/app/quiz/LazyQuizCard';
+import { useStreamLiveStatus } from '@/hooks/use-stream-live-status';
+
+import { buildAvatarUrl, extractAvatarPath, buildImageUrl, buildFeedImageUrls, buildVideoUrl, buildHlsUrl } from '@/lib/media-url';
+import { extractReplayUrl, isReplayTruncated } from '@/lib/live-replay';
+import { hasStreamEnded, isStreamLive, streamRefreshInterval } from '@/lib/live-status';
+import { PageHeader } from '@/components/app/PageHeader';
+import { VideoCard } from '@/components/app/cards/VideoCard';
+import { CardHeader } from '@/components/app/cards/CardHeader';
+import { ImageCard } from '@/components/app/cards/ImageCard';
+import { PostCard } from '@/components/app/cards/PostCard';
+import { PostBgLayer, ProfilePostBgArtContext, postBgHostProps, useAuthorPostBg } from '@/components/app/profile/PostBackground';
+import { CommentsWrapper } from '@/components/app/cards/CommentsWrapper';
+import { PostAIChatLazy } from '@/components/app/cards/PostAIChatLazy';
+import { ReportModal } from '@/components/app/modals/ReportModal';
+import { PostUtilityMenuItems } from '@/components/app/cards/PostUtilityMenuItems';
+import { TipModal } from '@/components/app/modals/TipModal';
+import { applyOptimisticEdit } from '@/lib/optimistic-edit';
+import { DeletePostModal } from '@/components/app/modals/DeletePostModal';
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+} from '@/components/ui/drawer';
+import { formatTimeAgo, formatDuration, formatViews } from '@/lib/feed-utils';
+import { useAuth } from '@/contexts/AuthContext';
+import { useFeedSwallowClip } from '@/hooks/use-feed-swallow-clip';
+import { FeedSwallowMotion } from '@/components/app/feeds/FeedSwallowMotion';
+import type { VideoItem, ImagePost, TextPost, LiveStream } from '@/types/feed.types';
+import { hlsUrlFor, liveProviderOf, noteLatencyMode } from '@/lib/live-ingest';
+import { warmLiveStandbyFor } from '@/lib/live/hls-standby';
+import { FocusCommentProvider, NoFocusComment } from '@/lib/focus-comment';
+import { bringIntoView } from '@/lib/focus-scroll';
+import { canonicalUrl } from '@/lib/seo/route-meta';
+import { usePostStagePhone } from '@/hooks/use-post-stage-phone';
+import { PostStagePhone } from '@/components/app/post-stage/PostStagePhone';
+import { setPostFeedLook } from '@/lib/post-feed-look';
+import { PostCommentsSplit } from '@/components/app/post-stage/PostCommentsSplit';
+import type { CommentsSplitRouteState } from '@/lib/comments-split';
+import { POST_STAGE_COMPOSE_EVENT, type PostStageValue } from '@/components/app/post-stage/post-stage-context';
+import { viewerShareUrl } from '@/lib/share-url';
+import { trackShare } from '@/lib/analytics';
+import { toStoryboard } from '@/lib/storyboard';
+import { storedVideoAspect, storedVideoSizeShown } from '@/lib/video-aspect';
+import { profilePath } from '@/lib/profile-path';
+
+/*
+ * The post goes up first; everything below it waits its turn. These were
+ * static imports, so the page code could not run (and the post could not be
+ * asked for) until ~50 extra files had arrived: the whole live player and
+ * shop for a post that is not live, the edit sheet nobody has opened, the
+ * author's thread and the related rows that only mount after the post has
+ * painted. Each now loads on its own, behind the post.
+ */
+const LiveStreamCard = lazyWithRetry(() =>
+  import('@/components/app/cards/LiveStreamCard').then((m) => ({ default: m.LiveStreamCard })),
+);
+const StreamShopRail = lazyWithRetry(() =>
+  import('@/components/app/live/StreamShop').then((m) => ({ default: m.StreamShopRail })),
+);
+const StreamShopManager = lazyWithRetry(() =>
+  import('@/components/app/live/StreamShopManager').then((m) => ({ default: m.StreamShopManager })),
+);
+const LazyEditPostModal = lazyWithRetry(() =>
+  import('@/components/app/modals/EditPostModal').then((m) => ({ default: m.EditPostModal })),
+);
+const LazyAuthorThread = lazyWithRetry(() =>
+  import('@/components/app/cards/AuthorThread').then((m) => ({ default: m.AuthorThread })),
+);
+const LazyRelatedVideosFeed = lazyWithRetry(() =>
+  import('@/components/app/feeds/RelatedVideosFeed').then((m) => ({ default: m.RelatedVideosFeed })),
+);
+const LazyRelatedImagesFeed = lazyWithRetry(() =>
+  import('@/components/app/feeds/RelatedImagesFeed').then((m) => ({ default: m.RelatedImagesFeed })),
+);
+const LazyRelatedPostsFeed = lazyWithRetry(() =>
+  import('@/components/app/feeds/RelatedPostsFeed').then((m) => ({ default: m.RelatedPostsFeed })),
+);
+const LazyStageRelated = lazyWithRetry(() =>
+  import('@/components/app/post-stage/StageRelated').then((m) => ({ default: m.StageRelated })),
+);
+
+function AuthorThread(props: React.ComponentProps<typeof LazyAuthorThread>) {
+  return <Suspense fallback={null}><LazyAuthorThread {...props} /></Suspense>;
+}
+function RelatedVideosFeed(props: React.ComponentProps<typeof LazyRelatedVideosFeed>) {
+  return <Suspense fallback={null}><LazyRelatedVideosFeed {...props} /></Suspense>;
+}
+function RelatedImagesFeed(props: React.ComponentProps<typeof LazyRelatedImagesFeed>) {
+  return <Suspense fallback={null}><LazyRelatedImagesFeed {...props} /></Suspense>;
+}
+function RelatedPostsFeed(props: React.ComponentProps<typeof LazyRelatedPostsFeed>) {
+  return <Suspense fallback={null}><LazyRelatedPostsFeed {...props} /></Suspense>;
+}
+function StageRelated(props: React.ComponentProps<typeof LazyStageRelated>) {
+  return <Suspense fallback={null}><LazyStageRelated {...props} /></Suspense>;
+}
+/** Built the first time it opens, then kept so its closing animation plays. */
+function EditPostModal(props: React.ComponentProps<typeof LazyEditPostModal>) {
+  if (!useOpenedOnce(props.open)) return null;
+  return <Suspense fallback={null}><LazyEditPostModal {...props} /></Suspense>;
+}
+
+/*
+ * Only a live post ever renders this, and a live post is a small minority of
+ * what this page opens — but the static import put the whole chat panel, its
+ * voice recorder, waveform player, mention dropdown and translation stack on
+ * the boot path for every post. See scripts/boot-path-report.mjs.
+ */
+const LivePostChat = lazyWithRetry(() =>
+  import('@/components/app/cards/LivePostChat').then((m) => ({ default: m.LivePostChat })),
+);
+
+/**
+ * A link straight to a live. index.html asked for the post while the app was
+ * still loading, so the answer is often here before the page has drawn
+ * anything. The moment it says "live", fetch the player and its chat, and
+ * open the connection to the stream's host, instead of waiting for the page
+ * to render its way down to each of them in turn (measured: the chat's code
+ * was only asked for 1.2 s after the player's).
+ */
+function preloadLiveFromPrefetch() {
+  try {
+    const pre = (window as Window & { __postPrefetch?: { p?: Promise<unknown> } }).__postPrefetch;
+    void pre?.p
+      ?.then((data) => {
+        const nft = data && typeof data === 'object' && 'result' in data ? (data as { result: unknown }).result : data;
+        if (!nft || typeof nft !== 'object' || getContentType(nft as DeHubNFT) !== 'live') return;
+        void LiveStreamCard.preload().catch(() => undefined);
+        void LivePostChat.preload().catch(() => undefined);
+        // Building the address is what opens the connection (see hlsUrlFor).
+        const stream = (nft as { stream?: Parameters<typeof hlsUrlFor>[0] }).stream;
+        if (stream?.playbackId) hlsUrlFor(stream);
+        // And the stream itself starts loading now, not once the page has
+        // rendered its way down to the player.
+        warmLiveStandbyFor(toLiveStream(nft as DeHubNFT));
+      })
+      .catch(() => undefined);
+  } catch {
+    /* A head start only. */
+  }
+}
+if (typeof window !== 'undefined') preloadLiveFromPrefetch();
+
+/**
+ * Detect content type from API response
+ */
+function getContentType(post: DeHubNFT): 'video' | 'image' | 'post' | 'live' {
+  const postType = (post as any).postType as string | undefined;
+  if (postType === 'live' || (post as any).isLive !== undefined) return 'live';
+  // Audio posts render through VideoCard (which has AudioVisualizer support)
+  if (postType === 'audio' || postType === 'feed-audio' || (post as any).audioUrl) return 'video';
+  if (postType === 'video' || post.videoUrl) return 'video';
+  if (
+    postType === 'image' ||
+    postType === 'feed-images' ||
+    (post.imageUrls && post.imageUrls.length > 0 && !post.videoUrl) ||
+    (post.imageUrl && !post.videoUrl)
+  ) return 'image';
+  return 'post';
+}
+
+/**
+ * Transform API NFT data to VideoItem format
+ */
+function toVideoItem(nft: DeHubNFT): VideoItem {
+  const views = formatViews(resolveViewCount(nft)).replace(' views', '');
+  const title = nft.title || nft.name || '';
+  const rawDescription = nft.description && nft.description !== title ? nft.description : undefined;
+  // Videos can carry an attached sound as a [soundtrack:…] tag — play it, don't print it.
+  const soundtrack = parseSoundtrackTag(rawDescription);
+  const soundtrackTokenId = soundtrack.soundtrackUrl ? rawDescription?.match(/\[soundtrack:(\d+)/)?.[1] : undefined;
+  const description = rawDescription?.replace(/\[soundtrack:[^\]]*\]/g, '').trim() || undefined;
+  const rawTimestamp = nft.createdAt || nft.created_at || (nft as any).mintedAt || (nft as any).minted_at || (nft as any).updatedAt || (nft as any).updated_at;
+  const timestamp = rawTimestamp && !/^(just now|\d+[smhdwy]|\d+mo)$/i.test(String(rawTimestamp).trim()) ? rawTimestamp : undefined;
+
+  // Detect audio posts
+  const postType = (nft as any).postType as string | undefined;
+  const rawAudioUrl = (nft as any).audioUrl as string | undefined;
+  const isAudioPost = postType === 'audio' || postType === 'feed-audio' || !!rawAudioUrl;
+  
+  const durationSeconds = isAudioPost 
+    ? ((nft as any).audioDuration || nft.videoDuration || nft.duration || 0)
+    : (nft.videoDuration || nft.duration || 0);
+  
+  const streamInfo = nft.streamInfo;
+  const isW2E = nft.is_w2e || streamInfo?.isAddBounty || false;
+  const bountyViews = streamInfo?.addBountyFirstXViewers != null ? Number(streamInfo.addBountyFirstXViewers) : undefined;
+  const bountyComments = streamInfo?.addBountyFirstXComments != null ? Number(streamInfo.addBountyFirstXComments) : undefined;
+  const bountyAmount = streamInfo?.addBountyAmount;
+  const bountyCurrency = streamInfo?.addBountyTokenSymbol || 'DHB';
+  
+  // Canonical avatar resolution (matches feed normalization)
+  const creatorObj = (nft as any).creator;
+  const ownerObj = (nft as any).owner;
+  const rawAvatarPath = extractAvatarPath(nft) || extractAvatarPath(creatorObj);
+  const resolvedAddress = nft.minter || creatorObj?.id || creatorObj?.address;
+  const avatar = rawAvatarPath && resolvedAddress ? buildAvatarUrl(resolvedAddress, rawAvatarPath) || '/placeholder.svg' : '/placeholder.svg';
+  
+  // Build audio URL for audio posts — try audioUrl first, then fall back to videoUrl/media_url
+  // The API sometimes returns the audio file path in videoUrl for audio posts
+  const rawAudioSource = rawAudioUrl || (isAudioPost ? (nft.videoUrl || nft.media_url) : undefined);
+  const audioUrl = isAudioPost && rawAudioSource
+    ? (rawAudioSource.startsWith('http') ? rawAudioSource : `https://dehubcdn.ams3.cdn.digitaloceanspaces.com/${rawAudioSource.replace(/^\/+/, '')}`)
+    : undefined;
+  
+  return {
+    id: String(nft.tokenId),
+    contentRating: nft.contentRating,
+    mediaDescriptions: nft.mediaDescriptions,
+    layout: nft.layout,
+    mediaCaptions: nft.mediaCaptions,
+    comicBorder: nft.comicBorder,
+    hideAssetCards: nft.hideAssetCards,
+    hiddenLinkPreviews: nft.hiddenLinkPreviews,
+    imageTags: nft.imageTags,
+    hasQuiz: nft.hasQuiz,
+    spoilerText: nft.spoilerText,
+    quotePolicy: nft.quotePolicy,
+    visibility: nft.visibility,
+    quoteRevoked: nft.quoteRevoked,
+    replyPolicy: nft.replyPolicy,
+    shopLinks: (nft as any).shopLinks,
+    shopListingCount: (nft as any).shopListingCount,
+    type: 'video',
+    thumbnail: buildImageUrl(nft.tokenId, nft.imageUrl) || '/placeholder.svg',
+    videoUrl: isAudioPost ? undefined : (nft.tokenId ? buildVideoUrl(nft.tokenId) : undefined),
+    hlsUrl: isAudioPost ? undefined : buildHlsUrl(nft.hlsUrl),
+    audioUrl,
+    audioDuration: isAudioPost ? (typeof durationSeconds === 'number' ? durationSeconds : 0) : undefined,
+    isAudio: isAudioPost,
+    duration: formatDuration(durationSeconds),
+    durationSeconds: typeof durationSeconds === 'number' ? durationSeconds : 0,
+    title,
+    description,
+    ...(isAudioPost ? {} : { ...soundtrack, soundtrackTokenId }),
+    channel: nft.minterDisplayName || nft.minterUsername || nft.mintername || creatorObj?.display_name || creatorObj?.username || ownerObj?.username || 'Unknown',
+    channelAvatar: avatar,
+    verified: false,
+    views,
+    createdAt: timestamp,
+    uploadedAgo: formatTimeAgo(timestamp),
+    status: nft.status,
+    transcodingStatus: nft.transcodingStatus,
+    storyboard: toStoryboard(nft.storyboard),
+    storedAspect: storedVideoAspect(nft.videoInfo),
+    storedAspectShown: storedVideoSizeShown(nft.videoInfo),
+    creatorId: resolvedAddress,
+    creatorUsername: nft.minterUsername || nft.mintername || creatorObj?.username || ownerObj?.username,
+    // Same source the feed normalizer reads (use-unified-feed). Without it the
+    // creator row on this page rendered no staking badge while the identical row
+    // on the home feed did.
+    creatorBadgeBalance: (nft as any).minterUser?.hideBadgeAndBalance ? 0 : ((nft as any).minterUser?.badgeBalance ?? (nft as any).badgeBalance),
+    creatorPaymentsDisabled: (nft as any).minterUser?.hideBadgeAndBalance === true,
+    isLiked: nft.isLiked ?? false,
+    isDisliked: nft.isDisliked ?? false,
+    myReaction: resolveMyReaction(nft),
+    reactionCounts: resolveReactionCounts(nft),
+    isReposted: nft.isReposted ?? false,
+    likeCount: resolveLikeCount(nft),
+    dislikeCount: resolveDislikeCount(nft),
+    commentCount: nft.commentCount || nft.comment_count || 0,
+    isPPV: nft.is_ppv || streamInfo?.isPayPerView || false,
+    ppvPrice: nft.ppv_price || streamInfo?.payPerViewAmount,
+    ppvPreviewReady: nft.ppvPreview?.ready === true,
+    ppvCurrency: nft.ppv_currency || nft.streamInfo?.payPerViewTokenSymbol || 'DHB',
+    isW2E,
+    isLocked: nft.is_locked || streamInfo?.isLockContent || false,
+    lockedPrice: nft.locked_price || streamInfo?.lockContentAmount,
+    lockedCurrency: nft.locked_currency || streamInfo?.lockContentTokenSymbol || 'DHB',
+    lockedTokenAddress: streamInfo?.lockContentContractAddress,
+    lockedChainId: streamInfo?.lockContentChainIds?.[0],
+    subscriberPlans: (nft as any).plansDetails,
+    bountyViews,
+    bountyComments,
+    bountyAmount,
+    bountyCurrency,
+    isOwner: nft.isOwner ?? false,
+    isUnlocked: nft.isUnlocked ?? false,
+    repostCount: (nft.totalReposts || nft.reposts || 0) + (nft.quotes || 0),
+    totalTips: nft.totalTips ?? 0,
+  };
+}
+
+/**
+ * Transform API NFT data to ImagePost format
+ */
+function toImagePost(nft: DeHubNFT): ImagePost {
+  const views = formatViews(resolveViewCount(nft)).replace(' views', '');
+  
+  // Canonical image resolution (matches feed normalization)
+  const primaryImage = buildImageUrl(nft.tokenId, nft.imageUrl) || '/placeholder.svg';
+  const feedImages = buildFeedImageUrls(nft.imageUrls, undefined, (nft as { imageSizes?: unknown }).imageSizes);
+  const imageUrls = feedImages && feedImages.length > 0 ? feedImages : [primaryImage];
+  
+  const title = nft.title || nft.name;
+  const rawDescription = nft.description && nft.description !== title ? nft.description : undefined;
+  const soundtrack = parseSoundtrackTag(rawDescription);
+  const description = rawDescription?.replace(/\[soundtrack:[^\]]*\]/, '').trim() || undefined;
+  const rawTimestamp = nft.createdAt || nft.created_at || (nft as any).mintedAt || (nft as any).minted_at || (nft as any).updatedAt || (nft as any).updated_at;
+  const timestamp = rawTimestamp && !/^(just now|\d+[smhdwy]|\d+mo)$/i.test(String(rawTimestamp).trim()) ? rawTimestamp : undefined;
+  const streamInfo = nft.streamInfo;
+  
+  // Canonical avatar resolution (matches feed normalization)
+  const creatorObj = (nft as any).creator;
+  const ownerObj = (nft as any).owner;
+  const rawAvatarPath = extractAvatarPath(nft) || extractAvatarPath(creatorObj);
+  const resolvedAddress = nft.minter || creatorObj?.id || creatorObj?.address;
+  const avatar = rawAvatarPath && resolvedAddress ? buildAvatarUrl(resolvedAddress, rawAvatarPath) || '/placeholder.svg' : '/placeholder.svg';
+  
+  return {
+    id: String(nft.tokenId),
+    contentRating: nft.contentRating,
+    mediaDescriptions: nft.mediaDescriptions,
+    layout: nft.layout,
+    mediaCaptions: nft.mediaCaptions,
+    comicBorder: nft.comicBorder,
+    hideAssetCards: nft.hideAssetCards,
+    hiddenLinkPreviews: nft.hiddenLinkPreviews,
+    imageTags: nft.imageTags,
+    hasQuiz: nft.hasQuiz,
+    spoilerText: nft.spoilerText,
+    quotePolicy: nft.quotePolicy,
+    visibility: nft.visibility,
+    quoteRevoked: nft.quoteRevoked,
+    replyPolicy: nft.replyPolicy,
+    shopLinks: (nft as any).shopLinks,
+    shopListingCount: (nft as any).shopListingCount,
+    type: 'image',
+    username: nft.minterDisplayName || nft.minterUsername || nft.mintername || creatorObj?.display_name || creatorObj?.username || ownerObj?.username || 'Unknown',
+    verified: false,
+    avatar,
+    image: primaryImage,
+    imageUrls,
+    title,
+    description,
+    likes: resolveLikeCount(nft),
+    dislikes: resolveDislikeCount(nft),
+    caption: rawDescription || '',
+    comments: nft.commentCount || nft.comment_count || 0,
+    status: nft.status,
+    views,
+    createdAt: timestamp,
+    timeAgo: formatTimeAgo(timestamp),
+    creatorId: resolvedAddress,
+    creatorUsername: nft.minterUsername || nft.mintername || creatorObj?.username || ownerObj?.username,
+    creatorBadgeBalance: (nft as any).minterUser?.hideBadgeAndBalance ? 0 : ((nft as any).minterUser?.badgeBalance ?? (nft as any).badgeBalance),
+    creatorPaymentsDisabled: (nft as any).minterUser?.hideBadgeAndBalance === true,
+    isLiked: nft.isLiked ?? false,
+    isDisliked: nft.isDisliked ?? false,
+    myReaction: resolveMyReaction(nft),
+    reactionCounts: resolveReactionCounts(nft),
+    isReposted: nft.isReposted ?? false,
+    isPPV: nft.is_ppv || streamInfo?.isPayPerView || false,
+    ppvPrice: nft.ppv_price || streamInfo?.payPerViewAmount,
+    ppvCurrency: nft.ppv_currency || nft.streamInfo?.payPerViewTokenSymbol || 'DHB',
+    isW2E: nft.is_w2e || streamInfo?.isAddBounty || false,
+    isLocked: nft.is_locked || streamInfo?.isLockContent || false,
+    lockedPrice: nft.locked_price || streamInfo?.lockContentAmount,
+    lockedCurrency: nft.locked_currency || streamInfo?.lockContentTokenSymbol || 'DHB',
+    lockedTokenAddress: streamInfo?.lockContentContractAddress,
+    lockedChainId: streamInfo?.lockContentChainIds?.[0],
+    subscriberPlans: (nft as any).plansDetails,
+    bountyViews: streamInfo?.addBountyFirstXViewers != null ? Number(streamInfo.addBountyFirstXViewers) : undefined,
+    bountyComments: streamInfo?.addBountyFirstXComments != null ? Number(streamInfo.addBountyFirstXComments) : undefined,
+    bountyAmount: streamInfo?.addBountyAmount,
+    bountyCurrency: streamInfo?.addBountyTokenSymbol || 'DHB',
+    isOwner: nft.isOwner ?? false,
+    isUnlocked: nft.isUnlocked ?? false,
+    repostCount: (nft.totalReposts || nft.reposts || 0) + (nft.quotes || 0),
+    isQuotePost: !!nft.isQuotePost,
+    quotedPost: nft.quotedPost || null,
+    totalTips: nft.totalTips ?? 0,
+    ...soundtrack,
+  };
+}
+
+/**
+ * Transform API NFT data to TextPost format
+ */
+function toTextPost(nft: DeHubNFT): TextPost {
+  const views = formatViews(resolveViewCount(nft)).replace(' views', '');
+  const rawTimestamp = nft.createdAt || nft.created_at || (nft as any).mintedAt || (nft as any).minted_at || (nft as any).updatedAt || (nft as any).updated_at;
+  const timestamp = rawTimestamp && !/^(just now|\d+[smhdwy]|\d+mo)$/i.test(String(rawTimestamp).trim()) ? rawTimestamp : undefined;
+  const streamInfo = nft.streamInfo;
+
+  // Canonical avatar resolution (matches feed normalization)
+  const creatorObj = (nft as any).creator;
+  const ownerObj = (nft as any).owner;
+  const rawAvatarPath = extractAvatarPath(nft) || extractAvatarPath(creatorObj);
+  const resolvedAddress = nft.minter || creatorObj?.id || creatorObj?.address;
+  const avatar = rawAvatarPath && resolvedAddress ? buildAvatarUrl(resolvedAddress, rawAvatarPath) || '/placeholder.svg' : '/placeholder.svg';
+  
+  // Determine if the name is a meaningful title (matches feed normalization)
+  const rawName = nft.name || '';
+  // A sound only rides photos/videos; a stray tag (photo removed after adding a song) must not print.
+  const rawDescription = (nft.description || '').replace(/\[soundtrack:[^\]]*\]/g, '').trim();
+  const trimmedName = rawName.trim();
+  const trimmedDesc = rawDescription.trim();
+  const hasMeaningfulTitle = trimmedName.length > 0 
+    && trimmedName !== trimmedDesc 
+    && !trimmedDesc.startsWith(trimmedName);
+
+  return {
+    id: String(nft.tokenId),
+    contentRating: nft.contentRating,
+    mediaDescriptions: nft.mediaDescriptions,
+    layout: nft.layout,
+    mediaCaptions: nft.mediaCaptions,
+    comicBorder: nft.comicBorder,
+    hideAssetCards: nft.hideAssetCards,
+    hiddenLinkPreviews: nft.hiddenLinkPreviews,
+    imageTags: nft.imageTags,
+    hasQuiz: nft.hasQuiz,
+    spoilerText: nft.spoilerText,
+    quotePolicy: nft.quotePolicy,
+    visibility: nft.visibility,
+    quoteRevoked: nft.quoteRevoked,
+    replyPolicy: nft.replyPolicy,
+    shopLinks: (nft as any).shopLinks,
+    shopListingCount: (nft as any).shopListingCount,
+    type: 'post',
+    createdAt: timestamp || '',
+    views,
+    status: nft.status,
+    author: {
+      id: resolvedAddress,
+      name: nft.minterDisplayName || nft.minterUsername || nft.mintername || creatorObj?.display_name || creatorObj?.username || ownerObj?.username || 'Unknown',
+      handle: nft.minterUsername || nft.mintername || creatorObj?.username || ownerObj?.username || resolvedAddress?.slice(0, 8) || 'anonymous',
+      avatarSeed: avatar,
+      verified: false,
+      badgeBalance: (nft as any).minterUser?.hideBadgeAndBalance ? 0 : ((nft as any).minterUser?.badgeBalance ?? (nft as any).badgeBalance),
+      paymentsDisabled: (nft as any).minterUser?.hideBadgeAndBalance === true,
+    },
+    title: hasMeaningfulTitle ? trimmedName : undefined,
+    content: trimmedDesc || (hasMeaningfulTitle ? '' : trimmedName) || '',
+    rawName,
+    rawDescription,
+    articleBody: nft.articleBody,
+    articleImageUrl: nft.articleImageUrl ? buildFeedImageUrls([nft.articleImageUrl])?.[0] : undefined,
+    stats: {
+      comments: nft.commentCount || nft.comment_count || 0,
+      reposts: (nft.totalReposts || nft.reposts || 0) + (nft.quotes || 0),
+      likes: resolveLikeCount(nft),
+      dislikes: resolveDislikeCount(nft),
+    },
+    // These three used to be missing here — the video and image mappers above
+    // both carry them, so only text posts lost their like/dislike/repost state
+    // when opened on their own page: PostCard got isLiked===undefined and the
+    // thumb rendered inactive even though the feed showed it lit. It looked
+    // fine for a few minutes only because ActionBar falls back to the
+    // in-memory vote cache, which expires.
+    isLiked: nft.isLiked ?? false,
+    isDisliked: nft.isDisliked ?? false,
+    myReaction: resolveMyReaction(nft),
+    reactionCounts: resolveReactionCounts(nft),
+    isReposted: nft.isReposted ?? false,
+    isQuotePost: !!nft.isQuotePost,
+    quotedPost: nft.quotedPost || null,
+    communityAlertPending: (nft as any).communityAlertStatus === 'pending',
+    isLocked: nft.is_locked || streamInfo?.isLockContent || false,
+    lockedPrice: nft.locked_price || streamInfo?.lockContentAmount,
+    lockedCurrency: nft.locked_currency || streamInfo?.lockContentTokenSymbol || 'DHB',
+    lockedTokenAddress: streamInfo?.lockContentContractAddress,
+    lockedChainId: streamInfo?.lockContentChainIds?.[0],
+    subscriberPlans: (nft as any).plansDetails,
+    isOwner: nft.isOwner ?? false,
+    isUnlocked: nft.isUnlocked ?? false,
+    totalTips: nft.totalTips ?? 0,
+  };
+}
+
+/** Livepeer CDN bases - .studio is the active CDN; .com is legacy/deprecated */
+const LIVEPEER_CDN_BASES = [
+  'https://livepeercdn.studio',
+  'https://livepeercdn.com',
+];
+
+/**
+ * Build HLS playback URL from stream playbackId (when api.dehub.io /start fails)
+ * Prefers backend playbackUrl if present; otherwise builds from playbackId.
+ */
+function buildLivePlaybackUrl(nft: DeHubNFT): string | undefined {
+  const stream = (nft as any).stream;
+  // Prefer backend-provided URL
+  const fromApi = stream?.playbackUrl || nft.videoUrl || (nft as any).playbackUrl;
+  if (fromApi && fromApi.includes('.m3u8')) return fromApi;
+
+  const playbackId = stream?.playbackId;
+  if (playbackId) {
+    return hlsUrlFor(stream);
+  }
+  return fromApi;
+}
+
+/** Build all possible playback URLs for fallback (different Livepeer CDNs) */
+function buildLivePlaybackUrls(nft: DeHubNFT): string[] {
+  const stream = (nft as any).stream;
+  noteLatencyMode(stream);
+  const playbackId = stream?.playbackId;
+  if (!playbackId) return [];
+  // Only Livepeer has a second CDN to fall back to; a self-hosted stream is
+  // served from one host and a fabricated alternate would just 404 twice.
+  const primary = hlsUrlFor(stream);
+  if (!primary) return [];
+  return liveProviderOf(stream) === 'mediamtx'
+    ? [primary]
+    : [primary, `${LIVEPEER_CDN_BASES[1]}/hls/${playbackId}/index.m3u8`];
+}
+
+/**
+ * Derive isLive from stream status fields.
+ * A stream is live only when Livepeer reports it as active AND it hasn't been ended.
+ */
+function deriveIsLive(nft: DeHubNFT): boolean {
+  return isStreamLive((nft as any).stream, !!((nft as any).isLive ?? nft.is_live));
+}
+
+/**
+ * Transform API NFT data to LiveStream format
+ */
+function toLiveStream(nft: DeHubNFT): LiveStream {
+  // Canonical avatar resolution (matches feed normalization)
+  const creatorObj = (nft as any).creator;
+  const ownerObj = (nft as any).owner;
+  const rawAvatarPath = extractAvatarPath(nft) || extractAvatarPath(creatorObj);
+  const resolvedAddress = nft.minter || creatorObj?.id || creatorObj?.address;
+  const avatar = rawAvatarPath && resolvedAddress ? buildAvatarUrl(resolvedAddress, rawAvatarPath) || '/placeholder.svg' : '/placeholder.svg';
+  
+  const streamObj = (nft as any).stream;
+
+  return {
+    id: String(nft.tokenId),
+    contentRating: nft.contentRating,
+    mediaDescriptions: nft.mediaDescriptions,
+    layout: nft.layout,
+    mediaCaptions: nft.mediaCaptions,
+    comicBorder: nft.comicBorder,
+    hideAssetCards: nft.hideAssetCards,
+    hiddenLinkPreviews: nft.hiddenLinkPreviews,
+    imageTags: nft.imageTags,
+    hasQuiz: nft.hasQuiz,
+    spoilerText: nft.spoilerText,
+    quotePolicy: nft.quotePolicy,
+    visibility: nft.visibility,
+    quoteRevoked: nft.quoteRevoked,
+    replyPolicy: nft.replyPolicy,
+    // The Shop board rides straight through to LiveStreamCard, which is what
+    // renders the player here — the button lives inside it.
+    shopLinks: (nft as any).shopLinks,
+    shopListingCount: (nft as any).shopListingCount,
+    type: 'live',
+    // The Mongo ObjectId every /api/live/{id}/* route requires. Without it the
+    // card falls back to the numeric tokenId and like/gift/activities/end all
+    // 500 (or silently no-op) server-side. Same resolution as the feed mapper.
+    streamId: streamObj?._id || streamObj?.streamId || undefined,
+    streamer: nft.minterDisplayName || nft.minterUsername || nft.mintername || creatorObj?.display_name || creatorObj?.username || ownerObj?.username || 'Unknown',
+    avatar,
+    title: nft.title || nft.name || 'Live Stream',
+    game: nft.description || '',
+    viewers: formatViews(resolveViewCount(nft)).replace(' views', ''),
+    thumbnail: buildImageUrl(nft.tokenId, nft.imageUrl) || '',
+    tags: [],
+    isLive: deriveIsLive(nft),
+    liveStatus: streamObj?.status,
+    creatorId: resolvedAddress,
+    creatorUsername: nft.minterUsername || nft.mintername || creatorObj?.username || ownerObj?.username,
+    creatorBadgeBalance: (nft as any).minterUser?.hideBadgeAndBalance ? 0 : ((nft as any).minterUser?.badgeBalance ?? (nft as any).badgeBalance),
+    creatorPaymentsDisabled: (nft as any).minterUser?.hideBadgeAndBalance === true,
+    likeCount: resolveLikeCount(nft),
+    dislikeCount: resolveDislikeCount(nft),
+    isLiked: nft.isLiked ?? false,
+    isDisliked: nft.isDisliked ?? false,
+    myReaction: resolveMyReaction(nft),
+    reactionCounts: resolveReactionCounts(nft),
+    commentCount: Math.max(nft.commentCount ?? nft.comment_count ?? 0, (nft as any).liveChatCount ?? 0),
+    playbackUrl: buildLivePlaybackUrl(nft),
+    playbackUrls: buildLivePlaybackUrls(nft),
+    replayUrl: extractReplayUrl(streamObj),
+    replayTruncated: isReplayTruncated(streamObj),
+    startedAt: streamObj?.startedAt || undefined,
+    totalTips: streamObj?.totalTips ?? 0,
+    // Access, from the same streamInfo every other post type reads. A live
+    // post is minted through /user_mint with the composer's switches on it, so
+    // it can be sold per view or gated like anything else.
+    tokenId: String(nft.tokenId),
+    isPPV: (nft as any).is_ppv || nft.streamInfo?.isPayPerView || false,
+    ppvPrice: (nft as any).ppv_price || nft.streamInfo?.payPerViewAmount,
+    ppvCurrency: (nft as any).ppv_currency || nft.streamInfo?.payPerViewTokenSymbol || 'DHB',
+    ppvChainId: nft.streamInfo?.payPerViewChainIds?.[0] ?? nft.chainId,
+    isLocked: (nft as any).is_locked || nft.streamInfo?.isLockContent || false,
+    lockedPrice: (nft as any).locked_price || nft.streamInfo?.lockContentAmount,
+    lockedCurrency: (nft as any).locked_currency || nft.streamInfo?.lockContentTokenSymbol || 'DHB',
+    lockedTokenAddress: nft.streamInfo?.lockContentContractAddress,
+    lockedChainId: nft.streamInfo?.lockContentChainIds?.[0],
+    subscriberPlans: (nft as any).plansDetails,
+    isOwner: (nft as any).isOwner ?? false,
+    isUnlocked: (nft as any).isUnlocked ?? false,
+  };
+}
+
+/**
+ * Live post wrapper: merges Supabase live status when api.dehub.io /start fails
+ */
+function LivePostWithStatus({ liveData, post, chatSlot, immersive }: { liveData: LiveStream; post: DeHubNFT; chatSlot?: React.ReactNode; immersive?: boolean }) {
+  const tokenId = String(post.tokenId ?? (post as any).tokenId ?? liveData.id);
+  const { data: isLiveFromSupabase } = useStreamLiveStatus(tokenId);
+  const mergedStream: LiveStream = {
+    ...liveData,
+    isLive: !hasStreamEnded((post as any).stream) && (liveData.isLive || !!isLiveFromSupabase),
+  };
+  return <Suspense fallback={<QuietPostLoading />}><LiveStreamCard key={liveData.streamId ?? tokenId} stream={mergedStream} postPage chatSlot={chatSlot} immersive={immersive} /></Suspense>;
+}
+
+/**
+ * Processing state component for posts still being minted
+ */
+function ProcessingState() {
+  const { t: _copy } = _useCopy();
+  return (
+    <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
+      <div className="w-16 h-16 rounded-xl bg-zinc-800 flex items-center justify-center mb-4">
+        <Clock className="w-8 h-8 text-zinc-400 animate-pulse" />
+      </div>
+      <h2 className="text-xl font-semibold text-white mb-2">{_copy("copy.5ef5143d3481", { defaultValue: "Post is Processing" })}</h2>
+      <p className="text-zinc-400 max-w-md">{_copy("copy.ed0b7f073c24", { defaultValue: "This post is being minted on decentralized databases. Metadata is being validated and will be available shortly." })}</p>
+    </div>
+  );
+}
+
+/**
+ * Error state component for posts not found
+ */
+function NotFoundState() {
+  const { t: _copy } = _useCopy();
+  return (
+    <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
+      <ThemedIcon icon="posts" alt="" className="w-16 h-16 object-contain mb-4 opacity-80" />
+      <h2 className="text-xl font-semibold text-white mb-2">{_copy("copy.0a78f0f5908f", { defaultValue: "Post Not Found" })}</h2>
+      <p className="text-zinc-400 max-w-md">{_copy("copy.cc0a24992143", { defaultValue: "This post may have been removed or the link is incorrect." })}</p>
+    </div>
+  );
+}
+
+/**
+ * Loading state component
+ */
+function LoadingState() {
+  return <QuietPostLoading />;
+}
+
+/**
+ * Immersive header for video posts - back button + creator info on same line
+ */
+interface ImmersiveVideoHeaderProps {
+  fallbackRoute?: string;
+  channel?: string;
+  channelAvatar?: string;
+  creatorUsername?: string;
+  creatorId?: string;
+  verified?: boolean;
+  showBack?: boolean;
+  /** Override the back action (e.g. close the drawer with animation first) */
+  onBack?: () => void;
+}
+
+function ImmersiveVideoHeader({
+  fallbackRoute = '/app',
+  channel,
+  channelAvatar,
+  creatorUsername,
+  creatorId,
+  verified = false,
+  showBack = true,
+  onBack,
+}: ImmersiveVideoHeaderProps) {
+  const { t: _copy } = _useCopy();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const handleBack = () => {
+    if (onBack) {
+      onBack();
+      return;
+    }
+    if ((location.key && location.key !== 'default') || window.history.length > 1) {
+      navigate(-1);
+    } else {
+      navigate(fallbackRoute, { replace: true });
+    }
+  };
+
+  const handleProfileClick = () => {
+    if (creatorUsername) {
+      const cleanUsername = creatorUsername.replace('@', '');
+      navigate(profilePath(cleanUsername));
+    } else if (creatorId) {
+      navigate(`/app/profile?id=${creatorId}`);
+    }
+  };
+
+  const isClickable = !!(creatorId || creatorUsername);
+
+  if (!showBack) return null;
+
+  return (
+    <div className="absolute top-2 left-2 z-50">
+      {/* Sits on the media, never on the page. data-on-media keeps the
+          baseline themes' control finish off it: on Light, System and Minimal
+          that finish made it a pale chip that vanished over bright photos.
+          Canvas themes still dress it in their own material. */}
+      <button
+        onClick={handleBack}
+        data-swipe-back
+        data-on-media
+        className="h-8 w-8 rounded-xl bg-black/50 backdrop-blur-[24px] backdrop-saturate-[180%] border border-white/10 hover:bg-black/60 transition-colors flex items-center justify-center"
+        aria-label={_copy("copy.6aadac2f2b7a", { defaultValue: "Go back" })}
+      >
+        <ArrowLeft className="w-4 h-4 text-white" />
+      </button>
+    </div>
+  );
+}
+
+/**
+ * Desktop creator row for a video post.
+ *
+ * This is deliberately the SAME markup the home feed's VideoCard renders above
+ * its player — `CardHeader` — rather than a
+ * second hand-rolled avatar+name block. The hand-rolled one drifted: a 40px
+ * square avatar against the feed's 36px, no badge icon, no profile hover card,
+ * `mb-4` where the feed uses CardHeader's own `pb-3`, and a lucide-free inline
+ * check instead of the feed's CheckCircle. It also lived OUTSIDE the bento, so
+ * the card visibly started at the video and the creator sat on the bare canvas
+ * with no glass behind it — the "bento doesn't wrap the username" report. It is
+ * rendered inside the bento now, so one frosted card holds the whole post.
+ */
+interface DesktopCreatorInfoProps {
+  channel?: string;
+  channelAvatar?: string;
+  creatorUsername?: string;
+  creatorId?: string;
+  verified?: boolean;
+  badgeBalance?: number;
+}
+
+function DesktopCreatorInfo({
+  channel,
+  channelAvatar,
+  creatorUsername,
+  creatorId,
+  verified = false,
+  badgeBalance,
+}: DesktopCreatorInfoProps) {
+  if (!channel) return null;
+
+  return (
+    <div className="flex items-start justify-between">
+      <CardHeader
+        postPage
+        username={channel}
+        handle={creatorUsername}
+        avatarSeed={channelAvatar || ''}
+        verified={verified}
+        contentType="video"
+        creatorId={creatorId}
+        creatorUsername={creatorUsername}
+        badgeBalance={badgeBalance}
+      />
+      {/* VideoCard portals its boost + options buttons in here. */}
+      <div data-post-head-actions className="flex items-center" />
+    </div>
+  );
+}
+
+interface SinglePostPageProps {
+  /** The feed still owns the visible photo/text card; append only its details. */
+  detailsOnly?: boolean;
+  /**
+   * True when AppLayout renders this inside the from-feed post overlay. That
+   * layer is its own scroll container, so the page must not touch the document
+   * scroll — doing so would move the home feed mounted underneath and throw
+   * away the position the user comes back to.
+   */
+  inOverlay?: boolean;
+  /**
+   * Render a specific post regardless of the route params. NewPostPage uses
+   * this to show an off-chain post AT its /newpost/<n> URL — navigating to
+   * /app/post/<tokenId> instead would swap the address bar to the NFT-style
+   * URL the slug exists to avoid.
+   */
+  overrideId?: string;
+  /** The page the site opened on is being covered by the Shorts viewer (or not any more). */
+  onSharedHold?: (hold: boolean) => void;
+}
+
+/**
+ * Canonical URL for a post page: always /app/post/<tokenId>, whichever shape
+ * the visitor arrived on (/posts/1/b, /post/1, /newpost/<n>). That is the URL
+ * the worker's crawler page declares and the post sitemap lists; a self
+ * canonical on /posts/* pointed the other way.
+ */
+function postSeoUrl(id?: string, articleSlug?: string): string {
+  return canonicalUrl(`/app/post/${articleSlug || id}`);
+}
+
+const FEATURE_REQUEST_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** A post id is a tokenId (digits) or a stream ObjectId; anything else with a letter is an article slug. */
+function isArticleSlugParam(value?: string): value is string {
+  return !!value && !/^\d+$/.test(value) && !/^[a-f\d]{24}$/i.test(value) && !FEATURE_REQUEST_ID.test(value) && /^[a-z0-9][a-z0-9-]*$/i.test(value) && /[a-z]/i.test(value);
+}
+
+/**
+ * /app/post/<readable-slug>: resolve the slug to its tokenId, then render the
+ * post AT the readable URL (everything inside keys on the tokenId). Lives in
+ * the same tree position as the numeric page, so the replace from
+ * /app/post/<n> to its slug re-renders the open post instead of remounting it
+ * (a playing video keeps playing).
+ */
+function useSlugTokenId(slug?: string) {
+  return useQuery({
+    queryKey: ['article-slug', (slug || '').toLowerCase()],
+    queryFn: () => resolveArticleSlug((slug || '').toLowerCase()),
+    enabled: !!slug,
+    staleTime: 10 * 60_000,
+  });
+}
+
+function SlugNotFound() {
+  const { t: _copy } = _useCopy();
+  const navigate = useNavigate();
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center gap-4 p-8 text-center">
+      <SEOHead title="Post not found | Riftn" noindex noCanonical />
+      <p className="text-foreground font-medium">{_copy("copy.fb44f57948b0", { defaultValue: "This post doesn't exist" })}</p>
+      <p className="text-muted-foreground text-sm">{_copy("copy.23b0c7979c69", { defaultValue: "The link may be wrong, or the post was deleted." })}</p>
+      <button
+        onClick={() => navigate('/app')}
+        className="mt-2 px-6 py-2.5 bg-white/10 hover:bg-white/15 text-foreground rounded-xl text-sm font-medium transition-colors"
+      >{_copy("copy.4027386e8d11", { defaultValue: "Go to feed" })}</button>
+    </div>
+  );
+}
+
+/** The app shares comment links as ?c=, web as ?comment=. */
+function commentFromSearch(search: string): string | undefined {
+  const params = new URLSearchParams(search);
+  return params.get('comment') || params.get('c') || undefined;
+}
+
+/**
+ * Publishes the deep-linked comment to everything under the page — the
+ * comments list included, which sits behind five card components and a lazy
+ * wrapper and has no other reason to know about notifications. Same two
+ * sources the page itself reads, resolved once here so the list and the
+ * author thread can never disagree about which comment was linked.
+ */
+/**
+ * A phone that opened the site on this post (lib/shared-video-landing): until
+ * the post is known to be a video, and while the Shorts viewer plays it on
+ * top, the page's own player stays paused so the two never play together.
+ */
+function SharedLandingHold({ enabled, children }: { enabled: boolean; children: (onHold: (hold: boolean) => void) => ReactNode }) {
+  const parentActive = useContext(CachedPageActiveContext);
+  const [hold, setHold] = useState(() => enabled && hasSharedVideoLanding());
+  return (
+    <CachedPageActiveContext.Provider value={parentActive && !hold}>
+      {children(setHold)}
+    </CachedPageActiveContext.Provider>
+  );
+}
+
+export default function SinglePostPage(props: SinglePostPageProps = {}) {
+  useRouteContentReady();
+  const { postId, tokenId, commentId } = useParams<{ postId?: string; tokenId?: string; commentId?: string }>();
+  const { search } = useLocation();
+  const slug = !props.overrideId && isArticleSlugParam(postId) ? postId : undefined;
+  const slugQuery = useSlugTokenId(slug);
+  const focusCommentId = commentId || commentFromSearch(search);
+
+  // The Requests board once shared its cards as /app/post/<request id>. Posts
+  // are numbers or slugs, never UUIDs, so open the request on the board.
+  if (!props.overrideId && postId && FEATURE_REQUEST_ID.test(postId)) {
+    const params = new URLSearchParams(search);
+    params.delete('feature');
+    return <Navigate replace to={`/build?feature=${encodeURIComponent(postId)}${params.size ? `&${params}` : ''}`} />;
+  }
+
+  if (slug && slugQuery.isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <SEOHead title="Riftn" noindex noCanonical />
+        <Loader2 className="w-6 h-6 text-white/40 animate-spin" />
+      </div>
+    );
+  }
+  if (slug && !slugQuery.data) return <SlugNotFound />;
+
+  const overrideId = slug ? String(slugQuery.data!.tokenId) : props.overrideId;
+  const id = overrideId || postId || tokenId;
+  return (
+    <SharedLandingHold enabled={!props.inOverlay && !props.detailsOnly}>
+      {onSharedHold => (
+        <FocusCommentProvider tokenId={id} commentId={focusCommentId}>
+          <SinglePostPageContent {...props} overrideId={overrideId} onSharedHold={onSharedHold} />
+        </FocusCommentProvider>
+      )}
+    </SharedLandingHold>
+  );
+}
+
+function SinglePostPageContent({ inOverlay = false, overrideId, detailsOnly = false, onSharedHold }: SinglePostPageProps = {}) {
+  const { postId, tokenId, commentId } = useParams<{ postId?: string; tokenId?: string; commentId?: string }>();
+  const navigate = useNavigate();
+  const { t, i18n } = useI18n();
+  const { t: _copy } = _useCopy();
+  const id = overrideId || postId || tokenId;
+  const location = useLocation();
+
+  // Deep link to one comment: the thread-entry form (/posts/1/b/55) carries it
+  // as a path segment; the share forms (?comment=55, and the app's ?c=55) keep working too.
+  const focusCommentId = commentId || commentFromSearch(location.search);
+  const [highlightCommentId, setHighlightCommentId] = useState<string | undefined>(focusCommentId);
+  useEffect(() => {
+    setHighlightCommentId(focusCommentId);
+  }, [focusCommentId]);
+  
+  // Detect if opened from feed (overlay mode)
+  const isFromFeed = !!(location.state as any)?.fromFeed;
+  
+  // Hide back button when there's no navigation history (direct URL access)
+  const hasHistory = isFromFeed || !!(location.key && location.key !== 'default') || window.history.length > 1;
+  
+  // State for desktop AI chat and options drawer
+  const [showDesktopAIChat, setShowDesktopAIChat] = useState(false);
+  const [showDesktopOptionsDrawer, setShowDesktopOptionsDrawer] = useState(false);
+  const [showDesktopReportModal, setShowDesktopReportModal] = useState(false);
+  const [showTipModal, setShowTipModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  // Desktop: closed until the comment button asks, same as a feed card.
+  // Phone and tablet keep them open under the post.
+  // A notification link (?comment=<id>, or ?comments=1) opens them on desktop
+  // too: the reply it names lives in that list, and a closed list left the
+  // reader on the top of the post with nothing to land on. The card strips
+  // ?comments=1 from the address on mount, so it is read once, here.
+  // matchMedia, not innerWidth: on a phone innerWidth lays the whole page out
+  // first, and this runs while the post is opening over the feed.
+  const desktopView = () => typeof window !== 'undefined' && window.matchMedia('(min-width: 1024px)').matches;
+  const askedForComments = useRef(new URLSearchParams(location.search).get('comments') === '1');
+  const [showPageComments, setShowPageComments] = useState(() => !desktopView() || !!focusCommentId || askedForComments.current);
+  const [postOptions, setPostOptions] = useState<(() => void) | null>(null);
+  const registerPostOptions = useCallback((open: (() => void) | null) => setPostOptions(() => open), []);
+  const [pageCommentsInitialTab, setPageCommentsInitialTab] = useState<'replies' | 'quotes' | 'reposts' | 'search' | undefined>();
+  const { walletAddress } = useAuth();
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    setShowPageComments(!desktopView() || !!focusCommentId || askedForComments.current);
+    askedForComments.current = false;
+    setPageCommentsInitialTab(undefined);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, focusCommentId]);
+
+  const handleOpenPageComments = useCallback((tab?: 'replies' | 'quotes' | 'reposts' | 'search') => {
+    setPageCommentsInitialTab(tab);
+    if (tab) {
+      setShowPageComments(true);
+      return;
+    }
+    setShowPageComments((open) => !open);
+  }, []);
+  const [detailsExpanded, setDetailsExpanded] = useState(false);
+  const retainedCommentsRef = useRef<HTMLDivElement>(null);
+  const scrollToRetainedComments = useRef(false);
+  // Phone posts opened from the feed show comments in a half-screen sheet
+  // under the post (PostCommentsSplit), like Shorts.
+  const [commentsSplit, setCommentsSplit] = useState(false);
+  const closeCommentsSplitSheet = useCallback(() => setCommentsSplit(false), []);
+  const splitPhone = usePostStagePhone();
+  useLayoutEffect(() => { setDetailsExpanded(false); setCommentsSplit(false); }, [id]);
+  useLayoutEffect(() => {
+    if (!detailsOnly || !id) return;
+    return bindRetainedComments(String(id), tab => {
+      handleOpenPageComments(tab);
+      if (splitPhone) {
+        setCommentsSplit(true);
+        return;
+      }
+      scrollToRetainedComments.current = true;
+      setDetailsExpanded(true);
+    });
+  }, [detailsOnly, id, handleOpenPageComments, splitPhone]);
+  // A feed card's comments button opens the post with the sheet already up.
+  const splitLocation = useLocation();
+  const splitRouteState = splitLocation.state as CommentsSplitRouteState | null;
+  const splitRouteKey = splitLocation.key;
+  useLayoutEffect(() => {
+    if (!detailsOnly || !id || !splitPhone || !splitRouteState?.openComments) return;
+    handleOpenPageComments('replies');
+    setCommentsSplit(true);
+    // Once per visit: the route key changes on every navigation.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [detailsOnly, id, splitPhone, splitRouteKey]);
+  // The sheet starts at the post's top, under the pill. On a post opened from
+  // a link (or after a refresh) the page itself is the scroller.
+  useLayoutEffect(() => {
+    if (!commentsSplit) return;
+    const overlay = document.querySelector('[data-post-overlay][data-scroll-nav-source]');
+    if (overlay) overlay.scrollTo({ top: 0 });
+    else scrollDocumentTo(0);
+  }, [commentsSplit]);
+  
+  // Mobile/tablet vs desktop layout. The post used to open in a vaul bottom
+  // sheet on mobile; it is now the same page it is on desktop, so this only
+  // picks between the two layouts (immersive media on mobile, creator bar +
+  // card chrome on desktop) and — unlike the old branch, which rendered the
+  // desktop tree too and merely hid it with `lg:` classes — renders one, not
+  // both. That alone stops mobile mounting a second copy of every video.
+  const [isMobileView, setIsMobileView] = useState(() =>
+    typeof window !== 'undefined' && window.innerWidth < 1024
+  );
+  useEffect(() => {
+    const onResize = () => setIsMobileView(window.innerWidth < 1024);
+    window.addEventListener('resize', onResize, { passive: true });
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+
+  // Phones (<640px) get the "Stage" layout (PostStagePhone). Tablets and
+  // desktop keep the layouts below exactly as they were.
+  const isStagePhone = usePostStagePhone();
+
+  // Scrolling content root. Used for the swallow clip on the standalone route,
+  // where the page itself scrolls; in overlay mode AppLayout's fixed layer is
+  // the scroller and clips itself.
+  const postRootRef = useRef<HTMLDivElement>(null);
+
+  const goBack = useCallback(() => {
+    if (hasHistory) navigate(-1);
+    else navigate('/app');
+  }, [hasHistory, navigate]);
+
+  // Open every post at its top.
+  //
+  // In overlay mode AppLayout's fixed layer is the scroller and resets itself,
+  // so there is nothing to do here — and touching the page scroll would drag
+  // the home feed underneath to the top and lose the user's place in it.
+  //
+  // On the standalone route the page itself scrolls, so reset it before paint.
+  // This used to be gated on `useNavigationType() === 'PUSH'`, which never
+  // matched: App.tsx renders `<Routes location={loc}>`, and react-router pins
+  // navigationType to POP for every consumer below an explicit location. The
+  // effect simply never ran, which is why a post opened at whatever offset the
+  // feed was scrolled to. Nothing here needs the navigation type: a fresh post
+  // id always starts at the top, and browser back/forward on a standalone post
+  // is a full page view whose own scroll the browser restores.
+  useLayoutEffect(() => {
+    if (inOverlay) return;
+    scrollDocumentTo(0);
+  }, [id, inOverlay]);
+
+  const { data: post, isLoading } = useQuery({
+    queryKey: ['single-post', id],
+    queryFn: async () => {
+      // What we're already showing: the seed the feed card wrote on click, the
+      // last good fetch, or the feed item behind `placeholderData` below. Used
+      // to keep viewer flags when this response comes back anonymous.
+      const shown =
+        queryClient.getQueryData<DeHubNFT>(['single-post', id]) ??
+        (findCachedFeedPost(queryClient, id!) as unknown as DeHubNFT | undefined);
+
+      // Stream ObjectIds cannot be parsed by the numeric NFT endpoint.
+      const isStreamId = /^[a-f\d]{24}$/i.test(id!) && !/^\d+$/.test(id!);
+      const loadPost = async (nftId: string): Promise<DeHubNFT> => {
+        // A post link asked for this during page load (index.html).
+        const nft = (await takePrefetchedPost(nftId)) ?? await loadPostData(nftId);
+        const normalizedNft = {
+          ...nft,
+          createdAt: nft.createdAt || nft.created_at || (nft as any).mintedAt || (nft as any).minted_at || (nft as any).updatedAt || (nft as any).updated_at || '',
+        };
+
+        // api.dehub.io answers a request carrying an expired token with 200 and
+        // NO viewer fields rather than 401. Replacing the seed wholesale with
+        // such a response is what flipped a liked post to unliked one second
+        // after opening it. Counts still come from the response; only the
+        // per-viewer flags are carried over.
+        const merged = mergeViewerState(normalizedNft, shown);
+        // The comments under the post read the same record by ['nft-info'];
+        // without this they asked for it a second time once they mounted.
+        if (queryClient.getQueryData(['nft-info', nftId]) === undefined) {
+          queryClient.setQueryData<DeHubNFT>(['nft-info', nftId], normalizedNft);
+        }
+
+        // Enrich quote post if quotedPost data is missing
+        if (merged.isQuotePost && merged.quotedTokenId && !merged.quotedPost) {
+          try {
+            const quoted = await getNFTInfo(String(merged.quotedTokenId));
+            return { ...merged, quotedPost: quoted };
+          } catch {
+            // If we can't fetch the quoted post, still return the main post
+            return merged;
+          }
+        }
+
+        return merged;
+      };
+
+      if (!isStreamId) {
+        try {
+          return await loadPost(id!);
+        } catch {
+          // Older stream links may not have the standard ObjectId shape.
+        }
+      }
+      // Resolve stream links directly, or fall back after an NFT lookup fails.
+      const liveRes = await getLiveStream(id!);
+      const stream: any = (liveRes as any)?.result || liveRes;
+      if (!stream) throw new Error('Post not found');
+
+      // A stream link to a minted live post shows the post. Likes, reactions
+      // and comments are cast on the post, so the stream doc's own `likes`
+      // stays 0 — reading it is why a live opened by its stream link showed no
+      // likes while the same live in feeds and on profiles showed them all.
+      // The stream doc still wins for status and playback: it is the fresher.
+      if (stream.tokenId != null && /^\d+$/.test(String(stream.tokenId))) {
+        try {
+          const post = await loadPost(String(stream.tokenId));
+          return { ...post, stream: { ...(post as any).stream, ...stream } } as DeHubNFT;
+        } catch {
+          // Fall through to the stream-only shape below.
+        }
+      }
+
+      // Convert livestream data to DeHubNFT-like shape for unified rendering
+      const account = (stream as any).account;
+      return {
+        // Prefer the stream doc's own numeric NFT tokenId: downstream this
+        // becomes stream.id, which the on-chain gift path BigInt()-encodes
+        // — a hex Mongo _id there throws. The _id stays available for the
+        // /api/live/{id}/* routes via the `stream` passthrough below.
+        tokenId: (stream as any).tokenId ?? ((stream as any)._id || stream.streamId || id),
+        // Carry the raw stream doc so toLiveStream can resolve the Mongo
+        // ObjectId (stream._id) for the /api/live/{id}/* interaction routes.
+        stream,
+        name: stream.title,
+        title: stream.title,
+        description: stream.description,
+        postType: 'live',
+        isLive: isStreamLive(stream),
+        videoUrl: stream.playbackUrl || hlsUrlFor(stream as any),
+        playbackUrl: stream.playbackUrl || hlsUrlFor(stream as any),
+        imageUrl: stream.thumbnailUrl || (stream as any).thumbnail,
+        views: stream.viewerCount || (stream as any).totalViews || 0,
+        totalVotes: { for: stream.likeCount || (stream as any).likes || 0, against: 0 },
+        minter: stream.address || account?.address,
+        minterDisplayName: account?.displayName || account?.username || stream.streamer?.displayName,
+        minterUsername: account?.username || stream.streamer?.username,
+        minterAvatarUrl: account?.avatarImageUrl || account?.avatarUrl || stream.streamer?.avatarImageUrl,
+        category: (stream as any).categories || (stream.category ? [stream.category] : []),
+        creator: account ? { id: account.address, username: account.username, display_name: account.displayName, avatar_url: account.avatarImageUrl || account.avatarUrl } : undefined,
+      } as unknown as DeHubNFT;
+    },
+    enabled: !!id,
+    // A stream that has not ended is never trusted from cache: reopening it or
+    // coming back to the tab asks again, so an old "not live" answer can't stick.
+    staleTime: (query) => {
+      const stream = (query.state.data as any)?.stream;
+      return stream && !hasStreamEnded(stream) ? 0 : 5 * 60 * 1000;
+    },
+    refetchInterval: (query) => streamRefreshInterval((query.state.data as any)?.stream),
+    retry: 1,
+    // Instant open: if any feed cache already holds THIS post, paint it
+    // immediately while the authoritative getNFTInfo fetch runs behind it.
+    // Never fall back to previousData — that's the PREVIOUS post's content
+    // (navigating post A → post B used to flash A's body under B's URL).
+    placeholderData: () =>
+      findCachedFeedPost(queryClient, id!) as unknown as DeHubNFT | undefined,
+    // Always overlay the vote cache so a vote cast seconds ago outranks a
+    // response that predates it (both counters are written, not just totalVotes).
+    select: (data) => {
+      if (!data || !id) return data;
+      // A stream link's votes are cast (and cached) under the post's tokenId.
+      const tokenKey = data.tokenId != null ? String(data.tokenId) : undefined;
+      const cached = getVoteCache(id) ?? (tokenKey && tokenKey !== id ? getVoteCache(tokenKey) : null);
+      if (!cached) return data;
+      return applyVoteStateToNFT(data, cached);
+    },
+  });
+
+  // An article opened by its number (/app/post/7074, /post/7074) moves to its
+  // readable address in place: same page, no reload, ?ref and ?comment kept.
+  // The resolved slug is seeded so the slug route paints without a lookup.
+  const articleSlug = (post as any)?.articleSlug as string | undefined;
+  useEffect(() => {
+    if (inOverlay || overrideId || !articleSlug || !id) return;
+    if (!/^\/(?:app\/)?post\/\d+\/?$/.test(location.pathname)) return;
+    queryClient.setQueryData(['article-slug', articleSlug], { tokenId: Number(id), articleSlug });
+    navigate(`/app/post/${articleSlug}${location.search}${location.hash}`, { replace: true, state: location.state });
+  }, [articleSlug, id, inOverlay, overrideId, location.pathname, location.search, location.hash, location.state, navigate, queryClient]);
+
+  // Check if we have cached data (from feed navigation) to show immediately
+  const hasCachedData = !!post;
+
+  // Defer related-feed mounting until the main post has painted and the
+  // browser is idle. The related feeds fire their own network requests and
+  // render ~10 cards on mount, which otherwise competes with the main post's
+  // media loading the moment the page opens.
+  const [showRelated, setShowRelated] = useState(false);
+  useEffect(() => {
+    if (!post || showRelated) return;
+    let cancelIdle: (() => void) | undefined;
+    const raf = requestAnimationFrame(() => {
+      if ('requestIdleCallback' in window) {
+        const idleId = requestIdleCallback(() => setShowRelated(true), { timeout: 1500 });
+        cancelIdle = () => cancelIdleCallback(idleId);
+      } else {
+        const timerId = setTimeout(() => setShowRelated(true), 400);
+        cancelIdle = () => clearTimeout(timerId);
+      }
+    });
+    return () => {
+      cancelAnimationFrame(raf);
+      cancelIdle?.();
+    };
+  }, [post, showRelated]);
+  
+  // Determine content type
+  const contentType = post ? getContentType(post) : null;
+
+  /**
+   * The room key for everything hanging off a live post: its chat and its shop.
+   *
+   * Not the URL param. `/api/live` hands out Mongo ObjectIds, so a viewer who
+   * opened the stream from the Live tab or the home carousel arrives on
+   * /app/post/<ObjectId>, while the host and anyone arriving from the feed use
+   * the numeric tokenId. Keying on the param put those two groups in different
+   * rooms for the same broadcast — the host never saw Live-tab messages and
+   * pins did not reach them. The loader already resolves both shapes to
+   * `post.tokenId`, which is the id LivePostChat documents as the only one
+   * every caller can produce.
+   */
+  const liveRoomTokenId = String((post as any)?.tokenId ?? id ?? '');
+  // toLiveStream builds fresh playbackUrls arrays; called inline in render it
+  // handed LiveStreamCard new array identities on every page re-render, and
+  // the playback effect (keyed on urlsToTry) tore down and re-created the
+  // player each time — a guaranteed visible restart when showRelated flips
+  // ~1s after paint. Memoize on the post object instead.
+  const liveData = useMemo(
+    () => (post && getContentType(post) === 'live' ? toLiveStream(post) : null),
+    [post]
+  );
+  const isAudioPost = post ? ((post as any).postType === 'audio' || (post as any).postType === 'feed-audio') : false;
+  const isVideoPost = contentType === 'video' && !isAudioPost;
+  const isImagePost = contentType === 'image';
+  const isTextPost = contentType === 'post' || contentType === null;
+  // A text post opens on its author's post background, the look its profile tile has.
+  const textBg = useAuthorPostBg(post && isTextPost ? (post as { minter?: string | null; postBg?: unknown }) : null);
+
+  // Opened from a shared link on a phone: a video plays in the Shorts viewer
+  // on top of this page, the same player a feed tap opens. Back or closing it
+  // shows this page; Back again goes to Home (lib/shared-video-landing).
+  const { shortsEnabled } = useShortsEnabled();
+  const brainrotSession = useBrainrotSession();
+  const sharedViewer = useRef<{ seen: boolean; release: () => void } | null>(null);
+  useEffect(() => {
+    if (!post || inOverlay || detailsOnly || sharedViewer.current) return;
+    if (!takeSharedVideoLanding()) {
+      onSharedHold?.(false);
+      return;
+    }
+    const video = isVideoPost ? toVideoItem(post) : null;
+    const phone = window.matchMedia('(max-width: 767px)').matches;
+    const playable = !!video && phone && shortsEnabled && !!video.videoUrl && !video.spoilerText
+      && post.status !== 'pending' && isBrainrotPlayable(post as Parameters<typeof isBrainrotPlayable>[0]);
+    if (!video || !playable) {
+      onSharedHold?.(false);
+      return;
+    }
+    openBrainrotFeed(video.id, videoItemToShort(video));
+    const viewer = { seen: false, release: () => {} };
+    viewer.release = holdBackForViewer(closeBrainrotFeed, () => !!sharedViewer.current);
+    sharedViewer.current = viewer;
+  }, [post, inOverlay, detailsOnly, isVideoPost, shortsEnabled, onSharedHold]);
+  useEffect(() => {
+    const viewer = sharedViewer.current;
+    if (!viewer) return;
+    if (brainrotSession) {
+      viewer.seen = true;
+      return;
+    }
+    if (!viewer.seen) return;
+    sharedViewer.current = null;
+    viewer.release();
+    onSharedHold?.(false);
+  }, [brainrotSession, onSharedHold]);
+
+  // Deep link to a thread entry or comment: put it in view once it has
+  // rendered, with no glow or wash, and hold it there while the post loads. The element
+  // can lag the page by a fetch (the thread mounts with post data), so poll
+  // briefly rather than giving up after one paint.
+  useEffect(() => {
+    if (!post || !focusCommentId) return;
+    let cancelled = false;
+    const tryScroll = (attempt: number) => {
+      if (cancelled) return;
+      const el = document.querySelector(`[data-comment-id="${CSS.escape(focusCommentId)}"]`);
+      if (el) {
+        bringIntoView(el);
+        return;
+      }
+      // The comments list mounts after the post and fetches on its own, so
+      // give it up to six seconds on a slow connection rather than three.
+      if (attempt < 24) window.setTimeout(() => tryScroll(attempt + 1), 250);
+    };
+    const start = window.setTimeout(() => tryScroll(0), 150);
+    const stop = window.setTimeout(() => setHighlightCommentId(undefined), 4500);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(start);
+      window.clearTimeout(stop);
+    };
+  }, [post, focusCommentId]);
+
+  // Swallow the post content at the sticky nav pill's top edge under the glass
+  // themes, exactly like the home feed. Only for the standalone route: in
+  // overlay mode the scroll surface is AppLayout's fixed layer, which runs its
+  // own clip. No-op on opaque-nav themes and when no pill is visible.
+  useFeedSwallowClip(postRootRef, '[data-feed-nav]', [inOverlay, isMobileView, contentType]);
+
+  /**
+   * Drop the app's own mobile chrome for a post that owns the screen.
+   *
+   * The fixed mobile header is `z-[60]` and the feed nav pill is `z-50`;
+   * a full-bleed viewer sits at `z-[55]` between them. Without this the
+   * header draws straight through the viewer's own header row — creator
+   * capsule, follow, close and all — and the nav pill cuts the chat
+   * composer in half at the bottom. This class is what the immersive
+   * video post has always used to clear both, plus the `main` padding
+   * they reserve; a full-bleed live post needs exactly the same thing and
+   * shipped without asking for it.
+   */
+  const isFullBleedLive = contentType === 'live' && isMobileView;
+  // An image post opens the same way a video post does on phone and tablet:
+  // picture first, full width, the app's top chrome out of the way.
+  // Phones: every post page looks like the post on the feed: logo bar and pill
+  // with Back on top, the same bento card at the same spot, no floating back
+  // square or options square. Video too: its player sits in the bento like a
+  // feed card instead of running edge to edge under a floating back button.
+  const feedLookPhone = isStagePhone && !inOverlay && !detailsOnly && !!post &&
+    post.status !== 'pending' && (isTextPost || isImagePost || isAudioPost || isVideoPost);
+  useLayoutEffect(() => {
+    if (!feedLookPhone) return;
+    setPostFeedLook(true);
+    return () => setPostFeedLook(false);
+  }, [feedLookPhone]);
+  const isImmersiveImage = !detailsOnly && isImagePost && isMobileView && !feedLookPhone;
+  const swallowLayers = !inOverlay && contentType !== 'live' && (feedLookPhone || !isMobileView);
+  useEffect(() => {
+    const mark = isFullBleedLive ? 'data-immersive-live-mode' : ((isVideoPost && !feedLookPhone) || isImmersiveImage) ? 'data-immersive-video-mode' : null;
+    if (mark) markBody(mark, true);
+    return () => {
+      markBody('data-immersive-video-mode', false);
+      markBody('data-immersive-live-mode', false);
+    };
+  }, [isFullBleedLive, isVideoPost, isImmersiveImage, feedLookPhone]);
+
+  // On phones/tablets the loaded video owns Back; the nav pill keeps its tabs
+  // and feed settings. Desktop keeps the nav pill's back like every other post.
+  const hasMediaBack = isMobileView && isVideoPost && !isAudioPost && !!post && post.status !== 'pending' && !feedLookPhone;
+  useEffect(() => {
+    if (hasMediaBack) markBody('data-post-media-back', true);
+    return () => markBody('data-post-media-back', false);
+  }, [hasMediaBack]);
+
+
+  // (The `body { pointer-events: none }` guard that used to live here is gone
+  // with the sheet: vaul set it even at modal={false}, which blocked taps on the
+  // fixed mobile header, and undoing it needed a MutationObserver on the body
+  // for as long as the post was open. The post is a plain page now, so there is
+  // nothing to fight.)
+
+  // Clearance for the chrome floating above the post, and for the mobile bottom
+  // nav floating below it. In overlay mode the layer spans the whole viewport, so
+  // the post has to clear the mobile header (h-11) plus the home feed's nav pill
+  // — 5.5rem, the same resting offset the old bottom sheet had — and on desktop
+  // just the pill. On the standalone route that chrome is in normal flow above
+  // the content and needs none. Padding rather than an outer offset, so the post
+  // scrolls up *under* the pill and gets swallowed at its edge like the feed.
+  // A phone post page drawn like the feed sits where the feed's first card
+  // sits: 8px higher than the 12px this page used to leave under the pill.
+  const chromeClearance = inOverlay
+    ? 'pt-[5.5rem] pb-24 lg:pt-14 lg:pb-8'
+    : feedLookPhone ? 'pt-1 pb-8 lg:pt-0' : 'pt-3 pb-8 lg:pt-0';
+
+  // A video post hides that chrome on mobile instead of clearing it, so the media
+  // starts at the very top of the screen and runs the full width — the shape the
+  // immersive layout was always drawing, minus the 88px of nothing above it.
+  // Desktop keeps its clearance: the chrome it clears is still on screen.
+  const videoChromeClearance = inOverlay
+    ? 'pb-24 lg:pt-14 lg:pb-8'
+    : 'pb-8 lg:pt-0';
+
+  // Determine content type and render appropriate card
+  // Phones: every post page's comment button opens the comments sheet, not
+  // just posts opened from the feed. A post opened from a link, a
+  // notification or after a refresh used to toggle the inline list (nothing
+  // visible on a post with no comments) or, on video posts, flash the docked
+  // "Type here" bar. Live keeps its chat.
+  const splitComments = splitPhone && contentType !== 'live';
+  const openPageComments = useCallback((tab?: 'replies' | 'quotes' | 'reposts' | 'search') => {
+    if (!splitComments) {
+      handleOpenPageComments(tab);
+      return;
+    }
+    setPageCommentsInitialTab(tab ?? 'replies');
+    setShowPageComments(true);
+    setCommentsSplit(true);
+  }, [splitComments, handleOpenPageComments]);
+
+  const renderContent = () => {
+    // Only show loading if we have no data at all (not even cached)
+    if (isLoading && !hasCachedData) return <LoadingState />;
+    // Only treat it as "not found" when we genuinely have NO post to show.
+    // We must NOT gate on `error` here: React Query retains the last good
+    // `data` across a *failed background refetch* while still exposing `error`.
+    // A seeded/loaded post that later hits a transient refetch failure (network
+    // blip, request aborted on quick nav, cert/5xx hiccup) would otherwise flip
+    // to "Post Not Found" even though we still hold valid data — the classic
+    // "not found on back-nav, fine after refresh" bug. If `post` exists, render it.
+    if (!post) return <NotFoundState />;
+
+    // Handle processing posts. 'signed' is NOT transient: it is the for-life
+    // status of a post published with mint opt-out, and those must render.
+    if (post.status === 'pending') {
+      return <ProcessingState />;
+    }
+
+    switch (contentType) {
+      case 'video':
+        return <VideoCard video={toVideoItem(post)} postPage onBack={isAudioPost || !isMobileView || feedLookPhone ? undefined : goBack} isImmersive={!isAudioPost && !feedLookPhone} onOpenComments={openPageComments} />;
+      case 'image':
+        return <ImageCard post={toImagePost(post)} aboveFold postPage isImmersive={isImmersiveImage} onOpenComments={openPageComments} />;
+      case 'live': {
+        if (!liveData) return <NotFoundState />;
+        return (
+          <LivePostWithStatus
+            liveData={liveData}
+            post={post}
+            /* Phone and tablet get the full-bleed viewer — picture edge to
+               edge with the chrome floating on it, the same layout the app
+               draws. Desktop keeps the card. */
+            immersive={isMobileView}
+            chatSlot={
+              id ? (
+                <Suspense fallback={null}>
+                  {/* streamId is the ObjectId the live routes take; it resolves
+                      the audience figure in the chat header, which without it
+                      used to fall back to the platform-wide chat online count. */}
+                  <LivePostChat
+                    tokenId={liveRoomTokenId}
+                    streamId={(post as any)?.stream?._id || (post as any)?.stream?.streamId || undefined}
+                    isOffline={!('isLive' in post ? (post as any).isLive : true)}
+                    isHost={!!(walletAddress && post.minter?.toLowerCase() === walletAddress.toLowerCase())}
+                    /* Over the video, not in a slab: no panel, no header of
+                       its own, messages riding the shade at the foot of the
+                       frame. The broadcaster's phone layout has drawn it this
+                       way since the chat moved onto the picture. */
+                    overlay={isMobileView}
+                  />
+                </Suspense>
+              ) : undefined
+            }
+          />
+        );
+      }
+      default: {
+        const card = (
+          <PostCard
+            post={toTextPost(post)}
+            postPage
+            onOpenComments={openPageComments}
+            threadSlot={
+              id ? <AuthorThread tokenId={String(id)} authorAddress={post.minter} highlightId={highlightCommentId} /> : undefined
+            }
+          />
+        );
+        // The author's post background, as on their profile tile.
+        if (!textBg.bg) return card;
+        return (
+          <ProfilePostBgArtContext.Provider value={textBg.art}>
+            <div data-opened-post-bg className="rounded-2xl p-3" {...postBgHostProps(textBg.bg, id)}>
+              <PostBgLayer bg={textBg.bg} seed={id} />
+              {card}
+            </div>
+          </ProfilePostBgArtContext.Provider>
+        );
+      }
+    }
+  };
+
+  /*
+   * Phone "Stage". Comments are always open there, the bar's comments tile
+   * scrolls to them and puts the cursor in the docked composer, and the repost
+   * sheet's "View quotes / View reposts" rows switch the same section to the
+   * existing quotes and reposters lists.
+   */
+  const useStage = isStagePhone && !!post && post.status !== 'pending' && contentType !== 'live' && !feedLookPhone;
+
+  const revealStageComments = useCallback((focusComposer: boolean) => {
+    // The composer is put away until asked for. Raised inside the tap so the
+    // focus it takes still opens the keyboard.
+    if (focusComposer) window.dispatchEvent(new Event(POST_STAGE_COMPOSE_EVENT));
+    // After the section has re-rendered with its new tab.
+    requestAnimationFrame(() => {
+      document.querySelector('[data-stage-comments]')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }, []);
+  const stageValue = useMemo<PostStageValue>(() => ({
+    onBack: goBack,
+    registerOptions: registerPostOptions,
+    openOptions: postOptions ?? undefined,
+    openComments: () => {
+      if (splitComments) return openPageComments('replies');
+      setShowPageComments(true);
+      setPageCommentsInitialTab('replies');
+      revealStageComments(true);
+    },
+    openQuotes: () => {
+      if (splitComments) return openPageComments('quotes');
+      setShowPageComments(true);
+      setPageCommentsInitialTab('quotes');
+      revealStageComments(false);
+    },
+    openReposts: () => {
+      if (splitComments) return openPageComments('reposts');
+      setShowPageComments(true);
+      setPageCommentsInitialTab('reposts');
+      revealStageComments(false);
+    },
+    quoteCount: Number(post?.quotes ?? 0) || 0,
+    repostCount: Number(post?.totalReposts || post?.reposts || 0) || 0,
+  }), [goBack, registerPostOptions, postOptions, revealStageComments, splitComments, openPageComments, post?.quotes, post?.totalReposts, post?.reposts]);
+
+  // The post goes up on its own first. The comments (list, composer, emoji and
+  // GIF pickers) were built in the same commit and roughly doubled the time to
+  // the first frame with the post in it; they now follow two frames later.
+  const [commentsReady, setCommentsReady] = useState(false);
+  useEffect(() => {
+    if (!post || commentsReady) return;
+    let second = 0;
+    const first = requestAnimationFrame(() => { second = requestAnimationFrame(() => setCommentsReady(true)); });
+    return () => { cancelAnimationFrame(first); cancelAnimationFrame(second); };
+  }, [post, commentsReady]);
+
+  const pageComments = post && id && commentsReady ? (
+    <CommentsWrapper
+      open={showPageComments}
+      onOpenChange={setShowPageComments}
+      tokenId={String(id)}
+      initialTab={pageCommentsInitialTab}
+      commentsDisabled={!!(post as { commentsDisabled?: boolean }).commentsDisabled}
+      replyPolicy={(post as { replyPolicy?: import('@/lib/api/dehub/types').ReplyPolicy }).replyPolicy}
+      forKids={!!(post as { forKids?: boolean }).forKids}
+      postAuthorAddress={isTextPost ? post.minter : undefined}
+      forceInline
+      knownCount={Number((post as { commentCount?: number; comment_count?: number }).commentCount ?? (post as { comment_count?: number }).comment_count) || 0}
+    />
+  ) : null;
+  const commentsSplitSheet = (
+    <AnimatePresence>
+      {commentsSplit && pageComments && (
+        <PostCommentsSplit key="comments-split" onClose={closeCommentsSplitSheet}>{pageComments}</PostCommentsSplit>
+      )}
+    </AnimatePresence>
+  );
+  useLayoutEffect(() => {
+    if (!detailsOnly || !detailsExpanded || !post || !scrollToRetainedComments.current) return;
+    scrollToRetainedComments.current = false;
+    retainedCommentsRef.current?.scrollIntoView({ block: 'start', behavior: 'smooth' });
+  }, [detailsOnly, detailsExpanded, post, pageCommentsInitialTab]);
+
+  const postAge = (timestamp?: string) => formatPostAge(parsePostTimestamp(timestamp), i18n.language, t);
+  const renderStage = () => {
+    if (!post || !id) return null;
+    const isText = isTextPost;
+    let kind: 'video' | 'audio' | 'image' | 'text' = 'text';
+    let title = post.title || post.name || '';
+    let subtitle = '';
+    let thumbnail: string | undefined;
+    if (contentType === 'video') {
+      const v = toVideoItem(post);
+      kind = isAudioPost ? 'audio' : 'video';
+      subtitle = [v.channel, postAge(v.createdAt)].filter(Boolean).join(' · ');
+      thumbnail = v.thumbnail;
+    } else if (contentType === 'image') {
+      const ip = toImagePost(post);
+      kind = 'image';
+      title = ip.title || ip.description || '';
+      subtitle = [ip.username, postAge(ip.createdAt)].filter(Boolean).join(' · ');
+      thumbnail = ip.imageUrls?.[0] || ip.image;
+    } else {
+      const tp = toTextPost(post);
+      title = tp.title || tp.content.split('\n')[0] || '';
+      subtitle = [tp.author.name, postAge(tp.createdAt)].filter(Boolean).join(' · ');
+      thumbnail = tp.author.avatarSeed;
+    }
+    const commentCount = Number(post.commentCount ?? post.comment_count ?? 0) || 0;
+    return (
+      <div data-glass-page ref={inOverlay ? undefined : postRootRef} className="flex flex-col">
+        <PostStagePhone
+          value={stageValue}
+          kind={kind}
+          title={title}
+          subtitle={subtitle}
+          thumbnail={thumbnail}
+          padded={isText}
+          related={showRelated ? <StageRelated kind={kind} postId={id} /> : null}
+          comments={commentsSplit ? null : (
+            <CommentsWrapper
+              open
+              onOpenChange={() => {}}
+              tokenId={String(id)}
+              initialTab={pageCommentsInitialTab}
+              commentsDisabled={!!(post as { commentsDisabled?: boolean }).commentsDisabled}
+              replyPolicy={(post as { replyPolicy?: import('@/lib/api/dehub/types').ReplyPolicy }).replyPolicy}
+              forKids={!!(post as { forKids?: boolean }).forKids}
+              postAuthorAddress={isText ? post.minter : undefined}
+              forceInline
+              stage
+              stageCount={commentCount}
+              onStageTabChange={setPageCommentsInitialTab}
+            />
+          )}
+        >
+          {renderContent()}
+          {contentType === 'image' && parseInt(id, 10) > 0 && <div className="px-3"><PollCard tokenId={parseInt(id, 10)} /></div>}
+          {contentType === 'image' && parseInt(id, 10) > 0 && <div className="px-3"><LazyQuizCard tokenId={parseInt(id, 10)} /></div>}
+        </PostStagePhone>
+        {commentsSplitSheet}
+      </div>
+    );
+  };
+
+  // Immersive layout for videos - uses fixed positioning to overlay the header area on mobile/tablet
+  // Desktop gets standard layout with PageHeader
+  // Both include the related videos feed below the main content
+  if (isVideoPost && post && !feedLookPhone) {
+    const videoData = toVideoItem(post);
+    // This branch returns before the shared SEOHead below — without its own,
+    // shared video links get the generic app title and no OG tags.
+    const videoSeoTitle = post.title || post.name || _copy("copy.d534be829e32", { defaultValue: "Video" });
+    const videoSeoDesc = post.description || _copy("copy.6d9f96048ba4", { defaultValue: "Watch this video on Riftn" });
+
+    return (
+      <>
+        <SEOHead
+          title={videoSeoTitle}
+          description={videoSeoDesc.slice(0, 155)}
+          url={postSeoUrl(id, (post as any)?.articleSlug)}
+          type="article"
+          aiScraping={getAiScrapingPreference((post as any).minterUser?.customs)}
+          jsonLd={{
+            '@context': 'https://schema.org',
+            '@type': 'VideoObject',
+            name: videoSeoTitle,
+            description: videoSeoDesc,
+            url: postSeoUrl(id, (post as any)?.articleSlug),
+            ...(videoData.thumbnail && { thumbnailUrl: videoData.thumbnail }),
+            ...(post.createdAt && { uploadDate: post.createdAt }),
+            publisher: { '@type': 'Organization', name: 'Riftn', url: 'https://riftn.com' },
+            usageInfo: getAiScrapingPreference((post as any).minterUser?.customs) === 'allow' ? 'ai-training-allowed' : 'ai-training-prohibited',
+          }}
+        />
+        {/* Mobile/tablet: a plain page, immersive media first, back button in the
+            top nav pill. This used to be a vaul bottom sheet, which brought a
+            portal, a transform animation, a body pointer-events fight and a
+            second scroll container that everything else had to be re-wired to. */}
+        {useStage ? renderStage() : isMobileView ? (
+          <div data-post-page data-glass-page ref={inOverlay ? undefined : postRootRef} className={cn('flex flex-col bg-black', videoChromeClearance)}>
+            <div className="relative">
+              {renderContent()}
+            </div>
+            <div className="px-2 sm:px-3">{pageComments}</div>
+            {showRelated && id && <NoFocusComment><RelatedVideosFeed currentVideoId={id} /></NoFocusComment>}
+          </div>
+        ) : (
+          /* Desktop: flush layout — top nav bar handles chrome, no floating back-button bento */
+          <div data-post-page ref={inOverlay ? undefined : postRootRef} className="flex flex-col">
+            <div className={cn('px-2 sm:px-3', chromeClearance)}>
+              <div className="w-full">
+                {/* One bento around the whole post — creator row included — with
+                    the exact className HomeFeed wraps every feed card in, so the
+                    canvas themes' shared [data-feed-item] glass frosts it
+                    identically on both surfaces. The creator row used to sit
+                    above this div, which left the card starting mid-post at the
+                    video's top edge. */}
+                <div data-feed-item className="rounded-2xl border border-white/[0.12] bg-white/[0.03] p-3">
+                  <DesktopCreatorInfo
+                    channel={videoData.channel}
+                    channelAvatar={videoData.channelAvatar}
+                    creatorUsername={videoData.creatorUsername}
+                    creatorId={videoData.creatorId}
+                    verified={videoData.verified}
+                    badgeBalance={videoData.creatorBadgeBalance}
+                  />
+                  {/* The video card draws its own poll. */}
+                  {renderContent()}
+                  {pageComments}
+                </div>
+                {/* Related Videos Feed */}
+                {showRelated && id && <NoFocusComment><RelatedVideosFeed currentVideoId={id} /></NoFocusComment>}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Desktop AI Chat */}
+        <PostAIChatLazy
+          isOpen={showDesktopAIChat}
+          onClose={() => setShowDesktopAIChat(false)}
+          postContext={{
+            type: 'video',
+            author: videoData.channel,
+            title: videoData.title,
+            imageUrl: videoData.thumbnail,
+            videoUrl: videoData.videoUrl,
+          }}
+        />
+
+        {/* Desktop Report Modal */}
+        <ReportModal
+          open={showDesktopReportModal}
+          onOpenChange={setShowDesktopReportModal}
+          tokenId={id || ''}
+          contentType="video"
+        />
+
+        {/* Desktop Options Drawer */}
+        <Drawer open={showDesktopOptionsDrawer} onOpenChange={setShowDesktopOptionsDrawer}>
+          <DrawerContent scrollable column glass className="px-4 pb-6">
+            <DrawerHeader className="pb-2">
+              <DrawerTitle className="text-white text-lg">{t('postOptions.options')}</DrawerTitle>
+            </DrawerHeader>
+            <div className="flex flex-col gap-1">
+              {/* Bookmark / pin / post info — the same three rows the feed
+                  card's menu carries, which this page's menu was missing. */}
+              <PostUtilityMenuItems
+                onActionBar
+                postId={id}
+                tokenId={id ? parseInt(id, 10) || undefined : undefined}
+                isOwnPost={!!(walletAddress && videoData.creatorId?.toLowerCase() === walletAddress.toLowerCase())}
+                canShareToMoment={!!videoData.videoUrl && !videoData.isAudio && canShareToMoment(videoData)}
+                onBeforeNavigate={() => setShowDesktopOptionsDrawer(false)}
+                linkText={videoData.description}
+                onClose={() => setShowDesktopOptionsDrawer(false)}
+              />
+              {!(walletAddress && videoData.creatorId?.toLowerCase() === walletAddress.toLowerCase()) && (
+                <button
+                  onClick={() => { setShowDesktopOptionsDrawer(false); setShowTipModal(true); }}
+                  className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left"
+                >
+                  <Gem className="w-5 h-5" /> {t('postOptions.sendTip')}
+                </button>
+              )}
+              {/* Queue / Watch List removed until implemented — they rendered
+                  as clickable options that silently did nothing. */}
+              <button
+                onClick={() => {
+                  setShowDesktopOptionsDrawer(false);
+                  setShowDesktopReportModal(true);
+                }}
+                className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left"
+              >
+                <Flag className="w-5 h-5" /> {t('postOptions.report')}
+              </button>
+              {/* Download removed until implemented — dead button. */}
+              <button 
+                onClick={() => {
+                  const url = viewerShareUrl(`${window.location.origin}/app/post/${(post as any)?.articleSlug || id}`);
+                  trackShare('copy_link', { kind: 'post' });
+                  navigator.clipboard.writeText(url)
+                    .then(() => toast.success(t('postOptions.linkCopied')))
+                    .catch(() => toast.error(t('postOptions.copyFailed', 'Could not copy link')));
+                  setShowDesktopOptionsDrawer(false);
+                }}
+                className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left"
+              >
+                <Link2 className="w-5 h-5" /> {t('postOptions.copyLink')}
+              </button>
+              {id && /^\d+$/.test(id) && (!(post as any)?.visibility || (post as any).visibility === 'public') && (
+                <button
+                  onClick={() => { copyPostEmbedCode(id, t); setShowDesktopOptionsDrawer(false); }}
+                  className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left"
+                >
+                  <Code className="w-5 h-5" /> {t('postOptions.copyEmbedCode')}
+                </button>
+              )}
+              {/* Block Creator removed until implemented — dead button. */}
+              {walletAddress && videoData.creatorId?.toLowerCase() === walletAddress.toLowerCase() && (
+                <>
+                  <div className="border-t border-white/10 my-1" />
+                  <button
+                    onClick={() => { setShowDesktopOptionsDrawer(false); setShowEditModal(true); }}
+                    className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left"
+                  >
+                    <Pencil className="w-5 h-5" /> {t('postOptions.editPost')}
+                  </button>
+                  <button
+                    onClick={() => { setShowDesktopOptionsDrawer(false); setShowDeleteModal(true); }}
+                    className="flex items-center gap-3 px-4 py-3 text-red-400 hover:bg-white/10 rounded-xl transition-colors text-left"
+                  >
+                    <Trash2 className="w-5 h-5" /> {t('postOptions.deletePost')}
+                  </button>
+                </>
+              )}
+            </div>
+          </DrawerContent>
+        </Drawer>
+
+        {/* Edit Post Modal */}
+        <EditPostModal
+          open={showEditModal}
+          onOpenChange={setShowEditModal}
+          tokenId={id || ''}
+          canReplaceVideo={!videoData.isAudio}
+          currentTitle={videoData.title}
+          currentDescription={videoData.description}
+          currentContentRating={videoData.contentRating}
+          currentSpoilerText={videoData.spoilerText}
+          currentQuotePolicy={videoData.quotePolicy}
+          currentReplyPolicy={videoData.replyPolicy}
+          currentVisibility={(videoData as any).justMe ? 'self' : (videoData as any).visibility}
+          currentShopLinks={videoData.shopLinks}
+          onSuccess={(edited) => {
+            applyOptimisticEdit(queryClient, id || '', edited);
+          }}
+        />
+
+        {/* Delete Post Modal */}
+        <DeletePostModal
+          open={showDeleteModal}
+          onOpenChange={setShowDeleteModal}
+          tokenId={id || ''}
+          onSuccess={() => navigate('/app')}
+        />
+
+        {/* Tip Modal */}
+        <TipModal
+          open={showTipModal}
+          onOpenChange={setShowTipModal}
+          creatorAddress={videoData.creatorId}
+          creatorName={videoData.channel}
+          context={id || undefined}
+        />
+      </>
+    );
+  }
+
+  // Build SEO title/description from post data
+  const seoTitle = post?.title || post?.name || _copy("copy.a5554622c655", { defaultValue: "Post" });
+  const seoDesc = post?.description || _copy("copy.4fa459932407", { defaultValue: "View this post on Riftn" });
+
+  // Standard layout for other content types
+  const isLivePost = contentType === 'live';
+
+  const renderPostContent = () => (
+    detailsOnly && isStagePhone && (isTextPost || isImagePost) ? (
+      /* Phone text and image posts opened from the feed: no "more" toggle and
+         no composer. The ad and then more posts follow the post straight away;
+         comments (with their composer) appear only when the comment button asks. */
+      <section data-retained-post-details className="pt-3">
+        {detailsExpanded && !commentsSplit && <div ref={retainedCommentsRef}>{pageComments}</div>}
+        {/* Hidden, not unmounted, while the sheet is up: the top half shows the post alone. */}
+        <div hidden={commentsSplit}>
+          {showRelated && isImagePost && id && <NoFocusComment><RelatedImagesFeed currentPostId={id} /></NoFocusComment>}
+          {showRelated && isTextPost && id && <NoFocusComment><RelatedPostsFeed currentPostId={id} /></NoFocusComment>}
+        </div>
+        {commentsSplitSheet}
+      </section>
+    ) : detailsOnly && isMobileView ? (
+      <section data-retained-post-details className="pt-3">
+        <button type="button" data-retained-details-toggle aria-expanded={detailsExpanded}
+          aria-label={_copy('common.more', { defaultValue: 'More' })}
+          onClick={() => setDetailsExpanded(value => !value)}
+          className="mx-auto flex h-10 w-10 items-center justify-center rounded-xl text-white hover:bg-white/10">
+          <More className="h-5 w-5" />
+        </button>
+        {detailsExpanded && <div ref={retainedCommentsRef} hidden={commentsSplit}>
+          {!commentsSplit && pageComments}
+          {showRelated && isImagePost && id && <NoFocusComment><RelatedImagesFeed currentPostId={id} /></NoFocusComment>}
+          {showRelated && isTextPost && id && <NoFocusComment><RelatedPostsFeed currentPostId={id} /></NoFocusComment>}
+        </div>}
+        {commentsSplitSheet}
+      </section>
+    ) : detailsOnly ? (
+      /* Desktop posts opened from the feed: the same as the feed.
+         The card above keeps its own comment button and opens comments inside
+         its bento; under it, the ad and then more posts, loading as you scroll. */
+      <section data-retained-post-details className="pt-3">
+        {showRelated && isImagePost && id && <NoFocusComment><RelatedImagesFeed currentPostId={id} /></NoFocusComment>}
+        {showRelated && isTextPost && id && <NoFocusComment><RelatedPostsFeed currentPostId={id} /></NoFocusComment>}
+      </section>
+    ) : useStage ? (
+      renderStage()
+    ) : isImmersiveImage ? (
+      /* Same shape as the phone video post: media at the very top, edge to
+         edge, its own back button on it, comments and related under it. */
+      <div className={cn('flex flex-col', videoChromeClearance)}>
+        <div className="relative">
+          <ImmersiveVideoHeader onBack={goBack} />
+          {renderContent()}
+          {post && id && parseInt(id, 10) > 0 && <div className="px-3"><PollCard tokenId={parseInt(id, 10)} /></div>}
+          {post && id && parseInt(id, 10) > 0 && <div className="px-3"><LazyQuizCard tokenId={parseInt(id, 10)} /></div>}
+        </div>
+        <div className="px-2 sm:px-3">{pageComments}</div>
+        {showRelated && id && <div className="px-2 sm:px-3"><NoFocusComment><RelatedImagesFeed currentPostId={id} /></NoFocusComment></div>}
+      </div>
+    ) : isLivePost && isMobileView ? (
+      /* The viewer is `fixed inset-0` and owns the screen: wrapping it in
+         the post bento would draw a card border around nothing, and the
+         poll and shop rails below would sit under a layer they cannot be
+         scrolled to. Everything the stream needs is on the picture. */
+      renderContent()
+    ) : (
+    <>
+      {/* Header removed — top nav bar provides chrome; no floating back-button bento on any breakpoint */}
+      <div className={cn('px-2 sm:px-3', chromeClearance)}>
+        <div className="w-full">
+          {/* The post's bento — deliberately the same markup HomeFeed wraps every
+              feed card in, className and all, so the canvas themes' shared
+              [data-feed-item] glass paints it identically on both surfaces.
+              It wraps the post and its poll and nothing else: the related feeds
+              and the live chat below are siblings, not children, so this is one
+              card's bento and not a full-height slab down the column. */}
+          {/* Phone and tablet draw no bento: the post lies flat on the page,
+              full width, the same as the immersive video and image posts and
+              the flat comments under it. No [data-feed-item] either, or the
+              canvas themes' glass would paint the box straight back. */}
+          <div
+            data-feed-item={isMobileView && !feedLookPhone ? undefined : true}
+            data-post-flat={(isMobileView && !feedLookPhone) || undefined}
+            className={isMobileView && !feedLookPhone ? 'px-1 sm:px-0 pt-1' : 'rounded-2xl border border-white/[0.12] bg-white/[0.03] p-3'}
+          >
+            {renderContent()}
+            {/* A video card draws its own poll; a photo card leaves it to the page. */}
+            {!isTextPost && contentType !== 'video' && id && parseInt(id, 10) > 0 && <PollCard tokenId={parseInt(id, 10)} />}
+          {!isTextPost && contentType !== 'video' && id && parseInt(id, 10) > 0 && <LazyQuizCard tokenId={parseInt(id, 10)} />}
+            {/* Desktop: comments open inside the post's bento, attached to it like on the feed. */}
+            {!isMobileView && !isLivePost && !commentsSplit && pageComments}
+          </div>
+          {/* A live post has one conversation: the chat, open under the player.
+              It used to have comments as well, so what people said during the
+              broadcast and what they said "about the post" were two lists that
+              never met. Old comments were folded into the chat room. */}
+          {isMobileView && !isLivePost && !commentsSplit && pageComments}
+          {!isLivePost && commentsSplitSheet}
+          {/* Shop rail sits between the player and the chat: close enough to the
+              stream to read as part of it, above the chat so a busy room does
+              not push it off screen. The host sees the manager instead — they
+              are not a customer of their own broadcast. */}
+          {isLivePost && id && post && (
+            walletAddress && post.minter?.toLowerCase() === walletAddress.toLowerCase()
+              ? <Suspense fallback={null}><StreamShopManager tokenId={liveRoomTokenId} /></Suspense>
+              : <Suspense fallback={null}><StreamShopRail tokenId={liveRoomTokenId} /></Suspense>
+          )}
+          {/* The chat is no longer a panel down here. It hangs off the message
+              button in the stream's own action bar (see `chatSlot` above), so a
+              broadcast has one conversation in one place instead of a chat
+              slab under the player that read as the platform's. */}
+          {showRelated && isImagePost && id && <NoFocusComment><RelatedImagesFeed currentPostId={id} /></NoFocusComment>}
+          {showRelated && (isAudioPost || isVideoPost) && id && <NoFocusComment><RelatedVideosFeed currentVideoId={id} /></NoFocusComment>}
+          {showRelated && !isImagePost && !isVideoPost && !isAudioPost && !isLivePost && id && <NoFocusComment><RelatedPostsFeed currentPostId={id} /></NoFocusComment>}
+        </div>
+      </div>
+    </>
+    )
+  );
+
+  return (
+    <>
+      <SEOHead
+        title={seoTitle}
+        description={seoDesc}
+        image={post?.socialImageUrl ? buildFeedImageUrls([post.socialImageUrl])?.[0] : post?.articleImageUrl ? buildFeedImageUrls([post.articleImageUrl])?.[0] : undefined}
+        url={postSeoUrl(id, (post as any)?.articleSlug)}
+        type="article"
+        aiScraping={getAiScrapingPreference((post as any)?.minterUser?.customs)}
+        jsonLd={{
+          '@context': 'https://schema.org',
+          '@type': 'Article',
+          headline: seoTitle,
+          description: seoDesc,
+          url: postSeoUrl(id, (post as any)?.articleSlug),
+          ...(post?.minterDisplayName && { author: { '@type': 'Person', name: post.minterDisplayName } }),
+          ...(post?.createdAt && { datePublished: post.createdAt }),
+          publisher: { '@type': 'Organization', name: 'Riftn', url: 'https://riftn.com' },
+          usageInfo: getAiScrapingPreference((post as any)?.minterUser?.customs) === 'allow' ? 'ai-training-allowed' : 'ai-training-prohibited',
+        }}
+      />
+      {/* One layout for every breakpoint. `chromeClearance` is padding INSIDE the
+          scrolling content (not an outer margin) so the post scrolls up UNDER the
+          sticky nav pill and is swallowed at its rounded top edge on the glass
+          themes, exactly like the home feed. */}
+      <CoAuthorInviteBanner tokenId={post?.tokenId} creatorName={post?.minterDisplayName || post?.minterUsername} />
+      {useStage && !detailsOnly ? (
+        renderPostContent()
+      ) : (
+      <div
+        ref={inOverlay ? undefined : postRootRef}
+        data-post-page
+        data-glass-page
+        className={cn('flex flex-col', isLivePost && 'bg-black min-h-screen', isImmersiveImage && 'bg-black')}
+      >
+        {/* The bento layouts get the swallow layers, so the cut under the nav
+            pill is a shift instead of clip-path: clip-path stops the post's
+            frosted bento (and the related cards) from blurring the theme
+            canvas, which then showed through sharp. Live and the full-bleed
+            viewers keep the plain root: their fixed layers must not sit
+            inside a shifted box. */}
+        {swallowLayers ? <FeedSwallowMotion className="flex flex-col">{renderPostContent()}</FeedSwallowMotion> : renderPostContent()}
+      </div>
+      )}
+    </>
+  );
+}

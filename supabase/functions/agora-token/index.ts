@@ -1,0 +1,329 @@
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+// Same RTC token format as `scripts/test-agora-credentials.mjs` (official builder, 006 prefix).
+// The previous hand-written "007" token did not match Agora’s wire format → CAN_NOT_GET_GATEWAY_SERVER / invalid vendor key.
+import agora from "agora-access-token";
+import { requireDeHubAuth, serviceClient } from "../_shared/auth.ts";
+
+const { RtcTokenBuilder, RtcRole } = agora as {
+  RtcTokenBuilder: {
+    buildTokenWithUid: (
+      appId: string,
+      certificate: string,
+      channel: string,
+      uid: number,
+      role: number,
+      privilegeExpiredTs: number,
+    ) => string;
+  };
+  RtcRole: { PUBLISHER: number; SUBSCRIBER: number };
+};
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type, x-wallet-address, x-dehub-token, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version, x-request-id, prefer",
+};
+
+/**
+ * Who is allowed to be handed a PUBLISHER token.
+ *
+ * This function is verify_jwt = false and takes only a channel name, which is
+ * what makes guest listening free: a signed-out visitor on an invite link can
+ * mint a subscriber token with the publishable key and nothing else. That part
+ * is deliberate and stays.
+ *
+ * The same openness applied to `role: "publisher"`, which is not deliberate.
+ * `audio_spaces` is world-readable, so `channel_name` is public, and anyone who
+ * read one could mint a broadcaster token and talk in that room. They would
+ * hold no participant row, so nobody could see them in the UI and the host's
+ * "remove speaker" — which updates a row that does not exist — could not evict
+ * them.
+ *
+ * A publisher token now requires a verified Riftn token whose wallet is either
+ * the stage's host or holds an active host/speaker participant row. Every
+ * legitimate path already writes that row BEFORE asking for a token (both
+ * clients: create, start-scheduled and join all insert or upsert first), so
+ * this costs nothing at the call sites.
+ *
+ * ── Rollout ──
+ * The gate shipped in report-only mode in August 2026 so that installed
+ * clients which did not yet send the header kept working. Both apps have sent
+ * it since late August 2026, but report mode kept the hole open for as long
+ * as nobody set the flag: every caller still got a publisher token.
+ *
+ * It now enforces by default. AGORA_PUBLISHER_GATE=report is the off switch —
+ * it logs what it would refuse and issues the token anyway, with no redeploy.
+ */
+function gateMode(): "enforce" | "report" {
+  return Deno.env.get("AGORA_PUBLISHER_GATE") === "report" ? "report" : "enforce";
+}
+
+/**
+ * Is this wallet entitled to publish into this channel?
+ *
+ * Deliberately does NOT gate on the stage being `live`. A host is entitled to
+ * their own room whatever state the row is in, and a channel whose stage is not
+ * live has nobody in it to talk to — so the status check would only add a race
+ * against the client's own "flip to live, then fetch a token" ordering.
+ */
+/**
+ * The Agora uid a wallet must use on a co-stream channel.
+ *
+ * The host's browser maps each remote uid back to a seat to decide who goes
+ * into the picture, so the uid has to be a function of the wallet rather than
+ * whatever the caller asks for. Mirrors costreamUid in
+ * src/lib/live/costream-api.ts.
+ */
+function costreamUid(wallet: string): number {
+  return (parseInt(wallet.slice(2, 10), 16) >>> 1) || 1;
+}
+
+async function mayPublish(channelName: string, wallet: string, uid: number): Promise<boolean> {
+  const { createClient } = await import("https://esm.sh/@supabase/supabase-js@2");
+  const admin = createClient(
+    Deno.env.get("SUPABASE_URL")!,
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+    { auth: { persistSession: false } },
+  );
+
+  /**
+   * A co-stream: guests on screen with a live video host. Channel
+   * `costream-<live_costreams.id>`. The host of an open room and its accepted
+   * guests publish; a removed guest's next token is refused, and the uid is
+   * pinned to the wallet so the host can tell who is who.
+   */
+  const costream = channelName.match(/^costream-([0-9a-fA-F-]{36})$/);
+  if (costream) {
+    if (uid !== costreamUid(wallet)) return false;
+    const { data: room } = await admin
+      .from("live_costreams")
+      .select("id, host_wallet, status")
+      .eq("id", costream[1])
+      .maybeSingle();
+    if (!room || room.status !== "active") return false;
+    if ((room.host_wallet || "").toLowerCase() === wallet) return true;
+    const { data: seat } = await admin
+      .from("live_costream_guests")
+      .select("status")
+      .eq("costream_id", room.id)
+      .eq("wallet", wallet)
+      .maybeSingle();
+    return seat?.status === "accepted";
+  }
+
+  /**
+   * A one-to-one call is not a stage and has no row in `audio_spaces`.
+   *
+   * Its channel is named `dm-call-<call session id>` by the client, so the
+   * stage lookup below finds nothing and the answer would be a flat no — which
+   * means turning the gate on would have 403'd every voice and video call in
+   * direct messages, on a code path whose whole point is to be switched from
+   * report to enforce once the logs go quiet. The logs would have been quiet:
+   * the report branch is only reached for a caller with a verified Riftn
+   * token, and this refusal would have shown up there as one more line to
+   * scroll past rather than as anything obviously fatal.
+   *
+   * Both parties to a call publish — that is what a call is — so entitlement is
+   * simply being one of the two on the session.
+   */
+  const dmCall = channelName.match(/^dm-call-([0-9a-fA-F-]{36})$/);
+  if (dmCall) {
+    const { data: call } = await admin
+      .from("call_sessions")
+      .select("caller_address, recipient_address")
+      .eq("id", dmCall[1])
+      .maybeSingle();
+    if (!call) return false;
+    return (
+      (call.caller_address || "").toLowerCase() === wallet ||
+      (call.recipient_address || "").toLowerCase() === wallet
+    );
+  }
+
+  /**
+   * A group call: the group's own room, `group-call-<community id>`. Any
+   * active member of the group may talk in it; nobody else may.
+   */
+  const groupCall = channelName.match(/^group-call-([0-9a-fA-F-]{36})$/);
+  if (groupCall) {
+    const { data: member } = await admin.rpc("is_active_group_member", {
+      p_group: groupCall[1],
+      p_wallet: wallet,
+    });
+    return member === true;
+  }
+
+  const { data: stage } = await admin
+    .from("audio_spaces")
+    .select("id, host_wallet_address")
+    .eq("channel_name", channelName)
+    .maybeSingle();
+  if (!stage) return false;
+
+  if ((stage.host_wallet_address || "").toLowerCase() === wallet) return true;
+
+  // ilike, not eq: the verified wallet arrives lowercased, but participant
+  // rows written by older mobile builds carry whatever casing the client held
+  // — a checksummed row would make its own speaker fail this check the day
+  // the gate is enforced. ilike without wildcards is exact-match,
+  // case-insensitive, which is the comparison every RLS policy here uses.
+  const { data: seat } = await admin
+    .from("space_participants")
+    .select("role")
+    .eq("space_id", stage.id)
+    .ilike("wallet_address", wallet)
+    .is("left_at", null)
+    .maybeSingle();
+
+  return seat?.role === "host" || seat?.role === "speaker";
+}
+
+serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return new Response("ok", { headers: corsHeaders });
+  }
+
+  try {
+    const AGORA_APP_ID = Deno.env.get("AGORA_APP_ID");
+    const AGORA_APP_CERTIFICATE = Deno.env.get("AGORA_APP_CERTIFICATE");
+
+    if (!AGORA_APP_ID || !AGORA_APP_CERTIFICATE) {
+      console.error("Missing Agora credentials");
+      return new Response(JSON.stringify({ error: "Agora credentials not configured" }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const { channelName, uid, role: requestedRole } = await req.json();
+
+    if (typeof channelName !== "string" || !channelName) {
+      return new Response(JSON.stringify({ error: "channelName is required" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const userUid = uid ?? 0;
+    const wantsPublisher = requestedRole === "publisher";
+    const rtcRole = wantsPublisher ? RtcRole.PUBLISHER : RtcRole.SUBSCRIBER;
+
+    let verified: ReturnType<typeof requireDeHubAuth> | undefined;
+    const verify = () => verified ??= requireDeHubAuth(req);
+
+    if (/^(stage_|radio_)/.test(channelName)) {
+      const db = serviceClient();
+      const { data: stage, error } = await db
+        .from("audio_spaces")
+        .select("id, entry_locked")
+        .eq("channel_name", channelName)
+        .abortSignal(AbortSignal.timeout(5000))
+        .maybeSingle();
+      if (error) throw error;
+
+      if (!stage) {
+        return new Response(JSON.stringify({ error: "Stage not found." }), {
+          status: 404,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      if (stage.entry_locked) {
+        const auth = await verify();
+        if (!auth.ok) return auth.response;
+        const { data: allowed, error: accessError } = await db
+          .rpc("stage_entry_allowed", { p_space_id: stage.id, p_wallet: auth.wallet })
+          .abortSignal(AbortSignal.timeout(5000));
+        if (accessError) throw accessError;
+        if (allowed !== true) {
+          return new Response(JSON.stringify({ error: "The host must approve entry to this stage.", code: "STAGE_ENTRY_REQUIRED" }), {
+            status: 403,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+      }
+    }
+
+    if (wantsPublisher) {
+      const mode = gateMode();
+      let refusal: string | null = null;
+
+      // The whole gate under one deadline. requireDeHubAuth calls
+      // api.dehub.io with no timeout of its own, which would otherwise put an
+      // unbounded upstream on the critical path of every host going live —
+      // in REPORT mode, where the gate is meant to be free. A hung check is
+      // treated as "could not evaluate": logged and waved through in report
+      // mode, refused in enforce mode (fail closed, but fast enough that the
+      // client's error handling actually runs).
+      const GATE_DEADLINE_MS = 5000;
+      try {
+        const gateCheck = (async (): Promise<string | null> => {
+          const auth = await verify();
+          if (!auth.ok) return "no valid Riftn token";
+          if (!(await mayPublish(channelName, auth.wallet, Number(userUid)))) {
+            return `wallet ${auth.wallet} is not a party to this channel`;
+          }
+          return null;
+        })();
+        refusal = await Promise.race([
+          gateCheck,
+          new Promise<never>((_, reject) =>
+            setTimeout(() => reject(new Error("gate check timed out")), GATE_DEADLINE_MS),
+          ),
+        ]);
+      } catch (gateErr) {
+        refusal = `gate check failed: ${gateErr instanceof Error ? gateErr.message : gateErr}`;
+      }
+
+      if (refusal) {
+        if (mode === "enforce") {
+          console.warn(`[agora-token] refused publisher for ${channelName}: ${refusal}`);
+          return new Response(
+            JSON.stringify({ error: "Not entitled to publish to this channel." }),
+            { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+          );
+        }
+        // Report-only (AGORA_PUBLISHER_GATE=report): this is what enforcing
+        // would have blocked.
+        console.warn(
+          `[agora-token] would refuse publisher for ${channelName}: ${refusal} (gate=report)`,
+        );
+      }
+    }
+
+    const expirationTimeInSeconds = 86400;
+    const currentTimestamp = Math.floor(Date.now() / 1000);
+    const privilegeExpiredTs = currentTimestamp + expirationTimeInSeconds;
+
+    console.log(
+      `Generating token for channel: ${channelName}, uid: ${userUid}, role: ${requestedRole}`,
+    );
+
+    const token = RtcTokenBuilder.buildTokenWithUid(
+      AGORA_APP_ID.trim(),
+      AGORA_APP_CERTIFICATE.trim(),
+      channelName,
+      userUid,
+      rtcRole,
+      privilegeExpiredTs,
+    );
+
+    console.log(`Token generated successfully for channel: ${channelName}`);
+
+    return new Response(
+      JSON.stringify({
+        token,
+        appId: AGORA_APP_ID.trim(),
+        channel: channelName,
+        uid: userUid,
+      }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+    );
+  } catch (error) {
+    console.error("Error generating Agora token:", error);
+    return new Response(
+      JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }),
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+    );
+  }
+});

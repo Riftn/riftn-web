@@ -1,0 +1,34 @@
+import { useTranslation as _useCopy } from 'react-i18next';
+/**
+ * TV Page
+ * =======
+ * Dedicated page for browsing all TV channels.
+ * 
+ * @module pages/app/TVPage
+ */
+
+import { useLayoutEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import { SEOHead } from '@/components/SEOHead';
+import { PageBody, PageIsland } from '@/components/app/page-kit/PageKit';
+import { LiveTVSection } from '@/components/app/tv';
+import { scrollDocumentTo } from '@/lib/document-scroll';
+
+export default function TVPage() {
+  const { t: _copy } = _useCopy();
+  const { t } = useTranslation();
+  useLayoutEffect(() => {
+    scrollDocumentTo(0);
+  }, []);
+
+  return (
+    <div className="min-h-screen">
+      <SEOHead title={t('tv.seoTitle')} description={t('tv.seoDescription')} url="https://riftn.com/app/tv" jsonLd={{ '@context': 'https://schema.org', '@type': 'WebApplication', name: 'Riftn Live TV', url: 'https://riftn.com/app/tv', applicationCategory: 'EntertainmentApplication', description: _copy("copy.38db75210b51", { defaultValue: "Watch free live TV channels from around the world." }), offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' }, operatingSystem: 'Web' }} />
+      <h1 className="sr-only">{t('tv.srHeading')}</h1>
+      <PageIsland back icon="tv" title={t('tv.title')} />
+      <PageBody>
+        <LiveTVSection />
+      </PageBody>
+    </div>
+  );
+}

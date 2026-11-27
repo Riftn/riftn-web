@@ -1,0 +1,201 @@
+/**
+ * ViewingPreferencesSync — carries the per-channel playback speeds to the
+ * account's other devices.
+ *
+ * Renders nothing. Speeds are written by the players straight into
+ * localStorage (they need the value synchronously, before the first frame),
+ * which is why this cannot live in the player: something mounted once has to
+ * own the round trip. It registers the map with the preference blob, applies
+ * whatever the server has on sign-in, and pushes again whenever a player
+ * announces a write.
+ *
+ * The "hide watched" switch syncs itself from `useHideWatched` — its consumers
+ * are the feeds and the settings row, which is where it is read and written.
+ *
+ * @module components/app/ViewingPreferencesSync
+ */
+
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useSyncedPreference } from '@/contexts/UserPreferencesContext';
+import { getCreatorPlaybackRates, setCreatorPlaybackRates } from '@/lib/video-preferences';
+import { sanitiseGroups, useFollowGroupList, writeGroups } from '@/lib/follow-groups';
+import { DEFAULT_AD_LOAD, normaliseAdLoad, useAdLoad, writeAdLoad } from '@/lib/ad-load';
+import { DEFAULT_FEED_VIDEO_SHAPE, normaliseFeedVideoShape, useFeedVideoShape, writeFeedVideoShape } from '@/lib/feed-video-shape';
+import { useSkipSegments, writeSkipSegments } from '@/lib/skip-segments';
+import { DEFAULT_MENU_LAYOUT, MENU_LAYOUT_PREF_KEY, normaliseMenuLayout, useMenuLayout, writeMenuLayout } from '@/lib/menu-layout';
+import { useVideoGlitch, writeVideoGlitch } from '@/lib/video-glitch';
+import {
+  PUBLIC_CHAT_ALERTS_PREF_KEY,
+  PUBLIC_CHAT_DEFAULT_ENABLED,
+  PUBLIC_CHAT_DEFAULT_PER_HOUR,
+  PUBLIC_CHAT_RATE_PREF_KEY,
+  normalisePerHour,
+  usePublicChatAlertsEnabled,
+  usePublicChatAlertsPerHour,
+  writePublicChatAlerts,
+  writePublicChatPerHour,
+} from '@/lib/public-chat-alerts';
+import { NAV_ORDER_PREF_KEYS, sanitiseNavOrder, useNavOrder, writeNavOrder, type NavOrderSurface } from '@/lib/nav-order';
+import { MENU_GROUP_MOVES_PREF_KEY, sanitiseMenuGroupMoves, useMenuGroupMoves, writeMenuGroupMoves } from '@/lib/menu-group-moves';
+
+// Renamed when the old pinned speeds were cleared (video-preferences
+// RATE_SCOPE 3), so the account copy of that map cannot bring them back.
+const PREF_KEY = 'videoChannelSpeeds3';
+const GROUPS_KEY = 'followGroups';
+const AD_LOAD_KEY = 'adLoad';
+const FEED_VIDEO_SHAPE_KEY = 'feedVideoShape';
+const SKIP_SEGMENTS_KEY = 'skipVideoSegments';
+const VIDEO_GLITCH_KEY = 'videoGlitchLoader';
+const EMPTY: Record<string, number> = {};
+
+/**
+ * Follow groups are edited through use-follow-groups (which pushes its own
+ * writes) and read by the home feed. Only the inbound half needs a permanent
+ * home, and this is it — the editor is not always mounted, and a group made on
+ * the desktop should be there when the phone opens the Following feed.
+ */
+function useFollowGroupSync() {
+  const groups = useFollowGroupList();
+  const apply = useCallback((value: unknown) => {
+    writeGroups(sanitiseGroups(value));
+  }, []);
+  useSyncedPreference(GROUPS_KEY, groups, apply, []);
+}
+
+/** Ad load is one string; same inbound-only shape as the groups above. */
+function useAdLoadSync() {
+  const adLoad = useAdLoad();
+  const apply = useCallback((value: unknown) => {
+    writeAdLoad(normaliseAdLoad(value));
+  }, []);
+  useSyncedPreference(AD_LOAD_KEY, adLoad, apply, DEFAULT_AD_LOAD);
+}
+
+/** Feed video shape is one string; same as ad load. */
+function useFeedVideoShapeSync() {
+  const shape = useFeedVideoShape();
+  const apply = useCallback((value: unknown) => {
+    writeFeedVideoShape(normaliseFeedVideoShape(value));
+  }, []);
+  useSyncedPreference(FEED_VIDEO_SHAPE_KEY, shape, apply, DEFAULT_FEED_VIDEO_SHAPE);
+}
+
+/** Phone menu layout (tabs / sections / folders) is one string; same as above. */
+function useMenuLayoutSync() {
+  const layout = useMenuLayout();
+  const apply = useCallback((value: unknown) => {
+    writeMenuLayout(normaliseMenuLayout(value));
+  }, []);
+  useSyncedPreference(MENU_LAYOUT_PREF_KEY, layout, apply, DEFAULT_MENU_LAYOUT);
+}
+
+/** Sponsor skipping is one boolean; inbound only, like the two above. */
+function useSkipSegmentsSync() {
+  const skipSegments = useSkipSegments();
+  const apply = useCallback((value: unknown) => {
+    writeSkipSegments(value === true || value === 'true');
+  }, []);
+  useSyncedPreference(SKIP_SEGMENTS_KEY, skipSegments, apply, false);
+}
+
+/** The video loading glitch; inbound only, same shape as the two above. */
+function useVideoGlitchSync() {
+  const videoGlitch = useVideoGlitch();
+  const apply = useCallback((value: unknown) => {
+    writeVideoGlitch(value === true || value === 'true');
+  }, []);
+  useSyncedPreference(VIDEO_GLITCH_KEY, videoGlitch, apply, false);
+}
+
+/**
+ * Public chat alerts: the switch and the hourly ceiling under it. Two keys
+ * because they are two decisions — someone who turns the room back on should
+ * get the limit they picked last time, not the default.
+ */
+function usePublicChatAlertsSync() {
+  const enabled = usePublicChatAlertsEnabled();
+  const perHour = usePublicChatAlertsPerHour();
+
+  const applyEnabled = useCallback((value: unknown) => {
+    writePublicChatAlerts(value === true || value === 'true');
+  }, []);
+  useSyncedPreference(PUBLIC_CHAT_ALERTS_PREF_KEY, enabled, applyEnabled, PUBLIC_CHAT_DEFAULT_ENABLED);
+
+  const applyRate = useCallback((value: unknown) => {
+    writePublicChatPerHour(normalisePerHour(value));
+  }, []);
+  useSyncedPreference(
+    PUBLIC_CHAT_RATE_PREF_KEY,
+    perHour,
+    applyRate,
+    PUBLIC_CHAT_DEFAULT_PER_HOUR,
+  );
+}
+
+/**
+ * Dragged menu orders (phone menu, desktop rail, bottom bar). Written by
+ * hooks/use-nav-order, which pushes its own writes; inbound only here.
+ */
+function useNavOrderSync(surface: NavOrderSurface) {
+  const order = useNavOrder(surface);
+  const apply = useCallback((value: unknown) => {
+    writeNavOrder(surface, sanitiseNavOrder(value));
+  }, [surface]);
+  useSyncedPreference(NAV_ORDER_PREF_KEYS[surface], order, apply, []);
+}
+
+/** Menu tiles moved to another group; written by MobileMenuGrid, inbound only here. */
+function useMenuGroupMovesSync() {
+  const moves = useMenuGroupMoves();
+  const apply = useCallback((value: unknown) => {
+    writeMenuGroupMoves(sanitiseMenuGroupMoves(value));
+  }, []);
+  useSyncedPreference(MENU_GROUP_MOVES_PREF_KEY, moves, apply, {});
+}
+
+export function ViewingPreferencesSync() {
+  useMenuGroupMovesSync();
+  useNavOrderSync('menu');
+  useNavOrderSync('rail');
+  useNavOrderSync('bar');
+  useNavOrderSync('home');
+  useFollowGroupSync();
+  useAdLoadSync();
+  useFeedVideoShapeSync();
+  useMenuLayoutSync();
+  useSkipSegmentsSync();
+  useVideoGlitchSync();
+  usePublicChatAlertsSync();
+  const [rates, setRates] = useState<Record<string, number>>(() => getCreatorPlaybackRates());
+
+  // What the server last handed us. A server-applied map re-fires the same
+  // change event the players use, and without this the echo would be pushed
+  // straight back as if the user had set it.
+  const appliedRef = useRef<string | null>(null);
+
+  const apply = useCallback((value: unknown) => {
+    const map = value && typeof value === 'object' && !Array.isArray(value)
+      ? (value as Record<string, number>)
+      : EMPTY;
+    appliedRef.current = JSON.stringify(map);
+    setCreatorPlaybackRates(map);
+    setRates(getCreatorPlaybackRates());
+  }, []);
+
+  const { push } = useSyncedPreference(PREF_KEY, rates, apply, EMPTY);
+
+  useEffect(() => {
+    const handler = () => {
+      const next = getCreatorPlaybackRates();
+      const serialised = JSON.stringify(next);
+      setRates(next);
+      if (serialised === appliedRef.current) return; // our own echo
+      appliedRef.current = serialised;
+      push(next);
+    };
+    window.addEventListener('video-prefs-changed', handler);
+    return () => window.removeEventListener('video-prefs-changed', handler);
+  }, [push]);
+
+  return null;
+}

@@ -1,0 +1,40 @@
+name: Mobile swipe back production verification
+on:
+  workflow_dispatch:
+    inputs:
+      scenario:
+        type: choice
+        options: [navigation, profile-photos]
+        default: navigation
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Prepare hosted mobile browser
+        run: |
+          npm install --prefix "$RUNNER_TEMP/swipe-browser" --no-save --no-package-lock --ignore-scripts playwright@1.64.0
+          "$RUNNER_TEMP/swipe-browser/node_modules/.bin/playwright" install --with-deps chromium
+      - name: Verify real touch navigation on production
+        env:
+          SWIPE_BROWSER_ROOT: ${{ runner.temp }}/swipe-browser
+          SCENARIO: ${{ inputs.scenario }}
+        run: |
+          if [ "$SCENARIO" = profile-photos ]; then
+            node tests/profile-photo-swipe-production.mjs
+          else
+            node tests/swipe-back-production.mjs
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mobile-swipe-back-production
+          path: swipe-back-results/
+          if-no-files-found: ignore
+          retention-days: 14

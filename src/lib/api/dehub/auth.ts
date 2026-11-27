@@ -1,0 +1,570 @@
+import { holdFieldFor } from '@/lib/username-hold';
+import { predictSafeAddress } from '@/lib/smart-account-address';
+import { DEHUB_API_BASE, setAuthToken, setRefreshToken, setTokenExpiresAt, getRefreshToken, getAuthToken, refreshTokenShared, refreshTokenSharedDetailed } from './core';
+import type { TokenRefreshOutcome } from './core';
+import type { AuthResponse } from './types';
+import { deviceHeaders } from '@/lib/device-id';
+import { requestSession } from './session-request';
+import { TWO_FACTOR_REQUIRED_CODE } from '@/lib/two-factor-login';
+import { translateCopy as _translateCopy } from '@/i18n/copy';
+import { ACCOUNT_DELETED_CODE, deletedAccountMessage } from '@/lib/deleted-account';
+
+export interface UsernameCheckResponse {
+  status: boolean;
+  code: number;
+  available: boolean;
+  username: string;
+  message?: string;
+  error?: boolean;
+}
+
+/** The API's code for a wallet signup turned away by the on-chain history gate. */
+export const WALLET_SIGNUP_BLOCKED_CODE = 'WALLET_SIGNUP_REQUIRES_HISTORY';
+
+/**
+ * Thrown when a brand-new account is refused because the wallet has no history
+ * on any supported chain — the anti-bot gate the API added in stream-backend
+ * #128. Signing again cannot fix it, and neither can waiting: the person has to
+ * either fund the wallet or come in through Google/Apple/email/phone.
+ *
+ * It is a distinct type because the generic path tells the user to "try again",
+ * which is the one piece of advice guaranteed not to work here, and because it
+ * drops the API's own explanation — the only place the alternatives are named.
+ */
+export class WalletSignupBlockedError extends Error {
+  constructor(message?: string) {
+    super(message ?? _translateCopy("copy.0cb40ad83df4", { defaultValue: "To create an account with a wallet, that wallet needs some history on-chain — a balance, or a transaction it has sent before." }));
+    this.name = 'WalletSignupBlockedError';
+  }
+}
+
+/**
+ * Window event the auth provider fires when a wallet sign-up is refused for
+ * having no on-chain history, so the login sheet can move to the other
+ * sign-up options instead of offering the same wallet again.
+ */
+export const WALLET_SIGNUP_BLOCKED_EVENT = 'dehub:wallet-signup-blocked';
+/** The wallet's profile moved to a Google/email/phone login; detail.message names it. */
+export const PROFILE_MOVED_EVENT = 'dehub:profile-moved';
+
+export interface Web3AuthMeta {
+  typeOfLogin?: string;
+  verifier?: string;
+  verifierId?: string;
+  email?: string;
+  name?: string;
+  profileImage?: string;
+}
+
+export interface RefreshTokenResponse {
+  accessToken: string;
+  refreshToken: string;
+  expiresIn: number;
+}
+
+export async function checkUsernameAvailability(username: string): Promise<UsernameCheckResponse> {
+  const { apiCall } = await import('./core');
+  // A name this browser reserved reads as available to it, taken to others.
+  const holdToken = holdFieldFor(username);
+  return apiCall<UsernameCheckResponse>("/api/username/check", {
+    params: holdToken ? { username, holdToken } : { username },
+    requiresAuth: false,
+  });
+}
+
+export async function checkUsernameAvailabilityPost(username: string): Promise<UsernameCheckResponse> {
+  const { apiCall } = await import('./core');
+  return apiCall<UsernameCheckResponse>("/api/username/check", {
+    method: "POST",
+    body: { username },
+    requiresAuth: false,
+  });
+}
+
+/** Phantom's Solana account, and its signature over this same login message. */
+export interface SolanaLoginProof {
+  address: string;
+  signature: string;
+}
+
+export async function authenticateWallet(
+  address: string,
+  signature: string,
+  timestamp: number,
+  chainId: number = 8453,
+  web3AuthMeta?: Web3AuthMeta,
+  supabaseAccessToken?: string,
+  solanaProof?: SolanaLoginProof | null,
+  challengeId?: string,
+): Promise<AuthResponse> {
+  const body: Record<string, any> = {
+    address: address.toLowerCase(),
+    sig: signature,
+    timestamp,
+    chainId,
+    ...(challengeId ? { challengeId } : {}),
+  };
+
+  // Phantom signs in through its Ethereum provider, and that EVM address is a
+  // by-product most Phantom users have never touched — so the backend's
+  // anti-bot signup gate, which asks for on-chain history, turned every one of
+  // them away. This is the same login message countersigned by the Solana key:
+  // it lets the gate look at the half of the wallet that has actually been
+  // used, and leaves a verified Solana address on the account, which is what
+  // makes the creator payable on Solana at all.
+  if (solanaProof?.address && solanaProof?.signature) {
+    body.solanaProof = solanaProof;
+  }
+
+  if (web3AuthMeta) {
+    body.web3AuthMeta = web3AuthMeta;
+  }
+
+  // Proves this login actually owns web3AuthMeta.verifierId. Without it the
+  // backend (vetSupabaseIdentityLink) only accepts a FIRST link and silently
+  // drops the meta whenever any other account already holds that identity —
+  // so a stale or duplicate link could never be repaired from the web, and
+  // every later login bounced off the exchange with WALLET_NOT_LINKED. With
+  // it, the link is stored and made exclusive, which is what self-heals old
+  // duplicates. Mobile has always sent this; web is catching up.
+  //
+  // Body field, not the x-supabase-authorization header: that header is not
+  // in the API's CORS allowlist, so browsers refuse the preflight.
+  if (supabaseAccessToken) {
+    body.supabaseAccessToken = supabaseAccessToken;
+  }
+
+  const headers = {
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+    // The server records the device only at login, so these have to be here
+    // rather than on the shared request helper.
+    ...deviceHeaders(),
+  };
+
+  // Riftn API only exposes /api/web/auth (doc.md). /api/auth returns 404.
+  const response = await requestSession('/api/web/auth', {
+    method: "POST",
+    headers,
+    body: JSON.stringify(body),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    if (errorData.code === WALLET_SIGNUP_BLOCKED_CODE) {
+      throw new WalletSignupBlockedError(errorData.message || errorData.error_message);
+    }
+    if (errorData.code === ACCOUNT_DELETED_CODE) {
+      throw Object.assign(new Error(deletedAccountMessage(errorData.signupAfter)), { code: errorData.code, status: response.status });
+    }
+    throw Object.assign(new Error(errorData.message || errorData.error || _translateCopy("copy.93821eb7ce8c", { defaultValue: "Authentication failed" })), { code: errorData.code, status: response.status });
+  }
+
+  const data: AuthResponse = await response.json();
+
+  // Store access token
+  if (data.token) {
+    setAuthToken(data.token);
+  }
+
+  // Store refresh token if provided
+  if (data.refreshToken) {
+    setRefreshToken(data.refreshToken);
+  }
+
+  // Store dynamic expiry if provided (server sends seconds), otherwise fallback to 24h
+  if (data.expiresIn) {
+    setTokenExpiresAt(data.expiresIn);
+  } else {
+    // Legacy fallback — store a 24h expiry timestamp
+    localStorage.setItem("dehub_token_timestamp", String(Date.now()));
+  }
+
+  return data;
+}
+
+/**
+ * Thrown when the backend has no wallet linked to this Supabase identity yet.
+ * The caller must fall back to the signature flow, which is what creates the
+ * link — it is a normal state for a first-ever login, not an error to surface.
+ */
+export class WalletNotLinkedError extends Error {
+  constructor(message = 'No wallet is linked to this login yet.') {
+    super(message);
+    this.name = 'WalletNotLinkedError';
+  }
+}
+
+/**
+ * This login's profile lives on a different wallet from the one saved for it —
+ * usually the wallet from the original sign-in, after a newer wallet replaced
+ * it. Signing in needs that original wallet back, not a retry.
+ */
+export class ProfileLinkMismatchError extends Error {
+  constructor(message = 'Could not confirm your existing profile. Please try again.') {
+    super(message);
+    this.name = 'ProfileLinkMismatchError';
+  }
+}
+
+/**
+ * Move this login's existing account onto the wallet this browser holds.
+ *
+ * For the case where the account is linked to one address and the browser can
+ * only derive another. Signing in from there does not reach the account: the
+ * signature registers as a brand-new signup, which is both a second empty
+ * account under a generated username and — since the history gate — usually no
+ * account at all, because a wallet minted seconds ago has nothing on chain.
+ *
+ * Two proofs, and the backend requires both: the Supabase token says WHICH
+ * account (the same verifierId join the passwordless exchange uses), and the
+ * signature says the destination is a wallet the caller controls. Nothing here
+ * can move an account onto a wallet that did not sign.
+ *
+ * ORDER MATTERS — this must run BEFORE authenticateWallet. A signature login
+ * sends web3AuthMeta, and the backend makes that link exclusive by unsetting it
+ * on every other account, including the one being rescued, after which there is
+ * nothing left to look the account up by.
+ *
+ * The session it returns is deliberately dropped: the caller signs in straight
+ * afterwards through the normal path, so "signed in" keeps one definition.
+ *
+ * @throws WalletNotLinkedError when there is no account to move (409), which is
+ *   the ordinary answer for a genuinely new signup.
+ */
+/** Extra checks for a wallet reset the person started themselves. */
+export interface RotateWalletOptions {
+  /** The account on screen. The API refuses to move any other account. */
+  expectedFromAddress?: string;
+  /** Code from the authenticator app, for accounts with two-step sign-in. */
+  twoFactorCode?: string;
+  /** Throw instead of carrying on when the move did not happen. */
+  strict?: boolean;
+}
+
+export async function rotateWallet(
+  address: string,
+  signature: string,
+  timestamp: number,
+  chainId: number,
+  supabaseAccessToken: string,
+  challengeId?: string,
+  options?: RotateWalletOptions,
+): Promise<void> {
+  const response = await fetch(`${DEHUB_API_BASE}/api/auth/rotate-wallet`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+      ...deviceHeaders(),
+    },
+    body: JSON.stringify({
+      address: address.toLowerCase(),
+      sig: signature,
+      timestamp,
+      chainId,
+      // In the body, NOT the x-supabase-authorization header this used to
+      // send: that header is missing from the API's CORS allowlist, so every
+      // browser failed the preflight and the rescue never ran — the string of
+      // "Could not move the account onto this wallet: Failed to fetch" rows.
+      // The endpoint accepts either; only the body form works cross-origin.
+      supabaseAccessToken,
+      ...(challengeId ? { challengeId } : {}),
+      ...(options?.expectedFromAddress ? { expectedFromAddress: options.expectedFromAddress.toLowerCase() } : {}),
+      ...(options?.twoFactorCode ? { twoFactorCode: options.twoFactorCode } : {}),
+    }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({} as Record<string, unknown>));
+    const code = errorData.code as string | undefined;
+    if (code === 'WALLET_NOT_LINKED') {
+      throw new WalletNotLinkedError((errorData.message as string) || undefined);
+    }
+    // The API refuses BEFORE moving anything when the account has two-step
+    // sign-in and no code came with the request. A reset started on purpose
+    // has to say so, so the screen can ask for the code; the automatic rescue
+    // keeps going and lets the sign-in that follows ask instead.
+    if (code === TWO_FACTOR_REQUIRED_CODE) {
+      if (!options?.strict) return;
+      throw Object.assign(new Error(
+        (errorData.message as string) || _translateCopy('resetWallet.twoFactor', { defaultValue: 'Enter the code from your authenticator app to move your account.' }),
+      ), { code, status: response.status });
+    }
+    throw Object.assign(new Error(
+      (errorData.message as string) || (errorData.error as string) || _translateCopy("copy.2877ceb92688", { defaultValue: "Could not move the account" }),
+    ), { code, status: response.status });
+  }
+}
+
+/**
+ * Exchange a Supabase access token for a Riftn session, with no wallet
+ * signature — so login can finish without unlocking the wallet.
+ *
+ * The wallet stays encrypted; anything that needs to sign triggers an unlock at
+ * that point (see the dehub:wallet-unlock-required flow). The backend can repair
+ * a stale link from an authenticated Supabase wallet row, but a genuinely new
+ * identity still needs the signature flow once.
+ *
+ * @throws WalletNotLinkedError when no link exists yet (HTTP 409)
+ */
+export async function authenticateWithSupabaseSession(
+  supabaseAccessToken: string,
+  expectedAddress?: string,
+): Promise<AuthResponse> {
+  const response = await requestSession('/api/web/auth/supabase', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+      // Sent as a header rather than in the body so it does not land in request
+      // logs that record bodies.
+      Authorization: `Bearer ${supabaseAccessToken}`,
+      ...deviceHeaders(),
+    },
+    body: JSON.stringify(expectedAddress ? { expectedAddress } : {}),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({} as Record<string, unknown>));
+    const code = errorData.code as string | undefined;
+    // Only a genuinely missing link can be a new signup. An ambiguous link
+    // is an account error, never permission to provision another wallet.
+    if (code === 'WALLET_NOT_LINKED') {
+      throw new WalletNotLinkedError(
+        (errorData.message as string) || 'No wallet is linked to this login yet.',
+      );
+    }
+    if (code === 'PROFILE_LINK_MISMATCH') {
+      throw new ProfileLinkMismatchError(errorData.message as string | undefined);
+    }
+    if (code === ACCOUNT_DELETED_CODE) {
+      throw Object.assign(new Error(deletedAccountMessage(errorData.signupAfter as string | undefined)), { code, status: response.status });
+    }
+    throw new Error(
+      (errorData.message as string) || (errorData.error as string) || _translateCopy("copy.93821eb7ce8c", { defaultValue: "Authentication failed" }),
+    );
+  }
+
+  const data: AuthResponse = await response.json();
+
+  if (!data.token || !/^0x[0-9a-f]{40}$/i.test(data.user?.address ?? '')) {
+    throw new Error(_translateCopy("copy.62dafb71c505", { defaultValue: "Could not finish signing in to your profile. Please try again." }));
+  }
+
+  // Check public addresses before adopting any credential. This never opens a wallet.
+  const linked = data.user.address.toLowerCase();
+  if (expectedAddress && data.user.loginLinkSource !== 'wallet-email' &&
+      linked !== expectedAddress.toLowerCase() && linked !== await predictSafeAddress(expectedAddress)) {
+    throw new ProfileLinkMismatchError();
+  }
+
+  if (data.token) setAuthToken(data.token);
+  if (data.refreshToken) setRefreshToken(data.refreshToken);
+  if (data.expiresIn) setTokenExpiresAt(data.expiresIn);
+  else localStorage.setItem('dehub_token_timestamp', String(Date.now()));
+
+  return data;
+}
+
+export interface EmailLinkStatusResponse {
+  status: boolean;
+  /** True only for a link this flow wrote — the kind that can be removed. */
+  linked: boolean;
+  /** Masked server-side (us***@example.com) — safe to render as-is. */
+  email: string | null;
+  /**
+   * The address a notification email would be sent to, masked, or null if
+   * there is none. NOT the same question as `linked`: that one asks whether
+   * the sign-in link came from this flow, and almost every address on the
+   * platform came from a social login instead. Absent on older servers.
+   */
+  notifyEmail?: string | null;
+  /**
+   * Whether attaching an email can succeed at all. False for an account whose
+   * Supabase identity came from a social signup: it already signs in without a
+   * wallet, and confirm would refuse a second link with
+   * ACCOUNT_HAS_LOGIN_LINKED. Absent on servers older than that field.
+   */
+  canLink?: boolean;
+  /** 'wallet-email' for a link from this flow, 'other' for a social signup. */
+  source?: 'wallet-email' | 'other' | null;
+}
+
+/** Whether the signed-in account already carries an email login. */
+export async function getEmailLinkStatus(): Promise<EmailLinkStatusResponse> {
+  const { apiCall } = await import('./core');
+  return apiCall<EmailLinkStatusResponse>('/api/account/email-link/status', {
+    requiresAuth: true,
+  });
+}
+
+/**
+ * The same question as `getEmailLinkStatus`, asked in a way that also repairs
+ * the answer.
+ *
+ * A Google or email signup proves an address to Supabase and nothing ever
+ * wrote it onto the Riftn account, so `notifyEmail` came back null for almost
+ * everyone — and the email notifications row told people to go and add the
+ * address they had just signed in with. Logins record it now, but that only
+ * helps the next time someone signs in, which is no help at all to a person
+ * already sitting on the settings page.
+ *
+ * So the current Supabase session is handed over with the question. The server
+ * verifies it, and writes the address only when the session belongs to the
+ * identity this account is already linked to. An account with no Supabase
+ * session, or one that already holds an address, is answered unchanged.
+ *
+ * Sent in the body: `x-supabase-authorization` is not in the API's CORS
+ * allowlist, so the browser would never get the preflight through.
+ *
+ * Falls back to the plain status call, because web deploys minutes after a
+ * merge and the API deploys by hand — there is a window where this route is
+ * not there yet, and a 404 must not blank out a row that would otherwise work.
+ */
+export async function syncEmailLinkStatus(): Promise<EmailLinkStatusResponse> {
+  const { apiCall } = await import('./core');
+
+  let supabaseAccessToken: string | null = null;
+  try {
+    const { supabase } = await import('@/integrations/supabase/client');
+    const { data } = await supabase.auth.getSession();
+    supabaseAccessToken = data?.session?.access_token ?? null;
+  } catch {
+    // No Supabase session to offer — the status call below still answers.
+  }
+
+  try {
+    return await apiCall<EmailLinkStatusResponse>('/api/account/email-link/sync', {
+      method: 'POST',
+      body: supabaseAccessToken ? { supabaseAccessToken } : {},
+      requiresAuth: true,
+    });
+  } catch {
+    return getEmailLinkStatus();
+  }
+}
+
+/**
+ * Mail a 6-digit code that, once confirmed, lets this account sign in with
+ * that email — no wallet signature needed on future logins.
+ *
+ * Errors arrive as thrown Error instances whose message is the server's
+ * user-facing copy (cooldowns, rate limits, invalid email), so callers can
+ * toast them directly.
+ */
+export async function requestEmailLinkCode(email: string): Promise<{ status: boolean }> {
+  const { apiCall } = await import('./core');
+  return apiCall<{ status: boolean }>('/api/account/email-link/request', {
+    method: 'POST',
+    body: { email },
+    requiresAuth: true,
+  });
+}
+
+/**
+ * Verify the code and attach the email as a login route for this account.
+ *
+ * Refusals are 409s with a `code` in the body (EMAIL_IN_USE,
+ * EMAIL_ALREADY_LINKED, ACCOUNT_HAS_LOGIN_LINKED); apiCall flattens those to
+ * Error(message), which is all the UI needs to show.
+ */
+export async function confirmEmailLink(
+  email: string,
+  code: string,
+): Promise<{ status: boolean; linked: boolean; email: string | null }> {
+  const { apiCall } = await import('./core');
+  return apiCall<{ status: boolean; linked: boolean; email: string | null }>(
+    '/api/account/email-link/confirm',
+    {
+      method: 'POST',
+      body: { email, code },
+      requiresAuth: true,
+    },
+  );
+}
+
+/**
+ * Detach the email login again, so that address can no longer sign this
+ * account in.
+ *
+ * Only removes a link this flow attached. An account whose Supabase identity
+ * came from a social signup is refused with LOGIN_NOT_REMOVABLE — that link is
+ * its only way back in.
+ */
+export async function unlinkEmailLogin(): Promise<{ status: boolean; linked: boolean }> {
+  const { apiCall } = await import('./core');
+  return apiCall<{ status: boolean; linked: boolean }>('/api/account/email-link', {
+    method: 'DELETE',
+    requiresAuth: true,
+  });
+}
+
+/**
+ * Refresh the access token using the stored refresh token.
+ * Returns the new token data, or null if refresh failed.
+ *
+ * Delegates to core.ts's refreshTokenShared() so this call and any 401-
+ * triggered refresh inside apiCall() share the same single-flight request —
+ * two independent refreshes racing on the same refresh token can trigger a
+ * server's reuse-detection and revoke the whole session.
+ */
+export async function refreshAccessToken(): Promise<RefreshTokenResponse | null> {
+  return refreshTokenShared();
+}
+
+/**
+ * Same refresh, but reporting *why* it failed.
+ *
+ * Callers that decide whether to end the session must use this: the null
+ * returned above cannot distinguish "the server revoked this token" from
+ * "the request timed out", and treating the second as the first is what
+ * signs people out mid-session on a flaky connection.
+ */
+export async function refreshAccessTokenDetailed(): Promise<TokenRefreshOutcome> {
+  return refreshTokenSharedDetailed();
+}
+
+/**
+ * Revoke the current refresh token on the server (best-effort).
+ * Called on explicit logout.
+ */
+export async function logoutFromServer(): Promise<void> {
+  const refreshToken = getRefreshToken();
+  const accessToken = getAuthToken();
+  if (!refreshToken || !accessToken) return;
+
+  try {
+    await fetch(`${DEHUB_API_BASE}/api/auth/logout`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify({ refreshToken }),
+    });
+  } catch (e) {
+    // Best-effort — don't block logout on network failure
+    console.warn('[Auth] Server logout failed (non-blocking):', e);
+  }
+}
+
+/**
+ * Revoke ALL refresh tokens for the current user (best-effort).
+ */
+export async function logoutAllSessions(): Promise<void> {
+  const accessToken = getAuthToken();
+  if (!accessToken) return;
+
+  try {
+    await fetch(`${DEHUB_API_BASE}/api/auth/logout-all`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${accessToken}`,
+      },
+    });
+  } catch (e) {
+    console.warn('[Auth] Logout all sessions failed (non-blocking):', e);
+  }
+}

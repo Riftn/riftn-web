@@ -1,0 +1,32 @@
+import { useTranslation as _useCopy } from 'react-i18next';
+import Menu from "@/components/ui/cut-icons/menu";
+import Bell from "@/components/ui/cut-icons/alerts";
+
+import { MockAvatar } from './MockAvatar';
+
+interface MobileTopBarProps {
+  title?: string;
+  showAvatar?: boolean;
+  showNotification?: boolean;
+}
+
+export function MobileTopBar({ title = 'Riftn', showAvatar = true, showNotification = true }: MobileTopBarProps) {
+  const { t: _copy } = _useCopy();
+  return (
+    <div className="flex items-center justify-between px-4 py-2 bg-black/80 backdrop-blur-xl sticky top-0 z-30">
+      <div className="flex items-center gap-3">
+        <Menu className="w-5 h-5 text-white" />
+        {showAvatar && <MockAvatar name={_copy("copy.08b041935798", { defaultValue: "You" })} size="sm" />}
+      </div>
+      <span className="text-white text-base font-bold">{title}</span>
+      <div className="flex items-center gap-3">
+        {showNotification && (
+          <div className="relative">
+            <Bell className="w-5 h-5 text-white" />
+            <div className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-red-500" />
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

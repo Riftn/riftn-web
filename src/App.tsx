@@ -1,0 +1,1251 @@
+import { LanguageRouteSync } from '@/components/LanguageRouteSync';
+import MaintenanceGate from '@/components/MaintenanceGate';
+import { useTranslation as _useCopy } from 'react-i18next';
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { OfflineConnectionToast } from "@/components/OfflineConnectionToast";
+import { NotificationsPromptToast } from "@/components/app/NotificationsPromptToast";
+import { AvatarPrompt } from "@/components/app/AvatarPrompt";
+import { NonFollowerOffer } from "@/components/app/NonFollowerOffer";
+import { HalloweenGhostPrompt } from "@/components/app/halloween/HalloweenGhostPrompt";
+import { PushBlockedToast } from "@/components/app/PushBlockedToast";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { NativeTitleTooltips } from "@/components/app/NativeTitleTooltips";
+import { MutationCache, QueryClient, QueryClientProvider, useQueryClient } from "@tanstack/react-query";
+import { AuthenticationError } from "@/lib/api/dehub";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { TapPendingLogoBridge } from "@/components/routing/TapPendingLogoBridge";
+import { useSwipeBack } from '@/hooks/use-swipe-back';
+import { OptimisticPostsProvider } from "@/hooks/use-optimistic-posts";
+// Direct import (not the modals barrel) so the barrel's other modals stay out
+// of the entry bundle.
+import { GiveawayPrizeModal } from "@/components/app/GiveawayPrizeModal";
+import { ConnectLinkedWalletModal } from "@/components/app/wallet-setup/ConnectLinkedWalletModal";
+import { SelfBadgeSync } from "@/components/app/SelfBadgeSync";
+import { DefaultChainSync } from "@/components/app/DefaultChainSync";
+import { BadgeShowcaseHost } from "@/components/app/badge-showcase/BadgeShowcaseHost";
+import { CoAuthorSheetHost } from "@/components/app/co-authors/CoAuthorSheetHost";
+import { ViewingPreferencesSync } from "@/components/app/ViewingPreferencesSync";
+import { AccountLanguageSync } from "@/components/app/AccountLanguageSync";
+import { FeedDefaultsSync } from "@/components/app/FeedDefaultsSync";
+import { useAuth, useLoginSheet } from "@/contexts/AuthContext";
+import { useNotificationClickRouting } from "@/hooks/use-notification-click-routing";
+import { useNotificationRealtime } from "@/hooks/use-notification-realtime";
+import { useLiveListRealtime } from "@/hooks/use-live-list-realtime";
+import { usePageViewAddress, PageViewTracker } from "@/hooks/use-page-view-tracking";
+import { ChatLinkCatcher } from "@/components/app/chat/ChatLinkCatcher";
+import { getFeedViewer, HOME_FEED_PAGE_SIZE, prefetchUnifiedFeed } from "@/hooks/use-unified-feed";
+import { restoreQueryCache, startQueryPersist } from "@/lib/query-persist";
+import { setBackgroundPaused, scheduleBackgroundResume } from "@/lib/background-gate";
+import { QuickActionsHost } from "./components/app/QuickActionsHost";
+import { PostMenuGate } from "./components/app/post-menu/PostMenuGate";
+import { LoginModal, scheduleLoginPrefetch } from "@/components/app/LoginModal";
+import { AfterSignIn } from "@/components/app/AfterSignIn";
+import { SignInHandoff } from "@/components/app/login/SignInHandoff";
+import { getTwoFactorPrompt, useTwoFactorPrompt } from "@/lib/two-factor-login";
+import React, { Suspense, useCallback, useEffect, useState, type ReactNode } from "react";
+import { I18nextProvider } from "react-i18next";
+import i18nInstance from "@/i18n";
+import { HelmetProvider } from "react-helmet-async";
+import { SEOHead } from "@/components/SEOHead";
+import { ClientNavigateBridge } from "@/components/app/ClientNavigateBridge";
+import { HomeShellSkeleton, SeededProfileSkeleton } from "@/components/app/PageSkeletons";
+import { DocsLoadingSkeleton } from "@/components/DocsLoadingSkeleton";
+import { ThemePreviewProvider, ThemeProvider, useAppTheme } from "@/contexts/ThemeContext";
+import { UserPreferencesProvider } from "@/contexts/UserPreferencesContext";
+import { lazyWithRetry } from "@/lib/lazy-with-retry";
+
+import { CONSOLIDATED_GUIDES } from "@/lib/blog-redirects.js";
+const DexPage = React.lazy(() => import("@/pages/app/DexPage"));
+// DM unread total for the nav badges; keeps the messaging stack out of the boot file.
+const DmUnreadBridge = lazyWithRetry(() => import("@/components/app/chat/DmUnreadBridge"));
+const DmMessageBanner = lazyWithRetry(() => import("@/components/app/chat/DmMessageBanner"));
+const DesktopWordmarkPreview = React.lazy(() => import("@/pages/DesktopWordmarkPreview"));
+const DexPoolPage = React.lazy(() => import("@/pages/app/DexPoolPage"));
+import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { loadPostPage } from "@/lib/preload-post-page";
+import { SurfaceTransition } from "@/components/transitions/SurfaceTransition";
+
+const AppLayout = lazyWithRetry(() =>
+  import("./components/app/AppLayout").then(({ AppLayout }) => ({ default: AppLayout })),
+);
+export const preloadAppLayout = () => AppLayout.preload();
+
+// Update notices can load after the app paints; their watcher starts on mount.
+const NewVersionToast = lazyWithRetry(() =>
+  import("@/components/app/NewVersionToast").then((module) => ({ default: module.NewVersionToast })),
+);
+
+// Wallet/Auth providers — lazy loaded to keep them out of the main bundle.
+// Wagmi + RainbowKit + Web3Auth total ~1.5 MB; deferring them reduces TBT significantly.
+// lazyWithRetry (not plain React.lazy): this chunk contains the entire auth
+// system, so a stale-deploy chunk 404 here means login doesn't exist at all —
+// it gets one extra same-page retry before falling back to the ErrorBoundary's
+// reload-once handling.
+const WalletProviders = lazyWithRetry(() =>
+  import("./components/app/WalletProviders").then(m => m.loadWalletProviders())
+);
+/**
+ * Resolve the wallet/auth chunk without rendering. main.tsx awaits this before
+ * mounting: this boundary wraps every route, so when its chunk is still in
+ * flight React's FIRST commit is the Suspense fallback below — and that commit
+ * replaces the HTML shell, prerendered welcome panel included, with a loading
+ * skeleton for the few hundred ms until the chunk lands. Waiting here instead
+ * keeps the shell on screen and makes the first commit the app itself; once
+ * preloaded, lazyWithRetry renders the boundary without suspending at all.
+ */
+export const preloadWalletProviders = (): Promise<unknown> => WalletProviders.preload();
+// Kick off the wallet chunk download at module-eval time (before React even
+// mounts) so it arrives as early as possible; the lazy boundary above joins
+// the same in-flight request.
+if (typeof window !== "undefined") {
+  preloadWalletProviders().catch(() => {});
+}
+
+// Login modal — imported eagerly, and deliberately so. The sheet has to be on
+// screen the instant "Log in" is tapped, which it cannot be if a chunk has to
+// arrive and evaluate first. Only the shell is here: LoginModal itself holds
+// the Suspense boundary for its contents, and wagmi / RainbowKit / the wallet
+// steps all stay behind it, on the wallet-side chunks where the guardrails in
+// scripts/check-entry-bundle.mjs expect them.
+
+// Decorative theme backgrounds — lazy AND theme-gated here so vendor-three
+// (~200 KB gz) never downloads unless the matching theme is active. Each
+// component also self-gates on theme, so a mismatch renders nothing.
+const CosmicBackground = React.lazy(() =>
+  import("@/components/app/CosmicBackground").then(m => ({ default: m.CosmicBackground }))
+);
+const HazyNightsBackground = React.lazy(() =>
+  import("@/components/app/HazyNightsBackground").then(m => ({ default: m.HazyNightsBackground }))
+);
+const SwarmsBackground = React.lazy(() =>
+  import("@/components/app/SwarmsBackground").then(m => ({ default: m.SwarmsBackground }))
+);
+const WinterSnow = React.lazy(() =>
+  import("@/components/app/WinterSnow").then(m => ({ default: m.WinterSnow }))
+);
+const LavaLampBackground = React.lazy(() =>
+  import("@/components/app/LavaLampBackground").then(m => ({ default: m.LavaLampBackground }))
+);
+const IslandBackground = React.lazy(() =>
+  import("@/components/app/IslandBackground").then(m => ({ default: m.IslandBackground }))
+);
+const HackerBackground = React.lazy(() =>
+  import("@/components/app/HackerBackground").then(m => ({ default: m.HackerBackground }))
+);
+const HorrorBackground = React.lazy(() =>
+  import("@/components/app/HorrorBackground").then(m => ({ default: m.HorrorBackground }))
+);
+const WarBackground = React.lazy(() =>
+  import("@/components/app/WarBackground").then(m => ({ default: m.WarBackground }))
+);
+// The War boot sequence is its own chunk from the background: it renders once
+// per session and must not keep the terrain scene's code in memory afterwards.
+const WarPreloader = React.lazy(() =>
+  import("@/components/app/WarPreloader").then(m => ({ default: m.WarPreloader }))
+);
+const WarGameLauncher = React.lazy(() =>
+  import("@/components/app/war/WarGameLauncher").then(m => ({ default: m.WarGameLauncher }))
+);
+const OsakaBackground = React.lazy(() =>
+  import("@/components/app/OsakaBackground").then(m => ({ default: m.OsakaBackground }))
+);
+// Jungle is the one canvas theme that does NOT pull vendor-three: it is a single
+// full-screen shader written against raw WebGL, so this ~15 KB chunk is the
+// whole theme. See the header of JungleBackground.tsx for why.
+const JungleBackground = React.lazy(() =>
+  import("@/components/app/JungleBackground").then(m => ({ default: m.JungleBackground }))
+);
+// Its own chunk, like War's: the launcher is only reachable by an explicit
+// opt-in and must not keep the game's iframe plumbing in the theme's payload.
+const JungleGameLauncher = React.lazy(() =>
+  import("@/components/app/jungle/JungleGameLauncher").then(m => ({ default: m.JungleGameLauncher }))
+);
+// The call stage's own corner of the state gallery (?calls=ringing).
+const CallStageGallery = React.lazy(() => import("@/pages/app/CallStageGallery"));
+const StateGalleryPage = (import.meta.env.DEV || window.location.hostname === 'staging.dehub.io')
+  ? React.lazy(() => import("@/pages/app/StateGalleryPage"))
+  : null;
+
+const GlassBackground = React.lazy(() => import('@/components/app/GlassBackground').then(m => ({ default: m.GlassBackground })));
+
+function ThemedBackgrounds({ preview = false }: { preview?: boolean }) {
+  const { theme } = useAppTheme();
+  // Self-gating: only a canvas theme mounts a background. It renders on ALL
+  // routes including /docs and /guides — the docs surface goes transparent and
+  // wraps its content in liquid glass over the canvas (see docs-glass.css). The
+  // canvas is z-index:0 and .docs-root establishes a z-index:1 stacking context
+  // (docs-dark.css), so docs content composites above it and stays readable.
+  return (
+    <Suspense fallback={null}>
+      {theme === "cosmic" && !preview && <CosmicBackground />}
+      {theme === 'glass' && <GlassBackground />}
+      {theme === "hazy" && <HazyNightsBackground />}
+      {theme === "swarms" && <SwarmsBackground />}
+      {theme === "winter" && !preview && <WinterSnow />}
+      {theme === "lavalamp" && <LavaLampBackground />}
+      {theme === "island" && <IslandBackground />}
+      {theme === "hacker" && <HackerBackground />}
+      {theme === "horror" && <HorrorBackground />}
+      {theme === "war" && <WarBackground />}
+      {theme === "war" && !preview && <WarPreloader />}
+      {theme === "war" && !preview && <WarGameLauncher />}
+      {theme === "osaka" && <OsakaBackground />}
+      {theme === "jungle" && <JungleBackground />}
+      {theme === "jungle" && !preview && <JungleGameLauncher />}
+    </Suspense>
+  );
+}
+
+
+// Pages — lazy loaded
+const DeleteAccount = React.lazy(() => import("./pages/DeleteAccount"));
+const MaintenancePage = React.lazy(() => import('./pages/MaintenancePage'));
+// OBS browser source. Outside WalletProviders and the theme canvas on purpose:
+// it is composited over a live broadcast, so it carries nothing but widgets.
+const ObsOverlayPage = React.lazy(() => import('./pages/ObsOverlayPage'));
+const AuthConfirm = React.lazy(() => import("./pages/AuthConfirm"));
+const TelegramAuth = React.lazy(() => import("./pages/TelegramAuth"));
+const OAuthAuthorizePage = React.lazy(() => import("./pages/OAuthAuthorizePage"));
+const CreatorsPage = React.lazy(() => import("./pages/app/CreatorsPage"));
+const SkillPage = React.lazy(() => import("./pages/SkillPage"));
+const NotFound = React.lazy(() => import("./pages/NotFound"));
+// One persistent docs/blog surface for both /docs/* and the canonical
+// /guides/<slug> blog posts — providers + sidebar mount ONCE and stay mounted
+// across the /docs ↔ /guides boundary (see DocsSurface + the shared parent
+// route below), so clicking on and off a blog post never remounts the panels.
+const DocsSurface = lazyWithRetry(() => import("./pages/DocsSurface"));
+export const preloadDocsSurface = () => DocsSurface.preload();
+const ProfilePage = React.lazy(() => import("./pages/app/ProfilePage"));
+const PostInfoPage = React.lazy(() => import("@/lib/preload-post-page").then(module => module.loadPostInfoPage()));
+const StoryPermalinkPage = React.lazy(() => import("./pages/app/StoryPermalinkPage"));
+const PostReactionsPage = React.lazy(() => import("./pages/app/PostReactionsPage"));
+// lazyWithRetry, so that once the page's code is in hand (main.tsx waits a
+// moment for it on a post link) the post is part of the first render instead
+// of a second pass behind a loading state.
+const SinglePostPage = lazyWithRetry(loadPostPage);
+// Resolve the post page's code without rendering it.
+export const preloadPostPage = (): Promise<unknown> => SinglePostPage.preload();
+const NewPostPage = React.lazy(() => import("./pages/app/NewPostPage"));
+const UploadPage = React.lazy(() => import("./pages/app/UploadPage"));
+const YoutubeMigratePage = React.lazy(() => import("./pages/app/YoutubeMigratePage"));
+const GovernanceProposalPage = React.lazy(() => import("./pages/app/GovernanceProposalPage"));
+const PacksPage = React.lazy(() => import("./pages/app/PacksPage"));
+const PackPage = React.lazy(() => import("./pages/app/PackPage"));
+const BuilderPage = React.lazy(() => import("./pages/app/BuilderPage"));
+const BuilderPreviewPage = React.lazy(() => import("./pages/app/BuilderPreviewPage"));
+const PairTestPage = React.lazy(() => import("./pages/app/PairTestPage"));
+const StageDeepLinkPage = React.lazy(() => import("./pages/app/StageDeepLinkPage"));
+const ClipPage = React.lazy(() => import("./pages/app/ClipPage"));
+const DuetsPage = React.lazy(() => import("./pages/app/DuetsPage"));
+const CoStreamJoinPage = React.lazy(() => import("./pages/app/CoStreamJoinPage"));
+const LinkTvPage = React.lazy(() => import("./pages/app/LinkTvPage"));
+// Binary Metal: type text, hear it as a metal riff, download WAV or MP3 (engine in public/binary-metal).
+const BinaryMetalPage = React.lazy(() => import("./pages/app/BinaryMetalPage"));
+const MobilePreview = React.lazy(() => import("./pages/MobilePreview"));
+const GuidePage = React.lazy(() => import("./pages/GuidePage"));
+const BestDecentralizedStreaming = React.lazy(() => import("./pages/BestDecentralizedStreaming"));
+const ComparePage = React.lazy(() => import("./pages/app/ComparePage"));
+const PromptLanding = React.lazy(() => import("./pages/PromptLanding"));
+const CommunityPage = React.lazy(() => import("./pages/app/CommunityPage"));
+const CommunityInvitePage = React.lazy(() => import("./pages/app/CommunityInvitePage"));
+const StoreDetailPage = React.lazy(() => import("./pages/app/StoreDetailPage"));
+const EventPage = React.lazy(() => import("./pages/EventPage"));
+const LaunchpadPage = React.lazy(() => import("./pages/app/LaunchpadPage"));
+const LaunchpadCreatePage = React.lazy(() => import("./pages/app/LaunchpadCreatePage"));
+const LaunchpadCoinPage = React.lazy(() => import("./pages/app/LaunchpadCoinPage"));
+const WorkPostPage = React.lazy(() => import("./pages/app/WorkPostPage"));
+const SuperPowersPage = React.lazy(() => import("./pages/app/SuperPowersPage"));
+const WorkJobDetailPage = React.lazy(() => import("./pages/app/WorkJobDetailPage"));
+const WorkEditPage = React.lazy(() => import("./pages/app/WorkEditPage"));
+const WorkDisputesPage = React.lazy(() => import("./pages/app/WorkDisputesPage"));
+const WorkHistoryPage = React.lazy(() => import("./pages/app/WorkHistoryPage"));
+const BountyLegacyRedirect = React.lazy(() => import("./pages/app/BountyLegacyRedirect"));
+const CreatorEditorHost = React.lazy(() => import("./pages/CreatorEditorHost"));
+const VideoRemix = React.lazy(() => import("./pages/VideoRemix"));
+// Creator Flow (node canvas) is its own chunk: React Flow and its d3 deps are
+// only worth downloading once someone opens the canvas, not with /creator.
+const CreatorGalleryPage = React.lazy(() => import('./pages/app/CreatorGalleryPage'));
+const CreatorLearningPage = React.lazy(() => import("./pages/app/CreatorLearningPage"));
+const CreatorFlowPage = React.lazy(() => import("./pages/app/CreatorFlowPage"));
+const CreatorFlowPublicPage = React.lazy(() => import("./pages/app/CreatorFlowPublicPage"));
+const MaboroshiPage = React.lazy(() => import("./pages/app/MaboroshiPage"));
+// Eager import — the referral lander is a new user's first touch of Riftn and
+// must paint instantly; it renders outside WalletProviders (see App below) so
+// it never waits on the ~1.5 MB wallet chunk either.
+import ReferralLanding from "./pages/ReferralLanding";
+const PremiumPage = React.lazy(() => import("./pages/Premium"));
+const PricingPage = React.lazy(() => import("./pages/PricingPage"));
+const YoutubeImportPage = React.lazy(() => import("./pages/YoutubeImportPage"));
+const DePinPage = React.lazy(() => import("./pages/DePinPage"));
+const CinemaPage = React.lazy(() => import("./pages/CinemaPage"));
+const RafflePage = React.lazy(() => import("./pages/RafflePage"));
+const ConnectPage = React.lazy(() => import("./pages/ConnectPage"));
+const ConnectChatGPTPage = React.lazy(() => import("./pages/ConnectChatGPTPage"));
+const ConnectClaudePage = React.lazy(() => import("./pages/ConnectClaudePage"));
+const ApkPage = React.lazy(() => import("./pages/ApkPage"));
+const FullScreenChatPage = lazyWithRetry(() => import("./pages/app/FullScreenChatPage"));
+export const preloadFullScreenChat = () => FullScreenChatPage.preload();
+const StreamPage = React.lazy(() => import("./pages/StreamPage"));
+const DehubAppPage = React.lazy(() => import("./pages/DehubAppPage"));
+const AdminManualPage = React.lazy(() => import("./pages/AdminManualPage"));
+// The arcade player is a standalone full-viewport surface (no AppLayout): the
+// games take the whole window and two of them take the pointer, so the header
+// and sidebars would be in the way rather than useful. Its own chunk, like the
+// theme launchers', so the iframe plumbing never rides along in a page bundle.
+const ArcadeGamePage = React.lazy(() => import("./pages/ArcadeGamePage"));
+const ArcadeChessOnlinePage = React.lazy(() => import("./pages/ArcadeChessOnlinePage"));
+// Games with friends: correspondence chess and Okey 101 (riftn-backend src/games).
+const ArcadeCorrespondenceChessPage = React.lazy(() => import("./pages/ArcadeCorrespondenceChessPage"));
+const ArcadeOkeyPage = React.lazy(() => import("./pages/ArcadeOkeyPage"));
+// SillyCoin: tap-to-mine idle game with in-game sending (riftn-backend src/games).
+const ArcadeSillyCoinPage = React.lazy(() => import("./pages/ArcadeSillyCoinPage"));
+// Gratitude pen pals: turn-based, no repeats, miss your turn and lose (riftn-backend src/games).
+const ArcadeGratitudePage = React.lazy(() => import("./pages/ArcadeGratitudePage"));
+const ArcadeSpendPage = React.lazy(() => import("./pages/ArcadeSpendPage"));
+// Chestard: dice-drop arcade game, server-rolled dice and a top 10 (riftn-backend src/games).
+const ArcadeChestardPage = React.lazy(() => import("./pages/ArcadeChestardPage"));
+const ArcadeSplurgePage = React.lazy(() => import("./pages/ArcadeSplurgePage"));
+// Mini app player: standalone like the arcade player, because the app owns the
+// viewport and dehub draws only its own header above it.
+const MiniAppPage = React.lazy(() => import("./pages/MiniAppPage"));
+const MiniAppDevRunPage = React.lazy(() => import("./pages/MiniAppPage").then((m) => ({ default: m.MiniAppDevRunPage })));
+const AppsPage = React.lazy(() => import("./pages/app/AppsPage"));
+const AppsDevPage = React.lazy(() => import("./pages/app/AppsDevPage"));
+
+
+
+// A route wait should not introduce a separate branded opening screen.
+const PageLoader = () => {
+  const { t: copy } = _useCopy();
+  return (
+    <div role="status" aria-label={copy('copy.dc380888c4e2', { defaultValue: 'Loading' })} data-startup-skeleton className="min-h-[100dvh] w-full px-4 py-16">
+      <div aria-hidden="true" className="mx-auto max-w-xl space-y-4">
+        <div className="theme-skeleton h-10 w-2/3 rounded-xl" />
+        <div className="theme-skeleton h-48 w-full rounded-xl" />
+        <div className="theme-skeleton h-4 w-4/5 rounded" />
+        <div className="theme-skeleton h-4 w-3/5 rounded" />
+      </div>
+    </div>
+  );
+};
+
+// riftn.com/chat waits in its own shape: the chat list beside an empty chat.
+const ChatPageLoader = () => {
+  const { t: copy } = _useCopy();
+  return (
+    <div role="status" aria-label={copy('copy.dc380888c4e2', { defaultValue: 'Loading' })} data-startup-skeleton className="fixed inset-0 z-[70] flex h-[100dvh] overflow-hidden bg-black">
+      <div aria-hidden="true" className="flex h-full w-full flex-col md:w-[clamp(18rem,30vw,26.5rem)] md:shrink-0 md:border-r md:border-white/[0.07]">
+        <div className="px-3 pb-2 pt-3"><div className="theme-skeleton h-12 rounded-2xl" /></div>
+        {[...Array(7)].map((_, i) => (
+          <div key={i} className="flex items-center gap-3 p-4">
+            <div className="theme-skeleton h-12 w-12 shrink-0 rounded-lg" />
+            <div className="min-w-0 flex-1 space-y-2">
+              <div className="theme-skeleton h-4 w-32 rounded" />
+              <div className="theme-skeleton h-3 w-48 max-w-full rounded" />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+/**
+ * Builder lived at /app/builder until it took the top-level /builder URL.
+ * Direct hits are 301'd at the edge (SPA_REDIRECTS + the preview rule in
+ * CLOUDFLARE_WORKER_SEO.js); this covers in-app navigation and every
+ * already-shared /app/builder/preview/<id> link that lands client-side.
+ */
+/**
+ * The NFT market moved into the Fractions page as its NFTs tab. Old links
+ * keep their filters and an opened NFT (?chain=&contract=&token=); the old
+ * market's own ?tab= becomes ?view= so it does not clash with the page's.
+ * Direct hits are 301'd the same way at the edge (CLOUDFLARE_WORKER_SEO.js).
+ */
+function NftsRedirect() {
+  const { search, hash } = useLocation();
+  const p = new URLSearchParams(search);
+  const view = p.get('tab');
+  p.delete('tab');
+  if (view && view !== 'browse') p.set('view', view);
+  const rest = p.toString();
+  return <Navigate to={`/fractions?tab=nfts${rest ? `&${rest}` : ''}${hash}`} replace />;
+}
+
+/**
+ * The Build board (once Requests, once Features) lives at /build. Every older
+ * address forwards with its ?feature= / ?request= / ?comment= / ?tab= and hash
+ * intact, so shared cards, notifications and old bookmarks still land on the
+ * right request. The edge 301s direct hits the same way.
+ */
+function BuildRedirect() {
+  const { search, hash } = useLocation();
+  return <Navigate to={`/build${search}${hash}`} replace />;
+}
+
+function LegacyBuilderRedirect() {
+  const { pathname, search, hash } = useLocation();
+  return <Navigate to={`${pathname.replace('/app/builder', '/builder')}${search}${hash}`} replace />;
+}
+
+/**
+ * One-time cache migration for existing testers.
+ * Clears stale auth/wagmi/web3auth data after auth flow changes.
+ * Bump CURRENT_CACHE_VERSION to force another clear in the future.
+ */
+const CURRENT_CACHE_VERSION = '2';
+function migrateStaleCacheOnce() {
+  if (typeof window === 'undefined') return;
+  if (localStorage.getItem('dehub_cache_version') === CURRENT_CACHE_VERSION) return;
+
+  ['dehub_token', 'dehub_token_timestamp', 'dehub_wallet', 'dehub_user',
+   'dehub_connection_source', 'dehub_deployed_sa'].forEach(k => localStorage.removeItem(k));
+
+  const keysToRemove: string[] = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key && (
+      key.startsWith('wagmi') || key.startsWith('@appkit') || key.startsWith('@w3m') ||
+      key.startsWith('wc@') || key.startsWith('WCM@') || key.startsWith('W3M') ||
+      key.startsWith('Web3Auth') || key.startsWith('openlogin')
+    )) {
+      keysToRemove.push(key);
+    }
+  }
+  keysToRemove.forEach(k => localStorage.removeItem(k));
+
+  localStorage.setItem('dehub_cache_version', CURRENT_CACHE_VERSION);
+}
+if (typeof window !== 'undefined') {
+  migrateStaleCacheOnce();
+  /*
+   * Separate from the migration above, which is a one-shot keyed on a version
+   * number. This runs every boot and is about SIZE: the per-profile and per-DM
+   * caches write one key each and never delete any, and when the shared 5 MB
+   * quota fills the failure is silent — the newest write is the one dropped.
+   *
+   * Imported dynamically and run on idle: nothing on screen waits for it, so
+   * it has no business in the entry bundle (scripts/boot-path-report.mjs).
+   */
+  const runSweep = () => {
+    import("@/lib/local-cache-sweep").then(m => m.sweepLocalCaches()).catch(() => {});
+  };
+  const ric = (window as { requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => void })
+    .requestIdleCallback;
+  if (ric) ric(runSweep, { timeout: 5000 });
+  else setTimeout(runSweep, 3000);
+  // Signed follows (lib/follow-graph): catch up quietly once the page has
+  // settled, and again whenever the built-in wallet unlocks.
+  const syncFollows = () => {
+    import("@/lib/follow-graph").then(m => m.syncFollowSignatures()).catch(() => {});
+  };
+  setTimeout(syncFollows, 20_000);
+  window.addEventListener('dehub:wallet-lock-changed', syncFollows);
+}
+
+const queryClient = new QueryClient({
+  // Every write in the app funnels through a mutation, but only a handful of
+  // call sites ever checked for AuthenticationError. Everywhere else an
+  // expired session surfaced as a generic red toast in whichever component
+  // happened to catch it, leaving "sign out and back in" as the only fix the
+  // user could discover. This is the one place that catches all of them.
+  mutationCache: new MutationCache({
+    onError: (error) => {
+      if (error instanceof AuthenticationError) {
+        // Dispatched rather than handled here: this runs outside React, so it
+        // cannot touch auth context directly. AuthProvider listens.
+        window.dispatchEvent(new CustomEvent('dehub:auth-expired'));
+      }
+    },
+  }),
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000,
+      gcTime: 15 * 60 * 1000,
+      refetchOnWindowFocus: false,
+      // Retrying an auth failure just burns a round trip — apiCall has already
+      // tried to refresh by the time it throws AuthenticationError.
+      retry: (failureCount, error) =>
+        !(error instanceof AuthenticationError) && failureCount < 1,
+    },
+  },
+});
+
+// Rehydrate the persisted feed/profile slice BEFORE the boot prefetch below, so
+// a reload / return visit paints last-known content instantly (esp. on slow
+// connections) while fresh data loads behind it. Restored entries are stale, so
+// they refetch automatically. See lib/query-persist.ts.
+restoreQueryCache(queryClient);
+startQueryPersist(queryClient);
+
+// Warm the default home-feed cache at boot: the /api/feed request runs while
+// the wallet chunk is still downloading, so content is ready when HomeFeed
+// mounts. Cold loads always use the default filters (they persist in
+// sessionStorage, which is empty on a fresh visit), so this key matches the
+// one HomeFeed computes. Signed-in viewers adopt the HTML request in the feed
+// hook itself, where cached block and mute lists can be applied.
+if (typeof window !== "undefined") {
+  const bootPath = window.location.pathname;
+  if ((bootPath === "/" || bootPath === "/app" || bootPath === "/app/") && !getFeedViewer()) {
+    prefetchUnifiedFeed(queryClient, {
+      limit: HOME_FEED_PAGE_SIZE,
+      sortBy: "createdAt",
+      sortOrder: "desc",
+      status: "all",
+    }).catch(() => {});
+  }
+}
+
+/**
+ * The sign-in sheet and the flags that follow it. Its own component so that
+ * opening the sheet re-renders only this, not AppContent and every page under
+ * it, inside the tap.
+ */
+function LoginSheetHost() {
+  const { isLoginModalOpen } = useLoginSheet();
+  const { closeLoginModal, isConnecting, isProcessingRedirect, requiresUsername } = useAuth();
+  const twoFactor = useTwoFactorPrompt();
+
+  // The login flow is "active" from the modal opening until any
+  // connect/redirect it started has finished, which is a little past the sheet
+  // closing. `data-login-active` publishes that on <html> for CSS to hang off.
+  //
+  // The same condition drives the background render gate: openLoginModal
+  // pauses the WebGL backgrounds synchronously at tap time; here it stays
+  // paused for as long as any part of the flow is in flight, and once
+  // everything has gone quiet the resume is deferred past the sheet's exit
+  // animation (see scheduleBackgroundResume).
+  useEffect(() => {
+    const active = isLoginModalOpen || isConnecting || isProcessingRedirect || requiresUsername || !!twoFactor;
+    document.documentElement.toggleAttribute('data-login-active', active);
+    if (active) {
+      setBackgroundPaused(true);
+    } else {
+      scheduleBackgroundResume();
+    }
+  }, [isLoginModalOpen, isConnecting, isProcessingRedirect, requiresUsername, twoFactor]);
+
+  // Always mounted, and closed it costs nothing: ui/drawer keeps vaul's Root
+  // out of the tree until a sheet first opens, so this renders no DOM and
+  // registers no listeners until someone taps "Log in". Mounting it up front
+  // is what buys the slide-up — a vaul Root created with `open` already true
+  // renders at its final position with no transition, which is why the sheet
+  // used to appear rather than come up.
+  //
+  // `requiresUsername` opens it too: an account with no profile finishes
+  // signing up on the sheet's profile step, which used to be a separate
+  // centred dialog on top of the whole viewport. The sheet refuses to close
+  // while that flag is set.
+  //
+  // A sign-in waiting on its two-step code holds it open as well (wallet and
+  // redirect logins can reach that point with the sheet already closed);
+  // closing it there cancels that sign-in.
+  const onOpenChange = useCallback((next: boolean) => {
+    if (!next) getTwoFactorPrompt()?.cancel();
+    closeLoginModal();
+  }, [closeLoginModal]);
+  return <LoginModal open={isLoginModalOpen || requiresUsername || !!twoFactor} onOpenChange={onOpenChange} />;
+}
+
+/**
+ * Authenticated app shell — everything that needs WalletProviders / AuthProvider.
+ * Only mounted after user has passed the hero (or is a returning user).
+ */
+function AppContent() {
+  useSwipeBack();
+  const { t: _copy } = _useCopy();
+  const { user, walletAddress, isAuthenticated, isLoading: authLoading, isConnecting, isProcessingRedirect, requiresUsername } = useAuth();
+  const queryClient = useQueryClient();
+  // Guests get the sign-in sheet's chunks after the page has fully loaded, so
+  // their first tap opens onto the real options, not the skeleton.
+  useEffect(() => {
+    if (!authLoading && !isAuthenticated) scheduleLoginPrefetch();
+  }, [authLoading, isAuthenticated]);
+  // Views are recorded by <PageViewTracker /> above <Routes>; this only
+  // attaches the signed-in address to them.
+  usePageViewAddress(walletAddress);
+  // A pushed notification focuses this tab and posts where it wanted to go.
+  useNotificationClickRouting(walletAddress);
+  // Session-wide, not page-wide: the bell count and the cached notifications
+  // page both go stale while the reader is anywhere else in the app.
+  useNotificationRealtime();
+  // Someone going live (or ending) shows on every live surface at once.
+  useLiveListRealtime();
+
+  const wallet = walletAddress ?? (user as { walletAddress?: string | null; address?: string | null } | null)?.walletAddress ?? (user as { address?: string | null } | null)?.address ?? null;
+  const referralAccountCreatedAt = user?.username ? user.createdAt : undefined;
+  const { search } = useLocation();
+
+  // Capture ?ref=CODE / ?aff=CODE on first load (first-touch wins, 90-day cookie).
+  // Passing the signed-in wallet lets the shared RPC remove an owner's own
+  // test visit from their affiliate analytics.
+  useEffect(() => {
+    import("@/lib/affiliateRef").then(m => m.captureAffiliateRefFromUrl(wallet, search));
+  }, [wallet, search]);
+
+  // When a wallet signs in, self-attribute any pending cookie referral.
+  useEffect(() => {
+    if (!wallet || !isAuthenticated || requiresUsername || isConnecting || isProcessingRedirect) return;
+    import("@/lib/affiliate").then(m => m.attributeReferralIfPending(wallet, referralAccountCreatedAt)).catch(() => undefined);
+  }, [wallet, isAuthenticated, requiresUsername, isConnecting, isProcessingRedirect, referralAccountCreatedAt]);
+
+  useEffect(() => {
+    if (!wallet || !isAuthenticated || requiresUsername || isConnecting || isProcessingRedirect) return;
+    import("@/lib/growth-session").then(m => m.syncGrowthSession(wallet)).catch(() => undefined);
+  }, [wallet, isAuthenticated, requiresUsername, isConnecting, isProcessingRedirect]);
+
+  // Share attribution and PostHog follow sign-out too (src/lib/growth-session.ts).
+  useEffect(() => {
+    if (!wallet || !isAuthenticated) import("@/lib/growth-session").then(m => m.syncGrowthSession(null)).catch(() => undefined);
+  }, [wallet, isAuthenticated]);
+
+  return (
+    <>
+      <SelfBadgeSync />
+      <DefaultChainSync />
+      <QuickActionsHost />
+      <PostMenuGate />
+      <BadgeShowcaseHost />
+      <CoAuthorSheetHost />
+      <ViewingPreferencesSync />
+      <AccountLanguageSync />
+      <FeedDefaultsSync />
+      <GiveawayPrizeModal />
+      <ConnectLinkedWalletModal />
+      <LoginSheetHost />
+      <SignInHandoff />
+      <AfterSignIn />
+      {isAuthenticated && <Suspense fallback={null}><DmUnreadBridge /></Suspense>}
+      {/* Phones: a DM that arrives elsewhere drops in at the top, pull down to reply. */}
+      {isAuthenticated && <Suspense fallback={null}><DmMessageBanner /></Suspense>}
+      <Suspense fallback={<PageLoader />}>
+        <SurfaceTransition>
+          {(loc) => (
+        <Routes location={loc}>
+          <Route path="/mobile-preview" element={<MobilePreview />} />
+        <Route path="/desktop-logo-preview" element={<Suspense fallback={<PageLoader />}><DesktopWordmarkPreview /></Suspense>} />
+          <Route path="/guide" element={<GuidePage />} />
+          {/* Hand-built static guide pages — higher route rank than the
+              /guides/* splat below, so they always win. */}
+          {/* Two older guides folded into the flagship post on the same query;
+              the worker 301s them too (CONSOLIDATED_GUIDES). */}
+          {Object.entries(CONSOLIDATED_GUIDES).map(([from, to]) => (
+            <Route key={from} path={`/guides/${from}`} element={<Navigate to={`/guides/${to}`} replace />} />
+          ))}
+          <Route path="/guides/best-decentralized-streaming-apps" element={<Suspense fallback={<DocsLoadingSkeleton pathname={loc.pathname} />}><BestDecentralizedStreaming /></Suspense>} />
+
+          {/* Unified docs/blog surface. This pathless parent stays mounted for
+              ALL of /docs, /docs/*, and /guides/<slug> (blog) — so crossing the
+              /docs ↔ /guides boundary (e.g. blog list → post) swaps only the
+              reading column, never the providers or the sidebar. DocsSurface
+              self-routes internally; the children below are match anchors only.
+              The skeleton keeps the Docs shell in place on a cold chunk load. */}
+          <Route element={<ErrorBoundary compact label={_copy("copy.7af023c43013", { defaultValue: "Docs" })}><Suspense fallback={<DocsLoadingSkeleton pathname={loc.pathname} />}><DocsSurface /></Suspense></ErrorBoundary>}>
+            <Route path="/docs" element={null} />
+            <Route path="/docs/*" element={null} />
+            <Route path="/guides/*" element={null} />
+          </Route>
+
+          {/* Builder — its own full-page surface like docs: mounted OUTSIDE
+              AppLayout so no app chrome renders, and getSurface('/builder')
+              plays the same panel slide-off when entering/leaving.
+              Top-level /builder is the canonical URL. `builder` is reserved in
+              src/lib/reserved-usernames.js, so the /:username route below can
+              never claim it — without that, the first person to register the
+              handle owns this URL and the page becomes unreachable. */}
+          <Route
+            path="/builder"
+            element={
+              <ErrorBoundary compact label={_copy("copy.090940e73258", { defaultValue: "Builder" })}>
+                <Suspense fallback={<PageLoader />}>
+                  <BuilderPage />
+                </Suspense>
+              </ErrorBoundary>
+            }
+          />
+          {/* Public, auth-free renderer for a built app — the shareable link. */}
+          <Route
+            path="/builder/preview/:id"
+            element={
+              <ErrorBoundary compact label={_copy("copy.c3d4759d35d0", { defaultValue: "Builder preview" })}>
+                <Suspense fallback={<PageLoader />}>
+                  <BuilderPreviewPage />
+                </Suspense>
+              </ErrorBoundary>
+            }
+          />
+          {/* Links minted while Builder lived under /app. Kept so every already
+              shared preview link keeps resolving; the edge 301s direct hits. */}
+          <Route path="/app/builder/*" element={<LegacyBuilderRedirect />} />
+
+          {/* Random pairing connection test. Unlisted on purpose — no nav entry
+              and no app chrome; it exists to prove matchmaking and the WebRTC
+              path before any camera code lands. */}
+          <Route
+            path="/app/pair"
+            element={
+              <ErrorBoundary compact label={_copy("copy.ed6e31c6f372", { defaultValue: "Pair test" })}>
+                <Suspense fallback={<PageLoader />}>
+                  <PairTestPage />
+                </Suspense>
+              </ErrorBoundary>
+            }
+          />
+
+          <Route path="/delete-account" element={<DeleteAccount />} />
+          <Route path="/auth/confirm" element={<Suspense fallback={<PageLoader />}><AuthConfirm /></Suspense>} />
+          {/* Where oauth.telegram.org is allowed to send people back to. Must
+              stay on this exact path — it is registered against the bot, and
+              the mobile app builds the same URL with ?app=1. */}
+          <Route path="/auth/telegram" element={<Suspense fallback={<PageLoader />}><TelegramAuth /></Suspense>} />
+          {/* Where Mastodon apps send someone signing in to dehub.io. The token
+              endpoints beside it are relayed to the API by the Worker. */}
+          <Route path="/oauth/authorize" element={<Suspense fallback={<PageLoader />}><OAuthAuthorizePage /></Suspense>} />
+
+          {/*
+            /admin used to live here — a second admin frontend on the public
+            site, sharing the real admin API token behind a route guard whose
+            entire body was "does a token exist". No role check, no verification.
+            Every page it carried is now on godmode.dehub.io, including the ads
+            review queue, which moved there last because it was the only one
+            without an equivalent. Nothing links here and nothing should.
+          */}
+
+          <Route path="/creators" element={<CreatorsPage />} />
+          <Route path="/skill.md" element={<SkillPage />} />
+          <Route path="/editor" element={<Suspense fallback={<PageLoader />}><CreatorEditorHost /></Suspense>} />
+          <Route path="/creator/remix" element={<Suspense fallback={<PageLoader />}><VideoRemix /></Suspense>} />
+          <Route path="/creator" element={<Suspense fallback={<PageLoader />}><CreatorEditorHost /></Suspense>} />
+          <Route path="/creator/gallery" element={<Suspense fallback={<PageLoader />}><CreatorGalleryPage /></Suspense>} />
+          <Route path="/creator/gallery/:id" element={<Suspense fallback={<PageLoader />}><CreatorGalleryPage /></Suspense>} />
+          <Route path="/creator/learn" element={<Suspense fallback={<PageLoader />}><CreatorLearningPage /></Suspense>} />
+          <Route path="/creator/flow" element={<Suspense fallback={<PageLoader />}><CreatorFlowPage /></Suspense>} />
+          <Route path="/creator/remake" element={<Suspense fallback={<PageLoader />}><MaboroshiPage remake /></Suspense>} />
+          <Route path="/creator/maboroshi" element={<Suspense fallback={<PageLoader />}><MaboroshiPage /></Suspense>} />
+          <Route path="/creator/flow/:id" element={<Suspense fallback={<PageLoader />}><CreatorFlowPublicPage /></Suspense>} />
+          {/* /r/:code renders in the top-level Routes (outside WalletProviders) — see App below */}
+          <Route path="/prompt" element={<Suspense fallback={<PageLoader />}><PromptLanding /></Suspense>} />
+          <Route path="/premium" element={<Suspense fallback={<PageLoader />}><PremiumPage /></Suspense>} />
+          <Route path="/pricing" element={<Suspense fallback={<PageLoader />}><PricingPage /></Suspense>} />
+          {/* Where the Android app sends a buyer to pay (?plan=, plus Play's
+              ?gpt= token). The app claims /premium and /pricing as verified
+              links, exact path only, so checking out on those URLs bounced
+              straight back into the app. These paths are not claimed and open
+              in the browser. Both pages already canonicalize to the bare URL. */}
+          <Route path="/premium/checkout" element={<Suspense fallback={<PageLoader />}><PremiumPage /></Suspense>} />
+          <Route path="/pricing/checkout" element={<Suspense fallback={<PageLoader />}><PricingPage /></Suspense>} />
+          <Route path="/depin" element={<Suspense fallback={<PageLoader />}><DePinPage /></Suspense>} />
+          {/* Prize draws. dehub.net/prize-draw and raffle.dehub.net both 301
+              here (CLOUDFLARE_WORKER_SEO.js), so this route is the landing for
+              every legacy raffle URL the old domain still holds in the index. */}
+          <Route path="/raffle" element={<Suspense fallback={<PageLoader />}><RafflePage /></Suspense>} />
+          <Route path="/connect" element={<Suspense fallback={<PageLoader />}><ConnectPage /></Suspense>} />
+          <Route path="/connect/chatgpt" element={<Suspense fallback={<PageLoader />}><ConnectChatGPTPage /></Suspense>} />
+          <Route path="/connect/claude" element={<Suspense fallback={<PageLoader />}><ConnectClaudePage /></Suspense>} />
+          <Route path="/mcp" element={<Navigate to="/connect" replace />} />
+          <Route path="/developers" element={<Navigate to="/docs/developers" replace />} />
+          <Route path="/developer" element={<Navigate to="/docs/developers" replace />} />
+          {/* The Build board's older addresses. */}
+          <Route path="/requests" element={<BuildRedirect />} />
+          <Route path="/features" element={<BuildRedirect />} />
+          <Route path="/app/features" element={<BuildRedirect />} />
+          <Route path="/app/requests" element={<BuildRedirect />} />
+          <Route path="/app/build" element={<BuildRedirect />} />
+          {/* Renamed to /converter — kept as a redirect for anyone with the old link. */}
+          <Route path="/yt-dlp" element={<Navigate to="/converter" replace />} />
+          {/* The app's sign-in help link points here; without it the address fell
+              to the username catch-all and showed a missing profile. */}
+          <Route path="/support" element={<Navigate to="/docs/contact" replace />} />
+
+          {/* Direct APK download lander. Standalone (no AppLayout) — it is a
+              single non-scrolling screen that owns the viewport, and it is
+              reached from outside the app far more often than from inside it. */}
+          <Route path="/apk" element={<Suspense fallback={<PageLoader />}><ApkPage /></Suspense>} />
+          {/* Messages full screen, Telegram-style: list and chat side by side,
+              no app chrome. Standalone for the same reason as /apk: it owns
+              the viewport. Reached from the button in Messages. */}
+          <Route path="/chat" element={<Suspense fallback={<ChatPageLoader />}><FullScreenChatPage /></Suspense>} />
+          <Route path="/app/chat" element={<Navigate to="/chat" replace />} />
+          <Route path="/stream" element={<Suspense fallback={<PageLoader />}><StreamPage /></Suspense>} />
+
+          <Route path="/dehub-app" element={<Suspense fallback={<PageLoader />}><DehubAppPage /></Suspense>} />
+
+          {/* The moderation handbook, published. Standalone for the same reason
+              as /apk — it owns the viewport and is reached from outside the app
+              far more often than from inside it. The same document is served to
+              moderators at godmode.dehub.io/manual. */}
+          <Route path="/admin-manual" element={<Suspense fallback={<PageLoader />}><AdminManualPage /></Suspense>} />
+
+          {/* Arcade player. Two segments, so it outranks the /:username
+              catch-all inside AppLayout below and never has to be ordered
+              against it — but it lives out here rather than in the layout
+              because the game owns the viewport. The /arcade grid itself DOES
+              sit in the layout (see the cached pages below). */}
+          <Route path="/arcade/correspondence-chess" element={<Suspense fallback={<PageLoader />}><ArcadeCorrespondenceChessPage /></Suspense>} />
+          <Route path="/arcade/okey" element={<Suspense fallback={<PageLoader />}><ArcadeOkeyPage /></Suspense>} />
+          <Route path="/arcade/sillycoin" element={<Suspense fallback={<PageLoader />}><ArcadeSillyCoinPage /></Suspense>} />
+          <Route path="/arcade/gratitude" element={<Suspense fallback={<PageLoader />}><ArcadeGratitudePage /></Suspense>} />
+          <Route path="/arcade/spend" element={<Suspense fallback={<PageLoader />}><ArcadeSpendPage /></Suspense>} />
+          <Route path="/arcade/chestard" element={<Suspense fallback={<PageLoader />}><ArcadeChestardPage /></Suspense>} />
+          <Route path="/arcade/splurge" element={<Suspense fallback={<PageLoader />}><ArcadeSplurgePage /></Suspense>} />
+          <Route path="/arcade/:slug" element={<Suspense fallback={<PageLoader />}><ArcadeGamePage /></Suspense>} />
+
+          {/* Online chess: the King's Gambit lobby and live board. Standalone
+              for the same reason as the player above — a live match owns the
+              viewport — and three segments, so it needs no ordering against
+              /arcade/:slug either. */}
+          <Route path="/arcade/kings-gambit/online" element={<Suspense fallback={<PageLoader />}><ArcadeChessOnlinePage /></Suspense>} />
+
+          {/* Mini app player. Two and three segments, so neither is ordered
+              against the /:username catch-all; /apps and /apps/dev themselves
+              sit inside AppLayout below. */}
+          <Route path="/apps/:slug" element={<Suspense fallback={<PageLoader />}><MiniAppPage /></Suspense>} />
+          <Route path="/apps/dev/run" element={<Suspense fallback={<PageLoader />}><MiniAppDevRunPage /></Suspense>} />
+
+
+
+          {/* Single shared AppLayout — header/sidebar mount ONCE and persist across all app routes */}
+          <Route element={<Suspense fallback={<PageLoader />}><AppLayout /></Suspense>}>
+            <Route path="/jobs" element={null} />
+            <Route path="/stats" element={null} />
+            {/* Revenue & costs was parked here before it joined /stats. */}
+            <Route path="/stats/money" element={<Navigate to="/stats" replace />} />
+            <Route path="/build" element={null} />
+            <Route path="/feedback" element={null} />
+            <Route path="/compare" element={<Suspense fallback={<PageLoader />}><ComparePage /></Suspense>} />
+            <Route path="/app/compare" element={<Suspense fallback={<PageLoader />}><ComparePage /></Suspense>} />
+            <Route path="/governance" element={null} />
+            <Route path="/dao" element={null} />
+            <Route path="/stake" element={null} />
+            <Route path="/communities" element={null} />
+            <Route path="/communities/join/:code" element={<Suspense fallback={<PageLoader />}><CommunityInvitePage /></Suspense>} />
+            <Route path="/communities/:slug" element={<Suspense fallback={<PageLoader />}><CommunityPage /></Suspense>} />
+
+            {/* Sits inside the layout, not with the marketing pages it used
+                to ship beside — it's a signed-in action, not a landing page,
+                so it gets the sidebar/nav chrome like wallet/profile/etc. */}
+            <Route path="/converter" element={<Suspense fallback={<PageLoader />}><YoutubeImportPage /></Suspense>} />
+
+            {/* Cinema sits INSIDE the layout, unlike the marketing pages it
+                shipped beside. It shares to the feed and it collects reviews,
+                so it needs the app's provider stack — ShareEntityDrawer calls
+                useGlobalDropZone, which only exists under AppLayout, and it is
+                AppLayout that renders the composer that "share to feed" opens.
+                Standalone, opening a title threw straight to the error
+                boundary. */}
+            <Route path="/cinema" element={<Suspense fallback={<PageLoader />}><CinemaPage /></Suspense>} />
+
+            {/* The mini app store and the developer tool. Inside the layout: they
+                are pages you browse, unlike the player at /apps/:slug. */}
+            <Route path="/apps" element={<Suspense fallback={<PageLoader />}><AppsPage /></Suspense>} />
+            <Route path="/apps/dev" element={<Suspense fallback={<PageLoader />}><AppsDevPage /></Suspense>} />
+            {/* One title. Same page — the open film is URL state so it can be
+                shared, carded and indexed; see the note in CinemaPage. */}
+            <Route path="/cinema/:filmType/:filmId" element={<Suspense fallback={<PageLoader />}><CinemaPage /></Suspense>} />
+
+            {/* dehub.io root IS the home feed — rendered in place, no redirect.
+                Same cached HomePage as /app (see PersistentPageCache home paths). */}
+            <Route path="/" element={null} />
+            <Route path="/dex" element={<Suspense fallback={<PageLoader />}><DexPage /></Suspense>} />
+            <Route path="/dex/:chain/:address" element={<Suspense fallback={<PageLoader />}><DexPoolPage /></Suspense>} />
+
+            {/* App routes — cached pages render null, PersistentPageCache manages them */}
+            <Route path="/app">
+              <Route index element={null} />
+              <Route path="affiliate" element={null} />
+              <Route path="arcade" element={null} />
+              
+              <Route path="explore" element={null} />
+              {/* Old feed-tab links (shared before the clean URLs) land on the tab, not a 404. */}
+              <Route path="shorts" element={<Navigate to="/shorts" replace />} />
+              <Route path="videos" element={<Navigate to="/videos" replace />} />
+              <Route path="images" element={<Navigate to="/images" replace />} />
+              <Route path="profile" element={null} />
+              {/* The composer as a page, so it has an address to frame — see pages/app/UploadPage. */}
+              <Route path="upload" element={<Suspense fallback={null}><UploadPage /></Suspense>} />
+              <Route path="migrate-youtube" element={<Suspense fallback={<PageLoader />}><YoutubeMigratePage /></Suspense>} />
+              <Route path="notifications" element={null} />
+              <Route path="messages" element={null} />
+              <Route path="assistant" element={null} />
+              <Route path="leaderboard" element={null} />
+              <Route path="bookmarks" element={null} />
+              <Route path="settings" element={null} />
+              <Route path="command-centre" element={null} />
+              <Route path="wallet" element={null} />
+              <Route path="music" element={null} />
+              <Route path="stages" element={null} />
+              <Route path="buy" element={null} />
+              <Route path="agents" element={null} />
+              <Route path="tv" element={null} />
+              <Route path="feedback" element={null} />
+              <Route path="planned" element={null} />
+              <Route path="governance" element={null} />
+              <Route path="dao" element={null} />
+              <Route path="governance/:proposalId" element={<Suspense fallback={<PageLoader />}><GovernanceProposalPage /></Suspense>} />
+              <Route path="packs" element={<Suspense fallback={<PageLoader />}><PacksPage /></Suspense>} />
+              <Route path="packs/:slug" element={<Suspense fallback={<PageLoader />}><PackPage /></Suspense>} />
+              <Route path="stake" element={null} />
+              <Route path="superpowers" element={<Suspense fallback={<PageLoader />}><SuperPowersPage /></Suspense>} />
+              <Route path="bridge" element={null} />
+              <Route path="top-100" element={null} />
+              <Route path="jobs" element={null} />
+              <Route path="glossary" element={null} />
+              <Route path="stats" element={null} />
+              <Route path="events" element={null} />
+              <Route path="events/:eventNumber" element={<Suspense fallback={<PageLoader />}><EventPage /></Suspense>} />
+              <Route path="communities" element={null} />
+              <Route path="fractions" element={null} />
+              <Route path="stores" element={null} />
+              <Route path="stores/:storeId" element={<Suspense fallback={<PageLoader />}><StoreDetailPage /></Suspense>} />
+              <Route path="usernames" element={null} />
+              <Route path="nfts" element={<NftsRedirect />} />
+              <Route path="accounts" element={null} />
+              <Route path="ads" element={null} />
+              <Route path="work" element={null} />
+              <Route path="work/post" element={<Suspense fallback={<PageLoader />}><WorkPostPage /></Suspense>} />
+              <Route path="work/disputes" element={<Suspense fallback={<PageLoader />}><WorkDisputesPage /></Suspense>} />
+              <Route path="work/history" element={<Suspense fallback={<PageLoader />}><WorkHistoryPage /></Suspense>} />
+              {/* A bounty's own URL is /bounty/<n> (work_jobs.job_number). The
+                  /work/<uuid> pair below is the pre-numbers share form and
+                  only redirects — see BountyLegacyRedirect. */}
+              <Route path="bounty/:jobKey" element={<Suspense fallback={<PageLoader />}><WorkJobDetailPage /></Suspense>} />
+              <Route path="bounty/:jobKey/edit" element={<Suspense fallback={<PageLoader />}><WorkEditPage /></Suspense>} />
+              <Route path="work/:jobKey" element={<Suspense fallback={<PageLoader />}><BountyLegacyRedirect /></Suspense>} />
+              <Route path="work/:jobKey/edit" element={<Suspense fallback={<PageLoader />}><BountyLegacyRedirect suffix="/edit" /></Suspense>} />
+
+              <Route path="communities/join/:code" element={<Suspense fallback={<PageLoader />}><CommunityInvitePage /></Suspense>} />
+              <Route path="communities/:slug" element={<Suspense fallback={<PageLoader />}><CommunityPage /></Suspense>} />
+              <Route path="post/:postId" element={<Suspense fallback={<PageLoader />}><SinglePostPage /></Suspense>} />
+              <Route path="video/:tokenId" element={<Suspense fallback={<PageLoader />}><SinglePostPage /></Suspense>} />
+              <Route path="newpost/:n" element={<Suspense fallback={<PageLoader />}><NewPostPage /></Suspense>} />
+              <Route path="moment/:id" element={<Suspense fallback={<PageLoader />}><StoryPermalinkPage /></Suspense>} />
+              <Route path="post/:postId/info" element={<Suspense fallback={<PageLoader />}><PostInfoPage /></Suspense>} />
+              <Route path="post/:postId/duets" element={<Suspense fallback={<PageLoader />}><DuetsPage /></Suspense>} />
+              <Route path="post/:postId/reactions" element={<Suspense fallback={<PageLoader />}><PostReactionsPage /></Suspense>} />
+              {/* Launchpad — hidden, no nav links, reachable by URL only */}
+              <Route path="launchpad" element={<Suspense fallback={<PageLoader />}><LaunchpadPage /></Suspense>}>
+                <Route path="create" element={<Suspense fallback={<PageLoader />}><LaunchpadCreatePage /></Suspense>} />
+              </Route>
+              <Route path="launchpad/:mintId" element={<Suspense fallback={<PageLoader />}><LaunchpadCoinPage /></Suspense>} />
+            </Route>
+
+            {/* /work aliases */}
+            <Route path="/work" element={null} />
+            <Route path="/work/post" element={<Suspense fallback={<PageLoader />}><WorkPostPage /></Suspense>} />
+            <Route path="/work/disputes" element={<Suspense fallback={<PageLoader />}><WorkDisputesPage /></Suspense>} />
+            <Route path="/work/history" element={<Suspense fallback={<PageLoader />}><WorkHistoryPage /></Suspense>} />
+            <Route path="/work/:jobKey" element={<Suspense fallback={<PageLoader />}><BountyLegacyRedirect /></Suspense>} />
+            <Route path="/work/:jobKey/edit" element={<Suspense fallback={<PageLoader />}><BountyLegacyRedirect suffix="/edit" /></Suspense>} />
+
+            {/* Canonical bounty URLs. `bounty` is reserved in
+                src/lib/reserved-usernames.js so no account can claim the
+                handle and shadow this space. */}
+            <Route path="/bounty/:jobKey" element={<Suspense fallback={<PageLoader />}><WorkJobDetailPage /></Suspense>} />
+            <Route path="/bounty/:jobKey/edit" element={<Suspense fallback={<PageLoader />}><WorkEditPage /></Suspense>} />
+
+            {/* /affiliate alias (page itself is rendered by PersistentPageCache) */}
+            <Route path="/affiliate" element={null} />
+
+            {/* /usernames alias — the canonical form the worker links and
+                sitemaps, so the SPA has to answer it too. */}
+            <Route path="/usernames" element={null} />
+            {/* The NFT market moved into the Fractions page as its NFTs tab. */}
+            <Route path="/nfts" element={<NftsRedirect />} />
+
+            {/* /accounts alias — same shape as /usernames above. */}
+            <Route path="/accounts" element={null} />
+
+            {/* The rest of the /app children, at the bare address as well.
+                Every section above had already been given its twin one at a
+                time, each after someone noticed a shared dehub.io/<x> link
+                landing on the /:username catch-all and rendering the empty
+                profile of a user who does not exist. These are the ones that
+                had not had that moment yet — /fractions and
+                /superpowers are public pages people link at, and the private
+                ones are what a support answer or a bookmark gets typed as.
+                All of these names are reserved in reserved-usernames.js, so
+                the bare path is ours to take.
+
+                `/wallet` is deliberately absent: a real account registered
+                that handle in Feb 2026, and routing the bare path would take
+                their profile away. /app/wallet still works. */}
+            <Route path="/stores" element={null} />
+            <Route path="/stores/:storeId" element={<Suspense fallback={<PageLoader />}><StoreDetailPage /></Suspense>} />
+            <Route path="/fractions" element={null} />
+            <Route path="/planned" element={null} />
+            <Route path="/superpowers" element={<Suspense fallback={<PageLoader />}><SuperPowersPage /></Suspense>} />
+            <Route path="/ads" element={null} />
+            {/* PersistentPageCache had already been given the `/glossary` alias
+                and the router never got the matching route, so the bare URL
+                went to the /:username catch-all anyway. */}
+            <Route path="/glossary" element={null} />
+            <Route path="/buy" element={null} />
+            <Route path="/settings" element={null} />
+            <Route path="/notifications" element={null} />
+            <Route path="/messages" element={null} />
+            <Route path="/bookmarks" element={null} />
+            <Route path="/command-centre" element={null} />
+            <Route path="/profile" element={null} />
+            <Route path="/upload" element={<Suspense fallback={null}><UploadPage /></Suspense>} />
+            <Route path="/migrate-youtube" element={<Suspense fallback={<PageLoader />}><YoutubeMigratePage /></Suspense>} />
+
+            {/* Detail pages under a section that already had its bare twin but
+                whose children were still /app-only. A share link to one of
+                these is the whole point of the page having an address. */}
+            <Route path="/events/:eventNumber" element={<Suspense fallback={<PageLoader />}><EventPage /></Suspense>} />
+            <Route path="/governance/:proposalId" element={<Suspense fallback={<PageLoader />}><GovernanceProposalPage /></Suspense>} />
+            <Route path="/packs" element={<Suspense fallback={<PageLoader />}><PacksPage /></Suspense>} />
+            <Route path="/packs/:slug" element={<Suspense fallback={<PageLoader />}><PackPage /></Suspense>} />
+            <Route path="/moment/:id" element={<Suspense fallback={<PageLoader />}><StoryPermalinkPage /></Suspense>} />
+            <Route path="/post/:postId" element={<Suspense fallback={<PageLoader />}><SinglePostPage /></Suspense>} />
+            <Route path="/post/:postId/info" element={<Suspense fallback={<PageLoader />}><PostInfoPage /></Suspense>} />
+            <Route path="/post/:postId/reactions" element={<Suspense fallback={<PageLoader />}><PostReactionsPage /></Suspense>} />
+            <Route path="/post/:postId/duets" element={<Suspense fallback={<PageLoader />}><DuetsPage /></Suspense>} />
+            <Route path="/video/:tokenId" element={<Suspense fallback={<PageLoader />}><SinglePostPage /></Suspense>} />
+
+
+            {/* Stage invite links. /stages/:id is the short numeric share form
+                (audio_spaces.short_id); the exact /stages path below still opens
+                the hub page — a param segment never matches the bare route. */}
+            {/* Co-stream invite links: a host bringing someone on screen. */}
+            <Route path="/app/live/join/:id" element={<Suspense fallback={<PageLoader />}><CoStreamJoinPage /></Suspense>} />
+            <Route path="/stage/:id" element={<Suspense fallback={<PageLoader />}><StageDeepLinkPage /></Suspense>} />
+            {/* Stage 15 was replaced by stage 18; old links land on the new one. */}
+            <Route path="/stages/15" element={<Navigate to="/stages/18" replace />} />
+            <Route path="/stages/:id" element={<Suspense fallback={<PageLoader />}><StageDeepLinkPage /></Suspense>} />
+            {/* A posted live clip, /clip/<n> (live_clips.short_id). */}
+            <Route path="/clip/:id" element={<Suspense fallback={<PageLoader />}><ClipPage /></Suspense>} />
+            {/* An off-chain post's own URL — the canonical share form is top-level. */}
+            <Route path="/newpost/:n" element={<Suspense fallback={<PageLoader />}><NewPostPage /></Suspense>} />
+
+            {/* Short post URLs, mirroring /stages/:n. /posts/1 opens the post;
+                /b hangs the author's own straight comments off it as a thread
+                (X-style), and /posts/1/b/<commentId> deep-links one entry. */}
+            <Route path="/posts/:postId" element={<Suspense fallback={<PageLoader />}><SinglePostPage /></Suspense>} />
+            <Route path="/posts/:postId/b" element={<Suspense fallback={<PageLoader />}><SinglePostPage /></Suspense>} />
+            <Route path="/posts/:postId/b/:commentId" element={<Suspense fallback={<PageLoader />}><SinglePostPage /></Suspense>} />
+
+            {/* Launchpad — public URL alias (hidden, no nav links) */}
+            <Route path="/launchpad" element={<Suspense fallback={<PageLoader />}><LaunchpadPage /></Suspense>}>
+              <Route path="create" element={<Suspense fallback={<PageLoader />}><LaunchpadCreatePage /></Suspense>} />
+            </Route>
+            <Route path="/launchpad/:mintId" element={<Suspense fallback={<PageLoader />}><LaunchpadCoinPage /></Suspense>} />
+
+            {/* Clean, indexable section URLs (SEO sitelink targets). /explore
+                renders the Explore page; /videos and /shorts open the home feed
+                on the matching tab. All are managed by PersistentPageCache and
+                must sit BEFORE /:username so they aren't caught as profiles.
+                The bare forms below exist because the SEO worker canonicalizes
+                /app/<section> to /<section> and links the bare URLs in bot HTML
+                and the sitemap — without a matching SPA route, a human clicking
+                a search result landed on the /:username catch-all (dehub.io/music
+                rendered the empty profile of the user "@music"). */}
+            <Route path="/explore" element={null} />
+            {/* The arcade grid. Bare /arcade is the canonical URL the sitemap
+                and the nav both point at; /app/arcade is the twin every other
+                section has. Both are backed by one cached page. */}
+            <Route path="/arcade" element={null} />
+            <Route path="/stages" element={null} />
+            <Route path="/videos" element={null} />
+            <Route path="/images" element={null} />
+            <Route path="/shorts" element={null} />
+            <Route path="/music" element={null} />
+            <Route path="/tv" element={null} />
+            {/* Where the TV app sends people to sign it in ("or visit riftn.com/link"). */}
+            <Route path="/link" element={<Suspense fallback={<PageLoader />}><LinkTvPage /></Suspense>} />
+            <Route path="/music/binary-metal" element={<Suspense fallback={<PageLoader />}><BinaryMetalPage /></Suspense>} />
+            <Route path="/bridge" element={null} />
+            <Route path="/agents" element={null} />
+            <Route path="/assistant" element={null} />
+            <Route path="/top-100" element={null} />
+            <Route path="/leaderboard" element={null} />
+            <Route path="/events" element={null} />
+            {/* Radio is a tab of the Music page, not its own page — but the
+                worker advertises /radio to bots, so give humans a landing on
+                the canonical bare form (not the /app twin). */}
+            <Route path="/radio" element={<Navigate to="/music" replace />} />
+
+            {/* Username profiles — inside shared layout so header never remounts */}
+            <Route path="/:username" element={<Suspense fallback={<SeededProfileSkeleton />}><ProfilePage /></Suspense>} />
+          </Route>
+
+          <Route path="*" element={<Suspense fallback={<PageLoader />}><NotFound /></Suspense>} />
+        </Routes>
+          )}
+        </SurfaceTransition>
+      </Suspense>
+    </>
+  );
+}
+
+// Shown while the wallet chunk loads. On home/app routes, paint the real
+// shell skeleton immediately instead of a black screen; other routes (docs,
+// marketing pages) keep the plain boot shell to avoid a misleading flash.
+const WalletLoader = () => {
+  const path = window.location.pathname;
+  const isAppShellRoute = path === "/" || path === "/app" || path.startsWith("/app/");
+  if (isAppShellRoute) return <HomeShellSkeleton />;
+  // Docs/blog readers (SEO landings) used to get a BLANK page here while the
+  // wallet chunk loaded. Give them a neutral reading-page skeleton — plain
+  // divs only, theme-agnostic greys that read fine on light or dark.
+  if (path.startsWith("/docs") || path.startsWith("/guides")) {
+    return (
+      <div className="mx-auto max-w-3xl px-6 py-16 animate-pulse" aria-hidden="true">
+        <div className="h-8 w-2/3 rounded bg-zinc-500/20 mb-6" />
+        <div className="space-y-3">
+          <div className="h-4 w-full rounded bg-zinc-500/15" />
+          <div className="h-4 w-11/12 rounded bg-zinc-500/15" />
+          <div className="h-4 w-4/5 rounded bg-zinc-500/15" />
+          <div className="h-4 w-full rounded bg-zinc-500/15" />
+          <div className="h-4 w-3/4 rounded bg-zinc-500/15" />
+        </div>
+      </div>
+    );
+  }
+  // Everything else (marketing/standalone routes) used to get a blank screen
+  // for the whole wallet-chunk fetch.
+  return <PageLoader />;
+};
+
+/**
+ * Last-resort boundary for anything the contained per-surface boundaries don't
+ * cover — the providers, AppLayout's own chrome, and the standalone routes that
+ * render outside it (/premium, /pricing, /connect, NotFound, …).
+ *
+ * It has to live INSIDE BrowserRouter for the resetKey: catching unmounts the
+ * whole <Routes> subtree, so nothing below can navigate, and without a reset on
+ * the route the only ways out were a hard refresh or the fallback's Go Home
+ * button. With it, Back/Forward recovers too, and the boundary in main.tsx goes
+ * back to being what it should be — the net for a failure during boot itself.
+ */
+function RouteErrorBoundary({ children }: { children: ReactNode }) {
+  const location = useLocation();
+  return <ErrorBoundary resetKey={location.pathname}>{children}</ErrorBoundary>;
+}
+
+const App = () => (
+  <HelmetProvider>
+    <I18nextProvider i18n={i18nInstance}>
+      <QueryClientProvider client={queryClient}>
+        {/*
+         * BrowserRouter is now OUTSIDE WalletProviders so the hero route (/)
+         * can render immediately without waiting for the ~1.5 MB wallet chunk.
+         */}
+        <BrowserRouter>
+          <TapPendingLogoBridge />
+          {/* Publishes the router's navigate() to lib/client-navigate, so post
+              bodies can route without hand-rolling a history push. */}
+          <ClientNavigateBridge />
+          <LanguageRouteSync />
+          <SEOHead />
+          <Sonner />
+          <OfflineConnectionToast />
+          {/* Watches /version.json for a newer deploy; renders nothing itself. */}
+          <Suspense fallback={null}><NewVersionToast /></Suspense>
+          {/*
+           * dehub.io has no separate landing page — `/` is the app home. The
+           * old 3D "nebula" lander (Welcome To Our World hero + app-store
+           * download buttons) was archived on 2026-07-14; recover it from git
+           * history at 27c5f2890 (src/pages/Index.tsx + src/components/hero/*
+           * + src/components/ui/futuristic-alien-hero.tsx) if ever needed.
+           *
+           * All routes (including `/`) go through WalletProviders; the redirect
+           * from `/` to `/app` happens inside AppContent's <Routes>.
+           */}
+          <RouteErrorBoundary>
+          <MaintenanceGate>
+          {/* Above <Routes>: /r/:code never reaches AppContent, and it is a
+              new visitor's first touch. */}
+          <PageViewTracker />
+          <ChatLinkCatcher />
+          <Routes>
+            <Route path="/maintenance" element={<Suspense fallback={null}><MaintenancePage /></Suspense>} />
+            {/*
+             * Referral lander — a new user's first touch of Riftn. Mounted
+             * OUTSIDE WalletProviders (it uses no auth/wallet state) so it
+             * paints without waiting for the ~1.5 MB wallet chunk.
+             */}
+            <Route path="/r/:code" element={<ReferralLanding />} />
+            {/* A creator's stream overlay, as an OBS browser source. index.html
+                makes these pages transparent before the bundle runs. */}
+            <Route path="/overlay/:token" element={<Suspense fallback={null}><ObsOverlayPage /></Suspense>} />
+            {/* /r/<code>/<any/path> attributes the visit, then redirects to that
+                path — one shareable link that earns and lands somewhere specific. */}
+            <Route path="/r/:code/*" element={<ReferralLanding />} />
+            {StateGalleryPage && (
+              <Route
+                path="/app/state-gallery"
+                element={
+                  <ThemePreviewProvider>
+                    <TooltipProvider>
+                      <ErrorBoundary fallback={null}>
+                        <ThemedBackgrounds preview />
+                      </ErrorBoundary>
+                      <NativeTitleTooltips />
+                      <Suspense fallback={<PageLoader />}>
+                        {new URLSearchParams(window.location.search).has('calls') ? <CallStageGallery /> : <StateGalleryPage />}
+                      </Suspense>
+                    </TooltipProvider>
+                  </ThemePreviewProvider>
+                }
+              />
+            )}
+            <Route
+              path="*"
+              element={
+                <Suspense fallback={<WalletLoader />}>
+                  <WalletProviders>
+                    <UserPreferencesProvider>
+                    <ThemeProvider>
+                      <OptimisticPostsProvider>
+                        <TooltipProvider>
+                          {/* The animated canvas is purely decorative — a WebGL
+                              context loss or GPU throw here must NEVER take down
+                              the app (it used to, via the single root boundary).
+                              Fail silent: worst case you lose the background. */}
+                          <ErrorBoundary fallback={null}>
+                            <ThemedBackgrounds />
+                          </ErrorBoundary>
+
+                          {/* Engagement-gated soft-ask for browser
+                              notifications; renders nothing itself. Reads
+                              auth, so it must stay inside WalletProviders. */}
+                          <NotificationsPromptToast />
+
+                          {/* Asks accounts with no profile picture to add one,
+                              a few times at most. Same provider requirement. */}
+                          <AvatarPrompt />
+                          <NonFollowerOffer />
+
+                          {/* Halloween 2026 only: once per device while Horror is on. */}
+                          <HalloweenGhostPrompt />
+
+                          {/* Says so when a granted permission is delivering
+                              nothing, which the Settings row alone only ever
+                              tells someone who goes looking. Renders nothing
+                              itself; same provider requirement as above. */}
+                          <PushBlockedToast />
+
+                          {/* Swaps the OS's grey `title=` tooltip for our own
+                              hover label everywhere. Renders nothing itself. */}
+                          <NativeTitleTooltips />
+
+                          <AppContent />
+                        </TooltipProvider>
+                      </OptimisticPostsProvider>
+                    </ThemeProvider>
+                    </UserPreferencesProvider>
+                  </WalletProviders>
+                </Suspense>
+              }
+            />
+          </Routes>
+          </MaintenanceGate>
+          </RouteErrorBoundary>
+        </BrowserRouter>
+      </QueryClientProvider>
+    </I18nextProvider>
+  </HelmetProvider>
+);
+
+export default App;

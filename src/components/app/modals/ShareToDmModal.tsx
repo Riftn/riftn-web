@@ -1,0 +1,471 @@
+import { useTranslation as _useCopy } from 'react-i18next';
+import { useSurfaceDraft } from '@/hooks/use-surface-draft';
+/**
+ * Share To DM Modal
+ * =================
+ * Lets a user send anything in Riftn into a direct message — a post, a shop
+ * item, a store, a community, an event, a profile. Opened from that thing's
+ * Share drawer ("Send in a message"). Lists existing conversations + user
+ * search, and sends the link over the DM socket (emitSendMessage), which
+ * renders as a rich card on the recipient's side (see DehubLinkEmbed).
+ *
+ * It takes a URL rather than a post id. The sheet is identical for every kind
+ * of thing being shared and only the link and the preview above it vary;
+ * hard-coding a tokenId is the reason "send in a message" existed on posts and
+ * nowhere else.
+ *
+ * Recipients who charge a per-message DM fee are routed into the conversation
+ * (openDmWith + autoSendBody) so the existing fee-payment flow handles it.
+ *
+ * Groups, channels the viewer runs and communities shown in Chats are listed
+ * too: there the link goes in as a normal line in the room, which shows its
+ * card, the same as the app's share sheet.
+ */
+
+import { useState, useEffect, useMemo } from 'react';
+import { DhbCoin } from '@/components/app/DhbAmount';
+import { openDmDock } from '@/hooks/use-dm-dock';
+import { Loader2 } from "lucide-react";
+import Check from "@/components/ui/cut-icons/check";
+
+import Search from "@/components/ui/cut-icons/search";
+import Send from "@/components/ui/cut-icons/send";
+import X from "@/components/ui/cut-icons/close";
+import Gem from "@/components/ui/cut-icons/diamond";
+
+import { toast } from 'sonner';
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
+import { Input } from '@/components/ui/input';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { VerifiedBadge } from '@/components/app/VerifiedBadge';
+import { DehubLinkEmbed } from '@/components/app/cards/DehubLinkEmbed';
+import { useConversations, useUserSearchForDM } from '@/hooks/use-messages';
+import { useDebouncedValue } from '@/hooks/use-debounced-value';
+import { emitCreateAndStart, emitSendMessage } from '@/lib/api/dehub/dm-socket';
+import { prepareOutgoing } from '@/lib/dm-e2ee/keys';
+import { getAccountInfo, type DeHubUser, type DeHubConversation } from '@/lib/api/dehub';
+import { buildAvatarUrl, extractAvatarPath } from '@/lib/media-url';
+import { parseDehubLink, dehubLinkLabel } from '@/lib/dehub-links';
+import { AppState } from '@/components/app/AppState';
+import { BadgedName } from '@/components/app/BadgedName';
+import { useAuth } from '@/contexts/AuthContext';
+import { useUserCommunities, type Community } from '@/hooks/use-communities';
+import { useChatPrefs } from '@/hooks/use-chat-prefs';
+import { roomChatId } from '@/lib/api/dehub/chat-prefs';
+import { chatsFromMemberships, communityKindOf } from '@/lib/community-kinds';
+import { insertCommunityChatMessage } from '@/lib/community-chat-send';
+import { reportCommunityChatMessage } from '@/lib/community-chat-notify';
+import { storageImage, deviceWidth } from '@/lib/media-url';
+
+interface ShareToDmModalProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  /** Absolute URL of the thing being shared — build it with `dehubLinkFor`. */
+  url: string;
+  aboveMoment?: boolean;
+}
+
+/**
+ * Extract a per-message DM fee (DHB) from a user's dmSettings, if any.
+ * `perMessageFee` / `dmSetting` are present at runtime but not on the DeHubUser
+ * type, so we narrow through `unknown` rather than widening to `any`.
+ */
+function perMessageFeeOf(user: DeHubUser | undefined): number {
+  const holder = user as { dmSettings?: unknown; dmSetting?: unknown } | undefined;
+  const raw = holder?.dmSettings ?? holder?.dmSetting;
+  const settings = (Array.isArray(raw) ? raw[0] : raw) as { perMessageFee?: number } | undefined;
+  return Number(settings?.perMessageFee) || 0;
+}
+
+function conversationFeeOf(conv: DeHubConversation): number {
+  // The server's access decision takes precedence over the creator's public fee.
+  if (conv.dmFee) return conv.dmFee.required && !conv.dmFee.hasFreeAccess ? conv.dmFee.fee : 0;
+  return perMessageFeeOf(conv.otherUser);
+}
+
+type RowStatus = 'idle' | 'sending' | 'sent';
+
+export function ShareToDmModal({ open, onOpenChange, url, aboveMoment }: ShareToDmModalProps) {
+  const { t: _copy } = _useCopy();
+  const [caption, setCaption] = useSurfaceDraft("components/app/modals/ShareToDmModal.tsx:caption", '', url);
+  const [searchInput, setSearchInput] = useSurfaceDraft("components/app/modals/ShareToDmModal.tsx:searchInput", '', url);
+  const search = useDebouncedValue(searchInput, 300);
+  const [rowStatus, setRowStatus] = useState<Record<string, RowStatus>>({});
+
+  const { conversations, isLoading: convosLoading } = useConversations('', open);
+  const { data: userSearchResults, isLoading: isSearchingUsers } = useUserSearchForDM(search, open);
+  const { walletAddress, user } = useAuth();
+  const { data: memberships } = useUserCommunities();
+  const { byId: chatPrefs } = useChatPrefs();
+
+  // Reset transient state whenever the modal opens.
+  useEffect(() => {
+    if (open) {
+      setCaption.initialize('');
+      setSearchInput.initialize('');
+      setRowStatus({});
+    }
+  }, [open, setCaption, setSearchInput]);
+
+  const sharedLink = useMemo(() => parseDehubLink(url), [url]);
+  // Capitalised for the toast: "Item sent to Ana", "Community sent to Ana".
+  const noun = dehubLinkLabel(sharedLink ? sharedLink.kind : 'link');
+  const sentLabel = noun.charAt(0).toUpperCase() + noun.slice(1);
+
+  const buildContent = () => {
+    const c = caption.trim();
+    return c ? `${c}\n${url}` : url;
+  };
+
+  // Filter existing conversations by the search term (client-side).
+  const filteredConversations = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    const oneToOne = conversations.filter(c => !c.isGroup && !c.groupInfo && c.otherUser?.address);
+    if (!q) return oneToOne;
+    return oneToOne.filter(c => {
+      const u = c.otherUser;
+      return (
+        u?.displayName?.toLowerCase().includes(q) ||
+        u?.username?.toLowerCase().includes(q) ||
+        u?.address?.toLowerCase().includes(q)
+      );
+    });
+  }, [conversations, search]);
+
+  // Users from search who don't already have a conversation.
+  const existingAddresses = useMemo(
+    () => new Set(conversations.map(c => c.otherUser?.address?.toLowerCase()).filter(Boolean)),
+    [conversations]
+  );
+  const newUserResults: DeHubUser[] = useMemo(() => {
+    if (search.trim().length < 2) return [];
+    return (userSearchResults?.items || []).filter(
+      (u: DeHubUser) => u.address && !existingAddresses.has(u.address.toLowerCase())
+    );
+  }, [userSearchResults, existingAddresses, search]);
+
+  // Rooms the viewer can post in: every group, channels they own or admin,
+  // and communities they chose to show in Chats.
+  const groups = useMemo(() => {
+    const canPost = new Set(
+      (memberships ?? [])
+        .filter(m => communityKindOf(m.communities) !== 'channel' || m.role === 'owner' || m.role === 'admin')
+        .map(m => m.community_id),
+    );
+    const q = search.trim().toLowerCase();
+    return chatsFromMemberships(memberships, id => !!chatPrefs.get(roomChatId(id))?.listedAt)
+      .filter(c => canPost.has(c.id) && (!q || c.name.toLowerCase().includes(q)));
+  }, [memberships, chatPrefs, search]);
+
+  const sendToGroup = async (group: Community) => {
+    const key = `group:${group.id}`;
+    if (!walletAddress) return;
+    setRowStatus(s => ({ ...s, [key]: 'sending' }));
+    try {
+      const me = user as { username?: string; displayName?: string; avatarImageUrl?: string; avatarUrl?: string } | null;
+      const { data, error } = await insertCommunityChatMessage<{ id: string }>({
+        communityId: group.id, walletAddress, content: buildContent(),
+        sender: { username: me?.username, displayName: me?.displayName, avatarUrl: me?.avatarImageUrl ?? me?.avatarUrl },
+      });
+      if (error) throw error;
+      if (data?.id) void reportCommunityChatMessage(group.id, data.id, walletAddress);
+      setRowStatus(s => ({ ...s, [key]: 'sent' }));
+      toast.success(_copy('dehubLinks.sentTo', { item: sentLabel, name: group.name }));
+    } catch (err) {
+      console.error('[ShareToDm] send to group failed:', err);
+      setRowStatus(s => ({ ...s, [key]: 'idle' }));
+      toast.error(_copy('dehubLinks.sendFailed', { item: noun }));
+    }
+  };
+
+  /** Route fee-gated recipients into the chat where the payment flow lives. */
+  const routeToChat = (address: string, username: string | undefined) => {
+    openDmDock({ address, username: username?.replace('@', ''), autoSendBody: buildContent() });
+    onOpenChange(false);
+  };
+
+  const sendToConversation = async (conv: DeHubConversation) => {
+    const key = `conv:${conv.id}`;
+    const fee = conversationFeeOf(conv);
+    if (fee > 0) {
+      if (conv.otherUser?.address) routeToChat(conv.otherUser.address, conv.otherUser.username);
+      return;
+    }
+    const isVirtual = conv.id.startsWith('new_') || /^0x[0-9a-fA-F]{40}$/i.test(conv.id);
+    if (isVirtual) {
+      // One-tap for virtual rows too: create the real conversation over the
+      // socket and send immediately. Routing to the chat instead used to queue
+      // the message behind a dmId that never materialised — the user landed on
+      // an empty composer and the share was silently lost.
+      if (conv.otherUser) { await sendToUser(conv.otherUser, key); return; }
+      toast.error(_copy('dehubLinks.sendFailed', { item: noun }));
+      return;
+    }
+    setRowStatus(s => ({ ...s, [key]: 'sending' }));
+    try {
+      const wire = await prepareOutgoing(conv.otherUser?.address, buildContent());
+      await emitSendMessage({ dmId: conv.id, content: wire.content, type: 'msg' });
+      setRowStatus(s => ({ ...s, [key]: 'sent' }));
+      toast.success(_copy('dehubLinks.sentTo', { item: sentLabel, name: conv.otherUser?.displayName || conv.otherUser?.username || _copy('dehubLinks.recipientChat') }));
+    } catch (err) {
+      console.error('[ShareToDm] send to conversation failed:', err);
+      setRowStatus(s => ({ ...s, [key]: 'idle' }));
+      toast.error(_copy('dehubLinks.sendFailed', { item: noun }));
+    }
+  };
+
+  const sendToUser = async (user: DeHubUser, statusKey?: string) => {
+    const key = statusKey ?? `user:${user.address || user._id}`;
+    setRowStatus(s => ({ ...s, [key]: 'sending' }));
+    try {
+      let userId = user._id || user.id;
+      if (!userId && user.address) {
+        try {
+          const info = await getAccountInfo(user.address);
+          userId = info._id || user.address;
+        } catch {
+          userId = user.address;
+        }
+      }
+      if (!userId) throw new Error('Missing recipient id');
+      const conv = await emitCreateAndStart(userId);
+      if (!conv?._id) throw new Error('Could not open conversation');
+      if (conv.dmFee?.required && !conv.dmFee.hasFreeAccess && conv.dmFee.fee > 0) {
+        if (user.address) routeToChat(user.address, user.username);
+        setRowStatus(s => ({ ...s, [key]: 'idle' }));
+        return;
+      }
+      const wire = await prepareOutgoing(user.address, buildContent());
+      await emitSendMessage({ dmId: conv._id, content: wire.content, type: 'msg' });
+      setRowStatus(s => ({ ...s, [key]: 'sent' }));
+      toast.success(_copy('dehubLinks.sentTo', { item: sentLabel, name: user.displayName || user.username || _copy('dehubLinks.recipientUser') }));
+    } catch (err) {
+      console.error('[ShareToDm] send to user failed:', err);
+      setRowStatus(s => ({ ...s, [key]: 'idle' }));
+      toast.error(_copy('dehubLinks.sendFailed', { item: noun }));
+    }
+  };
+
+  const hasResults = groups.length > 0 || filteredConversations.length > 0 || newUserResults.length > 0;
+
+  return (
+    <Drawer open={open} onOpenChange={onOpenChange}>
+      <DrawerContent column
+        glass
+        className={aboveMoment ? "max-h-[85dvh] z-[2147482010]" : "max-h-[85dvh]"}
+        overlayClassName={aboveMoment ? "z-[2147482009]" : undefined}
+        data-no-navigate
+        onClick={(e: React.MouseEvent) => e.stopPropagation()}
+        onPointerDown={(e: React.PointerEvent) => e.stopPropagation()}
+      >
+        <DrawerHeader className="relative">
+          <DrawerTitle className="text-white/90 font-semibold">{_copy("copy.20e392c29da3", { defaultValue: "Send in a message" })}</DrawerTitle>
+          <button
+            type="button"
+            onClick={() => onOpenChange(false)}
+            className="absolute right-4 top-3 w-8 h-8 flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white transition-colors"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </DrawerHeader>
+
+        <div className="px-4 pb-6 space-y-3 overflow-y-auto overscroll-contain flex-1">
+          {/* What's being shared */}
+          {sharedLink && <DehubLinkEmbed link={sharedLink} compact />}
+
+          {/* Optional caption */}
+          <Input
+            value={caption}
+            onChange={(e) => setCaption(e.target.value.slice(0, 500))}
+            placeholder={_copy("copy.0e4633fab693", { defaultValue: "Add a message (optional)" })}
+            className="bg-white/5 border-white/10 text-white placeholder:text-zinc-600 rounded-xl"
+          />
+
+          {/* Recipient search */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+            <Input
+              type="search"
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              placeholder={_copy("copy.73913e8faf3f", { defaultValue: "Search people…" })}
+              className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-zinc-600 rounded-xl"
+            />
+          </div>
+
+          {/* Recipient list */}
+          <div className="space-y-1">
+            {convosLoading && filteredConversations.length === 0 && (
+              <div className="flex justify-center py-6">
+                <Loader2 className="w-5 h-5 animate-spin text-zinc-500" />
+              </div>
+            )}
+
+            {groups.length > 0 && (
+              <p className="text-zinc-500 text-[11px] uppercase tracking-wider font-medium px-1 pb-1">{_copy('dm.shareGroups', { defaultValue: 'Groups' })}</p>
+            )}
+            {groups.map((group) => {
+              const key = `group:${group.id}`;
+              const kind = communityKindOf(group);
+              return (
+                <RecipientRow
+                  key={key}
+                  avatarUrl={group.avatar_url ? storageImage(group.avatar_url, deviceWidth(40)) : undefined}
+                  name={group.name}
+                  subtitle={kind === 'channel'
+                    ? _copy('dm.shareKindChannel', { defaultValue: 'Channel' })
+                    : kind === 'group'
+                      ? _copy('dm.shareKindGroup', { defaultValue: 'Group' })
+                      : _copy('dm.shareKindCommunity', { defaultValue: 'Community' })}
+                  fee={0}
+                  status={rowStatus[key] || 'idle'}
+                  onSend={() => sendToGroup(group)}
+                />
+              );
+            })}
+            {groups.length > 0 && filteredConversations.length > 0 && (
+              <p className="text-zinc-500 text-[11px] uppercase tracking-wider font-medium px-1 pt-3 pb-1">{_copy('explore.people', { defaultValue: 'People' })}</p>
+            )}
+
+            {filteredConversations.map((conv) => {
+              const u = conv.otherUser;
+              const key = `conv:${conv.id}`;
+              const status = rowStatus[key] || "idle";
+              const avatarUrl = buildAvatarUrl(u?.address || '', u?.avatarImageUrl || u?.avatarUrl);
+              const name = u?.displayName || u?.username ||
+                (u?.address ? `${u.address.slice(0, 6)}...${u.address.slice(-4)}` : _copy("copy.b512d97e7cbf", { defaultValue: "User" }));
+              const fee = conversationFeeOf(conv);
+              return (
+                <RecipientRow
+                  key={key}
+                  avatarUrl={avatarUrl}
+                  name={name}
+                  username={u?.username ?? undefined}
+                  badgeBalance={u?.hideBadgeAndBalance ? 0 : (u as { badgeBalance?: number } | undefined)?.badgeBalance}
+                  badgeLookupId={u?.hideBadgeAndBalance ? null : (u?.username || u?.address)}
+                  verified={u?.isVerified || u?.is_verified}
+                  fee={fee}
+                  status={status}
+                  onSend={() => sendToConversation(conv)}
+                />
+              );
+            })}
+
+            {/* New users from search */}
+            {newUserResults.length > 0 && (
+              <p className="text-zinc-500 text-[11px] uppercase tracking-wider font-medium px-1 pt-3 pb-1">{_copy("copy.5460ee7363b2", { defaultValue: "Other people" })}</p>
+            )}
+            {newUserResults.map((user) => {
+              const key = `user:${user.address || user._id}`;
+              const status = rowStatus[key] || "idle";
+              const avatarPath = extractAvatarPath(user);
+              const avatarUrl = user.address ? buildAvatarUrl(user.address, avatarPath) : undefined;
+              const name = user.displayName || user.display_name || user.username || _copy("copy.b512d97e7cbf", { defaultValue: "User" });
+              return (
+                <RecipientRow
+                  key={key}
+                  avatarUrl={avatarUrl}
+                  name={name}
+                  username={user.username ?? undefined}
+                  badgeBalance={user.hideBadgeAndBalance ? 0 : user.badgeBalance}
+                  badgeLookupId={user.hideBadgeAndBalance ? null : (user.username || user.address)}
+                  verified={user.isVerified || user.is_verified}
+                  fee={perMessageFeeOf(user)}
+                  status={status}
+                  onSend={() => sendToUser(user)}
+                />
+              );
+            })}
+
+            {search.trim().length >= 2 && isSearchingUsers && (
+              <div className="flex items-center justify-center gap-2 py-4 text-zinc-500 text-sm">
+                <Loader2 className="w-4 h-4 animate-spin" />{_copy("copy.c31723ab3302", { defaultValue: "Searching…" })}</div>
+            )}
+
+            {!convosLoading && !isSearchingUsers && !hasResults && (
+              <AppState icon={search.trim() ? 'search' : 'messages'} title={search.trim() ? _copy("copy.ea574034aa5a", { defaultValue: "No people found" }) : _copy("copy.0d60084f056e", { defaultValue: "No conversations yet" })} description={search.trim() ? _copy("copy.2e6d79de50dc", { defaultValue: "Try a different search." }) : _copy("copy.47ca5ef7eac6", { defaultValue: "Search for someone above to start a conversation." })} kind={search.trim() ? 'search-empty' : 'empty'} size="compact" />
+            )}
+          </div>
+        </div>
+      </DrawerContent>
+    </Drawer>
+  );
+}
+
+function RecipientRow({
+  avatarUrl,
+  name,
+  username,
+  subtitle,
+  badgeBalance,
+  badgeLookupId,
+  verified,
+  fee,
+  status,
+  onSend,
+}: {
+  avatarUrl?: string;
+  name: string;
+  username?: string;
+  /** A group's kind ("Group", "Channel"), shown where a person has their @username. */
+  subtitle?: string;
+  /** Staked DHB when the row carries it; otherwise the badge is looked up. */
+  badgeBalance?: number;
+  badgeLookupId?: string | null;
+  verified?: boolean;
+  fee: number;
+  status: RowStatus;
+  onSend: () => void;
+}) {
+  const { t: _copy } = _useCopy();
+  return (
+    <div className="w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-white/[0.04] transition-colors">
+      <Avatar className="w-10 h-10">
+        {avatarUrl && <AvatarImage src={avatarUrl} />}
+        <AvatarFallback className="bg-zinc-700 text-white font-medium">
+          {(name.startsWith('0x') ? name.charAt(2) : name.charAt(0)).toUpperCase()}
+        </AvatarFallback>
+      </Avatar>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-1.5">
+          <BadgedName
+            badgeBalance={badgeBalance}
+            lookupId={badgeLookupId}
+            username={username}
+            className="font-semibold text-white truncate"
+          >
+            {name}
+          </BadgedName>
+          {verified && <VerifiedBadge className="w-3.5 h-3.5" />}
+        </div>
+        {username && <p className="text-xs text-zinc-500 truncate">@{username}</p>}
+        {!username && subtitle && <p className="text-xs text-zinc-500 truncate">{subtitle}</p>}
+        {fee > 0 && (
+          <p className="text-[11px] text-amber-400 mt-0.5 flex items-center gap-1">
+            <Gem className="w-3 h-3" />
+            {fee.toLocaleString()} <DhbCoin />{_copy("copy.cf92bc9b461f", { defaultValue: " to message" })}</p>
+        )}
+      </div>
+      <button
+        type="button"
+        onClick={onSend}
+        disabled={status !== 'idle'}
+        className={`shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-medium transition-colors ${
+          status === 'sent'
+            ? 'bg-white/10 text-white/70'
+            : 'bg-gradient-to-br from-white/20 via-white/10 to-white/5 backdrop-blur-xl border border-white/30 text-white hover:from-white/25 disabled:opacity-60'
+        }`}
+      >
+        {status === 'sending' ? (
+          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+        ) : status === 'sent' ? (
+          <><Check className="w-3.5 h-3.5" />{_copy("copy.55e8d6528d42", { defaultValue: " Sent" })}</>
+        ) : fee > 0 ? (
+          _copy("copy.0600175af842", { defaultValue: "Open chat" })
+        ) : (
+          <><Send className="w-3.5 h-3.5" />{_copy("copy.72f38da4fe92", { defaultValue: " Send" })}</>
+        )}
+      </button>
+    </div>
+  );
+}

@@ -1,0 +1,464 @@
+import { Skeleton } from "@/components/ui/skeleton";
+import { useTranslation as _useCopy } from 'react-i18next';
+import { useSurfaceDraft } from '@/hooks/use-surface-draft';
+/**
+ * DAO Page
+ * ========
+ * The treasury and who funded it. One wallet anyone can send tokens to; the page
+ * reads its balance and every transfer into it straight off the chain, and
+ * ranks contributors by how much of the pool they put in. That share is the
+ * weight their voice carries when the DAO decides how the treasury is spent.
+ */
+
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useQuery } from '@tanstack/react-query';
+import { Loader2, HeartHandshake, FilePenLine } from "lucide-react";
+import Copy from "@/components/ui/cut-icons/copy";
+import Check from "@/components/ui/cut-icons/check";
+import ExternalLink from "@/components/ui/cut-icons/open-externally";
+import RefreshCw from "@/components/ui/cut-icons/refresh";
+import Info from "@/components/ui/cut-icons/information";
+
+import { toast } from 'sonner';
+import { DhbAmount } from '@/components/app/DhbAmount';
+import { SEOHead } from '@/components/SEOHead';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
+import { UserAvatar } from '@/components/app/UserAvatar';
+import { IslandAction, PageBody, PageIsland } from '@/components/app/page-kit/PageKit';
+import { DaoProposalExperience } from '@/components/app/dao/DaoProposals';
+import { useAuth, useLoginSheet } from '@/contexts/AuthContext';
+import { useProfileAvatar } from '@/hooks/use-profile-avatar-cache';
+import { useWalletLocked } from '@/hooks/use-wallet-locked';
+import { useDaoTreasury, useContributeToDao, useOwnDhbBalance } from '@/hooks/use-dao-treasury';
+import { getAccountInfo } from '@/lib/api/dehub';
+import { DAO_TREASURY_ADDRESS, daoTxUrl, shortAddress, type DaoContributor, type DaoContribution } from '@/lib/dao-treasury';
+import { isWalletLockedError } from '@/lib/contracts/aa-utils';
+import { toastTxError } from '@/lib/tx-error-toast';
+
+const QUICK_AMOUNTS = [100, 1_000, 10_000];
+
+function formatDhb(amount: number): string {
+  if (amount >= 1_000_000) return `${(amount / 1_000_000).toFixed(2)}M`;
+  if (amount >= 10_000) return Math.round(amount).toLocaleString();
+  if (amount >= 1) return amount.toLocaleString(undefined, { maximumFractionDigits: 2 });
+  return amount.toFixed(4);
+}
+
+function formatShare(share: number): string {
+  const pct = share * 100;
+  if (pct === 0) return '0%';
+  if (pct < 0.01) return '<0.01%';
+  return `${pct.toFixed(pct < 1 ? 2 : 1)}%`;
+}
+
+function useContributorProfile(address: string) {
+  const avatar = useProfileAvatar(address);
+  const { data: user } = useQuery({
+    queryKey: ['dao-contributor-profile', address],
+    queryFn: () => getAccountInfo(address).catch(() => null),
+    staleTime: 10 * 60_000,
+  });
+  const username = user?.username || null;
+  return {
+    avatar,
+    name: user?.displayName || username || shortAddress(address),
+    handle: username ? `@${username}` : shortAddress(address),
+  };
+}
+
+function ContributorRow({ row, rank, isSelf }: { row: DaoContributor; rank: number; isSelf: boolean }) {
+  const { t } = useTranslation();
+  const profile = useContributorProfile(row.address);
+  return (
+    <div className={`flex items-center gap-3 rounded-xl px-3 py-3 ${isSelf ? 'bg-white/10' : 'bg-white/[0.03]'}`}>
+      <span className="w-6 text-center text-xs font-semibold text-zinc-500 tabular-nums">{rank}</span>
+      <UserAvatar name={profile.name} handle={profile.handle} avatarUrl={profile.avatar} size="sm" />
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2 min-w-0">
+          <span className="text-sm font-semibold text-white truncate">{profile.name}</span>
+          {isSelf && <span className="text-[10px] uppercase tracking-wide text-zinc-400">{t('dao.you')}</span>}
+        </div>
+        <div className="text-xs text-zinc-500 truncate">
+          {profile.handle} · {t('dao.transferCount', { count: row.txCount })}
+        </div>
+        <div className="mt-1.5 h-1 rounded-full bg-white/10 overflow-hidden">
+          <div className="h-full bg-white/70 rounded-full" style={{ width: `${Math.max(1, row.share * 100)}%` }} />
+        </div>
+      </div>
+      <div className="text-right shrink-0">
+        <div className="text-sm font-semibold text-white tabular-nums"><DhbAmount amount={formatDhb(row.amount)} /></div>
+        <div className="text-xs text-zinc-400 tabular-nums">{formatShare(row.share)} {t('dao.power')}</div>
+      </div>
+    </div>
+  );
+}
+
+function RecentRow({ item }: { item: DaoContribution }) {
+  const profile = useContributorProfile(item.from);
+  const when = item.timestamp ? new Date(item.timestamp * 1000).toLocaleDateString() : '';
+  return (
+    <a
+      href={daoTxUrl(item.chainId, item.txHash)}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="flex items-center justify-between gap-3 rounded-xl px-3 py-2 bg-white/[0.03] hover:bg-white/[0.06] transition-colors"
+    >
+      <span className="text-sm text-zinc-300 truncate">{profile.name}</span>
+      <span className="text-xs text-zinc-500 shrink-0">{when}</span>
+      <span className="text-sm font-medium text-white tabular-nums shrink-0">+{formatDhb(item.amount)}</span>
+      <ExternalLink className="w-3.5 h-3.5 text-zinc-500 shrink-0" />
+    </a>
+  );
+}
+
+function ContributeDrawer({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
+  const { t } = useTranslation();
+  const { isAuthenticated, requestWalletUnlock } = useAuth();
+  const { isLoginModalOpen } = useLoginSheet();
+  const [amount, setAmount] = useSurfaceDraft("pages/app/DaoPage.tsx:amount", '');
+  const [pendingAfterUnlock, setPendingAfterUnlock] = useState<number | null>(null);
+  const [unlockSheetSeen, setUnlockSheetSeen] = useState(false);
+  const { mutate: contribute, isPending } = useContributeToDao();
+  const walletLocked = useWalletLocked();
+  const sendingRef = useRef(false);
+  const { data: held } = useOwnDhbBalance(open && isAuthenticated);
+
+  const parsed = Math.floor(Number(amount));
+  const valid = Number.isFinite(parsed) && parsed > 0;
+
+  const queueAfterUnlock = useCallback((value: number) => {
+    setPendingAfterUnlock(value);
+    setUnlockSheetSeen(false);
+
+    // Do not stack the password sheet on top of another vaul drawer. Closing
+    // this one first is the difference between an unlock prompt the user can
+    // complete and the dead-end toast captured in the support recording.
+    onOpenChange(false);
+    window.requestAnimationFrame(() => requestWalletUnlock());
+  }, [onOpenChange, requestWalletUnlock]);
+
+  const sendContribution = useCallback((value: number) => {
+    // A synchronous latch, not `isPending`: that is React state, so a double
+    // click can run this from a closure that still reads false and sign a
+    // second transfer.
+    if (sendingRef.current) return;
+    sendingRef.current = true;
+    contribute(value, {
+      onSuccess: (result) => {
+        toast.success(t('dao.sentTitle'), {
+          description: t('dao.sentDesc', { amount: value.toLocaleString(), chain: result.chain }),
+          action: {
+            label: t('dao.viewTx'),
+            onClick: () => window.open(daoTxUrl(result.chainId, result.txHash), '_blank', 'noopener'),
+          },
+        });
+        setAmount.complete(amount, '');
+        onOpenChange(false);
+        // The transfer is out. Only a revert is still worth saying, and it
+        // arrives long after the drawer has closed.
+        result.confirmed.then((ok) => {
+          if (!ok) toastTxError(null, t('dao.sendFailed'));
+        });
+      },
+      onError: (err) => {
+        // A stale lock reading can still arrive here if the auto-lock interval
+        // expires between render and tap. Treat it exactly like the preflight:
+        // unlock, then resume this same amount automatically.
+        if (isWalletLockedError(err)) {
+          queueAfterUnlock(value);
+          return;
+        }
+        toastTxError(err, t('dao.sendFailed'), {
+          description: err instanceof Error ? err.message : undefined,
+        });
+      },
+      onSettled: () => {
+        sendingRef.current = false;
+      },
+    });
+  }, [contribute, onOpenChange, queueAfterUnlock, t, setAmount, amount]);
+
+  // The password/biometric sheet is controlled by AuthProvider. Once it has
+  // visibly opened and then closed, either resume the exact transfer that led
+  // there or restore this drawer unchanged when the user cancelled. Nothing
+  // remains armed for some unrelated unlock later in the session.
+  useEffect(() => {
+    if (pendingAfterUnlock === null) return;
+    if (isLoginModalOpen) {
+      if (!unlockSheetSeen) setUnlockSheetSeen(true);
+      return;
+    }
+    if (!unlockSheetSeen) return;
+
+    const value = pendingAfterUnlock;
+    setPendingAfterUnlock(null);
+    setUnlockSheetSeen(false);
+    if (walletLocked) {
+      onOpenChange(true);
+      return;
+    }
+    sendContribution(value);
+  }, [isLoginModalOpen, onOpenChange, pendingAfterUnlock, sendContribution, unlockSheetSeen, walletLocked]);
+
+  const handleSend = () => {
+    if (!valid) return;
+    if (walletLocked) {
+      queueAfterUnlock(parsed);
+      return;
+    }
+    sendContribution(parsed);
+  };
+
+  return (
+    <Drawer open={open} onOpenChange={onOpenChange}>
+      <DrawerContent column className="bg-black/60 backdrop-blur-[24px] border-white/10 max-h-[85dvh]">
+        <DrawerHeader>
+          <DrawerTitle className="text-white text-lg font-bold">{t('dao.contribute')}</DrawerTitle>
+        </DrawerHeader>
+        <div className="px-4 pb-6 space-y-4">
+          <p className="text-sm text-zinc-400">{t('dao.contributeIntro')}</p>
+
+          <div>
+            <label className="text-zinc-400 text-xs font-medium mb-1 block">{t('dao.amountLabel')}</label>
+            <Input
+              type="number"
+              inputMode="numeric"
+              min={1}
+              step={1}
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              placeholder="1000"
+              className="bg-zinc-900 border-zinc-800 text-white placeholder:text-zinc-600 rounded-xl"
+            />
+            <div className="flex items-center justify-between mt-2 gap-2">
+              <div className="flex gap-1.5">
+                {QUICK_AMOUNTS.map((q) => (
+                  <button
+                    key={q}
+                    type="button"
+                    onClick={() => setAmount(String(q))}
+                    className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-xs text-zinc-300 transition-colors"
+                  >
+                    {q.toLocaleString()}
+                  </button>
+                ))}
+              </div>
+              {typeof held === 'number' && (
+                <button
+                  type="button"
+                  onClick={() => setAmount(String(Math.floor(held)))}
+                  className="text-[11px] text-zinc-500 hover:text-zinc-300"
+                >
+                  {t('dao.youHold', { amount: formatDhb(held) })}
+                </button>
+              )}
+            </div>
+          </div>
+
+          <div className="flex items-start gap-2 text-[11px] text-zinc-500">
+            <Info className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+            <span>{t('dao.irreversible')}</span>
+          </div>
+
+          <Button
+            onClick={handleSend}
+            disabled={!valid || isPending}
+            variant="glass"
+            className="w-full rounded-xl font-semibold"
+          >
+            {isPending ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <>
+                <HeartHandshake className="w-4 h-4" />
+                {valid ? t('dao.sendAmount', { amount: parsed.toLocaleString() }) : t('dao.contribute')}
+              </>
+            )}
+          </Button>
+        </div>
+      </DrawerContent>
+    </Drawer>
+  );
+}
+
+export default function DaoPage() {
+  const { t: _copy } = _useCopy();
+  const { t } = useTranslation();
+  const { isAuthenticated, openLoginModal, walletAddress } = useAuth();
+  const { data, isLoading, isFetching, refetch, isError } = useDaoTreasury();
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [proposalDrawerOpen, setProposalDrawerOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const self = walletAddress?.toLowerCase() ?? null;
+  const ownRow = useMemo(
+    () => (self ? data?.contributors.find((c) => c.address === self) ?? null : null),
+    [data, self],
+  );
+
+  const copyAddress = () => {
+    navigator.clipboard.writeText(DAO_TREASURY_ADDRESS);
+    setCopied(true);
+    toast.success(t('dao.addressCopied'));
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleContribute = () => {
+    if (!isAuthenticated) { openLoginModal(); return; }
+    setDrawerOpen(true);
+  };
+
+  const handlePropose = () => {
+    if (!isAuthenticated) { openLoginModal(); return; }
+    setProposalDrawerOpen(true);
+  };
+
+  return (
+    <div className="min-h-screen">
+      <SEOHead
+        title={_copy("copy.b87b467906e6", { defaultValue: "DAO Treasury: Fund Riftn and Earn a Say" })}
+        description={_copy("copy.02ce53459982", { defaultValue: "The Riftn DAO treasury: one wallet anyone can send tokens to. See its live balance, who has contributed, and the share of the pool each contributor holds when the DAO decides how it is spent." })}
+        url="https://riftn.com/dao"
+        image="https://riftn.com/og/dao.jpg"
+        jsonLd={{
+          '@context': 'https://schema.org',
+          '@type': 'WebPage',
+          name: 'Riftn DAO Treasury',
+          url: 'https://riftn.com/dao',
+          description: _copy("copy.9bab7b8fd081", { defaultValue: "The Riftn DAO treasury — live balance, contributors and their decision-making share." }),
+          isPartOf: { '@type': 'WebSite', name: 'Riftn', url: 'https://riftn.com' },
+        }}
+      />
+      <h1 className="sr-only">{_copy("copy.730f5eed0d6e", { defaultValue: "Riftn DAO Treasury — Decentralised, User Owned Social Media" })}</h1>
+
+      <PageIsland
+        icon="dao"
+        title={t('dao.title')}
+        subtitle={t('dao.subtitle')}
+        actions={
+          <>
+            <IslandAction label={t('dao.contribute')} onClick={handleContribute}>
+              <HeartHandshake className="h-[18px] w-[18px]" />
+            </IslandAction>
+            <IslandAction label={_copy("copy.1cbd9e713d93", { defaultValue: "Propose" })} onClick={handlePropose}>
+              <FilePenLine className="h-[18px] w-[18px]" />
+            </IslandAction>
+          </>
+        }
+      />
+
+      <PageBody>
+        {/* Balance */}
+        <section data-kit-section className="bg-zinc-900 p-4 sm:p-6">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <div className="text-xs uppercase tracking-wide text-zinc-500">{t('dao.treasuryBalance')}</div>
+              <div className="text-3xl sm:text-4xl font-bold text-white tabular-nums mt-1">
+                {isLoading ? <Skeleton className="h-9 sm:h-10 w-44 rounded-lg" aria-hidden /> : <DhbAmount amount={formatDhb(data?.totalBalance ?? 0)} iconClassName="h-7 w-7 sm:h-8 sm:w-8" className="gap-2" />}
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => refetch()}
+              disabled={isFetching}
+              aria-label={t('dao.refresh')}
+              className="p-2 rounded-lg text-zinc-500 hover:text-white hover:bg-white/5 transition-colors disabled:opacity-50"
+            >
+              <RefreshCw className={`w-4 h-4 ${isFetching ? 'animate-spin' : ''}`} />
+            </button>
+          </div>
+
+          <div className="mt-4">
+            <div className="text-xs text-zinc-500 mb-1">{t('dao.treasuryAddress')}</div>
+            <div className="flex items-center gap-2">
+              <code className="flex-1 min-w-0 font-mono text-xs sm:text-sm text-zinc-300 bg-black/40 rounded-lg px-3 py-2 break-all">
+                {DAO_TREASURY_ADDRESS}
+              </code>
+              <Button variant="outline" size="sm" onClick={copyAddress} className="shrink-0 rounded-lg" aria-label={t('dao.copyAddress')}>
+                {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+              </Button>
+            </div>
+            <p className="text-xs text-zinc-500 mt-2">{t('dao.sendAnyWallet')}</p>
+          </div>
+
+          {isError && !data && (
+            <p className="text-sm text-red-400 mt-3">{t('dao.loadFailed')}</p>
+          )}
+        </section>
+
+        <DaoProposalExperience proposeOpen={proposalDrawerOpen} onProposeOpenChange={setProposalDrawerOpen} />
+
+        {/* Your share */}
+        {isAuthenticated && data && (
+          <section data-kit-section className="bg-zinc-900 p-4 sm:p-6">
+            <div className="text-xs uppercase tracking-wide text-zinc-500 mb-2">{t('dao.yourPower')}</div>
+            {ownRow ? (
+              <div className="flex items-end justify-between gap-3">
+                <div>
+                  <div className="text-2xl font-bold text-white tabular-nums">{formatShare(ownRow.share)}</div>
+                  <div className="text-sm text-zinc-400">{t('dao.yourContribution', { amount: formatDhb(ownRow.amount) })}</div>
+                </div>
+                <Button onClick={handleContribute} variant="glass" size="sm" className="rounded-xl">
+                  {t('dao.addMore')}
+                </Button>
+              </div>
+            ) : (
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-sm text-zinc-400">{t('dao.noContributionYet')}</p>
+                <Button onClick={handleContribute} variant="glass" size="sm" className="rounded-xl shrink-0">
+                  {t('dao.contribute')}
+                </Button>
+              </div>
+            )}
+          </section>
+        )}
+
+        {/* How power works */}
+        <section data-kit-section className="bg-zinc-900 p-4 sm:p-6">
+          <h2 className="text-sm font-semibold text-white mb-1">{t('dao.howItWorksTitle')}</h2>
+          <p className="text-sm text-zinc-400">{t('dao.howItWorksBody')}</p>
+        </section>
+
+        {/* Contributors */}
+        <section data-kit-section className="bg-zinc-900 p-4 sm:p-6">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-sm font-semibold text-white">{t('dao.contributors')}</h2>
+            {data && (
+              <span className="text-xs text-zinc-500">
+                {t('dao.pooledTotal', { amount: formatDhb(data.totalContributed) })}
+              </span>
+            )}
+          </div>
+          {isLoading ? (
+            <div className="space-y-2">
+              {[0, 1, 2].map((i) => <div key={i} className="h-14 rounded-xl theme-skeleton animate-pulse" />)}
+            </div>
+          ) : data && data.contributors.length > 0 ? (
+            <div className="space-y-2">
+              {data.contributors.map((row, i) => (
+                <ContributorRow key={row.address} row={row} rank={i + 1} isSelf={row.address === self} />
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-zinc-500">{t('dao.noContributors')}</p>
+          )}
+        </section>
+
+        {/* Recent */}
+        {data && data.recent.length > 0 && (
+          <section data-kit-section className="bg-zinc-900 p-4 sm:p-6">
+            <h2 className="text-sm font-semibold text-white mb-3">{t('dao.recent')}</h2>
+            <div className="space-y-1.5">
+              {data.recent.map((item) => <RecentRow key={`${item.chainId}-${item.txHash}`} item={item} />)}
+            </div>
+          </section>
+        )}
+      </PageBody>
+
+      <ContributeDrawer open={drawerOpen} onOpenChange={setDrawerOpen} />
+    </div>
+  );
+}

@@ -1,0 +1,179 @@
+/**
+ * Intent-based route chunk preloading.
+ * =====================================
+ * Every page is lazy-loaded, so on slow connections tapping a nav item used
+ * to feel dead while the page's JS chunk downloaded AFTER the tap. Calling
+ * preloadRoute() on touchstart / pointerenter / focus starts that download
+ * the moment intent appears — by the time the click handler fires, the chunk
+ * is warm (or already in flight).
+ *
+ * The import() specifiers below intentionally match the lazy() specifiers in
+ * PersistentPageCache.tsx / App.tsx exactly — Vite resolves them to the same
+ * module, so this warms the very chunk the router will request; it never
+ * creates extra bundles.
+ *
+ * List pages warm their detail-page chunk as a companion (second array entry):
+ * the only way to reach a detail page is through its list, so by the time the
+ * user clicks a card the detail chunk is already in cache — no double
+ * waterfall (chunk fetch → data fetch) on first open.
+ */
+
+type Preloader = () => Promise<unknown>;
+
+const PRELOADERS: Record<string, Preloader | Preloader[]> = {
+  '/app/explore': () => import('@/pages/app/ExplorePage'),
+  '/explore': () => import('@/pages/app/ExplorePage'),
+  '/app/profile': () => import('@/pages/app/ProfilePage'),
+  '/app/notifications': () => import('@/pages/app/NotificationsPage'),
+  '/app/messages': () => import('@/pages/app/MessagesPage'),
+  '/chat': () => import('@/pages/app/FullScreenChatPage'),
+  '/app/assistant': () => import('@/pages/app/AssistantPage'),
+  '/assistant': () => import('@/pages/app/AssistantPage'),
+  '/app/leaderboard': () => import('@/pages/app/LeaderboardPage'),
+  '/leaderboard': () => import('@/pages/app/LeaderboardPage'),
+  '/app/bookmarks': () => import('@/pages/app/BookmarksPage'),
+  '/app/settings': () => import('@/pages/app/SettingsPage'),
+  '/app/command-centre': () => import('@/pages/app/CommandCentrePage'),
+  '/app/wallet': () => import('@/pages/app/FullWalletPage'),
+  '/app/music': () => import('@/pages/app/MusicPage'),
+  '/music': () => import('@/pages/app/MusicPage'),
+  '/app/stages': () => import('@/pages/app/StagesPage'),
+  '/stages': () => import('@/pages/app/StagesPage'),
+  '/app/tv': () => import('@/pages/app/TVPage'),
+  '/tv': () => import('@/pages/app/TVPage'),
+  '/app/buy': () => import('@/pages/app/BuyCoinsPage'),
+  '/app/agents': () => import('@/pages/app/AgentsPage'),
+  '/agents': () => import('@/pages/app/AgentsPage'),
+  '/build': () => import('@/pages/app/FeaturesPage'),
+  '/app/governance': [
+    () => import('@/pages/app/GovernancePage'),
+    () => import('@/pages/app/GovernanceProposalPage'),
+  ],
+  '/governance': [
+    () => import('@/pages/app/GovernancePage'),
+    () => import('@/pages/app/GovernanceProposalPage'),
+  ],
+  '/app/dao': () => import('@/pages/app/DaoPage'),
+  '/dao': () => import('@/pages/app/DaoPage'),
+  '/app/jobs': () => import('@/pages/app/CareersPage'),
+  '/jobs': () => import('@/pages/app/CareersPage'),
+  '/app/glossary': () => import('@/pages/app/GlossaryPage'),
+  '/glossary': () => import('@/pages/app/GlossaryPage'),
+  '/compare': () => import('@/pages/app/ComparePage'),
+  '/app/compare': () => import('@/pages/app/ComparePage'),
+  '/app/stats': () => import('@/pages/app/StatsPage'),
+  '/stats': () => import('@/pages/app/StatsPage'),
+  '/app/live-studio': () => import('@/pages/app/LiveStudioPage'),
+  '/live-studio': () => import('@/pages/app/LiveStudioPage'),
+  '/feedback': () => import('@/pages/app/FeedbackPage'),
+  '/app/feedback': () => import('@/pages/app/FeedbackPage'),
+  '/app/planned': () => import('@/pages/app/PlannedPage'),
+  '/app/stake': () => import('@/pages/app/StakingPage'),
+  '/stake': () => import('@/pages/app/StakingPage'),
+  '/app/bridge': () => import('@/pages/app/BridgePage'),
+  '/bridge': () => import('@/pages/app/BridgePage'),
+  '/app/communities': [
+    () => import('@/pages/app/CommunitiesPage'),
+    () => import('@/pages/app/CommunityPage'),
+  ],
+  '/communities': [
+    () => import('@/pages/app/CommunitiesPage'),
+    () => import('@/pages/app/CommunityPage'),
+  ],
+  '/app/events': [
+    () => import('@/pages/app/EventsPage'),
+    () => import('@/pages/EventPage'),
+  ],
+  '/events': [
+    () => import('@/pages/app/EventsPage'),
+    () => import('@/pages/EventPage'),
+  ],
+  '/app/stores': [
+    () => import('@/pages/app/StoresPage'),
+    () => import('@/pages/app/StoreDetailPage'),
+  ],
+  // The post info page is the fraction market's other half — a listing card
+  // links straight to it, and its panel is the same components.
+  '/app/fractions': [
+    () => import('@/pages/app/FractionsPage'),
+    () => import('@/pages/app/PostInfoPage'),
+  ],
+  '/app/work': [
+    () => import('@/pages/app/WorkPage'),
+    () => import('@/pages/app/WorkJobDetailPage'),
+  ],
+  '/work': [
+    () => import('@/pages/app/WorkPage'),
+    () => import('@/pages/app/WorkJobDetailPage'),
+  ],
+  '/app/launchpad': [
+    () => import('@/pages/app/LaunchpadPage'),
+    () => import('@/pages/app/LaunchpadCoinPage'),
+  ],
+  '/launchpad': [
+    () => import('@/pages/app/LaunchpadPage'),
+    () => import('@/pages/app/LaunchpadCoinPage'),
+  ],
+  // The grid warms the player as its companion: the only way into a game is
+  // through a card, so the player chunk is already cached by the time one is
+  // clicked. The game's own bundle is a separate origin-level iframe fetch and
+  // is deliberately NOT warmed — that is megabytes for a page the visitor may
+  // only be browsing.
+  '/arcade': [
+    () => import('@/pages/app/ArcadePage'),
+    () => import('@/pages/ArcadeGamePage'),
+  ],
+  '/app/arcade': [
+    () => import('@/pages/app/ArcadePage'),
+    () => import('@/pages/ArcadeGamePage'),
+  ],
+  '/app/affiliate': () => import('@/pages/app/AffiliatePage'),
+  '/affiliate': () => import('@/pages/app/AffiliatePage'),
+  '/app/usernames': () => import('@/pages/app/UsernamesPage'),
+  '/usernames': () => import('@/pages/app/UsernamesPage'),
+  '/app/accounts': () => import('@/pages/app/AccountsPage'),
+  '/accounts': () => import('@/pages/app/AccountsPage'),
+  '/app/top-100': () => import('@/pages/app/Top100CryptosPage'),
+  '/top-100': () => import('@/pages/app/Top100CryptosPage'),
+  '/app/ads': () => import('@/pages/app/AdsPage'),
+  '/premium': () => import('@/pages/Premium'),
+  '/pricing': () => import('@/pages/PricingPage'),
+  '/prompt': () => import('@/pages/PromptLanding'),
+  '/converter': () => import('@/pages/YoutubeImportPage'),
+  '/guide': () => import('@/pages/GuidePage'),
+  '/docs': () => import('@/pages/DocsSurface'),
+  '/guides': () => import('@/pages/DocsSurface'),
+};
+
+const warmed = new Set<string>();
+
+export function preloadRoute(path: string | undefined): void {
+  if (!path) return;
+  const clean = path.split('?')[0].split('#')[0].replace(/\/+$/, '') || '/';
+  // Exact match first, then longest registered prefix (e.g. /docs/blog -> /docs).
+  let key = PRELOADERS[clean] ? clean : undefined;
+  if (!key) {
+    key = Object.keys(PRELOADERS)
+      .filter(p => clean.startsWith(p + '/'))
+      .sort((a, b) => b.length - a.length)[0];
+  }
+  if (!key || warmed.has(key)) return;
+  warmed.add(key);
+  const loaders = PRELOADERS[key];
+  const list = Array.isArray(loaders) ? loaders : [loaders];
+  const warm = () => {
+    Promise.all(list.map(load => load())).catch(() => {
+      // Network hiccup — allow a later intent to retry.
+      warmed.delete(key);
+    });
+  };
+  // Callers are touch and hover handlers. Starting a page's imports costs real
+  // time on a slow phone (one tag per file it needs), and inside the handler
+  // that time sits between the finger and the pressed state. One frame later
+  // costs the page nothing: a tap that follows starts the same imports itself.
+  if (typeof requestAnimationFrame === 'function' && typeof document !== 'undefined' && !document.hidden) {
+    requestAnimationFrame(() => setTimeout(warm, 0));
+  } else {
+    warm();
+  }
+}

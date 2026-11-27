@@ -1,0 +1,152 @@
+import { useTranslation as _useCopy } from 'react-i18next';
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useAuth } from '@/contexts/AuthContext';
+import { apiCall } from '@/lib/api/dehub/core';
+import { toast } from 'sonner';
+import { translateCopy as _translateCopy } from '@/i18n/copy';
+
+/**
+ * The three states the DM API actually models, matching mobile's
+ * `DMSettingsSection` (dehub-mobile components/Settings/DMSettingsSection.tsx):
+ *
+ *   'everyone' → ACTIVE_ALL  — anyone can start a conversation
+ *   'no-new'   → NEW_DM      — no new conversations; existing threads still work
+ *   'none'     → ALL         — every incoming message is disabled
+ *
+ * Web previously only had 'everyone' | 'none' and mapped 'none' to
+ * `NEW_DM/disable`, which is the middle state — so picking "No one" here left
+ * existing threads open, and the fully-disabled state was unreachable from web
+ * while mobile could set it (and web would then render it as "No one" anyway).
+ */
+export type WhoCanMessage = 'everyone' | 'no-new' | 'none';
+
+/** Shared with mobile's `DND_KEY`. */
+const DND_STORAGE_KEY = 'dehub_dm_dnd';
+
+interface DmStatusResponse {
+  disables?: string[];
+  perMessageFee?: number;
+  freeAccessUsers?: string[];
+}
+
+/**
+ * Derives the WhoCanMessage value from the API's disables array, using the
+ * same precedence mobile applies (ALL beats NEW_DM beats ACTIVE_ALL).
+ */
+function deriveWhoCanMessage(disables?: string[]): WhoCanMessage {
+  if (!disables || disables.length === 0) return 'everyone';
+  if (disables.includes('ALL')) return 'none';
+  if (disables.includes('NEW_DM')) return 'no-new';
+  return 'everyone';
+}
+
+/**
+ * Maps WhoCanMessage back to API payload.
+ */
+function toStatusPayload(value: WhoCanMessage): { status: string; action: string } {
+  switch (value) {
+    case 'none':
+      return { status: 'ALL', action: 'disable' };
+    case 'no-new':
+      return { status: 'NEW_DM', action: 'disable' };
+    case 'everyone':
+    default:
+      return { status: 'ACTIVE_ALL', action: 'enable' };
+  }
+}
+
+export function useDmSettings() {
+  const { t: _copy } = _useCopy();
+  const { walletAddress, isAuthenticated } = useAuth();
+  const queryClient = useQueryClient();
+
+  // Fetch current DM status from the dedicated endpoint
+  const { data: dmStatus, isLoading } = useQuery({
+    queryKey: ['dm-user-status', walletAddress],
+    queryFn: async (): Promise<DmStatusResponse> => {
+      if (!walletAddress) return {};
+      try {
+        const response = await apiCall<any>(`/api/dm/user-status/${walletAddress.toLowerCase()}`, {
+          method: 'GET',
+          requiresAuth: true,
+        });
+        return response?.data || response?.result || response || {};
+      } catch (error) {
+        console.error('[useDmSettings] Failed to fetch DM status:', error);
+        return {};
+      }
+    },
+    enabled: !!walletAddress && isAuthenticated,
+    staleTime: 30_000,
+  });
+
+  const whoCanMessage = deriveWhoCanMessage(dmStatus?.disables);
+  const messageFee = dmStatus?.perMessageFee ?? 0;
+  // Do Not Disturb is device-local on both clients. Key matches mobile's
+  // `DND_KEY` (components/Settings/DMSettingsSection.tsx) so the two agree.
+  const [doNotDisturb, setDoNotDisturbLocal] = useState(() => {
+    try { return localStorage.getItem(DND_STORAGE_KEY) === 'true'; } catch { return false; }
+  });
+
+  // Update DM status (who can message)
+  const updateMutation = useMutation({
+    mutationFn: async (payload: { status: string; action: string }) => {
+      if (!walletAddress) throw new Error(_translateCopy("copy.76d1efbeed2d", { defaultValue: "Not authenticated" }));
+      await apiCall<any>(`/api/dm/user-status/${walletAddress.toLowerCase()}`, {
+        method: 'POST',
+        body: payload,
+        requiresAuth: true,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['dm-user-status', walletAddress] });
+      toast.success(_copy("copy.0f88edcda292", { defaultValue: "DM settings updated" }));
+    },
+    onError: (error) => {
+      console.error('[useDmSettings] Failed to update DM settings:', error);
+      toast.error(_copy("copy.6191770d00b1", { defaultValue: "Failed to update DM settings" }));
+    },
+  });
+
+  // Update fee — API requires status+action in every POST. Include current DM access state.
+  const updateFeeMutation = useMutation({
+    mutationFn: async (fee: number) => {
+      if (!walletAddress) throw new Error(_translateCopy("copy.76d1efbeed2d", { defaultValue: "Not authenticated" }));
+      const payload = toStatusPayload(whoCanMessage);
+      await apiCall<any>(`/api/dm/user-status/${walletAddress.toLowerCase()}`, {
+        method: 'POST',
+        body: { ...payload, perMessageFee: fee },
+        requiresAuth: true,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['dm-user-status', walletAddress] });
+      toast.success(_copy("copy.0f88edcda292", { defaultValue: "DM settings updated" }));
+    },
+    onError: (error) => {
+      console.error('[useDmSettings] Failed to update fee:', error);
+      toast.error(_copy("copy.94dc5a91c82c", { defaultValue: "Failed to update message fee" }));
+    },
+  });
+
+  return {
+    whoCanMessage,
+    messageFee,
+    doNotDisturb,
+    isLoading,
+    isUpdating: updateMutation.isPending || updateFeeMutation.isPending,
+    updateWhoCanMessage: (value: WhoCanMessage) => {
+      const payload = toStatusPayload(value);
+      updateMutation.mutate(payload);
+    },
+    updateMessageFee: (fee: number, onSaved?: () => void) => {
+      updateFeeMutation.mutate(fee, { onSuccess: onSaved });
+    },
+    updateDoNotDisturb: (enabled: boolean) => {
+      setDoNotDisturbLocal(enabled);
+      try { localStorage.setItem(DND_STORAGE_KEY, String(enabled)); } catch {}
+      toast.success(_copy("copy.0f88edcda292", { defaultValue: "DM settings updated" }));
+    },
+  };
+}

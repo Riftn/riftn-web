@@ -1,0 +1,185 @@
+/**
+ * Auth Context — light module
+ * ===========================
+ * Holds ONLY the context object, its type, and useAuth. The provider
+ * implementation lives in ./AuthProvider (loaded inside the lazy
+ * WalletProviders chunk).
+ *
+ * IMPORTANT: keep this file free of runtime imports of wagmi / rainbowkit /
+ * wallet SDKs (type-only imports are fine — they are erased at build time).
+ * ~180 components import useAuth from here; any heavy runtime import added
+ * here lands in the entry bundle and defeats the wallet code split.
+ * scripts/check-entry-bundle.mjs fails the build if that happens.
+ */
+
+import { createContext, useContext } from 'react';
+import type { DeHubUser } from '@/lib/api/dehub';
+import type { WalletBackup } from '@/lib/wallet-core/export';
+
+export type SocialProvider = 'google' | 'twitter' | 'telegram' | 'apple' | 'discord' | 'github';
+export type WalletProvider = 'metamask' | 'phantom' | 'trust';
+
+/**
+ * Smart-wallet setup phase (social/email logins only):
+ *  - 'none'    — no wallet step pending
+ *  - 'create'  — Supabase-authed but no wallet row: show create flow
+ *  - 'unlock'  — wallet exists: show password unlock
+ */
+// 'secure': "Secure your wallet" at the first wallet action of a silent sign-up.
+export type WalletPhase = 'none' | 'create' | 'unlock' | 'restore' | 'secure';
+
+export interface AuthContextType {
+  user: DeHubUser | null;
+  walletAddress: string | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  isConnecting: boolean;
+  isProcessingRedirect: boolean;
+  requiresUsername: boolean;
+  needsSignature: boolean;
+  connectionSource: 'web3auth' | 'wagmi' | null;
+  // Smart-wallet (Supabase identity) state
+  walletPhase: WalletPhase;
+  supabaseUserId: string | null;
+  // Legacy connect method (opens login modal)
+  connect: () => Promise<void>;
+  // Social / email login (Supabase Auth)
+  connectWithProvider: (provider: SocialProvider) => Promise<void>;
+  connectWithEmail: (email: string) => Promise<void>;
+  cancelEmailMagicLink: () => void;
+  verifyEmailOtp: (email: string, code: string) => Promise<void>;
+  connectWithSMS: (phone: string) => Promise<void>;
+  verifyPhoneOtp: (phone: string, code: string) => Promise<void>;
+  /**
+   * Telegram login. Telegram is not a Supabase Auth provider, so this does not
+   * go through connectWithProvider — it redirects to oauth.telegram.org and
+   * comes back through /auth/telegram, where AuthProvider picks the signed
+   * payload up and exchanges it for a session. Resolves `true` once the
+   * redirect is under way, `false` when Telegram login is unavailable or
+   * could not be started.
+   */
+  connectWithTelegram: () => Promise<boolean>;
+  /**
+   * Passkey-only sign-in: the fingerprint/face passkey IS the account, with no
+   * email, phone or OAuth identity behind it. 'signin' asserts an existing
+   * Riftn passkey; 'signup' creates one and a new account with it. Rejects
+   * with the message to show; a PasskeyLoginError with code
+   * UNKNOWN_CREDENTIAL means the chosen passkey has no account yet.
+   */
+  connectWithPasskey: (mode: 'signin' | 'signup') => Promise<boolean>;
+  connectWithWallet: (wallet: WalletProvider) => Promise<boolean | 'same-account'>;
+  /** Give up on a wallet sign-in that is still waiting on the wallet, and let the wallet go. */
+  cancelWalletLogin: () => Promise<void>;
+  /**
+   * Final step of the smart-wallet login: called by the login modal once the
+   * wallet key is available (created, imported, or unlocked). Activates the
+   * key, derives the Safe smart account, signs the Riftn auth message, and
+   * establishes the Riftn session.
+   */
+  completeSmartWalletLogin: (privKeyHex: string) => Promise<void>;
+  /** Decrypt the current wallet's backup: private key, plus its 12 words when it has them (Settings). */
+  exportPrivateKey: (password: string) => Promise<WalletBackup>;
+  /**
+   * Same export, unlocked with biometrics — the only backup path available to
+   * a wallet created with biometrics and no password.
+   */
+  exportPrivateKeyWithBiometrics: () => Promise<WalletBackup>;
+  /**
+   * Last resort for a wallet nothing on this device can open — the passkey
+   * lived on a handset that is gone. Mints a fresh wallet and MOVES the
+   * existing account onto it, so the username, posts, DMs and followers all
+   * survive; only on-chain assets stay at the old address.
+   */
+  replaceLostWallet: (password: string) => Promise<void>;
+  /** Settings → Reset wallet: move this account onto a new built-in wallet. */
+  resetWallet: (password: string, twoFactorCode?: string) => Promise<void>;
+  /**
+   * Become another profile saved on this device (Settings → Profile →
+   * Profiles). Silent when that account's session can be restored from its
+   * stored snapshot; otherwise opens the sign-in sheet for it. Resolves by
+   * reloading the page, so it does not return in the normal case.
+   */
+  switchToProfile: (id: string) => Promise<void>;
+  /**
+   * Sign out. `forgetProfile` is the user's own "Log out": this account is
+   * removed from the device and, when another saved account is left, that
+   * one takes over (most recently used first). Only the last account signs
+   * the browser out completely.
+   */
+  disconnect: (options?: { forgetProfile?: boolean; allAccounts?: boolean }) => Promise<void>;
+  refreshUser: () => Promise<void>;
+  patchUser: (patch: Partial<DeHubUser>) => void;
+  /**
+   * Re-establish a usable Riftn session. Pass `force` when reacting to a
+   * request the server actually rejected — without it, a token that only looks
+   * valid against the local clock short-circuits to `true` and the caller
+   * reports a success that never happened.
+   */
+  refreshSession: (force?: boolean) => Promise<boolean>;
+  setRequiresUsername: (value: boolean) => void;
+  /**
+   * Arm (or clear) "the next wagmi connection is a login the user asked for".
+   * `wallet` names the button that was tapped — the sheet's wallet id, or a
+   * discovered connector's id — so the signature goes to that wallet and not
+   * to another extension that reattached itself first. Omit it only where
+   * there is a single provider to reach (a wallet's in-app browser).
+   */
+  setWagmiAuthIntent: (value: boolean, wallet?: string | null) => void;
+  // Login modal state lives in LoginSheetContext (useLoginSheet below).
+  openLoginModal: (options?: {
+    intent?: 'login' | 'signup' | 'add-profile';
+    /** A saved profile being signed back into, which the allowance already counts. */
+    forProfileId?: string;
+    /**
+     * What to do once this sign-in finishes. Left out, the button tapped just
+     * before is pressed again (see lib/after-sign-in).
+     */
+    then?: () => void;
+    /** A page to open once this sign-in finishes. Survives redirect logins. */
+    path?: string;
+  }) => void;
+  closeLoginModal: () => void;
+  /**
+   * Ask for the wallet password now, for built-in-wallet sessions whose key is
+   * no longer in memory. Safe to call from anywhere: it renders synchronously,
+   * and falls back to the sign-in sheet only when there is no identity to
+   * unlock against.
+   *
+   * Use this wherever a locked wallet would otherwise be a dead end — an action
+   * on the "wallet is locked" toast, the wallet menu, Settings. Do NOT reach for
+   * openLoginModal instead: that shows sign-in options to somebody who is
+   * already signed in.
+   */
+  requestWalletUnlock: () => void;
+}
+
+export const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+export interface LoginSheetState {
+  isLoginModalOpen: boolean;
+  /**
+   * Why the sheet is open. 'add-profile' — opened from the Profiles UI while
+   * already signed in — retitles it, so the sheet doesn't read as "you were
+   * logged out" to somebody who wasn't.
+   */
+  loginIntent: 'login' | 'signup' | 'add-profile';
+}
+
+/**
+ * Kept out of AuthContext on purpose: opening the sheet used to change the auth
+ * value, which re-rendered every useAuth() consumer on the page (hundreds in a
+ * feed) inside the tap, before the sheet could paint.
+ */
+export const LoginSheetContext = createContext<LoginSheetState>({ isLoginModalOpen: false, loginIntent: 'login' });
+
+export function useLoginSheet(): LoginSheetState {
+  return useContext(LoginSheetContext);
+}
+
+export function useAuth() {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+}

@@ -1,0 +1,84 @@
+import { tokenLabel } from '@/lib/token-label';
+/**
+ * Bounty Link Embed
+ * =================
+ * Detects bounty URLs (/bounty/<job_number>, and the legacy /work/<uuid>) and
+ * renders them as rich preview cards — the same treatment stores and events
+ * already get. `useWorkJob` resolves either key shape on its own.
+ */
+
+import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { Clock } from 'lucide-react';
+import { format } from 'date-fns';
+import type { ReactNode } from 'react';
+import { ThemedIcon } from '@/components/app/war/WarHudIcon';
+import { useWorkJob } from '@/features/work/hooks/use-work';
+import { statusLabelKey } from '@/features/work/components/TxLink';
+import dehubCoin from '@/assets/dehub-coin.png';
+
+interface BountyLinkEmbedProps {
+  jobKey: string;
+  /** The path as written in the source link — preserves /work/<uuid>/edit etc. */
+  path: string;
+  fallback?: ReactNode;
+}
+
+export function BountyLinkEmbed({ jobKey, path, fallback = null }: BountyLinkEmbedProps) {
+  const navigate = useNavigate();
+  const { t } = useTranslation();
+  const { data: job, isLoading } = useWorkJob(jobKey);
+
+  if (isLoading) {
+    return <div className="mt-2 h-20 rounded-xl bg-white/[0.04] animate-pulse" />;
+  }
+  if (!job) return <>{fallback}</>;
+
+  const budget = Number(job.total_budget);
+
+  return (
+    <button
+      type="button"
+      onClick={(e) => {
+        e.stopPropagation();
+        navigate(path);
+      }}
+      data-no-navigate
+      className="w-full mt-2 rounded-xl bg-white/[0.04] border border-white/[0.08] hover:bg-white/[0.07] transition-colors text-left overflow-hidden"
+    >
+      {job.cover_image_url && (
+        <img src={job.cover_image_url} alt="" loading="lazy" className="w-full aspect-video object-contain bg-black/20" />
+      )}
+      <div className="flex items-start gap-3 p-4">
+      <div className="w-12 h-12 rounded-lg bg-white/[0.06] flex items-center justify-center flex-shrink-0 overflow-visible">
+        <ThemedIcon icon="bounties" alt="" className="w-10 h-10 object-contain opacity-80" />
+      </div>
+      <div className="flex-1 min-w-0 flex flex-col justify-center gap-0.5">
+        <p className="text-sm font-semibold text-white line-clamp-2">{job.title}</p>
+        <p className="text-xs text-zinc-500 truncate capitalize">
+          {t('work.embedStatus', { status: t(statusLabelKey(job.status)), type: t(job.job_type === 'shill' ? 'work.typeShillShort' : job.job_type === 'clipping' ? 'work.typeClipping' : 'work.typeContract') })}
+        </p>
+        {job.description && <p className="text-sm text-white/60 line-clamp-2 mt-1">{job.description}</p>}
+        <div className="flex flex-wrap items-center gap-3 mt-2">
+          <p className="text-sm font-semibold text-white flex items-center gap-1">
+            {job.currency === 'DHB' ? (
+              <>
+                <img src={dehubCoin} alt={tokenLabel()} className="w-4 h-4" />
+                {budget.toLocaleString(undefined, { maximumFractionDigits: 2 })} {tokenLabel(job.currency)}
+              </>
+            ) : (
+              `${budget.toLocaleString(undefined, { maximumFractionDigits: 2 })} ${job.currency}`
+            )}
+          </p>
+          {job.deadline && (
+            <p className="text-xs text-zinc-500 flex items-center gap-1">
+              <Clock className="w-3 h-3" />
+              {format(new Date(job.deadline), 'MMM d')}
+            </p>
+          )}
+        </div>
+      </div>
+      </div>
+    </button>
+  );
+}

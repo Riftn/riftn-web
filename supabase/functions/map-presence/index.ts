@@ -1,0 +1,70 @@
+import {
+  handleCorsPreflight,
+  jsonResponse,
+  requireDeHubAuth,
+  serviceClient,
+} from '../_shared/auth.ts';
+
+import { readAllPresence, coarsenCoordinate } from './presence.ts';
+
+Deno.serve(async (req) => {
+  const preflight = handleCorsPreflight(req);
+  if (preflight) return preflight;
+
+  const db = serviceClient();
+  if (req.method === 'GET') {
+    let data;
+    try {
+      data = await readAllPresence(async (offset, size) => {
+        const { data, error } = await db.from('arcade_map_presence')
+          .select('public_id,latitude,longitude,username,avatar_url,updated_at')
+          .order('public_id', { ascending: true }).range(offset, offset + size - 1);
+        if (error) throw error;
+        return data || [];
+      });
+    } catch {
+      return jsonResponse({ error: 'Could not load the community map.' }, 500);
+    }
+    return jsonResponse({ people: (data || []).map((row) => ({
+      id: row.public_id,
+      name: row.username || 'Community member',
+      latitude: row.latitude,
+      longitude: row.longitude,
+      avatar_url: row.avatar_url,
+      profile_url: row.username ? `https://riftn.com/${encodeURIComponent(row.username)}` : null,
+    })) });
+  }
+
+  if (req.method === 'DELETE') {
+    const auth = await requireDeHubAuth(req);
+    if (!auth.ok) return auth.response;
+    const { error } = await db.from('arcade_map_presence').delete().eq('wallet_address', auth.wallet);
+    return error ? jsonResponse({ error: 'Could not remove your map presence.' }, 500) : jsonResponse({ removed: true });
+  }
+
+  if (req.method !== 'POST') return jsonResponse({ error: 'Method not allowed.' }, 405);
+  const auth = await requireDeHubAuth(req);
+  if (!auth.ok) return auth.response;
+  const body = await req.json().catch(() => null);
+  const latitude = body?.latitude;
+  const longitude = body?.longitude;
+  const precisionKm = Math.round(Math.min(100, Math.max(1, Number(body?.precisionKm) || 25)));
+  if (!Number.isFinite(latitude) || latitude < -90 || latitude > 90 ||
+      !Number.isFinite(longitude) || longitude < -180 || longitude > 180) {
+    return jsonResponse({ error: 'Valid coordinates are required.' }, 400);
+  }
+  const username = typeof body?.username === 'string' ? body.username.trim().slice(0, 80) || null : null;
+  const avatarUrl = typeof body?.avatarUrl === 'string' && /^https:\/\//i.test(body.avatarUrl)
+    ? body.avatarUrl.slice(0, 1000) : null;
+  const { error } = await db.from('arcade_map_presence').upsert({
+    wallet_address: auth.wallet,
+    latitude: coarsenCoordinate(latitude, precisionKm, 90),
+    longitude: coarsenCoordinate(longitude, precisionKm, 180),
+    precision_km: precisionKm,
+    username,
+    avatar_url: avatarUrl,
+    updated_at: new Date().toISOString(),
+  });
+  return error ? jsonResponse({ error: 'Could not place you on the map.' }, 500)
+    : jsonResponse({ placed: true, precisionKm });
+});

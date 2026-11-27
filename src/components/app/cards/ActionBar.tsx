@@ -1,0 +1,1474 @@
+import { FEED_ICON_CLASS } from './feed-icon-size';
+import { TranslationText } from '@/components/TranslationText';
+import { useTranslation as _useCopy } from 'react-i18next';
+/**
+ * Action Bar Component
+ * ====================
+ * Universal action bar for all feed card types.
+ * Provides consistent interaction buttons: like, dislike, comment, share, bookmark.
+ * 
+ * @example
+ * ```tsx
+ * <ActionBar 
+ *   postId="123"
+ *   onComment={() => openComments()}
+ * />
+ * ```
+ */
+
+import { useState, useCallback, useEffect, useRef, lazy, Suspense } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import { Code, ImageDown } from "lucide-react";
+import { copyPostEmbedCode } from '@/lib/post-embed-code';
+import type { PostVisibility, QuotePolicy } from '@/lib/api/dehub/types';
+import ThumbsDown from "@/components/ui/cut-icons/dislike";
+import Quote from "@/components/ui/cut-icons/quote";
+import Link from "@/components/ui/cut-icons/link";
+import Info from "@/components/ui/cut-icons/information";
+
+import MessageSquare from "@/components/ui/cut-icons/messages";
+import Share2 from "@/components/ui/cut-icons/postshare";
+import Repeat2 from "@/components/ui/cut-icons/repost";
+import Send from "@/components/ui/cut-icons/send";
+import PublicChatIcon from "@/components/ui/cut-icons/chat";
+import { Button } from '@/components/ui/button';
+import { MomentAdd } from '@/components/app/stories/moment-icons';
+import { useStoriesStore } from '@/store/storiesStore';
+
+import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
+import { motion } from 'framer-motion';
+import { voteOnPost, reactToPost } from '@/lib/api/dehub';
+import {
+  applyReactionDelta,
+  isPositiveReaction,
+  negativeThumbLabel,
+  reactionForTap,
+  reactionForThumbTap,
+  reactionMeta,
+  reconcileReactionCounts,
+  resolveLeadReaction,
+  resolveThumbReaction,
+  resolveThumbCount,
+  type PostReaction,
+  type ReactionCounts,
+} from '@/lib/reactions';
+import { ReactionEmoji } from './ReactionEmoji';
+import { ThumbIcon } from './ThumbIcon';
+import { ReactionPicker } from './ReactionPicker';
+import { maybeShowReactionTip } from '@/lib/reaction-tip';
+import { useAuth } from '@/contexts/AuthContext';
+import { useEngagementWeight } from '@/hooks/use-engagement-weight';
+import { useLeftHanded } from '@/hooks/use-left-handed';
+import { PostUtilityButtons } from './PostUtilityButtons';
+import { useFoldUtility, UtilityOverflowButton } from './UtilityOverflow';
+import { dehubLinkFor } from '@/lib/dehub-links';
+// Lazy so the DM/socket graph doesn't ride in the feed chunk — only loads when a user shares.
+const ShareToDmModal = lazy(() =>
+  import('@/components/app/modals/ShareToDmModal').then((m) => ({ default: m.ShareToDmModal }))
+);
+// Only ever opened by the author of the post, so it stays out of the bundle
+// every card pays for.
+const ReactionInfoDrawer = lazy(() =>
+  import('./ReactionInfoDrawer').then((m) => ({ default: m.ReactionInfoDrawer }))
+);
+import { getVoteCache, setVoteCache, patchFeedCaches } from '@/lib/vote-cache';
+import { hideDislikedPost, restoreDislikedPost } from '@/lib/disliked-posts-store';
+import { applyVoteStateToNFT, isVoteConfirmed } from '@/lib/engagement';
+import { usePostLinkCopyCount, useLinkCopyFloor, useTrackPostLinkCopy } from '@/hooks/use-link-copy-count';
+import { isPostReposted, markReposted, unmarkReposted } from '@/lib/repost-cache';
+import { useCommentCount } from '@/lib/comment-count-store';
+import {
+  DOUBLE_TAP_LIKE_EVENT,
+  OPEN_REACTIONS_EVENT,
+  emitTapReactionCast,
+  type DoubleTapLikeEventDetail,
+  type OpenReactionsEventDetail,
+} from '@/lib/tap-reactions';
+import { useReactionTray } from '@/hooks/use-reaction-tray';
+import { TipGemIcon } from './TipGemIcon';
+import { subscribePostTipped } from '@/lib/tip-events';
+import { useViewerTippedPost } from '@/hooks/use-post-tip-count';
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+} from '@/components/ui/drawer';
+import type { PostStageValue } from '@/components/app/post-stage/post-stage-context';
+const RepostShareSheet = lazy(() => import('@/components/app/post-stage/RepostShareSheet').then(m => ({ default: m.RepostShareSheet })));
+import { viewerLiveShareUrl, viewerShareUrl } from '@/lib/share-url';
+import { trackShare } from '@/lib/analytics';
+import { POST_MENU_EVENT, type PostMenuBridgeDetail } from '@/lib/post-menu';
+
+interface ActionBarProps {
+  /** Post ID for info navigation and voting */
+  postId?: string;
+  /**
+   * The off-chain slug, when the post has one and is not yet minted. Share
+   * and copy-link then hand out /newpost/<n> instead of the NFT-style
+   * /app/post/<tokenId> the post hasn't earned. Omitted → old behaviour.
+   */
+  newPostSlug?: number | null;
+  /** An article's readable slug — shares as /app/post/<slug>, ahead of every other shape. */
+  articleSlug?: string | null;
+  /**
+   * The link Copy Link and the share targets hand out, for surfaces whose
+   * items are not posts (a governance proposal lives at its own route, not
+   * /app/post/<id>). Omitted → the post's own link.
+   */
+  shareUrl?: string;
+  /** Opens the Public Chat composer with a public stream's link. */
+  onShareToPublicChat?: () => void;
+  /** Handler for comment action */
+  onComment?: () => void;
+  /** Handler for share action */
+  onShare?: () => void;
+  /** Handler for repost action */
+  onRepost?: () => void | Promise<unknown>;
+  /** Handler for quote action */
+  onQuote?: () => void;
+  /** Additional CSS classes */
+  className?: string;
+  /** Whether to show border on top */
+  showBorder?: boolean;
+  /** Whether the current user has liked this item */
+  isLiked?: boolean;
+  /** Whether the current user has disliked this item */
+  isDisliked?: boolean;
+  /**
+   * Which of the ten reactions the viewer holds. `isLiked`/`isDisliked` stay
+   * the polarity rollup of it, so a post the viewer loved still reads as liked.
+   */
+  myReaction?: PostReaction | null;
+  /** Per-reaction totals — decides which icon leads on the card. */
+  reactionCounts?: ReactionCounts | null;
+  /**
+   * Hide the hold-to-react tray, leaving a plain like/dislike pair. Set by
+   * surfaces whose "posts" aren't posts (governance proposals, feature
+   * requests) — they route votes through onLike/onDislike, and /request_reaction
+   * has no row to write for them.
+   */
+  disableReactions?: boolean;
+  /**
+   * Hide the thumbs entirely. A multiple choice governance proposal votes
+   * through its own answer list, so a like/dislike pair beside it would be a
+   * second, meaningless vote.
+   */
+  hideVotes?: boolean;
+  /** Hide the dislike button (e.g., for images) */
+  hideDislike?: boolean;
+  /** Like count to display */
+  likeCount?: number;
+  /** Dislike count to display */
+  dislikeCount?: number;
+  /** Comment count to display */
+  commentCount?: number;
+  /** Repost count to display */
+  repostCount?: number;
+  /** Whether the current user has already reposted this post */
+  isReposted?: boolean;
+  /** Whether this is an optimistic (processing) post */
+  isOptimistic?: boolean;
+  /** Handler for like action (overrides default voteOnPost) */
+  onLike?: () => void;
+  /** Persist a reaction on a non-post entity using the same tray and gestures. */
+  onReaction?: (reaction: PostReaction | null) => Promise<unknown>;
+  /** Handler for dislike action (overrides default voteOnPost) */
+  onDislike?: () => void;
+  /**
+   * Vote weight multiplier for optimistic count updates.
+   *
+   * Omitted on a post: the viewer's own badge weight is used, because that is
+   * what the server will apply (1 with no badge, 2 at Crab, up to 14 at
+   * Megalodon). Governance passes its own weight — a different ladder, on a
+   * different table — and keeps overriding this.
+   */
+  voteWeight?: number;
+  /** Live applause is repeatable; the persisted post vote still toggles normally. */
+  onLiveReaction?: (reaction: PostReaction) => void;
+  liveShare?: boolean;
+  /** Tip count to display next to repost */
+  tipCount?: number;
+  /** Handler for tip action */
+  onTip?: () => void;
+  /** Handler for see engagements action */
+  onSeeEngagements?: () => void;
+  /** Whether voting buttons should be disabled (e.g. mutation pending) */
+  disabled?: boolean;
+  /** Handler for share-as-image action (text posts only) */
+  onShareAsImage?: () => Promise<void>;
+  /** A public stream that can be shared as a linked Moment. */
+  streamMomentTokenId?: number;
+  /** Numeric token ID for pin functionality */
+  tokenId?: number;
+  /**
+   * Your own post. Shows the pin button, and puts the ⓘ in the reaction tray
+   * that opens the who-reacted-what breakdown — that list is the author's
+   * alone (the API enforces the same rule).
+   */
+  isOwnPost?: boolean;
+  /**
+   * Who the author lets quote this post. 'nobody' takes the Quote action away
+   * from everyone else; 'followers' leaves it, and the server answers anyone
+   * who does not follow with a refusal the composer shows.
+   */
+  quotePolicy?: QuotePolicy;
+  /**
+   * Who may see the post. A followers-only or direct post cannot be reposted,
+   * quoted, embedded or sent in a message: each would hand it to people it
+   * was not written for. Absent is everyone.
+   */
+  visibility?: PostVisibility;
+  /**
+   * Listen for double-tap-to-like events for this post (default true).
+   * Set false on secondary instances of the same post (e.g. a copy of the bar
+   * inside the fullscreen image viewer) so a single double-tap doesn't cast two votes.
+   */
+  enableDoubleTapLike?: boolean;
+  /**
+   * When true, the repost button reposts directly (with optimistic count bump)
+   * instead of opening the share drawer. Used inside high-z overlays like the
+   * fullscreen image viewer, where the z-[100] drawer would render behind it.
+   */
+  quickRepost?: boolean;
+  /**
+   * On desktop (lg+), center the actions as one cluster instead of spreading
+   * them edge-to-edge (primary group left, secondary group right). Mobile/tablet
+   * keep the edge-to-edge layout. Used in the fullscreen image viewer.
+   */
+  centered?: boolean;
+  /**
+   * On desktop (lg+), hide the left utility cluster (bookmark / pin / info).
+   * Used by the fullscreen viewer, which lifts those buttons up to the
+   * top-right chip cluster on desktop. Mobile/tablet keep them inline.
+   */
+  hideUtilityDesktop?: boolean;
+  /**
+   * Three controls in a column instead of a row of seven: the gift, the
+   * share, and the thumb with its reaction tray. For chrome over a video,
+   * where a full engagement bar is a strip of icons across someone's
+   * broadcast and the counts are noise.
+   *
+   * A prop rather than a hand-built cluster in the viewer, because the
+   * thumb is not a button — it is the hold gesture, the ten-reaction tray,
+   * the per-reaction glow, the optimistic vote cache and the feed
+   * invalidation behind it. All of that stays here.
+   */
+  compact?: boolean;
+  /**
+   * Adds a "Share link" row that opens the device's own share sheet, where
+   * the browser has one. The live viewer sets it: its Share button is the only
+   * way out of a broadcast to another app.
+   */
+  nativeShare?: { title?: string };
+
+  /**
+   * Hide the utility buttons (bookmark / pin / info) at ALL breakpoints.
+   * Feed cards set this and render PostUtilityButtons in their top-right
+   * header cluster next to the AI button instead.
+   */
+  hideUtility?: boolean;
+  /**
+   * Feed-card layout: utility buttons (bookmark / pin / info) are hidden
+   * anchored to the LEFT on desktop and to the RIGHT below lg (the card's
+   * three-dot menu still carries them at every width),
+   * with the engagement buttons filling the remaining row width evenly.
+   * Mutually exclusive with hideUtility/hideUtilityDesktop/centered — those
+   * stay on the original contents-based layout used by the fullscreen viewer
+   * and other non-card consumers.
+   */
+  utilityDesktopAnchor?: boolean;
+  /**
+   * The phone post page ("Stage"): one row of five equal tiles — like (with
+   * its hold/hover reaction tray), comments, repost, tip, save — and the
+   * repost tile opens the "Repost & share" sheet instead of the share sheet.
+   * No share, thumbs-down or info button. Feed cards never pass this.
+   */
+  stage?: PostStageValue | null;
+}
+
+/**
+ * Per-reaction totals, seeded — or reconciled — against the row's counts.
+ *
+ * Every vote cast before multi-reaction shipped is a bare boolean, so a
+ * long-lived post arrives with `likeCount: 40` and no breakdown at all. That
+ * used to be harmless — the breakdown only decided which icon led — but the
+ * tray now prints a number under every emoji, and a row of zeros beside a like
+ * count of 40 reads as a bug. Attributing that history to like/dislike is
+ * exactly what those votes were, and matches the API's own first write.
+ *
+ * A breakdown that IS present but doesn't add up to the like count (hand-edited
+ * totals on the backend) is stretched to fit rather than served raw, so the
+ * tray never contradicts the number beside the thumb.
+ */
+function reactionCountsOrSeed(
+  counts: ReactionCounts | null | undefined,
+  likeCount: number,
+  dislikeCount: number,
+): ReactionCounts {
+  return reconcileReactionCounts(likeCount, dislikeCount, counts);
+}
+
+/** Format count for display (e.g., 1500 -> 1.5K) */
+function formatCount(count?: number): string {
+  const value = count ?? 0;
+  if (value >= 1000000) return `${(value / 1000000).toFixed(1).replace(/\.0$/, '')}M`;
+  if (value >= 1000) return `${(value / 1000).toFixed(1).replace(/\.0$/, '')}K`;
+  return value.toString();
+}
+
+/**
+ * Like and dislike are the only engagement buttons whose count sits OUTSIDE
+ * them, which left each one a bare 20x20 glyph — a quarter the area of the
+ * share and comment buttons beside it, and under half Apple's 44pt minimum in
+ * both axes. The number next to the thumb is the post's like count, reads as
+ * part of the control, and does nothing when you tap it.
+ *
+ * On a phone that lands as "the like only registers if I hit the exact spot",
+ * and it is worse than the size alone suggests: at 20px a finger that rolls a
+ * few pixels between press and release ends the press on the count instead, so
+ * the click retargets to the wrapper and no vote is cast. Same tap, same
+ * apparent spot, works one time and not the next.
+ *
+ * So the count moves inside the button — tip, share and comment already carry
+ * theirs there — and 8px of side padding takes the target from 20px wide to
+ * ~46-50px. Both padding steps are cancelled by a matching negative margin, so
+ * the OUTER box the flex row distributes on is unchanged: nothing moves by a
+ * pixel and no card changes height.
+ *
+ * WHY THE HEIGHT IS LEFT ALONE
+ * It should be 44px too, and it can't be from here. Measured on the live feed
+ * at 375px, an action row has 8px of clearance above it (the translate button)
+ * and as little as 1.5px below on cards that render the bar above the caption,
+ * where the first hashtag link sits directly under it. Any vertical padding
+ * big enough to matter would swallow the top edge of that link and cast a vote
+ * when someone taps a tag. Giving the row real breathing room is a layout
+ * change, not a hit-target one.
+ *
+ * Mobile has never had this problem — `hitSlop={{ top: 13, bottom: 13, left: 6,
+ * right: 6 }}` on the shared button in `components/Home/FeedActionBar.tsx`,
+ * with the count inside the Pressable. Only the web was missing it.
+ *
+ * WHY `touch-pan-y` AND NOT `touch-none`
+ * `touch-action: none` means a touch that STARTS on the element cannot pan the
+ * page at all, so a thumb landing here and swiping up scrolls nothing. That was
+ * survivable while the target was 20px wide and easy to miss; widening it to
+ * ~46px doubled the dead strip, and the action row is exactly where a thumb
+ * rests. `pan-y` gives the vertical scroll back and keeps everything the tray
+ * needs: a still press runs the 400ms hold timer as before, and a press that
+ * turns into a scroll fires `pointercancel`, which already cancels the hold —
+ * which is what should happen. The horizontal axis stays locked so a sideways
+ * drag on the thumb cannot start a pan the card has no use for.
+ *
+ * Note for themes: the count is a plain `<span>` child, and every engaged-state
+ * rule reaches the icon through `> :is(svg, [data-engaged-glyph])`, so bringing
+ * it inside the button does not drag the number into the reaction glow or the
+ * Osaka cycle — the arrangement repost and tip already rely on.
+ */
+const THUMB_BUTTON_CLASS =
+  'flex items-center gap-0.5 px-2 -mx-2 transition-colors text-white select-none touch-pan-y';
+
+/**
+ * A compact button, sized and filled to match the live composer it shares a
+ * row with — same 46px height, same radius, same glass. Bare icons beside a
+ * filled input read as three loose glyphs rather than as controls.
+ */
+const COMPACT_BUTTON_CLASS =
+  // `mx-0 px-0` is not decoration: the thumb carries `px-2 -mx-2` from
+  // THUMB_BUTTON_CLASS, which widens its tap target by eating 8px of the
+  // margin on each side. Against a row gap of 8 that cancels exactly, and
+  // the thumb and the share button met with no space between them.
+  'h-[46px] w-[46px] shrink-0 justify-center rounded-xl border border-white/15 bg-black/40 backdrop-blur-md hover:bg-black/60 mx-0 px-0';
+
+
+
+export function ActionBar({
+  postId,
+  newPostSlug,
+  articleSlug,
+  shareUrl,
+  onShareToPublicChat,
+  onComment,
+  onShare,
+  onRepost,
+  onQuote,
+  onLike,
+  onReaction,
+  onDislike,
+  className,
+  showBorder = false,
+  isLiked: initialIsLiked = false,
+  isDisliked: initialIsDisliked = false,
+  myReaction: initialMyReaction = null,
+  reactionCounts: initialReactionCounts = null,
+  disableReactions = false,
+  hideVotes = false,
+  hideDislike = false,
+  likeCount,
+  dislikeCount,
+  commentCount: rawCommentCount,
+  repostCount,
+  isReposted: initialIsReposted = false,
+  isOptimistic = false,
+  voteWeight: voteWeightProp,
+  onLiveReaction,
+  liveShare,
+  tipCount,
+  onTip,
+  onSeeEngagements,
+  onShareAsImage,
+  streamMomentTokenId,
+  disabled: externalDisabled = false,
+  tokenId,
+  isOwnPost = false,
+  quotePolicy,
+  visibility,
+  enableDoubleTapLike = true,
+  quickRepost = false,
+  centered = false,
+  hideUtilityDesktop = false,
+  compact = false,
+  nativeShare,
+  hideUtility = false,
+  utilityDesktopAnchor = false,
+  stage = null,
+}: ActionBarProps) {
+  const { t: _copy } = _useCopy();
+  /** A reaction's name in the viewer's language. */
+  const reactionLabel = (reaction: PostReaction) =>
+    _copy(`reactionInfo.labels.${reaction}`, { defaultValue: reactionMeta(reaction).label });
+  // What one reaction from this viewer counts for. A badge multiplies the
+  // reaction they already have; it never buys them a second one, so this only
+  // ever scales the count, never the number of votes cast.
+  const selfWeight = useEngagementWeight();
+  const voteWeight = voteWeightProp ?? selfWeight;
+
+  const commentCount = useCommentCount(postId, rawCommentCount ?? 0);
+  
+  // Optimistic repost count: increment locally on repost for instant feedback
+  const [repostDelta, setRepostDelta] = useState(0);
+  const prevRepostCountRef = useRef(repostCount);
+  
+  // Reset delta when server data refreshes (prevents double-counting)
+  if (repostCount !== prevRepostCountRef.current) {
+    prevRepostCountRef.current = repostCount;
+    if (repostDelta !== 0) {
+      setRepostDelta(0);
+    }
+  }
+  
+  const displayRepostCount = (repostCount ?? 0) + repostDelta;
+
+  // Share counter = reposts + link copies. The copies come from Supabase
+  // (batched to one request per feed page); the floor is this session's own
+  // copies, so the number moves on the tap rather than on the next refetch.
+  const { data: linkCopyCount = 0 } = usePostLinkCopyCount(postId);
+  const linkCopyFloor = useLinkCopyFloor(postId);
+  const displayShareCount = displayRepostCount + Math.max(linkCopyCount, linkCopyFloor);
+  const trackLinkCopy = useTrackPostLinkCopy();
+  // On mount, check global vote cache for recent votes on this post
+  const cachedVote = postId ? getVoteCache(postId) : null;
+
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const [shareSheetMounted, setShareSheetMounted] = useState(false);
+  useEffect(() => { if (sheetOpen) setShareSheetMounted(true); }, [sheetOpen]);
+  const [isLiked, setIsLiked] = useState(cachedVote ? cachedVote.isLiked : initialIsLiked);
+  const [isDisliked, setIsDisliked] = useState(cachedVote ? cachedVote.isDisliked : initialIsDisliked);
+  const [localLikeCount, setLocalLikeCount] = useState(cachedVote ? cachedVote.likeCount : (likeCount ?? 0));
+  const [localDislikeCount, setLocalDislikeCount] = useState(cachedVote ? cachedVote.dislikeCount : (dislikeCount ?? 0));
+  const [isVoting, setIsVoting] = useState(false);
+  const voteInFlightRef = useRef(false);
+  const [justVoted, setJustVoted] = useState<'like' | 'dislike' | null>(null);
+  const [myReaction, setMyReaction] = useState<PostReaction | null>(
+    cachedVote?.myReaction !== undefined ? cachedVote.myReaction : initialMyReaction,
+  );
+  const [localReactionCounts, setLocalReactionCounts] = useState<ReactionCounts>(
+    cachedVote?.reactionCounts ??
+      reactionCountsOrSeed(initialReactionCounts, likeCount ?? 0, dislikeCount ?? 0),
+  );
+  // Closes whichever reaction tray is open. A ref because handleReaction is
+  // declared above the trays and every cast — thumb, tray or double-tap —
+  // should put them away.
+  const closeTrays = useRef<() => void>(() => {});
+  // Same reason: whether this bar has a tray at all is worked out below.
+  const reactionsEnabledRef = useRef(false);
+  const [reactionInfoOpen, setReactionInfoOpen] = useState(false);
+  const [isSharingImage, setIsSharingImage] = useState(false);
+  // Track when user voted locally so we don't let stale API refetches overwrite optimistic state
+  const lastVoteTimeRef = useRef(cachedVote ? Date.now() : 0);
+  const VOTE_GUARD_MS = 10000; // ignore prop syncs for 10s after a local vote
+
+  const handleShareAsImage = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!onShareAsImage || isSharingImage) return;
+    // Blur focused element before closing to prevent aria-hidden conflict
+    (document.activeElement as HTMLElement)?.blur();
+    setIsSharingImage(true);
+    setSheetOpen(false);
+    // Wait for drawer close animation before capturing
+    await new Promise((r) => setTimeout(r, 350));
+    try {
+      await onShareAsImage();
+    } finally {
+      setIsSharingImage(false);
+    }
+  };
+
+  const { isAuthenticated, walletAddress, openLoginModal } = useAuth();
+  // Left-handed mode mirrors the whole row so the thumb lands on the left.
+  const { leftHanded } = useLeftHanded();
+  const queryClient = useQueryClient();
+  // When external handlers are provided (governance), always sync from props
+  const hasExternalHandlers = !!(onLike || onDislike || onReaction);
+
+  // Confirmed reactions accept fresh totals immediately, including during the
+  // short vote guard. Only an unconfirmed local mutation keeps its overlay.
+  useEffect(() => {
+    const cached = !hasExternalHandlers && postId ? getVoteCache(postId) : null;
+    const confirmed = cached && isVoteConfirmed({
+      isLiked: initialIsLiked,
+      isDisliked: initialIsDisliked,
+      myReaction: initialMyReaction,
+    }, cached);
+    if (!hasExternalHandlers && !confirmed && Date.now() - lastVoteTimeRef.current < VOTE_GUARD_MS) return;
+    const pending = confirmed ? null : cached;
+    setIsLiked(pending?.isLiked ?? initialIsLiked);
+    setIsDisliked(pending?.isDisliked ?? initialIsDisliked);
+    setLocalLikeCount(pending?.likeCount ?? likeCount ?? 0);
+    setLocalDislikeCount(pending?.dislikeCount ?? dislikeCount ?? 0);
+    setMyReaction(pending && pending.myReaction !== undefined ? pending.myReaction : initialMyReaction);
+    setLocalReactionCounts(pending?.reactionCounts ?? reactionCountsOrSeed(initialReactionCounts, likeCount ?? 0, dislikeCount ?? 0));
+  }, [postId, hasExternalHandlers, initialIsLiked, initialIsDisliked, initialMyReaction, likeCount, dislikeCount, initialReactionCounts]);
+  // Propagate API-sourced like/dislike state to all feed caches
+  // so old likes from previous sessions sync across all feeds
+  useEffect(() => {
+    if (!postId) return;
+    if ((!initialIsLiked && !initialIsDisliked) || getVoteCache(postId)) return;
+    patchFeedCaches(queryClient, postId, {
+      isLiked: initialIsLiked,
+      isDisliked: initialIsDisliked,
+      likeCount: likeCount ?? 0,
+      dislikeCount: dislikeCount ?? 0,
+    });
+  }, [initialIsLiked, initialIsDisliked, postId]);
+  
+  /**
+   * Cast, switch or toggle off a reaction.
+   *
+   * Sending the reaction the viewer already holds is what REMOVES it — that's
+   * true of the server too, so the optimistic state and the eventual refetch
+   * agree without the client having to model a separate "unreact" call.
+   *
+   * `likeCount`/`dislikeCount` track POLARITY, not the individual reaction, so
+   * swapping like → love leaves both counts alone and only moves
+   * `reactionCounts`. Getting this wrong would make a post's like count jump
+   * every time somebody changed their mind.
+   */
+  const handleReaction = useCallback(async (reaction: PostReaction, options?: { float?: boolean }) => {
+    if (isAuthenticated && !externalDisabled && options?.float !== false) onLiveReaction?.(reaction);
+    if (!postId || isVoting || voteInFlightRef.current || externalDisabled) return;
+
+    if (!isAuthenticated) {
+      openLoginModal();
+      return;
+    }
+
+    const wantsPositive = isPositiveReaction(reaction);
+    // When external handlers are provided (e.g. governance), skip local optimistic updates
+    // since the parent mutation handles optimistic state via React Query cache
+    const hasExternalHandler = onReaction || (wantsPositive && onLike) || (!wantsPositive && onDislike);
+
+    const previous = myReaction;
+    const isRemovingVote = previous === reaction;
+    const next: PostReaction | null = isRemovingVote ? null : reaction;
+
+    const wasPositive = previous ? isPositiveReaction(previous) : false;
+    const wasNegative = previous ? !wasPositive : false;
+    const nextPositive = next ? isPositiveReaction(next) : false;
+    const nextNegative = next ? !nextPositive : false;
+
+    // The whole optimistic result for a given weight. Written as a function of
+    // the weight because the server's answer carries the weight it actually
+    // applied, and that can differ from the one guessed here — the live wallet
+    // read promotes a tier early, and a username override draws a badge the
+    // API does not honour.
+    const countsAt = (weight: number) => {
+      let like = localLikeCount;
+      let dislike = localDislikeCount;
+      if (wasPositive && !nextPositive) like = Math.max(0, like - weight);
+      if (!wasPositive && nextPositive) like += weight;
+      // A dislike always shows as one, whatever badge cast it.
+      if (wasNegative && !nextNegative) dislike = Math.max(0, dislike - 1);
+      if (!wasNegative && nextNegative) dislike += 1;
+      return {
+        likeCount: like,
+        dislikeCount: dislike,
+        reactionCounts: applyReactionDelta(localReactionCounts, previous, next, weight),
+      };
+    };
+
+    const optimistic = countsAt(voteWeight);
+    let newLikeCount = optimistic.likeCount;
+    let newDislikeCount = optimistic.dislikeCount;
+
+    const newLiked = nextPositive;
+    const newDisliked = nextNegative;
+    const newReactionCounts = optimistic.reactionCounts;
+
+    voteInFlightRef.current = true;
+    setIsVoting(true);
+    closeTrays.current();
+    lastVoteTimeRef.current = Date.now();
+
+    if (!hasExternalHandler) {
+      // Only do local optimistic updates for regular posts (not governance)
+      setIsLiked(newLiked);
+      setIsDisliked(newDisliked);
+      setMyReaction(next);
+      setLocalLikeCount(newLikeCount);
+      setLocalDislikeCount(newDislikeCount);
+      setLocalReactionCounts(newReactionCounts);
+      if (!isRemovingVote) setJustVoted(nextPositive ? 'like' : 'dislike');
+      setTimeout(() => setJustVoted(null), 400);
+
+      // Sync global vote cache & all feed caches synchronously with computed values
+      const voteState = {
+        isLiked: newLiked,
+        isDisliked: newDisliked,
+        myReaction: next,
+        likeCount: newLikeCount,
+        dislikeCount: newDislikeCount,
+        reactionCounts: newReactionCounts,
+      };
+      setVoteCache(postId, voteState);
+      patchFeedCaches(queryClient, postId, voteState);
+      // A dislike takes the post out of this viewer's feeds; undoing it brings it back.
+      if (nextNegative && !wasNegative) hideDislikedPost(postId);
+      else if (wasNegative && !nextNegative) restoreDislikedPost(postId);
+      // Also patch the single-post query cache so dedicated post pages reflect the vote immediately
+      queryClient.setQueriesData<any>(
+        { queryKey: ['single-post', postId] },
+        (old: any) => old ? applyVoteStateToNFT(old, voteState) : old,
+      );
+    }
+
+    try {
+      // Use override if provided, otherwise hit the reaction endpoint
+      if (onReaction) {
+        await onReaction(next);
+      } else if (wantsPositive && onLike) {
+        await onLike();
+      } else if (!wantsPositive && onDislike) {
+        await onDislike();
+      } else {
+        const numericId = parseInt(postId, 10);
+        if (isNaN(numericId)) {
+          console.warn('[ActionBar] Non-numeric postId used without override handler:', postId);
+          return;
+        }
+        // Plain like/dislike keeps using the long-lived vote endpoint; anything
+        // else needs the reaction one. Same row either way on the server.
+        const response =
+          reaction === 'like' || reaction === 'dislike'
+            ? await voteOnPost({ tokenId: numericId, voteType: reaction === 'like' ? 'for' : 'against' })
+            : await reactToPost({ tokenId: numericId, reaction });
+
+        // Settle on the weight the server actually applied. Only differs when
+        // this side is a beat ahead of the account row — but leaving it would
+        // park a wrong count in the vote cache for as long as the cache
+        // outlives the refetch.
+        const applied = typeof response?.weight === 'number' ? response.weight : voteWeight;
+        if (!hasExternalHandler && applied !== voteWeight) {
+          const settled = countsAt(applied);
+          setLocalLikeCount(settled.likeCount);
+          setLocalDislikeCount(settled.dislikeCount);
+          setLocalReactionCounts(settled.reactionCounts);
+          const settledState = {
+            isLiked: newLiked,
+            isDisliked: newDisliked,
+            myReaction: next,
+            ...settled,
+          };
+          setVoteCache(postId, settledState);
+          patchFeedCaches(queryClient, postId, settledState);
+          queryClient.setQueriesData<any>(
+            { queryKey: ['single-post', postId] },
+            (old: any) => (old ? applyVoteStateToNFT(old, settledState) : old),
+          );
+        }
+      }
+      // After a successful reaction, softly invalidate feeds so fresh
+      // isLiked/myReaction arrives from API before the vote cache expires
+      if (!hasExternalHandler) {
+        // Use a short delay so the backend has time to process the vote
+        setTimeout(() => {
+          queryClient.invalidateQueries({ queryKey: ['unified-feed'], refetchType: 'none' });
+          queryClient.invalidateQueries({ queryKey: ['dehub-feed'], refetchType: 'none' });
+          queryClient.invalidateQueries({ queryKey: ['dehub-user-content'], refetchType: 'none' });
+          if (nextNegative || wasNegative) queryClient.invalidateQueries({ queryKey: ['profile-dislikes'], refetchType: 'none' });
+        }, 2000);
+      }
+    } catch (error: unknown) {
+      if (!hasExternalHandler) {
+        // Revert to pre-vote state on error (only for local optimistic updates)
+        setIsLiked(isLiked);
+        setIsDisliked(isDisliked);
+        setMyReaction(previous);
+        setLocalLikeCount(localLikeCount);
+        setLocalDislikeCount(localDislikeCount);
+        setLocalReactionCounts(localReactionCounts);
+        const revertState = {
+          isLiked,
+          isDisliked,
+          myReaction: previous,
+          likeCount: localLikeCount,
+          dislikeCount: localDislikeCount,
+          reactionCounts: localReactionCounts,
+        };
+        setVoteCache(postId, revertState);
+        patchFeedCaches(queryClient, postId, revertState);
+        if (nextNegative && !wasNegative) restoreDislikedPost(postId);
+        else if (wasNegative && !nextNegative) hideDislikedPost(postId);
+        queryClient.setQueriesData<any>(
+          { queryKey: ['single-post', postId] },
+          (old: any) => old ? applyVoteStateToNFT(old, revertState) : old,
+        );
+      }
+      toast.error(_copy("copy.520424cf959c", { defaultValue: "Failed to react. Please try again." }));
+    } finally {
+      voteInFlightRef.current = false;
+      setIsVoting(false);
+    }
+  }, [postId, isVoting, externalDisabled, isLiked, isDisliked, myReaction, localLikeCount, localDislikeCount, localReactionCounts, isAuthenticated, queryClient, onLike, onDislike, onReaction, voteWeight, onLiveReaction, _copy]);
+
+  /**
+   * Tapping the thumbs-up / thumbs-down.
+   *
+   * The thumb casts whichever reaction it is WEARING: a post leading with 🔥
+   * draws a 🔥 thumb, so tapping it reacts 🔥 rather than quietly casting a 👍
+   * the viewer never picked. Tapping a reaction you already hold re-sends it,
+   * which the server reads as "toggle it off" — so the thumb clears a 🔥 the
+   * same way it clears a 👍, instead of downgrading it to a plain like.
+   */
+  const thumbRef = useRef<HTMLButtonElement>(null);
+  /**
+   * On a live, tapping again is applause: another reaction floats up and the
+   * thumb pops, and the vote you already cast stays. Taking it back is in the
+   * tray (hold on a phone, hover on a mouse), never a second tap.
+   */
+  const repeatLiveReaction = useCallback((reaction: PostReaction) => {
+    onLiveReaction?.(reaction);
+    const el = thumbRef.current;
+    if (el && typeof el.animate === 'function' && !window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
+      el.animate(
+        [{ transform: 'scale(1)' }, { transform: 'scale(1.22)', offset: 0.35 }, { transform: 'scale(1)' }],
+        { duration: 260, easing: 'cubic-bezier(0.2, 0.8, 0.3, 1)' },
+      );
+    }
+  }, [onLiveReaction]);
+
+  const handleVote = useCallback((vote: boolean) => {
+    if (vote && onLiveReaction && isAuthenticated && !externalDisabled && isLiked) {
+      return repeatLiveReaction(myReaction && isPositiveReaction(myReaction) ? myReaction : 'like');
+    }
+    // With reactions on there is no thumbs-down: 👎 lives in the thumbs-up's
+    // tray, and the thumb wears it while it is yours. A tap then takes it back
+    // rather than casting a like over it — see reactionForThumbTap.
+    if (vote && reactionsEnabledRef.current) {
+      if (!isLiked && !isDisliked && isAuthenticated) void maybeShowReactionTip(walletAddress);
+      return handleReaction(reactionForThumbTap(myReaction, localReactionCounts));
+    }
+    return handleReaction(reactionForTap(vote, myReaction, localReactionCounts));
+  }, [handleReaction, myReaction, localReactionCounts, isLiked, isDisliked, isAuthenticated, walletAddress, onLiveReaction, externalDisabled, repeatLiveReaction]);
+
+  // Listen for double-tap-to-like events dispatched by photo thumbnails / fullscreen viewer.
+  // Instagram-style: double-tap always likes (never unlikes) and only for this post's ID.
+  // It stays a plain 👍 even on a card whose thumb leads with 🔥 — the gesture
+  // wears no glyph, so there is nothing for it to promise to cast.
+  const handleReactionRef = useRef(handleReaction);
+  useEffect(() => { handleReactionRef.current = handleReaction; }, [handleReaction]);
+  useEffect(() => {
+    if (!postId || !enableDoubleTapLike) return;
+    const listener = (e: Event) => {
+      const detail = (e as CustomEvent<DoubleTapLikeEventDetail>).detail;
+      if (!detail || String(detail.postId) !== String(postId)) return;
+      const reaction = detail.reaction ?? 'like';
+      // A tap gesture only ever adds. `handleReaction` reads a repeat of the
+      // reaction you already hold as "clear it", so casting blind here would
+      // make a stray double-tap silently remove a like — the one outcome the
+      // gesture must never produce.
+      if (myReaction === reaction) return;
+      // The third tap upgrades to ❤️ even though the second tap's 👍 already
+      // set isLiked, so only the plain like defers to an existing positive vote.
+      if (reaction === 'like' && isLiked) return;
+      // Past the guards, so this one is really happening: tell the burst to
+      // draw. It listens here rather than to the gesture so a refused tap
+      // stays silent instead of replaying a like that never moved.
+      emitTapReactionCast({ ...detail, reaction });
+      handleReactionRef.current(reaction);
+    };
+    window.addEventListener(DOUBLE_TAP_LIKE_EVENT, listener as EventListener);
+    return () => window.removeEventListener(DOUBLE_TAP_LIKE_EVENT, listener as EventListener);
+  }, [postId, isLiked, myReaction, enableDoubleTapLike]);
+
+
+  const hasVoted = isLiked || isDisliked;
+
+  // ── Reaction tray ─────────────────────────────────────────────────────────
+  // Only real posts get reactions: governance proposals and feature requests
+  // reuse this bar with non-numeric ids and their own vote mutations, and the
+  // reaction endpoint has no row to write for them.
+  const numericPostId = postId ? parseInt(postId, 10) : NaN;
+  const reactionsEnabled = !disableReactions && (!!onReaction || (!hasExternalHandlers && !isNaN(numericPostId)));
+
+  // The breakdown of who reacted what belongs to the author. The ⓘ only exists
+  // on your own posts; the API refuses the list to everyone else regardless.
+  const reactionInfoTokenId = tokenId ?? (isNaN(numericPostId) ? undefined : numericPostId);
+  const canViewReactionInfo = isOwnPost && reactionInfoTokenId !== undefined;
+
+  // One tray, on the thumbs-up, holding every reaction — 👎 included, after a
+  // divider. The thumbs-down button only exists where reactions are off
+  // (governance, feature requests), and it never opens a tray of its own.
+  const likeTray = useReactionTray(reactionsEnabled);
+  reactionsEnabledRef.current = reactionsEnabled;
+
+  const viewerTipped = useViewerTippedPost(tokenId != null ? String(tokenId) : postId, walletAddress);
+  // Bumps each time this viewer tips this post, replaying the gem's swirl.
+  const [tipBurst, setTipBurst] = useState(0);
+  useEffect(() => {
+    const ids = [postId, tokenId].filter((v) => v != null).map(String);
+    if (!ids.length) return;
+    return subscribePostTipped((id) => { if (ids.includes(id)) setTipBurst((n) => n + 1); });
+  }, [postId, tokenId]);
+
+  useEffect(() => {
+    closeTrays.current = () => { likeTray.close(); };
+  }, [likeTray.close]);
+
+  // A hold on the post's media opens the positive tray. Declared down here
+  // rather than beside the other gesture listener because `reactionsEnabled`
+  // and the tray are defined above this point and below that one.
+  useEffect(() => {
+    if (!postId || !enableDoubleTapLike || !reactionsEnabled) return;
+    const listener = (e: Event) => {
+      const detail = (e as CustomEvent<OpenReactionsEventDetail>).detail;
+      if (!detail || String(detail.postId) !== String(postId)) return;
+      likeTray.openNow();
+    };
+    window.addEventListener(OPEN_REACTIONS_EVENT, listener as EventListener);
+    return () => window.removeEventListener(OPEN_REACTIONS_EVENT, listener as EventListener);
+  }, [postId, enableDoubleTapLike, reactionsEnabled, likeTray.openNow]);
+
+  /**
+   * The one glyph the thumbs-up wears: the viewer's own reaction (a 👎
+   * included, since there is no thumbs-down beside it), else the post's
+   * most-used positive one, else null for the plain thumbs-up icon. Where
+   * reactions are off the thumbs-down is still there and keeps its own vote.
+   */
+  const leadReaction = reactionsEnabled
+    ? resolveThumbReaction(localReactionCounts, myReaction)
+    : resolveLeadReaction(localReactionCounts, myReaction);
+  const thumbCount = resolveThumbCount(localLikeCount, localDislikeCount, leadReaction);
+  /**
+   * A 👍 or 👎 stays the plain thumb icon (turned down for a 👎), filled and
+   * nodding once every 5 seconds when it is your own. Any other reaction in
+   * the lead shows as its emoji, moving when it is yours.
+   */
+  const thumbDown = leadReaction === 'dislike';
+  const thumbGlyph = leadReaction && !thumbDown ? leadReaction : null;
+  const thumbMine = thumbDown ? myReaction === 'dislike' : isLiked;
+  /** The viewer's own reaction, split by side. */
+  const myPositiveReaction = myReaction && isPositiveReaction(myReaction) ? myReaction : null;
+  const myNegativeReaction = myReaction && !isPositiveReaction(myReaction) ? myReaction : null;
+
+  // An off-chain post shares as its own slug, never as an NFT-style URL.
+  const shareUrlForPost = () =>
+    shareUrl
+      ? shareUrl
+      : articleSlug
+      ? dehubLinkFor.article(articleSlug)
+      : newPostSlug != null
+      ? dehubLinkFor.newPost(newPostSlug)
+      : postId
+        ? dehubLinkFor.post(postId)
+        : window.location.href;
+
+  const getShareUrl = () => liveShare
+    ? viewerLiveShareUrl(shareUrlForPost(), !visibility || visibility === 'public')
+    : viewerShareUrl(shareUrlForPost());
+
+  const handleCopyLink = () => {
+    const url = getShareUrl();
+    navigator.clipboard.writeText(url);
+    toast.success(_copy("copy.e91de547a0b8", { defaultValue: "Post URL copied to clipboard" }));
+    // A copy is a share: it counts once per actor per post, next to reposts.
+    trackLinkCopy(postId, walletAddress, linkCopyCount);
+    setSheetOpen(false);
+  };
+
+  const canNativeShare = !!nativeShare && typeof navigator !== 'undefined' && typeof navigator.share === 'function';
+  const handleNativeShare = () => {
+    const url = getShareUrl();
+    setSheetOpen(false);
+    navigator
+      .share({ title: nativeShare?.title || undefined, url })
+      .then(() => trackShare('native', { kind: 'post' }))
+      // Dismissing the system sheet rejects; nothing to report.
+      .catch(() => {});
+  };
+
+  const [isReposted, setIsReposted] = useState(() => initialIsReposted || (postId ? isPostReposted(postId) : false));
+
+  useEffect(() => {
+    setRepostDelta(0);
+    setIsReposted(initialIsReposted || (postId ? isPostReposted(postId) : false));
+  }, [initialIsReposted, postId, walletAddress]);
+
+  // Only a public post travels further than its own audience.
+  const isPublicPost = !visibility || visibility === 'public';
+
+  const handleRepost = () => {
+    if (!isPublicPost) {
+      toast.info(_copy('postVisibility.noRepost'));
+      return;
+    }
+    if (onRepost) {
+      setRepostDelta(prev => prev + 1);
+      setIsReposted(true);
+      if (postId) markReposted(postId);
+      // Roll back the optimistic +1 / filled icon if the card's API call
+      // rejects (cards rethrow after their own error toast).
+      Promise.resolve(onRepost()).catch(() => {
+        setRepostDelta(prev => prev - 1);
+        setIsReposted(false);
+        if (postId) unmarkReposted(postId);
+      });
+      toast.success(_copy("copy.5f39b8b65253", { defaultValue: "Reposted!" }));
+    } else {
+      toast.info(_copy("copy.67e396a51838", { defaultValue: "Repost not available for this post" }));
+    }
+    setSheetOpen(false);
+  };
+
+  const handleUndoRepost = () => {
+    if (onRepost) {
+      setRepostDelta(prev => prev - 1);
+      setIsReposted(false);
+      if (postId) unmarkReposted(postId);
+      // Same API call toggles the repost off; restore state if it rejects.
+      Promise.resolve(onRepost()).catch(() => {
+        setRepostDelta(prev => prev + 1);
+        setIsReposted(true);
+        if (postId) markReposted(postId);
+      });
+      toast.success(_copy("copy.6a629ab80468", { defaultValue: "Repost removed" }));
+    }
+    setSheetOpen(false);
+  };
+
+  // The author turned quotes off for everyone but themselves.
+  const canQuote = isPublicPost && (quotePolicy !== 'nobody' || isOwnPost);
+
+  const handleQuote = () => {
+    if (onQuote) {
+      onQuote();
+    } else {
+      toast.info(_copy("copy.12124ce8fbf2", { defaultValue: "Quote not available for this post" }));
+    }
+    setSheetOpen(false);
+  };
+
+  // "Send in a message" — only for real posts (numeric tokenId). Feature-request
+  // and governance cards reuse ActionBar with non-post ids and must not show it.
+  const canSendInDm = isPublicPost && typeof tokenId === 'number' && tokenId > 0;
+  const [dmShareOpen, setDmShareOpen] = useState(false);
+  const handleSendInDm = () => {
+    setSheetOpen(false);
+    if (!isAuthenticated) { openLoginModal(); return; }
+    setDmShareOpen(true);
+  };
+
+  // The post's right-click menu (lib/post-menu) does its react, repost and
+  // send-in-a-message through this bar, so the counts here move with it.
+  // The first bar for the post takes it; a second copy of the same post's bar
+  // (the fullscreen viewer's) sets enableDoubleTapLike off and stays out.
+  const menuBridge = useRef({ handleRepost, handleUndoRepost, handleSendInDm, isReposted, myReaction, reactionsEnabled: false, canRepost: false, canSendInDm: false });
+  menuBridge.current = { handleRepost, handleUndoRepost, handleSendInDm, isReposted, myReaction, reactionsEnabled: reactionsEnabledRef.current, canRepost: !!onRepost, canSendInDm };
+  useEffect(() => {
+    if (!postId || !enableDoubleTapLike) return;
+    const listener = (e: Event) => {
+      const detail = (e as CustomEvent<PostMenuBridgeDetail>).detail;
+      if (!detail || detail.handled || String(detail.postId) !== String(postId)) return;
+      const bar = menuBridge.current;
+      if (detail.action === 'state') {
+        detail.handled = true;
+        detail.state = { myReaction: bar.myReaction, isReposted: bar.isReposted, reactionsEnabled: bar.reactionsEnabled };
+      } else if (detail.action === 'react' && detail.reaction && bar.reactionsEnabled) {
+        detail.handled = true;
+        handleReactionRef.current(detail.reaction);
+      } else if (detail.action === 'repost' && bar.canRepost) {
+        detail.handled = true;
+        if (bar.isReposted) bar.handleUndoRepost(); else bar.handleRepost();
+      } else if (detail.action === 'dm' && bar.canSendInDm) {
+        detail.handled = true;
+        bar.handleSendInDm();
+      }
+    };
+    window.addEventListener(POST_MENU_EVENT, listener as EventListener);
+    return () => window.removeEventListener(POST_MENU_EVENT, listener as EventListener);
+  }, [postId, enableDoubleTapLike]);
+
+  const ShareOptions = () => (
+    <>
+      {isReposted ? (
+        <button
+          onClick={(e) => { e.stopPropagation(); handleUndoRepost(); }}
+          className="flex items-center gap-3 w-full p-4 text-red-400 hover:text-red-300 hover:bg-white/10 rounded-xl transition-all duration-200"
+        >
+          <Repeat2 className="w-5 h-5" />
+          <span className="font-medium"><TranslationText name="copy.aed838e7efff" fallback={"Undo Repost"} /></span>
+        </button>
+      ) : !isPublicPost ? (
+        <p className="px-4 py-3 text-sm text-zinc-400">{_copy('postVisibility.noRepost')}</p>
+      ) : (
+        <button
+          onClick={(e) => { e.stopPropagation(); handleRepost(); }}
+          className="flex items-center gap-3 w-full p-4 text-zinc-200 hover:text-white hover:bg-white/10 rounded-xl transition-all duration-200"
+        >
+          <Repeat2 className="w-5 h-5" />
+          <span className="font-medium"><TranslationText name="copy.f4fd9adb8f2d" fallback={"Repost"} /></span>
+        </button>
+      )}
+      {canQuote && (
+      <button
+        onClick={(e) => { e.stopPropagation(); handleQuote(); }}
+        className="flex items-center gap-3 w-full p-4 text-zinc-200 hover:text-white hover:bg-white/10 rounded-xl transition-all duration-200"
+      >
+        <Quote className="w-5 h-5" />
+        <span className="font-medium"><TranslationText name="copy.eb4cdebd82bf" fallback={"Quote"} /></span>
+      </button>
+      )}
+      {onShareAsImage && (
+        <button
+          onClick={handleShareAsImage}
+          disabled={isSharingImage}
+          className="flex items-center gap-3 w-full p-4 text-zinc-200 hover:text-white hover:bg-white/10 rounded-xl transition-all duration-200 disabled:opacity-50"
+        >
+          <ImageDown className="w-5 h-5" />
+          <span className="font-medium">{isSharingImage ? _copy("copy.58c753bf3fe8", { defaultValue: "Capturing..." }) : _copy("copy.c431035b32d3", { defaultValue: "Share as Image" })}</span>
+        </button>
+      )}
+      {streamMomentTokenId != null && (
+        <Button
+          type="button"
+          variant="ghost"
+          className="h-auto min-h-11 w-full justify-start gap-3 p-4 text-base text-zinc-200 hover:text-white focus-visible:ring-current focus-visible:ring-offset-0 [&_svg]:size-5"
+          onClick={(e) => {
+            e.stopPropagation();
+            setSheetOpen(false);
+            const open = () => useStoriesStore.getState().openPostMoment(streamMomentTokenId);
+            if (isAuthenticated) open();
+            else openLoginModal({ then: open });
+          }}
+        >
+          <MomentAdd />
+          {_copy('stories.shareToMoment', 'Share to Moment')}
+        </Button>
+      )}
+      {onSeeEngagements && (
+        <button
+          onClick={(e) => { e.stopPropagation(); setSheetOpen(false); onSeeEngagements(); }}
+          className="flex items-center gap-3 w-full p-4 text-zinc-200 hover:text-white hover:bg-white/10 rounded-xl transition-all duration-200"
+        >
+          <Repeat2 className="w-5 h-5" />
+          <span className="font-medium"><TranslationText name="copy.f5ab429b0727" fallback={"See Engagements"} /></span>
+        </button>
+      )}
+      {canSendInDm && (
+        <button
+          onClick={(e) => { e.stopPropagation(); handleSendInDm(); }}
+          className="flex items-center gap-3 w-full p-4 text-zinc-200 hover:text-white hover:bg-white/10 rounded-xl transition-all duration-200"
+        >
+          <Send className="w-5 h-5" />
+          <span className="font-medium"><TranslationText name="copy.20e392c29da3" fallback={"Send in a message"} /></span>
+        </button>
+      )}
+      {isPublicPost && onShareToPublicChat && (
+        <Button
+          type="button"
+          variant="ghost"
+          onClick={(e) => {
+            e.stopPropagation();
+            setSheetOpen(false);
+            if (isAuthenticated) onShareToPublicChat();
+            else openLoginModal();
+          }}
+          className="h-auto min-h-14 w-full justify-start gap-3 whitespace-normal p-4 text-left text-base text-zinc-200 hover:bg-white/10 hover:text-white focus-visible:ring-current focus-visible:ring-offset-0 [&_svg]:size-5"
+        >
+          <PublicChatIcon />
+          {_copy('publicChat.title')}
+        </Button>
+      )}
+      <button
+        onClick={(e) => { e.stopPropagation(); handleCopyLink(); }}
+        className="flex items-center gap-3 w-full p-4 text-zinc-200 hover:text-white hover:bg-white/10 rounded-xl transition-all duration-200"
+      >
+        <Link className="w-5 h-5" />
+        <span className="font-medium"><TranslationText name="copy.724e78a3254c" fallback={"Copy Link"} /></span>
+      </button>
+      {canNativeShare && (
+        <button
+          onClick={(e) => { e.stopPropagation(); handleNativeShare(); }}
+          className="flex items-center gap-3 w-full p-4 text-zinc-200 hover:text-white hover:bg-white/10 rounded-xl transition-all duration-200"
+        >
+          <Share2 className="w-5 h-5" />
+          <span className="font-medium">{_copy('communities.shareLink')}</span>
+        </button>
+      )}
+      {isPublicPost && postId && /^\d+$/.test(postId) && (
+        <button
+          onClick={(e) => { e.stopPropagation(); copyPostEmbedCode(postId, _copy); setSheetOpen(false); }}
+          className="flex items-center gap-3 w-full p-4 text-zinc-200 hover:text-white hover:bg-white/10 rounded-xl transition-all duration-200"
+        >
+          <Code className="w-5 h-5" />
+          <span className="font-medium">{_copy('postOptions.copyEmbedCode')}</span>
+        </button>
+      )}
+    </>
+  );
+
+  // Engagement actions — order left → right: tip · share · comment · like
+  // (plus a dislike before share where reactions are off)
+  const engagementButtons = (
+    <>
+      {/* A private-balance creator has no Riftn payment entry point. */}
+      {onTip ? (
+        <button
+          onClick={(e) => { e.stopPropagation(); onTip(); }}
+          data-tipped={viewerTipped || tipBurst > 0 ? '' : undefined}
+          className={cn('flex items-center gap-0 text-white hover:text-zinc-400 transition-colors', compact && COMPACT_BUTTON_CLASS)}
+          aria-label={_copy("copy.3838a4d8cb8c", { defaultValue: "Tips" })}
+        >
+          <TipGemIcon tipped={viewerTipped || tipBurst > 0} burstKey={tipBurst} className={FEED_ICON_CLASS.tip} />
+          {/* Counts come off over a video: the icons are the controls, and a
+              tally beside each one is three more numbers on someone's frame. */}
+          {!compact && (
+            <span className="text-xs text-zinc-400 relative z-10" style={{ marginLeft: '2.5px' }}>{formatCount(tipCount)}</span>
+          )}
+        </button>
+      ) : null}
+
+      {/* Downvotes as their own button only where reactions are off —
+          governance proposals and feature requests vote through their own
+          onLike/onDislike. On a post, 👎 is the last item of the thumbs-up's
+          tray instead. */}
+      {!hideVotes && !hideDislike && !compact && !reactionsEnabled && (
+        <span className={cn("relative flex items-center gap-0.5", isVoting && "opacity-50")}>
+          <motion.button
+            onClick={() => handleVote(false)}
+            /* Theme hook for the engaged state. `fill-current` on the glyph is the
+               only other signal, and it can't cover repost (which changes stroke
+               weight instead) — so every engagement button carries the same
+               attribute and themes style one selector. */
+            data-engaged={isDisliked ? 'dislike' : undefined}
+            className={THUMB_BUTTON_CLASS}
+            aria-label={negativeThumbLabel(myNegativeReaction)}
+            disabled={isVoting && !onLiveReaction}
+            animate={justVoted === 'dislike' ? { scale: [1, 1.3, 1] } : {}}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+          >
+            <ThumbsDown className={cn(FEED_ICON_CLASS.like, isDisliked && "fill-current")} />
+            <span className="text-xs text-zinc-400">{formatCount(localDislikeCount)}</span>
+          </motion.button>
+        </span>
+      )}
+
+      {/* Share - opens share sheet with repost/quote/copy-link/etc options */}
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          if (isOptimistic) {
+            toast.message(_copy("copy.9b2b21ee911e", { defaultValue: "Post processing, click ⓘ for more info" }), {
+              icon: <Info className="w-4 h-4" />,
+            });
+          } else if (onShare) {
+            onShare();
+          } else if (quickRepost) {
+            // Constrained overlays (fullscreen viewer) can't show the z-[100]
+            // share drawer above the viewer — repost/undo directly instead.
+            if (isReposted) {
+              handleUndoRepost();
+            } else {
+              handleRepost();
+            }
+          } else {
+            setSheetOpen(true);
+          }
+        }}
+        data-engaged={isReposted ? 'repost' : undefined}
+        className={cn('flex items-center gap-0.5 text-white hover:text-zinc-400 transition-colors', compact && COMPACT_BUTTON_CLASS)}
+        aria-label={_copy("copy.29887a5ff984", { defaultValue: "Share" })}
+      >
+        <Share2 className={FEED_ICON_CLASS.share} strokeWidth={isReposted ? 2.915 : 2} />
+        {!compact && <span className="text-xs text-zinc-400">{formatCount(displayShareCount)}</span>}
+      </button>
+
+      {!compact && (
+        <button
+          // On the phone post page the comments are already on the page: the
+          // button scrolls to them and opens the composer.
+          onClick={stage ? (e) => { e.stopPropagation(); stage.openComments(); } : onComment}
+          className="flex items-center gap-0.5 text-white hover:text-zinc-400 transition-colors"
+          aria-label={_copy("copy.44f5e3fbec57", { defaultValue: "Comment" })}
+        >
+          <MessageSquare className={FEED_ICON_CLASS.comment} />
+          <span className="text-xs text-zinc-400">{formatCount(commentCount)}</span>
+        </button>
+      )}
+
+      {/* Reactions — furthest right for easy thumb reach. Tap the thumb to
+          like/unlike, hold (or hover on desktop) to pick one of the ten. On
+          your own posts the tray ends in an ⓘ that opens the breakdown of who
+          reacted what; the count itself is inert text, since who reacted is
+          not public. The wrapper is `relative` so the tray anchors to it. */}
+      {!hideVotes && (
+      <span
+        className={cn("relative flex items-center gap-0.5", isVoting && "opacity-50")}
+        {...likeTray.areaProps}
+      >
+        <ReactionPicker
+          open={likeTray.open}
+          current={myReaction}
+          counts={localReactionCounts}
+          onSelect={(reaction) => {
+            // On a live the tray stays a launcher: picking the one you hold
+            // sends it again rather than taking it off (that is Unlike).
+            if (onLiveReaction && reaction === myReaction && isAuthenticated && !externalDisabled) {
+              likeTray.close();
+              repeatLiveReaction(reaction);
+              return;
+            }
+            likeTray.close();
+            handleReaction(reaction);
+          }}
+          onRemove={
+            onLiveReaction && myReaction && isAuthenticated
+              ? () => { likeTray.close(); handleReaction(myReaction, { float: false }); }
+              : undefined
+          }
+          onClose={likeTray.close}
+          align={leftHanded ? "left" : "right"}
+          onShowInfo={
+            canViewReactionInfo
+              ? () => {
+                  likeTray.close();
+                  setReactionInfoOpen(true);
+                }
+              : undefined
+          }
+        />
+        <motion.button
+          onClick={(e) => {
+            e.stopPropagation();
+            // The click that ends a hold must not also cast a like.
+            if (likeTray.consumePress()) return;
+            handleVote(true);
+          }}
+          {...likeTray.buttonProps}
+          ref={thumbRef}
+          // The phone post page's mini player mirrors and presses this one.
+          data-stage-like={stage ? '' : undefined}
+          /* Engaged whenever the viewer holds a reaction, not only a plain
+             👍 — a post the viewer loved is still a post they liked, and a 👎
+             they cast shows here now that there is no thumbs-down beside it. */
+          data-engaged={
+            isLiked
+              ? (myReaction && myReaction !== 'like' ? 'reaction' : 'like')
+              : reactionsEnabled && isDisliked
+                ? 'dislike'
+                : undefined
+          }
+          className={cn(THUMB_BUTTON_CLASS, compact && COMPACT_BUTTON_CLASS)}
+          aria-label={
+            myPositiveReaction || (reactionsEnabled && myNegativeReaction)
+              ? _copy("copy.a3156ed263d2", { defaultValue: "{{value1}} — hold to change your reaction", value1: reactionLabel((myPositiveReaction ?? myNegativeReaction)!) })
+              : _copy("copy.12b91b0ac5dd", { defaultValue: "{{value1}} — hold to react", value1: reactionLabel(resolveLeadReaction(localReactionCounts, myReaction) ?? "like") })
+          }
+          aria-haspopup={reactionsEnabled ? 'menu' : undefined}
+          aria-expanded={reactionsEnabled ? likeTray.open : undefined}
+          disabled={isVoting && !onLiveReaction}
+          animate={justVoted === 'like' || (reactionsEnabled && justVoted === 'dislike') ? { scale: [1, 1.3, 1] } : {}}
+          transition={{ duration: 0.3, ease: "easeOut" }}
+        >
+          {thumbGlyph ? (
+            <span
+              /* Marks the glyph so a theme can light the reaction without also
+                 lighting the count, which is a sibling span in the same row.
+                 Your own reaction moves, the same as it does in the tray — a
+                 🔥 somebody else put in the lead stays still. */
+              data-engaged-glyph
+              className="text-[19.36px] leading-none w-[24.64px] h-[24.64px] flex items-center justify-center"
+              aria-hidden="true"
+            >
+              <ReactionEmoji reaction={thumbGlyph} animate={thumbGlyph === myReaction} />
+            </span>
+          ) : (
+            <ThumbIcon down={thumbDown} nod={thumbMine} className={cn(FEED_ICON_CLASS.like, thumbMine && "fill-current")} />
+          )}
+          {!compact && (
+            <span className="text-xs text-zinc-400">{formatCount(thumbCount)}</span>
+          )}
+        </motion.button>
+      </span>
+      )}
+    </>
+  );
+
+  /**
+   * The share sheet, the DM picker and the reaction breakdown.
+   *
+   * Both arms render them. The compact arm used to return its three
+   * buttons and nothing else, so the share button set state that nothing
+   * was listening to — on the live viewer it looked like a dead control.
+   */
+  const overlays = (
+    <>
+      {stage ? (
+        (sheetOpen || shareSheetMounted) && <Suspense fallback={null}><RepostShareSheet
+          open={sheetOpen}
+          onOpenChange={setSheetOpen}
+          tokenId={postId}
+          isReposted={isReposted}
+          onRepost={handleRepost}
+          onUndoRepost={handleUndoRepost}
+          onQuote={handleQuote}
+          canQuote={canQuote}
+          canRepost={isPublicPost}
+          shareUrl={getShareUrl()}
+          onCopyLink={handleCopyLink}
+          quoteCount={stage.quoteCount}
+          repostCount={Math.max(0, stage.repostCount + repostDelta)}
+          onViewQuotes={() => { setSheetOpen(false); stage.openQuotes(); }}
+          onViewReposts={() => { setSheetOpen(false); stage.openReposts(); }}
+        /></Suspense>
+      ) : (
+        <Drawer open={sheetOpen} onOpenChange={setSheetOpen}>
+          <DrawerContent scrollable column glass className="px-4 pb-6" data-no-navigate onClick={(e: React.MouseEvent) => e.stopPropagation()} onPointerDown={(e: React.PointerEvent) => e.stopPropagation()}>
+            <DrawerHeader className="relative">
+              <DrawerTitle className="text-white/90 font-semibold">{_copy("copy.29887a5ff984", { defaultValue: "Share" })}</DrawerTitle>
+            </DrawerHeader>
+            <div className="flex flex-col gap-1 mt-2 relative">
+              <ShareOptions />
+            </div>
+          </DrawerContent>
+        </Drawer>
+      )}
+
+      {canSendInDm && dmShareOpen && (
+        <Suspense fallback={null}>
+          <ShareToDmModal open={dmShareOpen} onOpenChange={setDmShareOpen} url={articleSlug ? dehubLinkFor.article(articleSlug) : newPostSlug != null ? dehubLinkFor.newPost(newPostSlug) : dehubLinkFor.post(tokenId!)} />
+        </Suspense>
+      )}
+
+      {canViewReactionInfo && reactionInfoOpen && (
+        <Suspense fallback={null}>
+          <ReactionInfoDrawer
+            open={reactionInfoOpen}
+            onOpenChange={setReactionInfoOpen}
+            tokenId={reactionInfoTokenId!}
+          />
+        </Suspense>
+      )}
+    </>
+  );
+
+  // Narrow cards fold bookmark / pin / info into one + button before the row
+  // would wrap and push the like button onto a line of its own.
+  const actionRowRef = useRef<HTMLDivElement>(null);
+  const foldUtility = useFoldUtility(actionRowRef, !compact && !hideUtility);
+  const utilityButtons = foldUtility
+    ? <UtilityOverflowButton postId={postId} tokenId={tokenId} isOwnPost={isOwnPost} />
+    : (
+      <PostUtilityButtons
+        postId={postId}
+        tokenId={tokenId}
+        isOwnPost={isOwnPost}
+        variant="inline"
+      />
+    );
+
+  if (compact) {
+    return (
+      /* One row, sharing the composer's line: gift, share, thumb. The thumb
+         is last — furthest right, where a right-handed thumb already is, and
+         its tray is right-aligned so it opens back across the frame. */
+      <div className={cn('flex items-center gap-2', leftHanded && 'flex-row-reverse', className)}>
+        {engagementButtons}
+        {overlays}
+      </div>
+    );
+  }
+
+  return (
+    <div
+      // Idle buttons take the view counter's grey (post-meta-grey.css). Not
+      // in the fullscreen viewer, where the row sits over the picture.
+      data-feed-actions={quickRepost ? undefined : ''}
+      className={cn(
+      "p-3",
+      showBorder && "border-t border-zinc-800",
+      className
+    )}>
+      {utilityDesktopAnchor ? (
+        <div ref={actionRowRef} className={cn("flex flex-wrap items-center justify-between gap-y-2 gap-x-3", leftHanded ? "flex-row-reverse lg:pl-0.5" : "lg:pr-0.5")}>
+          {/* Counters end on bare digits while icons carry ~2px of built-in
+              inset, so the trailing count read tighter to the card edge than
+              the icons do to the side and bottom. lg:pr-0.5 nudges it in. */}
+          {/* Utility cluster — a real flex item of this justify-between row
+              (not a separately-margined sibling), so the gap to the
+              neighbouring engagement button matches the gaps between every
+              other button. It leads the row on desktop and trails it below lg,
+              which puts bookmark/pin/info at the right-hand end of the bar on
+              phones — the same place the app's card carries them. */}
+          {!hideUtility && (
+            <div className="flex items-center gap-4 shrink-0 order-last lg:order-none">
+              {utilityButtons}
+            </div>
+          )}
+          {/* display:contents so each engagement button is its own flex item
+              of the row too, spacing evenly against the utility cluster and
+              each other alike. */}
+          <div className="contents">
+            {engagementButtons}
+          </div>
+        </div>
+      ) : (
+        <div ref={actionRowRef} className={cn(
+          "flex flex-wrap items-center gap-y-2 gap-x-2 justify-between",
+          // Same optical nudge as above: the trailing count is bare digits.
+          leftHanded ? "flex-row-reverse pl-0.5" : "pr-0.5",
+          centered && "lg:justify-center lg:gap-x-4"
+        )}>
+          {/* Utility actions (bookmark, pin, info) — display:contents so every
+              button is a direct flex item of the row: all actions distribute
+              evenly edge-to-edge across the card width regardless of count.
+              Hidden on desktop when the host lifts them to a top-right cluster. */}
+          {!hideUtility && (
+            <div className={cn(
+              "contents",
+              hideUtilityDesktop && "lg:hidden"
+            )}>
+              {utilityButtons}
+            </div>
+          )}
+          <div className="contents">
+            {engagementButtons}
+          </div>
+        </div>
+      )}
+
+      {overlays}
+    </div>
+  );
+}

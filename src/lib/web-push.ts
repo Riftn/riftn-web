@@ -1,0 +1,361 @@
+/**
+ * Web push subscription — the browser half.
+ *
+ * Notifications on the web have always been in-tab only: `new Notification()`
+ * needs the page open, so closing the tab meant silence. This subscribes the
+ * browser itself, through the service worker, so a notification arrives with
+ * Riftn closed — which is what "notifications" means everywhere else.
+ *
+ * Everything here degrades rather than throws. A browser with no push support,
+ * a deployment with no VAPID keys, a reader who said no to the permission
+ * prompt: all end with in-tab notifications still working, because that is
+ * strictly better than an error nobody can act on.
+ *
+ * @module lib/web-push
+ */
+
+import { getVapidPublicKey, registerPushToken, unregisterPushToken } from '@/lib/api/dehub';
+import { getDeviceId } from '@/lib/device-id';
+
+/**
+ * What the browser is actually doing about push, as opposed to what our
+ * stored flag says it ought to be doing.
+ *
+ * Those are not the same thing, and the gap between them is not theoretical:
+ * a browser can hold the permission, run the service worker, and still refuse
+ * to register a subscription. A corrupt push key store does exactly that, and
+ * every subscribe() then fails with "could not retrieve the public key".
+ * None of that is visible to the reader, so the switch sits on over a channel
+ * that cannot deliver. This is what lets a surface say so instead.
+ *
+ *   'unknown'        - not resolved yet this page load
+ *   'unsupported'    - no service worker, or no PushManager
+ *   'off'            - no permission, or deliberately unsubscribed
+ *   'subscribed'     - a live subscription the server knows about
+ *   'unavailable'    - we asked, and the browser or the deployment said no
+ *   'blocked'        - subscribed fine, but the OS refuses to display anything
+ *   'display-failed' - the browser itself failed to display one, and said why
+ */
+export type WebPushState =
+  | 'unknown'
+  | 'unsupported'
+  | 'off'
+  | 'subscribed'
+  | 'unavailable'
+  | 'blocked'
+  | 'display-failed';
+
+const STATE_EVENT = 'dehub:web-push-state-changed';
+
+let state: WebPushState = 'unknown';
+
+/** The browser's own words for the last display failure, if it gave any. */
+let failureReason: string | null = null;
+
+function setState(next: WebPushState): void {
+  if (state === next) return;
+  state = next;
+  try {
+    window.dispatchEvent(new Event(STATE_EVENT));
+  } catch {}
+}
+
+export function getWebPushState(): WebPushState {
+  return state;
+}
+
+/**
+ * What the browser said when it last refused to display a notification.
+ *
+ * Worth surfacing verbatim rather than paraphrasing: it is the only part of
+ * this that names a cause, and the cause is not one we can enumerate.
+ */
+export function getWebPushFailureReason(): string | null {
+  return failureReason;
+}
+
+export function subscribeWebPushState(onChange: () => void): () => void {
+  window.addEventListener(STATE_EVENT, onChange);
+  return () => window.removeEventListener(STATE_EVENT, onChange);
+}
+
+/** The VAPID key arrives base64url; `applicationServerKey` wants raw bytes. */
+function urlBase64ToUint8Array(base64: string): Uint8Array<ArrayBuffer> {
+  const padding = '='.repeat((4 - (base64.length % 4)) % 4);
+  const normalised = (base64 + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const raw = atob(normalised);
+  // Annotated off the allocation, not as a bare Uint8Array: a bare annotation
+  // widens the buffer type and CI rejects it where the local build does not.
+  const output = new Uint8Array(raw.length);
+  for (let i = 0; i < raw.length; i++) output[i] = raw.charCodeAt(i);
+  return output;
+}
+
+function toSubscriptionPayload(subscription: PushSubscription) {
+  const json = subscription.toJSON();
+  return {
+    endpoint: subscription.endpoint,
+    keys: {
+      p256dh: json.keys?.p256dh ?? '',
+      auth: json.keys?.auth ?? '',
+    },
+  };
+}
+
+export function isWebPushSupported(): boolean {
+  return (
+    typeof window !== 'undefined' &&
+    'serviceWorker' in navigator &&
+    'PushManager' in window &&
+    'Notification' in window
+  );
+}
+
+/** Close system alerts that deep-link to the conversation being read. */
+export async function dismissReadMessageNotifications(conversationId: string): Promise<void> {
+  if (!isWebPushSupported() || document.visibilityState !== 'visible' || Notification.permission !== 'granted') return;
+  const readThrough = Date.now();
+  try {
+    const registration = await navigator.serviceWorker.getRegistration();
+    if (!registration?.getNotifications) return;
+    const notifications = await registration.getNotifications();
+    const origin = window.location.origin;
+    for (const notification of notifications) {
+      if ('timestamp' in notification && typeof notification.timestamp === 'number' && notification.timestamp > readThrough) continue;
+      if (typeof notification.data?.url !== 'string') continue;
+      let url: URL;
+      try { url = new URL(notification.data.url, origin); } catch { continue; }
+      if (url.origin !== origin) continue;
+      const id = url.pathname === '/app/messages' || url.pathname === '/chat'
+        ? url.searchParams.get('conversation')
+        : url.pathname.match(/^\/(?:app\/)?dm\/([^/]+)\/?$/)?.[1];
+      if (id === conversationId) notification.close();
+    }
+  } catch {
+    // A browser tray failure must not interfere with the read receipt.
+  }
+}
+
+let inFlight: Promise<boolean> | null = null;
+
+/**
+ * Subscribe this browser and tell the API about it.
+ *
+ * Returns false for every "cannot", quietly: no support, no keys configured,
+ * no permission, no service worker yet. The caller's job is to keep in-tab
+ * notifications working either way, not to explain the browser to the reader.
+ */
+export async function subscribeToWebPush(): Promise<boolean> {
+  if (!isWebPushSupported()) {
+    setState('unsupported');
+    return false;
+  }
+  if (Notification.permission !== 'granted') {
+    setState('off');
+    return false;
+  }
+
+  // Two callers race on a normal load: setStoredEnabled, when a surface flips
+  // the switch, and the once-per-load reconcile. Each one that gets through is
+  // a POST to /api/push/token, so they share one attempt rather than making
+  // two and registering the same endpoint twice.
+  if (!inFlight) {
+    inFlight = attemptSubscribe().finally(() => {
+      inFlight = null;
+    });
+  }
+  return inFlight;
+}
+
+async function attemptSubscribe(): Promise<boolean> {
+  try {
+    const publicKey = await getVapidPublicKey();
+    if (!publicKey) {
+      // No VAPID keys on this deployment: push is off for everyone, which is
+      // a different thing from broken for this reader.
+      setState('unavailable');
+      return false;
+    }
+
+    // `ready` rather than `register`: the worker is registered at boot
+    // (lib/register-sw), and waiting on ready avoids racing that.
+    const registration = await navigator.serviceWorker.ready;
+
+    // An existing subscription is reused unless it was made with a different
+    // key — a rotated VAPID key leaves subscriptions that the push service
+    // still accepts and the server can no longer sign for.
+    const existing = await registration.pushManager.getSubscription();
+    if (existing) {
+      const existingKey = existing.options?.applicationServerKey;
+      const sameKey =
+        existingKey &&
+        new Uint8Array(existingKey).toString() === urlBase64ToUint8Array(publicKey).toString();
+      if (sameKey) {
+        // Reuse is right for the ordinary case and wrong for a retired one.
+        // A subscription the push service has already answered 410 Gone for
+        // still comes back from getSubscription() looking perfectly healthy,
+        // while the server has deleted the row it 410'd — so handing it the
+        // same endpoint again re-registers something known to be dead, and the
+        // next send 410s and deletes it again. Seen in production: two days of
+        // a switch reading "on", a live subscription object in the browser, and
+        // no row on the server at all.
+        //
+        // Registration failing is the only signal available from here, so use
+        // it: drop the subscription and build a fresh one below, rather than
+        // reporting a fault whose only cure is turning the switch off and on.
+        try {
+          await registerSubscription(existing);
+          setState('subscribed');
+          return true;
+        } catch (error) {
+          console.warn('[web-push] re-registering the existing subscription failed', error);
+          await existing.unsubscribe().catch(() => {});
+        }
+      } else {
+        await existing.unsubscribe().catch(() => {});
+      }
+    }
+
+    const subscription = await registration.pushManager.subscribe({
+      // Required by every browser that implements push: a subscription that
+      // could fire silently is one a site could use to track you with.
+      userVisibleOnly: true,
+      applicationServerKey: urlBase64ToUint8Array(publicKey),
+    });
+
+    await registerSubscription(subscription);
+    setState('subscribed');
+    return true;
+  } catch (error) {
+    console.warn('[web-push] subscribe failed', error);
+    setState('unavailable');
+    return false;
+  }
+}
+
+async function registerSubscription(subscription: PushSubscription): Promise<void> {
+  const payload = toSubscriptionPayload(subscription);
+  const result = await registerPushToken({
+    // The endpoint IS the device identity on the web — unique per browser
+    // install, and stable until the subscription is replaced.
+    token: payload.endpoint,
+    deviceId: getDeviceId(),
+    platform: 'web',
+    deviceName: browserName(),
+    webSubscription: payload,
+  });
+  if (!result.success) {
+    throw new Error(result.message || 'Push registration was rejected');
+  }
+}
+
+/** Unsubscribe this browser and drop the row server-side. */
+/**
+ * Pull a readable reason out of whatever showNotification() rejected with.
+ *
+ * The emptiness is the signal, not an inconvenience. An OS refusing to post
+ * for the browser rejects with literally `undefined` - no name, no message,
+ * nothing to serialise - and that is the signature we matched on. A rejection
+ * that arrives carrying a message is therefore a *different* fault wearing
+ * the same shape, and the message is the only thing that distinguishes them.
+ */
+function rejectionMessage(error: unknown): string {
+  if (typeof error === 'string') return error.trim();
+  if (error && typeof error === 'object') {
+    const message = (error as { message?: unknown }).message;
+    if (typeof message === 'string') return message.trim();
+  }
+  return '';
+}
+
+/**
+ * Ask the service worker to display one, and report whether it could.
+ *
+ * This is the only honest capability check, and the old one was not it.
+ * `new Notification()` from the page CONSTRUCTS successfully on a machine
+ * whose OS is blocking the browser's notifications - observed directly, not
+ * theorised - so the enable-time test passed while nothing was ever
+ * displayed, and no surface could tell. `registration.showNotification()` is
+ * the path a real push takes, so anything gating on "can we deliver" has to
+ * go through here.
+ *
+ * What it must NOT do is decide it knows why. This used to read every
+ * rejection as the OS blocking the browser, on the strength of the one
+ * machine where that was true. It then met a machine where the OS was
+ * allowing notifications perfectly well and Chrome's own notification store
+ * had lost its LevelDB pointer: every call rejected with "Notification data
+ * could not be persisted", and the reader was sent to an OS setting that was
+ * already correct - so they turned a working switch off and on and nothing
+ * changed. The reason was sitting in the rejection the whole time.
+ */
+export async function probeNotificationDisplay(title: string, body: string): Promise<boolean> {
+  if (!isWebPushSupported()) return false;
+  if (Notification.permission !== 'granted') return false;
+  try {
+    const registration = await navigator.serviceWorker.ready;
+    await registration.showNotification(title, {
+      body,
+      icon: '/icon-192.png',
+      tag: 'dehub-test-notification',
+      data: { url: '/app/notifications' },
+    });
+    failureReason = null;
+    // A display that works clears a display fault, or the warning outlives the
+    // problem until the next reload — and the button that re-runs this probe
+    // is exactly what someone clicks to find out whether they have fixed it.
+    if (state === 'blocked' || state === 'display-failed') {
+      const live = await registration.pushManager.getSubscription().catch(() => null);
+      setState(live ? 'subscribed' : 'off');
+    }
+    return true;
+  } catch (error) {
+    const reason = rejectionMessage(error);
+    failureReason = reason || null;
+    // Only the empty rejection gets blamed on the operating system, because
+    // that is the only one observed to be the operating system. Everything
+    // else says what it is and lets the reader read it.
+    setState(reason ? 'display-failed' : 'blocked');
+    return false;
+  }
+}
+
+/**
+ * Tear the subscription down and build a fresh one.
+ *
+ * The reconcile deliberately reuses a subscription whose key still matches,
+ * which is right for the ordinary case and useless for a dead one: the
+ * browser still reports it, the server still holds the endpoint, and every
+ * send is accepted and delivered nowhere. Switching the setting off and on
+ * is what people discover by accident - this is that, as one call.
+ */
+export async function resubscribeWebPush(): Promise<boolean> {
+  await unsubscribeFromWebPush();
+  return subscribeToWebPush();
+}
+
+export async function unsubscribeFromWebPush(): Promise<void> {
+  if (!isWebPushSupported()) return;
+  setState('off');
+  try {
+    const registration = await navigator.serviceWorker.ready;
+    const subscription = await registration.pushManager.getSubscription();
+    if (subscription) await subscription.unsubscribe().catch(() => {});
+    // Dropped server-side too: an unsubscribed endpoint would answer 410 on
+    // the next send and be cleaned up eventually, but "eventually" means the
+    // reader keeps a row that says they want notifications they turned off.
+    await unregisterPushToken(getDeviceId()).catch(() => {});
+  } catch (error) {
+    console.warn('[web-push] unsubscribe failed', error);
+  }
+}
+
+/** Rough, and only used as a label in the account's device list. */
+function browserName(): string {
+  const ua = navigator.userAgent;
+  if (/edg\//i.test(ua)) return 'Edge';
+  if (/opr\//i.test(ua)) return 'Opera';
+  if (/chrome|crios/i.test(ua)) return 'Chrome';
+  if (/firefox|fxios/i.test(ua)) return 'Firefox';
+  if (/safari/i.test(ua)) return 'Safari';
+  return 'Browser';
+}

@@ -1,0 +1,117 @@
+/**
+ * Client for the `transcript-corrections` edge function.
+ *
+ * Reads are anonymous — a corrected caption is for everyone watching, signed
+ * in or not. Writes carry the Riftn token and the function derives the author
+ * from it. Every write is a POST, removal included: the shared CORS headers
+ * allow GET, POST and OPTIONS only.
+ */
+import { getAuthToken } from '@/lib/api/dehub/core';
+import { translateCopy as _translateCopy } from '@/i18n/copy';
+
+const SUPABASE_URL =
+  import.meta.env.VITE_SUPABASE_URL || 'https://aigxuutjaqsywioxjefr.supabase.co';
+const SUPABASE_KEY =
+  import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFpZ3h1dXRqYXFzeXdpb3hqZWZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc2MzY0MzIsImV4cCI6MjA4MzIxMjQzMn0.hjMx0kShuJlaZ26UoG7RFGu3OC_aLR0C1Sf1qdk3x0I';
+
+const FN_URL = `${SUPABASE_URL}/functions/v1/transcript-corrections`;
+
+export type CorrectionStatus = 'suggested' | 'accepted';
+
+export interface TranscriptCorrection {
+  id: string;
+  transcript_id: string;
+  segment_index: number;
+  text: string;
+  address: string;
+  votes_up: number;
+  votes_down: number;
+  status: CorrectionStatus;
+  created_at: string;
+}
+
+/** Thrown when the function is not deployed yet — treated as "no corrections". */
+export class CorrectionsUnavailableError extends Error {
+  constructor() {
+    super(_translateCopy("copy.a9a351ec2f31", { defaultValue: "Caption corrections are not available yet" }));
+    this.name = 'CorrectionsUnavailableError';
+  }
+}
+
+const anonHeaders = {
+  apikey: SUPABASE_KEY,
+  Authorization: `Bearer ${SUPABASE_KEY}`,
+};
+
+/**
+ * fetch, with "could not reach the function at all" folded into the same
+ * unavailable state as an explicit 404.
+ *
+ * Supabase's 404 for an undeployed function carries no CORS headers, so the
+ * browser rejects it at the preflight and fetch REJECTS rather than resolving
+ * — a bare `res.status === 404` check is unreachable in a real browser until
+ * the function exists. Same trap as film-reviews (#581).
+ */
+async function reach(input: string, init?: RequestInit): Promise<Response> {
+  let res: Response;
+  try {
+    res = await fetch(input, init);
+  } catch {
+    throw new CorrectionsUnavailableError();
+  }
+  // Still checked, for the case where something between us and the function
+  // answers with CORS headers and a 404 — an edge rule, a proxy, a rename.
+  if (res.status === 404) throw new CorrectionsUnavailableError();
+  return res;
+}
+
+export async function fetchTranscriptCorrections(transcriptId: string): Promise<TranscriptCorrection[]> {
+  const res = await reach(`${FN_URL}?transcript_id=${encodeURIComponent(transcriptId)}`, {
+    headers: anonHeaders,
+  });
+
+  if (!res.ok) throw new Error(`Could not load corrections (${res.status})`);
+
+  const data = await res.json();
+  return (data?.corrections ?? []) as TranscriptCorrection[];
+}
+
+async function post(body: Record<string, unknown>): Promise<any> {
+  const token = getAuthToken();
+  if (!token) throw new Error(_translateCopy("copy.1ba0ae88fee7", { defaultValue: "Sign in first." }));
+
+  const res = await reach(FN_URL, {
+    method: 'POST',
+    headers: { ...anonHeaders, 'Content-Type': 'application/json', 'x-dehub-token': token },
+    body: JSON.stringify(body),
+  });
+
+  const data = await res.json().catch(() => null);
+  if (!res.ok) throw new Error(data?.error ?? _translateCopy("copy.94dd9f908316", { defaultValue: "Request failed ({{value1}})", value1: res.status }));
+  return data;
+}
+
+export async function submitTranscriptCorrection(input: {
+  transcriptId: string;
+  segmentIndex: number;
+  text: string;
+  originalText: string;
+}): Promise<TranscriptCorrection> {
+  const data = await post({
+    transcript_id: input.transcriptId,
+    segment_index: input.segmentIndex,
+    text: input.text,
+    original_text: input.originalText,
+  });
+  return data.correction as TranscriptCorrection;
+}
+
+/** 1 agrees, -1 disagrees, 0 withdraws your vote. */
+export async function voteTranscriptCorrection(correctionId: string, vote: 1 | -1 | 0): Promise<void> {
+  await post({ correction_id: correctionId, vote });
+}
+
+export async function removeTranscriptCorrection(correctionId: string): Promise<void> {
+  await post({ remove_correction_id: correctionId });
+}

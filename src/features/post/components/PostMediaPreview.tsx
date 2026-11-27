@@ -1,0 +1,1344 @@
+import { useTranslation as _useCopy } from 'react-i18next';
+import { useState, useRef, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
+import { Square, Loader2, Paintbrush, Grip } from "lucide-react";
+import Trash2 from "@/components/ui/cut-icons/delete";
+import Upload from "@/components/ui/cut-icons/upload";
+import Music from "@/components/ui/cut-icons/music";
+import Crop from "@/components/ui/cut-icons/crop";
+import Scissors from "@/components/ui/cut-icons/trim";
+import Pencil from "@/components/ui/cut-icons/edit";
+import ImageIcon from "@/components/ui/cut-icons/images";
+
+import X from "@/components/ui/cut-icons/close";
+import Mic from "@/components/ui/cut-icons/mic";
+import Play from "@/components/ui/cut-icons/play";
+import Pause from "@/components/ui/cut-icons/pause";
+
+import nailIcon from '@/assets/icons/nail-icon.png';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { Progress } from '@/components/ui/progress';
+import { motion, AnimatePresence } from 'framer-motion';
+import { toast } from 'sonner';
+import type { MediaFile, AudioFile } from '../types';
+import type { FilterSettings, CropSettings } from '../types/filters';
+import { AudioVisualizer } from '@/components/app/audio';
+import { FilterEditor } from './FilterEditor';
+import { CropRotateEditor } from './CropRotateEditor';
+import { AudioTrimmer } from './AudioTrimmer';
+import { generateFilterCSS, applyEditsToImageFile } from '@/lib/filters';
+import { ImageAnnotator } from './ImageAnnotator';
+import { PhotoStudio, type StudioTab, type StudioResult } from './PhotoStudio';
+import type { StudioEdits } from '../lib/studioPaint';
+import { DraftVideoProgress } from './DraftVideoProgress';
+import { AltTextButton, AltTextDialog } from './AltTextEditor';
+import type { DraftVideoSnapshot } from '../lib/draft-video';
+import { DmMediaStudio, type DmStudioItem } from '@/components/app/chat/DmVideoStudio';
+import { cropPayload } from '../lib/video-crop';
+import { cn } from '@/lib/utils';
+import { hasVideoEdits, paintEditedFrame, svgMatrixValues, videoEditsMatrix, vignetteBackground, type PostVideoEdits } from '../lib/video-edits';
+import { isPaintingFile } from '@/lib/painting/engine';
+
+/** The frame at `at` seconds, with the video's edits painted on, as a JPEG blob URL for the post's cover. */
+function grabVideoFrame(url: string, at: number, edits?: PostVideoEdits | null): Promise<string | null> {
+  return new Promise((resolve) => {
+    const v = document.createElement('video');
+    v.muted = true;
+    v.playsInline = true;
+    v.preload = 'auto';
+    v.src = url;
+    const done = (out: string | null) => { v.removeAttribute('src'); v.load(); resolve(out); };
+    v.addEventListener('error', () => done(null), { once: true });
+    v.addEventListener('loadedmetadata', () => { v.currentTime = Math.min(Math.max(0, at), Math.max(0, (v.duration || at) - 0.05)); }, { once: true });
+    v.addEventListener('seeked', () => {
+      if (!v.videoWidth) return done(null);
+      const c = paintEditedFrame(v, v.videoWidth, v.videoHeight, edits);
+      c.toBlob((b) => done(b ? URL.createObjectURL(b) : null), 'image/jpeg', 0.9);
+    }, { once: true });
+  });
+}
+
+/**
+ * The composer tile for a video: the shape of the picture after its turn and
+ * crop, and where the <video> sits so only the kept part shows. `placed` is
+ * false for an untouched video, which keeps the plain fill.
+ */
+function videoTileGeometry(ratio: number, e?: PostVideoEdits | null): { aspect: number; placed: boolean; style?: React.CSSProperties } {
+  const side = e?.rotate === 90 || e?.rotate === 270;
+  const shown = side ? 1 / ratio : ratio;
+  const c = cropPayload(e?.crop);
+  if (!side && !c) return { aspect: ratio, placed: false };
+  const r = c ?? { x: 0, y: 0, w: 1, h: 1 };
+  const aspect = shown * (r.w / r.h);
+  return {
+    aspect,
+    placed: true,
+    style: {
+      left: `${((0.5 - r.x) / r.w) * 100}%`,
+      top: `${((0.5 - r.y) / r.h) * 100}%`,
+      width: side ? `${100 / (aspect * r.h)}%` : `${100 / r.w}%`,
+      height: side ? `${(100 * aspect) / r.w}%` : `${100 / r.h}%`,
+    },
+  };
+}
+
+interface PostMediaPreviewProps {
+  media: MediaFile[];
+  onRemove: (index: number) => void;
+  onMove: (from: number, to: number) => void;
+  onAddAudio: (index: number, audio: AudioFile) => void;
+  onRemoveAudio: (index: number) => void;
+  onToggleMusicVideo?: (index: number) => void;
+  onAddThumbnail?: (index: number, thumbnailUrl: string) => void;
+  onRemoveThumbnail?: (index: number) => void;
+  onApplyFilter?: (index: number, settings: FilterSettings, presetId?: string) => void;
+  onClearFilter?: (index: number) => void;
+  onApplyCrop?: (index: number, settings: CropSettings) => void;
+  onClearCrop?: (index: number) => void;
+  onApplyTrim?: (index: number, trimStart: number, trimEnd: number) => void;
+  /** Swap the attached video for another file. */
+  onReplaceVideo?: (file: File) => Promise<void> | void;
+  /** Merge fields into one item: video edits, the post timer, music video. */
+  onUpdateMedia?: (index: number, patch: Partial<MediaFile>) => void;
+  /** Replace an image's bytes outright — used by the annotator, which bakes. */
+  onReplaceImage?: (index: number, file: File, studio?: { original: File; edits: StudioEdits }) => void;
+  /** Alt text for one image or video; without it the ALT buttons are not shown. */
+  onSetDescription?: (index: number, description: string) => void;
+  /** Keeps the parent composer from treating the portalled viewer as an outside press. */
+  onFullscreenChange?: (open: boolean) => void;
+  /** The attached video's early upload, shown under its preview. */
+  draftVideo?: DraftVideoSnapshot | null;
+}
+
+const MAX_DURATION = 30; // 30 seconds max
+
+/**
+ * Per-image voice-overs record fine but have never uploaded: /user_mint treats
+ * every file on a feed-images post as an image, so the audio blob was parked
+ * on the media item and silently dropped at post time. The affordance stays
+ * off until the backend can carry it — attaching an existing audio post via
+ * the sound picker (soundtrack tag) is the supported way to put sound on an
+ * image post.
+ */
+const IMAGE_AUDIO_SUPPORTED = false;
+
+/**
+ * Video filter/crop settings would be silently discarded — a video cannot be
+ * re-encoded in the browser without shipping a wasm encoder, and the backend
+ * reads no filter/crop fields. Off until it does; the editors are kept.
+ */
+const VIDEO_EDITS_SUPPORTED = false;
+
+/**
+ * Trim is cut on the server from the draft upload (user_mint trimStart /
+ * trimEnd), so the trimmer is on.
+ */
+const VIDEO_TRIM_SUPPORTED = true;
+
+/** The old cover strip beside the video; the cover is picked in the editor now. */
+const SHOW_FRAME_STRIP = false;
+
+/** "1h", "12h", "1d", "7d", "30d" for the post timer chip. */
+function postDestructShort(s: number): string {
+  return s % 86400 === 0 ? `${s / 86400}d` : `${Math.round(s / 3600)}h`;
+}
+
+// Helper to check if crop is applied
+function hasCropApplied(settings?: CropSettings): boolean {
+  if (!settings) return false;
+  return settings.rotation !== 0 || settings.flipX || settings.flipY || settings.aspectRatio !== '1:1';
+}
+
+// Generate transform CSS from crop settings
+function generateCropTransform(settings?: CropSettings): string | undefined {
+  if (!settings) return undefined;
+  const transforms: string[] = [];
+  
+  if (settings.rotation !== 0) {
+    transforms.push(`rotate(${settings.rotation}deg)`);
+  }
+  if (settings.flipX) {
+    transforms.push('scaleX(-1)');
+  }
+  if (settings.flipY) {
+    transforms.push('scaleY(-1)');
+  }
+  
+  return transforms.length > 0 ? transforms.join(' ') : undefined;
+}
+
+export function PostMediaPreview({ 
+  media, 
+  onRemove, 
+  onMove,
+  onAddAudio, 
+  onRemoveAudio, 
+  onToggleMusicVideo,
+  onAddThumbnail,
+  onRemoveThumbnail,
+  onApplyFilter,
+  onClearFilter,
+  onApplyCrop,
+  onClearCrop,
+  onApplyTrim,
+  onReplaceVideo,
+  onUpdateMedia,
+  onReplaceImage,
+  onFullscreenChange,
+  draftVideo,
+  onSetDescription,
+}: PostMediaPreviewProps) {
+  const [altEditorIndex, setAltEditorIndex] = useState<number | null>(null);
+  const { t: _copy } = _useCopy();
+  const [recordingIndex, setRecordingIndex] = useState<number | null>(null);
+  const [recordingTime, setRecordingTime] = useState(0);
+  const [playingIndex, setPlayingIndex] = useState<number | null>(null);
+  const [showAudioOptions, setShowAudioOptions] = useState<number | null>(null);
+  const [playingVideoIndex, setPlayingVideoIndex] = useState<number | null>(null);
+  const [processingVideos, setProcessingVideos] = useState<Map<number, number>>(new Map());
+  const [filterEditorIndex, setFilterEditorIndex] = useState<number | null>(null);
+  const [cropEditorIndex, setCropEditorIndex] = useState<number | null>(null);
+  // The photo studio (Crop / Looks / Adjust / Draw in one editor) for every
+  // still photo; GIFs keep the old CSS editors since a bake would freeze them.
+  const [studio, setStudio] = useState<{ index: number; tab: StudioTab } | null>(null);
+  // The video edit screen (Cover and Trim). It opens by itself when a video
+  // is added, on Cover, and Confirm brings the choices back to the post.
+  const [videoEdit, setVideoEdit] = useState<{ index: number; item: DmStudioItem; timer: number | null; music: boolean } | null>(null);
+  const openVideoEdit = useCallback((index: number) => {
+    const m = media[index];
+    if (!m || m.type !== 'video') return;
+    const e = m.videoEdits;
+    setVideoEdit({
+      index,
+      timer: m.destructSeconds ?? null,
+      music: !!m.isMusicVideo,
+      item: {
+        id: m.preview, file: m.file, url: m.preview, kind: 'video', duration: m.duration,
+        options: { trimStart: m.trimStart, trimEnd: m.trimEnd, mirror: e?.mirror, rotate: e?.rotate || undefined, speed: e?.speed },
+        destruct: null, lockPrice: null,
+        description: m.description ?? '',
+        look: e?.look, strength: e?.strength, adjust: e?.adjust,
+        crop: e?.crop, cropRatio: e?.cropRatio,
+      },
+    });
+  }, [media]);
+  // Covers the creator uploaded, so a later edit does not paint over them.
+  const ownCovers = useRef<Set<string>>(new Set());
+  const coverInputRef = useRef<HTMLInputElement | null>(null);
+  const videoReplaceInputRef = useRef<HTMLInputElement | null>(null);
+  const seenVideos = useRef<Set<string> | null>(null);
+  useEffect(() => {
+    const videos = media.filter((m) => m.type === 'video').map((m) => m.preview);
+    if (!seenVideos.current) { seenVideos.current = new Set(videos); return; }
+    const fresh = media.findIndex((m) => m.type === 'video' && !seenVideos.current!.has(m.preview));
+    videos.forEach((v) => seenVideos.current!.add(v));
+    if (fresh >= 0 && !videoEdit) openVideoEdit(fresh);
+  }, [media, videoEdit, openVideoEdit]);
+  // Photos too: a newly added photo opens straight into the photo editor.
+  const seenPhotos = useRef<Set<string> | null>(null);
+  useEffect(() => {
+    const photos = media.filter((m) => m.type === 'image').map((m) => m.preview);
+    if (!seenPhotos.current) { seenPhotos.current = new Set(photos); return; }
+    // A painting comes straight from the Painting canvas, so it skips the editor.
+    const fresh = media.findIndex((m) => m.type === 'image' && m.file.type !== 'image/gif' && !isPaintingFile(m.file.name) && !seenPhotos.current!.has(m.preview));
+    photos.forEach((v) => seenPhotos.current!.add(v));
+    if (fresh >= 0 && onReplaceImage && !studio && !videoEdit) setStudio({ index: fresh, tab: 'crop' });
+  }, [media, studio, videoEdit, onReplaceImage]);
+  const confirmVideoEdit = async () => {
+    if (!videoEdit) return;
+    const { index, item, timer, music } = videoEdit;
+    setVideoEdit(null);
+    const m = media[index];
+    const dur = item.duration ?? m?.duration ?? 0;
+    const o = item.options;
+    if (onSetDescription && (item.description ?? '').trim() !== (m?.description ?? '').trim()) onSetDescription(index, (item.description ?? '').trim());
+    if (o.trimStart != null || o.trimEnd != null) onApplyTrim?.(index, o.trimStart ?? 0, o.trimEnd ?? dur);
+    const edits: PostVideoEdits = {
+      mirror: o.mirror || undefined,
+      rotate: (o.rotate || undefined) as PostVideoEdits['rotate'],
+      look: item.look && item.look !== 'normal' ? item.look : undefined,
+      strength: item.strength,
+      adjust: item.adjust,
+      crop: item.crop,
+      cropRatio: item.crop ? item.cropRatio : undefined,
+      speed: o.speed && o.speed !== 1 ? o.speed : undefined,
+    };
+    const editsOn = hasVideoEdits(edits);
+    const editsChanged = JSON.stringify(videoEditsMatrix(edits)) !== JSON.stringify(videoEditsMatrix(m?.videoEdits))
+      || !!edits.mirror !== !!m?.videoEdits?.mirror || (edits.rotate ?? 0) !== (m?.videoEdits?.rotate ?? 0)
+      || (edits.adjust?.vignette ?? 0) !== (m?.videoEdits?.adjust?.vignette ?? 0)
+      || JSON.stringify(edits.crop ?? null) !== JSON.stringify(m?.videoEdits?.crop ?? null);
+    onUpdateMedia?.(index, { videoEdits: editsOn ? edits : undefined, destructSeconds: timer, isMusicVideo: music });
+    if (!onAddThumbnail) return;
+    if (item.coverUrl) {
+      ownCovers.current.add(item.coverUrl);
+      onAddThumbnail(index, item.coverUrl);
+      return;
+    }
+    // A picked frame, or edits that change how the auto cover looks.
+    const ownCover = !!m?.thumbnail && ownCovers.current.has(m.thumbnail);
+    if (o.coverAt != null || (editsChanged && !ownCover)) {
+      const frame = await grabVideoFrame(item.url, o.coverAt ?? Math.max(0.1, o.trimStart ?? 0), edits);
+      if (frame) onAddThumbnail(index, frame);
+    }
+  };
+  const [videoFrames, setVideoFrames] = useState<Map<number, string[]>>(new Map());
+  // Width / height of each attached video, by preview URL, so its frame can match it.
+  const [videoRatios, setVideoRatios] = useState<Record<string, number>>({});
+  const noteVideoRatio = useCallback((preview: string, video: HTMLVideoElement) => {
+    const { videoWidth, videoHeight } = video;
+    if (videoWidth <= 0 || videoHeight <= 0) return;
+    const ratio = videoWidth / videoHeight;
+    setVideoRatios(prev => prev[preview] === ratio ? prev : { ...prev, [preview]: ratio });
+  }, []);
+  const [extractingFrames, setExtractingFrames] = useState<Set<number>>(new Set());
+  const [fullscreenPreview, setFullscreenPreview] = useState<{ index: number; src: string; type: 'image' | 'video'; filterSettings?: FilterSettings; cropSettings?: CropSettings; currentTime?: number } | null>(null);
+  const fullscreenVideoRef = useRef<HTMLVideoElement | null>(null);
+  const replacementInputRef = useRef<HTMLInputElement | null>(null);
+  const [replacementIndex, setReplacementIndex] = useState<number | null>(null);
+  const dragIndex = useRef<number | null>(null);
+  const [draggingIndex, setDraggingIndex] = useState<number | null>(null);
+  const [dropIndex, setDropIndex] = useState<number | null>(null);
+
+  const finishDrag = (event: React.PointerEvent, index: number) => {
+    const target = document.elementFromPoint(event.clientX, event.clientY)?.closest('[data-photo-index]');
+    const destination = target?.getAttribute('data-photo-index');
+    if (dragIndex.current !== null && destination !== null && destination !== undefined) {
+      onMove(dragIndex.current, Number(destination));
+    }
+    dragIndex.current = null;
+    setDraggingIndex(null);
+    setDropIndex(null);
+  };
+
+  const chooseReplacementImage = useCallback((index: number) => {
+    setReplacementIndex(index);
+    replacementInputRef.current?.click();
+  }, []);
+
+  const handleReplacementImage = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (file && replacementIndex !== null) onReplaceImage?.(replacementIndex, file);
+    setReplacementIndex(null);
+  }, [onReplaceImage, replacementIndex]);
+
+  useEffect(() => {
+    onFullscreenChange?.(fullscreenPreview !== null);
+    return () => onFullscreenChange?.(false);
+  }, [fullscreenPreview, onFullscreenChange]);
+
+  // Escape belongs to whatever is on top. Without this the composer drawer
+  // hears it first and closes the whole post out from under the preview.
+  useEffect(() => {
+    if (!fullscreenPreview) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return;
+      e.preventDefault();
+      e.stopPropagation();
+      setFullscreenPreview(null);
+    };
+    document.addEventListener('keydown', onKeyDown, true);
+    return () => document.removeEventListener('keydown', onKeyDown, true);
+  }, [fullscreenPreview]);
+  const [annotator, setAnnotator] = useState<{ index: number; url: string; name: string; type: string; sourceIdentity: string } | null>(null);
+
+  /**
+   * The annotator draws on a flattened copy: whatever filter and crop are set
+   * are baked in first, so the user marks up the picture they can actually see.
+   * On apply the caller replaces the file and drops those settings, since they
+   * are now part of the pixels.
+   */
+  const openAnnotator = useCallback(async (index: number, m: MediaFile) => {
+    const flattened = await applyEditsToImageFile(m.file, m.filterSettings, m.cropSettings);
+    setAnnotator({
+      index,
+      url: URL.createObjectURL(flattened),
+      name: m.file.name,
+      type: m.file.type,
+      sourceIdentity: JSON.stringify([m.file.name, m.file.type, m.file.size, m.file.lastModified]),
+    });
+  }, []);
+
+  const closeAnnotator = useCallback(() => {
+    setAnnotator(prev => {
+      if (prev) URL.revokeObjectURL(prev.url);
+      return null;
+    });
+  }, []);
+  const [audioTrimmerData, setAudioTrimmerData] = useState<{
+    index: number;
+    file: File;
+    url: string;
+    duration: number;
+    fileName: string;
+  } | null>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const videoRefs = useRef<Map<number, HTMLVideoElement>>(new Map());
+  const audioInputRef = useRef<HTMLInputElement | null>(null);
+  const thumbnailInputRef = useRef<HTMLInputElement | null>(null);
+  const pendingUploadIndex = useRef<number | null>(null);
+  const pendingThumbnailIndex = useRef<number | null>(null);
+  const recordingTimeRef = useRef(0);
+
+  // Simulate video processing when video is added
+  useEffect(() => {
+    media.forEach((m, index) => {
+      if (m.type === 'video' && !processingVideos.has(index)) {
+        // Start simulated processing for new videos
+        setProcessingVideos(prev => new Map(prev).set(index, 0));
+        
+        const interval = setInterval(() => {
+          setProcessingVideos(prev => {
+            const current = prev.get(index) ?? 0;
+            if (current >= 100) {
+              clearInterval(interval);
+              const next = new Map(prev);
+              next.delete(index);
+              return next;
+            }
+            return new Map(prev).set(index, Math.min(current + Math.random() * 15 + 5, 100));
+          });
+        }, 200);
+
+        return () => clearInterval(interval);
+      }
+    });
+  }, [media.length]);
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+    };
+  }, []);
+
+  const startRecording = async (index: number) => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
+      chunksRef.current = [];
+
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) {
+          chunksRef.current.push(e.data);
+        }
+      };
+
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(chunksRef.current, { type: 'audio/webm' });
+        const url = URL.createObjectURL(blob);
+        // Use ref value to capture correct duration
+        onAddAudio(index, { blob, url, duration: recordingTimeRef.current });
+        stream.getTracks().forEach(track => track.stop());
+        setRecordingIndex(null);
+        setRecordingTime(0);
+        recordingTimeRef.current = 0;
+      };
+
+      mediaRecorder.start();
+      setRecordingIndex(index);
+      setRecordingTime(0);
+      recordingTimeRef.current = 0;
+
+      timerRef.current = setInterval(() => {
+        recordingTimeRef.current += 1;
+        setRecordingTime(recordingTimeRef.current);
+        
+        if (recordingTimeRef.current >= MAX_DURATION) {
+          stopRecording();
+        }
+      }, 1000);
+    } catch (err) {
+      console.error('Failed to start recording:', err);
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+      mediaRecorderRef.current.stop();
+    }
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+  };
+
+  const playAudio = (url: string, index: number) => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+    }
+    audioRef.current = new Audio(url);
+    audioRef.current.onended = () => setPlayingIndex(null);
+    audioRef.current.play();
+    setPlayingIndex(index);
+  };
+
+  const stopAudio = () => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+    setPlayingIndex(null);
+  };
+
+  const handleAudioUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    const index = pendingUploadIndex.current;
+    if (!file || index === null) return;
+
+    // Create audio element to get duration
+    const audioEl = document.createElement('audio');
+    audioEl.src = URL.createObjectURL(file);
+    
+    audioEl.onloadedmetadata = () => {
+      const duration = Math.round(audioEl.duration);
+      
+      if (duration > MAX_DURATION) {
+        // Open audio trimmer for long audio files
+        setAudioTrimmerData({
+          index,
+          file,
+          url: audioEl.src,
+          duration,
+          fileName: file.name,
+        });
+        setShowAudioOptions(null);
+        return;
+      }
+
+      const url = audioEl.src;
+      onAddAudio(index, { blob: file, url, duration });
+      setShowAudioOptions(null);
+    };
+
+    audioEl.onerror = () => {
+      toast.error(_copy("copy.722a1406cd0d", { defaultValue: "Failed to load audio file" }));
+      URL.revokeObjectURL(audioEl.src);
+    };
+
+    e.target.value = '';
+    pendingUploadIndex.current = null;
+  };
+
+  const triggerAudioUpload = (index: number) => {
+    pendingUploadIndex.current = index;
+    audioInputRef.current?.click();
+    setShowAudioOptions(null);
+  };
+
+  const handleStartRecording = (index: number) => {
+    setShowAudioOptions(null);
+    startRecording(index);
+  };
+
+  const handleThumbnailUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    const index = pendingThumbnailIndex.current;
+    if (!file || index === null) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast.error(_copy("copy.024eff991771", { defaultValue: "Please select an image file" }));
+      return;
+    }
+
+    const url = URL.createObjectURL(file);
+    onAddThumbnail?.(index, url);
+    e.target.value = '';
+    pendingThumbnailIndex.current = null;
+  };
+
+  const triggerThumbnailUpload = (index: number) => {
+    pendingThumbnailIndex.current = index;
+    thumbnailInputRef.current?.click();
+  };
+
+  // Extract frames from video for thumbnail selection
+  const extractVideoFrames = useCallback(async (videoUrl: string, index: number) => {
+    if (extractingFrames.has(index)) return;
+    
+    setExtractingFrames(prev => new Set(prev).add(index));
+    
+    try {
+      const video = document.createElement('video');
+      video.src = videoUrl;
+      video.setAttribute('webkit-playsinline', '');
+      // Only set crossOrigin for non-blob URLs (external resources)
+      // Blob URLs are same-origin and don't need CORS handling
+      if (!videoUrl.startsWith('blob:')) {
+        video.crossOrigin = 'anonymous';
+      }
+      video.preload = 'auto'; // Use 'auto' instead of 'metadata' for better compatibility
+      video.muted = true; // Required for autoplay policies
+      
+      // Wait for video to be ready to play (better for WebM/recorded videos)
+      await new Promise<void>((resolve, reject) => {
+        const handleCanPlay = () => {
+          video.removeEventListener('canplaythrough', handleCanPlay);
+          video.removeEventListener('error', handleError);
+          resolve();
+        };
+        const handleError = () => {
+          video.removeEventListener('canplaythrough', handleCanPlay);
+          video.removeEventListener('error', handleError);
+          reject(new Error('Failed to load video'));
+        };
+        video.addEventListener('canplaythrough', handleCanPlay);
+        video.addEventListener('error', handleError);
+        video.load();
+        setTimeout(() => {
+          video.removeEventListener('canplaythrough', handleCanPlay);
+          video.removeEventListener('error', handleError);
+          reject(new Error('Video load timeout'));
+        }, 15000);
+      });
+      
+      const duration = video.duration;
+      if (!duration || duration <= 0 || !isFinite(duration)) {
+        throw new Error('Invalid video duration');
+      }
+      
+      const frameCount = 20;
+      const frames: string[] = [];
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      
+      if (!ctx) {
+        throw new Error('Failed to get canvas context');
+      }
+      
+      // Keep the source shape. A fixed 640x360 stretched every portrait or
+      // 4:3 clip into 16:9, and the picked frame became a squashed cover.
+      const scale = 640 / Math.max(video.videoWidth || 640, video.videoHeight || 360);
+      canvas.width = Math.round((video.videoWidth || 640) * scale);
+      canvas.height = Math.round((video.videoHeight || 360) * scale);
+
+      for (let i = 0; i < frameCount; i++) {
+        // Include first frame (time 0) and distribute remaining frames evenly
+        const time = i === 0 ? 0.01 : (duration / (frameCount - 1)) * i; // Use 0.01 instead of 0 for better compatibility
+        video.currentTime = Math.min(time, duration - 0.1); // Don't seek past the end
+        
+        await new Promise<void>((resolve) => {
+          const handleSeeked = () => {
+            video.removeEventListener('seeked', handleSeeked);
+            // Small delay to ensure frame is rendered
+            setTimeout(resolve, 50);
+          };
+          video.addEventListener('seeked', handleSeeked);
+          // Fallback timeout in case seeked never fires (common with some WebM)
+          setTimeout(() => {
+            video.removeEventListener('seeked', handleSeeked);
+            resolve();
+          }, 500);
+        });
+        
+        // Check if video has valid dimensions
+        if (video.videoWidth > 0 && video.videoHeight > 0) {
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+          
+          const blob = await new Promise<Blob | null>(resolve => 
+            canvas.toBlob(resolve, 'image/jpeg', 0.7)
+          );
+          
+          if (blob && blob.size > 1000) { // Only add if blob has actual content
+            frames.push(URL.createObjectURL(blob));
+          }
+        }
+      }
+      
+      // Only set frames if we got at least some
+      if (frames.length > 0) {
+        setVideoFrames(prev => new Map(prev).set(index, frames));
+      } else {
+        console.warn('No frames could be extracted from video');
+      }
+    } catch (error) {
+      console.error('Failed to extract video frames:', error);
+    } finally {
+      setExtractingFrames(prev => {
+        const next = new Set(prev);
+        next.delete(index);
+        return next;
+      });
+    }
+  }, [extractingFrames]);
+
+  // Track video URLs to detect changes
+  const videoUrlsRef = useRef<Map<number, string>>(new Map());
+
+  // Trigger frame extraction when video is added or changed
+  useEffect(() => {
+    const currentUrls = new Map<number, string>();
+    
+    media.forEach((m, index) => {
+      if (m.type === 'video') {
+        currentUrls.set(index, m.preview);
+        const previousUrl = videoUrlsRef.current.get(index);
+        
+        // If video changed or is new, clear old frames and extract new ones
+        if (previousUrl !== m.preview) {
+          // Revoke old frame URLs if they exist
+          const oldFrames = videoFrames.get(index);
+          if (oldFrames) {
+            oldFrames.forEach(url => URL.revokeObjectURL(url));
+            setVideoFrames(prev => {
+              const next = new Map(prev);
+              next.delete(index);
+              return next;
+            });
+          }
+        }
+        
+        // Extract frames if not already done
+        if (SHOW_FRAME_STRIP && !videoFrames.has(index) && !extractingFrames.has(index)) {
+          extractVideoFrames(m.preview, index);
+        }
+      }
+    });
+    
+    // Update tracked URLs
+    videoUrlsRef.current = currentUrls;
+    
+    // Clean up frames for removed videos
+    videoFrames.forEach((frames, index) => {
+      if (!currentUrls.has(index)) {
+        frames.forEach(url => URL.revokeObjectURL(url));
+        setVideoFrames(prev => {
+          const next = new Map(prev);
+          next.delete(index);
+          return next;
+        });
+      }
+    });
+  }, [media, extractVideoFrames, videoFrames, extractingFrames]);
+
+  // Cleanup blob URLs when component unmounts
+  useEffect(() => {
+    return () => {
+      videoFrames.forEach(frames => {
+        frames.forEach(url => URL.revokeObjectURL(url));
+      });
+    };
+  }, []);
+
+  if (media.length === 0) return null;
+
+  return (
+    <>
+      {/* Hidden audio input */}
+      <input
+        ref={audioInputRef}
+        type="file"
+        accept="audio/*"
+        className="hidden"
+        onChange={handleAudioUpload}
+      />
+      {/* Hidden thumbnail input */}
+      <input
+        ref={thumbnailInputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={handleThumbnailUpload}
+      />
+      <input
+        ref={replacementInputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={handleReplacementImage}
+      />
+      <input
+        ref={videoReplaceInputRef}
+        type="file"
+        accept="video/*"
+        className="hidden"
+        onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ''; if (f) void onReplaceVideo?.(f); }}
+      />
+      <input
+        ref={coverInputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={(e) => {
+          const f = e.target.files?.[0];
+          e.target.value = '';
+          if (!f) return;
+          if (!f.type.startsWith('image/')) { toast.error(_copy("copy.024eff991771", { defaultValue: "Please select an image file" })); return; }
+          const url = URL.createObjectURL(f);
+          setVideoEdit((v) => (v ? { ...v, item: { ...v.item, coverUrl: url, options: { ...v.item.options, coverAt: undefined } } } : v));
+        }}
+      />
+      <AnimatePresence>
+        <motion.div
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: 'auto' }}
+          exit={{ opacity: 0, height: 0 }}
+          className="mt-2"
+        >
+          {/* Horizontal scroll container with touch swipe */}
+          <div 
+            className="flex gap-3 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-2 -mb-2 touch-pan-x"
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}
+          >
+            {media.map((m, index) => (
+              <div key={m.preview} data-audio-preview-item={m.type === 'audio' || undefined} data-photo-index={m.type === 'image' ? index : undefined} className={`relative flex-shrink-0 snap-center ${dropIndex === index && draggingIndex !== index ? 'ring-2 ring-white rounded-2xl' : ''}`}>
+                {m.type === 'image' ? (
+                  /* ==================== IMAGE PREVIEW ==================== */
+                  <div className="relative h-[160px] sm:h-[200px] md:h-[240px] rounded-2xl overflow-hidden bg-zinc-900">
+                    {/* Photos keep alt text in the editor; a GIF has no editor, so it keeps the button. */}
+                    {onSetDescription && (m.file.type === 'image/gif' || !onReplaceImage) && (
+                      <AltTextButton hasText={!!m.description} onClick={() => setAltEditorIndex(index)} className="absolute bottom-2 right-2" />
+                    )}
+                    {media.filter(item => item.type === 'image').length > 1 && (
+                      <button type="button" aria-label={_copy("copy.58bb510b9e80", { defaultValue: "Drag to reorder photo {{value1}}", value1: index + 1 })} title={_copy("copy.eb2b5e480faa", { defaultValue: "Drag to reorder photos" })}
+                        className="absolute z-20 bottom-2 left-2 flex items-center gap-1 rounded-lg bg-black/75 px-2 py-1 text-xs text-white touch-none cursor-grab active:cursor-grabbing"
+                        onPointerDown={event => { event.preventDefault(); event.currentTarget.setPointerCapture(event.pointerId); dragIndex.current = index; setDraggingIndex(index); }}
+                        onPointerMove={event => { if (dragIndex.current === null) return; const target = document.elementFromPoint(event.clientX, event.clientY)?.closest('[data-photo-index]'); setDropIndex(target ? Number(target.getAttribute('data-photo-index')) : null); }}
+                        onPointerUp={event => finishDrag(event, index)}
+                        onPointerCancel={() => { dragIndex.current = null; setDraggingIndex(null); setDropIndex(null); }}
+                      ><Grip className="h-4 w-4" />{index + 1}</button>
+                    )}
+                    <div className="relative h-full flex items-center justify-center">
+                      <img 
+                        src={m.preview} 
+                        alt="" 
+                        className="h-full w-auto max-w-none object-contain rounded-2xl cursor-pointer" 
+                        style={{ 
+                          filter: m.filterSettings ? generateFilterCSS(m.filterSettings) : undefined,
+                          transform: generateCropTransform(m.cropSettings),
+                        }}
+                        onClick={() => setFullscreenPreview({ 
+                          index, 
+                          src: m.preview, 
+                          type: 'image',
+                          filterSettings: m.filterSettings,
+                          cropSettings: m.cropSettings
+                        })}
+                      />
+                    
+                      {/* Top left: Filter + Crop + Audio buttons */}
+                      <div className="absolute top-2 left-2 flex items-center gap-1.5 flex-wrap">
+                        {onReplaceImage && (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <button
+                                type="button"
+                                onClick={(e) => { e.stopPropagation(); chooseReplacementImage(index); }}
+                                className="flex items-center justify-center w-7 h-7 rounded-xl text-white transition-all duration-300 hover:scale-105
+                                  bg-black/60 backdrop-blur-xl border border-white/20
+                                  hover:bg-black/70 hover:border-white/40"
+                                aria-label={_copy("copy.1067b33ac325", { defaultValue: "Change image {{value1}}", value1: index + 1 })}
+                              >
+                                <Upload className="w-3 h-3 text-white" />
+                              </button>
+                            </TooltipTrigger>
+                            <TooltipContent>{_copy("copy.87b8b0086a4c", { defaultValue: "Change image" })}</TooltipContent>
+                          </Tooltip>
+                        )}
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <button
+                              type="button"
+                              onClick={(e) => { e.stopPropagation(); if (onReplaceImage && m.file.type !== 'image/gif') setStudio({ index, tab: 'crop' }); else setFilterEditorIndex(index); }}
+                              className="flex h-7 w-7 items-center justify-center rounded-xl text-white transition-all duration-300 hover:scale-105
+                                bg-black/60 backdrop-blur-xl border border-white/20
+                                hover:bg-black/70 hover:border-white/40"
+                              aria-label={_copy("post.media.editPhoto", { defaultValue: "Edit photo {{value1}}", value1: index + 1 })}
+                            >
+                              <Pencil className="w-3 h-3 text-white" />
+                            </button>
+                          </TooltipTrigger>
+                          <TooltipContent>{_copy("post.media.editHint", { defaultValue: "Crop, looks, adjust, draw and alt text" })}</TooltipContent>
+                        </Tooltip>
+
+                        {/* Audio controls for images — gated off, see IMAGE_AUDIO_SUPPORTED. */}
+                        {IMAGE_AUDIO_SUPPORTED && (recordingIndex === index ? (
+                          <button
+                            type="button"
+                            onClick={(e) => { e.stopPropagation(); stopRecording(); }}
+                            className="flex items-center gap-2 bg-red-500 px-3 py-1.5 rounded-xl text-white text-xs font-medium animate-pulse"
+                          >
+                            <Square className="w-3 h-3 fill-white" />
+                            {recordingTime}s / {MAX_DURATION}s
+                          </button>
+                        ) : m.audio ? (
+                          <div className="flex items-center gap-2 bg-black/70 backdrop-blur-sm px-2 py-1 rounded-xl" onClick={(e) => e.stopPropagation()}>
+                            <button
+                              onClick={(e) => { e.stopPropagation(); playingIndex === index ? stopAudio() : playAudio(m.audio!.url, index); }}
+                              className="w-6 h-6 flex items-center justify-center text-white"
+                            >
+                              {playingIndex === index ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+                            </button>
+                            <span className="text-white text-xs">{m.audio.duration}s</span>
+                            <button
+                              onClick={(e) => { e.stopPropagation(); onRemoveAudio(index); }}
+                              className="w-5 h-5 flex items-center justify-center text-red-400 hover:text-red-300"
+                            >
+                              <Trash2 className="w-3 h-3" />
+                            </button>
+                          </div>
+                        ) : showAudioOptions === index ? (
+                          <>
+                            <Tooltip delayDuration={300}>
+                              <TooltipTrigger asChild>
+                                <button
+                                  type="button"
+                                  onClick={(e) => { e.stopPropagation(); triggerAudioUpload(index); }}
+                                  className="flex items-center justify-center w-7 h-7 rounded-xl text-white transition-all duration-300 hover:scale-105
+                                    bg-black/60 backdrop-blur-xl border border-white/20
+                                    hover:bg-blue-500/40 hover:border-blue-400/40"
+                                >
+                                  <Upload className="w-3 h-3" />
+                                </button>
+                              </TooltipTrigger>
+                              <TooltipContent>{_copy("copy.e38096579d58", { defaultValue: "Upload audio" })}</TooltipContent>
+                            </Tooltip>
+                            <Tooltip delayDuration={300}>
+                              <TooltipTrigger asChild>
+                                <button
+                                  type="button"
+                                  onClick={(e) => { e.stopPropagation(); handleStartRecording(index); }}
+                                  className="flex items-center justify-center w-7 h-7 rounded-xl text-white transition-all duration-300 hover:scale-105
+                                    bg-black/60 backdrop-blur-xl border border-white/20
+                                    hover:bg-red-500/40 hover:border-red-400/40"
+                                >
+                                  <Mic className="w-3 h-3 text-white" />
+                                </button>
+                              </TooltipTrigger>
+                              <TooltipContent>{_copy("copy.f9db93fda079", { defaultValue: "Record audio" })}</TooltipContent>
+                            </Tooltip>
+                            <Tooltip delayDuration={300}>
+                              <TooltipTrigger asChild>
+                                <button
+                                  type="button"
+                                  onClick={(e) => { e.stopPropagation(); setShowAudioOptions(null); }}
+                                  className="flex items-center justify-center w-7 h-7 rounded-xl text-white transition-all duration-300 hover:scale-105
+                                    bg-black/60 backdrop-blur-xl border border-white/20
+                                    hover:bg-black/70 hover:border-white/40"
+                                >
+                                  <X className="w-3 h-3" />
+                                </button>
+                              </TooltipTrigger>
+                              <TooltipContent>{_copy("copy.19766ed6ccb2", { defaultValue: "Cancel" })}</TooltipContent>
+                            </Tooltip>
+                          </>
+                        ) : (
+                          <Tooltip delayDuration={300}>
+                            <TooltipTrigger asChild>
+                              <button
+                                type="button"
+                                onClick={(e) => { e.stopPropagation(); setShowAudioOptions(index); }}
+                                className="flex items-center justify-center w-7 h-7 rounded-xl text-white transition-all duration-300 hover:scale-105
+                                  bg-black/60 backdrop-blur-xl border border-white/20
+                                  hover:bg-black/70 hover:border-white/40"
+                              >
+                                <Music className="w-3 h-3" />
+                              </button>
+                            </TooltipTrigger>
+                            <TooltipContent>{_copy("copy.9b0092ad98bd", { defaultValue: "Add audio" })}</TooltipContent>
+                          </Tooltip>
+                        ))}
+                      </div>
+                      
+                      {/* Remove button */}
+                      <button
+                        onClick={() => onRemove(index)}
+                        className="absolute top-2 right-2 p-1.5 bg-black/70 hover:bg-black rounded-xl transition-colors"
+                      >
+                        <X className="w-4 h-4 text-white" />
+                      </button>
+                    </div>
+                  </div>
+                ) : m.type === 'audio' ? (
+                  /* ==================== AUDIO PREVIEW ==================== */
+                  <div className="flex flex-col gap-3">
+                    <div data-glass-audio-preview className="relative w-full sm:w-[320px] md:w-[360px] rounded-2xl overflow-hidden bg-zinc-900">
+                      <div className="relative h-full flex items-center justify-center">
+                        <AudioVisualizer
+                          audioUrl={m.preview}
+                          displayTitle={m.file.name}
+                          isPlaying={playingIndex === index}
+                          onPlayPause={() => setPlayingIndex(prev => prev === index ? null : index)}
+                          className="h-full w-auto min-w-[200px] aspect-[2/1]"
+                          showStylePicker={true}
+                          /* This preview draws its own Music badge and file
+                             name at top-left, which is where the visualizer's
+                             volume pill would land. */
+                          showVolume={false}
+                        />
+                        
+                        <div data-audio-preview-label className="absolute top-3 left-3 right-3 flex items-center gap-3 pointer-events-none">
+                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500/40 to-blue-500/40 backdrop-blur-sm flex items-center justify-center border border-white/20">
+                            <Music className="w-5 h-5 text-white" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-white font-medium text-sm truncate drop-shadow-lg">{m.file.name}</p>
+                            <p className="text-white/70 text-xs drop-shadow">
+                              {m.duration ? `${Math.floor(m.duration / 60)}:${String(Math.floor(m.duration % 60)).padStart(2, '0')}` : _copy("copy.bc1b88907d3b", { defaultValue: "Audio" })}
+                            </p>
+                          </div>
+                        </div>
+                        
+                        <button
+                          onClick={() => onRemove(index)}
+                          className="absolute top-2 right-2 p-1.5 bg-black/70 hover:bg-black rounded-xl transition-colors"
+                        >
+                          <X className="w-4 h-4 text-white" />
+                        </button>
+                      </div>
+                    </div>
+                    {/* Audio thumbnail - shown below the visualizer */}
+                    <div className="relative w-full sm:w-[320px] md:w-[360px]">
+                      {m.thumbnail ? (
+                        <div className="relative rounded-2xl overflow-hidden bg-zinc-800 border border-white/10">
+                          <img 
+                            src={m.thumbnail} 
+                            alt={_copy("copy.f0b9be2f0d96", { defaultValue: "Audio thumbnail" })} 
+                            className="w-full aspect-square object-cover"
+                          />
+                          <div className="absolute top-2 left-2 px-2 py-0.5 bg-black/60 backdrop-blur-sm rounded-lg">
+                            <span className="text-white text-xs font-medium">{_copy("copy.3b35bbf626b5", { defaultValue: "Cover Art" })}</span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => onRemoveThumbnail(index)}
+                            className="absolute top-2 right-2 p-1.5 bg-black/70 hover:bg-black rounded-xl transition-colors"
+                          >
+                            <X className="w-3 h-3 text-white" />
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => triggerThumbnailUpload(index)}
+                          className="w-full flex items-center gap-2 justify-center py-3 bg-zinc-800/60 hover:bg-zinc-800 border border-dashed border-white/10 hover:border-white/20 rounded-2xl transition-all text-zinc-400 hover:text-white text-xs"
+                        >
+                          <ImageIcon className="w-3.5 h-3.5" />{_copy("copy.bff7683881b8", { defaultValue: "Add cover art" })}</button>
+                      )}
+                    </div>
+                  </div>
+                ) : m.type === 'video' ? (
+                  /* ==================== VIDEO + THUMBNAIL STACKED ==================== */
+                  <div className="flex flex-col gap-3">
+                    {/* Video preview container */}
+                    {/* Same height as a 16:9 preview always had, with the width taken
+                        from the video itself, so tall, square and extra-wide
+                        clips show whole instead of cropped into a 16:9 box. */}
+                    <div className={cn('relative self-start max-w-full h-[158px] sm:h-[180px] md:h-[214px] rounded-2xl overflow-hidden bg-zinc-900', videoTileGeometry(videoRatios[m.preview] ?? 16 / 9, m.videoEdits).placed ? 'min-w-[88px]' : 'min-w-[150px]')} style={{ aspectRatio: videoTileGeometry(videoRatios[m.preview] ?? 16 / 9, m.videoEdits).aspect }}>
+                      {/* Processing overlay */}
+                      {processingVideos.has(index) && (
+                        <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/80 rounded-2xl">
+                          <Loader2 className="w-8 h-8 text-white animate-spin mb-3" />
+                          <p className="text-white text-sm font-medium mb-2">{_copy("copy.712947f52fed", { defaultValue: "Processing video..." })}</p>
+                          <div className="w-3/4 max-w-[200px]">
+                            <Progress value={processingVideos.get(index) ?? 0} className="h-2" />
+                          </div>
+                          <p className="text-zinc-400 text-xs mt-1">{Math.round(processingVideos.get(index) ?? 0)}%</p>
+                        </div>
+                      )}
+                      
+                      {/* Always show video */}
+                      <video 
+                        ref={(el) => {
+                          if (!el) return;
+                          videoRefs.current.set(index, el);
+                          // A cached file can finish loading before React is listening.
+                          if (el.readyState >= 1) noteVideoRatio(m.preview, el);
+                        }}
+                        src={m.preview} 
+                        playsInline
+                        {...{"webkit-playsinline": ""}}
+                        poster={videoTileGeometry(videoRatios[m.preview] ?? 16 / 9, m.videoEdits).placed ? undefined : m.thumbnail}
+                        className={cn('pointer-events-none', videoTileGeometry(videoRatios[m.preview] ?? 16 / 9, m.videoEdits).placed ? 'absolute max-w-none object-cover' : 'w-full h-full object-contain rounded-2xl')}
+                        style={{ 
+                          filter: videoEditsMatrix(m.videoEdits) ? `url(#post-video-fx-${index})` : m.filterSettings ? generateFilterCSS(m.filterSettings) : undefined,
+                          ...videoTileGeometry(videoRatios[m.preview] ?? 16 / 9, m.videoEdits).style,
+                          transform: [
+                            videoTileGeometry(videoRatios[m.preview] ?? 16 / 9, m.videoEdits).placed ? 'translate(-50%, -50%)' : '',
+                            m.videoEdits?.rotate ? `rotate(${m.videoEdits.rotate}deg)` : '',
+                            m.videoEdits?.mirror ? 'scaleX(-1)' : '',
+                            generateCropTransform(m.cropSettings) ?? '',
+                          ].filter(Boolean).join(' ') || undefined,
+                        }}
+                        onLoadedMetadata={(e) => noteVideoRatio(m.preview, e.currentTarget)}
+                        onEnded={() => setPlayingVideoIndex(null)}
+                        onPause={() => {
+                          if (playingVideoIndex === index) setPlayingVideoIndex(null);
+                        }}
+                      />
+                      
+                      {/* The cover is already turned and cropped: show it as is until the video plays. */}
+                      {videoTileGeometry(videoRatios[m.preview] ?? 16 / 9, m.videoEdits).placed && m.thumbnail && playingVideoIndex !== index && (
+                        <img src={m.thumbnail} alt="" className="pointer-events-none absolute inset-0 h-full w-full object-cover" />
+                      )}
+                      {videoEditsMatrix(m.videoEdits) && (
+                        <svg aria-hidden width="0" height="0" className="absolute">
+                          <filter id={`post-video-fx-${index}`} colorInterpolationFilters="sRGB">
+                            <feColorMatrix type="matrix" values={svgMatrixValues(videoEditsMatrix(m.videoEdits)!)} />
+                          </filter>
+                        </svg>
+                      )}
+                      {(m.videoEdits?.adjust?.vignette ?? 0) > 0 && (
+                        <span className="pointer-events-none absolute inset-0 rounded-2xl" style={{ background: vignetteBackground(m.videoEdits!.adjust!.vignette) }} />
+                      )}
+
+                      {/* One button. Tapping the video opens the same edit screen people
+                          see when they first add it: cover, trim, crop, looks, timer, alt
+                          text, music, change video and remove all live there. */}
+                      {!processingVideos.has(index) && (
+                        <button
+                          type="button"
+                          data-video-edit-tile
+                          onClick={(e) => { e.stopPropagation(); openVideoEdit(index); }}
+                          className="absolute inset-0 flex cursor-pointer items-end justify-center pb-2.5 focus-visible:outline-none"
+                          aria-label={_copy("post.media.editVideo", { defaultValue: "Edit video" })}
+                        >
+                          <span data-keep-dark className="dh-edit-glass flex h-8 items-center gap-1.5 rounded-full px-3.5 text-xs font-semibold text-white">
+                            <Pencil className="h-3.5 w-3.5" />
+                            {_copy("post.media.editVideo", { defaultValue: "Edit video" })}
+                          </span>
+                        </button>
+                      )}
+                    </div>
+
+                    <DraftVideoProgress draft={draftVideo} />
+                    
+                  </div>
+                ) : null}
+              </div>
+            ))}
+          </div>
+        </motion.div>
+      </AnimatePresence>
+
+      {/* Filter Editor Modal - works for both images and videos */}
+      {filterEditorIndex !== null && (media[filterEditorIndex]?.type === 'image' || media[filterEditorIndex]?.type === 'video') && (
+        <FilterEditor
+          isOpen={true}
+          onClose={() => setFilterEditorIndex(null)}
+          imageUrl={media[filterEditorIndex].type === 'video' 
+            ? media[filterEditorIndex].thumbnail || media[filterEditorIndex].preview 
+            : media[filterEditorIndex].preview}
+          isVideo={media[filterEditorIndex].type === 'video' && !media[filterEditorIndex].thumbnail}
+          initialSettings={media[filterEditorIndex].filterSettings}
+          initialPresetId={media[filterEditorIndex].filterPresetId}
+          onApply={(settings, presetId) => {
+            onApplyFilter?.(filterEditorIndex, settings, presetId);
+            setFilterEditorIndex(null);
+          }}
+        />
+      )}
+
+      {/* Crop/Rotate Editor Modal - works for both images and videos */}
+      {cropEditorIndex !== null && (media[cropEditorIndex]?.type === 'image' || media[cropEditorIndex]?.type === 'video') && (
+        <CropRotateEditor
+          isOpen={true}
+          onClose={() => setCropEditorIndex(null)}
+          imageUrl={media[cropEditorIndex].type === 'video' 
+            ? media[cropEditorIndex].thumbnail || media[cropEditorIndex].preview 
+            : media[cropEditorIndex].preview}
+          initialSettings={media[cropEditorIndex].cropSettings}
+          onApply={(settings) => {
+            onApplyCrop?.(cropEditorIndex, settings);
+            setCropEditorIndex(null);
+          }}
+        />
+      )}
+
+      {/* Audio Trimmer Modal */}
+      {audioTrimmerData && (
+        <AudioTrimmer
+          isOpen={true}
+          onClose={() => {
+            URL.revokeObjectURL(audioTrimmerData.url);
+            setAudioTrimmerData(null);
+          }}
+          audioUrl={audioTrimmerData.url}
+          audioBlob={audioTrimmerData.file}
+          duration={audioTrimmerData.duration}
+          maxDuration={MAX_DURATION}
+          fileName={audioTrimmerData.fileName}
+          onApply={(trimmedBlob, trimStart, trimEnd) => {
+            const trimmedUrl = URL.createObjectURL(trimmedBlob);
+            const trimmedDuration = trimEnd - trimStart;
+            onAddAudio(audioTrimmerData.index, {
+              blob: trimmedBlob,
+              url: trimmedUrl,
+              duration: trimmedDuration,
+              trimStart,
+              trimEnd,
+              originalDuration: audioTrimmerData.duration,
+            });
+            URL.revokeObjectURL(audioTrimmerData.url);
+            setAudioTrimmerData(null);
+          }}
+        />
+      )}
+
+      {/* Video edit screen: Cover and Trim, Confirm back to the post */}
+      {videoEdit && (
+        <DmMediaStudio
+          items={[videoEdit.item]}
+          active={0}
+          onActiveChange={() => undefined}
+          onItemChange={(_i, patch) => setVideoEdit((v) => {
+            if (!v) return v;
+            // Tapping a frame takes over from an uploaded cover picture.
+            const frameCover = patch.options?.coverAt != null && patch.options.coverAt !== v.item.options.coverAt;
+            return { ...v, item: { ...v.item, ...patch, ...(frameCover ? { coverUrl: undefined } : null) } };
+          })}
+          onRemoveItem={() => { const i = videoEdit.index; setVideoEdit(null); onRemove(i); }}
+          onClose={() => setVideoEdit(null)}
+          onConfirm={() => { void confirmVideoEdit(); }}
+          onlyTabs={['cover', 'trim', 'crop', 'speed', 'looks', 'adjust', 'expire', 'alt', 'music']}
+          allowAlt={!!onSetDescription}
+          initialTab="cover"
+          allowTimer={false}
+          postTimer={onUpdateMedia ? { value: videoEdit.timer, onChange: (t) => setVideoEdit((v) => (v ? { ...v, timer: t } : v)) } : undefined}
+          music={onUpdateMedia ? { on: videoEdit.music, onChange: (on) => setVideoEdit((v) => (v ? { ...v, music: on } : v)) } : undefined}
+          onUploadCover={onAddThumbnail ? () => coverInputRef.current?.click() : undefined}
+          onReplace={onReplaceVideo ? () => { setVideoEdit(null); videoReplaceInputRef.current?.click(); } : undefined}
+        />
+      )}
+
+      {studio && onReplaceImage && (() => {
+        const ids = media.map((m, i) => (m.type === 'image' && m.file.type !== 'image/gif' ? i : -1)).filter((i) => i >= 0);
+        const start = Math.max(0, ids.indexOf(studio.index));
+        return (
+          <PhotoStudio
+            photos={ids.map((i) => ({ original: media[i].studioOriginal ?? media[i].file, edits: media[i].studioEdits }))}
+            startIndex={start}
+            startTab={studio.tab}
+            descriptions={ids.map((i) => media[i].description ?? '')}
+            onDescriptions={onSetDescription ? (d) => d.forEach((text, k) => { if (text !== (media[ids[k]].description ?? '').trim()) onSetDescription(ids[k], text); }) : undefined}
+            onClose={() => setStudio(null)}
+            onDone={(results: StudioResult[]) => {
+              for (const r of results) onReplaceImage(ids[r.index], r.file, { original: r.original, edits: r.edits });
+              setStudio(null);
+            }}
+          />
+        );
+      })()}
+
+      {annotator && (
+        <ImageAnnotator
+          isOpen
+          onClose={closeAnnotator}
+          imageUrl={annotator.url}
+          fileName={annotator.name}
+          fileType={annotator.type}
+          sourceIdentity={annotator.sourceIdentity}
+          onApply={(file) => onReplaceImage?.(annotator.index, file)}
+        />
+      )}
+
+      {onSetDescription && altEditorIndex !== null && media[altEditorIndex] && (
+        <AltTextDialog
+          open
+          onOpenChange={(open) => { if (!open) setAltEditorIndex(null); }}
+          kind={media[altEditorIndex].type === 'video' ? 'video' : 'image'}
+          previewSrc={media[altEditorIndex].preview}
+          initial={media[altEditorIndex].description}
+          onSave={(text) => onSetDescription(altEditorIndex, text)}
+        />
+      )}
+
+      {/* Fullscreen Preview Modal.
+
+          Portalled to the body on purpose. The composer is a vaul drawer, and
+          vaul writes `transform: translate3d(...)` inline on its content to
+          drive the slide — a transformed ancestor becomes the containing block
+          for `position: fixed`, so rendering this in place pinned "fullscreen"
+          to the drawer's box instead of the viewport. Same reason it sits above
+          z-[100]: that is the drawer's own layer.
+
+          `pointer-events-auto` is not decoration. A modal drawer is a Radix
+          dialog underneath, and Radix pins `pointer-events: none` on the body
+          while it is open, re-enabling it only on its own content. Anything
+          portalled straight to the body therefore inherits the lock: the
+          viewer painted fullscreen but swallowed nothing, so every click on it
+          — the close button included — fell through to the composer behind and
+          the page read as frozen. */}
+      {createPortal(
+      <AnimatePresence>
+        {fullscreenPreview && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="pointer-events-auto fixed inset-0 z-[200] flex items-center justify-center"
+            onClick={() => setFullscreenPreview(null)}
+          >
+            {/* Blurred backdrop */}
+            <div className="absolute inset-0 bg-black/80 backdrop-blur-xl" />
+            
+            {/* Close button */}
+            <button
+              className="absolute top-4 right-4 z-10 w-10 h-10 flex items-center justify-center rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 text-white hover:bg-white/20 transition-colors"
+              onClick={() => setFullscreenPreview(null)}
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            {/* Media content */}
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="relative z-10 max-w-[90vw] max-h-[90vh]"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {fullscreenPreview.type === 'image' ? (
+                <img
+                  src={fullscreenPreview.src}
+                  alt=""
+                  className="max-w-full max-h-[90vh] object-contain rounded-lg"
+                  style={{
+                    filter: fullscreenPreview.filterSettings ? generateFilterCSS(fullscreenPreview.filterSettings) : undefined,
+                    transform: generateCropTransform(fullscreenPreview.cropSettings),
+                  }}
+                />
+              ) : (
+                <video
+                  ref={fullscreenVideoRef}
+                  src={fullscreenPreview.src}
+                  playsInline
+                  {...{"webkit-playsinline": ""}}
+                  className="max-w-full max-h-[90vh] object-contain rounded-lg"
+                  style={{
+                    filter: fullscreenPreview.filterSettings ? generateFilterCSS(fullscreenPreview.filterSettings) : undefined,
+                    transform: generateCropTransform(fullscreenPreview.cropSettings),
+                  }}
+                  controls
+                  autoPlay
+                  onLoadedMetadata={() => {
+                    if (fullscreenVideoRef.current && fullscreenPreview.currentTime) {
+                      fullscreenVideoRef.current.currentTime = fullscreenPreview.currentTime;
+                    }
+                  }}
+                />
+              )}
+            </motion.div>
+
+            {/* Image counter */}
+            <div data-keep-dark className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 px-4 py-2 rounded-xl bg-black/40 backdrop-blur-[24px] backdrop-saturate-[180%] border border-white/10 text-white text-sm">
+              {fullscreenPreview.index + 1} / {media.length}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>,
+      document.body
+      )}
+    </>
+  );
+}

@@ -1,0 +1,944 @@
+import { useTranslation as _useCopy } from 'react-i18next';
+import { tokenLabel } from '@/lib/token-label';
+/**
+ * Post Info Page
+ * ==============
+ * Displays NFT-related information for a post including:
+ * - Transaction hash of the mint
+ * - Exact timestamp
+ * - Blockchain chain info (Base or BSC/BNB)
+ * - Creator/minter wallet
+ * - Engagement stats
+ */
+
+import { lazy, Suspense, useEffect, useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
+import { Loader2, Tag, Hash, HandCoins, Globe, Ticket } from "lucide-react";
+import Copy from "@/components/ui/cut-icons/copy";
+import ExternalLink from "@/components/ui/cut-icons/open-externally";
+import ThumbsDown from "@/components/ui/cut-icons/dislike";
+import Eye from "@/components/ui/cut-icons/visibility";
+import Lock from "@/components/ui/cut-icons/privacy";
+import EyeOff from "@/components/ui/cut-icons/hidden";
+import Pencil from "@/components/ui/cut-icons/edit";
+import Radio from "@/components/ui/cut-icons/live";
+import Coins from "@/components/ui/cut-icons/coins";
+
+import ArrowLeft from "@/components/ui/cut-icons/back";
+import ThumbsUp from "@/components/ui/cut-icons/like";
+import MessageSquare from "@/components/ui/cut-icons/messages";
+import User from "@/components/ui/cut-icons/profile";
+import Plus from "@/components/ui/cut-icons/add";
+
+import { useTranslation } from 'react-i18next';
+import { formatPostDate, parsePostTimestamp } from '@/i18n/post-timestamp';
+import { toast } from 'sonner';
+import { DhbAmount } from '@/components/app/DhbAmount';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { DeHubNFT, updateTokenVisibility, TokenVisibility } from '@/lib/api/dehub';
+import { findCachedFeedPost } from '@/hooks/use-unified-feed';
+import { loadPostData } from '@/lib/post-warm';
+import { useMintExistingPost } from '@/hooks/use-mint-existing-post';
+import { MintChainSheet } from '@/components/app/mint/MintChainSheet';
+import type { EditionChoice } from '@/lib/api/dehub/content';
+import { CollectorPanel } from '@/components/app/collect/CollectorPanel';
+import { useEdition } from '@/hooks/use-edition';
+import { getChainConfig } from '@/lib/contracts/dhb-token';
+
+const collectionFor = (chainId: number) => {
+  try {
+    return getChainConfig(chainId as Parameters<typeof getChainConfig>[0]).streamCollection ?? null;
+  } catch {
+    return null;
+  }
+};
+import { buildAvatarUrl } from '@/lib/media-url';
+import { getTokenHolders, TOTAL_FRACTIONS, truncateAddress as truncateAddr } from '@/lib/api/token-holders';
+import { Progress } from '@/components/ui/progress';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
+import { useAuth } from '@/contexts/AuthContext';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
+import medal1 from '@/assets/medal-1.png';
+import medal2 from '@/assets/medal-2.png';
+import dehubCoin from '@/assets/dehub-coin.png';
+import medal3 from '@/assets/medal-3.png';
+import { EditPostModal } from '@/components/app/modals/EditPostModal';
+import { applyOptimisticEdit } from '@/lib/optimistic-edit';
+import { usePPVPurchaseCount } from '@/hooks/use-ppv-purchase-count';
+import { TranscriptSection } from '@/components/app/post-info/TranscriptSection';
+import { PostReactorsSection } from '@/components/app/post-info/PostReactorsSection';
+import { PostEditHistoryLine } from '@/components/app/post-info/PostEditHistory';
+import { SEOHead } from '@/components/SEOHead';
+import { ThemedIcon } from '@/components/app/war/WarHudIcon';
+
+// Visibility options configuration
+const VISIBILITY_OPTIONS: { value: TokenVisibility; icon: React.ReactNode }[] = [
+  { value: 'public', icon: <Globe className="w-4 h-4" /> },
+  { value: 'unlisted', icon: <EyeOff className="w-4 h-4" /> },
+  { value: 'private', icon: <Lock className="w-4 h-4" /> },
+];
+
+// The fraction market on this page is the same components the marketplace at
+// /app/fractions renders. It used to be ~440 lines inlined here, which is how
+// it ended up being the only place fractions could be traded at all.
+import { FractionMarketPanel } from '@/components/app/fractions/FractionMarketPanel';
+import { fractionImageFor } from '@/lib/fraction-thumb';
+import { resolveViewCount } from '@/lib/engagement';
+
+
+import { formatCount } from '@/lib/format-count';
+// Chain configuration
+const PostStatsPanel = lazy(() => import('@/components/app/post-stats/PostStatsPanel'));
+
+const CHAIN_CONFIG: Record<number, { name: string; explorerUrl: string; explorerName: string }> = {
+  8453: {
+    name: 'Base',
+    explorerUrl: 'https://basescan.org/tx/',
+    explorerName: 'BaseScan',
+  },
+  56: {
+    name: 'BNB Chain',
+    explorerUrl: 'https://bscscan.com/tx/',
+    explorerName: 'BscScan',
+  },
+};
+
+const getChainInfo = (chainId: number) => {
+  return CHAIN_CONFIG[chainId] || CHAIN_CONFIG[8453]; // Default to Base
+};
+
+export default function PostInfoPage() {
+  const { t: _copy } = _useCopy();
+  const { postId } = useParams<{ postId: string }>();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const { walletAddress } = useAuth();
+  const { t, i18n } = useTranslation();
+  const queryClient = useQueryClient();
+  
+  // Fetch NFT info with React Query
+  const { 
+    data: nftInfo, 
+    isLoading, 
+    error 
+  } = useQuery({
+    queryKey: ['nft-info', postId],
+    // Joins the request the tap that opened this page already started.
+    queryFn: () => loadPostData(postId!),
+    enabled: !!postId,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 30 * 60 * 1000, // 30 minutes in cache
+    // Instant paint: the user almost always arrives here FROM the post page,
+    // so the identical payload is already cached under ['single-post', id]
+    // (or sitting in a feed cache). Render it immediately — which also lets
+    // the token-holders query below start without waiting a round-trip —
+    // while the authoritative fetch runs behind it.
+    placeholderData: () =>
+      queryClient.getQueryData<DeHubNFT>(['single-post', postId]) ??
+      (findCachedFeedPost(queryClient, postId!) as unknown as DeHubNFT | undefined),
+  });
+  
+  // A post published off-chain: it lives at status 'signed' for good, so there
+  // is no NFT behind it — every on-chain section below renders a placeholder
+  // instead, and the holders read is skipped (there is nothing to hold).
+  const isUnminted = nftInfo?.status === 'signed';
+  const editionSupply = useEdition(nftInfo?.status === 'minted' ? nftInfo.tokenId : null).data?.supply ?? TOTAL_FRACTIONS;
+
+  // Fetch token holders with React Query (cached for 5 minutes)
+  const {
+    data: holders = [],
+    isLoading: isLoadingHolders
+  } = useQuery({
+    queryKey: ['token-holders', nftInfo?.tokenId, nftInfo?.chainId],
+    queryFn: () => getTokenHolders(nftInfo!.tokenId, nftInfo!.chainId),
+    enabled: !!nftInfo?.tokenId && !!nftInfo?.chainId && nftInfo?.status === 'minted',
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 30 * 60 * 1000, // 30 minutes in cache
+  });
+  
+  // Check if current user is the owner/minter. The API also returns an
+  // authoritative `isOwner` flag on authenticated nft_info calls — trust
+  // either signal so owner controls survive a missing/stale wallet context.
+  const isOwner = nftInfo?.isOwner === true ||
+    !!(walletAddress && nftInfo?.minter?.toLowerCase() === walletAddress.toLowerCase());
+  const [showEditModal, setShowEditModal] = useState(false);
+
+  // Mint-later for a post published off-chain. On success the page's own data
+  // is refetched, which flips isUnminted and swaps the placeholder for the
+  // real on-chain sections in place.
+  const { mint: mintExisting, isMinting } = useMintExistingPost();
+  const [showMintSheet, setShowMintSheet] = useState(false);
+  const handleMintNow = async (chosenChainId: number, edition?: EditionChoice) => {
+    if (!nftInfo?.tokenId) return;
+    const ok = await mintExisting(nftInfo.tokenId, nftInfo.chainId, chosenChainId, edition);
+    if (ok) {
+      setShowMintSheet(false);
+      queryClient.invalidateQueries({ queryKey: ['nft-info', postId] });
+      queryClient.invalidateQueries({ queryKey: ['token-holders'] });
+    }
+  };
+  const shouldAutoOpenEdit = searchParams.get('edit') === '1';
+
+  useEffect(() => {
+    if (!shouldAutoOpenEdit || !isOwner || !nftInfo || !postId) return;
+
+    setShowEditModal(true);
+    navigate(`/app/post/${postId}/info`, { replace: true });
+  }, [shouldAutoOpenEdit, isOwner, nftInfo, postId, navigate]);
+  
+  // PPV status and purchase count
+  const isPPV = nftInfo?.is_ppv || nftInfo?.streamInfo?.isPayPerView || false;
+  const ppvPrice = nftInfo?.ppv_price || nftInfo?.streamInfo?.payPerViewAmount;
+  const ppvCurrency = nftInfo?.ppv_currency || nftInfo?.streamInfo?.payPerViewTokenSymbol || 'DHB';
+  const { data: ppvPurchaseCount } = usePPVPurchaseCount(isPPV ? postId : undefined);
+
+  // Fetch tips for this specific post from tip_records. Floored against the
+  // backend's own totalTips at render time, NOT inside queryFn — nftInfo is a
+  // separate query that's frequently still unresolved when this one's queryFn
+  // actually runs (no shared queryKey, so it never re-fires just because
+  // nftInfo later arrives), which silently dropped the floor on a cold load.
+  // tip_records is only ever written by a client after it confirms its own
+  // send, so a tip whose confirmation step failed to persist (see
+  // read-tip-transaction.ts) silently never lands a row here — the backend's
+  // total doesn't have that gap.
+  const { data: recordedTipTotal = 0 } = useQuery({
+    queryKey: ['post-tips', postId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('tip_records')
+        .select('amount')
+        .eq('token_id', postId!);
+      return (error || !data) ? 0 : data.reduce((sum, r) => sum + Number(r.amount), 0);
+    },
+    enabled: !!postId,
+    staleTime: 2 * 60 * 1000,
+  });
+  // Recomputed every render, so it picks up nftInfo the moment it arrives —
+  // never a ceiling, just a floor under whatever tip_records currently has.
+  const postTipTotal = Math.max(recordedTipTotal, nftInfo?.totalTips ?? 0);
+
+  // Current visibility state (default to 'public' if not set)
+  const currentVisibility: TokenVisibility = (nftInfo as any)?.visibility || 'public';
+  
+  // Visibility mutation
+  const visibilityMutation = useMutation({
+    mutationFn: (newVisibility: TokenVisibility) => 
+      updateTokenVisibility(nftInfo!.tokenId, newVisibility),
+    onSuccess: () => {
+      toast.success(t('postInfo.visibilityUpdated'));
+      // Invalidate the NFT info query to refetch
+      queryClient.invalidateQueries({ queryKey: ['nft-info', postId] });
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || t('postInfo.visibilityFailed'));
+    },
+  });
+  
+  const handleVisibilityChange = (newVisibility: TokenVisibility) => {
+    if (!nftInfo?.tokenId) return;
+    visibilityMutation.mutate(newVisibility);
+  };
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text)
+      .then(() => toast.success(t('postInfo.copied')))
+      .catch(() => toast.error(t('postInfo.copyFailed')));
+  };
+  
+  const created = parsePostTimestamp(nftInfo?.createdAt);
+  
+  const truncateAddress = (address: string) => {
+    if (!address) return 'Unknown';
+    return `${address.slice(0, 6)}...${address.slice(-4)}`;
+  };
+  
+  // Show processing state for pending posts only. 'signed' is the for-life
+  // status of a post published with mint opt-out — it must render normally.
+  const isProcessing = nftInfo?.status === 'pending';
+  
+  if (isProcessing) {
+    return (
+      <div data-glass-page className="min-h-screen bg-black">
+        <div className="sticky top-11 lg:top-0 z-50 px-4 pt-1 pb-3 sm:px-4 sm:pt-3 sm:pb-3">
+          <div className="flex items-center gap-3 rounded-2xl bg-black/60 backdrop-blur-[24px] backdrop-saturate-[180%] px-3 py-2">
+            <button
+              data-swipe-back onClick={() => navigate(-1)}
+              className="p-2 rounded-xl hover:bg-white/10 transition-colors"
+              aria-label={_copy("copy.6aadac2f2b7a", { defaultValue: "Go back" })}
+            >
+              <ArrowLeft className="w-5 h-5 text-white" />
+            </button>
+            <h1 className="font-bold text-white">{t('postInfo.title')}</h1>
+          </div>
+        </div>
+        
+        <div className="flex flex-col items-center justify-center p-8 text-center max-w-md mx-auto mt-16">
+          {/* Animated processing indicator */}
+          <div className="relative mb-6">
+            <div className="w-20 h-20 rounded-xl bg-gradient-to-br from-white/15 to-white/5 flex items-center justify-center">
+              <Loader2 className="w-10 h-10 text-white animate-spin" />
+            </div>
+            <div className="absolute inset-0 rounded-xl bg-white/10 animate-ping" />
+          </div>
+          
+          <h2 className="text-xl font-semibold text-white mb-3">
+            {t('postInfo.uploadProcessing')}
+          </h2>
+          
+          <p className="text-white/60 text-sm leading-relaxed mb-4">
+            {t('postInfo.processingDesc')}
+          </p>
+          
+          <p className="text-white/40 text-xs leading-relaxed">
+            {t('postInfo.processingNote')}
+          </p>
+          
+          <button
+            data-swipe-back onClick={() => navigate(-1)}
+            className="mt-8 px-6 py-2.5 bg-white/10 hover:bg-white/15 text-white rounded-xl text-sm font-medium transition-colors"
+          >
+            {t('postInfo.goBack')}
+          </button>
+        </div>
+      </div>
+    );
+  }
+  
+  // Loading state
+  if (isLoading && !nftInfo) {
+    // Cold open from a link: the page's shape right away, not a loader.
+    return (
+      <div data-glass-page className="min-h-screen bg-black">
+        <div className="sticky top-0 z-50 px-4 pt-0 pb-3 sm:px-4 sm:pt-3 sm:pb-3">
+          <div className="flex items-center gap-3 rounded-2xl bg-black/60 backdrop-blur-[24px] backdrop-saturate-[180%] px-3 py-2">
+            <button
+              data-swipe-back onClick={() => navigate(-1)}
+              className="p-2 rounded-xl hover:bg-white/10 transition-colors"
+              aria-label={_copy("copy.6aadac2f2b7a", { defaultValue: "Go back" })}
+            >
+              <ArrowLeft className="w-5 h-5 text-white" />
+            </button>
+            <h1 className="font-bold text-white flex-1 truncate">{t('postInfo.title')}</h1>
+          </div>
+        </div>
+        <div className="p-4 space-y-6" aria-busy="true">
+          {[112, 80, 160, 96].map((h, i) => (
+            <Skeleton key={i} className="w-full rounded-xl bg-white/5" style={{ height: h }} />
+          ))}
+        </div>
+      </div>
+    );
+  }
+  
+  // Error state — only when we genuinely have NO post to show. Do NOT gate on
+  // `error` alone: React Query keeps the last good `data` across a failed
+  // background refetch while still exposing `error`, so gating on `error` would
+  // flip an already-loaded post to "not found" on a transient refetch failure
+  // (e.g. after back-navigation) even though we still hold valid data.
+  if (!nftInfo) {
+    return (
+      <div data-glass-page className="min-h-screen bg-black">
+        <div className="sticky top-11 lg:top-0 z-50 px-4 pt-1 pb-3 sm:px-4 sm:pt-3 sm:pb-3">
+          <div className="flex items-center gap-3 rounded-2xl bg-black/60 backdrop-blur-[24px] backdrop-saturate-[180%] px-3 py-2">
+            <button
+              data-swipe-back onClick={() => navigate(-1)}
+              className="p-2 rounded-xl hover:bg-white/10 transition-colors"
+              aria-label={_copy("copy.6aadac2f2b7a", { defaultValue: "Go back" })}
+            >
+              <ArrowLeft className="w-5 h-5 text-white" />
+            </button>
+            <h1 className="font-bold text-white">{t('postInfo.title')}</h1>
+          </div>
+        </div>
+        <div className="flex flex-col items-center justify-center p-8 text-center">
+          <ThemedIcon icon="posts" alt="" className="w-16 h-16 object-contain mb-4 opacity-75" />
+          <p className="text-white/60 mb-4">{error?.message || t('postInfo.notFound')}</p>
+          <button
+            data-swipe-back onClick={() => navigate(-1)}
+            className="text-white hover:underline"
+          >
+            {t('postInfo.goBack')}
+          </button>
+        </div>
+      </div>
+    );
+  }
+  
+  // Get chain info
+  const chainId = nftInfo.chainId || 8453;
+  const chainInfo = getChainInfo(chainId);
+  
+  // Get stats with fallbacks
+  // A feed copy painted first names these likes/dislikes, so read those too
+  // rather than flashing 0 until the full post lands.
+  const feedCounts = nftInfo as { likes?: number; dislikes?: number };
+  const likes = nftInfo.totalVotes?.for ?? nftInfo.like_count ?? feedCounts.likes ?? 0;
+  const dislikes = nftInfo.totalVotes?.against ?? nftInfo.dislike_count ?? feedCounts.dislikes ?? 0;
+  const views = resolveViewCount(nftInfo);
+  const comments = nftInfo.commentCount ?? nftInfo.comment_count ?? 0;
+  const totalTips = nftInfo.minterUser?.receivedTips ?? 0;
+  const likeRatio = likes + dislikes > 0 ? Math.round((likes / (likes + dislikes)) * 100) : 100;
+  
+  // Get creator info
+  const creatorName = nftInfo.minterDisplayName || nftInfo.mintername || truncateAddress(nftInfo.minter);
+  const creatorAvatar = buildAvatarUrl(nftInfo.minter, nftInfo.minterAvatarUrl);
+
+  return (
+    <div data-glass-page className="min-h-screen bg-black">
+      <SEOHead title={_copy("copy.f47d2472ba8f", { defaultValue: "Post #{{value1}} | Riftn", value1: nftInfo.tokenId })} description={_copy("copy.c3d7095600bf", { defaultValue: "On-chain post info for token #{{value1}} on Riftn. View mint transaction, creator wallet, and holders.", value1: nftInfo.tokenId })} url={`https://riftn.com/app/post/${postId}/info`} />
+      {/* Header */}
+      <div className="sticky top-0 z-50 px-4 pt-0 pb-3 sm:px-4 sm:pt-3 sm:pb-3">
+        <div className="flex items-center gap-3 rounded-2xl bg-black/60 backdrop-blur-[24px] backdrop-saturate-[180%] px-3 py-2">
+          <button
+            data-swipe-back onClick={() => navigate(-1)}
+            className="p-2 rounded-xl hover:bg-white/10 transition-colors"
+            aria-label={_copy("copy.6aadac2f2b7a", { defaultValue: "Go back" })}
+          >
+            <ArrowLeft className="w-5 h-5 text-white" />
+          </button>
+          <h1 className="font-bold text-white flex-1 truncate">{t('postInfo.title')}</h1>
+          {isOwner && (
+            <button
+              onClick={() => setShowEditModal(true)}
+              className="p-2 text-white/60 hover:text-white transition-colors"
+              aria-label={_copy("copy.a1933147e7c8", { defaultValue: "Edit post" })}
+            >
+              <Pencil className="w-4 h-4" />
+            </button>
+          )}
+        </div>
+      </div>
+      
+      <div>
+        <div className="p-4 space-y-6">
+          {isOwner && postId ? (
+            <Suspense fallback={null}>
+              <PostStatsPanel tokenId={postId} views={views} />
+            </Suspense>
+          ) : null}
+          {/* Transaction & Mint Info — or, for a post published off-chain, a
+              placeholder in its place. The post is real and everything social
+              about it works; only the NFT behind it does not exist yet. */}
+          {isUnminted ? (
+            <section className="bg-white/5 rounded-xl p-4 border border-white/10">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-sm font-medium text-white/60 mb-2">{t('postInfo.tokenId')}</h2>
+                  <p className="text-xl font-bold text-white">#{nftInfo.tokenId}</p>
+                </div>
+                <span className="px-2.5 py-1 text-xs font-medium rounded-lg bg-white/10 text-white/60">
+                  {t('postInfo.notMinted')}
+                </span>
+              </div>
+              <div className="border-t border-white/10 mt-4 pt-4 flex flex-col items-center text-center py-6">
+                <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center mb-3">
+                  <Coins className="w-6 h-6 text-white/40" />
+                </div>
+                <p className="text-white/60 text-sm leading-relaxed max-w-xs">
+                  {t('postInfo.mintToGenerate')}
+                </p>
+                <p className="text-white/40 text-xs mt-1.5 max-w-xs">
+                  {t('postInfo.mintDetailsLater')}
+                </p>
+                {isOwner && (
+                  <button
+                    onClick={() => setShowMintSheet(true)}
+                    disabled={isMinting}
+                    className="mt-5 px-6 py-2.5 bg-white/10 hover:bg-white/15 text-white rounded-xl text-sm font-medium transition-colors disabled:opacity-50 inline-flex items-center gap-2"
+                  >
+                    {isMinting && <Loader2 className="w-4 h-4 animate-spin" />}
+                    {t('postInfo.mintPost')}
+                  </button>
+                )}
+              </div>
+            </section>
+          ) : (
+          <section className="bg-white/5 rounded-xl p-4 border border-white/10 space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-sm font-medium text-white/60 mb-2">{t('postInfo.tokenId')}</h2>
+                <p className="text-xl font-bold text-white">#{nftInfo.tokenId}</p>
+              </div>
+              {nftInfo.status && (
+                <span className={`px-2.5 py-1 text-xs font-medium rounded-lg ${
+                  nftInfo.status === 'minted'
+                    ? 'bg-green-500/20 text-green-400'
+                    : 'bg-yellow-500/20 text-yellow-400'
+                }`}>
+                  {nftInfo.status}
+                </span>
+              )}
+            </div>
+
+            {created && (
+              <div className="border-t border-white/10 pt-4">
+                <h2 className="text-sm font-medium text-white/60 mb-2">{t('postInfo.mintedOn')}</h2>
+                <div className="space-y-1">
+                  <p className="text-white font-medium">{formatPostDate(created, i18n.language, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                  <p className="text-sm text-white/60">{formatPostDate(created, i18n.language, { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZoneName: 'short' })}</p>
+                </div>
+              </div>
+            )}
+
+            {nftInfo.mintTxHash && (
+              <div className="border-t border-white/10 pt-4">
+                <h2 className="text-sm font-medium text-white/60 mb-2">{t('postInfo.transactionHash')}</h2>
+                <div className="flex items-center gap-2">
+                  <code className="flex-1 text-sm text-white bg-white/5 p-3 rounded-lg font-mono break-all">
+                    {nftInfo.mintTxHash}
+                  </code>
+                  <button
+                    onClick={() => copyToClipboard(nftInfo.mintTxHash!)}
+                    className="p-2 text-white/60 hover:text-white transition-colors shrink-0"
+                    aria-label={_copy("copy.0223e9fac9b4", { defaultValue: "Copy transaction hash" })}
+                  >
+                    <Copy className="w-4 h-4" />
+                  </button>
+                  <a
+                    href={`${chainInfo.explorerUrl}${nftInfo.mintTxHash}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-2 text-white/60 hover:text-white transition-colors shrink-0"
+                    aria-label={_copy("copy.116044a926ba", { defaultValue: "View on {{value1}}", value1: chainInfo.explorerName })}
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                  </a>
+                </div>
+                <p className="text-xs text-white/40 mt-2">
+                  {t('postInfo.viewOnExplorer', { explorer: chainInfo.explorerName })}
+                </p>
+              </div>
+            )}
+          </section>
+          )}
+
+          {/* Live Stream Info - shown for live content */}
+          {((nftInfo as any).postType === 'live' || (nftInfo as any).isLive !== undefined) && (
+            <section className="bg-white/5 rounded-xl p-4 border border-white/10">
+              <h2 className="text-sm font-medium text-white/60 mb-3">{t('postInfo.streamInfo')}</h2>
+              <div className="flex items-center gap-3 mb-3">
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${(nftInfo as any).isLive ? 'bg-red-500/20' : 'bg-white/5'}`}>
+                  <Radio className={`w-5 h-5 ${(nftInfo as any).isLive ? 'text-red-400' : 'text-zinc-500'}`} />
+                </div>
+                <div>
+                  <p className="text-white font-medium">
+                    {(nftInfo as any).isLive ? t('postInfo.currentlyLive') : t('postInfo.streamOffline')}
+                  </p>
+                  <p className="text-xs text-white/60">
+                    {t('postInfo.totalViews', { count: (nftInfo as any).totalViews ?? nftInfo.views ?? 0 })}
+                  </p>
+                </div>
+              </div>
+            </section>
+          )}
+
+          {/* Creator Info */}
+          <section className="bg-white/5 rounded-xl p-4 border border-white/10">
+            <h2 className="text-sm font-medium text-white/60 mb-3">{t('postInfo.creator')}</h2>
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-xl bg-zinc-700 flex items-center justify-center overflow-hidden shrink-0">
+                {creatorAvatar && creatorAvatar !== '/placeholder.svg' ? (
+                  <img 
+                    src={creatorAvatar} 
+                    alt={creatorName}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.display = 'none';
+                    }}
+                  />
+                ) : (
+                  <span className="text-white font-medium">{(creatorName || '?').charAt(0).toUpperCase()}</span>
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-white font-medium truncate">{creatorName}</p>
+                <p className="text-sm font-mono text-white/60 truncate">
+                  {truncateAddress(nftInfo.minter)}
+                </p>
+              </div>
+              <button
+                onClick={() => copyToClipboard(nftInfo.minter)}
+                className="p-2 text-white/60 hover:text-white transition-colors shrink-0"
+                aria-label={_copy("copy.d7985e1a05c5", { defaultValue: "Copy creator wallet" })}
+              >
+                <Copy className="w-4 h-4" />
+              </button>
+            </div>
+          </section>
+
+          {/* Edit Post - Only shown to owner */}
+          {isOwner && (
+            <section className="bg-white/5 rounded-xl p-4 border border-white/10">
+              <button
+                onClick={() => setShowEditModal(true)}
+                className="flex items-center gap-3 w-full text-left text-white hover:text-white/80 transition-colors"
+              >
+                <Pencil className="w-4 h-4" />
+                <span className="font-medium">{t('postOptions.editPost')}</span>
+              </button>
+            </section>
+          )}
+
+          {/* Visibility Settings - Only shown to owner */}
+          {isOwner && (
+            <section className="bg-white/5 rounded-xl p-4 border border-white/10">
+              <h2 className="text-sm font-medium text-white/60 mb-3">{t('postInfo.visibility')}</h2>
+              <Select 
+                value={currentVisibility} 
+                onValueChange={(value: TokenVisibility) => handleVisibilityChange(value)}
+                disabled={visibilityMutation.isPending}
+              >
+                <SelectTrigger className="w-full bg-white/5 border-white/10 text-white">
+                  <SelectValue>
+                    <div className="flex items-center gap-2">
+                      {VISIBILITY_OPTIONS.find(opt => opt.value === currentVisibility)?.icon}
+                      <span>{t(`postInfo.${currentVisibility}`)}</span>
+                      {visibilityMutation.isPending && <Loader2 className="w-4 h-4 animate-spin ml-auto" />}
+                    </div>
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent className="bg-zinc-900 border-white/10">
+                  {VISIBILITY_OPTIONS.map((option) => (
+                    <SelectItem 
+                      key={option.value} 
+                      value={option.value}
+                      className="text-white hover:bg-white/10 focus:bg-white/10"
+                    >
+                      <div className="flex items-center gap-3">
+                        {option.icon}
+                        <div>
+                          <p className="font-medium">{t(`postInfo.${option.value}`)}</p>
+                          <p className="text-xs text-white/60">{t(`postInfo.${option.value}Desc`)}</p>
+                        </div>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </section>
+          )}
+
+          {/* Listings, offers and fraction ownership describe the on-chain
+              edition — for an unminted post the placeholder above stands in
+              for all of it. */}
+          {!isUnminted && (
+          <>
+          {/* Copies, royalties and owner extras belong to NFTs made in the
+              market's Create tab; a post's mint is its 1,000 fractions. */}
+          {(nftInfo as { nftOnly?: boolean }).nftOnly ? (
+            <CollectorPanel
+              tokenId={nftInfo.tokenId}
+              chainId={nftInfo.chainId || 8453}
+              contract={collectionFor(nftInfo.chainId || 8453)}
+            />
+          ) : null}
+
+          <FractionMarketPanel
+            tokenId={String(nftInfo.tokenId)}
+            chainId={nftInfo.chainId || 8453}
+            post={{
+              title: nftInfo.name || nftInfo.title,
+              imageUrl: fractionImageFor(nftInfo, 400) || undefined,
+              type: nftInfo.postType,
+              creatorAddress: nftInfo.minter,
+              creatorUsername: nftInfo.minterUsername || nftInfo.mintername,
+            }}
+          />
+
+          {/* Fraction Ownership */}
+          <section className="bg-white/5 rounded-xl p-4 border border-white/10">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-sm font-medium text-white/60">{t('postInfo.fractionOwnership')}</h2>
+              <span className="text-xs font-mono text-white/40">{t('postInfo.total', { count: editionSupply })}</span>
+            </div>
+            
+            {/* Distribution Progress */}
+            <div className="mb-4">
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="text-xs text-white/60">{t('postInfo.distribution')}</span>
+                <span className="text-xs font-medium text-white">
+                  {isLoadingHolders 
+                    ? <Loader2 className="w-3.5 h-3.5 animate-spin text-white/60" aria-label={t('postInfo.loading')} />
+                    : holders.length > 0 
+                      ? t('postInfo.owner', { count: holders.length })
+                      : t('postInfo.unavailable')
+                  }
+                </span>
+              </div>
+              <Progress 
+                value={holders.length > 0 ? 100 : 0} 
+                className="h-2 bg-white/10"
+              />
+            </div>
+            
+            {/* Owners List */}
+            <div className="space-y-3">
+              {isLoadingHolders ? (
+                // Loading skeletons
+                <>
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="flex items-center gap-3">
+                      <Skeleton className="w-10 h-10 rounded-md" />
+                      <div className="flex-1 space-y-1.5">
+                        <Skeleton className="h-4 w-24" />
+                        <Skeleton className="h-3 w-32" />
+                      </div>
+                    </div>
+                  ))}
+                </>
+              ) : holders.length > 0 ? (
+                // Real holders from on-chain data
+                holders.map((holder, index) => {
+                  const rank = index + 1;
+                  return (
+                    <div key={holder.address} className="flex items-center gap-3">
+                      {rank <= 3 ? (
+                        <div
+                          className="medal-shine-container w-10 h-10 shrink-0"
+                          style={{ '--medal-mask': `url(${rank === 1 ? medal1 : rank === 2 ? medal2 : medal3})` } as React.CSSProperties}
+                        >
+                          <img
+                            src={rank === 1 ? medal1 : rank === 2 ? medal2 : medal3}
+                            alt={_copy("copy.11fe66e7be8e", { defaultValue: "Rank {{value1}}", value1: rank })}
+                            className="w-10 h-10 object-contain relative"
+                          />
+                          <div
+                            className="medal-shine-overlay"
+                          />
+                        </div>
+                      ) : (
+                        <div className="w-10 h-10 rounded-xl bg-zinc-700 flex items-center justify-center shrink-0">
+                          <span className="text-sm font-bold text-white">{rank}</span>
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-white font-medium truncate font-mono text-sm">
+                          {truncateAddr(holder.address)}
+                        </p>
+                        <p className="text-xs text-white/60">
+                          {holder.balance}/{editionSupply}{_copy("copy.854cbbb4f34f", { defaultValue: " fractions (" })}{Math.round((Number(holder.balance) / editionSupply) * 100)}%)
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => copyToClipboard(holder.address)}
+                        className="p-2 text-white/60 hover:text-white transition-colors shrink-0"
+                        aria-label={_copy("copy.7614c65db3bf", { defaultValue: "Copy wallet address" })}
+                      >
+                        <Copy className="w-4 h-4" />
+                      </button>
+                    </div>
+                  );
+                })
+              ) : (
+                // A failed chain read, or no transfers in the scanned window, says
+                // nothing about who owns it, so no "creator owns 100%" row here.
+                <p className="text-xs text-white/60">{t('postInfo.ownersUnavailable')}</p>
+              )}
+            </div>
+          </section>
+          </>
+          )}
+
+          {/* Engagement Stats */}
+          <section className="bg-white/5 rounded-xl p-4 border border-white/10">
+            <h2 className="text-sm font-medium text-white/60 mb-3">{t('postInfo.engagement')}</h2>
+            <div className="grid grid-cols-2 gap-3">
+              {/* Like/Dislike Ratio */}
+              <div className="col-span-2 bg-white/5 rounded-lg p-3">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm text-white/60">{t('postInfo.likeRatio')}</span>
+                  <span className="text-lg font-bold text-white">{likeRatio}%</span>
+                </div>
+                <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-white rounded-full"
+                    style={{ width: `${likeRatio}%` }}
+                  />
+                </div>
+              </div>
+              
+              {/* Likes */}
+              <div className="bg-white/5 rounded-lg p-3 flex items-center gap-3">
+                <ThumbsUp className="w-5 h-5 text-white" />
+                <div>
+                  <p className="text-lg font-bold text-white">{formatCount(likes)}</p>
+                  <p className="text-xs text-white/60">{t('postInfo.likes')}</p>
+                </div>
+              </div>
+              
+              {/* Dislikes */}
+              <div className="bg-white/5 rounded-lg p-3 flex items-center gap-3">
+                <ThumbsDown className="w-5 h-5 text-white" />
+                <div>
+                  <p className="text-lg font-bold text-white">{formatCount(dislikes)}</p>
+                  <p className="text-xs text-white/60">{t('postInfo.dislikes')}</p>
+                </div>
+              </div>
+              
+              {/* Views */}
+              <div className="bg-white/5 rounded-lg p-3 flex items-center gap-3">
+                <Eye className="w-5 h-5 text-white" />
+                <div>
+                  <p className="text-lg font-bold text-white">{formatCount(views)}</p>
+                  <p className="text-xs text-white/60">{t('postInfo.views')}</p>
+                </div>
+              </div>
+              
+              {/* Comments */}
+              <div className="bg-white/5 rounded-lg p-3 flex items-center gap-3">
+                <MessageSquare className="w-5 h-5 text-white" />
+                <div>
+                  <p className="text-lg font-bold text-white">{formatCount(comments)}</p>
+                  <p className="text-xs text-white/60">{t('postInfo.comments')}</p>
+                </div>
+              </div>
+
+              {/* Tips on this Post */}
+              <div className="col-span-2 bg-white/5 rounded-lg p-3 flex items-center gap-3">
+                <img src={dehubCoin} alt={tokenLabel()} className="w-5 h-5" />
+                <div>
+                  <p className="text-lg font-bold text-white">{postTipTotal.toLocaleString()}</p>
+                  <p className="text-xs text-white/60">{t('postInfo.tipsOnPost')}</p>
+                </div>
+              </div>
+
+              {/* Total Tips */}
+              <div className="col-span-2 bg-white/5 rounded-lg p-3 flex items-center gap-3">
+                <img src={dehubCoin} alt={tokenLabel()} className="w-5 h-5" />
+                <div>
+                  <p className="text-lg font-bold text-white">{totalTips.toLocaleString()}</p>
+                  <p className="text-xs text-white/60">{t('postInfo.totalTipsCreator')}</p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* Who reacted - only the author gets person rows */}
+          {isOwner && nftInfo.tokenId != null && <PostReactorsSection tokenId={nftInfo.tokenId} />}
+
+          {/* PPV Sales Info - shown for PPV content */}
+          {isPPV && (
+            <section className="bg-white/5 rounded-xl p-4 border border-white/10">
+              <h2 className="text-sm font-medium text-white/60 mb-3">{t('postInfo.payPerView')}</h2>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="bg-white/5 rounded-lg p-3 flex items-center gap-3">
+                  <Ticket className="w-5 h-5 text-white" />
+                  <div>
+                    <p className="text-lg font-bold text-white">{formatCount(ppvPurchaseCount ?? 0)}</p>
+                    <p className="text-xs text-white/60">{t('postInfo.ppvSales')}</p>
+                  </div>
+                </div>
+                {ppvPrice && (
+                  <div className="bg-white/5 rounded-lg p-3 flex items-center gap-3">
+                    <Lock className="w-5 h-5 text-white" />
+                    <div>
+                      <p className="text-lg font-bold text-white"><DhbAmount amount={ppvPrice} currency={ppvCurrency} /></p>
+                      <p className="text-xs text-white/60">{t('postInfo.price')}</p>
+                    </div>
+                  </div>
+                )}
+                {ppvPrice && (
+                  <div className="col-span-2 bg-primary/10 rounded-lg p-3 flex items-center gap-3 border border-primary/20">
+                    <img src={dehubCoin} alt={tokenLabel()} className="w-6 h-6" />
+                    <div>
+                      <p className="text-lg font-bold text-white">
+                        <DhbAmount amount={((ppvPurchaseCount ?? 0) * Number(ppvPrice)).toLocaleString()} currency={ppvCurrency} />
+                      </p>
+                      <p className="text-xs text-white/60">{t('postInfo.totalRevenue')}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </section>
+          )}
+
+          {(nftInfo.name || nftInfo.description) && (
+            <section className="bg-white/5 rounded-xl p-4 border border-white/10">
+              <h2 className="text-sm font-medium text-white/60 mb-3">{t('postInfo.content')}</h2>
+              {nftInfo.name && (
+                <p className="text-white font-medium mb-2">{nftInfo.name}</p>
+              )}
+              {nftInfo.description && (
+                <p className="text-sm text-white/70">{nftInfo.description}</p>
+              )}
+              {nftInfo.tokenId != null && <PostEditHistoryLine tokenId={nftInfo.tokenId} />}
+            </section>
+          )}
+
+          {/* Categories */}
+          {(() => {
+            const categories = Array.isArray(nftInfo.category) 
+              ? nftInfo.category 
+              : nftInfo.category ? [nftInfo.category] : [];
+            if (categories.length === 0) return null;
+            return (
+              <section className="bg-white/5 rounded-xl p-4 border border-white/10">
+                <h2 className="text-sm font-medium text-white/60 mb-3 flex items-center gap-2">
+                  <Hash className="w-4 h-4" />
+                  {t('postInfo.categories')}
+                </h2>
+                <div className="flex flex-wrap gap-2">
+                  {categories.map((cat) => (
+                    <span key={cat} className="px-3 py-1.5 bg-white/10 rounded-lg text-sm text-white">
+                      {cat}
+                    </span>
+                  ))}
+                </div>
+              </section>
+            );
+          })()}
+
+          {/* Video transcript */}
+          {nftInfo.videoUrl && nftInfo.tokenId && (
+            <TranscriptSection
+              tokenId={Number(nftInfo.tokenId)}
+              durationSeconds={nftInfo.videoDuration}
+              // This page has no player, so a chapter or a line's timestamp
+              // opens the post at that moment instead.
+              onSeek={(seconds) => navigate(`/app/post/${postId}?t=${Math.floor(seconds)}`)}
+            />
+          )}
+
+        </div>
+      </div>
+
+      {isOwner && isUnminted && (
+        <MintChainSheet
+          open={showMintSheet}
+          onOpenChange={setShowMintSheet}
+          defaultChainId={nftInfo.chainId}
+          isMinting={isMinting}
+          hideEdition={!(nftInfo as { nftOnly?: boolean }).nftOnly}
+          onConfirm={handleMintNow}
+        />
+      )}
+
+      {/* Edit Post Modal */}
+      {isOwner && nftInfo && (
+        <EditPostModal
+          open={showEditModal}
+          onOpenChange={setShowEditModal}
+          tokenId={nftInfo.tokenId}
+          canReplaceVideo={nftInfo.postType === 'video'}
+          currentTitle={nftInfo.title || nftInfo.name || ''}
+          currentDescription={nftInfo.description || ''}
+          currentCategories={Array.isArray(nftInfo.category) ? nftInfo.category : nftInfo.category ? [nftInfo.category] : []}
+          currentContentRating={nftInfo.contentRating}
+          currentSpoilerText={nftInfo.spoilerText}
+          currentQuotePolicy={nftInfo.quotePolicy}
+          currentReplyPolicy={nftInfo.replyPolicy}
+          currentVisibility={(nftInfo as any).justMe ? 'self' : (nftInfo as any).visibility}
+          currentForKids={nftInfo.forKids}
+          currentShopLinks={(nftInfo as any).shopLinks}
+          onSuccess={(edited) => {
+            applyOptimisticEdit(queryClient, nftInfo.tokenId, edited);
+            queryClient.invalidateQueries({ queryKey: ['post-edit-history', String(nftInfo.tokenId)] });
+          }}
+        />
+      )}
+    </div>
+  );
+}

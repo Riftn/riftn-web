@@ -1,0 +1,999 @@
+import PenSquare from "@/components/ui/cut-icons/edit";
+import LogIn from "@/components/ui/cut-icons/sign-in";
+import CornerDownLeft from "@/components/ui/cut-icons/reply";
+import { useTranslation as _useCopy } from 'react-i18next';
+import { useSessionText } from '@/hooks/use-session-text';
+import React, { Suspense, lazy, useState, useRef, useEffect, useLayoutEffect, useCallback, useMemo } from 'react';
+import { useLocation, useNavigate, NavLink } from 'react-router-dom';
+import { isHomePath } from '@/lib/home-path';
+import { useTranslation } from 'react-i18next';
+import { motion } from 'framer-motion';
+
+import AssistantNavIcon from "@/components/ui/AssistantNavIcon";
+import LogOut from "@/components/ui/cut-icons/sign-out";
+
+import Menu from "@/components/ui/cut-icons/menu";
+import Search from "@/components/ui/cut-icons/search";
+import X from "@/components/ui/cut-icons/close";
+
+import { NAV_ITEMS } from '@/constants/app.constants';
+import type { NavItem } from '@/types/app.types';
+import { SidebarNavItem } from './SidebarNavItem';
+import { filterNavItems, exploreSearchHref } from './nav-search';
+import { navItemId } from './nav-item-id';
+import { applyNavOrder } from '@/lib/nav-order';
+import { useNavOrderEditor } from '@/hooks/use-nav-order';
+import { useDragReorder } from '@/hooks/use-drag-reorder';
+import { canManageAgents } from '@/lib/agent-access';
+import { useSearchHistory } from '@/hooks/use-search-history';
+import { useKidsModeLock } from '@/hooks/use-kids-mode';
+import { WarLogo } from '@/components/app/war/WarLogoLazy';
+import { CoinBalanceMenu } from '../CoinBalanceMenu';
+import { AuthPrompt } from '../AuthPrompt';
+import { useAuth } from '@/contexts/AuthContext';
+import { isOwnProfilePath } from '@/lib/own-profile-path';
+import { openStageModal } from '@/contexts/StageContext';
+import { useAppTheme } from '@/contexts/ThemeContext';
+
+import { useUnreadNotificationCount } from '@/hooks/use-notifications';
+import { useSelfBadge } from '@/hooks/use-self-badge-balance';
+import { useCustomUnreadCount } from '@/hooks/use-custom-notifications';
+import { useDmUnreadCount as useTotalUnreadCount } from '@/lib/dm-unread-store';
+import { usePublicChatUnreadCount } from '@/hooks/use-public-chat-unread';
+import dehubLogoCompact from '@/assets/dehub-logo-compact.png';
+// Derived from public/brand/mark-black.png, which stays full-resolution because
+// the docs Brand Assets page serves it as a download. The rail renders the mark
+// at 22x22, so pointing at the download asset shipped a 1920x1645 / 146 KB PNG
+// into a 22px box — and, being outside /assets/, without a long cache header.
+import dehubMarkBlack from '@/assets/dehub-mark-black.png';
+import riftnWordmarkWhite from '@/assets/riftn-wordmark-desktop-white.png';
+import riftnWordmarkInk from '@/assets/riftn-wordmark-desktop-ink.png';
+import { cn } from '@/lib/utils';
+import { preloadRoute } from '@/lib/route-preload';
+import { warmPostComposer } from '@/lib/preload-post-composer';
+import { buildAvatarUrl } from '@/lib/media-url';
+import { useSidebarCollapse } from '@/contexts/SidebarCollapseContext';
+import { leftRailVariants } from '@/lib/surface-motion';
+import { scrollDocumentToSmooth } from '@/lib/document-scroll';
+import { warmLoginSheet } from '@/components/app/LoginModal';
+
+// Loaded on first empty search: it pulls in the Requests board's submit code.
+const SearchRequestPrompt = lazy(() => import('./SearchRequestPrompt').then((m) => ({ default: m.SearchRequestPrompt })));
+
+/**
+ * Terminates the rail's nav list. Deliberately NOT in NAV_ITEMS: that array is
+ * shared with the mobile drawer, which already ends in its own log-out control,
+ * and it is ordered — anything appended there later would land underneath this.
+ * Rendered after the map instead, so "last" is structural rather than a position
+ * in a list somebody else maintains.
+ *
+ * `action` is what makes SidebarNavItem render a button rather than a NavLink;
+ * the value is only a discriminator, since the handler is passed in.
+ */
+const LOGOUT_ITEM: NavItem = { icon: LogOut, label: "Log out", path: '', action: 'logout' };
+
+/**
+ * Expanded desktop wordmark: the Riftn mark, still. Same 135x40.6 slot the old
+ * DeHub/Riftn animation used, so nothing around it moves. Light themes get
+ * the ink version instead of an inverted white one.
+ */
+function RiftnWordmark({ light = false }: { light?: boolean }) {
+  return (
+    <span className="inline-block relative w-[135px] h-[40.6px] -top-[3px]">
+      <img
+        src={light ? riftnWordmarkInk : riftnWordmarkWhite}
+        alt="Riftn"
+        width={135}
+        height={45}
+        className="absolute left-0 -top-[2.2px] h-[45px] w-[135px] max-w-none pointer-events-none"
+        data-logo-ink={light || undefined}
+        fetchPriority="high"
+        decoding="async"
+      />
+    </span>
+  );
+}
+
+interface DesktopSidebarProps {
+  onSignOut: () => void;
+  onPostClick: () => void;
+}
+
+export function DesktopSidebar({ onPostClick, onSignOut }: DesktopSidebarProps) {
+  const { t: _copy } = _useCopy();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { t } = useTranslation();
+  const { isAuthenticated, user, walletAddress, connect, isConnecting, needsSignature } = useAuth();
+
+  
+  const { isCollapsed, toggleCollapse } = useSidebarCollapse();
+  const { theme, themeChoice } = useAppTheme();
+  const isLightTheme = (theme === 'light' || themeChoice === 'system-light');
+  const isWarTheme = theme === 'war';
+  const isMinimal = theme === 'minimal';
+  const desktopNavTextColor = isLightTheme ? 'text-black' : 'text-white';
+  const [showAuthPrompt, setShowAuthPrompt] = useState(false);
+  const { data: unreadCount } = useUnreadNotificationCount();
+  const { data: customUnread } = useCustomUnreadCount();
+  const totalNotifUnread = (unreadCount?.total ?? 0) + (customUnread ?? 0);
+  const dmUnread = useTotalUnreadCount();
+  const messagesUnread = dmUnread + usePublicChatUnreadCount();
+
+  // Desktop sidebar active item overlay indicator refs/state
+  const sidePanelRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [activeItemEl, setActiveItemEl] = useState<HTMLElement | null>(null);
+  const [indicatorRect, setIndicatorRect] = useState({ x: 0, y: 0, width: 0, height: 0, ready: false });
+  const [renderCompactLogo, setRenderCompactLogo] = useState(isCollapsed);
+  const logoRevealTimerRef = useRef<number | null>(null);
+
+  // Menu search. Always shown on the open rail; on the collapsed rail it stays
+  // out of the way until the list is scrolled.
+  const [navQuery, setNavQuery] = useSessionText("desktop-nav-search");
+  const [navScrolled, setNavScrolled] = useState(false);
+  const [navAtBottom, setNavAtBottom] = useState(false);
+  const [searchFocused, setSearchFocused] = useState(false);
+  const [bottomSearchFocused, setBottomSearchFocused] = useState(false);
+  // Which field the query was typed into. Without it a non-empty query pins
+  // both fields open at once.
+  const [queryOwner, setQueryOwner] = useState<'top' | 'bottom'>('top');
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const bottomSearchInputRef = useRef<HTMLInputElement>(null);
+  const { addToHistory } = useSearchHistory();
+
+  // `navQuery` and `searchFocused` are not polish here, they are required:
+  // filtering shortens the list, which drops the scroll container back to
+  // scrollTop 0, which would retract the field mid-keystroke and restore the
+  // full list — and then scrollTop is still 0, so it would sit there flickering.
+  // Once the field has content or focus it stays regardless of scroll.
+  // Open rail: the field is always on top of the list. Hiding it until the
+  // list was scrolled meant people scrolled a long way and never found it
+  // (Requests f077714c). The collapsed rail keeps the scroll reveal.
+  const showSearch = !isCollapsed || (navScrolled && !navAtBottom) || searchFocused || (navQuery !== '' && queryOwner === 'top');
+  // Mirror of the top field, revealed once the list bottoms out. Only on the
+  // collapsed rail now: the open rail already shows the top field.
+  const showBottomSearch = (isCollapsed && navAtBottom) || bottomSearchFocused || (navQuery !== '' && queryOwner === 'bottom');
+
+  // Measured in the list's own content coordinates (offsetLeft/offsetTop
+  // against the scroll container), not in viewport coordinates. The indicator
+  // renders inside the scroller, so content coordinates make it ride with its
+  // row for free — nothing to recompute per frame, nothing to lag behind.
+  // Viewport coordinates re-targeted the spring on every scroll event, so the
+  // glass slid off its row under the wheel and sprang back onto it afterwards.
+  const updateIndicator = useCallback(() => {
+    const scroller = scrollRef.current;
+    const active = activeItemEl;
+    if (!scroller || !active) return;
+    // Summed up the offsetParent chain to the scroller: a row being dragged
+    // or gliding carries a transform, which makes it the offsetParent of the
+    // item inside it, and its own offsets are its resting slot either way.
+    let x = 0;
+    let y = 0;
+    let node: HTMLElement | null = active;
+    while (node && node !== scroller && scroller.contains(node)) {
+      x += node.offsetLeft;
+      y += node.offsetTop;
+      node = node.offsetParent as HTMLElement | null;
+    }
+    if (node !== scroller) {
+      x = active.offsetLeft;
+      y = active.offsetTop;
+    }
+    setIndicatorRect((prev) => {
+      const next = {
+        x,
+        y,
+        width: active.offsetWidth,
+        height: active.offsetHeight,
+        ready: true,
+      };
+      if (prev.ready && prev.x === next.x && prev.y === next.y && prev.width === next.width && prev.height === next.height) {
+        return prev;
+      }
+      return next;
+    });
+  }, [activeItemEl]);
+
+  // navQuery/isAuthenticated: filtering the list, or gaining/losing the
+  // signed-in rows, moves the active row without resizing it or the container,
+  // so neither the ResizeObserver below nor the scroll handler would notice.
+  //
+  // A layout effect, not a passive one: the glass has to land on the new row in
+  // the same paint that makes the row active. A passive effect ran after the
+  // page had painted, and with a heavy page mounting that could be most of a
+  // second later, so the old row kept the white-rimmed glass while the new row
+  // was already bold.
+  useLayoutEffect(() => { updateIndicator(); }, [updateIndicator, isCollapsed, navQuery, isAuthenticated]);
+
+  // Collapse/expand runs as 500ms CSS transitions (aside width/padding, the
+  // layout row's max-width), so the one-shot measurement above captures
+  // mid-transition geometry and goes stale once the transition settles —
+  // leaving the indicator the wrong width, or overhanging the panel's
+  // overflow clip so its right wall disappears. Re-measure on every frame
+  // of any panel/item size change, whatever caused it (collapse transitions,
+  // theme padding swaps, logo-swap reflows).
+  useEffect(() => {
+    if (typeof ResizeObserver === 'undefined') return;
+    const observer = new ResizeObserver(() => updateIndicator());
+    const panel = sidePanelRef.current;
+    if (panel) observer.observe(panel);
+    if (activeItemEl) observer.observe(activeItemEl);
+    // The scroll container too: it is what the offsets are measured against,
+    // and its width drives every row's width in stretch mode.
+    if (scrollRef.current) observer.observe(scrollRef.current);
+    return () => observer.disconnect();
+  }, [activeItemEl, updateIndicator]);
+
+  useEffect(() => {
+    if (logoRevealTimerRef.current !== null) {
+      window.clearTimeout(logoRevealTimerRef.current);
+      logoRevealTimerRef.current = null;
+    }
+
+    if (isCollapsed) {
+      setRenderCompactLogo(true);
+      return;
+    }
+
+    logoRevealTimerRef.current = window.setTimeout(() => {
+      setRenderCompactLogo(false);
+      logoRevealTimerRef.current = null;
+    }, 500);
+
+    return () => {
+      if (logoRevealTimerRef.current !== null) {
+        window.clearTimeout(logoRevealTimerRef.current);
+        logoRevealTimerRef.current = null;
+      }
+    };
+  }, [isCollapsed]);
+
+  useEffect(() => {
+    window.addEventListener('resize', updateIndicator);
+    return () => window.removeEventListener('resize', updateIndicator);
+  }, [updateIndicator]);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const handleScroll = () => {
+      // No indicator re-measure here: its position is a content coordinate, so
+      // scrolling the list moves it and the row it sits on by the same amount.
+      // Same 8px threshold the mobile header uses, so a stray wheel tick or a
+      // rubber-band does not flick the field in and out.
+      setNavScrolled(el.scrollTop > 8);
+      // Only when the list actually overflows — a filtered list short enough to
+      // fit is trivially "at the bottom" and would reveal both fields at once.
+      const overflow = el.scrollHeight - el.clientHeight;
+      setNavAtBottom(overflow > 8 && el.scrollTop >= overflow - 8);
+    };
+    handleScroll();
+    el.addEventListener('scroll', handleScroll, { passive: true });
+    return () => el.removeEventListener('scroll', handleScroll);
+  }, [navQuery, isCollapsed, isAuthenticated]);
+
+  // A route change re-renders the rail with a different active row; leaving a
+  // stale filter applied would hide the page the user just landed on.
+  useEffect(() => { setNavQuery.initialize(''); }, [location.pathname, setNavQuery]);
+
+  // Collapsing hides both the field and the hand-off row (there is no room for
+  // either at 60px), so a query left behind would filter the rail down to a few
+  // icons with nothing on screen explaining why.
+  useEffect(() => { setNavQuery.initialize(''); }, [isCollapsed, setNavQuery]);
+
+  // Preload both logo variants so collapse/expand swaps are instant
+  useEffect(() => {
+    [dehubLogoCompact, dehubMarkBlack, riftnWordmarkWhite, riftnWordmarkInk].forEach((src) => {
+      const img = new Image();
+      img.decoding = 'async';
+      img.src = src;
+    });
+  }, []);
+
+  // The whole DHB position — held plus staked, across both chains. Was
+  // hardcoded to 0, so the coin in the sidebar read 0 for everyone.
+  // SelfBadgeSync owns the fetch and this observer only reads its answer, so
+  // it costs no request; it is also what the badge beside the user's own name
+  // is drawn from, which keeps the two agreeing.
+  const coinBalance = useSelfBadge().balance ?? 0;
+
+  const handleCoinClick = () => {
+    if (!isAuthenticated) {
+      setShowAuthPrompt(true);
+      return false;
+    }
+    return true;
+  };
+
+  const handleLogoClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (isHomePath(location.pathname)) {
+      scrollDocumentToSmooth();
+    } else {
+      navigate('/app');
+    }
+  };
+
+  const handleToggleCollapse = () => {
+    if (!isCollapsed) {
+      setRenderCompactLogo(true);
+    }
+    toggleCollapse();
+  };
+
+  const handlePostClick = async () => {
+    if (!isAuthenticated) {
+      try {
+        await connect();
+      } catch {
+        // Error is already toasted in AuthContext
+      }
+      return;
+    }
+    onPostClick();
+  };
+
+  const handleProfileClick = (e: React.MouseEvent) => {
+    if (!isAuthenticated) {
+      e.preventDefault();
+      setShowAuthPrompt(true);
+      return;
+    }
+  };
+
+  // Hover / touch-start on the logged-out CTA warms the login sheet — its
+  // first-open mount dance and body chunk land in the hover gap, so the tap
+  // itself starts the slide-up on the same frame.
+  const warmSheetForLogin = () => {
+    if (!isAuthenticated) warmLoginSheet();
+    else warmPostComposer();
+  };
+
+  // The rail's own running order. Home is pinned to the top wherever it sits in
+  // NAV_ITEMS (it is first in the list now, but the rail keeps owning that), and
+  // Assistant is placed directly after Communities because it renders as its own
+  // NavLink rather than a SidebarNavItem.
+  //
+  // Assistant used to be injected inside Communities' render fragment. That is
+  // fine for a fixed list and wrong for a filtered one: searching "assistant"
+  // filters Communities out, and the Assistant link would have gone with it.
+  // Keeping it as a real entry in one ordered array is what makes it findable.
+  const railItems = useMemo(() => {
+    const home = NAV_ITEMS.find((item) => item.path === '/app');
+    const rest = NAV_ITEMS.filter((item) => item.path !== '/app' && item.label !== 'Assistant');
+    const assistant = NAV_ITEMS.find((item) => item.label === 'Assistant');
+    const ordered = home ? [home, ...rest] : [...rest];
+    if (assistant) {
+      const afterCommunities = ordered.findIndex((item) => item.label === 'Communities');
+      ordered.splice(afterCommunities >= 0 ? afterCommunities + 1 : ordered.length, 0, assistant);
+    }
+    return ordered;
+  }, []);
+  const defaultRailIds = useMemo(() => railItems.map(navItemId), [railItems]);
+  // The person's own order, dragged into place (hooks/use-drag-reorder).
+  const { order: savedRailOrder, customised: railCustomised, save: saveRailOrder, reset: resetRailOrder } =
+    useNavOrderEditor('rail', defaultRailIds);
+  const orderedRailItems = useMemo(
+    () => applyNavOrder(railItems, savedRailOrder, navItemId),
+    [railItems, savedRailOrder],
+  );
+
+  // `isKidsMode` is in the deps because `filterNavItems` reads the lock
+  // directly rather than taking it as an argument — without it here the rail
+  // keeps its adult destinations until the query or the language changes,
+  // which is to say until long after the parent armed Kids Mode.
+  const isKidsMode = useKidsModeLock();
+  const visibleRailItems = useMemo(
+    () => filterNavItems(orderedRailItems, isCollapsed ? '' : navQuery, t, canManageAgents(walletAddress)),
+    [orderedRailItems, navQuery, isCollapsed, t, isKidsMode, walletAddress],
+  );
+  const railSearching = !isCollapsed && !!navQuery.trim();
+  const railIds = useMemo(() => visibleRailItems.map(navItemId), [visibleRailItems]);
+  const onRailCommit = useCallback((next: string[]) => saveRailOrder(next), [saveRailOrder]);
+  const { order: liveRailOrder, animateNextChange: animateRail, itemProps: railDragProps } = useDragReorder({
+    ids: railIds,
+    onCommit: onRailCommit,
+    disabled: railSearching,
+    // A wide row reads as lifted at a much smaller scale than an icon.
+    liftScale: 1.02,
+  });
+  const onRailReset = useCallback(() => { animateRail(); resetRailOrder(); }, [animateRail, resetRailOrder]);
+  // A reorder moves the active row without resizing anything, so the
+  // ResizeObserver above wouldn't re-place the glass on its own. Placed on the
+  // active row's new slot straight away, so the glass glides there with it.
+  useEffect(() => {
+    const frame = requestAnimationFrame(updateIndicator);
+    return () => cancelAnimationFrame(frame);
+  }, [updateIndicator, liveRailOrder]);
+  // The lifted row needs its own fill, or the rows it passes show through it.
+  const railLiftClass = cn(
+    'rounded-2xl',
+    isLightTheme
+      ? 'data-[reorder-dragging=true]:bg-white data-[reorder-dragging=true]:shadow-[0_10px_24px_rgba(0,0,0,0.18)]'
+      : 'data-[reorder-dragging=true]:bg-zinc-900 data-[reorder-dragging=true]:shadow-[0_10px_24px_rgba(0,0,0,0.55)]',
+  );
+  const railById = useMemo(() => new Map(visibleRailItems.map((item) => [navItemId(item), item])), [visibleRailItems]);
+  const railRows = useMemo(
+    () => liveRailOrder.map((id) => railById.get(id)).filter((item): item is NavItem => !!item),
+    [liveRailOrder, railById],
+  );
+  // The router renders a new page inside a transition, so location.pathname
+  // only changes once that page is ready (up to half a second on a cold page).
+  // The address bar changes on the click itself, so the rail follows that
+  // straight away and the clicked row lights up at once instead of the old row
+  // staying lit until the page arrives. Dropped as soon as the router catches up.
+  const [clickedPath, setClickedPath] = useState<string | null>(null);
+  useLayoutEffect(() => { setClickedPath(null); }, [location.pathname]);
+  const onRailClickCapture = useCallback(() => {
+    // After the click has run its handlers, which is when the address changed.
+    window.setTimeout(() => {
+      const path = window.location.pathname;
+      setClickedPath((prev) => (prev === path ? prev : path));
+    }, 0);
+  }, []);
+  const activePath = clickedPath ?? location.pathname;
+  const isAIActive = activePath === '/app/assistant';
+
+  const runFullSearch = useCallback(() => {
+    const query = navQuery.trim();
+    if (!query) return;
+    addToHistory(query);
+    navigate(exploreSearchHref(query));
+    setNavQuery.complete(navQuery, '');
+    searchInputRef.current?.blur();
+    bottomSearchInputRef.current?.blur();
+  }, [navQuery, addToHistory, navigate, setNavQuery]);
+
+  const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      runFullSearch();
+      return;
+    }
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      if (navQuery) setNavQuery.clear();
+      else (e.currentTarget as HTMLInputElement).blur();
+    }
+  };
+
+  // Collapsed, the field is a 36px chip the size of a nav icon — there is no
+  // room for an input. Tapping it opens the rail and lands the caret in the
+  // field that has just appeared.
+  const handleCollapsedSearchClick = () => {
+    handleToggleCollapse();
+    window.setTimeout(() => searchInputRef.current?.focus(), 80);
+  };
+
+  // Get user display info for avatar
+  const displayName = user?.displayName || user?.username || _copy("copy.e7a8aa2df7e5", { defaultValue: "Anonymous" });
+  const userAvatarUrl = user?.avatarImageUrl && user?.address
+    ? buildAvatarUrl(user.address, user.avatarImageUrl)
+    : null;
+
+  return (
+    <>
+      {/* motion.aside inherits the surface transition label (center/exit/enter)
+          from SurfaceTransition — this is the left rail that slides OFF to the
+          left when opening docs and slides back IN when returning. Desktop-only
+          (`hidden lg:flex`), so the x-transform never affects mobile. */}
+      <motion.aside
+        data-desktop-left-rail
+        variants={leftRailVariants}
+        className={cn(
+        // items-stretch in BOTH modes: the nav bento and the post/login button
+        // below it must be exactly as wide as this rail's content box, so they
+        // line up on every theme. Under items-center the bento was shrink-to-fit
+        // instead, which made its width depend on its own inner padding — and
+        // light/minimal strip that padding from [data-side-panel] (index.css),
+        // so collapsed it measured 36px there vs 44px everywhere else.
+        "hidden lg:flex sticky top-0 h-screen px-2 pb-2 flex-col overflow-hidden items-stretch transition-[width,padding] duration-500 ease-in-out motion-reduce:transition-none z-0 isolate will-change-[width]",
+        isCollapsed ? "w-[68px] pt-[16.5px]" : "w-[68px] pt-[2px] lg:w-[231px] lg:px-[18px] lg:pt-0 lg:-mt-[3px]"
+      )}>
+        {/* Logo & Coin Balance */}
+        <div className={cn("relative z-10 flex items-center justify-between w-full", isCollapsed ? "mb-[14px]" : "mb-[14px] lg:mb-[15px]")}>
+          <div className={cn("flex items-center", isCollapsed ? "mt-[0.5px] mx-auto" : "mt-[9px] mx-auto lg:mx-0")}>
+            <button
+              onPointerDown={() => {
+                if (!isCollapsed) setRenderCompactLogo(true);
+              }}
+              onClick={handleToggleCollapse}
+              className={cn(
+                "flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-lg transition-colors relative -top-[1.5px]",
+                isLightTheme ? "hover:bg-zinc-200" : "hover:bg-zinc-800",
+                isCollapsed ? "hidden" : "hidden lg:flex mr-1.5"
+              )}
+              aria-label={_copy("copy.041aefc44394", { defaultValue: "Toggle sidebar" })}
+            >
+              <Menu className="w-[18px] h-[18px] text-zinc-400" />
+            </button>
+            <button
+              onClick={handleLogoClick}
+              data-glass-bare-action
+              className={cn(
+                "cursor-pointer flex items-center justify-center",
+                renderCompactLogo ? "overflow-hidden" : "overflow-visible",
+                // Compact width HUGS the 22px mark rather than padding it to 28.
+                // The row is mx-auto inside the rail's 44px content box, and
+                // margin:auto silently resolves to 0 the moment the row is wider
+                // than that — so the old 28 + 4 + 20 = 52px row could not centre
+                // and ran off to the right instead, putting the toggle outside
+                // the nav panel's column entirely. 22 + 4 + 18 = 44 fits exactly,
+                // so the pair sits on the panel's own centre line.
+                renderCompactLogo ? "w-[24px] h-[24px]" : "w-[135px] h-[42px]"
+              )}
+            >
+              {!renderCompactLogo ? <RiftnWordmark light={isLightTheme} /> : isWarTheme ? (
+                <>
+                  <WarLogo
+                    src={dehubLogoCompact}
+                    alt="Riftn"
+                    className={cn("h-[20px] w-[24px] object-contain", !renderCompactLogo && "hidden")}
+                  />
+                  <WarLogo
+                    src={riftnWordmarkWhite}
+                    alt="Riftn"
+                    className={cn("h-[40.6px] w-[135px] relative -top-[3px]", renderCompactLogo && "hidden")}
+                  />
+                </>
+              ) : (
+                <>
+                  <img
+                    src={isLightTheme ? dehubMarkBlack : dehubLogoCompact}
+                    data-logo-ink={isLightTheme || undefined}
+                    alt="Riftn"
+                    className={cn("h-[20px] w-[24px] object-contain", !renderCompactLogo && "hidden")}
+                    decoding="async"
+                  />
+                  <img
+                    src={riftnWordmarkWhite}
+                    alt="Riftn"
+                    className={cn("h-[40.6px] w-[135px] object-contain relative -top-[3px]", renderCompactLogo && "hidden")}
+                    fetchPriority="high"
+                    decoding="async"
+                    onError={() => setRenderCompactLogo(true)}
+                  />
+                </>
+              )}
+            </button>
+            {isCollapsed && (
+              <button
+                onClick={handleToggleCollapse}
+                className={cn(
+                  // 18px, not 20: see the compact-logo comment above — the row
+                  // has to land on exactly 44px to centre inside the rail, and
+                  // 18 keeps the gap to the mark at 6px instead of 10 without
+                  // shrinking the hit area any further than it has to.
+                  "flex-shrink-0 w-[18px] h-[18px] ml-1 flex items-center justify-center rounded-md transition-colors",
+                  isLightTheme ? "hover:bg-zinc-200" : "hover:bg-zinc-800"
+                )}
+                aria-label={_copy("copy.37a5d6485e10", { defaultValue: "Expand sidebar" })}
+              >
+                <Menu className="w-[14px] h-[14px] text-zinc-400" />
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Navigation Bento - scrollable */}
+        {/* data-rail-collapsed is a STYLING hook, not state the component reads.
+            The glass themes give this panel an ambient 0 8px 32px halo that
+            blurs ~16px past its own top edge. Expanded that is exactly right —
+            the 40px wordmark sits well clear of it and the lift reads well.
+            Collapsed, the rail parks a 22px brand mark and a 14px toggle only
+            6.5px above the panel, so both land in the wash with the panel's
+            bright glass rim right underneath and stop being legible. The hook
+            lets index.css drop the cast for the collapsed rail only. */}
+        <motion.div ref={sidePanelRef} data-side-panel data-sidebar-glass-surface data-rail-collapsed={isCollapsed ? 'true' : undefined} layoutRoot className="relative -mt-[9px] bg-zinc-900 rounded-2xl flex-1 min-h-0 overflow-hidden flex flex-col">
+          <div data-sidebar-glass-backdrop aria-hidden="true" />
+          {/* Menu search — revealed by scrolling the list, retracted when it
+              returns to the top. Animated through grid-template-rows so the
+              row's own height decides the travel; no hardcoded pixel value to
+              drift when a theme changes the field's padding. */}
+          <div
+            className={cn(
+              "relative z-10 grid transition-[grid-template-rows,opacity] duration-200 ease-out motion-reduce:transition-none",
+              showSearch ? "opacity-100" : "opacity-0 pointer-events-none"
+            )}
+            style={{ gridTemplateRows: showSearch ? '1fr' : '0fr' }}
+            aria-hidden={!showSearch}
+          >
+            <div className="overflow-hidden">
+              <div data-sidebar-search-inset className={cn(isCollapsed ? "p-2 pb-0" : "p-1 pb-0 lg:px-2.5 lg:pt-2.5")}>
+                {isCollapsed ? (
+                  <button
+                    type="button"
+                    onClick={handleCollapsedSearchClick}
+                    tabIndex={showSearch ? 0 : -1}
+                    aria-label={t('sidebar.searchMenu')}
+                    className={cn(
+                      "w-9 h-9 mx-auto rounded-xl flex items-center justify-center transition-colors",
+                      isLightTheme
+                        ? "bg-black/5 border border-black/10 hover:bg-black/10"
+                        : "bg-white/5 border border-white/10 hover:bg-white/10"
+                    )}
+                  >
+                    <Search className="w-[18px] h-[18px] text-zinc-400" />
+                  </button>
+                ) : (
+                  <div className="relative">
+                    <Search className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                    <input
+                      ref={searchInputRef}
+                      type="text"
+                      value={navQuery}
+                      onChange={(e) => setNavQuery(e.target.value)}
+                      onFocus={() => { setSearchFocused(true); setQueryOwner('top'); }}
+                      onBlur={() => setSearchFocused(false)}
+                      onKeyDown={handleSearchKeyDown}
+                      tabIndex={showSearch ? 0 : -1}
+                      placeholder={t('sidebar.searchMenu')}
+                      data-search-surface
+                      aria-label={t('sidebar.searchMenu')}
+                      className={cn(
+                        "w-full h-[38px] pl-9 pr-8 rounded-xl text-[14px] [@media(any-pointer:coarse)]:text-[16px] outline-none transition-colors",
+                        desktopNavTextColor,
+                        isLightTheme
+                          ? "bg-black/5 border border-black/10 placeholder:text-zinc-500 focus:border-black/25"
+                          : "bg-white/5 border border-white/10 placeholder:text-zinc-500 focus:border-white/30"
+                      )}
+                    />
+                    {navQuery && (
+                      <button
+                        type="button"
+                          onClick={() => { setNavQuery.clear(); searchInputRef.current?.focus(); }}
+                        aria-label={t('sidebar.clearSearch')}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 rounded-md flex items-center justify-center text-zinc-500 hover:text-zinc-300 transition-colors"
+                      >
+                        <X className="w-[14px] h-[14px]" />
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+          {/* Hand-off, top variant — the query was typed into the field above,
+              so that is where the user is looking; the bottom of the panel
+              (behind an emptied, scrolled-away list) is not. Mirrors the
+              bottom hand-off below, which stays put for a query owned by the
+              bottom field. */}
+          {navQuery && !isCollapsed && queryOwner === 'top' && (
+            <button
+              type="button"
+              onClick={runFullSearch}
+              className={cn(
+                "relative z-20 flex w-full items-center gap-2.5 px-3.5 py-3 text-left text-[13px] border-b transition-colors",
+                isLightTheme
+                  ? "border-black/10 text-zinc-600 hover:text-black"
+                  : "border-white/10 text-zinc-400 hover:text-white"
+              )}
+            >
+              <Search className="w-4 h-4 flex-shrink-0" />
+              <span className="truncate">{t('sidebar.searchDehubFor', { query: navQuery.trim() })}</span>
+              <CornerDownLeft className="w-3.5 h-3.5 ml-auto flex-shrink-0 opacity-60" />
+            </button>
+          )}
+          <div
+            ref={scrollRef}
+            data-desktop-nav-list
+            data-fade-mask-bottom={isCollapsed && !navQuery && !navAtBottom ? "" : undefined}
+            className={cn(
+              // overscroll-contain: without it, reaching the end of the nav list
+              // chains the wheel to the document and the feed scrolls out from
+              // under the cursor while the user is still working the sidebar.
+              // relative: the containing block the active-row glass below is
+              // positioned against, and the offsetParent its coordinates are
+              // measured from. The two have to be the same box.
+              // Collapsed, the panel keeps 8px round its 36px icons: the same
+              // as the gap between them, so the column reads as one even grid
+              // instead of icons jammed against a 4px edge.
+              "relative flex flex-col overflow-y-auto overscroll-contain overflow-x-hidden scrollbar-invisible flex-1 min-h-0",
+              isCollapsed ? "p-2" : "p-1 lg:p-2.5"
+            )}
+          >
+          {/* Active glass overlay indicator — an absolute child of the scroll
+              container, so it is laid out in the list's own scrollable content
+              and rides its row exactly, with no per-frame JS in the scroll path
+              and no spring chasing a moving target. The container's overflow
+              clips it at the list's real edges, so it can no longer float up
+              over the menu-search field or down past the last row; mid-list it
+              still bleeds freely around its item for the shadow. */}
+          {/* activeItemEl guard: filtering can take the active row out of the
+              list, and updateIndicator bails when there is nothing to measure —
+              which would otherwise leave the glass frozen over whatever row has
+              since slid into that slot. */}
+          {/* A plain div placed straight on the row, not a spring: a spring
+              starts from the old row and is driven from the main thread, so
+              while the new page mounts it sat on the row just left. */}
+          {indicatorRect.ready && activeItemEl && (
+            <div
+              data-sidebar-active-indicator
+              className={cn(
+                "pointer-events-none absolute left-0 top-0 z-0 bg-gradient-to-br from-white/20 via-white/10 to-white/5 border border-white/30",
+                isLightTheme
+                  ? "shadow-[0_2px_8px_rgba(0,0,0,0.1),inset_0_1px_0_rgba(255,255,255,0.25),inset_0_-1px_0_rgba(255,255,255,0.06)]"
+                  : "shadow-[0_4px_16px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.4),inset_0_-1px_0_rgba(255,255,255,0.1)]",
+                isCollapsed ? 'rounded-xl' : 'rounded-2xl'
+              )}
+              style={{
+                transform: `translate(${indicatorRect.x}px, ${indicatorRect.y}px)`,
+                width: indicatorRect.width,
+                height: indicatorRect.height,
+              }}
+            />
+          )}
+          {/* Rows live one level in, so `space-y` never lands a stray margin on
+              the absolutely-positioned glass above. */}
+          <div onClickCapture={onRailClickCapture} className={cn(
+            "flex flex-col space-y-2 items-center",
+            !isCollapsed && "lg:space-y-[2px] lg:items-stretch"
+          )}>
+          {railRows.map((item) => {
+            if (item.label === 'Assistant') {
+              return (
+                <div key={item.label} {...railDragProps(navItemId(item))} className={railLiftClass}>
+                <NavLink
+                  draggable={false}
+                  ref={isAIActive ? setActiveItemEl : undefined}
+                  to="/app/assistant"
+                  onPointerEnter={() => preloadRoute('/app/assistant')}
+                  onTouchStart={() => preloadRoute('/app/assistant')}
+                  onFocus={() => preloadRoute('/app/assistant')}
+                  className={cn(
+                    'relative flex items-center rounded-2xl text-left text-[15px]',
+                    isLightTheme ? 'transition-[font-weight]' : 'transition-colors',
+                    desktopNavTextColor,
+                    isCollapsed ? 'w-9 h-9 justify-center' : 'w-9 h-9 lg:w-full lg:h-auto justify-center lg:justify-start lg:px-2.5 lg:py-2.5 lg:gap-3',
+                    isAIActive ? 'font-semibold' : isLightTheme ? 'hover:font-semibold' : 'hover:bg-zinc-800/50'
+                  )}
+                >
+                  <div data-sidebar-assistant-icon className={cn(
+                    "relative z-10 w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors",
+                    isAIActive ? "bg-transparent" : isCollapsed ? "bg-transparent" : "lg:bg-zinc-800 bg-transparent"
+                  )}>
+                    <AssistantNavIcon className="w-5 h-5" />
+                  </div>
+                  <span className={cn("relative z-10 truncate", isCollapsed ? "hidden" : "hidden lg:inline")}>{t('nav.assistant')}</span>
+                </NavLink>
+                </div>
+              );
+            }
+
+            const isHomeItem = item.path === '/app';
+            const isActive = !item.external && !item.action && (
+              isHomeItem
+                ? isHomePath(activePath)
+                : item.path === '/app/profile'
+                  ? isOwnProfilePath(activePath)
+                  : activePath.startsWith(item.path)
+            );
+            const isProfileItem = item.label === 'Profile';
+            const isNotificationsItem = item.label === 'Notifications';
+            const isMessagesItem = item.label === 'Messages';
+            const isStagesItem = item.action === 'open-stages';
+
+            return (
+              <div key={item.label} {...railDragProps(navItemId(item))} className={railLiftClass}>
+              <SidebarNavItem
+                item={item}
+                isActive={isActive}
+                isHome={isHomeItem}
+                currentPath={location.pathname}
+                variant="desktop"
+                collapsed={true}
+                forceCollapsed={isCollapsed}
+                onClick={isStagesItem ? () => openStageModal() : isProfileItem ? handleProfileClick : undefined}
+                avatarUrl={isProfileItem && isAuthenticated ? userAvatarUrl : undefined}
+                avatarFallback={isProfileItem && isAuthenticated ? displayName.charAt(0).toUpperCase() : undefined}
+                notificationCount={isNotificationsItem ? totalNotifUnread : isMessagesItem ? messagesUnread : undefined}
+                layoutId={isCollapsed ? 'sidebar-nav-collapsed' : 'sidebar-nav-expanded'}
+                registerActiveRef={isActive ? setActiveItemEl : undefined}
+              />
+              </div>
+            );
+          })}
+          {railCustomised && !navQuery && !isCollapsed && (
+            <button
+              type="button"
+              data-rail-reorder-reset
+              onClick={onRailReset}
+              className={cn(
+                "hidden lg:flex w-full items-center rounded-xl px-2.5 py-1.5 text-left text-[12px]",
+                isLightTheme ? "text-zinc-500 hover:text-black" : "text-zinc-500 hover:text-white",
+              )}
+            >
+              {t('nav.reorderResetLong', { defaultValue: 'Reset menu order' })}
+            </button>
+          )}
+          {navQuery && visibleRailItems.length === 0 && !isCollapsed && (
+            navQuery.trim().length >= 2
+              ? <Suspense fallback={null}><SearchRequestPrompt query={navQuery} source="menu" compact className="mx-1 my-2" /></Suspense>
+              : <p className="px-2.5 py-3 text-[13px] text-zinc-500">{t('sidebar.noMenuMatches')}</p>
+          )}
+          {/* Always the last thing in the rail. Three conditions, each for its
+              own reason:
+
+              Only when there is a session to end — signed out, the rail's
+              primary CTA below already reads "Log in", and a Log out above it
+              would be offering to undo nothing.
+
+              Only when nothing is typed in the menu search. The list above is
+              then the filter's results, and an item that matched no query has
+              no business sitting among them; the hand-off row marks the end
+              instead, which is why the bottom fade is suppressed there too.
+
+              The trailing spacer lifts it clear of that fade — 80px of
+              near-opaque zinc, which half-erases whatever rests under it.
+              Acceptable for the last nav destination, not for the one control
+              here that ends a session. */}
+          {isAuthenticated && !navQuery && (
+            <>
+              <SidebarNavItem
+                item={LOGOUT_ITEM}
+                isActive={false}
+                isHome={false}
+                currentPath={location.pathname}
+                variant="desktop"
+                collapsed={true}
+                forceCollapsed={isCollapsed}
+                onClick={onSignOut}
+                layoutId={isCollapsed ? 'sidebar-nav-collapsed' : 'sidebar-nav-expanded'}
+              />
+              {/* Only while the fade is actually over the list. Once the list
+                  bottoms out the fade is gone and the bottom search field is
+                  the end of the panel, so this would be dead space. Removing it
+                  while pinned to the bottom cannot un-pin the scroll, so there
+                  is no flicker back and forth. */}
+              {!navAtBottom && <div aria-hidden className="h-14 flex-shrink-0" />}
+            </>
+          )}
+          </div>
+          </div>
+          {/* Hand-off, bottom variant. Last thing in the panel while a query
+              typed into the BOTTOM field has no matches, so the field it was
+              typed into is never a dead end: whatever was typed can be run as
+              a real search on Explore. A query owned by the top field gets its
+              own copy above instead — see the comment there. */}
+          {navQuery && !isCollapsed && queryOwner === 'bottom' && (
+            <button
+              type="button"
+              onClick={runFullSearch}
+              className={cn(
+                "relative z-20 flex w-full items-center gap-2.5 px-3.5 py-3 text-left text-[13px] border-t transition-colors",
+                isLightTheme
+                  ? "border-black/10 text-zinc-600 hover:text-black"
+                  : "border-white/10 text-zinc-400 hover:text-white"
+              )}
+            >
+              <Search className="w-4 h-4 flex-shrink-0" />
+              <span className="truncate">{t('sidebar.searchDehubFor', { query: navQuery.trim() })}</span>
+              <CornerDownLeft className="w-3.5 h-3.5 ml-auto flex-shrink-0 opacity-60" />
+            </button>
+          )}
+          {/* Menu search, bottom mirror — revealed once the list bottoms out,
+              so the field is in reach at either end of a 28-item rail. Same
+              grid-rows collapse as the top one, and it is the last thing in the
+              panel, so there is nothing under it. */}
+          {!isCollapsed && (
+            <div
+              data-fade-mask-bottom={!navQuery && !navAtBottom ? "" : undefined}
+              className={cn(
+                "relative z-20 grid transition-[grid-template-rows,opacity] duration-200 ease-out motion-reduce:transition-none",
+                showBottomSearch ? "opacity-100" : "opacity-0 pointer-events-none"
+              )}
+              style={{ gridTemplateRows: showBottomSearch ? '1fr' : '0fr' }}
+              aria-hidden={!showBottomSearch}
+            >
+              <div className="overflow-hidden">
+                <div data-sidebar-search-inset className="p-1 pt-0 lg:px-2.5 lg:pb-2.5">
+                  <div className="relative">
+                    <Search className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                    <input
+                      ref={bottomSearchInputRef}
+                      type="text"
+                      value={navQuery}
+                      onChange={(e) => setNavQuery(e.target.value)}
+                      onFocus={() => { setBottomSearchFocused(true); setQueryOwner('bottom'); }}
+                      onBlur={() => setBottomSearchFocused(false)}
+                      onKeyDown={handleSearchKeyDown}
+                      tabIndex={showBottomSearch ? 0 : -1}
+                      placeholder={t('sidebar.searchMenu')}
+                      data-search-surface
+                      aria-label={t('sidebar.searchMenu')}
+                      className={cn(
+                        "w-full h-[38px] pl-9 pr-8 rounded-xl text-[14px] [@media(any-pointer:coarse)]:text-[16px] outline-none transition-colors",
+                        desktopNavTextColor,
+                        isLightTheme
+                          ? "bg-black/5 border border-black/10 placeholder:text-zinc-500 focus:border-black/25"
+                          : "bg-white/5 border border-white/10 placeholder:text-zinc-500 focus:border-white/30"
+                      )}
+                    />
+                    {navQuery && (
+                      <button
+                        type="button"
+                          onClick={() => { setNavQuery.clear(); bottomSearchInputRef.current?.focus(); }}
+                        aria-label={t('sidebar.clearSearch')}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 rounded-md flex items-center justify-center text-zinc-500 hover:text-zinc-300 transition-colors"
+                      >
+                        <X className="w-[14px] h-[14px]" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+          {/* Bottom fade overlay — suppressed while filtering, where the list is
+              short and the hand-off row marks the end instead, and at the bottom
+              of the list, where there is nothing left to hint at. */}
+          {!navQuery && !navAtBottom && (
+            <div data-sidebar-fade className={cn("pointer-events-none absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-zinc-900 via-zinc-900/60 to-transparent rounded-b-2xl z-10")} />
+          )}
+        </motion.div>
+
+        {/* Post / Login Button — w-full with no side padding so the button's box
+            is the rail's content box, i.e. identical to the nav bento above it
+            in both collapsed and expanded mode, on every theme. */}
+        <div className="mt-3 w-full">
+          <button
+            type="button"
+            /* The rail's primary action. Tagged so themes can treat it as one:
+               untagged, it read as a second anonymous slab welded under the nav
+               bento, at nearly the same width and the same fill. */
+            data-primary-cta
+            data-nav-create
+            className={cn(
+              "cursor-pointer box-border rounded-2xl bg-zinc-900/90 hover:bg-zinc-800/90 transition-colors overflow-hidden shadow-none flex items-center justify-center",
+              isMinimal ? "border border-zinc-700" : "border border-white/30",
+              isConnecting && "opacity-70 pointer-events-none",
+              isCollapsed ? "w-full h-[44px] p-[7px]" : "w-full"
+            )}
+            onClick={handlePostClick}
+            onPointerDown={warmSheetForLogin}
+            onMouseEnter={warmSheetForLogin}
+            onFocus={warmSheetForLogin}
+            disabled={isConnecting}
+          >
+            <div className={cn(
+              "flex items-center gap-2 font-semibold text-white justify-center",
+              // leading-5: 13.5px text inherits a 20.25px line, which made the
+              // button 46.25px tall and left the nav bento above it ending on a
+              // quarter pixel, so its bottom corners blurred at 100% zoom.
+              isCollapsed ? "text-[13.5px] leading-5" : "py-[7px] lg:py-3 text-[13.5px] leading-5"
+            )}>
+              {isAuthenticated ? (
+                 <>
+                    <PenSquare className="w-[18px] h-[18px] flex-shrink-0" />
+                    <span className={cn(isCollapsed ? "hidden" : "hidden lg:inline")}>{t('nav.create')}</span>
+                 </>
+              ) : isConnecting ? (
+                 <>
+                    <span className="w-[18px] h-[18px] border-2 border-white/30 border-t-white rounded-full animate-spin flex-shrink-0" />
+                    <span className={cn("whitespace-nowrap", isCollapsed ? "hidden" : "hidden lg:inline")}>{t('nav.connecting')}</span>
+                 </>
+              ) : needsSignature ? (
+                 <>
+                    <LogIn className="w-[18px] h-[18px] flex-shrink-0" />
+                    <span className={cn("whitespace-nowrap", isCollapsed ? "hidden" : "hidden lg:inline")}>{t('nav.signMessage')}</span>
+                 </>
+              ) : (
+                 <>
+                    <LogIn className="w-[18px] h-[18px] flex-shrink-0" />
+                    <span className={cn("whitespace-nowrap", isCollapsed ? "hidden" : "hidden lg:inline")}>{t('nav.login')}</span>
+                 </>
+              )}
+            </div>
+          </button>
+        </div>
+      </motion.aside>
+
+      {/* Auth Prompt Dialog */}
+      <AuthPrompt 
+        isOpen={showAuthPrompt} 
+        onClose={() => setShowAuthPrompt(false)}
+      />
+    </>
+  );
+}

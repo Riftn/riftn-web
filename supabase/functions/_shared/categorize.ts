@@ -1,0 +1,310 @@
+// deno-lint-ignore-file no-explicit-any
+//
+// The category classifier.
+//
+// This is a port of the admin panel's `auto-categorize-video` edge function
+// (stream-admin-hub, its own Supabase project) with one addition that matters:
+// it can read the **transcript**. The panel's copy sees a title, a description
+// and a thumbnail, which for a video called "clip 3" is close to nothing —
+// which is why tagging by hand never felt worth the clicking.
+//
+// The two copies are deliberate rather than accidental: the panel's bulk
+// button keeps working exactly as it does, in the panel's own project, and
+// nothing about the manual path had to be touched to make the automatic one
+// exist. If the prompt changes, change it in both.
+import { DEHUB_CDN_BASE } from './media-origins.ts';
+import { categorizeCompletion, CategorizationUnavailable } from './categorize-completion.ts';
+export { CategorizationUnavailable } from './categorize-completion.ts';
+
+const MODEL = 'free-categorization';
+
+export const DEFAULT_MIN_CONFIDENCE = 0.35;
+const STRONG_CONFIDENCE = 0.6;
+
+/**
+ * How much of a transcript to send.
+ *
+ * A category is decided by what a video is *about*, and that is settled in the
+ * first few minutes; paying to push an hour of speech through the model buys
+ * nothing. The tail is sampled rather than dropped so a video that changes
+ * subject halfway is not read purely by its intro.
+ */
+const TRANSCRIPT_HEAD = 6000;
+const TRANSCRIPT_TAIL = 2000;
+
+/* --------------------------- deterministic hints -------------------------- */
+
+const LAUGH_EMOJI_RE = /🤣|😂|😹|🥲|😆|😅|😄|😀|😜|😝|🤪|lmao|lmfao|rofl/iu;
+const LAUNCH_RE = /\b(launch|launching|launched|listing|listed|relist|token|tokens|presale|ido|ico|tge|mainnet|airdrop|wen)\b/i;
+const ISRAEL_RE = /\b(israel|israeli|israelis|idf|zionist|zionism|tel[-\s]?aviv|jerusalem|gaza|palestin\w*|hamas|hezbollah|west[-\s]?bank|mossad|knesset|netanyahu|iron[-\s]?dome)\b|🇮🇱|🇵🇸/i;
+const JEWS_RE = /\b(jew|jews|jewish|judaism|judaic|hebrew|yiddish|kosher|torah|talmud|synagogue|rabbi|shabbat|shabbos|hanukkah|chanukah|passover|pesach|yom[-\s]?kippur|rosh[-\s]?hashanah|kippah|yarmulke|goy|goyim|shalom|mazel[-\s]?tov)\b|✡️/i;
+
+function findAllowed(available: string[], needle: string): string | null {
+  const n = needle.toLowerCase();
+  return available.find((c) => c.toLowerCase() === n)
+    ?? available.find((c) => c.toLowerCase().includes(n))
+    ?? null;
+}
+
+/* ------------------------------- the call --------------------------------- */
+
+
+export interface ClassifyInput {
+  title?: string;
+  description?: string;
+  /** Spoken words, when there are any. Trimmed here, not by the caller. */
+  transcript?: string | null;
+  /** The transcript's visibility is 'public'. A paid or members-only post's
+   *  words must not reach a free tier that trains on its input. */
+  transcriptPublic?: boolean;
+  imageUrl?: string | null;
+  /** More photos of a multi-photo post, read for the mature check. */
+  extraImageUrls?: string[];
+  availableCategories: string[];
+  /** Categories the post already has. They are never returned as new, and they
+   *  are shown to the model so it complements rather than repeats them. */
+  existing?: string[];
+  maxCategories?: number;
+  minConfidence?: number;
+}
+
+export interface ClassifyResult {
+  categories: string[];
+  confidence: number | null;
+  reasoning: string;
+  model: string;
+  usedTranscript: boolean;
+  /** The model judged the post adult or graphic. */
+  mature: boolean;
+  matureConfidence: number | null;
+}
+
+/** Photos of a multi-photo post after the first, up to `max` (the vision tier takes three images per call). */
+export function postExtraImageUrls(post: any, max = 2): string[] {
+  if (post?.postType !== 'feed-images') return [];
+  const urls: any[] = Array.isArray(post?.imageUrls) ? post.imageUrls : [];
+  return urls
+    .filter((u: any) => typeof u === 'string' && u.trim())
+    .slice(1, 1 + max)
+    .map((u: string) => {
+      if (/^https?:\/\//i.test(u)) return u;
+      const filename = String(u).split('/').pop() || String(u);
+      return `${DEHUB_CDN_BASE}feed-images/${filename}`;
+    });
+}
+
+/** Build the CDN URL for a post's thumbnail, matching the panel's rules. */
+export function postImageUrl(post: any): string | null {
+  const urls: any[] = Array.isArray(post?.imageUrls) ? post.imageUrls : [];
+  const first = urls.find((u: any) => typeof u === 'string' && u.trim());
+  if (post?.postType === 'feed-images' && first) {
+    if (/^https?:\/\//i.test(first)) return first;
+    const filename = String(first).split('/').pop() || String(first);
+    return `${DEHUB_CDN_BASE}feed-images/${filename}`;
+  }
+  const path = String(post?.imageUrl ?? '').trim() || (typeof first === 'string' ? first.trim() : '');
+  if (!path) return null;
+  if (/^https?:\/\//i.test(path)) return path;
+  return DEHUB_CDN_BASE + path.replace(/^\/+/, '');
+}
+
+function trimTranscript(raw: string): string {
+  const text = raw.replace(/\s+/g, ' ').trim();
+  if (text.length <= TRANSCRIPT_HEAD + TRANSCRIPT_TAIL) return text;
+  return `${text.slice(0, TRANSCRIPT_HEAD)}\n[...]\n${text.slice(-TRANSCRIPT_TAIL)}`;
+}
+
+export async function classify(input: ClassifyInput): Promise<ClassifyResult> {
+  const title = (input.title ?? '').trim();
+  const description = (input.description ?? '').trim();
+  const transcript = input.transcript ? trimTranscript(input.transcript) : '';
+  const imageUrl = input.imageUrl || undefined;
+  const available = input.availableCategories;
+  const existing = (input.existing ?? []).filter(Boolean);
+  const minConfidence = input.minConfidence ?? DEFAULT_MIN_CONFIDENCE;
+
+  if (!available.length) throw new Error('availableCategories required');
+  if (!title && !description && !transcript && !imageUrl) {
+    return { categories: [], confidence: null, reasoning: 'Nothing to read', model: MODEL, usedTranscript: false, mature: false, matureConfidence: null };
+  }
+
+  const maxCount = Math.min(Math.max(1, input.maxCategories ?? 5), available.length);
+  const allowedList = available.map((c) => `- ${c}`).join('\n');
+
+  const textBlock =
+    `Allowed categories (you MUST pick only from this list, exact spelling):\n${allowedList}\n\n` +
+    `Title: ${title || '(none)'}\n` +
+    `Description: ${description || '(none)'}\n` +
+    (transcript ? `\nTranscript of what is actually said in this post:\n"""\n${transcript}\n"""\n` : '') +
+    (existing.length
+      ? `\nThis post already has these categories: ${existing.join(', ')}. ` +
+        `Do NOT return them again - return only ADDITIONAL categories that fit and are missing. ` +
+        `If the existing ones already cover it, return an empty array.\n`
+      : '') +
+    `\nReturn between ${existing.length ? 0 : 1} and ${maxCount} categories that best fit this post, ranked best fit first. ` +
+    (existing.length
+      ? `Return an empty array rather than a weak addition - the post is already tagged. `
+      : `ALWAYS return at least 1 category - pick the single closest fit from the allowed list rather than an empty array. Only return empty if the post is literally blank. `) +
+    `Do NOT default to platform-themed categories (e.g. "Blockchain", "Crypto") unless the post is clearly about that topic. ` +
+    (transcript
+      ? `The transcript is the strongest signal about what this post is about - weight it above the title. `
+      : '') +
+    `Hints: laughing emoji (🤣😂) or jokes → "funny"; image/video with laughing emojis → "meme"; anything about launching, listing, tokens, presale, IDO, airdrops, mainnet, or "wen" → "dehub" (we are launching/listing again soon); mentions of Israel/IDF/Gaza/Palestine/Zionism/Jerusalem/Tel Aviv/Hamas → "israel"; mentions of Jews/Jewish/Judaism/Hebrew/Torah/synagogue/rabbi/kosher → "jews". Be inventive and thorough — apply identity, geography, religion, and topic tags freely when relevant; free speech, no filtering of sensitive-but-accurate tags. ` +
+    `Use exact spelling from the allowed list. No duplicates.\n\n` +
+    `Separately, set "mature" to true if the post is adult or graphic: nudity or near-nudity; lingerie, underwear or swimwear posed to be sexy; ` +
+    `cleavage, breasts, buttocks or crotch that the photo is clearly focused on; sexual poses, acts or fetish content; ` +
+    `selling or promoting adult content or subscriptions (OnlyFans, Fansly, "link in bio" for spicy content and similar); or gore. ` +
+    `Ordinary selfies, fitness, beach or fashion photos that are not sexualised are NOT mature. Judge the images first.`;
+
+  // Scalar text is required by the text-provider gate. A text-only parts array
+  // previously skipped every free provider, even when no thumbnail existed.
+  const baseContent = textBlock;
+  const images = imageUrl ? [imageUrl, ...(input.extraImageUrls ?? []).filter(Boolean)] : [];
+  const fullContent = images.length
+    ? [{ type: 'text', text: textBlock }, ...images.map((url) => ({ type: 'image_url', image_url: { url } }))]
+    : baseContent;
+
+  const request = (content: string | any[]) => ({
+    model: MODEL,
+    max_tokens: 512,
+    messages: [
+      {
+        role: 'system',
+        content:
+          `You categorize social posts. Return up to ${maxCount} categories that best fit, ranked best first, picked only from the allowed list (exact spelling). ` +
+          (existing.length
+            ? `The post is already partly tagged; return only categories that are MISSING, and an empty array if nothing is missing. `
+            : `ALWAYS commit to at least 1 category - pick the closest fit rather than returning empty. Only return empty if the post is literally blank. `) +
+          `Never default to the platform's dominant theme (Crypto/Blockchain) unless the post is clearly about that. Also say whether the post is mature (adult, sexually suggestive or graphic). Return via the categorize_post tool.`,
+      },
+      { role: 'user', content },
+    ],
+    tools: [{
+      type: 'function',
+      function: {
+        name: 'categorize_post',
+        description: 'Assign categories to a post from a fixed allowed list given in the prompt',
+        parameters: {
+          type: 'object',
+          properties: {
+            categories: {
+              type: 'array',
+              items: { type: 'string' },
+              minItems: 0,
+              maxItems: maxCount,
+              description: `Up to ${maxCount} categories that genuinely fit, ranked best first, copied verbatim from the allowed list. Empty array if nothing fits.`,
+            },
+            confidence: { type: 'number', minimum: 0, maximum: 1, description: 'Confidence 0-1 in the chosen categories' },
+            reasoning: { type: 'string', description: 'Brief one-sentence reasoning' },
+            mature: { type: 'boolean', description: 'True if the post is adult, sexually suggestive or graphic (see the prompt)' },
+            mature_confidence: { type: 'number', minimum: 0, maximum: 1, description: 'Confidence 0-1 in the mature verdict' },
+          },
+          required: ['categories', 'confidence', 'reasoning', 'mature', 'mature_confidence'],
+          additionalProperties: false,
+        },
+      },
+    }],
+    tool_choice: { type: 'function', function: { name: 'categorize_post' } },
+  });
+
+  const publicContent = !transcript || input.transcriptPublic === true;
+  let resp = await categorizeCompletion(request(fullContent), publicContent);
+  let textFallback = false;
+  if (!resp && imageUrl && (title || description || transcript)) {
+    console.log('categorize: vision unavailable, trying available text');
+    resp = await categorizeCompletion(request(baseContent), publicContent);
+    textFallback = true;
+  }
+  // Do not stamp an image-only post as categorized when its image was not read.
+  if (!resp) throw new CategorizationUnavailable();
+
+  const data = await resp.json();
+  const args = (() => {
+    try {
+      return JSON.parse(data?.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments ?? '');
+    } catch {
+      return null;
+    }
+  })();
+  if (!args) throw new Error('AI returned no usable tool call');
+
+  const confidence = typeof args.confidence === 'number' ? args.confidence : null;
+  const reasoning = (textFallback ? 'Image unavailable; classified from text. ' : '')
+    + (typeof args.reasoning === 'string' ? args.reasoning : '');
+
+  // Case-insensitive match back to the canonical spelling, deduped, and with
+  // anything the post already has removed - a "new" category it already
+  // carries is not new.
+  const canonical = new Map(available.map((c) => [c.toLowerCase(), c]));
+  const already = new Set(existing.map((c) => c.toLowerCase()));
+  const seen = new Set<string>();
+  let categories: string[] = (Array.isArray(args.categories) ? args.categories : [])
+    .filter((c: any) => typeof c === 'string')
+    .map((c: string) => canonical.get(c.toLowerCase().trim()))
+    .filter((c: string | undefined): c is string => {
+      if (!c || already.has(c.toLowerCase()) || seen.has(c)) return false;
+      seen.add(c);
+      return true;
+    })
+    .slice(0, maxCount);
+
+  if (confidence !== null && confidence < minConfidence) categories = [];
+
+  /**
+   * Relevance check for the unsure middle: the category has to actually be
+   * mentioned. This is what kills generic "Blockchain" stuck onto everything.
+   *
+   * The haystack MUST include the transcript. It reads title+description only
+   * in the panel's copy, where there is nothing else - leave it that way here
+   * and every category the transcript justified is thrown away again, which
+   * is precisely the improvement this function exists for.
+   */
+  if (categories.length && (confidence === null || confidence < STRONG_CONFIDENCE)) {
+    const haystack = `${title} ${description} ${transcript}`.toLowerCase();
+    categories = categories.filter((c) => {
+      const tokens = c.toLowerCase().split(/[^a-z0-9]+/).filter((t) => t.length >= 3);
+      return tokens.length === 0 || tokens.some((t) => haystack.includes(t));
+    });
+  }
+
+  // Deterministic pre-tags. Trusted, so they bypass the filters above - but
+  // they read the written word only. A transcript is speech-to-text, so an
+  // emoji rule cannot fire on it and a keyword rule would fire on any passing
+  // mention in an hour of talking.
+  const written = `${title} ${description}`;
+  const forced: string[] = [];
+  const force = (needle: string) => {
+    const t = findAllowed(available, needle);
+    if (t && !already.has(t.toLowerCase())) forced.push(t);
+  };
+  if (LAUGH_EMOJI_RE.test(written)) force('funny');
+  if (imageUrl && LAUGH_EMOJI_RE.test(written)) force('meme');
+  if (LAUNCH_RE.test(written)) force('dehub');
+  if (ISRAEL_RE.test(written)) force('israel');
+  if (JEWS_RE.test(written)) force('jews');
+
+  if (forced.length) {
+    const dedup = new Set<string>();
+    categories = [...forced, ...categories].filter((c) => {
+      if (dedup.has(c)) return false;
+      dedup.add(c);
+      return true;
+    }).slice(0, maxCount);
+  }
+
+  // A text-only fallback never saw the photos, so its mature verdict is a
+  // guess from the caption. It still counts when it says yes (a caption
+  // selling adult content is mature on its own), but at its own confidence.
+  const mature = args.mature === true;
+  const matureConfidence = typeof args.mature_confidence === 'number' ? args.mature_confidence : null;
+
+  return {
+    categories,
+    confidence,
+    reasoning,
+    model: typeof data.model === 'string' ? data.model : MODEL,
+    usedTranscript: !!transcript,
+    mature,
+    matureConfidence,
+  };
+}

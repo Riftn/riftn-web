@@ -1,0 +1,116 @@
+import { useTranslation as _useCopy } from 'react-i18next';
+import { useSurfaceDraft } from '@/hooks/use-surface-draft';
+/**
+ * BillingTab
+ * ==========
+ * Advertiser wallet: prepaid USD balance (funded by verified on-chain DHB
+ * transfers), lifetime totals, DHB top-up entry point, a manual
+ * "credit a transaction" recovery input, and the full payment ledger.
+ */
+
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { DhbCoin } from '@/components/app/DhbAmount';
+import { ArrowDownToLine, Loader2 } from "lucide-react";
+import Wallet from "@/components/ui/cut-icons/wallet";
+import ExternalLink from "@/components/ui/cut-icons/open-externally";
+
+import Plus from "@/components/ui/cut-icons/add";
+
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { useAdAccount, useAdPayments, useTopUpCredit } from '@/hooks/use-ads';
+import { AdTopUpModal } from '@/components/app/ads/AdTopUpModal';
+import { formatCompact, formatUsd } from '@/lib/ads/povr';
+
+const EXPLORERS: Record<string, string> = {
+  Base: 'https://basescan.org/tx/',
+  BNB: 'https://bscscan.com/tx/',
+};
+
+export function BillingTab() {
+  const { t: _copy } = _useCopy();
+  const { t } = useTranslation();
+  const { data: account } = useAdAccount();
+  const { data: payments = [], isLoading } = useAdPayments();
+  const topUp = useTopUpCredit();
+  const [topUpOpen, setTopUpOpen] = useState(false);
+  const [manualHash, setManualHash] = useSurfaceDraft("components/app/ads/BillingTab.tsx:manualHash", '');
+
+  return (
+    <div className="space-y-4">
+      {/* Balance card */}
+      <div className="rounded-2xl border border-foreground/10 bg-foreground/[0.03] p-5">
+        <div className="flex items-center justify-between gap-4 flex-wrap">
+          <div>
+            <div className="flex items-center gap-2 text-muted-foreground text-xs mb-1">
+              <Wallet className="w-3.5 h-3.5" />{_copy("copy.0ba9edde1a98", { defaultValue: " Ads balance" })}</div>
+            <p className="text-3xl font-bold text-foreground">{formatUsd(account?.balance_usd)}</p>
+            <p className="text-xs text-muted-foreground mt-1">{_copy("copy.bd18f70caac4", { defaultValue: "Deposited " })}{formatUsd(account?.total_deposited_usd)}{_copy("copy.c9aed7193ddf", { defaultValue: " · Spent " })}{formatUsd(account?.total_spent_usd)}
+            </p>
+          </div>
+          <Button variant="glass" onClick={() => setTopUpOpen(true)}>
+            <Plus className="w-4 h-4 mr-1.5" /> {t('ads.topUpWithTokens')}
+          </Button>
+        </div>
+      </div>
+
+      {/* Manual credit recovery */}
+      <div className="rounded-2xl border border-foreground/10 bg-foreground/[0.03] p-4">
+        <p className="text-sm font-semibold text-foreground mb-1">{t('ads.creditATransaction')}</p>
+        <p className="text-xs text-muted-foreground mb-3">
+          {t('ads.sentTokensNotCredited')}
+        </p>
+        <div className="flex gap-2">
+          <Input
+            placeholder={_copy("copy.564fb0c997ad", { defaultValue: "0x… transaction hash" })}
+            value={manualHash}
+            onChange={(e) => setManualHash(e.target.value)}
+            className="font-mono text-xs"
+          />
+          <Button
+            variant="glass"
+            disabled={!/^0x[a-fA-F0-9]{64}$/.test(manualHash.trim()) || topUp.isPending}
+            onClick={() => topUp.mutate(manualHash.trim(), { onSuccess: () => setManualHash.complete(manualHash, '') })}
+          >
+            {topUp.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <ArrowDownToLine className="w-4 h-4" />}
+          </Button>
+        </div>
+      </div>
+
+      {/* Payment history */}
+      <div className="rounded-2xl border border-foreground/10 bg-foreground/[0.03] p-4">
+        <p className="text-sm font-semibold text-foreground mb-3">{t('ads.paymentHistory')}</p>
+        {isLoading ? (
+          <p className="text-sm text-muted-foreground py-4 text-center">{t('ads.loading')}</p>
+        ) : payments.length === 0 ? (
+          <p className="text-sm text-muted-foreground py-4 text-center">{t('ads.noTopUpsYet')}</p>
+        ) : (
+          <div className="space-y-2">
+            {payments.map((p) => (
+              <div key={p.id} className="flex items-center justify-between gap-3 rounded-xl border border-foreground/10 px-3.5 py-2.5">
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-foreground">+{formatUsd(p.usd_value)}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {formatCompact(Number(p.dhb_amount))} <DhbCoin /> · {p.chain} · {new Date(p.created_at).toLocaleDateString()}
+                  </p>
+                </div>
+                <a
+                  href={`${EXPLORERS[p.chain] ?? EXPLORERS.Base}${p.tx_hash}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-muted-foreground hover:text-foreground transition-colors shrink-0"
+                  aria-label={t('ads.viewTransaction')}
+                >
+                  <ExternalLink className="w-4 h-4" />
+                </a>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <AdTopUpModal open={topUpOpen} onOpenChange={setTopUpOpen} />
+    </div>
+  );
+}

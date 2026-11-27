@@ -1,0 +1,54 @@
+import { useTranslation as _useCopy } from 'react-i18next';
+/**
+ * Minimized Chats Component
+ * =========================
+ * Global floating buttons for minimized chat sessions — AI chats and docked
+ * DMs share one rail, so the bottom-right corner never grows a second stack.
+ * Persists across all tabs and routes, similar to radio mini player.
+ */
+
+import { motion, AnimatePresence } from 'framer-motion';
+import { useMinimizedChats, type MinimizedChat } from '@/hooks/use-minimized-chats';
+import { ASSISTANT_AVATAR as assistantAvatar } from '@/lib/assistant';
+
+interface MinimizedAIChatsProps {
+  onRestore?: (chat: MinimizedChat) => void;
+}
+
+export function MinimizedAIChats({ onRestore }: MinimizedAIChatsProps) {
+  const { t: _copy } = _useCopy();
+  const { chats, removeChat } = useMinimizedChats();
+
+  if (chats.length === 0) return null;
+
+  return (
+    <div className="fixed right-4 z-50 flex flex-col-reverse gap-2" style={{ bottom: '140px' }}>
+      <AnimatePresence>
+        {chats.map((chat, index) => (
+          <motion.button
+            key={chat.id}
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0, opacity: 0 }}
+            transition={{ delay: index * 0.05 }}
+            onClick={() => {
+              removeChat(chat.id);
+              onRestore?.(chat);
+            }}
+            className="w-12 h-12 rounded-xl bg-black/60 backdrop-blur-[24px] backdrop-saturate-[180%] border border-white/10 shadow-2xl flex items-center justify-center hover:bg-black/80 transition-colors relative group"
+          >
+            <img
+              src={chat.avatar || assistantAvatar}
+              alt=""
+              className={`w-8 h-8 object-cover ${chat.type === 'dm' ? 'rounded-full' : 'rounded-lg'}`}
+            />
+            {/* Tooltip on hover */}
+            <div data-glass-tooltip className="absolute right-14 px-2 py-1 rounded-lg text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none max-w-[150px] truncate">
+              {chat.title || _copy("copy.4390ee6449c2", { defaultValue: "{{value1}} chat", value1: chat.type })}
+            </div>
+          </motion.button>
+        ))}
+      </AnimatePresence>
+    </div>
+  );
+}

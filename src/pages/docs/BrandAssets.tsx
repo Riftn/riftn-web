@@ -1,0 +1,329 @@
+import { useTranslation as _useCopy } from 'react-i18next';
+import React, { useState } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { FileText, Package, Palette } from "lucide-react";
+import ImageIcon from "@/components/ui/cut-icons/images";
+import ExternalLink from "@/components/ui/cut-icons/open-externally";
+
+import Download from "@/components/ui/cut-icons/download";
+
+import { useLanguage } from '@/contexts/LanguageContext';
+const designSystemZip = { url: '/brand/dehub-design-system.zip?v=vector-wordmark-1' };
+const figmaDuplicateInstruction = { url: '/docs/figma-duplicate-instruction.png' };
+const wordmarkWhite = { url: '/brand/riftn-wordmark-white.png' };
+const wordmarkBlack = { url: '/brand/riftn-wordmark-black.png' };
+const markWhite = { url: '/brand/riftn-icon-white.png' };
+const markBlack = { url: '/brand/riftn-icon-black.png' };
+
+type LogoAsset = {
+  id: string;
+  name: string;
+  description: string;
+  url: string;
+  filename: string;
+  bg: 'dark' | 'light';
+};
+
+const BrandAssets = () => {
+  const { t: _copy } = _useCopy();
+  const { t } = useLanguage();
+
+  const handleDownload = async (url: string, filename: string) => {
+    try {
+      const res = await fetch(url, { mode: 'cors', cache: 'reload' });
+      if (!res.ok) throw new Error('Logo download failed');
+      const blob = await res.blob();
+      const objectUrl = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = objectUrl;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+    } catch {
+      // Fallback: open in new tab
+      window.open(url, '_blank', 'noopener,noreferrer');
+    }
+  };
+
+  const logoAssets: LogoAsset[] = [
+    {
+      id: 'wordmark-white',
+      name: t('brandAssets.logoWordmarkWhite'),
+      description: _copy("copy.febe4ba8ab01", { defaultValue: "Full Riftn wordmark for use on dark backgrounds." }),
+      url: wordmarkWhite.url,
+      filename: 'riftn-wordmark-white.png',
+      bg: 'dark',
+    },
+    {
+      id: 'wordmark-black',
+      name: t('brandAssets.logoWordmarkBlack'),
+      description: _copy("copy.b3a0a6360ee6", { defaultValue: "Full Riftn wordmark for use on light backgrounds." }),
+      url: wordmarkBlack.url,
+      filename: 'riftn-wordmark-black.png',
+      bg: 'light',
+    },
+    {
+      id: 'mark-white',
+      name: t('brandAssets.logoMarkWhite'),
+      description: _copy("copy.91387693b21c", { defaultValue: "Riftn icon mark for use on dark backgrounds." }),
+      url: markWhite.url,
+      filename: 'riftn-icon-white.png',
+      bg: 'dark',
+    },
+    {
+      id: 'mark-black',
+      name: t('brandAssets.logoMarkBlack'),
+      description: _copy("copy.eef94579ec7c", { defaultValue: "Riftn icon mark for use on light backgrounds." }),
+      url: markBlack.url,
+      filename: 'riftn-icon-black.png',
+      bg: 'light',
+    },
+  ];
+
+  const palette = [
+    { name: t('brandAssets.swatchBlack'), hex: '#000000', text: '#ffffff' },
+    { name: t('brandAssets.swatchGraphite'), hex: '#0a0b0d', text: '#ffffff' },
+    { name: t('brandAssets.swatchSurface'), hex: '#16181d', text: '#ffffff' },
+    { name: t('brandAssets.swatchSurfaceRaised'), hex: '#262a31', text: '#ffffff' },
+    { name: t('brandAssets.swatchGrey'), hex: '#6b727d', text: '#ffffff' },
+    { name: t('brandAssets.swatchLightGrey'), hex: '#9aa1ad', text: '#000000' },
+    { name: t('brandAssets.swatchOffWhite'), hex: '#eef0f3', text: '#000000' },
+    { name: t('brandAssets.swatchWhite'), hex: '#ffffff', text: '#000000' },
+  ];
+
+  return (
+    <div className="space-y-8">
+      <div className="space-y-4">
+        <h1 className="text-4xl font-bold text-foreground">{t('brandAssets.title')}</h1>
+        <p className="text-xl text-muted-foreground leading-relaxed">{t('brandAssets.subtitle')}</p>
+      </div>
+
+      {/* LOGOS */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <ImageIcon className="w-5 h-5" />
+            {t('brandAssets.logoDownloads')}
+          </CardTitle>
+          <CardDescription>{t('brandAssets.logoDownloadsDesc')}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid md:grid-cols-2 gap-6">
+            {logoAssets.map((asset) => (
+              <div key={asset.id} className="border border-border rounded-lg p-6 space-y-4">
+                <div
+                  className={`aspect-video rounded-lg flex items-center justify-center p-6 ${
+                    asset.bg === 'dark' ? 'bg-black' : ''
+                  }`}
+                  style={asset.bg === 'light' ? { backgroundColor: '#ffffff' } : undefined}
+                >
+                  <img
+                    src={asset.url}
+                    alt={asset.name}
+                    className="max-w-full max-h-full object-contain"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <h3 className="font-semibold text-lg text-foreground">{asset.name}</h3>
+                  <p className="text-sm text-muted-foreground">{asset.description}</p>
+                  <div className="flex flex-wrap gap-2">
+                    {(['png', 'svg'] as const).map((format) => (
+                      <Button
+                        key={format}
+                        onClick={() => handleDownload(asset.url.replace(/\.png$/, `.${format}`), asset.filename.replace(/\.png$/, `.${format}`))}
+                        size="sm"
+                        className="flex items-center gap-2"
+                      >
+                        <Download className="w-4 h-4" />
+                        {t('brandAssets.download')} {format.toUpperCase()}
+                      </Button>
+                    ))}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {asset.id.startsWith('wordmark')
+                      ? 'PNG image or scalable vector SVG with editable paths.'
+                      : 'PNG image or scalable vector SVG. The icon is separate from the R in the wordmark.'}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* MONOCHROME PALETTE */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Palette className="w-5 h-5" />{_copy("copy.c67ade5cbfe4", { defaultValue: "Monochrome Palette" })}</CardTitle>
+          <CardDescription>{_copy("copy.5a28721d3125", { defaultValue: "Riftn is strictly black, white and grey. No decorative colour." })}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {palette.map((c) => {
+              const inkOnSwatch = c.text === '#000000';
+              // The label colour is inline on every line, not just the card:
+              // docs-dark.css paints each div white, which left "Light Grey"
+              // white on its own grey swatch on every dark docs theme.
+              const label = inkOnSwatch ? '#0a0b0d' : c.text;
+              return (
+                <div
+                  key={c.hex}
+                  className="rounded-xl p-4 border border-border"
+                  style={{
+                    background: c.hex,
+                    color: label,
+                  }}
+                >
+                  <div className="font-semibold text-sm" style={{ color: label }}>
+                    {c.name}
+                  </div>
+                  <div
+                    className={`font-mono text-xs mt-1 ${inkOnSwatch ? '' : 'opacity-70'}`}
+                    style={{ color: label }}
+                  >
+                    {c.hex}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* TYPOGRAPHY */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <FileText className="w-5 h-5" />
+            {t('brandAssets.typography')}
+          </CardTitle>
+          <CardDescription>{t('brandAssets.typographyDesc')}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="font-exo grid grid-cols-1 sm:grid-cols-2 gap-4 text-center">
+            {[
+              { weight: 'font-black', label: "Exo Black", value: '900' },
+              { weight: 'font-semibold', label: "Exo Semi-bold", value: '600' },
+              { weight: 'font-medium', label: "Exo Medium", value: '500' },
+              { weight: 'font-light', label: "Exo Light", value: '300' },
+            ].map((f) => (
+              <div
+                key={f.value}
+                className="border border-border rounded-lg p-4 flex flex-col justify-center items-center"
+              >
+                <p className={`text-5xl ${f.weight}`}>{_copy("copy.81acaafba961", { defaultValue: "Aa" })}</p>
+                <p className="mt-2 text-lg font-semibold text-foreground">{f.label}</p>
+                <p className="text-sm text-muted-foreground">{f.value}</p>
+              </div>
+            ))}
+          </div>
+          <div className="mt-6 text-center">
+            <Button variant="outline" asChild>
+              <a
+                href="https://fonts.google.com/specimen/Exo"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2"
+              >
+                <Download className="w-4 h-4" />
+                {t('brandAssets.downloadExoFont')}
+              </a>
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* SOCIAL MEDIA TEMPLATES */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <ImageIcon className="w-5 h-5" />{_copy("copy.37c3f0f37b36", { defaultValue: "Social Media Templates" })}</CardTitle>
+          <CardDescription>{_copy("copy.19249dfea533", { defaultValue: "Editable Figma templates for social posts, banners and campaigns." })}</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="outline" className="flex items-center gap-2 w-full sm:w-auto">
+                <ExternalLink className="w-4 h-4" />{_copy("copy.f2c174c8b5b1", { defaultValue: "Copy and edit" })}</Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>{_copy("copy.283551a268cc", { defaultValue: "Edit & Copy in Figma" })}</DialogTitle>
+                <DialogDescription>{_copy("copy.121680131671", { defaultValue: "Using Figma's free account tier, you can duplicate this file and edit as you please!" })}</DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4">
+                <img
+                  src={figmaDuplicateInstruction.url}
+                  alt={_copy("copy.5e9fe00ece85", { defaultValue: "Right-click a Figma file thumbnail and choose Duplicate" })}
+                  className="w-full rounded-xl border border-border"
+                  loading="lazy"
+                />
+                <p className="text-sm text-muted-foreground">{_copy("copy.3e046f2c30b1", { defaultValue: "Simply right click on any file thumbnail in your recent or shared tabs then hit duplicate." })}</p>
+                <Button asChild className="w-full rounded-2xl flex items-center gap-2">
+                  <a
+                    href="https://www.figma.com/design/BjnSoqSIFYXL73yz4svKLh/Dehub-SM-Template-2.0--Copy-"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >{_copy("copy.8f7bdf474291", { defaultValue: "Continue to Figma" })}<ExternalLink className="w-4 h-4" />
+                  </a>
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+          <div className="w-full rounded-lg overflow-hidden border border-border bg-black">
+            <iframe
+              title={_copy("copy.b86577a30956", { defaultValue: "Riftn Social Media Templates" })}
+              src="https://embed.figma.com/design/BjnSoqSIFYXL73yz4svKLh/Dehub-SM-Template-2.0--Copy-?node-id=0-1&embed-host=share"
+              className="w-full h-[600px] block"
+              allowFullScreen
+              style={{ border: '1px solid rgba(255,255,255,0.1)' }}
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* COMPLETE PACKAGE */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Package className="w-5 h-5" />
+            {t('brandAssets.completeBrandPackage')}
+          </CardTitle>
+          <CardDescription>{t('brandAssets.completeBrandPackageDesc')}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="bg-muted/50 rounded-lg p-6 text-center space-y-4">
+            <Package className="w-12 h-12 text-muted-foreground mx-auto" />
+            <div className="space-y-3">
+              <h3 className="font-semibold text-foreground">{t('brandAssets.requestFullBrandKit')}</h3>
+              <p className="text-sm text-muted-foreground">{t('brandAssets.requestFullBrandKitDesc')}</p>
+              <div className="flex items-center justify-center gap-3 flex-wrap">
+                <Button asChild>
+                  <a href={designSystemZip.url} download="dehub-design-system.zip">
+                    <Download className="w-4 h-4 mr-2" />{_copy("copy.8bd075ad6b13", { defaultValue: "Download kit" })}</a>
+                </Button>
+                <Button variant="outline" asChild>
+                  <a href="mailto:dev@riftn.com">{t('brandAssets.contactBrandTeam')}</a>
+                </Button>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
+export default BrandAssets;

@@ -1,0 +1,545 @@
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+
+vi.mock('@/lib/smart-wallet', () => ({
+  lockWallet: vi.fn(),
+}));
+
+vi.mock('@/integrations/supabase/client', () => ({
+  supabase: {
+    auth: {
+      onAuthStateChange: vi.fn(() => ({
+        data: { subscription: { unsubscribe: vi.fn() } },
+      })),
+    },
+  },
+}));
+
+import { lockWallet } from '@/lib/smart-wallet';
+import {
+  PROFILES_STORAGE_KEY,
+  adoptCurrentProfile,
+  applyProfileSnapshot,
+  stageIncomingIdentity,
+  listProfiles,
+  getProfile,
+  currentProfileId,
+  removeProfile,
+  removeSavedProfile,
+  snapshotCurrentSession,
+  beginProfileSwitch,
+  abortProfileSwitch,
+  profileAllowance,
+  canAddProfile,
+  preserveOutgoingProfile,
+  setLiveBadgeBalanceForProfiles,
+} from '@/lib/profiles';
+
+const SB_KEY = 'sb-testproject-auth-token';
+const ADDR_A = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+const ADDR_B = '0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb';
+
+function seedAccountA(): void {
+  localStorage.setItem('dehub_token', 'tok-a');
+  localStorage.setItem('dehub_refresh_token', 'rtok-a');
+  localStorage.setItem('dehub_wallet', ADDR_A);
+  localStorage.setItem('dehub_supabase_uid', 'uid-a');
+  localStorage.setItem('dehub_connection_source', 'web3auth');
+  localStorage.setItem('dehub_user', JSON.stringify({ displayName: 'Alice', username: 'alice' }));
+  localStorage.setItem(SB_KEY, JSON.stringify({ access_token: 'sa-now', refresh_token: 'sr-now' }));
+  localStorage.setItem('wagmi.connected', '1');
+}
+
+function seedAccountB(): void {
+  // Session teardown only — the profiles registry must survive it, exactly as
+  // a real switch never clears dehub_profiles_v1.
+  for (const key of Object.keys(localStorage)) {
+    if (key !== PROFILES_STORAGE_KEY) localStorage.removeItem(key);
+  }
+  localStorage.setItem('dehub_token', 'tok-b');
+  localStorage.setItem('dehub_refresh_token', 'rtok-b');
+  localStorage.setItem('dehub_wallet', ADDR_B);
+  localStorage.setItem('wagmi.connector', 'metaMask');
+}
+
+beforeEach(() => {
+  localStorage.clear();
+  vi.clearAllMocks();
+  // Module state, so it outlives a test that publishes one.
+  setLiveBadgeBalanceForProfiles(undefined);
+});
+
+afterEach(() => {
+  // Un-stage any switch the test left behind (no-op when none was staged).
+  abortProfileSwitch(null);
+});
+
+describe('snapshotCurrentSession', () => {
+  it('keeps distinct accounts with the same cached handle available for switching', () => {
+    seedAccountA();
+    adoptCurrentProfile();
+    seedAccountB();
+    localStorage.setItem('dehub_user', JSON.stringify({ username: 'alice' }));
+    adoptCurrentProfile();
+
+    expect(listProfiles()).toHaveLength(2);
+    expect(beginProfileSwitch('uid-a')?.address).toBe(ADDR_A);
+  });
+
+  it('records an explicitly adopted account with its session keys', () => {
+    seedAccountA();
+    adoptCurrentProfile();
+
+    const profiles = listProfiles();
+    expect(profiles).toHaveLength(1);
+    expect(profiles[0].id).toBe('uid-a');
+    expect(profiles[0].address.toLowerCase()).toBe(ADDR_A);
+    expect(profiles[0].name).toBe('Alice');
+    expect(profiles[0].username).toBe('alice');
+    expect(profiles[0].session?.tokens['dehub_token']).toBe('tok-a');
+    expect(profiles[0].session?.supabase).toEqual({
+      access_token: 'sa-now',
+      refresh_token: 'sr-now',
+    });
+  });
+
+  it('never adds an uninvited account — tracking refreshes, adoption creates', () => {
+    // Someone signs in once on a shared browser without ever using Add
+    // profile. Background tracking sees them constantly; the list must not.
+    seedAccountA();
+    snapshotCurrentSession();
+    expect(listProfiles()).toHaveLength(0);
+
+    localStorage.setItem('dehub_token', 'tok-a-rotated');
+    snapshotCurrentSession();
+    expect(listProfiles()).toHaveLength(0);
+
+    // The moment the user says "save this one", it lands — and later tracking
+    // keeps its session fresh.
+    adoptCurrentProfile();
+    localStorage.setItem('dehub_token', 'tok-a-rotated-again');
+    snapshotCurrentSession();
+    const profiles = listProfiles();
+    expect(profiles).toHaveLength(1);
+    expect(profiles[0].session?.tokens['dehub_token']).toBe('tok-a-rotated-again');
+  });
+
+  it('keys wallet-only accounts by address when there is no Supabase uid', () => {
+    seedAccountB();
+    adoptCurrentProfile();
+
+    expect(currentProfileId()).toBe(`addr:${ADDR_B}`);
+    expect(getProfile(`addr:${ADDR_B}`)?.session?.tokens['dehub_token']).toBe('tok-b');
+  });
+
+  it('ignores a half-established flow with a wallet but no token', () => {
+    localStorage.setItem('dehub_wallet', ADDR_A);
+    localStorage.removeItem('dehub_token');
+    adoptCurrentProfile();
+    expect(listProfiles()).toHaveLength(0);
+  });
+
+  it('updates the existing entry rather than duplicating it', () => {
+    seedAccountA();
+    adoptCurrentProfile();
+    localStorage.setItem('dehub_token', 'tok-a-rotated');
+    adoptCurrentProfile();
+
+    const profiles = listProfiles();
+    expect(profiles).toHaveLength(1);
+    expect(profiles[0].session?.tokens['dehub_token']).toBe('tok-a-rotated');
+  });
+});
+
+describe('switching', () => {
+  it('restores the target account and locks the outgoing wallet key away', () => {
+    seedAccountA();
+    adoptCurrentProfile();
+    seedAccountB();
+    adoptCurrentProfile();
+    expect(listProfiles()).toHaveLength(2);
+
+    const plan = beginProfileSwitch('uid-a');
+
+    expect(plan).not.toBeNull();
+    expect(plan!.id).toBe('uid-a');
+    expect(plan!.uid).toBe('uid-a');
+    expect(plan!.address.toLowerCase()).toBe(ADDR_A);
+    expect(plan!.supabase).toEqual({ access_token: 'sa-now', refresh_token: 'sr-now' });
+
+    // Target's session keys are on disk…
+    expect(localStorage.getItem('dehub_token')).toBe('tok-a');
+    expect(localStorage.getItem('dehub_supabase_uid')).toBe('uid-a');
+    expect(localStorage.getItem('wagmi.connector')).toBeNull();
+    expect(localStorage.getItem('wagmi.connected')).toBe('1');
+    // …the outgoing account's wallet-specific keys are not…
+    expect(localStorage.getItem('dehub_wallet')).toBe(ADDR_A);
+    expect(localStorage.getItem('dehub_user')).toContain('Alice');
+    // …and the vault was locked so the incoming profile starts sealed.
+    expect(lockWallet).toHaveBeenCalledTimes(1);
+  });
+
+  it('returns null for an unknown or session-less profile without touching disk', () => {
+    seedAccountB();
+    adoptCurrentProfile();
+
+    expect(beginProfileSwitch('uid-a')).toBeNull();
+    expect(lockWallet).not.toHaveBeenCalled();
+    expect(localStorage.getItem('dehub_token')).toBe('tok-b');
+  });
+
+  it('returns null when the stored profile has lost its session', () => {
+    seedAccountA();
+    adoptCurrentProfile();
+    const store = JSON.parse(localStorage.getItem(PROFILES_STORAGE_KEY)!);
+    store[0].session = null;
+    localStorage.setItem(PROFILES_STORAGE_KEY, JSON.stringify(store));
+
+    expect(beginProfileSwitch('uid-a')).toBeNull();
+    expect(lockWallet).not.toHaveBeenCalled();
+  });
+
+  it('does not snapshot over a staged switch', () => {
+    seedAccountA();
+    adoptCurrentProfile();
+    seedAccountB();
+    adoptCurrentProfile();
+
+    beginProfileSwitch('uid-a');
+    // Keys on disk now belong to A mid-handoff; tracking must leave them alone.
+    snapshotCurrentSession();
+
+    const b = getProfile(`addr:${ADDR_B}`);
+    expect(b?.session?.tokens['dehub_token']).toBe('tok-b');
+  });
+
+  it('rolls back to the outgoing account when a staged switch aborts', () => {
+    seedAccountA();
+    adoptCurrentProfile();
+    seedAccountB();
+    adoptCurrentProfile();
+
+    // Capture who is live BEFORE staging, exactly as switchToProfile does.
+    const prevId = currentProfileId();
+    beginProfileSwitch('uid-a');
+    expect(localStorage.getItem('dehub_token')).toBe('tok-a');
+
+    // setSession threw: disk goes back to whoever was live before the swap.
+    abortProfileSwitch(prevId);
+
+    expect(localStorage.getItem('dehub_token')).toBe('tok-b');
+    expect(localStorage.getItem('dehub_refresh_token')).toBe('rtok-b');
+    expect(localStorage.getItem('dehub_wallet')?.toLowerCase()).toBe(ADDR_B);
+    expect(localStorage.getItem('wagmi.connector')).toBe('metaMask');
+    expect(localStorage.getItem('wagmi.connected')).toBeNull();
+    // And tracking resumes — the guard is cleared.
+    snapshotCurrentSession();
+    expect(getProfile(`addr:${ADDR_B}`)?.session?.tokens['dehub_token']).toBe('tok-b');
+  });
+
+  it('wipes staged keys instead of restoring when there was no live account', () => {
+    seedAccountA();
+    adoptCurrentProfile();
+    seedAccountB();
+    adoptCurrentProfile();
+
+    // Switching from a signed-out state: nothing to roll back to.
+    beginProfileSwitch('uid-a');
+    abortProfileSwitch(null);
+
+    expect(localStorage.getItem('dehub_token')).toBeNull();
+    expect(localStorage.getItem('dehub_wallet')).toBeNull();
+    expect(localStorage.getItem('wagmi.connected')).toBeNull();
+    expect(localStorage.getItem('wagmi.connector')).toBeNull();
+  });
+
+  it('ignores an abort when no switch was staged', () => {
+    seedAccountB();
+    adoptCurrentProfile();
+    localStorage.setItem('dehub_token', 'tok-live');
+
+    abortProfileSwitch('uid-a');
+
+    expect(localStorage.getItem('dehub_token')).toBe('tok-live');
+  });
+});
+
+describe('removeProfile', () => {
+  it('drops only the removed entry', () => {
+    seedAccountA();
+    adoptCurrentProfile();
+    seedAccountB();
+    adoptCurrentProfile();
+
+    removeProfile('uid-a');
+
+    const ids = listProfiles().map((p) => p.id);
+    expect(ids).toEqual([`addr:${ADDR_B}`]);
+  });
+});
+
+describe('removeSavedProfile', () => {
+  it('removes legacy rows for the same saved account and keeps the live sign-in', () => {
+    seedAccountA();
+    adoptCurrentProfile();
+    const account = getProfile('uid-a');
+    seedAccountB();
+    adoptCurrentProfile();
+    localStorage.setItem(PROFILES_STORAGE_KEY, JSON.stringify([
+      ...listProfiles(),
+      { ...account, id: `addr:${ADDR_A}`, addedAt: 0 },
+    ]));
+
+    expect(() => removeSavedProfile(ADDR_B)).toThrow();
+    removeSavedProfile(ADDR_A.toUpperCase());
+
+    expect(getProfile('uid-a')).toBeNull();
+    expect(getProfile(`addr:${ADDR_A}`)).toBeNull();
+    expect(listProfiles().map((profile) => profile.address)).toEqual([ADDR_B]);
+    expect(localStorage.getItem('dehub_token')).toBe('tok-b');
+  });
+});
+
+describe('stageIncomingIdentity', () => {
+  it('clears the outgoing session but keeps the in-flight wagmi connection when asked', () => {
+    seedAccountA();
+    adoptCurrentProfile();
+
+    stageIncomingIdentity({ keepWagmiKeys: true });
+
+    // The outgoing account's keys are gone — the exchange writes fresh ones…
+    expect(localStorage.getItem('dehub_token')).toBeNull();
+    expect(localStorage.getItem('dehub_wallet')).toBeNull();
+    expect(localStorage.getItem('dehub_supabase_uid')).toBeNull();
+    expect(localStorage.getItem(SB_KEY)).toBeNull();
+    // …its wallet key is locked away…
+    expect(lockWallet).toHaveBeenCalled();
+    // …but the wagmi storage the just-connected MetaMask wrote survives.
+    expect(localStorage.getItem('wagmi.connected')).toBe('1');
+    // And the pending-login flags cannot outlive their flow.
+    localStorage.setItem('dehub_supa_login_pending', '1');
+    localStorage.setItem('dehub_supa_login_pending_at', String(Date.now()));
+    stageIncomingIdentity({ keepWagmiKeys: true });
+    expect(localStorage.getItem('dehub_supa_login_pending')).toBeNull();
+    expect(localStorage.getItem('dehub_supa_login_pending_at')).toBeNull();
+  });
+
+  it('wipes wagmi storage too when the incoming identity has none of its own', () => {
+    seedAccountA();
+    adoptCurrentProfile();
+
+    stageIncomingIdentity();
+
+    expect(localStorage.getItem('wagmi.connected')).toBeNull();
+    expect(localStorage.getItem('wagmi.connector')).toBeNull();
+    expect(localStorage.getItem('dehub_token')).toBeNull();
+  });
+
+  it('snapshots the outgoing account so an abandoned attempt can restore it', () => {
+    seedAccountA();
+    adoptCurrentProfile();
+
+    stageIncomingIdentity({ keepWagmiKeys: true });
+
+    const restored = applyProfileSnapshot('uid-a');
+    expect(restored?.supabase).toEqual({ access_token: 'sa-now', refresh_token: 'sr-now' });
+    expect(localStorage.getItem('dehub_token')).toBe('tok-a');
+    expect(localStorage.getItem('wagmi.connected')).toBe('1');
+  });
+
+  it('leaves disk clean when restoring a profile that never existed', () => {
+    seedAccountA();
+
+    const restored = applyProfileSnapshot('uid-ghost');
+
+    expect(restored?.supabase).toBeNull();
+    expect(localStorage.getItem('dehub_token')).toBeNull();
+  });
+
+  it('keeps the incoming Supabase session when the login is being built from it', () => {
+    seedAccountA();
+    // The single-slot vault. The hand-rolled clear this replaced left it
+    // behind, so the incoming account inherited the previous one's key.
+    localStorage.setItem('dehub_wallet_enc', 'cipher-a');
+    adoptCurrentProfile();
+
+    // The social path reaches teardown with the NEW identity's Supabase
+    // session already persisted — wiping it would destroy the session the
+    // login is made of.
+    stageIncomingIdentity({ keepSupabaseSession: true });
+
+    expect(localStorage.getItem('dehub_token')).toBeNull();
+    expect(localStorage.getItem('dehub_wallet_enc')).toBeNull();
+    expect(localStorage.getItem(SB_KEY)).toBe(
+      JSON.stringify({ access_token: 'sa-now', refresh_token: 'sr-now' }),
+    );
+  });
+});
+
+describe('preserveOutgoingProfile', () => {
+  it('saves an account that was never explicitly added, so a second login cannot lose it', () => {
+    seedAccountA();
+    // Deliberately NOT adopted: this is an ordinary session that has never
+    // been through Settings → Add profile.
+    expect(listProfiles()).toHaveLength(0);
+
+    expect(preserveOutgoingProfile()).toBe(true);
+    stageIncomingIdentity({ keepWagmiKeys: true });
+
+    // The account being signed out of the live keys is still switchable.
+    const saved = getProfile('uid-a');
+    expect(saved?.session?.tokens['dehub_token']).toBe('tok-a');
+    expect(beginProfileSwitch('uid-a')).not.toBeNull();
+    expect(localStorage.getItem('dehub_token')).toBe('tok-a');
+  });
+
+  it('refuses, rather than evicting, once the device is at its allowance', () => {
+    seedAccountA();
+    adoptCurrentProfile();
+    seedAccountB();
+    adoptCurrentProfile();
+
+    // Two profiles is the no-badge allowance. A third displacement must not
+    // silently drop one of the saved accounts to make room.
+    for (const key of Object.keys(localStorage)) {
+      if (key !== PROFILES_STORAGE_KEY) localStorage.removeItem(key);
+    }
+    localStorage.setItem('dehub_token', 'tok-c');
+    localStorage.setItem('dehub_wallet', '0xcccccccccccccccccccccccccccccccccccccccc');
+
+    expect(preserveOutgoingProfile()).toBe(false);
+    expect(listProfiles().map((p) => p.id).sort()).toEqual(['addr:' + ADDR_B, 'uid-a'].sort());
+  });
+});
+
+describe('badge-tier profile allowance', () => {
+  function seedAccount(n: number, badgeBalance?: number): void {
+    for (const key of Object.keys(localStorage)) {
+      if (key !== PROFILES_STORAGE_KEY) localStorage.removeItem(key);
+    }
+    localStorage.setItem('dehub_token', `tok-${n}`);
+    localStorage.setItem('dehub_wallet', `0x${String(n).repeat(40).slice(0, 40)}`);
+    localStorage.setItem('dehub_supabase_uid', `uid-${n}`);
+    localStorage.setItem(
+      'dehub_user',
+      JSON.stringify({ username: `user${n}`, ...(badgeBalance === undefined ? {} : { badgeBalance }) }),
+    );
+  }
+
+  it('keeps two profiles with no badge anywhere on the device', () => {
+    seedAccount(1);
+    expect(adoptCurrentProfile()).toBe(true);
+    seedAccount(2);
+    expect(adoptCurrentProfile()).toBe(true);
+
+    expect(profileAllowance().maxProfiles).toBe(2);
+    expect(canAddProfile()).toBe(false);
+
+    seedAccount(3);
+    expect(adoptCurrentProfile()).toBe(false);
+    expect(listProfiles()).toHaveLength(2);
+  });
+
+  it('adds a slot per badge tier, priced off the best badge saved', () => {
+    // Crab is the first tier (10k DHB) — one extra slot, so three.
+    seedAccount(1, 10_000);
+    adoptCurrentProfile();
+    seedAccount(2);
+    adoptCurrentProfile();
+
+    const allowance = profileAllowance();
+    expect(allowance.maxProfiles).toBe(3);
+    expect(allowance.tierName).toBe('Crab');
+    expect(allowance.nextTierProfiles).toBe(4);
+
+    seedAccount(3);
+    expect(adoptCurrentProfile()).toBe(true);
+    seedAccount(4);
+    expect(adoptCurrentProfile()).toBe(false);
+  });
+
+  /**
+   * Settings priced the allowance off the live badge balance and the adopt
+   * gate priced it off the stored snapshot, so somebody who had just staked
+   * into a tier was offered a slot the action then refused. SelfBadgeSync
+   * publishes the live number and both read the same one.
+   */
+  it('takes the published live balance into account, not just the snapshots', () => {
+    seedAccount(1);
+    adoptCurrentProfile();
+    seedAccount(2);
+    adoptCurrentProfile();
+
+    // Two no-badge profiles: full.
+    expect(profileAllowance().maxProfiles).toBe(2);
+    expect(canAddProfile()).toBe(false);
+
+    // The stake lands. The stored rows still say nothing.
+    setLiveBadgeBalanceForProfiles(10_000);
+
+    const allowance = profileAllowance();
+    expect(allowance.maxProfiles).toBe(3);
+    expect(allowance.tierName).toBe('Crab');
+    expect(canAddProfile()).toBe(true);
+
+    // And the gate that actually saves agrees with the button.
+    seedAccount(3);
+    expect(adoptCurrentProfile()).toBe(true);
+  });
+
+  it('only ever promotes on the live balance', () => {
+    seedAccount(1, 10_000);
+    adoptCurrentProfile();
+    // A balance below the saved snapshot must not strip the tier it bought.
+    setLiveBadgeBalanceForProfiles(0);
+    expect(profileAllowance().maxProfiles).toBe(3);
+  });
+
+  it('gives the top tier fifty and names no tier beyond it', () => {
+    seedAccount(1, 50_000_000);
+    adoptCurrentProfile();
+
+    const allowance = profileAllowance();
+    expect(allowance.maxProfiles).toBe(50);
+    expect(allowance.tierName).toBe('Megalodon');
+    expect(allowance.nextTierName).toBeNull();
+  });
+
+  it('names the next tier that is actually worth more, not the next one along', () => {
+    // King Cobra through Killer Whale all keep ten, so the offer under a
+    // King Cobra badge is Blue Whale's twenty-five — not "Octopus keeps 10".
+    seedAccount(1, 250_000);
+    adoptCurrentProfile();
+
+    const allowance = profileAllowance();
+    expect(allowance.maxProfiles).toBe(10);
+    expect(allowance.tierName).toBe('King Cobra');
+    expect(allowance.nextTierName).toBe('Blue Whale');
+    expect(allowance.nextTierProfiles).toBe(25);
+  });
+
+  it('refreshes a profile already saved even when the list is full', () => {
+    seedAccount(1);
+    adoptCurrentProfile();
+    seedAccount(2);
+    adoptCurrentProfile();
+
+    // Back to the first account, now with a new display name.
+    seedAccount(1);
+    localStorage.setItem('dehub_user', JSON.stringify({ username: 'user1', displayName: 'Renamed' }));
+    snapshotCurrentSession();
+
+    expect(listProfiles()).toHaveLength(2);
+    expect(getProfile('uid-1')?.name).toBe('Renamed');
+  });
+
+  it('lets a live balance promote the allowance before a snapshot catches up', () => {
+    seedAccount(1);
+    adoptCurrentProfile();
+    seedAccount(2);
+    adoptCurrentProfile();
+
+    expect(canAddProfile()).toBe(false);
+    // Just staked into Crab; the cached rows still read as no badge.
+    expect(canAddProfile(listProfiles(), 10_000)).toBe(true);
+  });
+});

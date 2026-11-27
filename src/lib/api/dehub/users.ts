@@ -1,0 +1,567 @@
+import { forgetHold, holdFieldFor } from '@/lib/username-hold';
+import { apiCall, authedUpload } from './core';
+import { isReservedUsername } from '@/lib/reserved-usernames';
+import { translateCopy as _translateCopy } from '@/i18n/copy';
+import type { DeHubUser, DeHubNFT, PaginatedResponse } from './types';
+import type { ApiCommentResponse } from './comments';
+
+export async function getAccountInfo(userId: string, address?: string): Promise<DeHubUser> {
+  const params: Record<string, string> = {};
+  if (address) {
+    params.address = address;
+  }
+  const response = await apiCall<{ result: DeHubUser } | DeHubUser>(`/api/account_info/${encodeURIComponent(userId)}`, { params });
+  if (response && typeof response === "object" && "result" in response) {
+    return response.result;
+  }
+  return response as DeHubUser;
+}
+
+export interface AccountSummary {
+  address: string;
+  username?: string | null;
+  displayName?: string | null;
+  avatarImageUrl?: string | null;
+  badgeBalance?: number | null;
+  /** Grandfathered tier; raw, run it through parseBadgeLock. */
+  badgeLock?: unknown;
+  followerCountVisible?: boolean;
+  isBanned?: boolean;
+}
+
+/** Lightweight identity lookup for notification actors. */
+export async function getAccountSummaries(addresses: string[]): Promise<AccountSummary[]> {
+  if (addresses.length === 0) return [];
+  const unique = [...new Set(addresses.filter(Boolean).map(address => address.toLowerCase()))];
+  const batches: string[][] = [];
+  for (let start = 0; start < unique.length; start += 100) {
+    batches.push(unique.slice(start, start + 100));
+  }
+  const responses = await Promise.all(batches.map(batch => apiCall<{ result: AccountSummary[] }>('/api/account_info/batch', {
+      method: 'POST',
+      body: { addresses: batch },
+    })));
+  return responses.flatMap(response => response?.result || []);
+}
+
+export async function getAccountSummariesByUsernames(usernames: string[]): Promise<AccountSummary[]> {
+  if (usernames.length === 0) return [];
+  const unique = [...new Set(usernames.filter(Boolean).map(username => username.replace(/^@/, '').trim().toLowerCase()))];
+  const response = await apiCall<{ result: AccountSummary[] }>('/api/account_info/batch', {
+    method: 'POST',
+    body: { usernames: unique.slice(0, 100) },
+  });
+  return response?.result || [];
+}
+
+/** Addresses and usernames resolved together, in one request per hundred of each. */
+export async function getAccountSummariesMixed(addresses: string[], usernames: string[]): Promise<AccountSummary[]> {
+  const result: AccountSummary[] = [];
+  for (let start = 0; start < Math.max(addresses.length, usernames.length); start += 100) {
+    const response = await apiCall<{ result: AccountSummary[] }>('/api/account_info/batch', {
+      method: 'POST',
+      body: { addresses: addresses.slice(start, start + 100), usernames: usernames.slice(start, start + 100) },
+    });
+    result.push(...(response?.result || []));
+  }
+  return result;
+}
+
+/** Detect empty-shell API responses that return 200 but have no real user data */
+function isEmptyUserResult(user: any): boolean {
+  return !user?._id && !user?.address && !user?.wallet_address && !user?.username;
+}
+
+export async function getAccountByUsername(username: string, address?: string): Promise<DeHubUser> {
+  const cleanUsername = username.replace("@", "").trim();
+  const params: Record<string, string> = {};
+  if (address) {
+    params.address = address;
+  }
+
+  // 1. Try exact input
+  const response = await apiCall<{ result: DeHubUser } | DeHubUser>(`/api/account_info/${encodeURIComponent(cleanUsername)}`, { params });
+  const user = (response && typeof response === "object" && "result" in response)
+    ? response.result
+    : (response as DeHubUser);
+
+  if (!isEmptyUserResult(user)) return user;
+
+  // 2. Try lowercase (backend is case-sensitive, e.g. "SableRaven_9847" → "sableraven_9847")
+  const lowerUsername = cleanUsername.toLowerCase();
+  if (lowerUsername !== cleanUsername) {
+    try {
+      const lowerResponse = await apiCall<{ result: DeHubUser } | DeHubUser>(`/api/account_info/${encodeURIComponent(lowerUsername)}`, { params });
+      const lowerUser = (lowerResponse && typeof lowerResponse === "object" && "result" in lowerResponse)
+        ? lowerResponse.result
+        : (lowerResponse as DeHubUser);
+      if (!isEmptyUserResult(lowerUser)) return lowerUser;
+    } catch { /* continue to search fallback */ }
+  }
+
+  // 3. Search fallback — strict match only
+  try {
+    const searchResponse = await apiCall<{ result: DeHubUser[] } | PaginatedResponse<DeHubUser>>("/api/users_search", {
+      // `searchParam`, not `q` — see searchUsers below.
+      params: { searchParam: cleanUsername, page: 1, limit: 10 },
+    });
+
+    const candidates = Array.isArray((searchResponse as any)?.result)
+      ? (searchResponse as any).result as DeHubUser[]
+      : Array.isArray((searchResponse as any)?.data)
+        ? (searchResponse as any).data as DeHubUser[]
+        : [];
+
+    // Identity safety: only accept strict username match here.
+    // Display names are not unique and can map to the wrong account.
+    const canonicalMatch = candidates.find(
+      (c) => c?.username?.toLowerCase() === lowerUsername,
+    );
+
+    if (canonicalMatch?.username) {
+      const retryResponse = await apiCall<{ result: DeHubUser } | DeHubUser>(`/api/account_info/${encodeURIComponent(canonicalMatch.username)}`, { params });
+      const retryUser = (retryResponse && typeof retryResponse === "object" && "result" in retryResponse)
+        ? retryResponse.result
+        : (retryResponse as DeHubUser);
+      if (!isEmptyUserResult(retryUser)) return retryUser;
+    }
+  } catch { /* exhausted all fallbacks */ }
+
+  return user;
+}
+
+export interface UpdateProfileData {
+  username?: string;
+  displayName?: string;
+  aboutMe?: string;
+  hideFollowers?: boolean;
+  isPrivate?: boolean;
+  hideBadgeAndBalance?: boolean;
+  /**
+   * Include mature posts in the public feeds this viewer is served. Top level
+   * rather than inside `customs` — the API keeps only numeric keys 1-5 in that
+   * blob and silently drops the rest.
+   */
+  showMatureContent?: boolean;
+  defaultProfileView?: DeHubUser['defaultProfileView'];
+  profileViewOthers?: DeHubUser['profileViewOthers'];
+  layoutViewer?: string;
+  notificationPreferences?: string;
+  /** The app's language (a 2-3 letter code), so pushes are written in it. */
+  preferredLanguage?: string;
+  twitterLink?: string;
+  discordLink?: string;
+  instagramLink?: string;
+  tiktokLink?: string;
+  telegramLink?: string;
+  youtubeLink?: string;
+  facebookLink?: string;
+  customs?: Record<string, string | number | boolean>;
+  badgeMuseumVisibility?: 'public' | 'hidden';
+  badgeMuseumViewer?: string;
+  dmSettings?: { disables?: string[]; minTipDhb?: number };
+  avatarImg?: File;
+  coverImg?: File;
+  /** Clear the profile picture / banner (ignored when a new file is sent with it). */
+  removeAvatar?: boolean;
+  removeCover?: boolean;
+  /** The owner's own backdrop for their text posts; the server stores it and sets customs.postBg to 'photo'. */
+  postBgImg?: File;
+}
+
+/**
+ * Give one of your own text posts its own backdrop: `postBg` "id|#a,#b,#c",
+ * or a picture / GIF / video file for that post only. Empty `postBg` sends it
+ * back to the profile's backdrop; tokenId 'all' does that for every post.
+ */
+export async function setPostBackground(tokenId: string | number | 'all', postBg: string, file?: File | null): Promise<{ result: boolean; postBg: string | null }> {
+  const formData = new FormData();
+  formData.append('tokenId', String(tokenId));
+  formData.append('postBg', postBg);
+  if (file) formData.append('postBgImg', file);
+  const result = await authedUpload<{ result: boolean; postBg: string | null; error?: string }>('/api/post_background', formData);
+  if (!result?.result) throw new Error(result?.error || 'Could not save the background');
+  return result;
+}
+
+export async function updateProfile(data: UpdateProfileData): Promise<{ result: boolean }> {
+  const formData = new FormData();
+
+  // Last gate on the client. Every username-editing surface checks this before
+  // enabling its save button, but they can only guard themselves — this covers
+  // whatever surface gets added next, and any path where a debounce has not
+  // caught up. The API accepts these names, so nothing downstream will stop it.
+  if (data.username !== undefined && isReservedUsername(data.username)) {
+    throw new Error(_translateCopy("copy.71bfd7fdb453", { defaultValue: "This username is reserved" }));
+  }
+
+  if (data.username !== undefined) formData.append("username", data.username);
+  // The name this browser reserved from a free profile link: lets the server
+  // hand it over while the one-minute hold is still on.
+  const usernameHold = data.username !== undefined ? holdFieldFor(data.username) : null;
+  if (usernameHold) formData.append("usernameHold", usernameHold);
+  if (data.displayName !== undefined) formData.append("displayName", data.displayName);
+  if (data.aboutMe !== undefined) formData.append("aboutMe", data.aboutMe);
+  if (data.hideFollowers !== undefined) formData.append("hideFollowers", String(data.hideFollowers));
+  if (data.isPrivate !== undefined) formData.append("isPrivate", String(data.isPrivate));
+  if (data.hideBadgeAndBalance !== undefined) formData.append("hideBadgeAndBalance", String(data.hideBadgeAndBalance));
+  if (data.showMatureContent !== undefined) formData.append("showMatureContent", String(data.showMatureContent));
+  if (data.defaultProfileView !== undefined) formData.append("defaultProfileView", data.defaultProfileView);
+  if (data.profileViewOthers !== undefined) formData.append("profileViewOthers", data.profileViewOthers);
+  if (data.layoutViewer !== undefined) formData.append("layoutViewer", data.layoutViewer);
+  if (data.notificationPreferences !== undefined) formData.append("notificationPreferences", data.notificationPreferences);
+  if (data.preferredLanguage !== undefined) formData.append("preferredLanguage", data.preferredLanguage);
+  if (data.twitterLink !== undefined) formData.append("twitterLink", data.twitterLink);
+  if (data.discordLink !== undefined) formData.append("discordLink", data.discordLink);
+  if (data.instagramLink !== undefined) formData.append("instagramLink", data.instagramLink);
+  if (data.tiktokLink !== undefined) formData.append("tiktokLink", data.tiktokLink);
+  if (data.telegramLink !== undefined) formData.append("telegramLink", data.telegramLink);
+  if (data.youtubeLink !== undefined) formData.append("youtubeLink", data.youtubeLink);
+  if (data.facebookLink !== undefined) formData.append("facebookLink", data.facebookLink);
+  
+  if (data.customs !== undefined) {
+    formData.append("customs", JSON.stringify(data.customs));
+  }
+  if (data.badgeMuseumVisibility !== undefined) {
+    formData.append("badgeMuseumVisibility", data.badgeMuseumVisibility);
+    if (data.badgeMuseumViewer !== undefined) formData.append("badgeMuseumViewer", data.badgeMuseumViewer);
+  }
+  if (data.dmSettings !== undefined) {
+    formData.append("dmSettings", JSON.stringify(data.dmSettings));
+  }
+
+  if (data.avatarImg) {
+    formData.append("avatarImg", data.avatarImg);
+    console.log('[updateProfile] Attaching avatarImg:', data.avatarImg.name, data.avatarImg.size, data.avatarImg.type);
+  }
+  if (data.coverImg) {
+    formData.append("coverImg", data.coverImg);
+    console.log('[updateProfile] Attaching coverImg:', data.coverImg.name, data.coverImg.size, data.coverImg.type);
+  }
+
+  if (data.removeAvatar && !data.avatarImg) formData.append("removeAvatar", "true");
+  if (data.removeCover && !data.coverImg) formData.append("removeCover", "true");
+  if (data.postBgImg) formData.append("postBgImg", data.postBgImg);
+
+  // Log all FormData keys being sent
+  const keys: string[] = [];
+  formData.forEach((_, key) => keys.push(key));
+  console.log('[updateProfile] FormData keys:', keys);
+
+  const result = await authedUpload<{ result: boolean }>('/api/update_profile', formData);
+  if (result?.result === false || (result as { error?: boolean })?.error) {
+    throw new Error(_translateCopy("copy.e51c5f7d0545", { defaultValue: "Profile update failed" }));
+  }
+  console.log('[updateProfile] API response:', JSON.stringify(result));
+  if (usernameHold) forgetHold();
+  return result;
+}
+
+export async function getUserNFTs(
+  userId: string,
+  page: number = 1,
+  limit: number = 20,
+): Promise<PaginatedResponse<DeHubNFT>> {
+  return apiCall<PaginatedResponse<DeHubNFT>>(`/api/user/${userId}/nfts`, {
+    params: { page, limit },
+  });
+}
+
+export async function getUsersCount(): Promise<number> {
+  const response = await apiCall<{ result: number } | number>("/api/users_count");
+  if (response && typeof response === 'object' && 'result' in response) {
+    return response.result;
+  }
+  return response as number;
+}
+
+export interface SearchUsersParams {
+  q: string;
+  page?: number;
+  limit?: number;
+}
+
+export async function searchUsers(params: SearchUsersParams): Promise<PaginatedResponse<DeHubUser>> {
+  const response = await apiCall<{ result: DeHubUser[] } | PaginatedResponse<DeHubUser>>("/api/users_search", {
+    // The API reads `searchParam`. Sending `q` left it undefined, and an empty
+    // search there is not an error — it returns an unfiltered page of users, so
+    // every caller got plausible-looking results that ignored the query.
+    params: { searchParam: params.q, page: params.page, limit: params.limit },
+  });
+  
+  // API returns { result: [...] } but we need { data: [...] }
+  if (response && typeof response === 'object' && 'result' in response && Array.isArray((response as any).result)) {
+    const items = (response as any).result as DeHubUser[];
+    return {
+      data: items,
+      total: items.length,
+      page: params.page || 1,
+      limit: params.limit || 10,
+      has_more: items.length === (params.limit || 10),
+    };
+  }
+  
+  return response as PaginatedResponse<DeHubUser>;
+}
+
+/**
+ * The account row the comments endpoint nests as `author` (and as the parent
+ * comment's `author`). Same projection the feed uses for a post's minter, so
+ * the name, avatar and badge beside a reply resolve without another call.
+ */
+export interface UserCommentAuthor {
+  address: string;
+  username?: string;
+  displayName?: string;
+  avatarImageUrl?: string;
+  badgeBalance?: number;
+  badgeLock?: { tier: string; requirement: number } | null;
+  hideBadgeAndBalance?: boolean;
+}
+
+/** The comment a reply answers — only present when `isReply` is true and the parent still exists. */
+export interface UserCommentParent {
+  id: number;
+  content?: string;
+  imageUrl?: string | null;
+  gifUrl?: string | null;
+  audioUrl?: string | null;
+  audioDuration?: number;
+  address?: string;
+  createdAt?: string;
+  author?: UserCommentAuthor;
+}
+
+/**
+ * One row of GET /api/users/:address/comments. It is a comment plus the
+ * context the profile tab needs to show it as a thread: who wrote it, the
+ * comment it answers, and a sliver of the post it sits under (the post's
+ * `minter` here is a bare address — the full post comes from getNFTInfo).
+ */
+export interface UserCommentItem extends Omit<ApiCommentResponse, 'writor'> {
+  writor?: ApiCommentResponse['writor'];
+  isReply?: boolean;
+  author?: UserCommentAuthor;
+  parentComment?: UserCommentParent;
+  post?: {
+    tokenId: number;
+    name?: string;
+    imageUrl?: string;
+    postType?: string;
+    minter?: string;
+    status?: string;
+  };
+  gifUrl?: string | null;
+  audioUrl?: string | null;
+  audioDuration?: number;
+}
+
+export interface UserCommentsResponse {
+  data: UserCommentItem[];
+  total: number;
+  page: number;
+  limit: number;
+  has_more: boolean;
+}
+
+export async function getUserComments(
+  address: string,
+  page: number = 1,
+  limit: number = 20,
+): Promise<UserCommentsResponse> {
+  const response = await apiCall<any>(`/api/users/${encodeURIComponent(address)}/comments`, {
+    params: { page, limit },
+  });
+  // Normalize: API may return { result: { items, pagination } }, an older
+  // { result: { items, totalCount, hasMore } }, or { data, ... }
+  if (response?.result?.items) {
+    const items: UserCommentItem[] = response.result.items;
+    const pagination = response.result.pagination ?? response.result;
+    const total = pagination.totalCount ?? pagination.total ?? pagination.count ?? items.length;
+    return {
+      data: items,
+      total,
+      page,
+      limit,
+      has_more: pagination.hasMore ?? (items.length >= limit),
+    };
+  }
+  if (Array.isArray(response?.data)) {
+    const res = response as UserCommentsResponse;
+    // Ensure total is at least the length of returned data
+    if (res.total === 0 && res.data.length > 0) {
+      res.total = res.data.length;
+    }
+    return res;
+  }
+  return { data: [], total: 0, page, limit, has_more: false };
+}
+
+export interface SuggestedAccount {
+  address: string;
+  username?: string;
+  displayName?: string;
+  avatarUrl?: string;
+  avatarImageUrl?: string;
+  followers?: number;
+  isFollowing?: boolean;
+  badgeBalance?: number;
+  /** Grandfathered tier, so the card wears the badge the profile does. */
+  badgeLock?: { tier: string; requirement: number } | null;
+  hideBadgeAndBalance?: boolean;
+  /** Profile banner path, as the profile API returns it. */
+  coverImageUrl?: string | null;
+  aboutMe?: string | null;
+  uploads?: number;
+  followsYou?: boolean;
+  /** Why the server picked this account. */
+  reason?: 'follows_you' | 'followed_by_people_you_know' | 'engagement_overlap' | 'suggested';
+  /** Up to two people you follow who follow them. */
+  mutualConnections?: { address: string; username?: string; displayName?: string; avatarImageUrl?: string }[];
+}
+
+export async function getSuggestedAccounts(limit: number = 10, page: number = 1): Promise<{ items: SuggestedAccount[]; hasMore: boolean }> {
+  const response = await apiCall<any>("/api/suggested-accounts", {
+    params: { limit, page },
+    requiresAuth: true,
+  });
+  
+  // Handle various API response shapes defensively
+  let items: unknown = response;
+  let hasMore = false;
+  
+  // Unwrap { result: ... }
+  if (response && typeof response === 'object' && 'result' in response) {
+    items = response.result;
+  }
+  
+  // Unwrap { items: [...], pagination: { ... } } (paginated response)
+  if (items && typeof items === 'object' && !Array.isArray(items)) {
+    const obj = items as any;
+    if ('items' in obj) {
+      // Check pagination metadata for hasMore
+      if (obj.pagination) {
+        const { page: currentPage, totalPages, total } = obj.pagination;
+        hasMore = currentPage < totalPages || (obj.items?.length === limit);
+      } else {
+        hasMore = obj.items?.length === limit;
+      }
+      items = obj.items;
+    }
+  }
+  
+  if (Array.isArray(items)) {
+    // If no pagination metadata, infer hasMore from batch size
+    if (!hasMore && items.length === limit) {
+      hasMore = true;
+    }
+    console.log(`[Suggestions] Got ${items.length} suggested accounts (page ${page}, hasMore: ${hasMore})`);
+    return { items: (items as any[]).map((i: any) => ({ ...i, badgeBalance: i.badgeBalance ?? 0 })) as SuggestedAccount[], hasMore };
+  }
+  
+  console.warn('[Suggestions] Unexpected response shape:', JSON.stringify(response).slice(0, 200));
+  return { items: [], hasMore: false };
+}
+
+/**
+ * The endless Who to follow list: every account you don't follow, a page at a
+ * time. `active` (feed) puts recently active, complete profiles first;
+ * `newest` (Explore) the newest sign-ups. Empty profiles come last on both.
+ * `nextCursor` is null once everyone has been shown.
+ */
+export async function getRankedSuggestions(
+  sort: 'active' | 'newest',
+  cursor?: string | null,
+  limit: number = 10,
+): Promise<{ items: SuggestedAccount[]; nextCursor: string | null }> {
+  const response = await apiCall<any>("/api/suggested-accounts", {
+    params: { sort, limit, ...(cursor ? { cursor } : {}) },
+    requiresAuth: true,
+  });
+  const result = response && typeof response === 'object' && 'result' in response ? response.result : response;
+  const items = Array.isArray(result?.items) ? result.items : [];
+  return {
+    items: items.map((i: SuggestedAccount) => ({ ...i, badgeBalance: i.badgeBalance ?? 0 })),
+    nextCursor: typeof result?.nextCursor === 'string' ? result.nextCursor : null,
+  };
+}
+
+/**
+ * The addresses that must stay off people lists: banned, adult, spam.
+ *
+ * For lists read straight from Supabase (New members, the signed-out Who to
+ * follow cache), which know nothing about bans or adult flags. Fails open, so
+ * a slow API never empties a list; the API's own lists filter server-side.
+ */
+export async function getDiscoveryHidden(addresses: string[]): Promise<Set<string>> {
+  const wanted = [...new Set(addresses.filter(Boolean).map(a => a.toLowerCase()))].slice(0, 200);
+  if (!wanted.length) return new Set();
+  try {
+    const response = await apiCall<{ result?: { hidden?: string[] } }>('/api/accounts/discovery-hidden', {
+      method: 'POST',
+      body: { addresses: wanted },
+      timeoutMs: 6000,
+    });
+    return new Set((response?.result?.hidden ?? []).map(a => a.toLowerCase()));
+  } catch {
+    return new Set();
+  }
+}
+
+/**
+ * Fetch cached suggested profiles for unauthenticated users.
+ * These are pre-cached top active users from the leaderboard.
+ */
+export async function getCachedSuggestedProfiles(limit: number = 10, offset: number = 0): Promise<{ items: SuggestedAccount[]; hasMore: boolean }> {
+  const { supabase } = await import('@/integrations/supabase/client');
+  
+  const { data, error } = await supabase
+    .from('suggested_profiles_cache')
+    .select('address, username, display_name, avatar_url, followers, badge_balance')
+    .order('badge_balance', { ascending: false })
+    .range(offset, offset + limit - 1);
+
+  if (error) {
+    console.warn('[CachedSuggestions] Error:', error);
+    return { items: [], hasMore: false };
+  }
+
+  const rows = data || [];
+  const hidden = await getDiscoveryHidden(rows.map((row: any) => row.address));
+  const items: SuggestedAccount[] = rows.filter((row: any) => !hidden.has(String(row.address).toLowerCase())).map((row: any) => ({
+    address: row.address,
+    username: row.username || undefined,
+    displayName: row.display_name || row.username || undefined,
+    avatarUrl: row.avatar_url || undefined,
+    followers: row.followers || 0,
+    isFollowing: false,
+    badgeBalance: row.badge_balance || 0,
+    // This cache cannot carry the live account privacy preference. Fail closed.
+    hideBadgeAndBalance: true,
+  }));
+
+  return { items, hasMore: rows.length === limit };
+}
+
+export interface AnalyticsResponse {
+  result: boolean;
+  range: string;
+  totals: {
+    likes: number;
+    dislikes: number;
+    followers: number;
+    following: number;
+    uploads: number;
+    receivedTips: number;
+    sentTips: number;
+  };
+  likesOverTime: { date: string; count: number }[];
+  followersOverTime: { date: string; count: number }[];
+}
+
+export async function getMyAnalytics(range: '7d' | '30d' | '90d' = '30d'): Promise<AnalyticsResponse> {
+  return apiCall<AnalyticsResponse>("/api/my-analytics", {
+    params: { range },
+    requiresAuth: true,
+  });
+}

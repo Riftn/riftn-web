@@ -1,0 +1,255 @@
+import { useTranslation as _useCopy } from 'react-i18next';
+/**
+ * Data Portability — Settings → Privacy → Your data
+ * =================================================
+ * Export replaces a "coming soon" button that had been sitting there; import
+ * is what makes the export worth having. Moving to another account means
+ * following the same people again, and a list you cannot act on is not
+ * portable data.
+ *
+ * The import is deliberately two steps. Applying it follows accounts, restores
+ * blocks and creates folders as you — side effects on a live account — so the
+ * file is read and counted first, and the dialog says exactly what will happen
+ * before anything is written.
+ *
+ * @module components/app/settings/DataPortability
+ */
+
+import { useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Loader2 } from "lucide-react";
+import Upload from "@/components/ui/cut-icons/upload";
+
+import Download from "@/components/ui/cut-icons/download";
+
+import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { SettingsRow } from '@/components/app/settings/SettingsRow';
+import { useAuth } from '@/contexts/AuthContext';
+import {
+  applyImport,
+  buildExport,
+  downloadExport,
+  parseExport,
+  planImport,
+  type ImportPlan,
+} from '@/lib/data-portability';
+
+export function DataPortability() {
+  const { t: _copy } = _useCopy();
+  const { t } = useTranslation();
+  const { user, walletAddress, isAuthenticated } = useAuth();
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [isExporting, setIsExporting] = useState(false);
+  const [isPlanning, setIsPlanning] = useState(false);
+  const [isApplying, setIsApplying] = useState(false);
+  const [plan, setPlan] = useState<ImportPlan | null>(null);
+  const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
+  const [exportStep, setExportStep] = useState<{ done: number; total: number } | null>(null);
+
+  const address = user?.address || walletAddress || '';
+
+  const handleExport = async () => {
+    if (!address) return;
+    setIsExporting(true);
+    setExportStep(null);
+    try {
+      const data = await buildExport(
+        {
+          address,
+          username: user?.username,
+          displayName: (user as { displayName?: string } | null)?.displayName,
+        },
+        (done, total) => setExportStep({ done, total }),
+      );
+      downloadExport(data);
+      toast.success(
+        t(
+          'settings.exportReady2',
+          'Your data is downloading — {{posts}} posts, {{comments}} comments, {{messages}} messages, {{count}} accounts followed.',
+          {
+            count: data.following.length,
+            posts: data.archive?.posts.length ?? 0,
+            comments: data.archive?.comments.length ?? 0,
+            messages: data.archive?.conversations.reduce((sum, convo) => sum + convo.messages.length, 0) ?? 0,
+          },
+        ),
+      );
+      // A partial export is still worth having, but the user has to know it is
+      // partial — silently shipping eleven of twelve sections is the failure.
+      const missing = data.archive?.meta.failed ?? [];
+      if (missing.length > 0) {
+        toast.info(
+          t('settings.exportPartial', 'These sections could not be read and are missing: {{sections}}.', {
+            sections: missing.join(', '),
+          }),
+        );
+      }
+    } catch (error) {
+      console.error('[export]', error);
+      toast.error(t('settings.exportFailed', 'Could not build your export. Try again.'));
+    } finally {
+      setIsExporting(false);
+      setExportStep(null);
+    }
+  };
+
+  const handleFile = async (file: File) => {
+    setIsPlanning(true);
+    try {
+      const data = parseExport(await file.text());
+      const next = await planImport(data, address);
+      setPlan(next);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : _copy("copy.e9fe8433758b", { defaultValue: "That file could not be read." });
+      toast.error(message);
+    } finally {
+      setIsPlanning(false);
+      // Same file twice in a row should still fire onChange.
+      if (fileRef.current) fileRef.current.value = '';
+    }
+  };
+
+  const handleApply = async () => {
+    if (!plan) return;
+    setIsApplying(true);
+    setProgress({ done: 0, total: plan.toFollow.length + plan.toBlock.length + plan.data.bookmarkFolders.length });
+    try {
+      const result = await applyImport(plan, (done, total) => setProgress({ done, total }));
+      toast.success(
+        t('settings.importDone', 'Imported: {{followed}} followed, {{folders}} folders, {{items}} posts filed.', {
+          followed: result.followed,
+          folders: result.foldersCreated,
+          items: result.itemsFiled,
+        }),
+      );
+      if (result.followFailed > 0) {
+        toast.info(
+          t('settings.importPartial', '{{count}} accounts could not be followed — run the import again to retry them.', {
+            count: result.followFailed,
+          }),
+        );
+      }
+    } catch (error) {
+      console.error('[import]', error);
+      toast.error(t('settings.importFailed', 'The import stopped early. What had already applied is kept.'));
+    } finally {
+      setIsApplying(false);
+      setProgress(null);
+      setPlan(null);
+    }
+  };
+
+  if (!isAuthenticated) return null;
+
+  return (
+    <>
+      <SettingsRow
+        icon={<Download />}
+        title={t('settings.extractData')}
+        description={
+          isExporting && exportStep
+            ? t('settings.exportStep', 'Collecting your data — {{done}} of {{total}} sections…', exportStep)
+            : t(
+                'settings.extractDataDesc3',
+                'Download everything on this account as one file: your profile, posts, comments, messages, notifications, transactions, follows, blocks, saved posts, folders and settings.',
+              )
+        }
+        action={
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={isExporting || !address}
+            onClick={handleExport}
+            className="bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700 rounded-xl"
+          >
+            {isExporting ? <Loader2 className="w-4 h-4 animate-spin" /> : t('settings.download')}
+          </Button>
+        }
+      />
+
+      <SettingsRow
+        icon={<Upload />}
+        title={t('settings.importData', 'Import data')}
+        description={t(
+          'settings.importDataDesc',
+          'Bring an export into this account: follow the same people, restore blocks, folders and groups. You see the numbers before anything is applied.',
+        )}
+        action={
+          <>
+            <input
+              ref={fileRef}
+              type="file"
+              accept="application/json,.json"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) void handleFile(file);
+              }}
+            />
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={isPlanning || isApplying}
+              onClick={() => fileRef.current?.click()}
+              className="bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700 rounded-xl"
+            >
+              {isPlanning ? <Loader2 className="w-4 h-4 animate-spin" /> : t('settings.chooseFile', 'Choose file')}
+            </Button>
+          </>
+        }
+      />
+
+      <AlertDialog open={!!plan} onOpenChange={(open) => { if (!open && !isApplying) setPlan(null); }}>
+        <AlertDialogContent className="bg-zinc-900 border-zinc-800">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-white">
+              {t('settings.importReview', 'Apply this import?')}
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-zinc-400">
+              {plan && (
+                <span className="block space-y-1">
+                  <span className="block">{_copy("copy.e484a95dcc85", { defaultValue: "From " })}{plan.data.account.username || plan.data.account.address.slice(0, 10)}
+                    {plan.data.exportedAt ? _copy("copy.9289b1a64ba0", { defaultValue: ", exported {{value1}}", value1: plan.data.exportedAt.slice(0, 10) }) : ''}.
+                  </span>
+                  <span className="block">{_copy("copy.25b7f7cd02a2", { defaultValue: "· Follow " })}{plan.toFollow.length}{_copy("copy.efa83732e983", { defaultValue: " accounts" })}{plan.alreadyFollowing > 0 ? _copy("copy.d2d020a0e675", { defaultValue: " ({{value1}} already followed)", value1: plan.alreadyFollowing }) : ''}</span>
+                  <span className="block">{_copy("copy.473f53afcf1b", { defaultValue: "· Block " })}{plan.toBlock.length}{_copy("copy.efa83732e983", { defaultValue: " accounts" })}</span>
+                  <span className="block">{_copy("copy.3f646d78c3e2", { defaultValue: "· Create " })}{plan.foldersToCreate.length}{_copy("copy.b39b442f1fbc", { defaultValue: " bookmark folders, fill " })}{plan.foldersToFill}</span>
+                  <span className="block">{_copy("copy.70cf128f75cd", { defaultValue: "· Restore " })}{plan.groups}{_copy("copy.bedf102cf459", { defaultValue: " follow groups and your playback settings" })}</span>
+                  <span className="block pt-1 text-zinc-500">{_copy("copy.c3ad9fa615e4", { defaultValue: "Following and blocking happen as you, on this account. Nothing is removed." })}</span>
+                </span>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          {progress && (
+            <p className="text-xs text-zinc-500">
+              {t('settings.importProgress', 'Applying {{done}} of {{total}}…', progress)}
+            </p>
+          )}
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isApplying} className="bg-zinc-800 border-zinc-700 text-white">
+              {t('common.cancel', 'Cancel')}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              disabled={isApplying}
+              onClick={(e) => { e.preventDefault(); void handleApply(); }}
+              className="bg-white/10 border border-white/20 text-white hover:bg-white/20"
+            >
+              {isApplying ? <Loader2 className="w-4 h-4 animate-spin" /> : t('settings.applyImport', 'Apply')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
+  );
+}

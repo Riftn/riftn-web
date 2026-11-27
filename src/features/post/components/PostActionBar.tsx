@@ -1,0 +1,852 @@
+import { useTranslation as _useCopy } from 'react-i18next';
+import { useState, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
+import { useCrossPostAccountCount } from './CrossPostPicker';
+import { Eye, Loader2, SpellCheck, Palette, Paintbrush, ChevronLeft, Type, Hash, BarChart2, MonitorPlay, Cable, AlertTriangle, ScreenShare, GraduationCap, UserRound, Image as ImageIcon } from "lucide-react";
+import BookOpen from "@/components/ui/cut-icons/docs";
+import Check from "@/components/ui/cut-icons/check";
+import More from "@/components/ui/cut-icons/more";
+import Paperclip from "@/components/ui/cut-icons/attach";
+import Calendar from "@/components/ui/cut-icons/events";
+import Radio from "@/components/ui/cut-icons/live";
+import Sparkles from "@/components/ui/cut-icons/assistant";
+import Music from "@/components/ui/cut-icons/music";
+import Video from "@/components/ui/cut-icons/video";
+import Upload from "@/components/ui/cut-icons/upload";
+import Camera from "@/components/ui/cut-icons/camera";
+
+import Send from "@/components/ui/cut-icons/send";
+import Mic from "@/components/ui/cut-icons/mic";
+import ChevronRight from "@/components/ui/cut-icons/next";
+import X from "@/components/ui/cut-icons/close";
+import Search from "@/components/ui/cut-icons/search";
+import MessageSquare from "@/components/ui/cut-icons/messages";
+import Languages from "@/components/ui/cut-icons/language";
+import { LANGUAGE_NAMES } from '@/hooks/use-user-language';
+import { TranslateLanguageList } from './TranslateLanguageList';
+import { rememberedTranslateLang } from '../post-translate';
+
+import { Button } from '@/components/ui/button';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
+import { cn } from '@/lib/utils';
+import { GLASS_STYLES } from '@/constants/app.constants';
+import { LiquidGlassBubble } from '@/components/ui/liquid-glass-bubble';
+import { AI_STYLE_OPTIONS } from '@/constants/ai-styles.constants';
+import { GoLiveModal } from '@/components/app/modals';
+import { EmojiGifPicker } from '@/components/app/chat/EmojiGifPicker';
+import type { LiveMode, LiveStreamHandoff } from '../types';
+import { clock, soundMix, soundWindow, type SoundMix } from '@/lib/sound-window';
+import { SoundMixer } from './SoundMixer';
+import type { AttachedSound } from '../hooks/usePostSound';
+
+import { formatCount } from '@/lib/format-count';
+interface PostActionBarProps {
+  imageInputRef: React.RefObject<HTMLInputElement>;
+  videoInputRef: React.RefObject<HTMLInputElement>;
+  audioInputRef: React.RefObject<HTMLInputElement>;
+  onImageSelect: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onVideoSelect: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onAudioSelect: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onStartRecording: () => void;
+  liveMode: LiveMode;
+  setLiveMode: (value: LiveMode) => void;
+  /**
+   * A stream the composer's own mint just provisioned. Its arrival is what
+   * opens the broadcast sheet — there is no setup step any more, so the sheet
+   * is only ever entered already on air.
+   */
+  liveStream?: LiveStreamHandoff | null;
+  onInsertFormatting: (format: 'bold' | 'italic' | 'mention') => void;
+  onInsertEmoji: (emoji: string) => void;
+  onInsertGif: (gifUrl: string) => void;
+  onCameraCapture: () => void;
+  onEnhanceWithAI: (mode: 'spellcheck' | 'grammar' | 'style', style?: string) => void;
+  /** AI menu > Translate: turn the draft into the picked language. */
+  onTranslate?: (lang: string) => void;
+  onPost: () => void;
+  /** Opens the post drawn by the real feed card. */
+  onPreview?: () => void;
+  canPost: boolean;
+  isEnhancing: boolean;
+  isPosting?: boolean;
+  uploadProgress?: number;
+  /** The mint is waiting on a wallet that has not answered yet. */
+  mintAwaitingWallet?: boolean;
+  /** Give up on the wallet and publish the post off-chain. */
+  onAbandonMint?: () => void;
+  
+  hasText: boolean;
+  hasImage?: boolean;
+  hasVideo?: boolean;
+  isScheduled?: boolean;
+  onCloseModal?: () => void;
+  onOpenCategories?: () => void;
+  onOpenSoundPicker?: () => void;
+  attachedSound?: AttachedSound | null;
+  onClearSound?: () => void;
+  /** Song / video sound levels; only offered on a video post. */
+  onSoundMixChange?: (mix: SoundMix) => void;
+  onTogglePoll?: () => void;
+  hasPoll?: boolean;
+  /** Add or take off a quiz (Create Post > Quiz). */
+  onToggleQuiz?: () => void;
+  hasQuiz?: boolean;
+  /** Open the photo tagger; only offered with photos attached. */
+  onTagPeople?: () => void;
+  /** People tagged so far, shown beside the row. */
+  tagCount?: number;
+  /** Turn Comic mode on or off (photos post as collector cards). */
+  onToggleComic?: () => void;
+  isComic?: boolean;
+  /** Open the Painting canvas; the finished painting joins the post as a photo. */
+  onOpenPainting?: () => void;
+  /** Search the free photo library and add a picture to the post. */
+  onOpenFreeImages?: () => void;
+  /** Add or take off a content warning. */
+  onToggleContentWarning?: () => void;
+  hasContentWarning?: boolean;
+  /** Multi-post account controls rendered inside the shared options sheet. */
+  extraTool?: React.ReactNode;
+  /** No Go Live control — a quote cannot be a livestream. */
+  hideLive?: boolean;
+}
+
+export function PostActionBar({
+  imageInputRef,
+  videoInputRef,
+  audioInputRef,
+  onImageSelect,
+  onVideoSelect,
+  onAudioSelect,
+  onStartRecording,
+  liveMode,
+  setLiveMode,
+  liveStream,
+  onInsertFormatting,
+  onInsertEmoji,
+  onInsertGif,
+  onCameraCapture,
+  onEnhanceWithAI,
+  onTranslate,
+  onPost,
+  onPreview,
+  canPost,
+  isEnhancing,
+  isPosting,
+  uploadProgress,
+  mintAwaitingWallet,
+  onAbandonMint,
+  
+  hasText,
+  hasImage,
+  hasVideo,
+  isScheduled,
+  onCloseModal,
+  onOpenCategories,
+  onOpenSoundPicker,
+  attachedSound,
+  onClearSound,
+  onSoundMixChange,
+  onTogglePoll,
+  onToggleQuiz,
+  hasQuiz,
+  onTagPeople,
+  tagCount = 0,
+  onToggleContentWarning,
+  hasContentWarning,
+  hasPoll,
+  onToggleComic,
+  isComic,
+  onOpenPainting,
+  onOpenFreeImages,
+  extraTool,
+  hideLive = false,
+}: PostActionBarProps) {
+  const { t: _copy } = _useCopy();
+  const { t } = useTranslation();
+  const [audioPopoverOpen, setAudioPopoverOpen] = useState(false);
+  const [postOptionsOpen, setPostOptionsOpen] = useState(false);
+  const crossPostCount = useCrossPostAccountCount(!!extraTool);
+  /**
+   * OBS does not want the composer's fields — it wants an ingest URL and a
+   * key. Picking it opens the Go Live sheet on its own setup step instead of
+   * putting the composer into live mode, so nothing is minted until the
+   * creator has actually asked for the credentials.
+   */
+  const [encoderSetup, setEncoderSetup] = useState(false);
+  // Same shape as the encoder: a capture card needs its picker and preview,
+  // which live on the Go Live sheet's own setup step.
+  const [captureSetup, setCaptureSetup] = useState(false);
+  const [livePopoverOpen, setLivePopoverOpen] = useState(false);
+  const [enhanceSheetOpen, setEnhanceSheetOpen] = useState(false);
+  const [styleView, setStyleView] = useState(false);
+  const [langView, setLangView] = useState(false);
+  const navigate = useNavigate();
+  const isLive = liveMode !== null;
+  const attachmentInputRef = useRef<HTMLInputElement>(null);
+
+  // One attachment control for both images and video: route the picked files to
+  // whichever handler matches the first file's type.
+  const handleAttachmentSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const first = e.target.files?.[0];
+    if (!first) return;
+    if (first.type.startsWith('video/')) {
+      onVideoSelect(e);
+    } else {
+      onImageSelect(e);
+    }
+  };
+
+
+  const handleSelectLiveMode = (mode: LiveMode) => {
+    setLiveMode(mode);
+    setLivePopoverOpen(false);
+    // Neither mode opens anything. Picking Live — video or stage — just puts
+    // the composer in live mode, and the composer itself is the setup form.
+    // Stages used to close this modal and hand over a second create form asking
+    // for the same title and description again; the room is now opened by the
+    // Go Live button below, off what was typed here.
+  };
+
+  const handleSelectEncoder = () => {
+    // Not a live mode: the composer's fields are for a post, and an encoder
+    // stream is set up in the Go Live sheet, which asks for the title once and
+    // then hands back the ingest URL and key.
+    setLiveMode(null);
+    setLivePopoverOpen(false);
+    setEncoderSetup(true);
+  };
+
+  const handleSelectCaptureCard = () => {
+    setLiveMode(null);
+    setLivePopoverOpen(false);
+    setCaptureSetup(true);
+  };
+
+  const handleSpellCheck = () => {
+    onEnhanceWithAI('spellcheck');
+    setEnhanceSheetOpen(false);
+    setStyleView(false);
+  };
+
+  const handleGrammar = () => {
+    onEnhanceWithAI('grammar');
+    setEnhanceSheetOpen(false);
+    setStyleView(false);
+  };
+
+  const handleStyleSelect = (styleId: string) => {
+    onEnhanceWithAI('style', styleId);
+    setEnhanceSheetOpen(false);
+    setStyleView(false);
+  };
+
+  const handleCloseEnhance = () => {
+    setEnhanceSheetOpen(false);
+    setStyleView(false);
+    setLangView(false);
+  };
+
+  const handleTranslate = (lang: string) => {
+    onTranslate?.(lang);
+    handleCloseEnhance();
+  };
+
+  // Menu content - used in Drawer on all devices
+  const menuContent = (
+    <div className="flex flex-col max-h-[50vh] overflow-y-auto pb-4">
+      {langView ? (
+        <TranslateLanguageList onPick={handleTranslate} />
+      ) : styleView ? (
+        <>
+          {AI_STYLE_OPTIONS.map((style) => (
+            <button
+              key={style.id}
+              type="button"
+              onClick={() => handleStyleSelect(style.id)}
+              className="flex items-center gap-3 px-4 py-3 text-sm text-white hover:bg-white/10 transition-colors"
+            >
+              <span className="text-lg">{style.emoji}</span>
+              {t(`aiStyles.${style.id}`)}
+            </button>
+          ))}
+        </>
+      ) : (
+        <>
+          <button
+            type="button"
+            onClick={handleSpellCheck}
+            className="flex items-center gap-3 px-4 py-3 text-sm text-white hover:bg-white/10 transition-colors"
+          >
+            <SpellCheck className="w-5 h-5 text-white" />{_copy("copy.c7792f24e82b", { defaultValue: "Spell Check" })}</button>
+          
+          <button
+            type="button"
+            onClick={handleGrammar}
+            className="flex items-center gap-3 px-4 py-3 text-sm text-white hover:bg-white/10 transition-colors"
+          >
+            <Type className="w-5 h-5 text-white" />{_copy("copy.687f9b07420c", { defaultValue: "Fix Grammar" })}</button>
+          
+          <button
+            type="button"
+            onClick={() => setStyleView(true)}
+            className="flex items-center justify-between px-4 py-3 text-sm text-white hover:bg-white/10 transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              <Palette className="w-5 h-5 text-white" />{_copy("copy.21b90e9de0f4", { defaultValue: "Change Style" })}</div>
+            <ChevronRight className="w-4 h-4 text-zinc-500" />
+          </button>
+
+          {onTranslate && (
+            <button
+              type="button"
+              onClick={() => setLangView(true)}
+              className="flex items-center justify-between px-4 py-3 text-sm text-white hover:bg-white/10 transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <Languages className="w-5 h-5 text-white" />{_copy("copy.8fe147696fbf", { defaultValue: "Translate" })}</div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-white/60">{LANGUAGE_NAMES[rememberedTranslateLang()] ?? LANGUAGE_NAMES.en}</span>
+                <ChevronRight className="w-4 h-4 text-zinc-500" />
+              </div>
+            </button>
+          )}
+
+          <button
+            type="button"
+            onClick={() => {
+              setEnhanceSheetOpen(false);
+              setStyleView(false);
+              onCloseModal?.();
+              navigate('/app/assistant');
+            }}
+            className="flex items-center gap-3 px-4 py-3 text-sm text-white hover:bg-white/10 transition-colors"
+          >
+            <MessageSquare className="w-5 h-5 text-white" />{_copy("copy.d0f3b9c25380", { defaultValue: "Generate Content" })}</button>
+        </>
+      )}
+    </div>
+  );
+
+  const handleGoLiveModalClose = () => {
+    // The encoder sheet carries its own post and never consumed the composer's
+    // fields, so backing out of it must leave what was typed here alone —
+    // closing the composer would throw away a draft the creator never
+    // submitted. Only the broadcast handover, which published its post before
+    // the camera came on, takes the composer down with it.
+    const wasBroadcast = !!liveStream;
+    setLiveMode(null);
+    setEncoderSetup(false);
+    setCaptureSetup(false);
+    if (wasBroadcast) onCloseModal?.();
+  };
+
+  const showUploadBar = isPosting && (uploadProgress ?? 0) > 0;
+
+  return (
+    <>
+      {/* Two ways in, and they land on different steps. A provisioned stream
+          arriving from the composer's own mint opens the broadcast console —
+          the composer above was its setup form. Picking OBS opens the sheet's
+          own setup step instead, because an encoder stream needs a key handed
+          back to it and the composer has no field for that. */}
+      <GoLiveModal
+        isOpen={!!liveStream || encoderSetup || captureSetup}
+        onClose={handleGoLiveModalClose}
+        initialStream={liveStream}
+        {...(encoderSetup && !liveStream ? { initialSource: 'rtmp' as const } : null)}
+        {...(captureSetup && !encoderSetup && !liveStream ? { initialSource: 'capture' as const } : null)}
+      />
+
+      {/* Upload progress bar — liquid glass bubble style */}
+      {showUploadBar && (
+        <div className="px-4 pt-2 pb-1">
+          <LiquidGlassBubble shimmer={false} noBorder={false} className="w-full">
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-xs text-white/60">
+                {mintAwaitingWallet
+                  ? _copy("copy.d978a5522ce4", { defaultValue: "Confirming" })
+                  : (uploadProgress ?? 0) < 60
+                    ? _copy("copy.72cb29c90ccd", { defaultValue: "Uploading..." })
+                    : (uploadProgress ?? 0) < 100
+                      ? _copy("copy.5f51143bee08", { defaultValue: "Publishing..." })
+                      : _copy("copy.b4e19ee2ae63", { defaultValue: "Done!" })}
+              </span>
+              <span className="text-xs text-white/60 tabular-nums">{uploadProgress ?? 0}%</span>
+            </div>
+            <div className="w-full h-2 rounded-full overflow-hidden bg-white/[0.06] border border-white/[0.08] shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]">
+              <div
+                className="h-full rounded-full transition-all duration-500 ease-out relative overflow-hidden"
+                style={{
+                  width: `${uploadProgress ?? 0}%`,
+                  background: 'linear-gradient(90deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.28) 50%, rgba(255,255,255,0.12) 100%)',
+                  boxShadow: '0 0 12px rgba(255,255,255,0.12), inset 0 1px 0 rgba(255,255,255,0.18)',
+                  borderTop: '1px solid rgba(255,255,255,0.15)',
+                }}
+              >
+                <div
+                  className="absolute inset-0"
+                  style={{
+                    background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.25) 50%, transparent 100%)',
+                    backgroundSize: '200% 100%',
+                    animation: 'shimmer 2s infinite linear',
+                  }}
+                />
+              </div>
+            </div>
+            {/*
+              The way out of a wallet prompt that never arrived.
+
+              Only appears once the mint has actually stalled, so a normal post
+              never sees it. It does not cancel anything — the post is already
+              published by this point — it stops waiting for the signature and
+              lets the composer close, which is the difference between losing
+              the post and losing only the mint.
+            */}
+            {mintAwaitingWallet && onAbandonMint && (
+              <div className="mt-2 flex items-center justify-between gap-3">
+                <span className="text-[11px] leading-tight text-white/45">{_copy("copy.c70f4a525aee", { defaultValue: "Your post is saved. If your wallet has not asked you to confirm, publish it without minting." })}</span>
+                <button
+                  type="button"
+                  onClick={onAbandonMint}
+                  className="shrink-0 rounded-full border border-white/15 bg-white/[0.06] px-3 py-1 text-[11px] text-white/80 transition-colors hover:bg-white/[0.12]"
+                >{_copy("copy.61a3f68e5e7d", { defaultValue: "Post without minting" })}</button>
+              </div>
+            )}
+          </LiquidGlassBubble>
+        </div>
+      )}
+
+      {/* Attached sound chip; with a photo or video and no song yet, the way to add one. */}
+      {attachedSound ? (
+        <div className="px-4 py-1.5 border-t border-white/10">
+          <div className="flex items-center gap-2 bg-white/5 rounded-lg px-3 py-1.5">
+            <Music className="w-3.5 h-3.5 text-white/60 flex-shrink-0" />
+            <button
+              type="button"
+              onClick={onOpenSoundPicker}
+              disabled={!onOpenSoundPicker}
+              className="min-w-0 flex-1 truncate text-left text-xs text-white/80"
+            >
+              ♪ {attachedSound.title} — {attachedSound.creator}
+              {soundWindow(attachedSound.url) && (
+                <span className="text-white/45"> · {clock(soundWindow(attachedSound.url)!.start)}{soundWindow(attachedSound.url)!.end != null ? `–${clock(soundWindow(attachedSound.url)!.end!)}` : ''}</span>
+              )}
+            </button>
+            <button
+              type="button"
+              onClick={onClearSound}
+              aria-label={_copy("copy.55fd43d20da5", { defaultValue: "Remove sound" })}
+              className="p-0.5 hover:bg-white/10 rounded transition-colors flex-shrink-0"
+            >
+              <X className="w-3.5 h-3.5 text-white/50" />
+            </button>
+          </div>
+          {hasVideo && onSoundMixChange && (
+            <SoundMixer className="mt-1.5" mix={soundMix(attachedSound.url)} onChange={onSoundMixChange} />
+          )}
+        </div>
+      ) : onOpenSoundPicker && !isLive && (hasImage || hasVideo) ? (
+        <div className="px-4 py-1.5 border-t border-white/10">
+          <button
+            type="button"
+            onClick={onOpenSoundPicker}
+            data-add-sound
+            className="flex h-8 items-center gap-1.5 rounded-full bg-white/10 px-3 text-xs font-semibold text-white transition-colors hover:bg-white/15"
+          >
+            <Music className="w-3.5 h-3.5" />
+            {_copy("copy.d14064f80f52", { defaultValue: "Add sound" })}
+          </button>
+        </div>
+      ) : null}
+
+    <div data-composer-action-bar className="px-4 py-2 border-t border-white/10 flex items-center justify-between gap-2">
+      <div className="flex items-center gap-0.5">
+        <input ref={imageInputRef} type="file" accept="image/*" multiple onChange={onImageSelect} className="hidden" />
+        <input ref={videoInputRef} type="file" accept="video/*" onChange={onVideoSelect} className="hidden" />
+        <input ref={audioInputRef} type="file" accept="audio/mp3,audio/mpeg,audio/wav,audio/ogg,audio/m4a,audio/*" onChange={onAudioSelect} className="hidden" />
+        <input
+          ref={attachmentInputRef}
+          type="file"
+          accept={hasImage ? 'image/*' : hasVideo ? 'video/*' : 'image/*,video/*'}
+          multiple={!hasVideo}
+          onChange={handleAttachmentSelect}
+          className="hidden"
+        />
+
+        {/* Camera button for recording - leftmost position */}
+        {!isLive && !hasVideo && !hasImage && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button 
+                type="button" 
+                onClick={onCameraCapture} 
+                className="p-2 hover:bg-white/10 rounded-xl transition-colors"
+              >
+                <Camera className="w-5 h-5 text-white" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent>{_copy("copy.5cb2b16872cb", { defaultValue: "Record video" })}</TooltipContent>
+          </Tooltip>
+        )}
+
+        {/* Attachment button — image and video share one control. It stays put
+            in live mode: the file picked there is the stream's preview media —
+            a thumbnail, a GIF or a short clip — not a second post. */}
+        {(
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                type="button"
+                onClick={() => attachmentInputRef.current?.click()}
+                className="p-2 hover:bg-white/10 rounded-xl transition-colors"
+              >
+                <Paperclip className="w-5 h-5 text-white" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent>
+              {isLive
+                ? _copy("copy.baf75275d4f5", { defaultValue: "Set live preview image or video" })
+                : hasImage ? _copy("copy.04136060b40f", { defaultValue: "Add image" }) : hasVideo ? _copy("copy.e9594fc595b1", { defaultValue: "Replace video" }) : _copy("copy.9f343703fd8d", { defaultValue: "Add image or video" })}
+            </TooltipContent>
+          </Tooltip>
+        )}
+
+        {/* Audio button with popover for upload/record options */}
+        {!isLive && (
+          <Popover open={audioPopoverOpen} onOpenChange={setAudioPopoverOpen} modal={true}>
+            <PopoverTrigger asChild>
+              <button 
+                type="button" 
+                aria-label={_copy("copy.bc1b88907d3b", { defaultValue: "Audio" })}
+                className="p-2 hover:bg-white/10 rounded-xl transition-colors"
+              >
+                <Music className="w-5 h-5 text-white" />
+              </button>
+            </PopoverTrigger>
+            <PopoverContent data-modal-shield="" 
+              className="w-auto p-1 bg-zinc-900/90 backdrop-blur-xl border border-white/10 shadow-xl rounded-xl z-[150]" 
+              align="center"
+              side="top"
+              sideOffset={8}
+            >
+              <div className="flex flex-col items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    audioInputRef.current?.click();
+                    setAudioPopoverOpen(false);
+                  }}
+                  className="p-2.5 rounded-xl bg-white/10 hover:bg-white/20 transition-all"
+                  title={_copy("copy.31997f8069c4", { defaultValue: "Upload Audio" })}
+                >
+                  <Upload className="w-5 h-5 text-white" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    onStartRecording();
+                    setAudioPopoverOpen(false);
+                  }}
+                  className="p-2.5 rounded-xl bg-white/10 hover:bg-white/20 transition-all"
+                  title={_copy("copy.ba70b10213ad", { defaultValue: "Record Audio" })}
+                >
+                  <Mic className="w-5 h-5 text-white" />
+                </button>
+                {onOpenSoundPicker && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onOpenSoundPicker();
+                      setAudioPopoverOpen(false);
+                    }}
+                    className="p-2.5 rounded-xl bg-white/10 hover:bg-white/20 transition-all"
+                    title={_copy("copy.05408027906c", { defaultValue: "Search Sounds" })}
+                  >
+                    <Search className="w-5 h-5 text-white" />
+                  </button>
+                )}
+              </div>
+            </PopoverContent>
+          </Popover>
+        )}
+        
+        {/* Always present. Hiding it once an image was attached left live mode
+            with no way back off it, now that a cover is a normal thing to
+            attach to a stream. */}
+        {!hideLive && (
+          <Popover open={livePopoverOpen} onOpenChange={setLivePopoverOpen} modal={true}>
+            <PopoverTrigger asChild>
+              <button 
+                type="button" 
+                onClick={() => {
+                  if (isLive) {
+                    setLiveMode(null);
+                  }
+                }}
+                className={cn("p-2 hover:bg-white/10 rounded-xl transition-colors", isLive && "bg-white/20")}
+                title={_copy("copy.a9f690169703", { defaultValue: "Go live" })}
+              >
+                <Radio className={cn("w-5 h-5", isLive ? "text-white" : "text-white")} />
+              </button>
+            </PopoverTrigger>
+            <PopoverContent data-modal-shield="" 
+              className="w-auto p-1 bg-zinc-900/90 backdrop-blur-xl border border-white/10 shadow-xl rounded-xl z-[150]" 
+              align="center"
+              side="top"
+              sideOffset={8}
+            >
+              <div className="flex flex-col gap-0.5 min-w-[11rem]">
+                <button
+                  type="button"
+                  onClick={() => handleSelectLiveMode('video')}
+                  className="flex items-center gap-2.5 w-full px-3 py-2.5 rounded-lg text-left bg-transparent motion-safe:transition-transform [@media(hover:hover)]:motion-safe:hover:scale-[1.02]"
+                >
+                  <Video className="w-4 h-4 text-white shrink-0" />
+                  <span className="text-sm text-white">{t('goLive.sourceCamera')}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleSelectLiveMode('townhall')}
+                  className="flex items-center gap-2.5 w-full px-3 py-2.5 rounded-lg text-left bg-transparent motion-safe:transition-transform [@media(hover:hover)]:motion-safe:hover:scale-[1.02]"
+                >
+                  <Mic className="w-4 h-4 text-white shrink-0" />
+                  <span className="text-sm text-white">{t('stages.title')}</span>
+                </button>
+                {/* The third one. Going live from here meant a camera or a
+                    stage and nothing else, so the encoder path — what a
+                    capture card, a console or a scene collection needs — was
+                    only reachable from a side-panel icon that exists on
+                    desktop, on one tab, and only while nobody is live. */}
+                <button
+                  type="button"
+                  onClick={handleSelectEncoder}
+                  className="flex items-center gap-2.5 w-full px-3 py-2.5 rounded-lg text-left bg-transparent motion-safe:transition-transform [@media(hover:hover)]:motion-safe:hover:scale-[1.02]"
+                >
+                  <MonitorPlay className="w-4 h-4 text-white shrink-0" />
+                  <span className="text-sm text-white">{t('goLive.sourceEncoder')}</span>
+                </button>
+                {/* Phone browsers have no screen capture for any website, so
+                    screen share on a phone lives in the app; say so here
+                    rather than leave the option missing. */}
+                {typeof navigator !== 'undefined' &&
+                  typeof navigator.mediaDevices?.getDisplayMedia !== 'function' && (
+                  <button
+                    type="button"
+                    onClick={() => toast(t('goLive.screenInAppNote'), {
+                      duration: 8000,
+                      action: { label: t('goLive.screenInAppCta'), onClick: () => navigate('/dehub-app') },
+                    })}
+                    className="flex items-center gap-2.5 w-full px-3 py-2.5 rounded-lg text-left bg-transparent motion-safe:transition-transform [@media(hover:hover)]:motion-safe:hover:scale-[1.02]"
+                  >
+                    <ScreenShare className="w-4 h-4 text-white shrink-0" />
+                    <span className="flex flex-col">
+                      <span className="text-sm text-white">{t('goLive.sourceScreen')}</span>
+                      <span className="text-[11px] text-zinc-400">{t('goLive.screenInAppHint')}</span>
+                    </span>
+                  </button>
+                )}
+                {/* Desktop only: phones can't take a USB capture card, and
+                    getDisplayMedia is the same desktop test the sheet uses. */}
+                {typeof navigator !== 'undefined' &&
+                  typeof navigator.mediaDevices?.getDisplayMedia === 'function' && (
+                  <button
+                    type="button"
+                    onClick={handleSelectCaptureCard}
+                    className="flex items-center gap-2.5 w-full px-3 py-2.5 rounded-lg text-left bg-transparent motion-safe:transition-transform [@media(hover:hover)]:motion-safe:hover:scale-[1.02]"
+                  >
+                    <Cable className="w-4 h-4 text-white shrink-0" />
+                    <span className="text-sm text-white">{_copy("copy.4a1bd4a3aaf3", { defaultValue: "Capture card" })}</span>
+                  </button>
+                )}
+              </div>
+            </PopoverContent>
+          </Popover>
+        )}
+
+        {/* Emoji/GIF picker - single working button */}
+        <EmojiGifPicker 
+          onEmojiSelect={onInsertEmoji}
+          onGifSelect={onInsertGif}
+          triggerClassName="h-auto w-auto p-2 rounded-xl text-white backdrop-blur-none hover:bg-white/10 [&_svg]:size-5"
+        />
+
+        {(!isLive && (onTogglePoll || onToggleQuiz || onTagPeople || onToggleComic || onOpenPainting || onOpenFreeImages || onToggleContentWarning || extraTool)) && (
+          <button
+            type="button"
+            onClick={() => setPostOptionsOpen(true)}
+            aria-label={t('upload.postOptions', { defaultValue: 'Post options' })}
+            aria-haspopup="dialog"
+            aria-expanded={postOptionsOpen}
+            className={cn('relative flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-white transition-colors hover:bg-white/10', (hasPoll || hasQuiz || tagCount > 0 || isComic || hasContentWarning || (extraTool && crossPostCount > 0)) && 'bg-white/20')}
+          >
+            <More className="h-5 w-5" />
+            {extraTool && crossPostCount > 0 && (
+              <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-white px-1 text-[10px] font-semibold text-black">{formatCount(crossPostCount)}</span>
+            )}
+          </button>
+        )}
+
+        <Drawer open={postOptionsOpen} onOpenChange={setPostOptionsOpen}>
+          <DrawerContent column glass className="border-t border-white/10 max-h-[80dvh]">
+            <DrawerHeader className="border-b border-white/10">
+              <DrawerTitle>{t('upload.postOptions', { defaultValue: 'Post options' })}</DrawerTitle>
+            </DrawerHeader>
+            <div className="overflow-y-auto p-4">
+              {!isLive && !isComic && onTogglePoll && (
+                <button type="button" aria-pressed={!!hasPoll}
+                  onClick={() => { setPostOptionsOpen(false); onTogglePoll(); }}
+                  className={cn('flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm text-white hover:bg-white/10', hasPoll && 'bg-white/15')}
+                >
+                  <BarChart2 className="h-5 w-5" />
+                  {hasPoll ? _copy('copy.03ed4421a6d5', { defaultValue: 'Remove poll' }) : _copy('copy.1dd3d9f671d4', { defaultValue: 'Add poll' })}
+                </button>
+              )}
+              {!isLive && !isComic && onToggleQuiz && (
+                <button type="button" aria-pressed={!!hasQuiz}
+                  onClick={() => { setPostOptionsOpen(false); onToggleQuiz(); }}
+                  className={cn('flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm text-white hover:bg-white/10', hasQuiz && 'bg-white/15')}
+                >
+                  <GraduationCap className="h-5 w-5" />
+                  {hasQuiz ? t('quiz.remove', { defaultValue: 'Remove quiz' }) : t('quiz.add', { defaultValue: 'Add quiz' })}
+                </button>
+              )}
+              {!isLive && onTagPeople && (
+                <button type="button"
+                  onClick={() => { setPostOptionsOpen(false); onTagPeople(); }}
+                  className={cn('flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm text-white hover:bg-white/10', tagCount > 0 && 'bg-white/15')}
+                >
+                  <UserRound className="h-5 w-5" />
+                  <span className="flex-1">{t('photoTags.title', { defaultValue: 'Tag people' })}</span>
+                  {tagCount > 0 && <span className="text-xs text-white/60">{formatCount(tagCount)}</span>}
+                </button>
+              )}
+              {!isLive && !hasVideo && !hasPoll && onToggleComic && (
+                <button type="button" aria-pressed={!!isComic}
+                  onClick={() => { setPostOptionsOpen(false); onToggleComic(); }}
+                  className={cn('flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm text-white hover:bg-white/10', isComic && 'bg-white/15')}
+                >
+                  <BookOpen className="h-5 w-5" />
+                  <span className="flex-1">{_copy('comic.tab', { defaultValue: 'Comic' })}</span>
+                  {isComic && <Check className="h-4 w-4" />}
+                </button>
+              )}
+              {!isLive && !hasVideo && onOpenPainting && (
+                <button type="button"
+                  onClick={() => { setPostOptionsOpen(false); onOpenPainting(); }}
+                  className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm text-white hover:bg-white/10"
+                >
+                  <Paintbrush className="h-5 w-5" />
+                  <span className="flex-1">{t('painting.title', { defaultValue: 'Painting' })}</span>
+                </button>
+              )}
+              {!isLive && !hasVideo && onOpenFreeImages && (
+                <button type="button"
+                  onClick={() => { setPostOptionsOpen(false); onOpenFreeImages(); }}
+                  className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm text-white hover:bg-white/10"
+                >
+                  <ImageIcon className="h-5 w-5" />
+                  <span className="flex-1">{t('freeImages.title', { defaultValue: 'Free images' })}</span>
+                </button>
+              )}
+              {!isLive && onToggleContentWarning && (
+                <button type="button" aria-pressed={!!hasContentWarning}
+                  onClick={() => { setPostOptionsOpen(false); onToggleContentWarning(); }}
+                  className={cn('flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm text-white hover:bg-white/10', hasContentWarning && 'bg-white/15')}
+                >
+                  <AlertTriangle className="h-5 w-5" />
+                  {hasContentWarning ? t('contentWarning.remove') : t('contentWarning.add')}
+                </button>
+              )}
+              {!isLive && extraTool}
+            </div>
+          </DrawerContent>
+        </Drawer>
+
+
+
+      </div>
+
+      <div className="flex items-center gap-2">
+        {/* Enhance: Always use Drawer/Sheet on all devices */}
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={!hasText || isEnhancing}
+          onClick={() => setEnhanceSheetOpen(true)}
+          className="rounded-xl border-white/20 bg-white/5 text-white hover:bg-white/10 hover:text-white gap-1.5 text-xs px-3 h-8"
+        >
+          {isEnhancing ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
+          <span className="hidden sm:inline">{isEnhancing ? _copy("copy.4a158b0341fe", { defaultValue: "Enhancing..." }) : 'AI'}</span>
+        </Button>
+        
+        <Drawer open={enhanceSheetOpen} onOpenChange={handleCloseEnhance}>
+          <DrawerContent column glass className="border-t border-white/10 max-h-[90dvh]">
+            <DrawerHeader className="border-b border-white/10">
+              {(styleView || langView) && (
+                <button
+                  type="button"
+                  onClick={() => { setStyleView(false); setLangView(false); }}
+                  className="flex items-center gap-1 text-sm text-zinc-400 hover:text-white transition-colors mb-2"
+                >
+                  <ChevronLeft className="w-4 h-4" />{_copy("copy.76900f1bfd16", { defaultValue: "Back" })}</button>
+              )}
+              <DrawerTitle className="text-white flex items-center gap-2">
+                {langView ? <Languages className="w-5 h-5 text-white" /> : <Sparkles className="w-5 h-5 text-white" />}
+                {langView ? _copy("copy.1944d5ab19cd", { defaultValue: "Translate to" }) : styleView ? _copy("copy.dc7a1d57c478", { defaultValue: "Choose Style" }) : _copy("copy.a91c19f54936", { defaultValue: "Enhance" })}
+              </DrawerTitle>
+            </DrawerHeader>
+            {menuContent}
+          </DrawerContent>
+        </Drawer>
+        
+        {onPreview && !isLive && canPost && !isPosting && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onPreview}
+            aria-label={_copy("upload.preview.title", { defaultValue: "Preview" })}
+            className="rounded-xl border-white/20 bg-white/5 text-white hover:bg-white/10 hover:text-white gap-1.5 text-xs px-3 h-8"
+          >
+            <Eye className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">{_copy("upload.preview.title", { defaultValue: "Preview" })}</span>
+          </Button>
+        )}
+
+        <Button
+          // One button, one form. This used to branch to a second Go Live
+          // sheet that asked for the title, description and cover all over
+          // again — the composer already has them, and the mint provisions the
+          // stream, so going live is just posting a live post.
+          onClick={onPost}
+          aria-label={isScheduled ? _copy("copy.f4830a1dae29", { defaultValue: "Schedule" }) : isLive ? _copy("copy.9e28dbaeb7ac", { defaultValue: "Go Live" }) : _copy("copy.a5554622c655", { defaultValue: "Post" })}
+          disabled={(!canPost && !isLive) || isPosting}
+          className={cn(
+            "rounded-xl px-3 h-8 sm:px-4 font-semibold disabled:opacity-50 text-sm",
+            isLive && !isScheduled
+              ? "bg-red-500 text-white hover:bg-red-600" 
+              : isScheduled
+                ? "bg-amber-500 text-black hover:bg-amber-400"
+                : "bg-white text-black hover:bg-zinc-200"
+          )}
+        >
+          {isPosting ? (
+            <Loader2 className="w-4 h-4 animate-spin" />
+          ) : (
+            <>
+              <span className="hidden sm:inline">
+                {isScheduled ? _copy("copy.f4830a1dae29", { defaultValue: "Schedule" }) : isLive ? _copy("copy.9e28dbaeb7ac", { defaultValue: "Go Live" }) : _copy("copy.a5554622c655", { defaultValue: "Post" })}
+              </span>
+              {isScheduled ? <Calendar className="w-4 h-4 sm:hidden" /> : isLive ? <Radio className="w-4 h-4 sm:hidden" /> : <Send className="w-4 h-4 sm:hidden" />}
+            </>
+          )}
+        </Button>
+      </div>
+    </div>
+    </>
+  );
+}

@@ -1,0 +1,745 @@
+import { useTranslation as _useCopy } from 'react-i18next';
+import { useVideoDownload } from "@/hooks/use-video-download";
+import { LibraryManager } from './LibraryManager';
+import { useAuth } from "@/contexts/AuthContext";
+import { lockBodyScroll } from '@/lib/body-scroll-lock';
+/**
+ * Results feed and viewer.
+ * ========================
+ * Every job the creator has started, newest first, running ones included so a
+ * render in progress is visible rather than a spinner on a button. Opening a
+ * result gives the actions that keep the work moving: animate a still, send it
+ * to the timeline, run it again.
+ */
+import { memo, Suspense, lazy, useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
+import { useTranslation } from 'react-i18next';
+import { createPortal } from 'react-dom';
+import { AlertCircle, Box, Clapperboard, FileText, Film, ImageIcon, Loader2 } from "lucide-react";
+import Music2 from "@/components/ui/cut-icons/music";
+import RefreshCw from "@/components/ui/cut-icons/refresh";
+import Scissors from "@/components/ui/cut-icons/trim";
+import Trash2 from "@/components/ui/cut-icons/delete";
+
+import Download from "@/components/ui/cut-icons/download";
+import X from "@/components/ui/cut-icons/close";
+
+import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
+import { useGenerationStore, type GenerationJob } from '@/store/generationStore';
+import { useCreatorFolderStore } from '@/store/creatorFolderStore';
+import { FolderBar, FolderPicker } from './LibraryFolders';
+import { MeshThumbnailQueue } from './MeshThumbnailQueue';
+import { cancelEditorImport, getEditorImportIds, sendJobToEditor, subscribeToEditorImports } from '@/lib/creator/sendToEditor';
+import { useEditorQuota } from '@/hooks/use-editor-quota';
+import { useCloseOnSurfaceSwitch } from '@/hooks/use-surface-switch';
+
+/** CSS aspect-ratio for a "w:h" string, falling back to 1:1. */
+function aspectStyle(aspect: string): React.CSSProperties {
+  const [w, h] = aspect.split(':').map(Number);
+  if (!w || !h) return { aspectRatio: '1 / 1' };
+  return { aspectRatio: `${w} / ${h}` };
+}
+
+const KIND_ICON = {
+  image: ImageIcon,
+  video: Film,
+  audio: Music2,
+  model3d: Box,
+} as const;
+
+/**
+ * three.js is ~600 kB and only the 3D surfaces need it, so the viewer is split
+ * into its own chunk and fetched the first time a mesh result is opened.
+ */
+const Model3dViewer = lazy(() =>
+  import('./Model3dViewer').then((m) => ({ default: m.Model3dViewer })),
+);
+
+/** File extension for a finished job, used for downloads. */
+function extensionFor(job: GenerationJob): string {
+  switch (job.kind) {
+    case 'video':
+      return 'mp4';
+    case 'audio':
+      return 'mp3';
+    case 'model3d':
+      // The format the creator actually asked for wins. fal's URLs do not
+      // reliably carry an extension, so sniffing one mislabels an FBX as .glb.
+      return (
+        job.exportFormat ??
+        job.url?.match(/\.(glb|gltf|usdz|fbx|obj|stl)(?:\?|$)/i)?.[1]?.toLowerCase() ??
+        'glb'
+      );
+    default:
+      return 'png';
+  }
+}
+
+/** Only GLB/glTF render in the browser; the rest are download-only. */
+function isViewableMesh(job: GenerationJob): boolean {
+  if (!job.url) return false;
+  // Prefer the requested format over the URL: fal serves meshes with a query
+  // string and often no extension, so sniffing alone would mount the GLB viewer
+  // on an STL and show a parse error instead of the download panel.
+  const ext = extensionFor(job);
+  return ext === 'glb' || ext === 'gltf';
+}
+
+interface ResultsFeedProps {
+  /** Signed-in wallet, needed so sent assets sync to cloud storage. */
+  wallet: string | null;
+  /** Called when the creator wants to animate a still. */
+  onAnimate: (job: GenerationJob) => void;
+  /** Called when the creator wants to turn a still into a mesh. */
+  onModel3d: (job: GenerationJob) => void;
+  /** Switches to the editor after a successful send. */
+  onOpenEditor: () => void;
+}
+
+export const ResultsFeed = memo(function ResultsFeed({ wallet, onAnimate, onModel3d, onOpenEditor }: ResultsFeedProps) {
+  const { t } = useTranslation();
+  const storedJobs = useGenerationStore((s) => s.jobs);
+  const allJobs = storedJobs.filter(job => !job.hidden);
+  const selectedFolderId = useCreatorFolderStore((s) => s.selectedFolderId);
+  const itemFolderMap = useCreatorFolderStore((s) => s.itemFolderMap);
+  // A folder filters what the grid shows; the running/finished counts stay
+  // library-wide so "clear" and the live region keep describing the whole.
+  const jobs = selectedFolderId ? allJobs.filter((j) => itemFolderMap[j.id]?.includes(selectedFolderId)) : allJobs;
+  const focusedId = useGenerationStore((s) => s.focusedId);
+  const focus = useGenerationStore((s) => s.focus);
+  const clearFinished = useGenerationStore((s) => s.clearFinished);
+
+  const focused = allJobs.find((j) => j.id === focusedId) ?? null;
+  const finishedCount = allJobs.filter((j) => j.status !== 'running').length;
+  const runningCount = allJobs.length - finishedCount;
+  const readyCount = allJobs.filter((j) => j.status === 'done').length;
+  const failedCount = allJobs.filter((j) => j.status === 'failed').length;
+
+  /**
+   * Stable identity matters here. The viewer's focus-and-scroll-lock effect is
+   * keyed on this callback, and a running job re-renders this component on
+   * every poll tick — an inline arrow would give the effect a new dependency
+   * each time, re-running it and yanking focus back to the Close button while
+   * someone was orbiting a mesh or tabbing to Download.
+   */
+  const closeViewer = useCallback(() => focus(null), [focus]);
+
+  // The viewer is plain markup inside the host's hidden wrapper, so switching
+  // to /editor makes it invisible without unmounting it. Close it explicitly or
+  // its body scroll lock stays applied to the editor.
+  useCloseOnSurfaceSwitch(closeViewer);
+
+  return (
+    <section className="w-full">
+      <MeshThumbnailQueue jobs={jobs} wallet={wallet} />
+      <div className="mb-3 flex items-baseline justify-between gap-3 px-0.5">
+        <h2 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-white/45">
+          {t('creator.yourGenerations')}
+        </h2>
+        {finishedCount > 0 && (
+          <button
+            type="button"
+            aria-label={t('creator.clearLibraryAria', { count: finishedCount })}
+            onClick={() => {
+              // Destructive and not undoable: it rewrites the stored library.
+              const ok = window.confirm(t('creator.clearLibraryConfirm', { count: finishedCount }));
+              if (ok) clearFinished();
+            }}
+            className="rounded-full px-2 py-0.5 text-[11px] font-medium text-white/50 transition hover:bg-white/10 hover:text-white"
+          >
+            {t('creator.clearLibrary')}
+          </button>
+        )}
+      </div>
+
+      <FolderBar />
+      <LibraryManager wallet={wallet} />
+
+      {/* Jobs settle in the store with no toast, so without this a screen
+          reader never learns a render finished. */}
+      <p aria-live="polite" className="sr-only">
+        {runningCount > 0
+          ? t('creator.generationsRunning', { count: runningCount })
+          : finishedCount > 0
+            ? `${t('creator.generationsFinished', { count: readyCount })}${failedCount ? ` ${t("copy.bb01ae575021", { defaultValue: "{{count}} failed.", count: failedCount })}` : ''}`
+            : ''}
+      </p>
+
+      {jobs.length === 0 && selectedFolderId && allJobs.length > 0 ? (
+        <div className="rounded-2xl border border-dashed border-white/12 px-6 py-10 text-center">
+          <Clapperboard className="mx-auto h-6 w-6 text-white/25" />
+          <p className="mt-3 text-sm font-medium text-white/70">{t('creatorFlow.foldersNoItems')}</p>
+          <p className="mx-auto mt-1 max-w-sm text-[13px] leading-relaxed text-white/40">
+            {t('creatorFlow.foldersNoItemsHint')}
+          </p>
+        </div>
+      ) : jobs.length === 0 ? (
+        <div className="rounded-2xl border border-dashed border-white/12 px-6 py-10 text-center">
+          <Clapperboard className="mx-auto h-6 w-6 text-white/25" />
+          <p className="mt-3 text-sm font-medium text-white/70">{t('creator.nothingGeneratedYet')}</p>
+          <p className="mx-auto mt-1 max-w-sm text-[13px] leading-relaxed text-white/40">
+            {t('creator.nothingGeneratedHint')}
+          </p>
+        </div>
+      ) : (
+        <ul className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+          {jobs.map((job) => (
+            <li key={job.id}>
+              <ResultCard job={job} onOpen={focus} />
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {focused && (
+        <ResultViewer
+          job={focused}
+          wallet={wallet}
+          onClose={closeViewer}
+          onAnimate={onAnimate}
+          onModel3d={onModel3d}
+          onOpenEditor={onOpenEditor}
+        />
+      )}
+    </section>
+  );
+});
+
+const ResultCard = memo(function ResultCard({ job, onOpen }: { job: GenerationJob; onOpen: (id: string) => void }) {
+  const { t } = useTranslation();
+  const cancel = useGenerationStore((s) => s.cancel);
+  const Icon = KIND_ICON[job.kind];
+
+  if (job.status === 'running') {
+    return (
+      <div
+        style={aspectStyle(job.aspect)}
+        className="relative flex w-full flex-col items-center justify-center gap-2 overflow-hidden rounded-xl border border-white/10 bg-white/[0.04] p-3 text-center"
+      >
+        <Loader2 className="relative h-5 w-5 animate-spin text-white/60" />
+        <p className="relative text-[11px] font-medium text-white/70">{job.stage || t('creator.working')}</p>
+        <p className="relative line-clamp-2 px-1 text-[10px] leading-snug text-white/55">{job.prompt}</p>
+        {/* Cancelling stops us waiting; it cannot stop the render or refund the
+            DHB already spent, so say so before throwing the result away. */}
+        <button
+          type="button"
+          onClick={() => {
+            // Video and 3D both queue upstream and are already paid for, so
+            // walking away throws away a result that will still be produced.
+            const ok =
+              (job.kind !== 'video' && job.kind !== 'model3d') ||
+              window.confirm(t('creator.stopWaitingConfirm'));
+            if (ok) cancel(job.id);
+          }}
+          className="relative mt-0.5 rounded-full border border-white/15 px-2 py-0.5 text-[10px] font-medium text-white/60 transition hover:bg-white/10 hover:text-white"
+        >
+          {t('creator.stopWaiting')}
+        </button>
+      </div>
+    );
+  }
+
+  if (job.status === 'failed' || job.status === 'cancelled') {
+    return (
+      <button
+        type="button"
+        onClick={() => onOpen(job.id)}
+        style={aspectStyle(job.aspect)}
+        className="flex w-full flex-col items-center justify-center gap-1.5 rounded-xl border border-white/12 bg-white/[0.02] p-3 text-center transition hover:border-white/25 hover:bg-white/[0.05]"
+      >
+        <AlertCircle className="h-4 w-4 text-white/45" />
+        <span className="text-[11px] font-medium text-white/65">
+          {t(job.status === 'cancelled' ? 'creator.cancelled' : 'creator.failed')}
+        </span>
+        <span className="line-clamp-2 text-[10px] leading-snug text-white/55">
+          {job.error?.replace(/\bDHB\b/g, t('buyCoins.tokensUnit')) || t('creator.somethingWentWrong')}
+        </span>
+      </button>
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={() => onOpen(job.id)}
+      style={aspectStyle(job.aspect)}
+      className="group relative w-full overflow-hidden rounded-xl border border-white/10 bg-white/5 transition hover:border-white/30"
+    >
+      {job.kind === 'image' && job.url && (
+        <img
+          src={job.url}
+          alt={job.prompt || t('creator.generatedImageAlt')}
+          loading="lazy"
+          decoding="async"
+          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+        />
+      )}
+      {job.kind === 'video' && job.url && (
+        <video
+          src={job.url}
+          poster={job.posterUrl}
+          muted
+          loop
+          playsInline
+          preload="metadata"
+          onMouseEnter={(e) => void e.currentTarget.play().catch(() => undefined)}
+          onMouseLeave={(e) => {
+            e.currentTarget.pause();
+            e.currentTarget.currentTime = 0;
+          }}
+          className="h-full w-full object-cover"
+        />
+      )}
+      {job.kind === 'audio' &&
+        (job.transcript ? (
+          // A wall of identical music notes told you nothing about which tile
+          // was the transcript you wanted, so it shows its own opening line.
+          <span className="flex h-full w-full flex-col justify-center gap-1 overflow-hidden p-2.5 text-left">
+            <FileText className="h-4 w-4 shrink-0 text-white/40" />
+            <span className="line-clamp-3 text-[11px] leading-snug text-white/55">
+              {job.transcript}
+            </span>
+          </span>
+        ) : (
+          <span className="flex h-full w-full items-center justify-center">
+            <Music2 className="h-6 w-6 text-white/40" />
+          </span>
+        ))}
+      {/* Meshes use the provider's rendered still when there is one. Booting a
+          WebGL context per grid tile would exhaust the browser's context budget
+          long before the grid filled, so the live viewer is opening-only. */}
+      {job.kind === 'model3d' &&
+        (job.posterUrl ? (
+          <img
+            src={job.posterUrl}
+            alt={job.prompt || t('creator.generated3dAlt')}
+            loading="lazy"
+            decoding="async"
+            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+          />
+        ) : (
+          <span className="flex h-full w-full flex-col items-center justify-center gap-1.5 bg-gradient-to-br from-white/[0.07] to-transparent">
+            <Box className="h-6 w-6 text-white/40" />
+            <span className="text-[9px] font-medium uppercase tracking-[0.14em] text-white/35">
+              {t('creator.viewIn3d')}
+            </span>
+          </span>
+        ))}
+
+      <span className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 to-transparent p-2 pt-6 text-left">
+        {/* A mesh made from a photo alone has no prompt, so name it by what it
+            is rather than leaving the caption blank. */}
+        <span className="line-clamp-1 text-[10px] font-medium text-white/85">
+          {job.prompt || (job.kind === 'model3d' ? t('creator.fromReferenceImage') : '')}
+        </span>
+      </span>
+      <span
+        data-keep-dark
+        className="pointer-events-none absolute left-1.5 top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-black/70 backdrop-blur"
+      >
+        <Icon className="h-3 w-3 text-white" />
+      </span>
+    </button>
+  );
+});
+
+interface ResultViewerProps {
+  job: GenerationJob;
+  wallet: string | null;
+  onClose: () => void;
+  onAnimate: (job: GenerationJob) => void;
+  onModel3d: (job: GenerationJob) => void;
+  onOpenEditor: () => void;
+}
+
+function ResultViewer({
+  job,
+  wallet,
+  onClose,
+  onAnimate,
+  onModel3d,
+  onOpenEditor,
+}: ResultViewerProps) {
+  const { t: _copy } = _useCopy();
+  const { t } = useTranslation();
+  const downloadVideo = useVideoDownload();
+  const { user } = useAuth();
+  const remove = useGenerationStore((s) => s.remove);
+  const retry = useGenerationStore((s) => s.retry);
+  const quota = useEditorQuota();
+  const sending = useSyncExternalStore(subscribeToEditorImports, getEditorImportIds).includes(job.id);
+  const save = useGenerationStore((s) => s.save);
+  const dialogRef = useRef<HTMLDivElement | null>(null);
+  const closeRef = useRef<HTMLButtonElement | null>(null);
+
+  useEffect(() => {
+    const opener = document.activeElement as HTMLElement | null;
+    closeRef.current?.focus();
+
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+        return;
+      }
+      // Keep Tab inside the viewer. It is a hand-rolled overlay rather than a
+      // Radix dialog, so nothing traps focus for us.
+      if (e.key !== 'Tab' || !dialogRef.current) return;
+      const focusable = dialogRef.current.querySelectorAll<HTMLElement>(
+        'button:not([disabled]), a[href], summary, video[controls], audio[controls], [tabindex]:not([tabindex="-1"])',
+      );
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+
+    window.addEventListener('keydown', onKey);
+    const releaseScroll = lockBodyScroll('ResultsFeed');
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      releaseScroll();
+      opener?.focus?.();
+    };
+  }, [onClose]);
+
+  const handleSend = useCallback(async () => {
+    const id = await sendJobToEditor(job, { wallet,
+      badgeBalance: quota.badgeBalance, username: quota.username });
+    if (id) {
+      toast.success(t('creator.addedToTimeline'));
+      onClose();
+      onOpenEditor();
+    }
+  }, [job, wallet, quota.badgeBalance, quota.username, onClose, onOpenEditor, t]);
+
+  /**
+   * The `download` attribute is ignored for cross-origin URLs, and every video
+   * result and some image results are served from a provider origin, so a plain
+   * anchor just navigated away instead of saving. Fetch to a blob first so the
+   * link is same-origin and the filename sticks.
+   */
+  const handleDownload = useCallback(async () => {
+    // A transcript has no asset to fetch — it is already in hand, so it is
+    // written straight out as a text file rather than downloaded from anywhere.
+    if (!job.url && job.transcript) {
+      const blob = new Blob([job.transcript], { type: 'text/plain;charset=utf-8' });
+      const objectUrl = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = objectUrl;
+      link.download = `dehub-transcript-${job.id}.txt`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(objectUrl), 30_000);
+      return;
+    }
+    if (!job.url) return;
+    if (job.kind === "video") {
+      await downloadVideo({ url: job.url, title: "dehub-video-" + job.id, username: user?.username });
+      return;
+    }
+    const filename = `dehub-${job.kind}-${job.id}.${extensionFor(job)}`;
+    let href = job.url;
+    let objectUrl: string | null = null;
+    try {
+      const res = await fetch(job.url);
+      if (res.ok) {
+        objectUrl = URL.createObjectURL(await res.blob());
+        href = objectUrl;
+      }
+    } catch {
+      // Blocked by CORS: fall back to opening the asset directly.
+    }
+    const a = document.createElement('a');
+    a.href = href;
+    a.download = filename;
+    a.rel = 'noopener';
+    if (!objectUrl) a.target = '_blank';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    if (objectUrl) setTimeout(() => URL.revokeObjectURL(objectUrl!), 30_000);
+  }, [job, downloadVideo, user?.username]);
+
+  const failed = job.status === 'failed' || job.status === 'cancelled';
+
+  // Portalled to <body> rather than rendered in place. The results feed sits
+  // inside /creator's swallow-clip wrapper, and a clip-path on an ancestor
+  // clips fixed-position descendants too — left here, the viewer would be
+  // carved down to the composer's cut line instead of filling the screen.
+  return createPortal(
+    <div
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-3 backdrop-blur-md sm:p-6"
+      role="dialog"
+      aria-modal="true"
+      aria-label={t('creator.generationResult')}
+      onClick={onClose}
+    >
+      <div
+        ref={dialogRef}
+        className="flex max-h-[92dvh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-white/10 bg-zinc-950/90 shadow-[0_8px_32px_rgba(0,0,0,0.6)] lg:flex-row"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex min-h-[14rem] flex-1 items-center justify-center bg-black/60 p-3">
+          {failed ? (
+            <div className="px-6 py-10 text-center">
+              <AlertCircle className="mx-auto h-6 w-6 text-white/40" />
+              <p className="mt-3 text-sm font-medium text-white/80">
+                {t(job.status === 'cancelled' ? 'creator.youCancelledRun' : 'creator.runFailed')}
+              </p>
+              <p className="mx-auto mt-1 max-w-sm text-[13px] leading-relaxed text-white/45">
+                {job.error?.replace(/\bDHB\b/g, t('buyCoins.tokensUnit')) || t('creator.noFurtherDetail')}
+              </p>
+            </div>
+          ) : job.kind === 'video' ? (
+            <video
+              src={job.url}
+              controls
+              autoPlay
+              loop
+              playsInline
+              className="max-h-[70dvh] w-auto max-w-full rounded-xl"
+            />
+          ) : job.kind === 'audio' && job.transcript ? (
+            // Transcription is the one job whose result is words rather than a
+            // file. It gets a readable column instead of a player pointed at
+            // nothing.
+            <div className="max-h-[70dvh] w-full max-w-2xl overflow-y-auto px-5 py-8">
+              <div className="mb-4 flex items-center justify-between gap-3">
+                <span className="inline-flex items-center gap-2 text-[13px] font-semibold text-white/70">
+                  <FileText className="h-4 w-4" />
+                  {t('creator.transcript')}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    void navigator.clipboard
+                      .writeText(job.transcript ?? '')
+                      .then(() => toast.success(t('creator.transcriptCopied')))
+                      .catch(() => toast.error(t('creator.transcriptCopyFailed')));
+                  }}
+                  className="rounded-lg border border-white/15 bg-white/[0.06] px-2.5 py-1.5 text-[12px] font-medium text-white/75 transition hover:border-white/30 hover:bg-white/[0.12] hover:text-white"
+                >
+                  {t('creator.copy')}
+                </button>
+              </div>
+
+              {job.segments?.length ? (
+                <div className="space-y-3">
+                  {job.segments.map((seg, i) => (
+                    <div key={i}>
+                      {seg.speaker && (
+                        <p className="text-[11px] font-semibold uppercase tracking-wide text-white/40">
+                          {seg.speaker.replace(/^speaker_?/i, `${t('creator.speaker')} `)}
+                        </p>
+                      )}
+                      <p className="text-[14px] leading-relaxed text-white/85">{seg.text}</p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="whitespace-pre-wrap text-[14px] leading-relaxed text-white/85">
+                  {job.transcript}
+                </p>
+              )}
+            </div>
+          ) : job.kind === 'audio' ? (
+            <div className="w-full max-w-md px-4 py-10 text-center">
+              <Music2 className="mx-auto h-7 w-7 text-white/40" />
+              <audio src={job.url} controls className="mt-4 w-full" />
+            </div>
+          ) : job.kind === 'model3d' ? (
+            job.url && isViewableMesh(job) ? (
+              <div className="h-[60dvh] max-h-[70dvh] w-full overflow-hidden rounded-xl bg-black/40 lg:h-[70dvh]">
+                <Suspense
+                  fallback={
+                    <div className="flex h-full w-full items-center justify-center">
+                      <Loader2 className="h-5 w-5 animate-spin text-white/60" />
+                    </div>
+                  }
+                >
+                  <Model3dViewer url={job.url} />
+                </Suspense>
+              </div>
+            ) : (
+              // An FBX/OBJ/USDZ export cannot be previewed here. Say so rather
+              // than showing an empty canvas that reads as a failed generation.
+              <div className="px-6 py-10 text-center">
+                <Box className="mx-auto h-7 w-7 text-white/40" />
+                <p className="mt-3 text-sm font-medium text-white/80">
+                  {t('creator.readyToDownload')}
+                </p>
+                <p className="mx-auto mt-1 max-w-xs text-[13px] leading-relaxed text-white/45">
+                  {t('creator.noPreviewForFormat')}
+                </p>
+              </div>
+            )
+          ) : (
+            <img
+              src={job.url}
+              alt={job.prompt || t('creator.generatedImageAlt')}
+              className="max-h-[70dvh] w-auto max-w-full rounded-xl object-contain"
+            />
+          )}
+        </div>
+
+        <aside className="flex w-full shrink-0 flex-col border-t border-white/10 lg:w-80 lg:border-l lg:border-t-0">
+          <div className="flex items-start justify-between gap-2 px-4 pt-4">
+            <div className="min-w-0">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-white/40">
+                {job.modelName}
+                {job.cloudSaved && <span className="ml-2 text-xs text-white/60">{_copy("copy.922cb35a34dc", { defaultValue: "Saved to your account" })}</span>}
+                {job.saveError && <button type="button" className="ml-2 text-xs underline" onClick={() => void save(job.id)}>{job.saveError}</button>}
+              </p>
+              <p className="mt-0.5 text-[11px] text-white/55">
+                {job.kind === 'model3d' ? t('creator.threeDModel') : t('creator.aspectGeneration', { aspect: job.aspect })}
+              </p>
+            </div>
+            <button
+              ref={closeRef}
+              type="button"
+              onClick={onClose}
+              aria-label={t('creator.close')}
+              className="rounded-full p-1.5 text-white/50 transition hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+
+          <div className="min-h-0 flex-1 overflow-y-auto px-4 py-3">
+            <p className="text-[13px] leading-relaxed text-white/75">
+              {job.prompt || (job.kind === 'model3d' ? t('creator.reconstructedFromImage') : '')}
+            </p>
+            {/* Guarded on content, not just difference: an image-only mesh run
+                has no prompt at all, and an empty expander is noise. */}
+            {!!job.resolvedPrompt && job.resolvedPrompt !== job.prompt && (
+              <details className="mt-3">
+                <summary className="cursor-pointer text-[11px] font-medium text-white/45 transition hover:text-white/75">
+                  {t('creator.fullPromptSent')}
+                </summary>
+                <p className="mt-1.5 text-[11px] leading-relaxed text-white/45">{job.resolvedPrompt}</p>
+              </details>
+            )}
+          </div>
+
+          <div className="grid gap-1.5 border-t border-white/10 p-3">
+            {!failed && (
+              <>
+                {/* The timeline holds video, images and audio. A mesh is not a
+                    clip, and a transcript has no file at all, so offering this
+                    for either would only ever fail. */}
+                {job.kind !== 'model3d' && !!job.url && (
+                  <button
+                    type="button"
+                    onClick={sending ? () => cancelEditorImport(job.id) : handleSend}
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/10 px-3 py-2.5 text-[13px] font-semibold text-white backdrop-blur-xl transition hover:border-white/40 hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    {sending ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Scissors className="h-4 w-4" />
+                    )}
+                    {t(sending ? 'common.cancel' : 'creator.editInTimeline')}
+                  </button>
+                )}
+
+                {job.kind === 'image' && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onAnimate(job);
+                        onClose();
+                      }}
+                      className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-white/15 bg-white/[0.06] px-3 py-2.5 text-[13px] font-medium text-white/85 transition hover:border-white/30 hover:bg-white/[0.12] hover:text-white"
+                    >
+                      <Film className="h-4 w-4" />
+                      {t('creator.animateThis')}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onModel3d(job);
+                        onClose();
+                      }}
+                      className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-white/15 bg-white/[0.06] px-3 py-2.5 text-[13px] font-medium text-white/85 transition hover:border-white/30 hover:bg-white/[0.12] hover:text-white"
+                    >
+                      <Box className="h-4 w-4" />
+                      {t('creator.makeIt3d')}
+                    </button>
+                  </>
+                )}
+
+                <FolderPicker itemId={job.id} />
+
+                <button
+                  type="button"
+                  onClick={() => void handleDownload()}
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-white/15 bg-white/[0.06] px-3 py-2.5 text-[13px] font-medium text-white/85 transition hover:border-white/30 hover:bg-white/[0.12] hover:text-white"
+                >
+                  <Download className="h-4 w-4" />
+                  {job.kind === 'model3d'
+                    ? t('creator.downloadExt', { ext: extensionFor(job).toUpperCase() })
+                    : job.url
+                      ? t('creator.download')
+                      : t('creator.downloadExt', { ext: 'TXT' })}
+                </button>
+              </>
+            )}
+
+            {failed && (
+              <>
+                {/* The render itself was paid for and usually finished; only the
+                    polling gave up. Reconnecting is free, so offer it first. */}
+                {job.ticket && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      retry(job.id);
+                      onClose();
+                    }}
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/10 px-3 py-2.5 text-[13px] font-semibold text-white transition hover:border-white/40 hover:bg-white/20"
+                  >
+                    <RefreshCw className="h-4 w-4" />
+                    {t('creator.reconnectToRender')}
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => {
+                    onAnimate(job);
+                    onClose();
+                  }}
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-white/15 bg-white/[0.06] px-3 py-2.5 text-[13px] font-medium text-white/85 transition hover:border-white/30 hover:bg-white/[0.12] hover:text-white"
+                >
+                  {t('creator.loadIntoComposer')}
+                </button>
+              </>
+            )}
+
+            <button
+              type="button"
+              onClick={() => {
+                remove(job.id);
+                onClose();
+              }}
+              className={cn(
+                'inline-flex w-full items-center justify-center gap-2 rounded-xl px-3 py-2 text-[12px] font-medium text-white/45 transition hover:bg-white/10 hover:text-white',
+              )}
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+              {t('creator.removeFromLibrary')}
+            </button>
+          </div>
+        </aside>
+      </div>
+    </div>,
+    document.body,
+  );
+}

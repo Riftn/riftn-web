@@ -1,0 +1,249 @@
+import { useSyncExternalStore } from 'react';
+
+const TOP_THRESHOLD = 60;
+const STICKY_NAV_TOP_THRESHOLD = 4;
+const STICKY_NAV_SELECTOR =
+  '[data-feed-nav-outer][data-nav-return-top]:not([data-nav-hide="off"])';
+
+/**
+ * Module-level store: three components (HomePage, GlobalFeedNav,
+ * MobileBottomNav) consume this hook, and the per-hook implementation attached
+ * 7 listeners EACH (5 scroll targets + 2 touch) all computing the same
+ * boolean. One shared listener set now feeds every subscriber via
+ * useSyncExternalStore. Listeners attach on first subscribe and detach when
+ * the last subscriber leaves.
+ */
+/**
+ * Elements that scroll instead of the document opt in with this attribute.
+ * The post layer (`[data-post-overlay]` in AppLayout) is one: it is `fixed` and
+ * carries its own `overflow-y-auto`, so the document never moves while a post
+ * opened from the feed is scrolled, and none of the targets below ever fire.
+ * That is why the top bar used to stay pinned on post pages.
+ *
+ * Scroll events do not bubble, but they DO reach a capture listener on
+ * document, so one listener covers a scroller that mounts and unmounts with a
+ * route. Only tagged elements count — every dialog, chat panel and carousel on
+ * the page also scrolls, and none of those should move the chrome.
+ */
+export const SCROLL_NAV_SOURCE_ATTR = 'data-scroll-nav-source';
+const SCROLL_NAV_SOURCE_SELECTOR = `[${SCROLL_NAV_SOURCE_ATTR}]`;
+
+let visible = true;
+let stickyNavVisible = true;
+let lastScrollY = 0;
+let touchLastY = 0;
+/** The tagged element currently being scrolled, if any; null = the document. */
+let activeScroller: HTMLElement | null = null;
+/**
+ * Set when the reader lands on a page (Back, swipe back, a tab, a link): the
+ * chrome is shown and stays shown until the reader's own finger, wheel or key
+ * moves the page. Landing scrolls the page by itself (Back restores the old
+ * offset frame by frame while the page fills in), and those jumps read as a
+ * hard scroll down, which is why the bars stayed hidden after a swipe back
+ * from a profile to the feed.
+ */
+let holdUntilInput = false;
+const subscribers = new Set<() => void>();
+const stickyNavSubscribers = new Set<() => void>();
+let detach: (() => void) | null = null;
+
+function setVisible(next: boolean) {
+  if (visible === next) return;
+  visible = next;
+  subscribers.forEach((cb) => cb());
+}
+
+function setStickyNavVisible(next: boolean) {
+  if (stickyNavVisible === next) return;
+  stickyNavVisible = next;
+  stickyNavSubscribers.forEach((cb) => cb());
+}
+
+/**
+ * Wait until the page has scrolled far enough for its content to occupy all of
+ * the space the sticky pill is about to vacate. Cached pages remain mounted,
+ * so use the first rendered pill rather than blindly measuring the first DOM
+ * match.
+ */
+function getStickyNavHideThreshold(): number {
+  const nav = Array.from(document.querySelectorAll<HTMLElement>(STICKY_NAV_SELECTOR))
+    .find((candidate) =>
+      candidate.offsetParent !== null && window.getComputedStyle(candidate).visibility !== 'hidden'
+    );
+  if (!nav) return TOP_THRESHOLD;
+
+  const top = Number.parseFloat(window.getComputedStyle(nav).top);
+  return Math.max(TOP_THRESHOLD, nav.offsetHeight + (Number.isFinite(top) ? Math.max(0, top) : 0));
+}
+
+function updateStickyNavVisibility(y: number) {
+  if (y <= STICKY_NAV_TOP_THRESHOLD) setStickyNavVisible(true);
+  // Once hidden, only reaching the top can show it. Measuring it again on
+  // every event cannot change the result and forces needless style/layout.
+  else if (!holdUntilInput && stickyNavVisible && y >= getStickyNavHideThreshold()) setStickyNavVisible(false);
+}
+
+function attachListeners(): () => void {
+  const getY = () =>
+    activeScroller?.isConnected
+      ? activeScroller.scrollTop
+      : window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
+
+  activeScroller = null;
+  lastScrollY = getY();
+  // Re-seed visibility from the actual scroll position: if the last subscriber
+  // left while the nav was hidden, a fresh subscriber at the top of a new page
+  // must start visible (the old per-hook useState(true) gave this for free).
+  setVisible(lastScrollY <= TOP_THRESHOLD ? true : visible);
+  setStickyNavVisible(
+    lastScrollY <= STICKY_NAV_TOP_THRESHOLD
+      ? true
+      : lastScrollY >= getStickyNavHideThreshold()
+        ? false
+        : stickyNavVisible,
+  );
+
+  // ── scroll events: attach to every possible container ──────────────────
+  const onScroll = () => {
+    const y = getY();
+    const diff = y - lastScrollY;
+    lastScrollY = y;
+    if (holdUntilInput) return;
+    updateStickyNavVisibility(y);
+    if (y <= TOP_THRESHOLD) { setVisible(true); return; }
+    if (diff > 4)  setVisible(false);
+    if (diff < -4) setVisible(true);
+  };
+
+  // Capture-phase catch-all for tagged element scrollers. Switching scroller
+  // re-seeds the baseline and skips one frame rather than diffing this
+  // container's scrollTop against the last one's — a jump of a few thousand
+  // pixels would otherwise read as a hard scroll down.
+  let scrollFrame: number | null = null;
+  const onCapturedScroll = (e: Event) => {
+    const target = e.target;
+    const el =
+      target instanceof HTMLElement && target.matches(SCROLL_NAV_SOURCE_SELECTOR)
+        ? target
+        : null;
+    const documentScroll = target === document || target === e.currentTarget || target === document.documentElement || target === document.body || target === document.getElementById('app-root');
+    // Nested chat and carousel scrolling must not reset the feed baseline.
+    if (!el && !documentScroll) return;
+    if (el !== activeScroller) {
+      activeScroller = el;
+      lastScrollY = getY();
+      updateStickyNavVisibility(lastScrollY);
+    }
+    if (scrollFrame === null) scrollFrame = requestAnimationFrame(() => {
+      scrollFrame = null;
+      onScroll();
+    });
+  };
+
+  // ── touch events: most reliable on iOS/Android ──────────────────────────
+  const onTouchStart = (e: TouchEvent) => {
+    holdUntilInput = false;
+    touchLastY = e.touches[0].clientY;
+    lastScrollY = getY();
+  };
+  const onReaderInput = () => {
+    if (!holdUntilInput) return;
+    holdUntilInput = false;
+    lastScrollY = getY();
+  };
+
+  const onTouchMove = (e: TouchEvent) => {
+    const y = getY();
+    // Keep the scroll baseline fresh while the finger is down. iOS defers
+    // `scroll` events during an active drag, so without this the first
+    // post-momentum `scroll` diffs against a stale, pre-gesture position and
+    // can (wrongly) re-hide the nav on the way back up.
+    lastScrollY = y;
+    const currentY = e.touches[0].clientY;
+    // Delta since the LAST move, not the gesture start — so reversing
+    // direction mid-drag flips show/hide immediately. Measuring from the
+    // start left `moved` positive after a downward flick, so scrolling back
+    // up within the same touch never re-showed the nav (the stuck bug).
+    const moved = touchLastY - currentY;
+    touchLastY = currentY;
+    // The finger that swiped back is still down on the page it landed on;
+    // only a fresh touch counts as the reader scrolling here.
+    if (holdUntilInput) return;
+    updateStickyNavVisibility(y);
+    if (y <= TOP_THRESHOLD) { setVisible(true); return; }
+    if (moved > 6)  setVisible(false);  // finger up   → scrolling down → hide
+    if (moved < -6) setVisible(true);   // finger down → scrolling up   → show
+  };
+
+  // Attach scroll to all candidates — no matter which one is the real container
+  // One capture listener sees both document and tagged element scrollers.
+  window.addEventListener('scroll', onCapturedScroll, { passive: true, capture: true });
+  window.addEventListener('touchstart', onTouchStart, { passive: true });
+  window.addEventListener('touchmove',  onTouchMove,  { passive: true });
+  window.addEventListener('wheel', onReaderInput, { passive: true, capture: true });
+  window.addEventListener('keydown', onReaderInput, true);
+
+  return () => {
+    window.removeEventListener('scroll', onCapturedScroll, { capture: true });
+    if (scrollFrame !== null) cancelAnimationFrame(scrollFrame);
+    activeScroller = null;
+    window.removeEventListener('touchstart', onTouchStart);
+    window.removeEventListener('touchmove',  onTouchMove);
+    window.removeEventListener('wheel', onReaderInput, { capture: true });
+    window.removeEventListener('keydown', onReaderInput, true);
+  };
+}
+
+/** Phones and tablets only: the chrome never hides from scroll at `lg` and up. */
+const PHONE_CHROME_QUERY = '(max-width: 1023.98px)';
+
+/**
+ * Bring the header, the bottom nav and every page pill back, and keep them
+ * there until the reader scrolls again. Called on every page change (Back,
+ * swipe back, Forward, a tab, a link), so arriving anywhere — the feed after a
+ * profile, a profile after a post — always shows where you are. Desktop is
+ * left alone.
+ */
+export function revealNavChrome(): void {
+  if (typeof window === 'undefined' || !window.matchMedia?.(PHONE_CHROME_QUERY).matches) return;
+  holdUntilInput = true;
+  setVisible(true);
+  setStickyNavVisible(true);
+}
+
+function subscribe(cb: () => void): () => void {
+  if (subscribers.size === 0 && stickyNavSubscribers.size === 0 && !detach) detach = attachListeners();
+  subscribers.add(cb);
+  return () => {
+    subscribers.delete(cb);
+    if (subscribers.size === 0 && stickyNavSubscribers.size === 0 && detach) {
+      detach();
+      detach = null;
+    }
+  };
+}
+
+function subscribeStickyNav(cb: () => void): () => void {
+  if (subscribers.size === 0 && stickyNavSubscribers.size === 0 && !detach) detach = attachListeners();
+  stickyNavSubscribers.add(cb);
+  return () => {
+    stickyNavSubscribers.delete(cb);
+    if (subscribers.size === 0 && stickyNavSubscribers.size === 0 && detach) {
+      detach();
+      detach = null;
+    }
+  };
+}
+
+const getSnapshot = () => visible;
+const getServerSnapshot = () => true;
+
+export function useScrollDirection() {
+  return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+}
+
+const getStickyNavSnapshot = () => stickyNavVisible;
+
+export function useStickyNavVisibility() {
+  return useSyncExternalStore(subscribeStickyNav, getStickyNavSnapshot, getServerSnapshot);
+}

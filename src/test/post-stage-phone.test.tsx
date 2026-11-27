@@ -1,0 +1,231 @@
+import { cleanup, fireEvent, render, screen, within, act } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { MemoryRouter } from 'react-router-dom';
+import { readFileSync } from 'node:fs';
+import postcss from 'postcss';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { ReactNode } from 'react';
+
+const voteOnPost = vi.fn();
+const reactToPost = vi.fn();
+const getPostQuotes = vi.fn();
+const getPostReposters = vi.fn();
+
+vi.mock('@/lib/api/dehub', () => ({
+  voteOnPost: (...args: unknown[]) => voteOnPost(...args),
+  reactToPost: (...args: unknown[]) => reactToPost(...args),
+  getPostQuotes: (...args: unknown[]) => getPostQuotes(...args),
+  getPostReposters: (...args: unknown[]) => getPostReposters(...args),
+}));
+vi.mock('@/contexts/AuthContext', () => ({
+  useAuth: () => ({ isAuthenticated: true, walletAddress: '0xviewer', openLoginModal: vi.fn() }),
+}));
+vi.mock('@/hooks/use-engagement-weight', () => ({ useEngagementWeight: () => 1 }));
+vi.mock('@/hooks/use-link-copy-count', () => ({
+  usePostLinkCopyCount: () => ({ data: 0 }),
+  useLinkCopyFloor: () => 0,
+  useTrackPostLinkCopy: () => vi.fn(),
+}));
+vi.mock('@/hooks/use-post-tip-count', () => ({ useViewerTippedPost: () => false }));
+vi.mock('@/hooks/use-bookmarks', () => ({
+  useBookmarkPost: () => ({ isBookmarked: false, isLoading: false, toggleBookmark: vi.fn() }),
+}));
+vi.mock('@/components/app/bookmarks/SaveToFolderDrawerLazy', () => ({ SaveToFolderDrawerLazy: () => null }));
+vi.mock('@/components/app/cards/PostUtilityButtons', () => ({
+  PostUtilityButtons: () => <button type="button" aria-label="Post info">i</button>,
+}));
+
+import { ActionBar } from '@/components/app/cards/ActionBar';
+import { clearCommentCounts } from '@/lib/comment-count-store';
+import type { PostStageValue } from '@/components/app/post-stage/post-stage-context';
+import { PostStagePhone, POST_STAGE_BODY_MARK } from '@/components/app/post-stage/PostStagePhone';
+
+function wrap(children: ReactNode) {
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  return (
+    <QueryClientProvider client={client}>
+      <MemoryRouter>{children}</MemoryRouter>
+    </QueryClientProvider>
+  );
+}
+
+function stageValue(overrides: Partial<PostStageValue> = {}): PostStageValue {
+  return {
+    onBack: vi.fn(),
+    openComments: vi.fn(),
+    openQuotes: vi.fn(),
+    openReposts: vi.fn(),
+    quoteCount: 12,
+    repostCount: 34,
+    ...overrides,
+  };
+}
+
+beforeEach(() => {
+  clearCommentCounts();
+  voteOnPost.mockResolvedValue({});
+  reactToPost.mockResolvedValue({});
+  getPostQuotes.mockResolvedValue({ result: [] });
+  getPostReposters.mockResolvedValue({ items: [] });
+  window.innerWidth = 390;
+  class IO {
+    observe() {}
+    disconnect() {}
+    unobserve() {}
+  }
+  (globalThis as unknown as { IntersectionObserver: unknown }).IntersectionObserver = IO;
+});
+
+afterEach(() => {
+  cleanup();
+  vi.clearAllMocks();
+  document.body.className = '';
+});
+
+describe('the phone post page bar', () => {
+  it('is the feed row — tip, share, comments, like, save and info — with no boxed tiles', () => {
+    render(wrap(
+      <ActionBar
+        postId="1234"
+        tokenId={1234}
+        stage={stageValue()}
+        likeCount={56}
+        dislikeCount={2}
+        commentCount={128}
+        repostCount={46}
+        onTip={vi.fn()}
+        utilityDesktopAnchor
+      />,
+    ));
+    expect(document.querySelector('[data-stage-bar]')).toBeNull();
+    expect(document.querySelector('[data-stage-tile]')).toBeNull();
+    expect(screen.getByRole('button', { name: 'Tips' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Share' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Comment' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Post info' })).toBeInTheDocument();
+    // The like keeps the hold-to-react thumb, and the mini player can find it.
+    const like = screen.getByRole('button', { name: /hold to react/ });
+    expect(like).toHaveAttribute('aria-haspopup', 'menu');
+    expect(like).toHaveAttribute('data-stage-like');
+  });
+
+  it('sends the comment button to the comments and composer', () => {
+    const stage = stageValue();
+    render(wrap(<ActionBar postId="1234" stage={stage} commentCount={3} />));
+    fireEvent.click(screen.getByRole('button', { name: 'Comment' }));
+    expect(stage.openComments).toHaveBeenCalledOnce();
+  });
+
+  it('opens "Repost & share" from the share button, with view quotes and view reposts', async () => {
+    const stage = stageValue();
+    render(wrap(<ActionBar postId="1234" tokenId={1234} stage={stage} repostCount={46} onRepost={vi.fn()} onQuote={vi.fn()} />));
+    fireEvent.click(screen.getByRole('button', { name: 'Share' }));
+    const sheet = await screen.findByText('Repost & share');
+    expect(sheet).toBeInTheDocument();
+    const quotes = document.querySelector('[data-stage-view="quotes"]') as HTMLElement;
+    const reposts = document.querySelector('[data-stage-view="reposts"]') as HTMLElement;
+    expect(quotes).toHaveTextContent('View quotes');
+    expect(quotes).toHaveTextContent('12');
+    expect(reposts).toHaveTextContent('View reposts');
+    expect(reposts).toHaveTextContent('34');
+    for (const target of ['copy', 'x', 'telegram', 'whatsapp', 'more']) {
+      expect(document.querySelector(`[data-stage-share-target="${target}"]`)).not.toBeNull();
+    }
+    fireEvent.click(quotes);
+    expect(stage.openQuotes).toHaveBeenCalledOnce();
+  });
+});
+
+describe('feed and desktop bars are untouched', () => {
+  it('renders the usual row with its share button and no stage markers', () => {
+    render(wrap(<ActionBar postId="1234" tokenId={1234} likeCount={1} utilityDesktopAnchor />));
+    expect(document.querySelector('[data-stage-like]')).toBeNull();
+    expect(screen.getByRole('button', { name: 'Share' })).toBeInTheDocument();
+  });
+});
+
+describe('the stage page shell', () => {
+  it('hides the app chrome while mounted and docks the composer above the screen edge', () => {
+    const { unmount } = render(wrap(
+      <PostStagePhone value={stageValue()} kind="video" title="Sunset" subtitle="Mal · 1h" comments={<div>comments</div>}>
+        <div data-media-full />
+      </PostStagePhone>,
+    ));
+    expect(document.body.hasAttribute(POST_STAGE_BODY_MARK)).toBe(true);
+    // The mini player is portalled to <body> and starts hidden.
+    const mini = document.body.querySelector(':scope > [data-stage-mini]');
+    expect(mini).not.toBeNull();
+    expect(mini).not.toHaveAttribute('data-visible');
+    act(() => unmount());
+    expect(document.body.hasAttribute(POST_STAGE_BODY_MARK)).toBe(false);
+  });
+
+  it('hides the bottom nav on phones only, and docks the composer as glass rather than solid', () => {
+    const css = postcss.parse(readFileSync('src/styles/post-stage.css', 'utf8'));
+    let hidesNav = false;
+    let composerGlass = false;
+    css.walkAtRules('media', (at) => {
+      if (!at.params.includes('max-width: 639px')) return;
+      at.walkRules((rule) => {
+        if (rule.selector.includes('post-stage-mode') && rule.selector.includes('[data-bottom-nav]')) {
+          rule.walkDecls('display', (d) => { if (d.value.includes('none')) hidesNav = true; });
+        }
+      });
+    });
+    css.walkRules((rule) => {
+      if (!/\[data-stage-composer\](:not\(#_\))*$/.test(rule.selector)) return;
+      let blur = false;
+      let tint = false;
+      rule.walkDecls((d) => {
+        if (d.prop === 'backdrop-filter' && /--float-glass-blur/.test(d.value)) blur = true;
+        if (d.prop === 'background' && /color-mix\(.*72%, transparent\)/.test(d.value)) tint = true;
+      });
+      if (blur && tint) composerGlass = true;
+    });
+    expect(hidesNav).toBe(true);
+    expect(composerGlass).toBe(true);
+    // Hand-written -webkit- prefixes make the minifier drop the standard one.
+    expect(readFileSync('src/styles/post-stage.css', 'utf8')).not.toMatch(/-webkit-backdrop-filter/);
+  });
+
+  it('hides the top bar and feed pill on image, video and audio posts', () => {
+    const css = readFileSync('src/styles/post-stage.css', 'utf8');
+    expect(css).toContain('body[data-post-stage-mode] :is([data-mobile-header], [data-feed-nav], [data-feed-nav-outer], [data-home-tabs])');
+    expect(css).not.toContain('post-stage-keep-nav');
+    const src = readFileSync('src/components/app/post-stage/PostStagePhone.tsx', 'utf8');
+    expect(src).not.toContain('StageMediaChrome');
+  });
+
+  it('docks the stage composer to the screen in the comments section', () => {
+    const src = readFileSync('src/components/app/cards/CommentsSection.tsx', 'utf8');
+    expect(src).toMatch(/data-stage-composer=\{stage \|\| undefined\}/);
+    expect(src).toContain('? "fixed inset-x-0 bottom-0');
+    // Portalled, so a theme's filtered page frame cannot re-anchor `fixed`.
+    expect(src).toContain('createPortal(el, document.body)');
+    expect(src).not.toContain('<div data-stage-composer-fade');
+    // Put away until Comment or Reply is pressed; hidden, not unmounted.
+    expect(src).toContain('stageComposerHidden && "hidden"');
+    expect(src).toContain('window.addEventListener(POST_STAGE_COMPOSE_EVENT, open)');
+  });
+
+  it('keeps image post options beside Follow and Back in the pinned strip', () => {
+    const image = readFileSync('src/components/app/cards/ImageCard.tsx', 'utf8');
+    expect(image).not.toContain('<StageMediaChrome');
+    expect(image).toContain('registerOptions(openPostOptions)');
+    expect(image).toContain("stage ? 'hidden'");
+    const comments = readFileSync('src/components/app/cards/CommentsSection.tsx', 'utf8');
+    const header = comments.slice(comments.indexOf('<div data-stage-comments-head'), comments.indexOf('data-comment-tabs-pin'));
+    expect(header).not.toContain('data-stage-options');
+    const creator = readFileSync('src/components/app/post-stage/StageCreatorRow.tsx', 'utf8');
+    expect(creator.indexOf('data-stage-options')).toBeGreaterThan(creator.indexOf("data-stage-follow="));
+    expect(creator).toContain('usePostStage()?.openOptions');
+    const css = postcss.parse(readFileSync('src/styles/post-stage.css', 'utf8'));
+    for (const marker of ['[data-stage-composer]:', '[data-comment-field]:']) {
+      const rules: string[] = [];
+      css.walkRules(rule => {
+        if (rule.selector.includes(marker)) rule.walkDecls('border', declaration => { rules.push(declaration.value); });
+      });
+      expect(rules).toContain('0');
+    }
+  });
+});

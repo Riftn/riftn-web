@@ -1,0 +1,161 @@
+import { useTranslation as _useCopy } from 'react-i18next';
+import { useSurfaceDraft, draftIdentity } from '@/hooks/use-surface-draft';
+import { useState } from 'react';
+import { Loader2 } from "lucide-react";
+import UserPlus from "@/components/ui/cut-icons/add-account";
+import ShieldCheck from "@/components/ui/cut-icons/security";
+
+import Settings from "@/components/ui/cut-icons/settings";
+
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog';
+import { addLiveChatModerator, updateLiveChatRoomSettings, type LiveChatRoom } from '@/lib/api/dehub';
+import { toast } from 'sonner';
+
+interface RoomSettingsModalProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  room: LiveChatRoom | null;
+  onUpdated: () => void;
+}
+
+export function RoomSettingsModal({ open, onOpenChange, room, onUpdated }: RoomSettingsModalProps) {
+  const { t: _copy } = _useCopy();
+  const [roomName, setRoomName] = useSurfaceDraft("src/components/app/chat/RoomSettingsModal.tsx:roomName", room?.name || room?.topic || '', draftIdentity(room));
+  const [roomDescription, setRoomDescription] = useSurfaceDraft("src/components/app/chat/RoomSettingsModal.tsx:roomDescription", room?.description || '', draftIdentity(room));
+  const [modAddress, setModAddress] = useSurfaceDraft("components/app/chat/RoomSettingsModal.tsx:modAddress", '', draftIdentity(room));
+  const [isSaving, setIsSaving] = useState(false);
+  const [isAddingMod, setIsAddingMod] = useState(false);
+
+  // Sync state when room changes
+  useState(() => {
+    if (room) {
+      setRoomName(room.name || room.topic || '');
+      setRoomDescription(room.description || '');
+    }
+  });
+
+  const handleSaveSettings = async () => {
+    if (!room) return;
+    setIsSaving(true);
+    try {
+      await updateLiveChatRoomSettings(room.id, {
+        name: roomName.trim(),
+        description: roomDescription.trim(),
+      });
+      toast.success(_copy("copy.8395ec5cfd7b", { defaultValue: "Room settings updated" }));
+      onUpdated();
+    } catch (err) {
+      console.error('[LiveChat] Failed to update room settings:', err);
+      toast.error(_copy("copy.63f6bf5375c1", { defaultValue: "Failed to update settings" }));
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleAddModerator = async () => {
+    if (!room || !modAddress.trim()) {
+      toast.error(_copy("copy.0e5b83322ba3", { defaultValue: "Enter a wallet address" }));
+      return;
+    }
+    setIsAddingMod(true);
+    try {
+      await addLiveChatModerator(room.id, modAddress.trim());
+      toast.success(_copy("copy.35d503b975bf", { defaultValue: "Moderator added" }));
+      setModAddress.complete(modAddress, '');
+      onUpdated();
+    } catch (err) {
+      console.error('[LiveChat] Failed to add moderator:', err);
+      toast.error(_copy("copy.7e3d41236c7a", { defaultValue: "Failed to add moderator" }));
+    } finally {
+      setIsAddingMod(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="bg-black/60 backdrop-blur-[24px] border border-white/10 shadow-2xl text-white max-w-sm">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2 text-white">
+            <Settings className="w-5 h-5" />{_copy("copy.1a428649f489", { defaultValue: "Room Settings" })}</DialogTitle>
+          <DialogDescription className="text-zinc-400">{_copy("copy.95ba8630cdbe", { defaultValue: "Manage room details and moderators" })}</DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-5 mt-2">
+          {/* Room settings */}
+          <div className="space-y-3">
+            <div className="space-y-1.5">
+              <label className="text-sm text-zinc-400">{_copy("copy.770af2048466", { defaultValue: "Room Name" })}</label>
+              <Input
+                value={roomName}
+                onChange={(e) => setRoomName(e.target.value)}
+                placeholder={_copy("copy.c90ad8c46274", { defaultValue: "Room name" })}
+                className="bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-sm text-zinc-400">{_copy("copy.526e0087cc3f", { defaultValue: "Description" })}</label>
+              <Input
+                value={roomDescription}
+                onChange={(e) => setRoomDescription(e.target.value)}
+                placeholder={_copy("copy.3858fb70fcea", { defaultValue: "Room description" })}
+                className="bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500"
+              />
+            </div>
+            <Button
+              onClick={handleSaveSettings}
+              disabled={isSaving}
+              className="w-full rounded-xl bg-white/10 border border-white/20 hover:bg-white/20 text-white font-medium gap-2"
+            >
+              {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Settings className="w-4 h-4" />}{_copy("copy.ec92e1dc9bb3", { defaultValue: "Save Settings" })}</Button>
+          </div>
+
+          {/* Divider */}
+          <div className="border-t border-zinc-800" />
+
+          {/* Add moderator */}
+          <div className="space-y-3">
+            <h4 className="text-sm font-medium text-white flex items-center gap-2">
+              <ShieldCheck className="w-4 h-4 text-emerald-400" />{_copy("copy.cdf0c2e4fb71", { defaultValue: "Add Moderator" })}</h4>
+            <div className="flex gap-2">
+              <Input
+                value={modAddress}
+                onChange={(e) => setModAddress(e.target.value)}
+                placeholder={_copy("copy.9b37f756f45a", { defaultValue: "Wallet address (0x...)" })}
+                className="bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500 flex-1 text-sm"
+              />
+              <Button
+                onClick={handleAddModerator}
+                disabled={isAddingMod || !modAddress.trim()}
+                size="icon"
+                className="rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/30 flex-shrink-0"
+              >
+                {isAddingMod ? <Loader2 className="w-4 h-4 animate-spin" /> : <UserPlus className="w-4 h-4" />}
+              </Button>
+            </div>
+
+            {/* Current moderators */}
+            {room?.moderators && room.moderators.length > 0 && (
+              <div className="space-y-1">
+                <p className="text-xs text-zinc-500">{_copy("copy.c06b14d45650", { defaultValue: "Current Moderators" })}</p>
+                {room.moderators.map((addr) => (
+                  <div key={addr} className="flex items-center gap-2 text-xs text-zinc-400 bg-zinc-800/50 rounded-lg px-3 py-1.5">
+                    <ShieldCheck className="w-3 h-3 text-emerald-500" />
+                    <span className="truncate">{addr}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}

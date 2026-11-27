@@ -1,0 +1,212 @@
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Save, Clock, CalendarClock } from "lucide-react";
+import Trash2 from "@/components/ui/cut-icons/delete";
+import Image from "@/components/ui/cut-icons/images";
+import Video from "@/components/ui/cut-icons/video";
+import BarChart3 from "@/components/ui/cut-icons/stats";
+
+import X from "@/components/ui/cut-icons/close";
+import Mic from "@/components/ui/cut-icons/mic";
+
+import { motion, AnimatePresence } from 'framer-motion';
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
+import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
+import { AppState } from '@/components/app/AppState';
+import type { DraftPayload } from '../types';
+
+export interface Draft {
+  id: string;
+  text: string;
+  createdAt: Date;
+  hasImage: boolean;
+  hasVideo: boolean;
+  hasAudio: boolean;
+  articleBody?: string;
+  articleTitle?: string;
+  articleImageData?: string;
+  socialImageData?: string;
+  /** Poll, schedule, pricing, category — everything that is neither text nor media. */
+  payload?: DraftPayload;
+}
+
+interface DraftsSheetProps {
+  isOpen: boolean;
+  onClose: () => void;
+  drafts: Draft[];
+  onSaveDraft: () => void;
+  onLoadDraft: (draft: Draft) => void;
+  onDeleteDraft: (id: string) => void;
+  canSave: boolean;
+}
+
+export function DraftsSheet({ 
+  isOpen, 
+  onClose, 
+  drafts, 
+  onSaveDraft, 
+  onLoadDraft, 
+  onDeleteDraft,
+  canSave 
+}: DraftsSheetProps) {
+  const { t, i18n } = useTranslation();
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  /*
+   * The timestamp was formatted with a hardcoded English pattern — "Sep 21,
+   * 2026 • 4:12 PM" in every language, including the ones that do not use a
+   * 12-hour clock or a Latin month name. Intl follows the interface language
+   * and needs no locale data shipped with it.
+   */
+  const formatSavedAt = (date: Date) => {
+    if (Number.isNaN(date?.getTime?.())) return '';
+    return new Intl.DateTimeFormat(i18n.language, {
+      dateStyle: 'medium',
+      timeStyle: 'short',
+    }).format(date);
+  };
+
+  const handleDelete = (id: string) => {
+    setDeletingId(id);
+    setTimeout(() => {
+      onDeleteDraft(id);
+      setDeletingId(null);
+      toast.success(t('drafts.deleted'));
+    }, 300);
+  };
+
+  const handleLoad = (draft: Draft) => {
+    onLoadDraft(draft);
+    onClose();
+    toast.success(t('drafts.loaded'));
+  };
+
+  const handleSave = () => {
+    onSaveDraft();
+    toast.success(t('drafts.saved'));
+    // Saving is the end of the composing session, not a checkpoint in it: the
+    // sheet closes here and the composer behind it is cleared by the handler.
+    onClose();
+  };
+
+  return (
+    <Drawer open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DrawerContent
+        glass
+        hideHandle
+        column
+        className="max-h-[90dvh] overflow-hidden flex flex-col px-4 pb-6"
+      >
+        <DrawerHeader className="relative pb-4 border-b border-white/10 shrink-0 px-0">
+          {/* Close and Save are the same height and sit the same distance from
+              the top as from their side, so each reads as tucked into its corner. */}
+          <div className="flex items-center justify-between">
+            <button onClick={onClose} className="flex h-8 w-8 items-center justify-center rounded-xl hover:bg-white/10 transition-colors">
+              <X className="w-5 h-5 text-zinc-400" />
+            </button>
+            <DrawerTitle className="text-white font-semibold absolute left-1/2 -translate-x-1/2">
+              {t('drafts.title')}
+            </DrawerTitle>
+            <button
+              onClick={handleSave}
+              disabled={!canSave}
+              className={cn(
+                "flex h-8 items-center gap-1.5 px-3 rounded-xl text-xs font-medium transition-all",
+                canSave
+                  ? "bg-white/10 text-white border border-white/20 hover:bg-white/20"
+                  : "bg-white/5 text-zinc-500 border border-white/10 cursor-not-allowed"
+              )}
+            >
+              <Save className="w-4 h-4" />
+              {t('drafts.saveCurrent')}
+            </button>
+          </div>
+        </DrawerHeader>
+
+        <div className="relative flex-1 overflow-y-auto pt-4">
+          {drafts.length === 0 ? (
+            <AppState
+              icon="posts"
+              title={t('drafts.emptyTitle')}
+              description={t('drafts.emptyDescription')}
+              size="drawer"
+            />
+          ) : (
+            <div className="space-y-2 px-1">
+              <AnimatePresence mode="popLayout">
+                {drafts.map((draft) => (
+                  <motion.div
+                    key={draft.id}
+                    layout
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: deletingId === draft.id ? 0 : 1, y: 0, scale: deletingId === draft.id ? 0.9 : 1 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
+                    className="group relative p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all cursor-pointer"
+                    onClick={() => handleLoad(draft)}
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-white text-sm line-clamp-2">
+                          {draft.articleTitle || draft.text || <span className="text-zinc-500 italic">{t('drafts.noText')}</span>}
+                        </p>
+                        
+                        {/* Media indicators */}
+                        <div className="flex items-center gap-2 mt-2">
+                          {draft.hasImage && (
+                            <span className="flex items-center gap-1 text-xs text-zinc-400">
+                              <Image className="w-3 h-3" /> {t('drafts.image')}
+                            </span>
+                          )}
+                          {draft.hasVideo && (
+                            <span className="flex items-center gap-1 text-xs text-zinc-400">
+                              <Video className="w-3 h-3" /> {t('drafts.video')}
+                            </span>
+                          )}
+                          {draft.hasAudio && (
+                            <span className="flex items-center gap-1 text-xs text-zinc-400">
+                              <Mic className="w-3 h-3" /> {t('drafts.audio')}
+                            </span>
+                          )}
+                          {draft.payload?.poll && (
+                            <span className="flex items-center gap-1 text-xs text-zinc-400">
+                              <BarChart3 className="w-3 h-3" /> {t('drafts.poll')}
+                            </span>
+                          )}
+                          {draft.payload?.scheduledDate && (
+                            <span className="flex items-center gap-1 text-xs text-zinc-400">
+                              <CalendarClock className="w-3 h-3" /> {t('drafts.scheduled')}
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="flex items-center gap-1.5 mt-2 text-xs text-zinc-500">
+                          <Clock className="w-3 h-3" />
+                          {formatSavedAt(draft.createdAt)}
+                        </div>
+                      </div>
+
+                      {/* Delete button */}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDelete(draft.id);
+                        }}
+                        className="p-2 rounded-xl text-zinc-500 hover:text-red-400 hover:bg-red-500/10 opacity-0 group-hover:opacity-100 transition-all"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </div>
+          )}
+
+          {/* Safe area padding */}
+          <div className="h-[env(safe-area-inset-bottom,16px)]" />
+        </div>
+      </DrawerContent>
+    </Drawer>
+  );
+}

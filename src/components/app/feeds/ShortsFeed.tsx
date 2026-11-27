@@ -1,0 +1,723 @@
+import { translateCopy as _translateCopy } from '@/i18n/copy';
+import { TranslationText } from '@/components/TranslationText';
+import { useTranslation as _useCopy } from 'react-i18next';
+import { useSurfaceDraft } from '@/hooks/use-surface-draft';
+import { isShortsPhoto, interleaveShorts } from '@/lib/shorts-photos';
+import { mapToShortVideo } from '@/lib/short-video';
+import { isTokenUnlocked } from '@/lib/unlocked-tokens-store';
+/**
+ * Shorts Feed Component
+ * =====================
+ * Displays short-form video content from Riftn API.
+ * 
+ * @module components/app/feeds/ShortsFeed
+ */
+
+import { useState, useEffect, useRef, useMemo, useCallback, lazy, Suspense } from 'react';
+import { toast } from 'sonner';
+import { useTranslation as useI18n } from 'react-i18next';
+import { useAutoRetryFeed } from '@/hooks/use-auto-retry-feed';
+import { usePersistedFeedFilter } from '@/hooks/use-persisted-feed-filter';
+import { Loader2 } from "lucide-react";
+import RefreshCw from "@/components/ui/cut-icons/refresh";
+
+import Play from "@/components/ui/cut-icons/play";
+
+import { ThemedIcon } from '@/components/app/war/WarHudIcon';
+import { AppState } from '@/components/app/AppState';
+import { ShortsFeedSkeleton } from '@/components/app/feeds/FeedSkeletons';
+import { FeedFilterLoader } from '@/components/app/feeds/FeedFilterLoader';
+import { useFeedFilterTransition } from '@/hooks/use-feed-filter-transition';
+import { AnimatePresence, motion } from 'framer-motion';
+import { useQuery } from '@tanstack/react-query';
+import { useVerticalOptOuts } from '@/hooks/use-stream-overlay';
+import { cn } from '@/lib/utils';
+import { GlassFilterRow } from '@/components/app/feeds/GlassFilterRow';
+import { useScrollFadeMask } from '@/components/app/feeds/useScrollFadeMask';
+// Lazy: the viewer only exists once a short is opened, and statically it drags
+// VideoSlide, the fullscreen/tap-gesture hooks, CommentsSection and its modals
+// onto the boot path — all parsed before the feed paints.
+const ShortsViewer = lazy(() =>
+  import('@/components/app/cards/ShortsViewer').then(m => ({ default: m.ShortsViewer })),
+);
+import { useDeHubFeed, useDeHubLive, mapApiLiveStreamToLocal } from '@/hooks/use-dehub-feed';
+import { LiveShortTile } from '@/components/app/feeds/LiveShortTile';
+import { interleaveLive, isVerticalFeedLive, liveToShort } from '@/lib/live-shorts';
+import { useUnifiedFeed } from '@/hooks/use-unified-feed';
+import { FeedSearchResults } from '@/components/app/feeds/FeedSearchResults';
+import { getCategories, type DeHubCategory, type DeHubNFT } from '@/lib/api/dehub';
+import { useAuth } from '@/contexts/AuthContext';
+import { useAppTheme } from '@/contexts/ThemeContext';
+import { SwipeableCarousel } from '@/components/app/SwipeableCarousel';
+import { SORT_OPTIONS, DEFAULT_FEED_SORT, SHORTS_RESET_SORT, DATE_FILTER_OPTIONS, applySorting, filterByDate, getApiSortMode, type SortOption, type DateFilterOption } from '@/lib/feed-utils';
+import type { ShortVideo } from '@/types/feed.types';
+import { useSidebarCollapse } from '@/contexts/SidebarCollapseContext';
+import { ShortsBricks, ShortTile } from '@/components/app/feeds/ShortsBricks';
+import { brickShape, packBricks } from '@/lib/shorts-bricks';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { useMediaQuery } from '@/hooks/use-media-query';
+import { FILL_LAST_ROW_2, FILL_LAST_ROW_3 } from '@/components/app/feeds/ShortsBricks';
+import { orderByInterests, useFeedInterests } from '@/lib/feed-interests';
+
+// ============================================================================
+// CONSTANTS
+// ============================================================================
+
+// Sort options are imported from feed-utils
+
+// Duration filters (client-side filtering) - shorter for shorts
+const DURATION_FILTERS = [
+  { label: 'Any', min: 0, max: Infinity },
+  { label: '< 15s', min: 0, max: 15 },
+  { label: '15-30s', min: 15, max: 30 },
+  { label: '30-60s', min: 30, max: 60 },
+  { label: '60s+', min: 60, max: Infinity },
+];
+
+// Upload date filters - imported from feed-utils for consistency
+
+
+// Fallback categories if API fails
+const FALLBACK_CATEGORIES: DeHubCategory[] = [
+  { id: 'dance', get name() { return _translateCopy("copy.23d2d73543f9", { defaultValue: "Dance" }); }, slug: 'dance' },
+  { id: 'comedy', get name() { return _translateCopy("copy.85f1c8c8e324", { defaultValue: "Comedy" }); }, slug: 'comedy' },
+  { id: 'music', get name() { return _translateCopy("copy.6eb00b4b2614", { defaultValue: "Music" }); }, slug: 'music' },
+  { id: 'gaming', get name() { return _translateCopy("copy.0fadfa228814", { defaultValue: "Gaming" }); }, slug: 'gaming' },
+  { id: 'food', get name() { return _translateCopy("copy.e4eb18069d65", { defaultValue: "Food" }); }, slug: 'food' },
+  { id: 'pets', get name() { return _translateCopy("copy.7dc1cd7eaff6", { defaultValue: "Pets" }); }, slug: 'pets' },
+];
+
+type DurationFilter = typeof DURATION_FILTERS[number];
+
+// Shared filter pill styles
+function useActiveFilterClass() {
+  const { theme, themeChoice } = useAppTheme();
+  return (theme === 'light' || themeChoice === 'system-light')
+    ? 'bg-gradient-to-br from-white/20 via-white/10 to-white/5 backdrop-blur-xl border border-white/30 text-white shadow-[0_2px_8px_rgba(0,0,0,0.1),inset_0_1px_0_rgba(255,255,255,0.2),inset_0_-1px_0_rgba(255,255,255,0.05)]'
+    : 'bg-gradient-to-br from-white/20 via-white/10 to-white/5 backdrop-blur-xl border border-white/30 text-white shadow-[0_4px_16px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.4),inset_0_-1px_0_rgba(255,255,255,0.1)]';
+}
+const INACTIVE_FILTER_CLASS = 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700';
+
+// ============================================================================
+// HELPERS
+// ============================================================================
+
+// Parse timeAgo string to approximate Date
+function parseTimeAgoToDate(timeAgo: string): Date {
+  const now = new Date();
+  if (!timeAgo) return now;
+  
+  const match = timeAgo.match(/(\d+)\s*(m|h|d|w|mo|y)/i);
+  if (!match) return now;
+  
+  const value = parseInt(match[1], 10);
+  const unit = match[2].toLowerCase();
+  
+  switch (unit) {
+    case 'm': return new Date(now.getTime() - value * 60 * 1000);
+    case 'h': return new Date(now.getTime() - value * 60 * 60 * 1000);
+    case 'd': return new Date(now.getTime() - value * 24 * 60 * 60 * 1000);
+    case 'w': return new Date(now.getTime() - value * 7 * 24 * 60 * 60 * 1000);
+    case 'mo': return new Date(now.getTime() - value * 30 * 24 * 60 * 60 * 1000);
+    case 'y': return new Date(now.getTime() - value * 365 * 24 * 60 * 60 * 1000);
+    default: return now;
+  }
+}
+
+// ============================================================================
+// FILTER SECTION COMPONENTS
+// ============================================================================
+
+function SortFilterSection({ selected, onSelect }: { selected: SortOption; onSelect: (o: SortOption) => void }) {
+  const { t } = useI18n();
+  return (
+    <div className="flex flex-col gap-2">
+      <span className="text-xs text-zinc-500 uppercase tracking-wider">{t('filters.sort')}</span>
+      <div className="relative">
+        <GlassFilterRow
+          items={SORT_OPTIONS.map((o) => ({ key: o.label, label: t(o.labelKey, o.label) }))}
+          activeKey={selected.label}
+          onSelect={(key) => { const o = SORT_OPTIONS.find(x => x.label === key); if (o) onSelect(o); }}
+        />
+      </div>
+    </div>
+  );
+}
+
+function DurationFilterSection({ selected, onSelect }: { selected: DurationFilter; onSelect: (o: DurationFilter) => void }) {
+  const { t } = useI18n();
+  return (
+    <div className="flex flex-col gap-2">
+      <span className="text-xs text-zinc-500 uppercase tracking-wider">{t('filters.duration')}</span>
+      <div className="relative">
+        <GlassFilterRow
+          items={DURATION_FILTERS.map((o) => ({ key: o.label, label: o.label === 'Any' ? t('filters.any') : o.label }))}
+          activeKey={selected.label}
+          onSelect={(key) => { const o = DURATION_FILTERS.find(x => x.label === key); if (o) onSelect(o); }}
+        />
+      </div>
+    </div>
+  );
+}
+
+// Category Filter Section with search
+function CategoryFilterSection({ 
+  categories, 
+  selectedCategory, 
+  onSelect,
+  isLoading 
+}: { 
+  categories: DeHubCategory[]; 
+  selectedCategory: string | null; 
+  onSelect: (cat: string | null) => void;
+  isLoading?: boolean;
+}) {
+  const { t: _copy } = _useCopy();
+  const { t } = useI18n();
+  const [search, setSearch] = useSurfaceDraft("components/app/feeds/ShortsFeed.tsx:search", '');
+  const { ref: fadeRef, style: fadeStyle } = useScrollFadeMask<HTMLDivElement>();
+  // A hook, so it is called once here rather than inside the branches and the
+  // .map below — a per-item, per-condition hook call is a render-count crash
+  // waiting for the category list to change length.
+  const activeFilterClass = useActiveFilterClass();
+
+  const selectedObj = useMemo(() => {
+    if (!selectedCategory) return null;
+    return categories.find(c => c.id === selectedCategory) || null;
+  }, [categories, selectedCategory]);
+
+  const filtered = useMemo(() => {
+    let list = categories;
+    if (search.trim()) {
+      const q = search.toLowerCase();
+      list = list.filter(c => c.name.toLowerCase().includes(q));
+    }
+    if (selectedObj) {
+      list = list.filter(c => c.id !== selectedCategory);
+    }
+    return list;
+  }, [categories, search, selectedCategory, selectedObj]);
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col gap-2">
+        <span className="text-xs text-zinc-500 uppercase tracking-wider">{t('filters.category')}</span>
+        <div className="flex items-center justify-center py-3">
+          <Loader2 className="w-4 h-4 animate-spin text-zinc-500" />
+          <span className="text-xs text-zinc-500 ml-2">{_copy("copy.d3cf16ece088", { defaultValue: "Loading categories..." })}</span>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-2">
+      <span className="text-xs text-zinc-500 uppercase tracking-wider">{t('filters.category')}</span>
+      <input
+        type="search"
+        value={search}
+        onChange={e => setSearch(e.target.value)}
+        placeholder={t('filters.searchCategories')}
+        className="w-full px-3 py-1.5 rounded-lg text-xs bg-zinc-800 text-zinc-200 placeholder-zinc-500 border border-zinc-700 focus:border-zinc-500 focus:outline-none transition-colors mb-1"
+      />
+      <div className="relative">
+        <div ref={fadeRef} className="flex gap-1.5 overflow-x-auto overflow-y-visible scrollbar-hide whitespace-nowrap pl-1 pr-6 py-1" style={{ touchAction: 'manipulation', ...fadeStyle }}>
+          {selectedObj && (
+            <button
+              data-feed-filter-button
+              data-active="true"
+              onClick={() => { onSelect(null); setSearch.complete(search, ''); }}
+              className={cn("flex-shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-all", activeFilterClass)}
+            >
+              {selectedObj.name}
+              <span className="ml-0.5 text-white/50 hover:text-white">✕</span>
+            </button>
+          )}
+          <button
+            data-feed-filter-button
+            data-active={selectedCategory === null ? 'true' : undefined}
+            onClick={() => { onSelect(null); setSearch.complete(search, ''); }}
+            className={cn(
+              'flex-shrink-0 px-3 py-1.5 rounded-lg text-xs font-medium transition-all',
+              selectedCategory === null ? activeFilterClass : INACTIVE_FILTER_CLASS
+            )}
+          >
+            {t('filters.all')}
+          </button>
+          {filtered.map((cat) => (
+            <button
+              key={cat.id}
+              data-feed-filter-button
+              data-active={selectedCategory === cat.id ? 'true' : undefined}
+              onClick={() => { onSelect(cat.id); setSearch.complete(search, ''); }}
+              className={cn(
+                'flex-shrink-0 px-3 py-1.5 rounded-lg text-xs font-medium transition-all',
+                selectedCategory === cat.id ? activeFilterClass : INACTIVE_FILTER_CLASS
+              )}
+            >
+              {cat.name}
+            </button>
+          ))}
+          {filtered.length === 0 && search.trim() && (
+            <span className="text-xs text-zinc-500 py-1.5">{t('filters.noMatches')}</span>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function UploadDateFilterSection({ selected, onSelect }: { selected: DateFilterOption; onSelect: (o: DateFilterOption) => void }) {
+  const { t } = useI18n();
+  return (
+    <div className="flex flex-col gap-2">
+      <span className="text-xs text-zinc-500 uppercase tracking-wider">{t('filters.uploadDate')}</span>
+      <div className="relative">
+        <GlassFilterRow
+          items={DATE_FILTER_OPTIONS.map((o) => ({ key: o.label, label: o.value === 'all' ? t('filters.all') : o.label }))}
+          activeKey={selected.label}
+          onSelect={(key) => { const o = DATE_FILTER_OPTIONS.find(x => x.label === key); if (o) onSelect(o); }}
+        />
+      </div>
+    </div>
+  );
+}
+
+// ============================================================================
+// MAIN COMPONENT
+// ============================================================================
+
+interface ShortsFeedProps {
+  showFilters?: boolean;
+  isRefreshing?: boolean;
+  refreshKey?: number;
+  /** A short tapped elsewhere in the app: open the viewer on it once the list has it. */
+  startShortId?: string;
+  onStartShortConsumed?: () => void;
+  /** Words typed into the pill's search: the grid turns into matching shorts. */
+  searchQuery?: string;
+}
+
+export function ShortsFeed({ showFilters = false, isRefreshing = false, refreshKey = 0, startShortId, onStartShortConsumed, searchQuery = '' }: ShortsFeedProps) {
+  const { t: _copy } = _useCopy();
+  const { t } = useI18n();
+  const { isCollapsed } = useSidebarCollapse();
+  // Sort is now client-side - default to "Latest" instead of "Random" to avoid 5-page prefetch - persisted
+  const [selectedSort, setSelectedSort] = usePersistedFeedFilter<SortOption>('shorts', 'sort', DEFAULT_FEED_SORT, SORT_OPTIONS);
+  // Duration and upload date are client-side filters - persisted
+  const [selectedDuration, setSelectedDuration] = usePersistedFeedFilter<typeof DURATION_FILTERS[number]>('shorts', 'duration', DURATION_FILTERS[0], DURATION_FILTERS);
+  const [selectedUploadDate, setSelectedUploadDate] = usePersistedFeedFilter<DateFilterOption>('shorts', 'date', DATE_FILTER_OPTIONS[0], DATE_FILTER_OPTIONS);
+  const [selectedCategory, setSelectedCategory] = usePersistedFeedFilter<string | null>('shorts', 'category', null);
+  // Phones mix tall and wide videos in brick rows.
+  const isPhone = useIsMobile();
+  const [viewerSelection, setViewerSelection] = useState<{ id: string; live: ShortVideo[] } | null>(null);
+  const loaderRef = useRef<HTMLDivElement>(null);
+
+  // Filter chips arm a loader on click so a sort switch never leaves the old
+  // results sitting there looking frozen (the feed query keeps previous data).
+  // The hook that owns it needs `isFetching` from the queries below, so a ref
+  // bridges the gap — a click can't land before the effect that fills it.
+  const beginFilterTransitionRef = useRef<() => void>(() => {});
+  const beginFilterTransition = useCallback(() => {
+    beginFilterTransitionRef.current();
+  }, []);
+
+  const { walletAddress, isAuthenticated, openLoginModal } = useAuth();
+  const isFollowingMode = selectedSort.value === 'following';
+
+  // Auth-guarded sort selection
+  const handleSortSelect = useCallback((option: SortOption) => {
+    if (option.value === 'following' && !isAuthenticated) {
+      openLoginModal();
+      return;
+    }
+    // Re-tapping the active chip changes nothing, so it must not flash a loader.
+    if (option.value === selectedSort.value) return;
+    beginFilterTransition();
+    setSelectedSort(option);
+  }, [isAuthenticated, openLoginModal, selectedSort.value, setSelectedSort, beginFilterTransition, _copy]);
+
+  // Every other chip row goes through these, so each one arms the loader.
+  const selectCategory = useCallback((value: string | null) => {
+    beginFilterTransition();
+    setSelectedCategory(value);
+  }, [setSelectedCategory, beginFilterTransition]);
+  const selectDuration = useCallback((value: typeof DURATION_FILTERS[number]) => {
+    beginFilterTransition();
+    setSelectedDuration(value);
+  }, [setSelectedDuration, beginFilterTransition]);
+  const selectUploadDate = useCallback((value: DateFilterOption) => {
+    beginFilterTransition();
+    setSelectedUploadDate(value);
+  }, [setSelectedUploadDate, beginFilterTransition]);
+  const resetAllFilters = useCallback(() => {
+    beginFilterTransition();
+    setSelectedSort(SHORTS_RESET_SORT);
+    setSelectedCategory(null);
+    setSelectedDuration(DURATION_FILTERS[0]);
+    setSelectedUploadDate(DATE_FILTER_OPTIONS[0]);
+  }, [setSelectedSort, setSelectedCategory, setSelectedDuration, setSelectedUploadDate, beginFilterTransition]);
+
+  // Topics picked while signing up go first in every category bar.
+  const feedInterests = useFeedInterests();
+  const putInterestsFirst = useCallback((list: DeHubCategory[]) => orderByInterests(list, feedInterests), [feedInterests]);
+  // Fetch categories from API
+  const { data: apiCategories, isLoading: categoriesLoading } = useQuery({
+    queryKey: ['dehub-categories'],
+    queryFn: getCategories,
+    select: putInterestsFirst,
+    staleTime: 1000 * 60 * 30,
+    retry: 2,
+    enabled: showFilters,
+  });
+
+  // Use API categories with fallback
+  const categories = useMemo(() => {
+    if (apiCategories && Array.isArray(apiCategories) && apiCategories.length > 0) {
+      return apiCategories;
+    }
+    return FALLBACK_CATEGORIES;
+  }, [apiCategories]);
+
+  // Fetch from Riftn API - pass sortMode based on selected filter (default source)
+  const {
+    data: apiData,
+    fetchNextPage: fetchNextPageDefault,
+    hasNextPage: hasNextPageDefault,
+    isFetchingNextPage: isFetchingNextPageDefault,
+    isLoading: isApiLoadingDefault,
+    isFetching: isApiFetchingDefault,
+    isError: isErrorDefault,
+    refetch: refetchDefault,
+  } = useDeHubFeed({
+    unit: 12,
+    sortMode: getApiSortMode(selectedSort.value),
+    category: selectedCategory || undefined,
+    postType: 'video',
+  });
+
+  // Fetch from unified feed API (when following mode is active)
+  const {
+    data: unifiedData,
+    fetchNextPage: fetchNextPageUnified,
+    hasNextPage: hasNextPageUnified,
+    isFetchingNextPage: isFetchingNextPageUnified,
+    isLoading: isApiLoadingUnified,
+    isFetching: isApiFetchingUnified,
+    isError: isErrorUnified,
+    refetch: refetchUnified,
+  } = useUnifiedFeed({
+    postType: 'video',
+    limit: 12,
+    sortBy: 'createdAt',
+    sortOrder: 'desc',
+    status: 'all',
+    category: selectedCategory || undefined,
+    followingOnly: true,
+    enabled: isFollowingMode,
+  });
+
+  const photosFeed = useUnifiedFeed({
+    postType: 'feed-images', search: 'soundtrack', limit: 12,
+    sortBy: selectedSort.value === 'most-liked' ? 'likes' : selectedSort.value === 'most-viewed' ? 'views' : 'createdAt', sortOrder: 'desc',
+    status: 'all', category: selectedCategory || undefined, followingOnly: isFollowingMode,
+  });
+
+  // Select active data source
+  const fetchNextPage = useCallback(() => Promise.all([
+    (isFollowingMode ? hasNextPageUnified : hasNextPageDefault)
+      ? (isFollowingMode ? fetchNextPageUnified() : fetchNextPageDefault()) : Promise.resolve(),
+    photosFeed.hasNextPage ? photosFeed.fetchNextPage() : Promise.resolve(),
+  ]), [isFollowingMode, hasNextPageUnified, hasNextPageDefault, fetchNextPageUnified, fetchNextPageDefault, photosFeed.hasNextPage, photosFeed.fetchNextPage]);
+  const hasNextPage = (isFollowingMode ? hasNextPageUnified : hasNextPageDefault) || photosFeed.hasNextPage;
+  const isFetchingNextPage = (isFollowingMode ? isFetchingNextPageUnified : isFetchingNextPageDefault) || photosFeed.isFetchingNextPage;
+  const isApiLoading = (isFollowingMode ? isApiLoadingUnified : isApiLoadingDefault) || photosFeed.isLoading;
+  const isApiFetching = (isFollowingMode ? isApiFetchingUnified : isApiFetchingDefault) || photosFeed.isFetching;
+  const isError = (isFollowingMode ? isErrorUnified : isErrorDefault) || photosFeed.isError;
+  const refetch = useCallback(() => Promise.all([(isFollowingMode ? refetchUnified() : refetchDefault()), photosFeed.refetch()]), [isFollowingMode, refetchUnified, refetchDefault, photosFeed.refetch]);
+
+  const filterTransition = useFeedFilterTransition(isApiFetching);
+  useEffect(() => {
+    beginFilterTransitionRef.current = filterTransition.begin;
+  }, [filterTransition.begin]);
+
+  // Refetch when refreshKey changes
+  useEffect(() => {
+    if (refreshKey > 0) {
+      refetch();
+    }
+  }, [refreshKey, refetch]);
+
+  // Get raw items for sorting - handle both data sources
+  const allRawNFTs = useMemo((): any[] => {
+    const videos = isFollowingMode
+      ? unifiedData?.pages.flatMap(page => page.items || []) || []
+      : apiData?.pages.flatMap(page => page.data || []) || [];
+    const photos = (photosFeed.data?.pages.flatMap(page => page.items || []) || []).filter(isShortsPhoto);
+    return interleaveShorts(videos, photos);
+  }, [apiData, unifiedData, isFollowingMode, photosFeed.data]);
+
+  // Dual-format live: streams on air right now lead the grid in their vertical
+  // view. Same query (and cache) as the Live tab. Gated or mature streams stay
+  // off, as pay-per-view does for shorts.
+  const liveQuery = useDeHubLive();
+  const liveCandidates = useMemo(() => {
+    const streams = liveQuery.data?.pages.flatMap((page) => page.data || []) || [];
+    return streams.map(mapApiLiveStreamToLocal).filter(isVerticalFeedLive).slice(0, 8);
+  }, [liveQuery.data]);
+  const candidateIds = useMemo(() => liveCandidates.map((s) => s.streamId).filter((id): id is string => !!id), [liveCandidates]);
+  const verticalOff = useVerticalOptOuts(candidateIds);
+  const liveShorts = useMemo(
+    () => liveCandidates.filter((s) => !s.streamId || !verticalOff.has(s.streamId)).slice(0, 6),
+    [liveCandidates, verticalOff],
+  );
+  // Apply date filter on raw NFTs, then sort and map to ShortVideo array
+  const allShorts = useMemo(() => {
+    const dateFiltered = isFollowingMode ? allRawNFTs : filterByDate(allRawNFTs, selectedUploadDate.value);
+    // Exclude PPV content from shorts, except a pay-per-view this viewer has
+    // already unlocked. `startShortId` is in the deps so the list is rebuilt
+    // on the tap that follows an unlock.
+    const nonPPV = dateFiltered.filter((nft: any) => {
+      const isPPV = !!nft.is_ppv || !!nft.streamInfo?.isPayPerView;
+      return !isPPV || isTokenUnlocked(String(nft.tokenId || nft.id || nft.token_id));
+    });
+    const sorted = isFollowingMode ? nonPPV : applySorting(nonPPV, selectedSort.value);
+    return sorted.map((nft: any, index: number) => mapToShortVideo(nft, index));
+    // The unlock check reads storage, so this rebuild is what picks up an unlock.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allRawNFTs, selectedSort.value, selectedUploadDate.value, isFollowingMode, startShortId]);
+
+  // Apply client-side duration filter
+  const shorts = useMemo((): ShortVideo[] => {
+    let list: typeof allShorts = allShorts;
+    // Duration filter
+    if (selectedDuration.max !== Infinity || selectedDuration.min !== 0) {
+      list = list.filter(short => {
+        return short.durationSeconds >= selectedDuration.min && short.durationSeconds < selectedDuration.max;
+      });
+    }
+    return list;
+  }, [allShorts, selectedDuration]);
+
+  // Check if any client-side filters are active
+  const hasActiveFilters = selectedDuration.label !== 'Any' || selectedUploadDate.value !== 'all';
+
+  // Desktop grid: two columns, three when the sidebar is collapsed on a wide
+  // screen. While more pages can still arrive, a part-filled last row waits
+  // for them; the final last row spreads to fill the width (FILL_LAST_ROW_*).
+  const isLarge = useMediaQuery('(min-width: 1024px)');
+  const gridCols = isCollapsed && isLarge ? 3 : 2;
+  const gridShorts = useMemo(() => {
+    if (isPhone || !hasNextPage) return shorts;
+    const liveCount = hasActiveFilters ? 0 : liveShorts.length;
+    const extra = (liveCount + shorts.length) % gridCols;
+    return extra && shorts.length > extra ? shorts.slice(0, shorts.length - extra) : shorts;
+  }, [isPhone, hasNextPage, shorts, hasActiveFilters, liveShorts, gridCols]);
+
+  // Phone brick rows. The tail waits for the next page so rows on screen never reshuffle.
+  const brickRows = useMemo(
+    () => (isPhone ? packBricks(shorts, (short) => brickShape(short.storedAspect), (short) => String(short.id), !hasNextPage) : []),
+    [isPhone, shorts, hasNextPage],
+  );
+
+  // Keep the live slides from the moment the viewer opens. The shorts can
+  // still update as more pages load or the feed refreshes.
+  const viewerShorts = useMemo(() => viewerSelection ? interleaveLive(shorts, viewerSelection.live) : shorts, [shorts, viewerSelection]);
+  const selectedIndex = viewerSelection ? viewerShorts.findIndex(item => String(item.id) === viewerSelection.id) : -1;
+  const viewerOpen = selectedIndex >= 0;
+
+  /** Open the viewer on a slide by id: a short's id, or `live-<streamId>`. */
+  const openViewerAt = useCallback((id: string): boolean => {
+    const live = hasActiveFilters ? [] : liveShorts.map(liveToShort);
+    if (!shorts.some(item => String(item.id) === id) && !live.some(item => String(item.id) === id)) return false;
+    setViewerSelection({ id, live });
+    return true;
+  }, [hasActiveFilters, liveShorts, shorts]);
+
+  // Open the viewer on the short that was tapped elsewhere. It waits until the
+  // list holds that short; if it never does, the feed simply stays as it is.
+  useEffect(() => {
+    if (!startShortId || shorts.length === 0) return;
+    if (!openViewerAt(startShortId)) return;
+    onStartShortConsumed?.();
+  }, [startShortId, shorts, onStartShortConsumed, openViewerAt]);
+
+  // Reset client-side filters
+  const clearFilters = () => {
+    selectDuration(DURATION_FILTERS[0]);
+    selectUploadDate(DATE_FILTER_OPTIONS[0]);
+  };
+
+  // Infinite scroll observer
+  useEffect(() => {
+    if (!loaderRef.current || !hasNextPage) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      { threshold: 0.1, rootMargin: '100px' }
+    );
+
+    observer.observe(loaderRef.current);
+    return () => observer.disconnect();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  const isLoading = isApiLoading || isRefreshing;
+
+  const EmptyState = () => (
+    <AppState
+      icon={isError ? 'notifications' : 'videos'}
+      title={isError ? _translateCopy("copy.5cd6047c4b96", { defaultValue: "Shorts could not load" }) : _translateCopy("copy.1a67b14aa38a", { defaultValue: "No shorts yet" })}
+      description={isError ? _translateCopy("copy.0b4e78022a4a", { defaultValue: "Try loading the shorts feed again." }) : _translateCopy("copy.30349ad97e62", { defaultValue: "Short videos will appear here." })}
+      kind={isError ? 'error' : 'empty'}
+      size="page"
+      primaryAction={isError ? { get label() { return _translateCopy("copy.d8b8392e2c54", { defaultValue: "Try again" }); }, onClick: () => refetch(), icon: <RefreshCw /> } : undefined}
+    />
+  );
+
+  const FilteredEmptyState = () => (
+    <div className="flex flex-col items-center justify-center py-12 text-center">
+      <ThemedIcon icon="search" alt="" className="w-12 h-12 object-contain mb-3 opacity-65" />
+      <h3 className="text-white font-semibold mb-1"><TranslationText name="copy.2df01a03ff43" fallback={"No matches"} /></h3>
+      <p className="text-zinc-400 text-sm mb-3"><TranslationText name="copy.4d765c1adda1" fallback={"Try adjusting your filters"} /></p>
+      <button 
+        onClick={clearFilters}
+        className="text-sm text-white/70 hover:text-white underline"
+      ><TranslationText name="copy.7179ea0035fc" fallback={"Clear filters"} /></button>
+    </div>
+  );
+
+  const { isAutoRetrying } = useAutoRetryFeed({
+    itemCount: allShorts.length,
+    // An in-flight filter switch is not an empty feed — without this the retry
+    // loop fires against the results the user is already waiting for.
+    isLoading: isApiLoading || filterTransition.active,
+    isError,
+    refetch,
+  });
+
+  if ((isLoading || isAutoRetrying) && !showFilters && !searchQuery) {
+    return (
+      <div data-grid-feed className="px-2 pb-2 sm:px-3 sm:pb-3">
+        <ShortsFeedSkeleton />
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <div data-feed-root data-grid-feed className="px-2 pb-2 sm:px-3 sm:pb-3">
+        {/* Filters */}
+        <AnimatePresence mode="wait">
+          {showFilters && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.25, ease: 'easeOut' }}
+              className="overflow-y-clip overflow-x-visible"
+            >
+              <div data-no-swipe data-feed-filter-panel className="relative rounded-xl border border-white/[0.12] bg-white/[0.03] backdrop-blur-[24px] px-2 sm:px-3 py-3 space-y-4">
+                <SortFilterSection selected={selectedSort} onSelect={handleSortSelect} />
+                <CategoryFilterSection 
+                  categories={categories} 
+                  selectedCategory={selectedCategory} 
+                  onSelect={selectCategory}
+                  isLoading={categoriesLoading}
+                />
+                <DurationFilterSection selected={selectedDuration} onSelect={selectDuration} />
+                <UploadDateFilterSection selected={selectedUploadDate} onSelect={selectUploadDate} />
+                {/* Reset filters - bottom right */}
+                <button
+                  onClick={resetAllFilters}
+                  className="absolute z-50 bottom-4 right-4 p-1.5 rounded-lg text-zinc-500 hover:text-white hover:bg-zinc-800 transition-colors"
+                  aria-label={t('filters.resetFilters')}
+                >
+                  <RefreshCw className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Shorts Grid, filter loader or Empty State. The loader sits BELOW the
+            filter panel, not in place of the whole feed, so the chips the user
+            is working with stay on screen and clickable while the request runs. */}
+        {searchQuery ? (
+          <FeedSearchResults tab="shorts" query={searchQuery} />
+        ) : isLoading || isAutoRetrying ? (
+          <ShortsFeedSkeleton />
+        ) : filterTransition.active ? (
+          <FeedFilterLoader className="mt-3" />
+        ) : allShorts.length === 0 ? (
+          <EmptyState />
+        ) : shorts.length === 0 && hasActiveFilters ? (
+          <FilteredEmptyState />
+        ) : (
+          <div key={`${selectedSort.value}-${selectedUploadDate.value}`}>
+            {isPhone ? (
+              <ShortsBricks
+                shorts={shorts}
+                rows={brickRows}
+                live={!hasActiveFilters ? liveShorts : []}
+                viewerOpen={viewerOpen}
+                onOpenLive={(id) => openViewerAt(`live-${id}`)}
+                onOpen={(short) => openViewerAt(String(short.id))}
+              />
+            ) : (
+            /* Shorts Grid - TikTok Style (desktop and tablets) */
+            <div className={cn("grid gap-2 sm:gap-3", gridCols === 3 ? "grid-cols-3" : "grid-cols-2", gridCols === 3 ? FILL_LAST_ROW_3 : FILL_LAST_ROW_2)}>
+              {!hasActiveFilters && liveShorts.map((stream) => (
+                <LiveShortTile
+                  key={`live-${stream.id}`}
+                  stream={stream}
+                  disabled={viewerOpen}
+                  onOpen={() => openViewerAt(`live-${stream.id}`)}
+                />
+              ))}
+              {gridShorts.map((short) => (
+                <ShortTile key={short.id} short={short} viewerOpen={viewerOpen} onOpen={() => openViewerAt(String(short.id))} />
+              ))}
+            </div>
+            )}
+
+            {/* Infinite scroll loader */}
+            <div ref={loaderRef} className="flex justify-center py-6">
+              {isFetchingNextPage && (
+                <div className="flex items-center gap-2 text-zinc-400">
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <span className="text-sm">{t('common.loadingMore')}</span>
+                </div>
+              )}
+              {!hasNextPage && shorts.length > 0 && (
+                <p className="text-zinc-500 text-sm">{_copy("copy.5c36e9c0a6ae", { defaultValue: "No more shorts to load" })}</p>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Full-screen Shorts Viewer. Suspense sits OUTSIDE AnimatePresence so the
+          viewer stays its direct child — a boundary in between swallows the exit
+          animation. */}
+      <Suspense fallback={null}>
+        <AnimatePresence>
+          {viewerSelection && viewerOpen && (
+            <ShortsViewer
+              key={viewerSelection.id}
+              shorts={viewerShorts}
+              initialIndex={selectedIndex}
+              onClose={() => setViewerSelection(null)}
+              onLoadMore={() => fetchNextPage()}
+              hasMore={hasNextPage ?? false}
+              isLoadingMore={isFetchingNextPage}
+            />
+          )}
+        </AnimatePresence>
+      </Suspense>
+    </>
+  );
+}

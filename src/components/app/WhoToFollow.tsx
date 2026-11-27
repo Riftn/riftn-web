@@ -1,0 +1,243 @@
+import { useTranslation as _useCopy } from 'react-i18next';
+import { useMemo, useCallback, useRef, useEffect } from 'react';
+import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
+import { Loader2 } from 'lucide-react';
+import { useStableNavigate } from '@/hooks/use-stable-navigate';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { AppState } from '@/components/app/AppState';
+import { getSuggestedAccounts, getCachedSuggestedProfiles, type SuggestedAccount } from '@/lib/api/dehub';
+import { buildAvatarUrl } from '@/lib/media-url';
+import { BadgeIcon } from '@/components/app/BadgeIcon';
+import { useAuth } from '@/contexts/AuthContext';
+import { useReauthHandler } from '@/hooks/use-reauth-handler';
+import { useFollowedSuggestions } from '@/hooks/use-followed-suggestions';
+import { useFollowOverrides, toggleFollowFor } from '@/hooks/use-follow';
+import { profilePath } from '@/lib/profile-path';
+
+const BATCH_SIZE = 10;
+const MAX_PAGES = 10;
+
+export function WhoToFollow() {
+  const { t: _copy } = _useCopy();
+  const navigate = useStableNavigate();
+  const { isAuthenticated, walletAddress, openLoginModal } = useAuth();
+  const { handleApiError } = useReauthHandler();
+  const { followedUsers, markFollowed, unmarkFollowed } = useFollowedSuggestions();
+  const followOverrides = useFollowOverrides();
+  const queryClient = useQueryClient();
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  // For unauthenticated users, use cached profiles from the database
+  // For authenticated users, use the personalized suggestions API
+  const {
+    data,
+    isLoading,
+    error,
+    refetch,
+    isFetching,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
+    queryKey: isAuthenticated ? ['suggested-accounts', walletAddress] : ['cached-suggested-profiles'],
+    queryFn: ({ pageParam = 1 }) => {
+      if (!isAuthenticated) {
+        const offset = (pageParam - 1) * BATCH_SIZE;
+        return getCachedSuggestedProfiles(BATCH_SIZE, offset);
+      }
+      return getSuggestedAccounts(BATCH_SIZE, pageParam);
+    },
+    getNextPageParam: (lastPage, allPages) => {
+      if (!lastPage.hasMore) return undefined;
+      if (allPages.length >= MAX_PAGES) return undefined;
+      const allPreviousAddresses = new Set(
+        allPages.slice(0, -1).flatMap(p => p.items.map(i => i.address))
+      );
+      const newItems = lastPage.items.filter(i => !allPreviousAddresses.has(i.address));
+      if (newItems.length === 0) return undefined;
+      return allPages.length + 1;
+    },
+    initialPageParam: 1,
+    staleTime: isAuthenticated ? 5 * 60 * 1000 : 30 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+    retry: 2,
+  });
+
+  const allSuggestions = useMemo(() => {
+    if (!data?.pages) return [];
+    return data.pages.flatMap(page => page.items);
+  }, [data]);
+
+  const filteredSuggestions = useMemo(() => {
+    // Deduplicate by address, remove users followed during this session
+    const seen = new Set<string>();
+    return allSuggestions.filter(user => {
+      if (followedUsers.has(user.address) || seen.has(user.address)) return false;
+      seen.add(user.address);
+      return true;
+    });
+  }, [allSuggestions, followedUsers]);
+
+  const isAlreadyFollowed = useCallback((user: SuggestedAccount) => {
+    return followOverrides.get(user.address.toLowerCase()) ?? user.isFollowing === true;
+  }, [followOverrides]);
+
+  // Infinite scroll handler
+  const handleScroll = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el || isFetchingNextPage || !hasNextPage) return;
+    const { scrollTop, scrollHeight, clientHeight } = el;
+    if (scrollHeight - scrollTop - clientHeight < 200) {
+      fetchNextPage();
+    }
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    el.addEventListener('scroll', handleScroll);
+    return () => el.removeEventListener('scroll', handleScroll);
+  }, [handleScroll]);
+
+  // Auto-fetch next page when filtered suggestions run low (only after user follows someone)
+  const prevFilteredCount = useRef(filteredSuggestions.length);
+  useEffect(() => {
+    if (
+      filteredSuggestions.length < 3 &&
+      filteredSuggestions.length < prevFilteredCount.current &&
+      !isLoading && !error
+    ) {
+      if (hasNextPage && !isFetchingNextPage) {
+        fetchNextPage();
+      }
+    }
+    prevFilteredCount.current = filteredSuggestions.length;
+  }, [filteredSuggestions.length, hasNextPage, isFetchingNextPage, isLoading, fetchNextPage, error]);
+
+  if (error) {
+    console.warn('[WhoToFollow] Query error:', error);
+  }
+
+  const getAvatarUrl = (user: SuggestedAccount) => {
+    const avatarPath = user.avatarImageUrl || user.avatarUrl;
+    if (avatarPath && user.address) {
+      return buildAvatarUrl(user.address, avatarPath);
+    }
+    return undefined;
+  };
+
+  const getDisplayName = (user: SuggestedAccount) => {
+    return user.displayName || user.username || `${user.address.slice(0, 6)}...${user.address.slice(-4)}`;
+  };
+
+  const handleUserClick = (user: SuggestedAccount) => {
+    const target = user.username || user.address;
+    if (target) {
+      navigate(profilePath(target));
+    }
+  };
+
+  const handleFollow = (e: React.MouseEvent, user: SuggestedAccount) => {
+    e.stopPropagation();
+
+    if (!isAuthenticated) {
+      openLoginModal();
+      return;
+    }
+
+    if (followedUsers.has(user.address) || isAlreadyFollowed(user)) {
+      return;
+    }
+
+    // Optimistic: hide the suggestion instantly, revert if the API call fails
+    markFollowed(user.address);
+    toggleFollowFor(queryClient, user.address, false, {
+      name: getDisplayName(user),
+      onError: (error, info) => {
+        unmarkFollowed(user.address);
+        if (!info.handled) handleApiError(error, 'Failed to follow user');
+      },
+    });
+  };
+
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <Loader2 className="w-6 h-6 text-zinc-500 animate-spin" />
+      </div>
+    );
+  }
+
+  if (filteredSuggestions.length === 0) {
+    return (
+      <AppState
+        icon="subscriptions"
+        title={error ? _copy("copy.30321743d913", { defaultValue: "Suggestions could not load" }) : _copy("copy.52f341e961cd", { defaultValue: "No suggestions yet" })}
+        description={error ? _copy("copy.b5e8c269e811", { defaultValue: "Try loading account suggestions again." }) : _copy("copy.34f5da2599fa", { defaultValue: "New account suggestions will appear here." })}
+        kind={error ? 'error' : 'empty'}
+        size="section"
+        primaryAction={error ? {
+          label: _copy("copy.d8b8392e2c54", { defaultValue: "Try again" }),
+          onClick: () => refetch(),
+          disabled: isFetching,
+          loading: isFetching,
+        } : undefined}
+      />
+    );
+  }
+
+  return (
+    <div className="flex flex-col h-full">
+      <div
+        data-fade-mask-bottom
+        ref={scrollRef}
+        className="flex-1 overflow-y-auto overflow-x-hidden space-y-1 pr-1 scrollbar-thin scrollbar-thumb-zinc-700 scrollbar-track-transparent"
+      >
+        {filteredSuggestions.map((user) => (
+          <div
+            key={user.address}
+            onClick={() => handleUserClick(user)}
+            className="flex items-center gap-3 py-2 px-4 hover:bg-zinc-800/50 transition-colors cursor-pointer"
+          >
+            <div className="flex-shrink-0">
+              <Avatar className="w-10 h-10">
+                {getAvatarUrl(user) && <AvatarImage src={getAvatarUrl(user)} />}
+                <AvatarFallback className="bg-zinc-700 text-white font-medium">
+                  {getDisplayName(user).charAt(0).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+            </div>
+            <div className="flex-1 min-w-0 overflow-hidden">
+              <span className="inline-flex items-baseline gap-1 shrink min-w-0 max-w-full">
+                <span className="font-semibold text-white text-sm truncate">{getDisplayName(user)}</span>
+                <BadgeIcon badgeBalance={user.hideBadgeAndBalance ? 0 : user.badgeBalance} username={user.username} className="w-[1em] h-[1em]" />
+              </span>
+            </div>
+            <button
+              onClick={(e) => handleFollow(e, user)}
+              disabled={isAlreadyFollowed(user)}
+              data-follow-btn
+              className={`h-6 min-w-0 w-auto px-2.5 text-[11px] font-semibold rounded-lg flex items-center justify-center transition-all duration-150 flex-shrink-0 ${
+                isAlreadyFollowed(user)
+                  ? 'bg-white/10 text-white/40 cursor-default'
+                  : 'bg-gradient-to-br from-white/15 via-white/8 to-white/4 backdrop-blur-xl border border-white/20 text-white/70 hover:from-white/25 hover:via-white/15 hover:to-white/10 hover:border-white/40 hover:text-white shadow-[0_2px_8px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.2)]'
+              }`}
+            >
+              {isAlreadyFollowed(user) ? _copy("copy.344b4271ca01", { defaultValue: "Following" }) : _copy("copy.641d1ef657bd", { defaultValue: "Follow" })}
+            </button>
+          </div>
+        ))}
+        {isFetchingNextPage && (
+          <div className="flex items-center justify-center py-4">
+            <Loader2 className="w-4 h-4 text-zinc-500 animate-spin" />
+          </div>
+        )}
+      </div>
+
+      <div className="relative">
+        <div className="absolute -top-8 left-0 right-0 h-8 bg-gradient-to-t from-zinc-900 to-transparent pointer-events-none" />
+      </div>
+    </div>
+  );
+}

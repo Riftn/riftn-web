@@ -1,0 +1,152 @@
+import { apiCall } from './core';
+
+export interface ChannelVideo {
+  youtubeVideoId: string;
+  title: string;
+  url: string;
+  alreadyImported: boolean;
+  thumbnailUrl?: string;
+  durationSeconds?: number;
+  viewCount?: number;
+  /** Optional: the uploads listing reads the channel's own tab rather than
+   * fetching each video, and that listing carries no reliable upload date. */
+  publishedAt?: string;
+}
+
+/**
+ * List a channel's uploads from its pasted address.
+ *
+ * Took no arguments while this went through a Google OAuth connection — the
+ * signed-in account was both the channel and the proof it belonged to you.
+ * Both of those are now explicit: the URL says which channel, and
+ * `ownershipConfirmed` is the creator's attestation that it is theirs. The
+ * backend rejects the call without it.
+ */
+export async function listChannelVideos(
+  channelUrl: string,
+  ownershipConfirmed: boolean,
+): Promise<{ videos: ChannelVideo[]; truncated: boolean }> {
+  const params = new URLSearchParams({
+    channelUrl,
+    ownershipConfirmed: String(ownershipConfirmed),
+  });
+  return apiCall<{ videos: ChannelVideo[]; truncated: boolean }>(
+    `/api/youtube_migration/videos?${params}`,
+    { requiresAuth: true },
+  );
+}
+
+/** One worked example off the price curve — what a batch of exactly this many
+ * videos comes to. Not a bracket: pricing is marginal, so a batch one video
+ * larger costs one more video, not the next row up. */
+export interface MigrationPricingTier {
+  videos: number;
+  /** Same number as `videos`, kept while older builds may still be reading it. */
+  maxVideos: number;
+  priceUsd: number;
+  priceDhb: number;
+  /** Effective rate at this size — falls as the batch grows. */
+  usdPerVideo?: number;
+  /** What each additional video costs once the batch is past the previous row. */
+  marginalUsdPerVideo?: number;
+}
+
+export interface MigrationPricing {
+  tiers: MigrationPricingTier[];
+  maxVideosPerBatch: number;
+  /** Videos a creator can migrate free in total, ever — not per batch. Comes
+   * off the top of a batch's count once, and the brackets price whatever is
+   * left. */
+  freeAllowance: number;
+}
+
+/** The price ladder, read from the same constant the quote is charged off —
+ * the explainer on the page can't drift from the bill that way. */
+export async function getMigrationPricing(): Promise<MigrationPricing> {
+  return apiCall<MigrationPricing>('/api/youtube_migration/pricing');
+}
+
+export interface MigrationQuote {
+  chargeId: string;
+  videoCount: number;
+  perVideoCreditDhb: number;
+  creditAppliedDhb: number;
+  amountDhb: number;
+  recipient: string | null;
+  dhbTokens: { chainId: number; tokenAddress: string }[];
+}
+
+/**
+ * Price a batch, and freeze what it will publish as.
+ *
+ * `itemUrls` carries the link each item actually lives at rather than letting
+ * the server rebuild a YouTube watch URL, which is right for exactly one
+ * source. `itemNames` and `itemDescriptions` carry whatever the creator typed
+ * on the picker, so the text they reviewed and paid for is the text that
+ * publishes hours later. All three are aligned to `youtubeVideoIds`, and the
+ * server refuses a batch where they are not.
+ *
+ * An empty string means "no override": the source's own title wins, which is
+ * what clearing the box asks for.
+ */
+export async function quoteMigration(
+  youtubeVideoIds: string[],
+  items?: { urls?: string[]; names?: string[]; descriptions?: string[] },
+): Promise<MigrationQuote> {
+  return apiCall<MigrationQuote>('/api/youtube_migration/quote', {
+    method: 'POST',
+    requiresAuth: true,
+    body: {
+      youtubeVideoIds,
+      itemUrls: items?.urls,
+      itemNames: items?.names,
+      itemDescriptions: items?.descriptions,
+    } as unknown as Record<string, unknown>,
+  });
+}
+
+export async function settleMigration(
+  chargeId: string,
+  txHash: string,
+  chainId: number,
+): Promise<{ settled: boolean; pending?: boolean }> {
+  return apiCall<{ settled: boolean; pending?: boolean }>('/api/youtube_migration/settle', {
+    method: 'POST',
+    requiresAuth: true,
+    body: { chargeId, txHash, chainId } as unknown as Record<string, unknown>,
+  });
+}
+
+export interface MigrationChargeStatus {
+  _id: string;
+  status: 'open' | 'settled' | 'void';
+  amountDhb: number;
+  youtubeVideoIds: string[];
+  /** Aligned to `youtubeVideoIds`, and absent on a batch quoted before the
+   * migration took more than YouTube. The progress grid links and titles each
+   * tile from these rather than rebuilding a watch URL, which would send a
+   * TikTok import to a YouTube video that does not exist. */
+  itemUrls?: string[];
+  itemNames?: string[];
+  results: {
+    youtubeVideoId: string;
+    status: 'pending' | 'imported' | 'failed';
+    tokenId?: number;
+    failedReason?: string;
+  }[];
+}
+
+export async function getMigrationChargeStatus(chargeId: string): Promise<MigrationChargeStatus> {
+  return apiCall<MigrationChargeStatus>(`/api/youtube_migration/charge/${chargeId}`, {
+    requiresAuth: true,
+  });
+}
+
+/** The creator's most recently paid batch, or null if they've never run one
+ * — lets the page resume showing progress/results after a reload or a
+ * closed tab instead of restarting the whole connect/list flow. */
+export async function getActiveMigrationCharge(): Promise<MigrationChargeStatus | null> {
+  return apiCall<MigrationChargeStatus | null>('/api/youtube_migration/charge/active', {
+    requiresAuth: true,
+  });
+}

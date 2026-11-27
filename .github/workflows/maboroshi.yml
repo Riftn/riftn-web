@@ -1,0 +1,89 @@
+name: Maboroshi
+on:
+  pull_request:
+    paths:
+      - 'services/maboroshi/**'
+      - 'tests/maboroshi-remake-browser.mjs'
+      - 'supabase/functions/maboroshi-provider/**'
+      - 'supabase/migrations/*maboroshi_stage_payments.sql'
+      - 'tests/sql/maboroshi-payment*'
+      - '.github/workflows/maboroshi.yml'
+  workflow_dispatch:
+jobs:
+  payment-ledger:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: payment-test
+          POSTGRES_DB: payment_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready --health-interval 5s
+          --health-timeout 5s --health-retries 10
+    env:
+      PGHOST: localhost
+      PGUSER: postgres
+      PGPASSWORD: payment-test
+      PGDATABASE: payment_test
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          psql -v ON_ERROR_STOP=1 -f tests/sql/maboroshi-payment-bootstrap.sql
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20260828120000_ai_payments_replace_credits.sql
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261011143000_maboroshi_stage_payments.sql
+          psql -v ON_ERROR_STOP=1 -f tests/sql/maboroshi-payment.sql
+      - name: Simultaneous retry charges the stage once
+        run: |
+          psql -v ON_ERROR_STOP=1 -c "INSERT INTO ai_payments(wallet_address,tx_hash,chain,paid_dhb,remaining_dhb) VALUES('0x'||repeat('1',40),'0x'||repeat('2',64),'Base',2000,2000)"
+          pids=()
+          for client in $(seq 1 12); do
+            psql -v ON_ERROR_STOP=1 -c "SELECT maboroshi_payment_spend('maboroshi:'||repeat('a',32)||':prepare','0x'||repeat('1',40),'0x'||repeat('2',64),1000)" >/dev/null &
+            pids+=("$!")
+          done
+          for pid in "${pids[@]}"; do wait "$pid"; done
+          test "$(psql -Atc 'SELECT remaining_dhb FROM ai_payments')" = 1000
+          test "$(psql -Atc 'SELECT count(*) FROM maboroshi_stage_payments')" = 1
+  workflow:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r services/maboroshi/requirements.txt httpx==0.28.1
+      - name: Verify private hosted workflow and source audio
+        working-directory: services/maboroshi
+        run: |
+          python -m unittest discover -s tests
+          python test_composite.py
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          node --check services/maboroshi/static/studio.js
+          node --check services/maboroshi/static/presets.js
+          node --check services/maboroshi/static/remake.js
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - run: deno test supabase/functions/maboroshi-provider/*_test.ts
+      - run: deno check supabase/functions/maboroshi-provider/index.ts
+      - name: Install hosted Remake browser
+        run: |
+          npm install --prefix "$RUNNER_TEMP/remake-browser" --no-save --no-package-lock --ignore-scripts playwright@1.64.0
+          "$RUNNER_TEMP/remake-browser/node_modules/.bin/playwright" install --with-deps chromium
+      - name: Verify cut review, isolated payments, revisions and assembly in a browser
+        env:
+          REMAKE_BROWSER_ROOT: ${{ runner.temp }}/remake-browser
+        run: node tests/maboroshi-remake-browser.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: remake-browser-results
+          path: remake-browser-results/
+          if-no-files-found: ignore
+          retention-days: 14

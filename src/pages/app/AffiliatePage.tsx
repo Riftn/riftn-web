@@ -1,0 +1,733 @@
+import { useTranslation as _useCopy } from 'react-i18next';
+import { useSurfaceDraft } from '@/hooks/use-surface-draft';
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import i18n from '@/i18n';
+import Users from "@/components/ui/cut-icons/communities";
+import Wallet from "@/components/ui/cut-icons/wallet";
+import Sparkles from "@/components/ui/cut-icons/assistant";
+import RefreshCw from "@/components/ui/cut-icons/refresh";
+import ExternalLink from "@/components/ui/cut-icons/open-externally";
+import Copy from "@/components/ui/cut-icons/copy";
+
+import Share2 from "@/components/ui/cut-icons/feedshare";
+import Plus from "@/components/ui/cut-icons/add";
+import X from "@/components/ui/cut-icons/close";
+
+import { AppState } from '@/components/app/AppState';
+import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
+import { AuthGate } from "@/components/app/AuthGate";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { LiquidGlassBubble2 } from "@/components/ui/liquid-glass-bubble-2";
+import { SEOHead } from "@/components/SEOHead";
+import { BadgeIcon } from "@/components/app/BadgeIcon";
+import { VerifiedBadge } from "@/components/app/VerifiedBadge";
+import { useDeHubProfile } from "@/hooks/use-dehub-profile";
+import { AFFILIATE_COMMISSION_PCT, AFFILIATE_L1_COMMISSION_PCT, AFFILIATE_L2_COMMISSION_PCT, DEFAULT_AFFILIATE_LANDING, AFFILIATE_CTA_PRESETS, MAX_AFFILIATE_LANDING_CTAS, isSafeLandingDestination, loadAffiliateStats, saveAffiliateLanding, type AffiliateLandingCustomization, type AffiliateLandingCta, type AffiliateStats, type AffiliateReferralEntry } from "@/lib/affiliate";
+import { getAffiliateShareImageUrl } from "@/lib/affiliateShareImage";
+import { buildReferralDeepLink, sanitizeDeepLinkPath } from "@/lib/affiliateDeepLink";
+import { buildInviteUrl } from "@/lib/inviteLink";
+import { streamerInviteLink } from "@/lib/streamer-page.js";
+import { Input } from "@/components/ui/input";
+import { PageBody } from "@/components/app/page-kit/PageKit";
+import { trackEvent } from "@/lib/analytics";
+
+import { formatCount } from '@/lib/format-count';
+const SITE = typeof window !== "undefined" ? window.location.origin : "https://riftn.com";
+
+function formatMoney(cents: number, currency = "USD") {
+  try {
+    return new Intl.NumberFormat(i18n.language || 'en', { style: "currency", currency }).format(cents / 100);
+  } catch {
+    return `$${(cents / 100).toFixed(2)}`;
+  }
+}
+
+export default function AffiliatePage() {
+  const { t: _copy } = _useCopy();
+  const { t } = useTranslation();
+  const { user } = useAuth();
+  const wallet = (user as { walletAddress?: string | null; address?: string | null } | null)
+    ?.walletAddress
+    ?? (user as { address?: string | null } | null)?.address
+    ?? null;
+  const displayName = (user as { username?: string | null; displayName?: string | null } | null)
+    ?.displayName ?? (user as { username?: string | null } | null)?.username ?? null;
+  const username = (user as { username?: string | null } | null)?.username ?? null;
+  const badgeBalance = (user as { badgeBalance?: number | null } | null)?.badgeBalance ?? null;
+
+  // Hydrate instantly from the last known stats for this wallet; the real
+  // numbers refresh in the background (stale-while-revalidate).
+  const [stats, setStats] = useState<AffiliateStats | null>(() => {
+    if (typeof window === "undefined" || !wallet) return null;
+    try {
+      const cached = window.localStorage.getItem(`affiliate-stats:${wallet.toLowerCase()}`);
+      return cached ? (JSON.parse(cached) as AffiliateStats) : null;
+    } catch { return null; }
+  });
+  const [loading, setLoading] = useState(!stats);
+  const [refreshing, setRefreshing] = useState(false);
+  const statsRef = useRef(stats);
+  useEffect(() => { statsRef.current = stats; }, [stats]);
+  // Stable per-code version stored in localStorage. Only bumped when user clicks Refresh,
+  // so the browser HTTP cache hits instantly on revisits.
+  const versionKey = stats?.code ? `affiliate-img-v:${stats.code}` : null;
+  const [imgVersion, setImgVersion] = useState<string>(() => {
+    if (typeof window === "undefined") return "1";
+    return "1";
+  });
+  const [imgLoaded, setImgLoaded] = useState(false);
+  const [landing, setLanding] = useSurfaceDraft<AffiliateLandingCustomization>("src/pages/app/AffiliatePage.tsx:landing", DEFAULT_AFFILIATE_LANDING);
+  const [savingLanding, setSavingLanding] = useState(false);
+
+  // Bump this whenever the share-image renderer changes so all users pick up the new look.
+  const RENDERER_VERSION = "6";
+  useEffect(() => {
+    if (!versionKey) return;
+    try {
+      const stored = window.localStorage.getItem(versionKey);
+      if (stored && stored.startsWith(`${RENDERER_VERSION}:`)) {
+        setImgVersion(stored);
+      } else {
+        const fresh = `${RENDERER_VERSION}:${Date.now()}`;
+        window.localStorage.setItem(versionKey, fresh);
+        setImgVersion(fresh);
+      }
+    } catch { /* ignore */ }
+  }, [versionKey]);
+
+  useEffect(() => { setImgLoaded(false); }, [stats?.code, imgVersion]);
+
+  const load = useCallback(async (opts?: { refreshImage?: boolean }) => {
+    if (!wallet) { setLoading(false); return; }
+    // Only show skeletons when there's nothing to show — cached stats stay
+    // visible while fresh numbers load in the background.
+    if (!statsRef.current) setLoading(true);
+    try {
+      const fallbackName = wallet ? `${wallet.slice(0, 6)}…${wallet.slice(-4)}` : null;
+      const s = await loadAffiliateStats(wallet, displayName ?? fallbackName);
+      setStats(s);
+      setLanding(s.landing);
+      try { window.localStorage.setItem(`affiliate-stats:${wallet.toLowerCase()}`, JSON.stringify(s)); } catch { /* ignore */ }
+      if (opts?.refreshImage && s?.code) {
+        const next = String(Date.now());
+        setImgVersion(next);
+        try { window.localStorage.setItem(`affiliate-img-v:${s.code}`, next); } catch { /* ignore */ }
+      }
+    } catch (e) {
+      toast.error(t("affiliate.loadFailed"));
+      // eslint-disable-next-line no-console
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
+  }, [displayName, t, wallet, setLanding]);
+
+  useEffect(() => { void load(); }, [load]);
+
+  const retry = () => {
+    setRefreshing(true);
+    void load().finally(() => setRefreshing(false));
+  };
+
+  // Tagged with the current name so X and chat apps draw a fresh card after a rename.
+  const inviteName = displayName || stats?.shareName || null;
+  const shareUrl = useMemo(
+    () => (stats?.code ? buildInviteUrl(SITE, stats.code, inviteName) : ""),
+    [stats?.code, inviteName],
+  );
+  const shareImageUrl = useMemo(
+    () => `${getAffiliateShareImageUrl(stats?.code, 1200, 630, "svg")}&v=${imgVersion}`,
+    [stats?.code, imgVersion],
+  );
+
+  const copy = async (txt: string, label?: string) => {
+    try {
+      await navigator.clipboard.writeText(txt);
+      trackEvent("invite_link_copied", { method: "copy", deep_link: !/\/r\/[A-Z0-9]+(\?n=[0-9a-z]+)?$/i.test(txt) });
+      toast.success(label ?? _copy("copy.8d525e5f158b", { defaultValue: "Copied" }));
+    }
+    catch { toast.error(_copy("copy.5b50e7a693fe", { defaultValue: "Copy failed" })); }
+  };
+
+  const nativeShare = () => {
+    const nav = navigator as Navigator & { share?: (d: ShareData) => Promise<void> };
+    if (nav.share) {
+      nav.share({ title: "Riftn", text: _copy("copy.f224cf8441cc", { defaultValue: "Join me on Riftn." }), url: shareUrl })
+        .then(() => trackEvent("invite_link_copied", { method: "native", deep_link: false }))
+        .catch(() => undefined);
+    } else {
+      void copy(shareUrl, _copy("copy.bd769dab6c4d", { defaultValue: "Invite link copied" }));
+    }
+  };
+
+  const landingCtas = landing.ctas ?? [];
+  const updateCta = (index: number, patch: Partial<AffiliateLandingCta>) =>
+    setLanding((v) => ({ ...v, ctas: (v.ctas ?? []).map((c, i) => (i === index ? { ...c, ...patch } : c)) }));
+  const addCta = (cta: AffiliateLandingCta) =>
+    setLanding((v) => ((v.ctas ?? []).length >= MAX_AFFILIATE_LANDING_CTAS ? v : { ...v, ctas: [...(v.ctas ?? []), cta] }));
+
+  const saveLanding = async () => {
+    if (!wallet || !stats?.code) return;
+    setSavingLanding(true);
+    try {
+      await saveAffiliateLanding(wallet, stats.code, landing);
+      setStats((current) => current ? { ...current, landing } : current);
+      toast.success(t('affiliateLanding.published'));
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : t('affiliateLanding.saveFailed'));
+    } finally {
+      setSavingLanding(false);
+    }
+  };
+
+  return (
+    <>
+      <SEOHead
+        title={_copy("copy.661f23a8550b", { defaultValue: "Riftn Affiliate: Earn 20% + 5% Recurring" })}
+        description={_copy("copy.5a56acf53e8e", { defaultValue: "Invite anyone to Riftn and earn {{value1}}% of all revenue they generate, plus {{value2}}% from everyone they invite. Forever.", value1: AFFILIATE_L1_COMMISSION_PCT, value2: AFFILIATE_L2_COMMISSION_PCT })}
+      />
+      {!wallet ? (
+        <AuthGate description={_copy("copy.ac2b28aec04a", { defaultValue: "You need a Riftn account to access the affiliate programme." })} />
+      ) : (
+        <PageBody className="mx-auto max-w-5xl pt-6 md:pt-10">
+          {/* Custom per-user share image */}
+          <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-black shadow-[0_18px_70px_rgba(255,255,255,0.08)] aspect-[1200/630]">
+            {stats?.code ? (
+              <img
+                src={shareImageUrl}
+                alt={_copy("copy.ef5523101c85", { defaultValue: "{{value1}} invited you to Riftn", value1: displayName || "" })}
+                width={1200}
+                height={630}
+                loading="eager"
+                onLoad={() => setImgLoaded(true)}
+                className={`absolute inset-0 w-full h-full block transition-opacity duration-500 ${imgLoaded ? "opacity-100" : "opacity-0"}`}
+              />
+            ) : null}
+            {loading || (stats?.code && !imgLoaded) ? (
+              <div className="absolute inset-0 overflow-hidden flex items-center justify-center">
+                <div className="absolute inset-0 theme-skeleton animate-pulse" />
+                <div
+                  className="absolute inset-y-0 -left-full w-1/2 bg-gradient-to-r from-transparent via-white/10 to-transparent"
+                  style={{ animation: "shimmer-sweep 1.6s linear infinite" }}
+                />
+                <span className="relative text-sm md:text-base text-white/80 font-medium tracking-wide">{t("affiliate.checkingForUpdates")}</span>
+              </div>
+            ) : !stats?.code ? (
+              // Loading finished without a code: the load failed. Say so and
+              // offer a retry rather than shimmering forever.
+              <div className="absolute inset-0 flex items-center justify-center">
+                <AppState
+                  kind="error"
+                  size="compact"
+                  title={t("common.failedToLoad")}
+                  primaryAction={{ label: t("common.retry"), onClick: retry, loading: refreshing }}
+                />
+              </div>
+            ) : null}
+          </div>
+
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h1 className="text-2xl md:text-4xl font-bold text-white">{_copy("affiliate.headline", { defaultValue: "Earn {{l1}}% from everyone you invite, and {{l2}}% from everyone they invite.", l1: AFFILIATE_L1_COMMISSION_PCT, l2: AFFILIATE_L2_COMMISSION_PCT })}</h1>
+              <p className="mt-2 text-sm md:text-base text-white/60 max-w-3xl">{_copy("copy.5d677d55b064", { defaultValue: "Every time someone uses any Riftn revenue-generating feature, you earn residually and perpetually." })}</p>
+            </div>
+          </div>
+
+          {/* Stats grid */}
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+            <StatCard
+              icon={<ExternalLink className="w-4 h-4" />}
+              label={t('referral.stats.pageViews')}
+              value={loading ? null : stats ? String(stats.totalViews ?? 0) : "—"}
+              hint={t('referral.stats.inLast30Days', { count: stats?.views30d ?? 0 })}
+            />
+            <StatCard
+              icon={<Users className="w-4 h-4" />}
+              label={t('referral.stats.uniqueVisitors')}
+              value={loading ? null : stats ? String(stats.uniqueVisitors ?? 0) : "—"}
+              hint={stats?.uniqueVisitors
+                ? t('referral.stats.percentJoined', { pct: ((stats.referrals / stats.uniqueVisitors) * 100).toFixed(1) })
+                : t('referral.stats.noVisits')}
+            />
+            <StatCard
+              icon={<Users className="w-4 h-4" />}
+              label={_copy("copy.002c7c68468b", { defaultValue: "Direct" })}
+              value={loading ? null : stats ? String(stats.referrals ?? 0) : "—"}
+              hint={`${AFFILIATE_L1_COMMISSION_PCT}%`}
+            />
+            <StatCard
+              icon={<Users className="w-4 h-4" />}
+              label={_copy("copy.62f2ccfffcc5", { defaultValue: "Secondary" })}
+              value={loading ? null : stats ? String(stats.l2Referrals ?? 0) : "—"}
+              hint={`${AFFILIATE_L2_COMMISSION_PCT}%`}
+            />
+            <StatCard
+              icon={<Wallet className="w-4 h-4" />}
+              label={_copy("copy.bd9d153c3d65", { defaultValue: "Total earned" })}
+              value={loading ? null : stats ? formatMoney(stats.totalEarnedCents ?? 0, stats.currency || "USD") : "—"}
+              hint={loading || !stats ? undefined : `T1 ${formatMoney(stats.l1EarnedCents, stats.currency || "USD")} · T2 ${formatMoney(stats.l2EarnedCents, stats.currency || "USD")}`}
+            />
+            <StatCard
+              icon={<Sparkles className="w-4 h-4" />}
+              label={_copy("copy.3d41e1a66a7d", { defaultValue: "Commission" })}
+              value={`${AFFILIATE_L1_COMMISSION_PCT}% + ${AFFILIATE_L2_COMMISSION_PCT}%`}
+              hint={t('referral.stats.commissionPersistence')}
+            />
+            <p className="col-span-2 md:col-span-3 text-[11px] text-white/40">
+              {t('referral.stats.selfVisitsExcluded')}
+            </p>
+          </div>
+
+          {/* Who your affiliates are */}
+          <AffiliatesList
+            l1={stats?.l1List ?? []}
+            l2={stats?.l2List ?? []}
+            l1Count={stats?.referrals ?? 0}
+            l2Count={stats?.l2Referrals ?? 0}
+            viewerWallet={wallet}
+            loading={loading}
+          />
+
+          <Card data-kit-section className="border-white/10 bg-white/[0.03] backdrop-blur">
+            <CardContent className="p-5 md:p-6 space-y-5">
+              <div>
+                <h2 className="text-lg font-semibold text-white">{t('affiliateLanding.title')}</h2>
+                <p className="text-sm text-white/60">{t('affiliateLanding.subtitle')}</p>
+              </div>
+              <div className="grid gap-5 lg:grid-cols-2">
+                <div className="space-y-4">
+                  <LabeledField label={t('affiliateLanding.headline')} count={`${landing.headline.length}/80`}>
+                    <Input className="border-white/15 !bg-black/50 !text-white placeholder:text-white/45" value={landing.headline} maxLength={80} onChange={(e) => setLanding((v) => ({ ...v, headline: e.target.value }))} placeholder={DEFAULT_AFFILIATE_LANDING.headline} />
+                  </LabeledField>
+                  <LabeledField label={t('affiliateLanding.message')} count={`${landing.message.length}/280`}>
+                    <textarea className="flex min-h-28 w-full rounded-md border border-white/15 !bg-black/50 px-3 py-2 text-sm !text-white placeholder:text-white/45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40" value={landing.message} maxLength={280} onChange={(e) => setLanding((v) => ({ ...v, message: e.target.value }))} />
+                  </LabeledField>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <LabeledField label={t('affiliateLanding.buttonText')} count={`${landing.ctaLabel.length}/32`}>
+                      <Input className="border-white/15 !bg-black/50 !text-white placeholder:text-white/45" value={landing.ctaLabel} maxLength={32} onChange={(e) => setLanding((v) => ({ ...v, ctaLabel: e.target.value }))} />
+                    </LabeledField>
+                    <LabeledField label={t('affiliateLanding.destination')}>
+                      <Input className="border-white/15 !bg-black/50 !text-white placeholder:text-white/45" value={landing.destination} maxLength={200} onChange={(e) => setLanding((v) => ({ ...v, destination: e.target.value }))} placeholder={_copy("copy.f53b52ad6d21", { defaultValue: "/app" })} />
+                    </LabeledField>
+                  </div>
+                  <div className="space-y-3 rounded-xl border border-white/10 p-3">
+                    <div>
+                      <p className="text-sm font-medium text-white">{t('affiliateLanding.extraTitle', { count: landingCtas.length, max: MAX_AFFILIATE_LANDING_CTAS })}</p>
+                      <p className="text-xs text-white/55">{t('affiliateLanding.extraHint')}</p>
+                    </div>
+                    {landingCtas.map((cta, i) => (
+                      <div key={i} className="grid grid-cols-[1fr_1fr_auto] gap-2">
+                        <Input aria-label={t('affiliateLanding.extraLabel')} className="border-white/15 !bg-black/50 !text-white placeholder:text-white/45" value={cta.label} maxLength={32} placeholder={t('affiliateLanding.extraLabel')} onChange={(e) => updateCta(i, { label: e.target.value })} />
+                        <Input aria-label={t('affiliateLanding.destination')} className="border-white/15 !bg-black/50 !text-white placeholder:text-white/45" value={cta.destination} maxLength={200} placeholder={_copy("copy.ae16d3d53b5c", { defaultValue: "/editor" })} onChange={(e) => updateCta(i, { destination: e.target.value })} />
+                        <Button variant="ghost" size="icon" aria-label={t('affiliateLanding.removeButton')} onClick={() => setLanding((v) => ({ ...v, ctas: (v.ctas ?? []).filter((_, j) => j !== i) }))}>
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                    {landingCtas.length < MAX_AFFILIATE_LANDING_CTAS && (
+                      <div className="flex flex-wrap gap-2">
+                        {AFFILIATE_CTA_PRESETS.filter((p) => !landingCtas.some((c) => c.destination === p.destination)).map((p) => (
+                          <Button key={p.key} size="sm" variant="outline" onClick={() => addCta({ label: t(`affiliateLanding.presets.${p.key}`), destination: p.destination })}>
+                            <Plus className="mr-1 h-3.5 w-3.5" /> {t(`affiliateLanding.presets.${p.key}`)}
+                          </Button>
+                        ))}
+                        <Button size="sm" variant="ghost" onClick={() => addCta({ label: "", destination: "/" })}>
+                          <Plus className="mr-1 h-3.5 w-3.5" /> {t('affiliateLanding.addCustom')}
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex gap-2">
+                    <Button onClick={() => void saveLanding()} disabled={savingLanding || !landing.headline.trim() || !landing.message.trim() || !landing.ctaLabel.trim() || landingCtas.some((c) => !c.label.trim() || !isSafeLandingDestination(c.destination.trim()))}>
+                      {savingLanding ? t('affiliateLanding.publishing') : t('affiliateLanding.publish')}
+                    </Button>
+                    <Button variant="ghost" onClick={() => setLanding(DEFAULT_AFFILIATE_LANDING)}>{t('affiliateLanding.reset')}</Button>
+                  </div>
+                </div>
+                <div className="rounded-2xl border border-white/10 bg-black p-6 flex min-h-72 flex-col items-center justify-center text-center">
+                  <p className="text-xs uppercase tracking-[0.25em] text-white/40">{t('affiliateLanding.preview')}</p>
+                  <h3 className="mt-4 text-3xl font-bold text-white whitespace-pre-line">{landing.headline || DEFAULT_AFFILIATE_LANDING.headline}</h3>
+                  <p className="mt-3 max-w-md text-sm text-white/65 whitespace-pre-line">{landing.message || DEFAULT_AFFILIATE_LANDING.message}</p>
+                  {landingCtas.length > 0 && (
+                    <div className="mt-5 grid w-full max-w-md grid-cols-2 gap-2">
+                      {landingCtas.map((c, i) => (
+                        <span key={i} className="truncate rounded-lg border border-white/15 px-3 py-2 text-xs font-semibold text-white">{c.label || "…"}</span>
+                      ))}
+                    </div>
+                  )}
+                  <span className="mt-6 rounded-md bg-white px-5 py-2.5 text-sm font-semibold text-black">{landing.ctaLabel || DEFAULT_AFFILIATE_LANDING.ctaLabel}</span>
+                </div>
+              </div>
+              {(stats?.ctaClicks?.length ?? 0) > 0 && (
+                <div className="space-y-2">
+                  <h3 className="text-sm font-semibold text-white">{t('affiliateLanding.clicksTitle')}</h3>
+                  <ul className="divide-y divide-white/10 rounded-xl border border-white/10">
+                    {(stats?.ctaClicks ?? []).map((c) => (
+                      <li key={c.destination} className="flex items-center justify-between gap-3 px-3 py-2 text-sm">
+                        <span className="truncate font-mono text-white/80">{c.destination}</span>
+                        <span className="shrink-0 text-white/60">{t('affiliateLanding.clicksRow', { count: c.clicks, clicks: c.clicks, unique: c.uniqueVisitors })}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Share section */}
+          <Card data-kit-section className="border-white/10 bg-white/[0.03] backdrop-blur">
+            <CardContent className="p-5 md:p-6 space-y-5">
+              <div className="flex items-start justify-between gap-3 flex-wrap">
+                <div>
+                  <h2 className="text-lg font-semibold text-white">{_copy("copy.1ed61b786730", { defaultValue: "Your invite link" })}</h2>
+                  <p className="text-sm text-white/60">{_copy("copy.c0ac0f73ce8d", { defaultValue: "Share anywhere. You earn " })}{AFFILIATE_L1_COMMISSION_PCT}{_copy("copy.29c0b3cf5ea2", { defaultValue: "% of every dollar your invites ever spend on Riftn, plus " })}{AFFILIATE_L2_COMMISSION_PCT}{_copy("copy.ffaa95c939fc", { defaultValue: "% from everyone " })}<em>{_copy("copy.151e58a83130", { defaultValue: "they" })}</em>{_copy("copy.d82b694585c4", { defaultValue: " invite." })}</p>
+                </div>
+              </div>
+
+              {loading ? (
+                <Skeleton className="h-12 w-full" />
+              ) : stats?.code ? (
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                  <div className="flex flex-wrap items-center gap-2 text-sm min-w-0">
+                    <Link
+                      to={`/r/${stats.code}`}
+                      className="px-3 py-1.5 rounded-md bg-white/10 text-white font-mono truncate hover:bg-white/15 inline-flex items-center gap-2"
+                    >
+                      {buildInviteUrl(typeof window !== "undefined" ? window.location.origin : "https://riftn.com", stats.code, inviteName)}
+                      <ExternalLink className="w-3 h-3 opacity-70" />
+                    </Link>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setRefreshing(true);
+                        void load({ refreshImage: true }).finally(() => setRefreshing(false));
+                      }}
+                      disabled={loading || refreshing}
+                    >
+                      <RefreshCw className={`w-4 h-4 mr-2 ${loading || refreshing ? "animate-spin" : ""}`} />{_copy("copy.7ce64141b163", { defaultValue: " Refresh" })}</Button>
+                  </div>
+                  <LiquidGlassBubble2
+                    label={_copy("copy.29887a5ff984", { defaultValue: "Share" })}
+                    icon={<Share2 className="w-4 h-4" />}
+                    width="140px"
+                    onClick={nativeShare}
+                  />
+                </div>
+
+              ) : (
+                <p className="text-sm text-white/60">{_copy("copy.7b639a3b9005", { defaultValue: "Could not generate a code. Try refreshing." })}</p>
+              )}
+
+              {stats?.code && (
+                <>
+                  <DeepLinkBuilder code={stats.code} onCopy={copy} />
+                  <StreamerInviteKit code={stats.code} onCopy={copy} />
+                </>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* How it works */}
+          <Card data-kit-section className="border-white/10 bg-white/[0.03]">
+            <CardContent className="p-5 md:p-6 grid grid-cols-1 md:grid-cols-4 gap-4">
+              <Step n={1} title={_copy("copy.486b75f1e0e1", { defaultValue: "Share your link" })} body={_copy("copy.54f921da537d", { defaultValue: "Drop your invite link into Discord, X, YouTube, your stream, anywhere." })} />
+              <Step n={2} title={_copy("copy.65683c287b13", { defaultValue: "They join Riftn" })} body={_copy("copy.44255c58528d", { defaultValue: "Anyone who lands via your link is permanently attributed to you (first-touch wins, 90-day cookie)." })} />
+              <Step n={3} title={_copy("copy.7e44b080227f", { defaultValue: "Earn {{value1}}% direct", value1: AFFILIATE_L1_COMMISSION_PCT })} body={_copy("affiliate.stepDirectBody", { defaultValue: "You receive {{pct}}% of every dollar of revenue your invites ever generate on Riftn.", pct: AFFILIATE_L1_COMMISSION_PCT })} />
+              <Step n={4} title={_copy("copy.2ed16d4204db", { defaultValue: "Earn {{value1}}% secondary", value1: AFFILIATE_L2_COMMISSION_PCT })} body={_copy("affiliate.stepSecondaryBody", { defaultValue: "When your invites invite their friends, you also earn {{pct}}% of their revenue. Recurring, lifetime.", pct: AFFILIATE_L2_COMMISSION_PCT })} />
+            </CardContent>
+          </Card>
+
+
+          {wallet && (
+            <p className="text-xs text-white/40 inline-flex items-center gap-1.5 flex-wrap">
+              <span>{_copy("copy.5601cb6b373b", { defaultValue: "Affiliate wallet: " })}</span>
+              <code className="font-mono">{wallet.slice(0, 6)}…{wallet.slice(-4)}</code>
+              {displayName ? (
+                <span className="inline-flex items-center gap-1.5">
+                  <span>· {displayName}</span>
+                  <BadgeIcon badgeBalance={badgeBalance ?? undefined} username={username} className="w-[1em] h-[1em]" />
+                </span>
+              ) : null}
+            </p>
+          )}
+        </PageBody>
+      )}
+    </>
+  );
+}
+
+function LabeledField({ label, count, children }: { label: string; count?: string; children: React.ReactNode }) {
+  return (
+    <label className="block space-y-1.5">
+      <span className="flex items-center justify-between text-xs font-medium text-white/70"><span>{label}</span>{count ? <span className="text-white/35">{formatCount(count)}</span> : null}</span>
+      {children}
+    </label>
+  );
+}
+
+/**
+ * Turns any Riftn page into a link that still pays the referrer.
+ *
+ * `/r/<CODE>/<path>` sets attribution and then forwards to `<path>`, so a single
+ * hyperlink can point at one docs section or app page instead of always dumping
+ * people on the generic invite splash.
+ */
+function DeepLinkBuilder({ code, onCopy }: { code: string; onCopy: (text: string, label?: string) => void }) {
+  const { t: _copy } = _useCopy();
+  const [target, setTarget] = useSurfaceDraft("pages/app/AffiliatePage.tsx:target", "");
+  const trimmed = target.trim();
+  const path = sanitizeDeepLinkPath(trimmed);
+  const invalid = trimmed.length > 0 && !path;
+  const link = buildReferralDeepLink(SITE, code, trimmed);
+
+  return (
+    <div className="mt-5 pt-5 border-t border-white/10 space-y-3">
+      <div>
+        <h3 className="text-sm font-semibold text-white">{_copy("copy.fc036ea0e9f0", { defaultValue: "Link to a specific page" })}</h3>
+        <p className="text-xs text-white/60">{_copy("copy.ae4410aa9943", { defaultValue: "Paste any Riftn page — a docs section, a bounty, your profile. The link below still attributes the visit to you, then takes them straight there." })}</p>
+      </div>
+      <div className="flex flex-col sm:flex-row gap-2">
+        <Input
+          value={target}
+          onChange={(e) => setTarget(e.target.value)}
+          placeholder={_copy("copy.12a7c0529934", { defaultValue: "/docs/getting-started" })}
+          aria-label={_copy("copy.9b44fb81d89e", { defaultValue: "Destination page" })}
+          aria-invalid={invalid}
+          className="font-mono text-sm bg-white/[0.04] border-white/10"
+        />
+        <Button
+          variant="secondary"
+          onClick={() => onCopy(link, _copy("copy.2ac0b6c71fa3", { defaultValue: "Deep link copied" }))}
+          disabled={invalid}
+          className="shrink-0"
+        >
+          <Copy className="w-4 h-4 mr-2" />{_copy("copy.085cd98e8e2e", { defaultValue: " Copy link" })}</Button>
+      </div>
+      <p className={`text-xs font-mono break-all ${invalid ? "text-red-400" : "text-white/50"}`}>
+        {invalid ? _copy("copy.c184b8c9592f", { defaultValue: "That has to be a page on riftn.com." }) : link}
+      </p>
+    </div>
+  );
+}
+
+/**
+ * Agency kit: a ready-to-send invite for live streamers. The link lands them on
+ * /stream with the visit already attributed (`/r/<CODE>?to=/stream`).
+ */
+function StreamerInviteKit({ code, onCopy }: { code: string; onCopy: (text: string, label?: string) => void }) {
+  const { t: _copy } = _useCopy();
+  const message = _copy("copy.cc96aaa18cf2", { defaultValue: "Come stream on Riftn with me. Tips land on-chain straight in your wallet, you own your audience, and you can keep posting to TikTok and everywhere else in one step. Sign up here: {{link}}", link: streamerInviteLink(SITE, code) });
+
+  return (
+    <div className="mt-5 pt-5 border-t border-white/10 space-y-3">
+      <div>
+        <h3 className="text-sm font-semibold text-white">{_copy("copy.b3412a3b86de", { defaultValue: "Invite streamers" })}</h3>
+        <p className="text-xs text-white/60">{_copy("copy.8c91325d901b", { defaultValue: "Send streamers to the Riftn streaming page with this message. Your link attributes them to you before they land." })}</p>
+      </div>
+      <p className="rounded-md border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-white/80 whitespace-pre-line break-words">{message}</p>
+      <Button variant="secondary" onClick={() => onCopy(message, _copy("copy.846d8244b7d8", { defaultValue: "Invite message copied" }))}>
+        <Copy className="w-4 h-4 mr-2" />{_copy("copy.77db95ebd737", { defaultValue: " Copy message" })}</Button>
+    </div>
+  );
+}
+
+function StatCard({ icon, label, value, hint }: { icon: React.ReactNode; label: string; value: string | null; hint?: string }) {
+  return (
+    <Card className="border-white/10 bg-white/[0.03] backdrop-blur">
+      <CardContent className="p-4">
+        <div className="flex items-center gap-2 text-xs uppercase tracking-wider text-white/60">
+          {icon} {label}
+        </div>
+        <div className="mt-2 text-2xl font-semibold text-white">
+          {value === null ? <Skeleton className="h-7 w-24" /> : value}
+        </div>
+        {hint ? <div className="mt-1 text-[11px] text-white/40">{hint}</div> : null}
+      </CardContent>
+    </Card>
+  );
+}
+
+function Step({ n, title, body }: { n: number; title: string; body: string }) {
+  return (
+    <div className="space-y-2">
+      <div className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-white/10 text-white text-sm font-semibold">{n}</div>
+      <h3 className="text-white font-medium">{title}</h3>
+      <p className="text-sm text-white/60">{body}</p>
+    </div>
+  );
+}
+
+const truncateAddress = (address: string) =>
+  address.length <= 10 ? address : `${address.slice(0, 6)}…${address.slice(-4)}`;
+
+function formatReferralDate(iso: string | null): string | null {
+  if (!iso) return null;
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return null;
+  try {
+    return d.toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
+  } catch {
+    return null;
+  }
+}
+
+const AFFILIATES_PAGE_SIZE = 12;
+
+/**
+ * Lists the actual accounts behind the referral counters. Direct (L1) are the
+ * people you invited; Secondary (L2) are the people they invited. Each row
+ * resolves its own profile so the list paints instantly from addresses and
+ * enriches with names/avatars as they load.
+ */
+function AffiliatesList({
+  l1,
+  l2,
+  l1Count,
+  l2Count,
+  viewerWallet,
+  loading,
+}: {
+  l1: AffiliateReferralEntry[];
+  l2: AffiliateReferralEntry[];
+  l1Count: number;
+  l2Count: number;
+  viewerWallet: string | null;
+  loading: boolean;
+}) {
+  const { t: _copy } = _useCopy();
+  const [tab, setTab] = useState<"direct" | "secondary">("direct");
+  const [visible, setVisible] = useState(AFFILIATES_PAGE_SIZE);
+  const hasSecondary = l2.length > 0 || l2Count > 0;
+  const list = tab === "direct" ? l1 : l2;
+
+  useEffect(() => { setVisible(AFFILIATES_PAGE_SIZE); }, [tab]);
+
+  const shown = list.slice(0, visible);
+  // A positive count with no rows means the list is still hydrating (fresh load
+  // or a pre-upgrade cached stats blob) — show skeletons, not an empty state.
+  const activeCount = tab === "direct" ? l1Count : l2Count;
+  const hydrating = list.length === 0 && (loading || activeCount > 0);
+
+  return (
+    <Card data-kit-section className="border-white/10 bg-white/[0.03] backdrop-blur">
+      <CardContent className="p-5 md:p-6 space-y-4">
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <div>
+            <h2 className="text-lg font-semibold text-white inline-flex items-center gap-2">
+              <Users className="w-4 h-4" />{_copy("copy.5887fc189c1b", { defaultValue: " Your affiliates" })}</h2>
+            <p className="text-sm text-white/60">{_copy("copy.efaf600adacf", { defaultValue: "The accounts you’ve referred to Riftn." })}</p>
+          </div>
+          {hasSecondary && (
+            <div className="inline-flex rounded-full bg-white/[0.06] p-0.5 text-sm">
+              <button
+                type="button"
+                onClick={() => setTab("direct")}
+                className={`px-3 py-1.5 rounded-full transition-colors ${tab === "direct" ? "bg-white/15 text-white" : "text-white/60 hover:text-white"}`}
+              >{_copy("copy.08a2457a57cf", { defaultValue: "Direct (" })}{l1Count})
+              </button>
+              <button
+                type="button"
+                onClick={() => setTab("secondary")}
+                className={`px-3 py-1.5 rounded-full transition-colors ${tab === "secondary" ? "bg-white/15 text-white" : "text-white/60 hover:text-white"}`}
+              >{_copy("copy.4b124ce647be", { defaultValue: "Secondary (" })}{l2Count})
+              </button>
+            </div>
+          )}
+        </div>
+
+        {hydrating ? (
+          <div className="space-y-2">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.03]">
+                <Skeleton className="w-10 h-10 rounded-full" />
+                <div className="flex-1 space-y-2">
+                  <Skeleton className="h-4 w-32" />
+                  <Skeleton className="h-3 w-24" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : list.length === 0 ? (
+          <AppState
+            icon="subscriptions"
+            title={tab === "direct" ? _copy("copy.5e7068385659", { defaultValue: "No affiliates yet" }) : _copy("copy.0013fee41d62", { defaultValue: "No secondary affiliates yet" })}
+            description={tab === "direct"
+              ? _copy("copy.2a869fe7a3a0", { defaultValue: "Share your invite link and new affiliates will appear here." })
+              : _copy("copy.47fb925824ba", { defaultValue: "Friends invited by your affiliates will appear here." })}
+            size="section"
+          />
+        ) : (
+          <div className="space-y-2">
+            {shown.map((entry) => (
+              <AffiliateRow key={entry.address} entry={entry} viewerWallet={viewerWallet} />
+            ))}
+            {visible < list.length && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full text-white/70 hover:text-white"
+                onClick={() => setVisible((v) => v + AFFILIATES_PAGE_SIZE)}
+              >{_copy("copy.1ce7c57ea800", { defaultValue: "Show more (" })}{list.length - visible})
+              </Button>
+            )}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+function AffiliateRow({ entry, viewerWallet }: { entry: AffiliateReferralEntry; viewerWallet: string | null }) {
+  const { t: _copy } = _useCopy();
+  const { data: profile, isLoading } = useDeHubProfile({
+    userId: entry.address,
+    address: viewerWallet || undefined,
+  });
+
+  const username = profile?.handle && profile.handle !== "@unknown"
+    ? profile.handle.replace(/^@/, "")
+    : null;
+  const name = profile?.name && profile.name !== "Unknown User" ? profile.name : truncateAddress(entry.address);
+  const to = username ? `/${username}` : `/profile?id=${entry.address}`;
+  const joined = formatReferralDate(entry.createdAt);
+
+  return (
+    <Link
+      to={to}
+      className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.03] border border-white/10 hover:bg-white/[0.06] transition-colors"
+    >
+      <Avatar className="w-10 h-10 shrink-0">
+        {profile?.avatarUrl ? <AvatarImage src={profile.avatarUrl} alt={name} /> : null}
+        <AvatarFallback className="bg-white/10 text-white text-sm">
+          {(name || "?")[0]?.toUpperCase()}
+        </AvatarFallback>
+      </Avatar>
+
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-1.5">
+          {isLoading && !profile ? (
+            <Skeleton className="h-4 w-28" />
+          ) : (
+            <span className="font-medium text-white truncate">{name}</span>
+          )}
+          {profile?.verified && <VerifiedBadge className="w-3.5 h-3.5 shrink-0" />}
+          <BadgeIcon badgeBalance={profile?.badgeBalance ?? undefined} username={username} className="w-[1em] h-[1em]" />
+        </div>
+        <div className="text-xs text-white/45 truncate">
+          {username ? `@${username}` : truncateAddress(entry.address)}
+          {joined ? <span className="text-white/30">{_copy("copy.80739712cd97", { defaultValue: " · joined " })}{joined}</span> : null}
+        </div>
+      </div>
+
+      {entry.subId && <code className="text-xs text-white/60 break-all">sub={entry.subId}</code>}
+      <ExternalLink className="w-3.5 h-3.5 text-white/30 shrink-0" />
+    </Link>
+  );
+}

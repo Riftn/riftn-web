@@ -1,0 +1,411 @@
+import { FreehandShapeControls } from "../FreehandShapeControls";
+import { FreehandPointControls } from "../FreehandPointControls";
+import { TextListControls } from "../TextListControls";
+import { ShapeStrokeEdges } from "../ShapeStrokeEdges";
+import { shapeGeometryParameters } from "@/lib/editor/shapeGeometry";
+import { PenControls } from "../PenControls";
+import { penShapeStyle } from "@/lib/editor/freehand";
+import { MEDIA_FRAMES, MEDIA_FRAME_NAMES } from "@/lib/editor/mediaFrames";
+import { CropPresets } from "../CropPresets";
+/**
+ * Layer controls for the inspector: placement, crop, corners, shadow and text
+ * styling. Everything a photo or graphic needs that the timeline-era inspector
+ * never had, since clips used to be locked full-frame.
+ *
+ * Sliders update live without history and record a single undo step when the
+ * drag (or key press) starts, so one adjustment is one undo.
+ */
+import { useTranslation } from "react-i18next";
+import { useBgRemovalStore } from "@/store/editorBgRemovalStore";
+import { matchesBackgroundRemovalScope } from "@/lib/editor/backgroundRemovalFailure";
+import { useEditorQuota } from "@/hooks/use-editor-quota";
+import { AlignCenterHorizontal, AlignCenterVertical, AlignEndHorizontal, AlignEndVertical, AlignStartHorizontal, AlignStartVertical, Bold, FlipHorizontal2, FlipVertical2, Italic, Minimize, RotateCcw, Loader2, Underline, CaseUpper, Frame, Unlock } from "lucide-react";
+import Maximize from "@/components/ui/cut-icons/fullscreen";
+import Scissors from "@/components/ui/cut-icons/trim";
+import Eye from "@/components/ui/cut-icons/visibility";
+import EyeOff from "@/components/ui/cut-icons/hidden";
+import Lock from "@/components/ui/cut-icons/privacy";
+
+import { Label } from "@/components/ui/label";
+import { EditorSlider as Slider } from "@/components/editor/EditorSlider";
+import { cn } from "@/lib/utils";
+import { useEditorStore } from "@/store/editorStore";
+import { useEditorUiStore } from "@/store/editorUiStore";
+import { BLEND_MODES, type BlendMode, type Clip, type ClipShadow, type MediaClip, type TextClip } from "@/lib/editor/types";
+import { clipBoxForSize, getTransform, placementPatch, placementPatchAt } from "@/lib/editor/render";
+import { isAnimated, resolveClipAt } from "@/lib/editor/keyframes";
+import { StrokePattern } from "@/components/editor/StrokePattern";
+import { TEXT_EFFECTS, TEXT_EFFECT_NAMES, textEffectPatch } from "@/lib/editor/textEffects";
+
+const DEFAULT_SHADOW: ClipShadow = { color: "#000000", opacity: 0.5, blur: 24, offsetX: 0, offsetY: 12 };
+
+export function LayerSection({ clip }: { clip: Clip }) {
+  const { t } = useTranslation();
+  const patchClip = useEditorStore((s) => s.patchClip);
+  const patchClipLive = useEditorStore((s) => s.patchClipLive);
+  const settings = useEditorStore((s) => s.settings);
+  const updateSettings = useEditorStore((s) => s.updateSettings);
+  const media = useEditorStore((s) => s.media);
+  const projectId = useEditorStore((s) => s.projectId);
+  const bgFailure = useBgRemovalStore((s) => s.failure);
+  const dismissBgFailure = useBgRemovalStore((s) => s.dismissFailure);
+  const bgClipId = useBgRemovalStore((s) => s.clipId);
+  const bgProgress = useBgRemovalStore((s) => s.progress);
+  const runBgRemoval = useBgRemovalStore((s) => s.run);
+  const cancelBgRemoval = useBgRemovalStore((s) => s.cancel);
+  const quota = useEditorQuota();
+  // Keyed layers show and edit their values at the playhead; static ones skip the per-frame re-render.
+  const recording = useEditorUiStore((s) => s.recordMotion);
+  const now = useEditorStore((s) => (isAnimated(clip) || recording ? s.currentTime : 0));
+
+  if (clip.kind === "audio") return null;
+  const tr = getTransform(resolveClipAt(clip, now));
+  const mediaClip = clip.kind === "image" || clip.kind === "video" ? (clip as MediaClip) : null;
+  const text = clip.kind === "text" ? (clip as TextClip) : null;
+  const shape = clip.kind === "shape" ? clip : null;
+  const source = mediaClip ? media.find((m) => m.id === mediaClip.mediaId) : null;
+
+  /** Live slider: one undo step per drag. */
+  const live = (label: string, value: number, min: number, max: number, step: number,
+    onChange: (v: number) => void) => (
+    <div className="space-y-1">
+      <Label className="text-[10px] uppercase tracking-wide text-white/40">{label}</Label>
+      <div>
+        <Slider value={[value]} min={min} max={max} step={step} onValueChange={(v) => onChange(v[0] ?? value)} />
+      </div>
+    </div>
+  );
+
+  /** Align the layer's visible bounds to a page edge or centre. */
+  const align = (axis: "x" | "y", where: "start" | "centre" | "end") => {
+    const ctx = document.createElement("canvas").getContext("2d");
+    const dims = source?.width && source?.height ? { w: source.width, h: source.height } : null;
+    const box = ctx ? clipBoxForSize(ctx, resolveClipAt(clip, now), settings.width, settings.height, dims) : null;
+    const size = axis === "x" ? settings.width : settings.height;
+    let half = 0;
+    if (box) {
+      const r = (box.rotation * Math.PI) / 180;
+      const c = Math.abs(Math.cos(r));
+      const s = Math.abs(Math.sin(r));
+      half = axis === "x" ? (box.w * c + box.h * s) / 2 : (box.w * s + box.h * c) / 2;
+    }
+    const centre = where === "start" ? half : where === "end" ? size - half : size / 2;
+    // Text stores an anchor, not a centre; shift by the anchor-to-centre offset.
+    const current = axis === "x" ? tr.x : tr.y;
+    const offset = box ? (axis === "x" ? box.cx : box.cy) / size - current : 0;
+    patchClip(clip.id, placementPatchAt(clip, { [axis]: centre / size - offset }, now, { record: recording }));
+  };
+
+  const iconBtn = (label: string, icon: React.ReactNode, onClick: () => void, active = false) => (
+    <button
+      type="button"
+      title={label}
+      aria-label={label}
+      aria-pressed={active}
+      onClick={onClick}
+      className={cn(
+        "flex h-7 items-center justify-center rounded-md border transition",
+        active ? "border-white/50 bg-white/15 text-white" : "border-white/10 text-white/60 hover:bg-white/5 hover:text-white",
+      )}
+    >
+      {icon}
+    </button>
+  );
+
+  const cropLabels = {
+    left: (value: number) => t("editor.layer.cropLeft", { value }),
+    right: (value: number) => t("editor.layer.cropRight", { value }),
+    top: (value: number) => t("editor.layer.cropTop", { value }),
+    bottom: (value: number) => t("editor.layer.cropBottom", { value }),
+  };
+  const blendLabels: Record<BlendMode, string> = {
+    normal: t("editor.blend.normal"),
+    multiply: t("editor.blend.multiply"),
+    screen: t("editor.blend.screen"),
+    overlay: t("editor.blend.overlay"),
+    darken: t("editor.blend.darken"),
+    lighten: t("editor.blend.lighten"),
+    "color-dodge": t("editor.blend.colorDodge"),
+    "color-burn": t("editor.blend.colorBurn"),
+    "hard-light": t("editor.blend.hardLight"),
+    "soft-light": t("editor.blend.softLight"),
+    difference: t("editor.blend.difference"),
+    exclusion: t("editor.blend.exclusion"),
+    hue: t("editor.blend.hue"),
+    saturation: t("editor.blend.saturation"),
+    color: t("editor.blend.color"),
+    luminosity: t("editor.blend.luminosity"),
+  };
+  const shadow = clip.shadow;
+  const crop = mediaClip?.crop ?? { left: 0, top: 0, right: 0, bottom: 0 };
+
+  return (
+    <div className="space-y-3 pt-2">
+      <div className="grid grid-cols-[1fr_auto_auto] items-end gap-1">
+        <div className="space-y-1">
+          <Label className="text-[10px] uppercase tracking-wide text-white/40">{t("editor.layer.blend")}</Label>
+          <select
+            value={clip.blend ?? "normal"}
+            onChange={(e) => patchClip(clip.id, { blend: e.target.value as BlendMode })}
+            className="h-7 w-full rounded-md border border-white/10 bg-white/5 px-2 text-xs text-white"
+          >
+            {BLEND_MODES.map((m) => (
+              <option key={m} value={m} className="bg-black">{blendLabels[m]}</option>
+            ))}
+          </select>
+        </div>
+        {iconBtn(clip.locked ? t("editor.layers.unlock") : t("editor.layers.lock"),
+          clip.locked ? <Lock className="mx-1.5 h-3.5 w-3.5" /> : <Unlock className="mx-1.5 h-3.5 w-3.5" />,
+          () => patchClip(clip.id, { locked: !clip.locked }), !!clip.locked)}
+        {iconBtn(clip.hidden ? t("editor.layers.show") : t("editor.layers.hide"),
+          clip.hidden ? <EyeOff className="mx-1.5 h-3.5 w-3.5" /> : <Eye className="mx-1.5 h-3.5 w-3.5" />,
+          () => patchClip(clip.id, { hidden: !clip.hidden }), !!clip.hidden)}
+      </div>
+
+      <p className="text-[10px] uppercase tracking-wide text-white/40">{t("editor.layer.alignToPage")}</p>
+      <div className="grid grid-cols-6 gap-1">
+        {iconBtn(t("editor.layer.alignLeft"), <AlignStartVertical className="h-3.5 w-3.5" />, () => align("x", "start"))}
+        {iconBtn(t("editor.layer.alignCentre"), <AlignCenterVertical className="h-3.5 w-3.5" />, () => align("x", "centre"))}
+        {iconBtn(t("editor.layer.alignRight"), <AlignEndVertical className="h-3.5 w-3.5" />, () => align("x", "end"))}
+        {iconBtn(t("editor.layer.alignTop"), <AlignStartHorizontal className="h-3.5 w-3.5" />, () => align("y", "start"))}
+        {iconBtn(t("editor.layer.alignMiddle"), <AlignCenterHorizontal className="h-3.5 w-3.5" />, () => align("y", "centre"))}
+        {iconBtn(t("editor.layer.alignBottom"), <AlignEndHorizontal className="h-3.5 w-3.5" />, () => align("y", "end"))}
+      </div>
+
+      {shape && (
+        <>
+          {!shape.locked && shapeGeometryParameters(shape.shape, shape.geometry).map(parameter => <div key={parameter.key}>{live(t(`editor.shape.geometry.${parameter.key}`, { defaultValue: parameter.label }) + ": " + (parameter.step < 1 ? Math.round(parameter.value * 100) + "%" : Math.round(parameter.value)), parameter.value, parameter.min, parameter.max, parameter.step, value => patchClipLive(shape.id, { geometry: { ...shape.geometry, [parameter.key]: value } }))}</div>)}
+          {shape.geometry && !shape.locked && <button type="button" onClick={() => patchClip(shape.id, { geometry: undefined })} className="min-h-9 rounded-lg border border-white/20 px-3 text-xs text-white/65">{t("editor.shape.resetGeometry", { defaultValue: "Reset shape geometry" })}</button>}
+          {shape.photoFrame && <button type="button" onClick={() => useEditorUiStore.getState().setPanel("media")} className="min-h-9 w-full rounded-lg bg-white px-3 text-xs font-medium text-black">{t("editor.grids.addPhoto", { defaultValue: "Choose a photo for this frame" })}</button>}
+          <div className="grid grid-cols-2 gap-1">
+            {iconBtn(t("editor.menu.flipH"), <FlipHorizontal2 className="h-3.5 w-3.5" />,
+              () => patchClip(clip.id, placementPatch(clip, { flipH: !tr.flipH })), !!tr.flipH)}
+            {iconBtn(t("editor.menu.flipV"), <FlipVertical2 className="h-3.5 w-3.5" />,
+              () => patchClip(clip.id, placementPatch(clip, { flipV: !tr.flipV })), !!tr.flipV)}
+          </div>
+          {live(t("editor.layer.size", { value: Math.round(tr.scale * 100) }), tr.scale, 0.05, 6, 0.01,
+            (v) => patchClipLive(clip.id, placementPatchAt(clip, { scale: v }, now, { record: recording })))}
+          <p className="pt-1 text-[10px] uppercase tracking-wide text-white/40">{t("editor.shape.style")}</p>
+          {shape.shape !== "line" && shape.shape !== "arrow" && (shape.shape !== "path" || shape.closedPath) && (
+            <div className="grid grid-cols-[1fr_auto] items-end gap-2">
+              <div className="space-y-1">
+                <Label className="text-[10px] uppercase tracking-wide text-white/40">{t("editor.shape.fill")}</Label>
+                <input type="color" value={shape.fill ?? "#7c5cff"} disabled={!shape.fill}
+                  onChange={(e) => patchClip(clip.id, { fill: e.target.value })}
+                  className="h-7 w-full cursor-pointer rounded-md border border-white/10 bg-white/5 disabled:opacity-40" />
+              </div>
+              <label className="flex h-7 items-center gap-1.5 text-[11px] text-white/70">
+                <input type="checkbox" checked={!!shape.fill} className="h-3.5 w-3.5 accent-white"
+                  onChange={(e) => patchClip(clip.id, { fill: e.target.checked ? "#7c5cff" : null })} />
+                {t("editor.shape.fillOn")}
+              </label>
+            </div>
+          )}
+          <div className="grid grid-cols-[1fr_auto] items-end gap-2">
+            <div className="space-y-1">
+              <Label className="text-[10px] uppercase tracking-wide text-white/40">{t("editor.shape.outline")}</Label>
+              <input type="color" value={shape.stroke?.color ?? "#ffffff"} disabled={!shape.stroke}
+                onChange={(e) => patchClip(clip.id, { stroke: { ...shape.stroke, width: shape.stroke?.width ?? 6, color: e.target.value } })}
+                className="h-7 w-full cursor-pointer rounded-md border border-white/10 bg-white/5 disabled:opacity-40" />
+            </div>
+            <label className="flex h-7 items-center gap-1.5 text-[11px] text-white/70">
+              <input type="checkbox" checked={!!shape.stroke} className="h-3.5 w-3.5 accent-white"
+                onChange={(e) => patchClip(clip.id, { stroke: e.target.checked ? { color: "#ffffff", width: 6 } : null })} />
+              {t("editor.shape.outlineOn")}
+            </label>
+          </div>
+          {!shape.chart && !shape.table && !shape.qr && !shape.connector && (shape.fill || shape.gradient) && live(t("editor.paint.fillOpacity", { defaultValue: "Fill opacity: {{value}}%", value: Math.round((shape.fillOpacity ?? 1) * 100) }), shape.fillOpacity ?? 1, 0, 1, 0.01, value => patchClipLive(clip.id, { fillOpacity: value }))}
+          {shape.stroke && live(t("editor.paint.strokeOpacity", { defaultValue: "Outline opacity: {{value}}%", value: Math.round((shape.stroke.opacity ?? 1) * 100) }), shape.stroke.opacity ?? 1, 0, 1, 0.01, value => patchClipLive(clip.id, { stroke: { ...shape.stroke!, opacity: value } }))}
+          {shape.stroke && live(t("editor.shape.outlineWidth", { value: Math.round(shape.stroke.width) }), shape.stroke.width, 1, 60, 1,
+            (v) => patchClipLive(clip.id, { stroke: { ...shape.stroke!, width: v } }))}
+          <ShapeStrokeEdges value={shape} onChange={patch => patchClip(clip.id, patch)} />
+          {shape.stroke && <StrokePattern stroke={shape.stroke} onChange={stroke => patchClip(clip.id, { stroke })} />}
+          {shape.shape === "path" && shape.points && <FreehandPointControls key={shape.id} points={shape.points} closed={!!shape.closedPath} disabled={!!shape.locked} onChange={points => { if (!shape.locked) patchClip(shape.id, { points }); }} />}
+          {shape.shape === "path" && <FreehandShapeControls key={shape.id} value={shape} onChange={patch => { if (!shape.locked) patchClip(shape.id, patch); }} />}
+          {shape.shape === "path" && <PenControls refineOnly value={{ color: shape.stroke?.color ?? "#ffffff", width: shape.stroke?.width ?? 8, smoothing: shape.pathSmoothing, cap: shape.strokeCap, join: shape.strokeJoin, closed: shape.closedPath, dash: shape.stroke?.dash }} onChange={value => { if (!clip.locked) patchClip(clip.id, penShapeStyle(value, shape.stroke?.opacity, shape.stroke?.dashOffset)); }} />}
+          {shape.shape === "rect" && live(t("editor.layer.cornerRounding", { value: Math.round(shape.radius ?? 0) }), shape.radius ?? 0, 0, 540, 1,
+            (v) => patchClipLive(clip.id, { radius: v }))}
+        </>
+      )}
+
+      {mediaClip && !mediaClip.videoMatte && (
+        <button
+          type="button"
+          disabled={!!bgClipId}
+          onClick={() => void runBgRemoval(clip.id, quota.walletAddress)}
+          className="flex h-8 w-full items-center justify-center gap-1.5 rounded-md bg-white text-[11px] font-semibold text-black transition hover:bg-white/90 disabled:opacity-60"
+        >
+          {bgClipId === clip.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Scissors className="h-3.5 w-3.5" />}
+          {bgClipId === clip.id
+            ? bgProgress?.stage === "download"
+              ? t("editor.bgRemove.downloading", { percent: Math.round((bgProgress.loaded / Math.max(1, bgProgress.total)) * 100) })
+              : bgProgress?.stage === "frames"
+                ? t("editor.videoMatte.frames", { completed: bgProgress.completed, total: bgProgress.total })
+                : t("editor.bgRemove.working")
+            : t("editor.bgRemove.action")}
+        </button>
+      )}
+      {!bgClipId && !mediaClip?.videoMatte && matchesBackgroundRemovalScope(bgFailure, projectId, clip) && (
+        <div role="alert" className="space-y-2 rounded-md border border-white/20 p-2 text-xs text-white/80">
+          <p className="break-words">{bgFailure?.message}</p>
+          <button type="button" onClick={dismissBgFailure} className="underline">{t("common.close")}</button>
+        </div>
+      )}
+      {mediaClip?.kind === "video" && !bgClipId && !mediaClip.videoMatte && <p className="text-[10px] leading-snug text-white/40">{t("editor.videoMatte.hint", { seconds: 600 })}</p>}
+      {mediaClip?.kind === "video" && bgClipId === clip.id && <button type="button" onClick={cancelBgRemoval} className="text-xs text-white/70">{t("editor.videoMatte.cancel")}</button>}
+      {mediaClip?.videoMatte && <button type="button" onClick={() => patchClip(clip.id, { videoMatte: null })} className="h-8 w-full rounded-md border border-white/20 text-xs text-white">{t("editor.videoMatte.restore")}</button>}
+      {mediaClip?.kind === "image" && !bgClipId && (
+        <p className="-mt-2 text-[10px] leading-snug text-white/40">{t("editor.bgRemove.hint")}</p>
+      )}
+
+      {mediaClip && (
+        <>
+          <label className="block space-y-1 text-xs text-white/65">
+            <span>{t("editor.frames.title", { defaultValue: "Photo frame" })}</span>
+            <select disabled={!!clip.locked} value={mediaClip.frame ?? "rect"} onChange={e => patchClip(clip.id, { frame: e.target.value as MediaClip["frame"] })} className="h-9 w-full rounded-lg border border-white/15 bg-neutral-900 px-2 text-white disabled:opacity-35">
+              {MEDIA_FRAMES.map(frame => <option key={frame} value={frame}>{t(`editor.frames.${frame}`, { defaultValue: MEDIA_FRAME_NAMES[frame] })}</option>)}
+            </select>
+          </label>
+          <label className="flex min-h-9 items-center gap-2 text-xs text-white/70"><input type="checkbox" checked={!!mediaClip.border} onChange={e => patchClip(clip.id, { border: e.target.checked ? { color: "#ffffff", width: 6 } : null })} />{t("editor.outline.border", { defaultValue: "Photo border" })}</label>
+          {mediaClip.border && <>
+            <input type="color" value={mediaClip.border.color} aria-label={t("editor.outline.colour", { defaultValue: "Border colour" })} onChange={e => patchClip(clip.id, { border: { ...mediaClip.border!, color: e.target.value } })} className="h-9 w-full bg-transparent" />
+            {live(t("editor.paint.borderOpacity", { defaultValue: "Border opacity: {{value}}%", value: Math.round((mediaClip.border.opacity ?? 1) * 100) }), mediaClip.border.opacity ?? 1, 0, 1, 0.01, value => patchClipLive(clip.id, { border: { ...mediaClip.border!, opacity: value } }))}
+            {live(t("editor.outline.width", { defaultValue: "Border width: {{value}}", value: Math.round(mediaClip.border.width) }), mediaClip.border.width, 1, 80, 1, value => patchClipLive(clip.id, { border: { ...mediaClip.border!, width: value } }))}
+            <StrokePattern stroke={mediaClip.border} onChange={border => patchClip(clip.id, { border })} />
+          </>}
+          <div className="grid grid-cols-4 gap-1">
+            {iconBtn(t("editor.menu.fitCanvas"), <Minimize className="h-3.5 w-3.5" />,
+              () => patchClip(clip.id, { fit: "contain", ...placementPatch(mediaClip, { x: 0.5, y: 0.5, scale: 1 }) }),
+              (mediaClip.fit ?? "contain") === "contain" && tr.scale === 1)}
+            {iconBtn(t("editor.menu.fillCanvas"), <Maximize className="h-3.5 w-3.5" />,
+              () => patchClip(clip.id, { fit: "cover", ...placementPatch(mediaClip, { x: 0.5, y: 0.5, scale: 1 }) }),
+              mediaClip.fit === "cover" && tr.scale === 1)}
+            {iconBtn(t("editor.menu.flipH"), <FlipHorizontal2 className="h-3.5 w-3.5" />,
+              () => patchClip(clip.id, placementPatch(clip, { flipH: !tr.flipH })), !!tr.flipH)}
+            {iconBtn(t("editor.menu.flipV"), <FlipVertical2 className="h-3.5 w-3.5" />,
+              () => patchClip(clip.id, placementPatch(clip, { flipV: !tr.flipV })), !!tr.flipV)}
+          </div>
+          {live(t("editor.layer.size", { value: Math.round(tr.scale * 100) }), tr.scale, 0.05, 4, 0.01,
+            (v) => patchClipLive(clip.id, placementPatchAt(clip, { scale: v }, now, { record: recording })))}
+        </>
+      )}
+
+      {live(t("editor.layer.rotation", { value: Math.round(tr.rotation) }), tr.rotation, -180, 180, 1,
+        (v) => patchClipLive(clip.id, placementPatchAt(clip, { rotation: v }, now, { record: recording })))}
+      {live(t("editor.layer.opacity", { value: Math.round((tr.opacity ?? 1) * 100) }), tr.opacity ?? 1, 0, 1, 0.01,
+        (v) => patchClipLive(clip.id, placementPatchAt(clip, { opacity: v }, now, { record: recording })))}
+
+      <button
+        type="button"
+        onClick={() => patchClip(clip.id, {
+          ...placementPatch(clip, { x: 0.5, y: 0.5, scale: 1, rotation: 0, flipH: false, flipV: false, opacity: 1 }),
+          keyframes: undefined,
+          ...(mediaClip ? { crop: null, fit: "contain" as const } : {}),
+        })}
+        className="flex h-7 w-full items-center justify-center gap-1.5 rounded-md border border-white/10 text-[11px] text-white/70 hover:bg-white/5 hover:text-white"
+      >
+        <RotateCcw className="h-3 w-3" /> {t("editor.layer.resetPosition")}
+      </button>
+
+      {mediaClip && source?.width && source?.height && (
+        <button
+          type="button"
+          onClick={() => {
+            // A photo opened on its own should be edited at its own size, like
+            // opening it in any image editor. Cap the long side at 4096.
+            const k = Math.min(1, 4096 / Math.max(source.width!, source.height!));
+            const w = Math.max(64, Math.round(source.width! * k)) & ~1;
+            const h = Math.max(64, Math.round(source.height! * k)) & ~1;
+            updateSettings({ width: w, height: h, aspectPreset: "custom" });
+            patchClip(clip.id, { fit: "contain", crop: null, ...placementPatch(mediaClip, { x: 0.5, y: 0.5, scale: 1, rotation: 0 }) });
+          }}
+          className="flex h-7 w-full items-center justify-center gap-1.5 rounded-md border border-white/10 text-[11px] text-white/70 hover:bg-white/5 hover:text-white"
+        >
+          <Frame className="h-3 w-3" /> {t("editor.layer.matchCanvas", { width: source.width, height: source.height })}
+        </button>
+      )}
+
+      {mediaClip && (
+        <>
+          <p className="pt-1 text-[10px] uppercase tracking-wide text-white/40">{t("editor.layer.crop")}</p>
+          <CropPresets key={clip.id} clip={mediaClip} source={source?.width && source.height ? { width: source.width, height: source.height } : null} />
+          <div className="grid grid-cols-2 gap-2">
+            {(["left", "right", "top", "bottom"] as const).map((edge) => (
+              <div key={edge}>
+                {live(cropLabels[edge](Math.round(crop[edge] * 100)), crop[edge], 0, 0.9, 0.01,
+                  (v) => patchClipLive(clip.id, { crop: { ...crop, [edge]: v } }))}
+              </div>
+            ))}
+          </div>
+          {live(t("editor.layer.cornerRounding", { value: Math.round(mediaClip.radius ?? 0) }), mediaClip.radius ?? 0, 0, 540, 1,
+            (v) => patchClipLive(clip.id, { radius: v }))}
+        </>
+      )}
+
+      {text && (
+        <>
+          <p className="pt-1 text-[10px] uppercase tracking-wide text-white/40">{t("editor.layer.textStyle")}</p>
+          {live(t("editor.paint.fillOpacity", { defaultValue: "Fill opacity: {{value}}%", value: Math.round((text.fillOpacity ?? 1) * 100) }), text.fillOpacity ?? 1, 0, 1, 0.01, value => patchClipLive(clip.id, { fillOpacity: value }))}
+          {(text.stroke || text.hollow) && live(t("editor.paint.strokeOpacity", { defaultValue: "Outline opacity: {{value}}%", value: Math.round((text.stroke?.opacity ?? 1) * 100) }), text.stroke?.opacity ?? 1, 0, 1, 0.01, value => patchClipLive(clip.id, { stroke: { color: text.color, width: 3, ...text.stroke, opacity: value } }))}
+          {text.stroke && <StrokePattern stroke={text.stroke} onChange={stroke => patchClip(clip.id, { stroke })} />}
+          <div className="grid grid-cols-4 gap-1">
+            {iconBtn(t("editor.layer.bold"), <Bold className="h-3.5 w-3.5" />,
+              () => patchClip(clip.id, { fontWeight: text.fontWeight >= 600 ? 400 : 700 }), text.fontWeight >= 600)}
+            {iconBtn(t("editor.layer.italic"), <Italic className="h-3.5 w-3.5" />,
+              () => patchClip(clip.id, { italic: !text.italic }), !!text.italic)}
+            {iconBtn(t("editor.layer.underline"), <Underline className="h-3.5 w-3.5" />,
+              () => patchClip(clip.id, { underline: !text.underline }), !!text.underline)}
+            {iconBtn(t("editor.layer.uppercase"), <CaseUpper className="h-3.5 w-3.5" />,
+              () => patchClip(clip.id, { uppercase: !text.uppercase }), !!text.uppercase)}
+          </div>
+          <label className="flex min-h-8 items-center gap-2 text-xs text-white/70"><input type="checkbox" checked={!!text.strikethrough} onChange={e => patchClip(clip.id, { strikethrough: e.target.checked })} />{t("editor.text.strikethrough", { defaultValue: "Strikethrough" })}</label>
+          <select value={text.list ?? "none"} onChange={e => patchClip(clip.id, { list: e.target.value as TextClip["list"] })} aria-label={t("editor.text.listStyle", { defaultValue: "List style" })} className="min-h-9 w-full rounded-lg border border-white/15 bg-neutral-900 px-2 text-xs text-white">
+            <option value="none">{t("editor.text.plain", { defaultValue: "Plain text" })}</option><option value="bullet">{t("editor.text.bullets", { defaultValue: "Bullet list" })}</option><option value="number">{t("editor.text.numbered", { defaultValue: "Numbered list" })}</option>
+          </select>
+          <TextListControls value={text} onChange={listStyle => patchClip(clip.id, { listStyle })} />
+          <div className="grid grid-cols-3 gap-1" role="group" aria-label={t("editor.text.effects", { defaultValue: "Text effects" })}>
+            {TEXT_EFFECTS.map(effect => <button key={effect} type="button" onClick={() => patchClip(clip.id, textEffectPatch(text, effect))} className="min-h-9 rounded-lg border border-white/15 px-2 text-xs text-white/75 hover:bg-white/10">{t(`editor.text.effect.${effect}`, { defaultValue: TEXT_EFFECT_NAMES[effect] })}</button>)}
+          </div>
+            {!!text.echo?.length && live(t("editor.text.echoDistance", { defaultValue: "Echo distance" }), Math.max(...text.echo.map(layer => Math.max(Math.abs(layer.x), Math.abs(layer.y)))), 1, 80, 1,
+              distance => { const max = Math.max(1, ...text.echo!.map(layer => Math.max(Math.abs(layer.x), Math.abs(layer.y)))); patchClipLive(clip.id, { echo: text.echo!.map(layer => ({ ...layer, x: layer.x ? layer.x / max * distance : layer.y ? 0 : distance, y: layer.y / max * distance })) }); })}
+          {live(t("editor.layer.letterSpacing", { value: Math.round(text.letterSpacing ?? 0) }), text.letterSpacing ?? 0, -10, 80, 1,
+            (v) => patchClipLive(clip.id, { letterSpacing: v }))}
+          {live(t("editor.layer.lineSpacing", { value: (text.lineHeight ?? 1.2).toFixed(1) }), text.lineHeight ?? 1.2, 0.7, 3, 0.05,
+            (v) => patchClipLive(clip.id, { lineHeight: v }))}
+        </>
+      )}
+
+      <div className="rounded-md border border-white/10 bg-white/[0.02] p-2">
+        <label className="flex items-center justify-between text-[11px] text-white/70">
+          <span className="font-medium">{t("editor.layer.shadow")}</span>
+          <input
+            type="checkbox"
+            checked={!!shadow}
+            onChange={(e) => patchClip(clip.id, { shadow: e.target.checked ? (shadow ?? DEFAULT_SHADOW) : null })}
+            className="h-3.5 w-3.5 accent-white"
+          />
+        </label>
+        {shadow && (
+          <div className="mt-2 space-y-2">
+            <div className="space-y-1">
+              <Label className="text-[10px] uppercase tracking-wide text-white/40">{t("editor.layer.colour")}</Label>
+              <input type="color" value={shadow.color}
+                onChange={(e) => patchClip(clip.id, { shadow: { ...shadow, color: e.target.value } })}
+                className="h-7 w-full cursor-pointer rounded-md border border-white/10 bg-white/5" />
+            </div>
+            {live(t("editor.layer.shadowOpacity", { value: Math.round(shadow.opacity * 100) }), shadow.opacity, 0, 1, 0.01,
+              (v) => patchClipLive(clip.id, { shadow: { ...shadow, opacity: v } }))}
+            {live(t("editor.layer.shadowBlur", { value: Math.round(shadow.blur) }), shadow.blur, 0, 120, 1,
+              (v) => patchClipLive(clip.id, { shadow: { ...shadow, blur: v } }))}
+            <div className="grid grid-cols-2 gap-2">
+              {live(t("editor.layer.shadowX", { value: Math.round(shadow.offsetX) }), shadow.offsetX, -80, 80, 1,
+                (v) => patchClipLive(clip.id, { shadow: { ...shadow, offsetX: v } }))}
+              {live(t("editor.layer.shadowY", { value: Math.round(shadow.offsetY) }), shadow.offsetY, -80, 80, 1,
+                (v) => patchClipLive(clip.id, { shadow: { ...shadow, offsetY: v } }))}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

@@ -1,0 +1,1387 @@
+import { useTranslation as _useCopy } from 'react-i18next';
+import { useSurfaceDraft } from '@/hooks/use-surface-draft';
+import { DIRECT_TIP_TOKENS } from '@/lib/direct-tip-tokens';
+import { useState, useEffect, useId, useMemo, type ReactNode } from 'react';
+import { DhbAmount, DhbCoin } from '@/components/app/DhbAmount';
+import { ppvTokenLabel } from '@/lib/token-label';
+import { useTranslation as useI18n } from 'react-i18next';
+import { Ticket, Shield, Hash, Save, Type, ShoppingBag, Baby, Quote, MessageSquareReply, Scissors } from "lucide-react";
+import type { RemixPolicy } from "@/lib/remix-links";
+import type { PostVisibility, QuotePolicy, ReplyPolicy } from "@/lib/api/dehub/types";
+import Gift from "@/components/ui/cut-icons/gifts";
+import Eye from "@/components/ui/cut-icons/visibility";
+import EyeOff from "@/components/ui/cut-icons/hidden";
+import Check from "@/components/ui/cut-icons/check";
+import Info from "@/components/ui/cut-icons/information";
+import Users from "@/components/ui/cut-icons/communities";
+import Coins from "@/components/ui/cut-icons/coins";
+
+import MessageCircle from "@/components/ui/cut-icons/messages";
+import Search from "@/components/ui/cut-icons/search";
+import X from "@/components/ui/cut-icons/close";
+import Plus from "@/components/ui/cut-icons/add";
+
+import { Switch } from '@/components/ui/switch';
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerFooter } from '@/components/ui/drawer';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { parsePpvPreviewSeconds } from '../lib/ppv-preview';
+import { cn } from '@/lib/utils';
+import { getCategories, type DeHubCategory, type ShopLink } from '@/lib/api/dehub';
+import { ShopSheetLazy, type ShopBoardDraft } from './ShopSheetLazy';
+import { useShopLinkAllowance } from '@/hooks/use-shop-links';
+import { toast } from 'sonner';
+import { useUserCommunities } from '@/hooks/use-communities';
+import { useAuth } from '@/contexts/AuthContext';
+import { AppState } from '@/components/app/AppState';
+import type { Currency } from '../types';
+import {
+  getLockTokensForChain,
+  isSolanaChain,
+  isValidEvmAddress,
+} from '@/lib/chains/constants';
+import { isValidSolanaAddress } from '@/lib/solana/wallet';
+import type { PostChainId } from '@/components/app/ChainSelector';
+import { getChainById } from '@/components/app/ChainSelector';
+import { useNavigate } from 'react-router-dom';
+import { useCreatorPlansLite } from '@/hooks/use-creator-plans';
+import { Star } from 'lucide-react';
+import { normalizeCategoryName } from '@/lib/category-names';
+import { storageImage, deviceWidth } from '@/lib/media-url';
+import { MintHomeAllowance } from '@/components/app/mint/MintHomeAllowance';
+
+interface PostAccessTogglesProps {
+  draftScope?: string;
+  /** Gate this post behind the creator's own subscription plans. */
+  isSubscribersOnly: boolean;
+  setIsSubscribersOnly: (value: boolean) => void;
+  isPPV: boolean;
+  setIsPPV: (value: boolean) => void;
+  ppvAmount: string;
+  setPpvAmount: (value: string) => void;
+  canConfigurePpvPreview?: boolean;
+  ppvPreviewSeconds?: string;
+  setPpvPreviewSeconds?: (value: string) => void;
+  ppvCurrency: Currency;
+  setPpvCurrency: (value: Currency) => void;
+  isWatch2Earn: boolean;
+  setIsWatch2Earn: (value: boolean) => void;
+  w2eViews: string;
+  setW2eViews: (value: string) => void;
+  w2eComments: string;
+  setW2eComments: (value: string) => void;
+  w2eTotal: string;
+  setW2eTotal: (value: string) => void;
+  w2eCurrency: Currency;
+  setW2eCurrency: (value: Currency) => void;
+  isTokenGated: boolean;
+  setIsTokenGated: (value: boolean) => void;
+  tokenContract: string;
+  setTokenContract: (value: string) => void;
+  tokenSymbol: string;
+  setTokenSymbol: (value: string) => void;
+  tokenAmount: string;
+  setTokenAmount: (value: string) => void;
+  postChainId: PostChainId;
+  selectedCategory: string;
+  setSelectedCategory: (value: string) => void;
+  markCategorySaved?: () => void;
+  showTitle: boolean;
+  setShowTitle: (value: boolean) => void;
+  /** Marks the post adult or graphic — see the row's copy for what that costs. */
+  isMature: boolean;
+  setIsMature: (value: boolean) => void;
+  /** Who may quote the post. The row is left out where this is not passed (a live stream). */
+  quotePolicy?: QuotePolicy;
+  setQuotePolicy?: (value: QuotePolicy) => void;
+  /** Who may stitch this video; null follows the account setting. Only passed for video posts. */
+  stitchPolicy?: RemixPolicy | null;
+  setStitchPolicy?: (value: RemixPolicy | null) => void;
+  /** Who may reply. Left out, like quotes, where this is not passed. */
+  replyPolicy?: ReplyPolicy;
+  setReplyPolicy?: (value: ReplyPolicy) => void;
+  /** Who may see the post. Left out for a quote or a livestream, which are always public. */
+  visibility?: PostVisibility;
+  setVisibility?: (value: PostVisibility) => void;
+  isForKids: boolean;
+  setIsForKids: (value: boolean) => void;
+  /**
+   * The Shop board: affiliate and shop links viewers open from the post or the
+   * live player. An empty array is the toggle being off — there is no separate
+   * boolean, because a board with no links in it and no board are the same
+   * post.
+   */
+  shopLinks?: ShopLink[];
+  setShopLinks?: (links: ShopLink[]) => void;
+  /**
+   * Ids of the creator's own store listings on this board. They are attached
+   * in Supabase after the post has a tokenId, so the composer only carries the
+   * choice — see the attach step in usePostForm.
+   */
+  shopListingIds?: string[];
+  setShopListingIds?: (ids: string[]) => void;
+  hasVideoOrAudio: boolean;
+  categoryDrawerOpen?: boolean;
+  setCategoryDrawerOpen?: (value: boolean) => void;
+  /** Put this post on-chain. Off by default on a built-in wallet. */
+  shouldMint: boolean;
+  setShouldMint: (value: boolean) => void;
+  /** e.g. "17 DHB" — omitted while the quote is loading, or when it is free. */
+  mintFeeLabel?: string | null;
+  /**
+   * Bounty locks tokens through the mint transaction, so it cannot be set up
+   * on a post that never goes on-chain. The composer forces minting on when
+   * bounty is enabled and passes true here so the row reads as unavailable.
+   */
+  mintRequired?: boolean;
+  /** Open plan setup above the composer without abandoning the post draft. */
+  onCreatePlan?: () => void;
+  /**
+   * Writing a quote: the server refuses paywalls, bounty, subscriber gating
+   * and a shop board on quotes, so those rows are not offered.
+   */
+  quoteMode?: boolean;
+  /** Keyboard is up: the options give most of their height to the writing area. */
+  compact?: boolean;
+}
+
+export function PostAccessToggles({
+  draftScope = "post:new",
+  isSubscribersOnly,
+  setIsSubscribersOnly,
+  isPPV,
+  setIsPPV,
+  ppvAmount,
+  setPpvAmount,
+  canConfigurePpvPreview,
+  ppvPreviewSeconds = '',
+  setPpvPreviewSeconds,
+  ppvCurrency,
+  setPpvCurrency,
+  isWatch2Earn,
+  setIsWatch2Earn,
+  w2eViews,
+  setW2eViews,
+  w2eComments,
+  setW2eComments,
+  w2eTotal,
+  setW2eTotal,
+  setW2eCurrency,
+  isTokenGated,
+  setIsTokenGated,
+  tokenContract,
+  setTokenContract,
+  tokenSymbol,
+  setTokenSymbol,
+  tokenAmount,
+  setTokenAmount,
+  postChainId,
+  selectedCategory,
+  setSelectedCategory,
+  markCategorySaved,
+  showTitle,
+  setShowTitle,
+  isMature,
+  setIsMature,
+  quotePolicy = 'public',
+  setQuotePolicy,
+  stitchPolicy = null,
+  setStitchPolicy,
+  replyPolicy = 'public',
+  setReplyPolicy,
+  visibility = 'public',
+  setVisibility,
+  isForKids,
+  setIsForKids,
+  shopLinks,
+  setShopLinks,
+  shopListingIds,
+  setShopListingIds,
+  hasVideoOrAudio,
+  categoryDrawerOpen: categoryDrawerOpenProp,
+  setCategoryDrawerOpen: setCategoryDrawerOpenProp,
+  shouldMint,
+  setShouldMint,
+  mintFeeLabel,
+  mintRequired = false,
+  quoteMode = false,
+  compact = false,
+  onCreatePlan,
+}: PostAccessTogglesProps) {
+  const { t: _copy } = _useCopy();
+  const { t } = useI18n();
+  const { walletAddress } = useAuth();
+  const navigate = useNavigate();
+  // The gate is the creator's own plans, so with none there is nothing to gate
+  // on and the row stays off — see the comment on the switch.
+  const { hasPlans, hasAnyPlan, isLoading: plansLoading } = useCreatorPlansLite(walletAddress);
+  const { data: userCommunities = [] } = useUserCommunities();
+  // Mobile drawer states
+  const [ppvDrawerOpen, setPpvDrawerOpen] = useState(false);
+  const [shopDrawerOpen, setShopDrawerOpen] = useState(false);
+  const [bountyDrawerOpen, setBountyDrawerOpen] = useState(false);
+  const [tokenDrawerOpen, setTokenDrawerOpen] = useState(false);
+  const [communityDrawerOpen, setCommunityDrawerOpen] = useState(false);
+  // Arming "Made for kids" asks first; disarming does not. The two directions
+  // are not symmetrical — a wrong "on" puts a post in front of a child, a
+  // wrong "off" costs the creator an audience they can get back with one tap.
+  const [forKidsConfirmOpen, setForKidsConfirmOpen] = useState(false);
+  const handleForKidsToggle = (checked: boolean) => {
+    if (checked) setForKidsConfirmOpen(true);
+    else setIsForKids(false);
+  };
+
+  const [categoryDrawerOpenLocal, setCategoryDrawerOpenLocal] = useState(false);
+  const categoryDrawerOpen = categoryDrawerOpenProp ?? categoryDrawerOpenLocal;
+  const setCategoryDrawerOpen = setCategoryDrawerOpenProp ?? setCategoryDrawerOpenLocal;
+
+  // Community helpers are defined after selectedCategoriesArray below
+  const hasCommunities = userCommunities.length > 0 && !!walletAddress;
+
+  // Temp states for drawer inputs
+  const [tempPpvAmount, setTempPpvAmount] = useSurfaceDraft("src/features/post/components/PostAccessToggles.tsx:tempPpvAmount", ppvAmount, draftScope);
+  const previewInputId = useId();
+  const [tempPpvPreview, setTempPpvPreview] = useSurfaceDraft("post:ppv-preview", ppvPreviewSeconds, draftScope);
+  const previewInvalid = canConfigurePpvPreview && parsePpvPreviewSeconds(tempPpvPreview) === null;
+  const [tempPpvCurrency, setTempPpvCurrency] = useState<Currency>(ppvCurrency);
+  const [tempW2eViews, setTempW2eViews] = useSurfaceDraft("src/features/post/components/PostAccessToggles.tsx:tempW2eViews", w2eViews, draftScope);
+  const [tempW2eComments, setTempW2eComments] = useSurfaceDraft("src/features/post/components/PostAccessToggles.tsx:tempW2eComments", w2eComments, draftScope);
+  const [tempW2eTotal, setTempW2eTotal] = useSurfaceDraft("src/features/post/components/PostAccessToggles.tsx:tempW2eTotal", w2eTotal, draftScope);
+  const [tempTokenAmount, setTempTokenAmount] = useSurfaceDraft("src/features/post/components/PostAccessToggles.tsx:tempTokenAmount", tokenAmount, draftScope);
+  const [tempTokenSymbol, setTempTokenSymbol] = useSurfaceDraft("src/features/post/components/PostAccessToggles.tsx:tempTokenSymbol", tokenSymbol || 'DHB', draftScope);
+  const [tempTokenContract, setTempTokenContract] = useSurfaceDraft("src/features/post/components/PostAccessToggles.tsx:tempTokenContract", tokenContract, draftScope);
+  const [useCustomToken, setUseCustomToken] = useState(!!tokenContract);
+
+  const lockTokens = useMemo(() => getLockTokensForChain(postChainId), [postChainId]);
+  const chainLabel = getChainById(postChainId)?.name ?? 'chain';
+  const solanaChain = isSolanaChain(postChainId);
+
+  // DHB does not exist on Solana, and a USD-denominated price has no mint the
+  // backend can build a transfer against — so Solana posts price PPV in the
+  // SPL tokens the chain actually supports. USD is gone from EVM too: it ships
+  // with no payPerViewContractAddress, and both clients' unlock flows refuse
+  // it, so a USD paywall could never be paid.
+  const ppvCurrencyOptions = useMemo<Currency[]>(
+    () =>
+      solanaChain
+        ? (lockTokens.map((t) => t.symbol) as Currency[])
+        : (['DHB', ...DIRECT_TIP_TOKENS.filter((tk) => tk.chainId === postChainId).map((tk) => tk.symbol)] as Currency[]),
+    [solanaChain, lockTokens, postChainId],
+  );
+
+  // Category state
+  const [categories, setCategories] = useState<DeHubCategory[]>([]);
+  const [categorySearch, setCategorySearch] = useSurfaceDraft("features/post/components/PostAccessToggles.tsx:categorySearch", '');
+  const [loadingCategories, setLoadingCategories] = useState(false);
+
+  // Fetch categories when drawer opens
+  useEffect(() => {
+    if (categoryDrawerOpen && categories.length === 0) {
+      setLoadingCategories(true);
+      getCategories()
+        .then(setCategories)
+        .catch(console.error)
+        .finally(() => setLoadingCategories(false));
+    }
+  }, [categoryDrawerOpen, categories.length]);
+
+  const selectedCategoriesArray = useMemo(() => 
+    selectedCategory ? selectedCategory.split('|||').filter(Boolean) : [],
+    [selectedCategory]
+  );
+
+  // Community slug is stored as a plain category (e.g. "dehub" not "community:dehub")
+  const communitySlugs = new Set(userCommunities.map(m => m.communities?.slug).filter(Boolean));
+  const selectedCommunitySlug = selectedCategoriesArray.find(c => communitySlugs.has(c)) || null;
+
+  const MAX_CATEGORIES = 5;
+
+  const filteredCategories = useMemo(() => {
+    const q = normalizeCategoryName(categorySearch).toLowerCase();
+    if (!q) return categories;
+    return categories
+      .filter(c => c.name.toLowerCase().includes(q))
+      .sort((a, b) => {
+        const aName = a.name.toLowerCase();
+        const bName = b.name.toLowerCase();
+        // Exact match first, then starts-with, then includes
+        const aExact = aName === q ? 0 : aName.startsWith(q) ? 1 : 2;
+        const bExact = bName === q ? 0 : bName.startsWith(q) ? 1 : 2;
+        return aExact - bExact || aName.localeCompare(bName);
+      });
+  }, [categories, categorySearch]);
+
+  const handleCategoryToggle = (checked: boolean) => {
+    if (checked) {
+      setCategorySearch.complete(categorySearch, '');
+      setCategoryDrawerOpen(true);
+    } else {
+      setSelectedCategory('');
+    }
+  };
+
+  const toggleCategory = (raw: string) => {
+    const name = normalizeCategoryName(raw);
+    if (!name) return;
+    const current = selectedCategoriesArray;
+    if (current.includes(name)) {
+      const next = current.filter(c => c !== name);
+      setSelectedCategory(next.join('|||'));
+    } else if (current.length < MAX_CATEGORIES) {
+      setSelectedCategory([...current, name].join('|||'));
+    }
+  };
+
+  const removeCategory = (name: string) => {
+    const next = selectedCategoriesArray.filter(c => c !== name);
+    setSelectedCategory(next.join('|||'));
+  };
+
+  const handlePpvToggle = (checked: boolean) => {
+    if (checked) {
+      setTempPpvAmount.initialize(ppvAmount);
+      setTempPpvPreview.initialize(ppvPreviewSeconds);
+      // Carrying DHB/USD over to a Solana post would leave the selector with
+      // nothing highlighted, so fall back to the chain's first token.
+      setTempPpvCurrency(
+        ppvCurrencyOptions.includes(ppvCurrency) ? ppvCurrency : ppvCurrencyOptions[0],
+      );
+      setPpvDrawerOpen(true);
+    } else {
+      setIsPPV(false);
+    }
+  };
+
+  const handleBountyToggle = (checked: boolean) => {
+    if (checked) {
+      setTempW2eViews.initialize(w2eViews);
+      setTempW2eComments.initialize(w2eComments);
+      setTempW2eTotal.initialize(w2eTotal);
+      setBountyDrawerOpen(true);
+    } else {
+      setIsWatch2Earn(false);
+    }
+  };
+
+  const handleTokenToggle = (checked: boolean) => {
+    if (checked) {
+      setTempTokenAmount.initialize(tokenAmount);
+      setTempTokenSymbol.initialize(tokenSymbol || lockTokens[0]?.symbol || 'DHB');
+      setTempTokenContract.initialize(tokenContract);
+      setUseCustomToken(!!tokenContract);
+      setTokenDrawerOpen(true);
+    } else {
+      setIsTokenGated(false);
+    }
+  };
+
+  const confirmPpv = () => {
+    if (previewInvalid) return;
+    setPpvAmount(tempPpvAmount);
+    if (canConfigurePpvPreview) setPpvPreviewSeconds?.(tempPpvPreview);
+    setPpvCurrency(tempPpvCurrency);
+    setIsPPV(true);
+    setPpvDrawerOpen(false);
+  };
+
+  const cancelPpv = () => {
+    setPpvDrawerOpen(false);
+  };
+
+  const confirmBounty = () => {
+    setW2eViews(tempW2eViews);
+    setW2eComments(tempW2eComments);
+    setW2eTotal(tempW2eTotal);
+    setW2eCurrency('DHB'); // Always DHB
+    setIsWatch2Earn(true);
+    setBountyDrawerOpen(false);
+  };
+
+  const cancelBounty = () => {
+    setBountyDrawerOpen(false);
+  };
+
+  const confirmToken = () => {
+    if (!tempTokenAmount.trim() || parseFloat(tempTokenAmount) <= 0) {
+      toast.error(_copy("copy.6871d495c634", { defaultValue: "Enter a valid minimum token amount" }));
+      return;
+    }
+    if (useCustomToken) {
+      const addr = tempTokenContract.trim();
+      if (!addr) {
+        toast.error(_copy("copy.5052f9293e6b", { defaultValue: "Enter a token contract address" }));
+        return;
+      }
+      if (solanaChain ? !isValidSolanaAddress(addr) : !isValidEvmAddress(addr)) {
+        toast.error(solanaChain ? _copy("copy.a8797c5bf7e6", { defaultValue: "Invalid Solana mint address" }) : _copy("copy.67a116fac571", { defaultValue: "Invalid token contract address" }));
+        return;
+      }
+      setTokenContract(addr);
+      setTokenSymbol(tempTokenSymbol.trim() || 'TOKEN');
+    } else {
+      const picked = lockTokens.find((t) => t.symbol === tempTokenSymbol);
+      if (!picked) {
+        toast.error(_copy("copy.3a4c088bcce4", { defaultValue: "Select a token" }));
+        return;
+      }
+      setTokenContract(picked.address);
+      setTokenSymbol(picked.symbol);
+    }
+    setTokenAmount(tempTokenAmount);
+    setIsTokenGated(true);
+    setTokenDrawerOpen(false);
+  };
+
+  const cancelToken = () => {
+    setTokenDrawerOpen(false);
+  };
+
+  // Calculate total bounty for preview
+  const totalBounty = tempW2eTotal && tempW2eViews 
+    ? parseFloat(tempW2eTotal) * (parseInt(tempW2eViews) + parseInt(tempW2eComments || '0'))
+    : 0;
+
+  const inputClass = "w-full h-12 px-4 text-base bg-zinc-800/50 border border-white/20 rounded-xl text-white placeholder:text-zinc-500 outline-none focus:border-white/50";
+
+  // Shop board. The row is only rendered when the composer wired it up, so
+  // surfaces that have not adopted it yet are unchanged.
+  const shopAllowance = useShopLinkAllowance();
+  const shopRows = (shopLinks?.length ?? 0) + (shopListingIds?.length ?? 0);
+  const shopEnabled = shopRows > 0;
+  /**
+   * Toggling on opens the editor rather than writing an empty board: a switch
+   * that turns green and does nothing is the shape of a bug report. Toggling
+   * off clears the board — there is no separate flag to park it behind, and
+   * keeping an invisible board on a post is worse than making somebody pick
+   * three things again.
+   */
+  const handleShopToggle = (next: boolean) => {
+    if (!setShopLinks) return;
+    if (next) {
+      setShopDrawerOpen(true);
+      return;
+    }
+    setShopLinks([]);
+    setShopListingIds?.([]);
+  };
+
+  const saveShopBoard = (value: ShopBoardDraft) => {
+    setShopLinks?.(value.links);
+    setShopListingIds?.(value.listingIds);
+  };
+
+  return (
+    <>
+      <div className="relative border-t border-white/10">
+        <div className={cn("px-4 py-2 space-y-1 overflow-y-auto scrollbar-none transition-[max-height] duration-200", compact ? "max-h-[56px]" : "max-h-[140px]")} style={{ maskImage: 'linear-gradient(to bottom, black 60%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to bottom, black 60%, transparent 100%)' }}>
+        {/* Mint post — off by default, so a first post needs no wallet at all */}
+        <label
+          className={cn(
+            'flex items-center justify-between py-0.5',
+            mintRequired ? 'cursor-not-allowed opacity-60' : 'cursor-pointer',
+          )}
+        >
+          <div className="flex items-center gap-2 min-w-0">
+            <Coins className="w-4 h-4 text-white shrink-0" />
+            <span className="text-sm text-white">{_copy("copy.8059f6bc8ca0", { defaultValue: "Mint post" })}</span>
+            {shouldMint && mintFeeLabel && (
+              <span className="text-xs text-white/50 truncate">({mintFeeLabel})</span>
+            )}
+            {mintRequired && (
+              <span className="text-xs text-white/50 truncate">{_copy("copy.3bd09b121466", { defaultValue: "(required for bounty)" })}</span>
+            )}
+          </div>
+          <Switch
+            checked={shouldMint}
+            onCheckedChange={setShouldMint}
+            disabled={mintRequired}
+            className="data-[state=checked]:bg-white scale-75"
+          />
+        </label>
+        {(shouldMint || mintRequired) && <MintHomeAllowance className="pl-6 -mt-0.5 pb-0.5" />}
+
+        {/* Title - forced on for video/audio, toggleable for others */}
+        {!hasVideoOrAudio && (
+          <label className="flex items-center justify-between py-0.5 cursor-pointer">
+            <div className="flex items-center gap-2 shrink-0">
+              <Type className="w-4 h-4 text-white" />
+              <span className="text-sm text-white">{_copy("copy.7e8cd2056da7", { defaultValue: "Title" })}</span>
+            </div>
+            <Switch checked={showTitle} onCheckedChange={setShowTitle} className="data-[state=checked]:bg-white scale-75" />
+          </label>
+        )}
+
+        {/* Category */}
+        <div className="space-y-1.5">
+          <label className="flex items-center justify-between py-0.5 cursor-pointer" onClick={() => handleCategoryToggle(selectedCategoriesArray.length === 0)}>
+            <div className="flex items-center gap-2 shrink-0">
+              <Hash className="w-4 h-4 text-white" />
+              <span className="text-sm text-white">{_copy("copy.292c06f0045a", { defaultValue: "Category" })}</span>
+            </div>
+            <Switch checked={selectedCategoriesArray.length > 0} onCheckedChange={handleCategoryToggle} className="data-[state=checked]:bg-white scale-75" onClick={e => e.stopPropagation()} />
+          </label>
+            {selectedCategoriesArray.length > 0 && (
+            <div className="flex flex-wrap items-center gap-1.5 pl-6">
+              {selectedCategoriesArray.length < MAX_CATEGORIES && (
+                <button type="button" onClick={() => { setCategoryDrawerOpen(true); }} className="text-xs text-white/50 hover:text-white">
+                  <Plus className="w-3.5 h-3.5" />
+                </button>
+              )}
+              {selectedCategoriesArray.map((cat) => (
+                <span key={cat} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] bg-white/10 text-white/80 border border-white/10">
+                  {cat}
+                  <button type="button" onClick={() => removeCategory(cat)} className="hover:text-red-400 transition-colors">
+                    <X className="w-2.5 h-2.5" />
+                  </button>
+                </span>
+              ))}
+              <button
+                type="button"
+                onClick={() => {
+                  localStorage.setItem('post_default_categories', selectedCategory);
+                  markCategorySaved?.();
+                  toast.success(_copy("copy.879083ad80be", { defaultValue: "Default categories saved" }));
+                }}
+                className="text-xs text-white/50 hover:text-white"
+              >
+                <Save className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Community */}
+        {hasCommunities && !quoteMode && (
+          <div className="space-y-1.5">
+            <label className="flex items-center justify-between py-0.5 cursor-pointer" onClick={() => { if (!selectedCommunitySlug) setCommunityDrawerOpen(true); }}>
+              <div className="flex items-center gap-2 shrink-0">
+                <Users className="w-4 h-4 text-white" />
+                <span className="text-sm text-white">{_copy("copy.bb501d7877eb", { defaultValue: "Community" })}</span>
+              </div>
+              <Switch
+                checked={!!selectedCommunitySlug}
+                onCheckedChange={(checked) => {
+                  if (checked) {
+                    setCommunityDrawerOpen(true);
+                  } else {
+                    // Remove community slug from categories
+                    const next = selectedCategoriesArray.filter(c => !communitySlugs.has(c)).join('|||');
+                    setSelectedCategory(next);
+                  }
+                }}
+                className="data-[state=checked]:bg-white scale-75"
+                onClick={e => e.stopPropagation()}
+              />
+            </label>
+            {selectedCommunitySlug && (
+              <div className="flex items-center gap-1.5 pl-6">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] bg-white/10 text-white/80 border border-white/10">
+                  <Users className="w-2.5 h-2.5" />
+                  {userCommunities.find(m => m.communities.slug === selectedCommunitySlug)?.communities.name || selectedCommunitySlug}
+                  <button type="button" onClick={() => {
+                    const next = selectedCategoriesArray.filter(c => !communitySlugs.has(c)).join('|||');
+                    setSelectedCategory(next);
+                  }} className="hover:text-red-400 transition-colors">
+                    <X className="w-2.5 h-2.5" />
+                  </button>
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    localStorage.setItem('post_default_categories', selectedCategory);
+                    markCategorySaved?.();
+                    toast.success(_copy("copy.71757eb61199", { defaultValue: "Default community saved" }));
+                  }}
+                  className="text-xs text-white/50 hover:text-white"
+                >
+                  <Save className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Made for kids — the creator's own declaration, sat under Category
+            because that is what it behaves like: in Kids Mode the category
+            chips are derived from the categories kids posts actually carry, so
+            this is what puts a post behind any of them.
+
+            Five rows above Mature, and that distance is the point. Mature is
+            last because it used to sit second and a mis-tap cost a creator the
+            public feed (see the comment on that row). This switch has the same
+            problem pointing the other way — a mis-tap here puts a post in
+            front of children — so it is nowhere near that one, and unlike that
+            one it confirms before it arms. Turning it back OFF is free. */}
+        <label
+          className="flex items-center justify-between py-0.5 cursor-pointer"
+          onClick={e => {
+            // The row, not just the switch — but never twice for one tap.
+            if ((e.target as HTMLElement).closest('[role="switch"]')) return;
+            e.preventDefault();
+            handleForKidsToggle(!isForKids);
+          }}
+        >
+          <div className="flex items-center gap-2 min-w-0">
+            <Baby className="w-4 h-4 text-white shrink-0" />
+            <span className="text-sm text-white">{t('drawers.madeForKids', 'Made for kids')}</span>
+            {isForKids && (
+              <span className="text-xs text-white/50 truncate">({t('drawers.madeForKidsHint', 'shown in Kids Mode')})</span>
+            )}
+          </div>
+          <Switch
+            checked={isForKids}
+            onCheckedChange={handleForKidsToggle}
+            className="data-[state=checked]:bg-white scale-75"
+          />
+        </label>
+
+        {/* Subscribers — EVM only.
+            This is NOT token gating: it sends the creator's plan ids on the
+            post, and the feed pipeline opens it for whoever holds an active
+            subscription to one of them. Token gating below asks a different
+            question (own N of a token), which any stranger can satisfy.
+
+            Disabled with no plans, on purpose. The switch used to write a DHB
+            lock with no amount when there was nothing real to write, and that
+            shipped posts gated against nothing. No plans, no gate. */}
+        {!solanaChain && !quoteMode && (
+        <label
+          className={cn(
+            'flex items-center justify-between py-0.5',
+            hasPlans ? 'cursor-pointer' : 'cursor-default',
+          )}
+        >
+          <div className="flex items-center gap-2">
+            <Star className="w-4 h-4 text-white" />
+            <span className={cn('text-sm', hasPlans ? 'text-white' : 'text-white/40')}>{_copy("copy.a344c89d660e", { defaultValue: "Subscribers" })}</span>
+            {/* Two different reasons the switch can be dead, and they need
+                different instructions: no plan at all, or a plan still sitting
+                as a draft. Showing "Create a plan first" to someone who has
+                already created two is how a post ended up gated behind plans
+                whose Subscribe button is permanently disabled. */}
+            {!plansLoading && !hasPlans && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  if (!hasAnyPlan && onCreatePlan) {
+                    onCreatePlan();
+                    return;
+                  }
+                  navigate('/app/profile?tab=subscribers');
+                }}
+                className="text-xs text-white/50 underline underline-offset-2 hover:text-white"
+              >
+                {hasAnyPlan ? _copy("copy.6d489e3c231f", { defaultValue: "Publish your plan first" }) : _copy("copy.9976aee18383", { defaultValue: "Create a plan first" })}
+              </button>
+            )}
+          </div>
+          <Switch
+            checked={isSubscribersOnly}
+            onCheckedChange={setIsSubscribersOnly}
+            disabled={!hasPlans}
+            className="data-[state=checked]:bg-white scale-75 disabled:opacity-40"
+          />
+        </label>
+        )}
+
+        {/* PPV */}
+        {!quoteMode && (
+        <label className="flex items-center justify-between py-0.5 cursor-pointer" onClick={() => handlePpvToggle(!isPPV)}>
+          <div className="flex items-center gap-2">
+            <Ticket className="w-4 h-4 text-white" />
+            <span className="text-sm text-white">{_copy("copy.bd9e3879bc60", { defaultValue: "PPV" })}</span>
+            {isPPV && ppvAmount && (
+              <span className="text-xs text-white/50">({ppvAmount} {ppvTokenLabel(ppvCurrency)})</span>
+            )}
+          </div>
+          <Switch checked={isPPV} onCheckedChange={handlePpvToggle} className="data-[state=checked]:bg-white scale-75" onClick={e => e.stopPropagation()} />
+        </label>
+        )}
+
+        {/* Bounty — EVM only */}
+        {!solanaChain && !quoteMode && (
+        <label className="flex items-center justify-between py-0.5 cursor-pointer" onClick={() => handleBountyToggle(!isWatch2Earn)}>
+          <div className="flex items-center gap-2">
+            <Gift className="w-4 h-4 text-white" />
+            <span className="text-sm text-white">{_copy("copy.0abbc4ecb2b0", { defaultValue: "Bounty" })}</span>
+            {isWatch2Earn && w2eTotal && (
+              <span className="text-xs text-white/50">({w2eTotal} <DhbCoin />)</span>
+            )}
+          </div>
+          <Switch checked={isWatch2Earn} onCheckedChange={handleBountyToggle} className="data-[state=checked]:bg-white scale-75" onClick={e => e.stopPropagation()} />
+        </label>
+        )}
+
+        {/* Token Gated */}
+        {!quoteMode && (
+        <label className="flex items-center justify-between py-0.5 cursor-pointer" onClick={() => handleTokenToggle(!isTokenGated)}>
+          <div className="flex items-center gap-2">
+            <Shield className="w-4 h-4 text-white" />
+            <span className="text-sm text-white">{_copy("copy.b0c1d4150deb", { defaultValue: "Token Gated" })}</span>
+            {isTokenGated && tokenAmount && (
+              <span className="text-xs text-white/50">(<DhbAmount amount={tokenAmount} currency={tokenSymbol} />)</span>
+            )}
+          </div>
+          <Switch checked={isTokenGated} onCheckedChange={handleTokenToggle} className="data-[state=checked]:bg-white scale-75" onClick={e => e.stopPropagation()} />
+        </label>
+        )}
+
+        {/* Shop — the creator's own listings and affiliate links. Tapping the row
+            anywhere opens the editor, including when it is already on, so
+            "add another link" is one tap rather than off-then-on. */}
+        {setShopLinks && !quoteMode && (
+        <label className="flex items-center justify-between py-0.5 cursor-pointer" onClick={() => setShopDrawerOpen(true)}>
+          <div className="flex items-center gap-2 min-w-0">
+            <ShoppingBag className="w-4 h-4 text-white shrink-0" />
+            <span className="text-sm text-white">{_copy("copy.d00aae6b7fbf", { defaultValue: "Shop" })}</span>
+            {shopEnabled && (
+              <span className="text-xs text-white/50 truncate">
+                ({shopRows}{_copy("copy.a4282e4b2298", { defaultValue: " of " })}{shopAllowance.allowance})
+              </span>
+            )}
+          </div>
+          <Switch
+            checked={shopEnabled}
+            onCheckedChange={handleShopToggle}
+            className="data-[state=checked]:bg-white scale-75"
+            onClick={e => e.stopPropagation()}
+          />
+        </label>
+        )}
+
+        {/* Who may see / quote / stitch / reply. Each is one row with a
+            switch: off is the open default, on shows the narrower choices as
+            buttons underneath. */}
+        {setVisibility && (
+          <ChoiceRow
+            icon={<Eye className="w-4 h-4 text-white shrink-0" />}
+            label={t('postVisibility.label')}
+            value={visibility}
+            offValue="public"
+            offLabel={t('postVisibility.public')}
+            options={[
+              { value: 'followers', label: t('postVisibility.followers') },
+              { value: 'direct', label: t('postVisibility.direct') },
+              // Only the author can read it. Same words as the quote setting's "Only me".
+              { value: 'self', label: t('quotePolicy.nobody') },
+            ]}
+            onChange={(v) => setVisibility(v as PostVisibility)}
+            hint={visibility === 'direct' ? t('postVisibility.directHint') : undefined}
+          />
+        )}
+
+        {setQuotePolicy && visibility === 'public' && (
+          <ChoiceRow
+            icon={<Quote className="w-4 h-4 text-white shrink-0" />}
+            label={t('quotePolicy.label')}
+            value={quotePolicy}
+            offValue="public"
+            offLabel={t('quotePolicy.public')}
+            options={[
+              { value: 'followers', label: t('quotePolicy.followers') },
+              { value: 'nobody', label: t('quotePolicy.nobody') },
+            ]}
+            onChange={(v) => setQuotePolicy(v as QuotePolicy)}
+          />
+        )}
+
+        {setStitchPolicy && visibility === 'public' && (
+          <ChoiceRow
+            icon={<Scissors className="w-4 h-4 text-white shrink-0" />}
+            label={t('remixLinks.stitch.allow', 'Allow stitches')}
+            value={stitchPolicy ?? ''}
+            offValue=""
+            offLabel={t('remixLinks.policy.default', 'My default')}
+            options={[
+              { value: 'everyone', label: t('remixLinks.policy.everyone', 'Everyone') },
+              { value: 'followers', label: t('remixLinks.policy.followers', 'Followers') },
+              { value: 'nobody', label: t('remixLinks.policy.nobody', 'No one') },
+            ]}
+            onChange={(v) => setStitchPolicy((v || null) as RemixPolicy | null)}
+          />
+        )}
+
+        {setReplyPolicy && (
+          <ChoiceRow
+            icon={<MessageSquareReply className="w-4 h-4 text-white shrink-0" />}
+            label={t('replyPolicy.label')}
+            value={replyPolicy}
+            offValue="public"
+            offLabel={t('replyPolicy.public')}
+            options={[
+              { value: 'followers', label: t('replyPolicy.followers') },
+              { value: 'following', label: t('replyPolicy.following') },
+              { value: 'mentioned', label: t('replyPolicy.mentioned') },
+            ]}
+            onChange={(v) => setReplyPolicy(v as ReplyPolicy)}
+          />
+        )}
+
+        {/* Mature content — the creator's own declaration. Marking it keeps the
+            post off the public feeds; it still reaches followers, the profile
+            and anyone with the link.
+
+            Last row on purpose. It is the only switch here that costs a
+            creator reach on a post they believe is fine, and it used to sit
+            second, inside a 140px strip people scroll with a thumb — one
+            mis-tap and the post never reaches the public feed. */}
+        <label className="flex items-center justify-between py-0.5 cursor-pointer">
+          <div className="flex items-center gap-2 min-w-0">
+            <EyeOff className="w-4 h-4 text-white shrink-0" />
+            <span className="text-sm text-white">{_copy("copy.9b8b53102e77", { defaultValue: "Mature content" })}</span>
+            {isMature && (
+              <span className="text-xs text-white/50 truncate">{_copy("copy.214371ade41e", { defaultValue: "(not shown on the public feed)" })}</span>
+            )}
+          </div>
+          <Switch checked={isMature} onCheckedChange={setIsMature} className="data-[state=checked]:bg-white scale-75" />
+        </label>
+        </div>
+      </div>
+
+      {/* Made for kids — confirm before arming.
+          Short on purpose: the creator needs to know this is not a category,
+          it is who gets shown the post, and that children are the audience it
+          adds. The three lines are the three things they can get wrong. */}
+      <Drawer open={forKidsConfirmOpen} onOpenChange={setForKidsConfirmOpen}>
+        <DrawerContent column glass hideHandle className="max-h-[90vh] max-h-[90dvh]">
+          <DrawerHeader>
+            <DrawerTitle className="flex items-center gap-2">
+              <Baby className="w-4 h-4" />
+              {t('drawers.madeForKidsConfirmTitle', 'Publish this for kids?')}
+            </DrawerTitle>
+          </DrawerHeader>
+          <div className="px-4 pb-2 space-y-2 text-sm text-white/70">
+            <p>{t('drawers.madeForKidsConfirmAudience', 'Children using Kids Mode will be shown this post. Nothing else on Riftn reaches them.')}</p>
+            <p>{t('drawers.madeForKidsConfirmReach', 'It also comes off the ordinary feeds — people still find it on your profile, in search and through a link you share.')}</p>
+            <p>{t('drawers.madeForKidsConfirmComments', 'Only Kids Mode can comment on it. You can still reply to them yourself.')}</p>
+          </div>
+          <DrawerFooter className="flex-row gap-2">
+            <Button
+              variant="ghost"
+              className="flex-1"
+              onClick={() => setForKidsConfirmOpen(false)}
+            >
+              {t('drawers.cancel')}
+            </Button>
+            <Button
+              className="flex-1"
+              onClick={() => {
+                setIsForKids(true);
+                setForKidsConfirmOpen(false);
+              }}
+            >
+              {t('drawers.madeForKidsConfirmYes', "Yes, it's for kids")}
+            </Button>
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
+
+      {/* Category Drawer */}
+      <Drawer open={categoryDrawerOpen} onOpenChange={setCategoryDrawerOpen}>
+        <DrawerContent column glass hideHandle className="max-h-[90dvh]">
+          <div className="flex items-center justify-between px-4 pt-4 pb-2">
+            <div className="flex items-center gap-2 text-white font-medium">
+              <Hash className="w-5 h-5" />{_copy("copy.aed360004d43", { defaultValue: "Select Categories" })}</div>
+            <button type="button" onClick={() => setCategoryDrawerOpen(false)} className="text-sm text-white/60 hover:text-white transition-colors">{_copy("copy.11a6767d5674", { defaultValue: "Done" })}</button>
+          </div>
+          <div className="px-4 pb-4 space-y-3">
+            {/* Selected chips */}
+            {selectedCategoriesArray.length > 0 && (
+              <div className="flex flex-wrap gap-1.5">
+                {selectedCategoriesArray.map((cat) => (
+                  <span key={cat} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs bg-white/15 text-white border border-white/20">
+                    {cat}
+                    <button type="button" onClick={() => removeCategory(cat)} className="hover:text-red-400 transition-colors">
+                      <X className="w-3 h-3" />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
+            {/* Search input */}
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+              <input
+                type="text"
+                value={categorySearch}
+                onChange={(e) => setCategorySearch(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && categorySearch.trim().length >= 3 && selectedCategoriesArray.length < MAX_CATEGORIES) {
+                    e.preventDefault();
+                    const exact = filteredCategories.find(c => c.name.toLowerCase() === normalizeCategoryName(categorySearch).toLowerCase());
+                    if (exact) {
+                      toggleCategory(exact.name);
+                    } else {
+                      toggleCategory(categorySearch.trim());
+                    }
+                    setCategorySearch.complete(categorySearch, '');
+                  }
+                }}
+                placeholder={_copy("copy.8a800ebbdaca", { defaultValue: "Search categories..." })}
+                className={cn(inputClass, "pl-10")}
+                autoFocus
+              />
+              {categorySearch && (
+                <button
+                  type="button"
+                  onClick={() => setCategorySearch.complete(categorySearch, '')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+
+            {/* Category list */}
+            <div className="max-h-[40vh] overflow-y-auto space-y-1 scrollbar-hide">
+              {loadingCategories ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                </div>
+              ) : (
+                <>
+                {/* Custom category option when search doesn't exactly match */}
+                {categorySearch.trim().length >= 3 && !categories.some(c => c.name.toLowerCase() === normalizeCategoryName(categorySearch).toLowerCase()) && selectedCategoriesArray.length < MAX_CATEGORIES && (
+                  <button
+                    type="button"
+                    onClick={() => { toggleCategory(categorySearch.trim()); setCategorySearch.complete(categorySearch, ''); }}
+                    className="w-full flex items-center gap-2 px-4 py-3 rounded-xl text-sm transition-colors text-white bg-white/10 hover:bg-white/15 border border-dashed border-white/20 mb-1"
+                  >
+                    <Plus className="w-4 h-4 text-emerald-400 shrink-0" />
+                    <span>{_copy("copy.dc242335e75c", { defaultValue: "Create \"" })}<span className="font-medium">{normalizeCategoryName(categorySearch)}</span>"</span>
+                  </button>
+                )}
+                {filteredCategories.length === 0 && !categorySearch.trim() ? (
+                  <AppState icon="search" title={_copy("copy.8b22abcaae1f", { defaultValue: "No categories found" })} description={_copy("copy.2e6d79de50dc", { defaultValue: "Try a different search." })} kind="search-empty" size="compact" />
+                ) : (
+                filteredCategories.map((cat) => (
+                  <button
+                    key={cat.id}
+                    type="button"
+                    onClick={() => toggleCategory(cat.name)}
+                    disabled={!selectedCategoriesArray.includes(cat.name) && selectedCategoriesArray.length >= MAX_CATEGORIES}
+                    className={cn(
+                      "w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm transition-colors",
+                      selectedCategoriesArray.includes(cat.name)
+                        ? "bg-white/15 text-white border border-white/20"
+                        : selectedCategoriesArray.length >= MAX_CATEGORIES
+                          ? "text-zinc-600 border border-transparent cursor-not-allowed"
+                          : "text-zinc-300 hover:bg-white/5 border border-transparent"
+                    )}
+                  >
+                    <span>{cat.name}</span>
+                    {selectedCategoriesArray.includes(cat.name) && (
+                      <Check className="w-4 h-4 text-white" />
+                    )}
+                  </button>
+                ))
+                )}
+                </>
+              )}
+            </div>
+          </div>
+        </DrawerContent>
+      </Drawer>
+
+      {/* Community Drawer */}
+      <Drawer open={communityDrawerOpen} onOpenChange={setCommunityDrawerOpen}>
+        <DrawerContent column glass hideHandle className="max-h-[90dvh]">
+          <div className="flex items-center justify-between px-4 pt-4 pb-2">
+            <div className="flex items-center gap-2 text-white font-medium">
+              <Users className="w-5 h-5" />{_copy("copy.3b707a701159", { defaultValue: "Select Community" })}</div>
+            <button type="button" onClick={() => setCommunityDrawerOpen(false)} className="text-sm text-white/60 hover:text-white transition-colors">{_copy("copy.11a6767d5674", { defaultValue: "Done" })}</button>
+          </div>
+          <div className="px-4 pb-6 space-y-1 max-h-[50vh] overflow-y-auto">
+            {userCommunities.map(membership => {
+              const community = membership.communities;
+              if (!community) return null;
+              const isSelected = selectedCommunitySlug === community.slug;
+              return (
+                <button
+                  key={community.id}
+                  type="button"
+                  onClick={() => {
+                    // Remove any existing community slug, add this one as a plain category
+                    const withoutCommunity = selectedCategoriesArray.filter(c => !communitySlugs.has(c));
+                    // Also add the community slug as a regular category so it appears in both places
+                    const slug = community.slug;
+                    const withCategory = withoutCommunity.includes(slug) ? withoutCommunity : [...withoutCommunity, slug];
+                    const next = [...withCategory.filter(c => c !== slug), slug].join('|||');
+                    setSelectedCategory(next);
+                    setCommunityDrawerOpen(false);
+                  }}
+                  className={cn(
+                    "w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm transition-colors",
+                    isSelected
+                      ? "bg-white/15 text-white border border-white/20"
+                      : "text-zinc-300 hover:bg-white/5 border border-transparent"
+                  )}
+                >
+                  <div className="flex items-center gap-2">
+                    <div className="w-7 h-7 rounded-lg bg-white/[0.06] flex items-center justify-center overflow-hidden">
+                      {community.avatar_url ? (
+                        <img src={storageImage(community.avatar_url, deviceWidth(28))} alt="" className="w-full h-full object-cover" loading="lazy" decoding="async" />
+                      ) : (
+                        <Users className="w-3.5 h-3.5 text-zinc-500" />
+                      )}
+                    </div>
+                    <span>{community.name}</span>
+                  </div>
+                  {isSelected && <Check className="w-4 h-4 text-white" />}
+                </button>
+              );
+            })}
+          </div>
+        </DrawerContent>
+      </Drawer>
+
+      {/* PPV Drawer */}
+      {setShopLinks && (
+        <ShopSheetLazy
+          draftScope={draftScope}
+          open={shopDrawerOpen}
+          onOpenChange={setShopDrawerOpen}
+          value={{ links: shopLinks ?? [], listingIds: shopListingIds ?? [] }}
+          onSave={saveShopBoard}
+          allowance={shopAllowance.allowance}
+          tier={shopAllowance.tier}
+        />
+      )}
+
+      <Drawer open={ppvDrawerOpen} onOpenChange={setPpvDrawerOpen}>
+        <DrawerContent column glass className="max-h-[90dvh] flex flex-col overflow-hidden">
+          <DrawerHeader className="text-left shrink-0">
+            <DrawerTitle className="flex items-center gap-2 text-white">
+              <Ticket className="w-5 h-5" />
+              {t('drawers.setPpvPrice')}
+            </DrawerTitle>
+          </DrawerHeader>
+          <div className="px-4 pb-4 space-y-4 overflow-y-auto flex-1 min-h-0 overscroll-contain">
+            {/* Currency selector */}
+            <div className="space-y-2">
+              <label className="text-sm text-white/70">{t('drawers.currency')}</label>
+              <div className="flex gap-2">
+                {ppvCurrencyOptions.map((cur) => (
+                  <button
+                    key={cur}
+                    type="button"
+                    onClick={() => setTempPpvCurrency(cur)}
+                    className={cn(
+                      "flex-1 py-2.5 rounded-xl text-sm font-medium transition-colors border",
+                      tempPpvCurrency === cur
+                        ? "bg-white/15 text-white border-white/20"
+                        : "bg-transparent text-zinc-400 border-white/10 hover:bg-white/5"
+                    )}
+                  >
+                    {ppvTokenLabel(cur)}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm text-white/70">{t('drawers.price')} ({ppvTokenLabel(tempPpvCurrency)})</label>
+              <input
+                type="number"
+                value={tempPpvAmount}
+                onChange={(e) => setTempPpvAmount(e.target.value)}
+                placeholder="0.00"
+                className={cn(inputClass, "[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none")}
+              />
+            </div>
+            {canConfigurePpvPreview && (
+              <div className="space-y-2">
+                <label htmlFor={previewInputId} className="text-sm text-foreground">
+                  {t('ppvPreview.seconds', { defaultValue: 'Free preview (seconds)' })}
+                </label>
+                <Input
+                  id={previewInputId}
+                  inputMode="numeric"
+                  value={tempPpvPreview}
+                  onChange={event => setTempPpvPreview(event.target.value)}
+                  placeholder="0"
+                  aria-describedby={`${previewInputId}-hint`}
+                  aria-invalid={previewInvalid || undefined}
+                  className="min-h-12 rounded-xl bg-[var(--control-fill,transparent)] px-4 text-[color:var(--ink,inherit)] focus-visible:ring-2 focus-visible:ring-ring"
+                />
+                <p id={`${previewInputId}-hint`} className="text-sm text-muted-foreground">
+                  {t('ppvPreview.secondsHint', { defaultValue: 'Choose 1–30 seconds. Enter 0 to skip the preview.' })}
+                </p>
+              </div>
+            )}
+            <div className="flex items-center gap-2 p-3 rounded-lg bg-zinc-800/30 border border-white/10">
+              <Info className="w-4 h-4 text-white/50 shrink-0" />
+              <span className="text-xs text-white/50">
+                {tempPpvCurrency === 'DHB' ? t('drawers.ppvDhbInfo') : t('drawers.ppvStableInfo', { symbol: tempPpvCurrency })}
+              </span>
+            </div>
+          </div>
+          <DrawerFooter className="flex-row gap-2 shrink-0 border-t border-white/10 p-4 pb-[max(1rem,env(safe-area-inset-bottom,0px))]">
+            <Button variant="glass" onClick={cancelPpv} className="flex-1 rounded-xl min-h-[48px] touch-manipulation">
+              {t('drawers.cancel')}
+            </Button>
+            <Button 
+              onClick={confirmPpv} 
+              disabled={!tempPpvAmount.trim() || previewInvalid}
+              variant="glass"
+              className="flex-1 rounded-xl min-h-[48px] touch-manipulation disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Check className="w-4 h-4 mr-2" />
+              {t('drawers.confirm')}
+            </Button>
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
+
+      {/* Bounty Drawer */}
+      <Drawer open={bountyDrawerOpen} onOpenChange={setBountyDrawerOpen}>
+        <DrawerContent column glass className="max-h-[90dvh] flex flex-col overflow-hidden">
+          <DrawerHeader className="text-left shrink-0">
+            <DrawerTitle className="flex items-center gap-2 text-white">
+              <Gift className="w-5 h-5" />
+              {t('drawers.setupBounty')}
+            </DrawerTitle>
+          </DrawerHeader>
+          <div className="px-4 pb-4 space-y-4 overflow-y-auto flex-1 min-h-0 overscroll-contain">
+            <div className="space-y-2">
+              <label className="flex items-center gap-2 text-sm text-white/70">
+                <Eye className="w-4 h-4" />
+                {t('drawers.viewersToReward')}
+              </label>
+              <input
+                type="number"
+                inputMode="numeric"
+                step="1"
+                min="0"
+                value={tempW2eViews}
+                onChange={(e) => setTempW2eViews(e.target.value.replace(/\.\d*$/, ''))}
+                placeholder={t('drawers.numberOfViewers')}
+                className={cn(inputClass, "[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none")}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="flex items-center gap-2 text-sm text-white/70">
+                <MessageCircle className="w-4 h-4" />
+                {t('drawers.commentersToReward')}
+              </label>
+              <input
+                type="number"
+                inputMode="numeric"
+                step="1"
+                min="0"
+                value={tempW2eComments}
+                onChange={(e) => setTempW2eComments(e.target.value.replace(/\.\d*$/, ''))}
+                placeholder={t('drawers.numberOfCommenters')}
+                className={cn(inputClass, "[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none")}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm text-white/70">{t('drawers.rewardPerPerson')}</label>
+              <input
+                type="text"
+                inputMode="decimal"
+                value={tempW2eTotal}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (val === '' || /^\d*\.?\d*$/.test(val)) setTempW2eTotal(val);
+                }}
+                placeholder={t('drawers.amountPerPerson')}
+                className={cn(inputClass, "[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none")}
+              />
+            </div>
+            {totalBounty > 0 && (
+              <div className="flex items-center gap-2 p-3 rounded-lg bg-zinc-800/30 border border-white/10">
+                <Info className="w-4 h-4 text-white/50 shrink-0" />
+                <span className="text-xs text-white/50">
+                  {t('drawers.totalLocked', { amount: totalBounty.toFixed(2) })}
+                </span>
+              </div>
+            )}
+          </div>
+          <DrawerFooter className="flex-row gap-2 shrink-0 border-t border-white/10 p-4 pb-[max(1rem,env(safe-area-inset-bottom,0px))]">
+            <Button variant="glass" onClick={cancelBounty} className="flex-1 rounded-xl min-h-[48px] touch-manipulation">
+              {t('drawers.cancel')}
+            </Button>
+            <Button 
+              onClick={confirmBounty} 
+              disabled={!tempW2eViews.trim() || !tempW2eTotal.trim()}
+              variant="glass"
+              className="flex-1 rounded-xl min-h-[48px] touch-manipulation disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Check className="w-4 h-4 mr-2" />
+              {t('drawers.confirm')}
+            </Button>
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
+
+      {/* Token Gated Drawer */}
+      <Drawer open={tokenDrawerOpen} onOpenChange={setTokenDrawerOpen}>
+        <DrawerContent column glass className="max-h-[90dvh] flex flex-col overflow-hidden">
+          <DrawerHeader className="text-left shrink-0">
+            <DrawerTitle className="flex items-center gap-2 text-white">
+              <Shield className="w-5 h-5" />
+              {t('drawers.tokenGateSettings')}
+            </DrawerTitle>
+          </DrawerHeader>
+          <div className="px-4 pb-4 space-y-4 overflow-y-auto flex-1 min-h-0 overscroll-contain">
+            <div className="flex items-center gap-2 p-3 rounded-lg bg-zinc-800/30 border border-white/10">
+              <Info className="w-4 h-4 text-white/50 shrink-0" />
+              <span className="text-xs text-white/50">{_copy("copy.c39e7a48904a", { defaultValue: "Viewers need the minimum balance of the selected token on " })}{chainLabel}.
+              </span>
+            </div>
+
+            {!useCustomToken && (
+              <div className="space-y-2">
+                <label className="text-sm text-white/70">{_copy("copy.d2089be67295", { defaultValue: "Token" })}</label>
+                <div className="flex flex-wrap gap-2">
+                  {lockTokens.map((tok) => (
+                    <button
+                      key={`${tok.symbol}-${tok.address}`}
+                      type="button"
+                      onClick={() => setTempTokenSymbol(tok.symbol)}
+                      className={cn(
+                        'px-3 py-2 rounded-xl text-sm font-medium border transition-colors',
+                        tempTokenSymbol === tok.symbol
+                          ? 'bg-white/15 text-white border-white/30'
+                          : 'bg-white/5 text-zinc-400 border-white/10 hover:bg-white/10',
+                      )}
+                    >
+                      {tok.symbol}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <label className="flex items-center justify-between gap-3 cursor-pointer">
+              <span className="text-sm text-white/70">{_copy("copy.f26de98645b0", { defaultValue: "Custom token contract" })}</span>
+              <Switch
+                checked={useCustomToken}
+                onCheckedChange={setUseCustomToken}
+                className="data-[state=checked]:bg-white scale-75"
+              />
+            </label>
+
+            {useCustomToken && (
+              <div className="space-y-2">
+                <label className="text-sm text-white/70">{_copy("copy.144a52b2b93a", { defaultValue: "Contract / mint address" })}</label>
+                <input
+                  type="text"
+                  value={tempTokenContract}
+                  onChange={(e) => setTempTokenContract(e.target.value)}
+                  placeholder={solanaChain ? _copy("copy.0aeda7534815", { defaultValue: "Solana mint address" }) : '0x...'}
+                  className={cn(inputClass, 'text-sm font-mono')}
+                />
+                <input
+                  type="text"
+                  value={tempTokenSymbol}
+                  onChange={(e) => setTempTokenSymbol(e.target.value.toUpperCase())}
+                  placeholder={_copy("copy.b60c5092c120", { defaultValue: "Symbol (e.g. PEPE)" })}
+                  className={inputClass}
+                />
+              </div>
+            )}
+
+            <div className="space-y-2">
+              <label className="text-sm text-white/70">{t('drawers.minimumDhb', 'Minimum balance')}</label>
+              <input
+                type="number"
+                value={tempTokenAmount}
+                onChange={(e) => setTempTokenAmount(e.target.value)}
+                placeholder={t('drawers.minimumAmount')}
+                className={cn(inputClass, "[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none")}
+              />
+            </div>
+          </div>
+          <DrawerFooter className="flex-row gap-2 shrink-0 border-t border-white/10 p-4 pb-[max(1rem,env(safe-area-inset-bottom,0px))]">
+            <Button variant="glass" onClick={cancelToken} className="flex-1 rounded-xl min-h-[48px] touch-manipulation">
+              {t('drawers.cancel')}
+            </Button>
+            <Button 
+              onClick={confirmToken} 
+              disabled={!tempTokenAmount.trim()}
+              variant="glass"
+              className="flex-1 rounded-xl min-h-[48px] touch-manipulation disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Check className="w-4 h-4 mr-2" />
+              {t('drawers.confirm')}
+            </Button>
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
+    </>
+  );
+}
+
+/**
+ * One post option as a single row: icon, title, switch. Off keeps the open
+ * default (shown greyed after the title); on picks the first narrower choice
+ * and shows every narrower choice as a button under the row.
+ */
+function ChoiceRow({
+  icon,
+  label,
+  value,
+  offValue,
+  offLabel,
+  options,
+  onChange,
+  hint,
+}: {
+  icon: ReactNode;
+  label: string;
+  value: string;
+  offValue: string;
+  offLabel: string;
+  options: { value: string; label: string }[];
+  onChange: (value: string) => void;
+  hint?: string;
+}) {
+  const on = value !== offValue;
+  // Once the switch is on, the open default is listed beside the narrower
+  // choices. Without it a creator who flipped "Who can see this" on, reading
+  // the switch as "visible", got Followers only with no Everyone to go back
+  // to on screen, and posted it believing it was public.
+  const chips = [{ value: offValue, label: offLabel }, ...options];
+  return (
+    <div className="py-0.5">
+      <label className="flex items-center justify-between gap-3 cursor-pointer">
+        <div className="flex items-center gap-2 min-w-0">
+          {icon}
+          <span className="text-sm text-white">{label}</span>
+          {!on && <span className="text-xs text-white/50 truncate">({offLabel})</span>}
+        </div>
+        <Switch
+          checked={on}
+          onCheckedChange={(next) => onChange(next ? options[0].value : offValue)}
+          aria-label={label}
+          className="data-[state=checked]:bg-white scale-75"
+        />
+      </label>
+      {on && (
+        <div className="mt-1 mb-1 flex flex-wrap gap-1.5 pl-6" role="radiogroup" aria-label={label}>
+          {chips.map((o) => (
+            <button
+              key={o.value}
+              type="button"
+              role="radio"
+              aria-checked={value === o.value}
+              onClick={() => onChange(o.value)}
+              className={cn(
+                'rounded-lg px-2.5 py-1 text-xs transition-colors',
+                value === o.value
+                  ? 'bg-white text-black font-semibold'
+                  : 'bg-white/10 text-white hover:bg-white/15',
+              )}
+            >
+              {o.label}
+            </button>
+          ))}
+        </div>
+      )}
+      {on && hint && <p className="mb-1 pl-6 text-xs text-white/60">{hint}</p>}
+    </div>
+  );
+}

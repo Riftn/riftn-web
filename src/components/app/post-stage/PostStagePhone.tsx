@@ -1,0 +1,72 @@
+/**
+ * Post page "Stage" — the phone (<640px) layout of the dedicated post page.
+ *
+ *   media, full width, laid out the same as the home feed card
+ *   creator row (followers + Follow), caption clamped with "more", meta row
+ *   one five-tile bar: like · comments · repost & share · tip · save
+ *   comments straight under it ("Comments N" + sort), composer docked to the
+ *   bottom of the screen as liquid glass; the logo bar, feed pill and bottom
+ *   nav are hidden here for every media kind
+ *   a mini player pinned to the top once the media scrolls away
+ *
+ * The cards are the same ones the feed uses. They read `PostStageContext` and
+ * only change shape when it is provided, which happens here and nowhere else,
+ * so the feed and the tablet/desktop post page are untouched.
+ */
+import { useEffect, useRef, type ReactNode } from 'react';
+import { markBody } from '@/lib/body-mark';
+import { PostStageContext, type PostStageValue } from './post-stage-context';
+import { StageMiniPlayer, type StageMediaKind } from './StageMiniPlayer';
+
+interface PostStagePhoneProps {
+  value: PostStageValue;
+  /** The post card (media, creator, caption, meta, bar). */
+  children: ReactNode;
+  /** Comments, already in stage mode. */
+  comments?: ReactNode;
+  /** Related posts under the comments. */
+  related?: ReactNode;
+  kind: StageMediaKind;
+  title: string;
+  subtitle: string;
+  thumbnail?: string;
+  /** Text posts have no media to sit flush against, so they get a gutter. */
+  padded?: boolean;
+}
+
+/** Body mark that hides the app's phone chrome while the stage is up. */
+export const POST_STAGE_BODY_MARK = 'data-post-stage-mode';
+
+export function PostStagePhone({ value, children, comments, related, kind, title, subtitle, thumbnail, padded }: PostStagePhoneProps) {
+  const rootRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    markBody(POST_STAGE_BODY_MARK, true);
+    return () => markBody(POST_STAGE_BODY_MARK, false);
+  }, []);
+
+  return (
+    <>
+      <div ref={rootRef} data-post-page data-post-stage={kind} className="flex flex-col">
+        {/* Only the post itself is on the stage. The related posts below are
+            ordinary feed cards and must not pick up its layout. */}
+        <PostStageContext.Provider value={value}>
+          {/* Same gutter the home feed uses, so media sits at the feed's width. */}
+          <div data-stage-post className={padded ? 'px-3' : 'px-2 sm:px-3'}>
+            {children}
+          </div>
+        </PostStageContext.Provider>
+        {comments && (
+          <div data-stage-comments className="px-3">
+            {comments}
+          </div>
+        )}
+        {related}
+        {/* Room for the docked composer, so the last comment and the related
+            posts can scroll clear of it. */}
+        <div aria-hidden="true" className="h-[calc(5.5rem+env(safe-area-inset-bottom))] shrink-0" />
+      </div>
+      <StageMiniPlayer rootRef={rootRef} kind={kind} title={title} subtitle={subtitle} thumbnail={thumbnail} onBack={value.onBack} />
+    </>
+  );
+}

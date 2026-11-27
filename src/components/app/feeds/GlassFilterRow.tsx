@@ -1,0 +1,132 @@
+/**
+ * Glass Filter Row
+ * ================
+ * Wraps a row of filter buttons with a front-overlay GlassIndicator
+ * so the spring bounce animation is never clipped by scroll containers.
+ */
+
+import { useRef, useState, useCallback, useLayoutEffect, useEffect, useMemo } from 'react';
+import { cn } from '@/lib/utils';
+import { GlassIndicator } from './GlassIndicator';
+import { useScrollFadeMask } from './useScrollFadeMask';
+
+interface GlassFilterRowProps<T extends string> {
+  items: { key: T; label: React.ReactNode }[];
+  activeKey?: T;
+  activeKeys?: T[];
+  onSelect: (key: T) => void;
+  className?: string;
+  buttonClassName?: string;
+  borderRadius?: string;
+  leadingContent?: React.ReactNode;
+  trailingContent?: React.ReactNode;
+}
+
+export function GlassFilterRow<T extends string>({
+  items,
+  activeKey,
+  activeKeys,
+  onSelect,
+  className,
+  buttonClassName,
+  borderRadius = '0.9375rem',
+  leadingContent,
+  trailingContent,
+}: GlassFilterRowProps<T>) {
+  const layerRef = useRef<HTMLDivElement>(null);
+  const btnRefs = useRef<Partial<Record<T, HTMLElement | null>>>({});
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [rect, setRect] = useState({ x: 0, y: 0, width: 0, height: 0, ready: false });
+  // Overflowing edges dissolve the row instead of being covered by a painted
+  // gradient — see useScrollFadeMask.
+  const { style: fadeStyle } = useScrollFadeMask(scrollRef);
+
+  const activeSet = useMemo(() => new Set(activeKeys ?? (activeKey != null ? [activeKey] : [])), [activeKey, activeKeys]);
+  const indicatorKey = activeKeys?.[0] ?? activeKey;
+
+  const update = useCallback(() => {
+    const layer = layerRef.current;
+    const btn = indicatorKey != null ? btnRefs.current[indicatorKey] : null;
+    if (!layer || !btn) return;
+    const lr = layer.getBoundingClientRect();
+    const br = btn.getBoundingClientRect();
+    const next = {
+      x: br.left - lr.left,
+      y: br.top - lr.top,
+      width: br.width,
+      height: br.height,
+      ready: true,
+    };
+    setRect((previous) => (
+      previous.x === next.x && previous.y === next.y &&
+      previous.width === next.width && previous.height === next.height &&
+      previous.ready === next.ready
+    ) ? previous : next);
+  }, [indicatorKey]);
+
+  useLayoutEffect(() => { update(); }, [update]);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    let frame: number | null = null;
+    const schedule = () => {
+      if (frame !== null) return;
+      frame = requestAnimationFrame(() => {
+        frame = null;
+        update();
+      });
+    };
+    window.addEventListener('resize', schedule);
+    el?.addEventListener('scroll', schedule, { passive: true });
+    return () => {
+      window.removeEventListener('resize', schedule);
+      el?.removeEventListener('scroll', schedule);
+      if (frame !== null) cancelAnimationFrame(frame);
+    };
+  }, [update]);
+
+  return (
+    <div className={cn('relative overflow-visible', className)}>
+      {/* Overlay layer for indicator - sits above scroll row so shadow is never clipped.
+          Carries the same edge fade as the row so the pill of a half-scrolled
+          chip dissolves with its label instead of spilling out of the panel. */}
+      <div ref={layerRef} className="absolute inset-0 overflow-visible pointer-events-none z-30" style={fadeStyle}>
+        <GlassIndicator rect={rect} borderRadius={borderRadius} variant="nav" />
+      </div>
+      {/* Scrollable button row. data-no-swipe so dragging the chips sideways
+          scrolls the row instead of flicking the page to the next tab — the
+          filter panels already opt out this way, this row was missed.
+          Allow both native pan axes so a vertical swipe starting on a chip
+          still scrolls the page. */}
+      <div
+        ref={scrollRef}
+        data-no-swipe
+        className="relative z-40 flex gap-1.5 overflow-x-auto overflow-y-visible scrollbar-hide whitespace-nowrap px-2 py-1"
+        style={{ touchAction: 'manipulation', ...fadeStyle }}
+      >
+        {leadingContent}
+        {items.map((item) => {
+          const isActive = activeSet.has(item.key);
+          return (
+            <button
+              key={item.key}
+              data-glass-toggle-button
+              data-active={isActive ? 'true' : undefined}
+              aria-pressed={isActive}
+              ref={(el) => { btnRefs.current[item.key] = el; }}
+              onClick={() => onSelect(item.key)}
+              className={cn(
+                'relative flex-shrink-0 px-3 py-1.5 rounded-[15px] text-xs font-medium transition-colors',
+                isActive ? 'text-white' : 'bg-transparent text-zinc-400 hover:text-white',
+                buttonClassName,
+              )}
+            >
+              <span className="relative z-20">{item.label}</span>
+            </button>
+          );
+        })}
+        {trailingContent}
+      </div>
+    </div>
+  );
+}

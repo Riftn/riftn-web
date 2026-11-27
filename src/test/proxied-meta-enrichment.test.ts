@@ -1,0 +1,586 @@
+/**
+ * Crawler HTML for posts and profiles is proxied from the deployed `ssr-seo`
+ * Supabase function and patched on the way out (proxied-meta-normalisation
+ * .test.ts says why). This covers the newest patch: the fn describes a
+ * bodyless post as `Post by <author> on Riftn — join the decentralized
+ * creator network.` and a bio-less profile as `Connect with <name> on Riftn,
+ * the open source alternative to legacy media.`, so every such page by one
+ * author carried the same description — 128 of 400 posts in the 2026-09-02
+ * sitemap crawl, 33 of them one account's. The rewrite builds one from what
+ * the page actually is; these pin that it is unique, bounded, escaped for
+ * both the attribute and the JSON-LD context, and absent where the fn had
+ * real copy.
+ */
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { describe, expect, it } from 'vitest';
+
+const ROOT = resolve(__dirname, '../..');
+const WORKER = readFileSync(resolve(ROOT, 'CLOUDFLARE_WORKER_SEO.js'), 'utf8');
+const INDEX_HTML = readFileSync(resolve(ROOT, 'index.html'), 'utf8');
+
+/** A whole declaration, never a byte window (the bounty-urls.test.ts lesson). */
+function decl(signature: string): string {
+  const start = WORKER.indexOf(signature);
+  expect(start, signature).toBeGreaterThan(-1);
+  return WORKER.slice(start, WORKER.indexOf('\n}\n', start) + 2);
+}
+
+function constant(name: string): string {
+  const line = WORKER.match(new RegExp(`^const ${name} = .*$`, 'm'));
+  expect(line, name).not.toBeNull();
+  return line![0];
+}
+
+type Nft = {
+  postType?: string;
+  category?: string[];
+  displayName?: string;
+  username?: string;
+  description?: string;
+  minterDisplayName?: string;
+  mintername?: string;
+} | null;
+
+const { enrichPostMeta, enrichProfileMeta, DESCRIPTION_MAX, HOME_DESCRIPTION, PROFILE_DESCRIPTION_MIN } = new Function(`
+  ${constant('TITLE_MAX')}
+  ${constant('DESCRIPTION_MAX')}
+  ${constant('POST_DESCRIPTION_TEMPLATE')}
+  ${constant('PROFILE_DESCRIPTION_TEMPLATE')}
+  ${constant('PROFILE_DESCRIPTION_MIN')}
+  ${constant('UNTITLED_POST_TITLES')}
+  ${constant('FILENAME_TITLE')}
+  ${constant('PLACEHOLDER_TITLE')}
+  ${constant('HOME_DESCRIPTION')}
+  ${constant('FN_FALLBACK_TITLE')}
+  ${constant('POST_CAPTION_TITLE_MAX')}
+  ${constant('BRAND_SUFFIX')}
+  ${decl('function truncate(text, max) {')}
+  ${decl('function clipAtWord(text, max) {')}
+  ${decl('function clampTitle(text, max) {')}
+  ${decl('function decodeFnText(s) {')}
+  ${decl('function escFnAttr(s) {')}
+  ${decl('function escJsonText(s) {')}
+  ${decl('function postKind(nft, html) {')}
+  ${decl('function titleSaysNothing(title) {')}
+  ${decl('function postCaption(html, nft, templated) {')}
+  ${decl('function postAuthor(html, nft, templated) {')}
+  ${decl('function replacePostTitle(html, oldTitle, newTitle) {')}
+  ${decl('function enrichPostMeta(html, postId, nft) {')}
+  ${decl('function profileTitle(html, handle, displayName) {')}
+  ${decl('function enrichProfileMeta(html, username, displayName) {')}
+  return { enrichPostMeta, enrichProfileMeta, DESCRIPTION_MAX, HOME_DESCRIPTION, PROFILE_DESCRIPTION_MIN };
+`)() as {
+  enrichPostMeta: (html: string, postId: string, nft: Nft) => string;
+  enrichProfileMeta: (html: string, username: string, displayName?: string) => string;
+  DESCRIPTION_MAX: number;
+  HOME_DESCRIPTION: string;
+  PROFILE_DESCRIPTION_MIN: number;
+};
+
+/** Exactly the fn's attribute escaping: `"`, `<`, `>` and nothing else. */
+const attr = (s: string) => s.replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+const POST_TEMPLATE = (author: string) => `Post by ${author} on Riftn — join the decentralized creator network.`;
+const PROFILE_TEMPLATE = (name: string) => `Connect with ${name} on Riftn, the open source alternative to legacy media.`;
+
+/** The shape the deployed fn emits for a post, trimmed to the tags in play. */
+const postPage = (id: string, title: string, description: string, video = true, author = 'davyJones') => `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>${attr(title)}</title>
+  <meta name="description" content="${attr(description)}">
+  <link rel="canonical" href="https://riftn.com/app/post/${id}">
+  <meta property="og:type" content="${video ? 'video.other' : 'article'}">
+  <meta property="og:title" content="${attr(title)}">
+  <meta property="og:description" content="${attr(description)}">
+  <meta property="og:image" content="https://dehubcdn.ams3.cdn.digitaloceanspaces.com/images/${id}.jpg">
+  <meta property="og:image:alt" content="${attr(title)}">
+${video ? `  <meta property="og:video" content="https://dehubcdn.ams3.cdn.digitaloceanspaces.com/videos/${id}.mp4">\n` : ''}  <meta name="twitter:title" content="${attr(title)}">
+  <meta name="twitter:description" content="${attr(description)}">
+  <meta name="twitter:image:alt" content="${attr(title)}">
+  <script type="application/ld+json">${JSON.stringify({
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'Article',
+        headline: title,
+        description,
+        url: `https://riftn.com/app/post/${id}`,
+        author: { '@type': 'Person', name: author },
+      },
+      { '@type': 'VideoObject', name: title, description },
+    ],
+  })}</script>
+</head>
+<body>
+  <h1>${attr(title)}</h1>
+  <img src="https://dehubcdn.ams3.cdn.digitaloceanspaces.com/images/${id}.png" alt="${attr(title)}">
+</body>
+</html>`;
+
+const profilePage = (handle: string, description: string) => `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>@${handle} on Riftn — posts, videos &amp; profile</title>
+  <meta name="description" content="${attr(description)}">
+  <link rel="canonical" href="https://riftn.com/${handle}">
+  <meta property="og:description" content="${attr(description)}">
+  <meta name="twitter:description" content="${attr(description)}">
+</head>
+</html>`;
+
+const valueOf = (html: string, tag: string) =>
+  tag === 'title'
+    ? html.match(/<title>([\s\S]*?)<\/title>/)![1]
+    : html.match(new RegExp(`(?:property|name)="${tag}" content="([\\s\\S]*?)">`))![1];
+
+const jsonLd = (html: string) =>
+  JSON.parse(html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)![1]);
+
+const TITLE_TAGS = ['title', 'og:title', 'og:image:alt', 'twitter:title', 'twitter:image:alt'];
+const DESCRIPTION_TAGS = ['description', 'og:description', 'twitter:description'];
+
+const VIDEO: Nft = {
+  postType: 'video',
+  category: ['business', 'entrepreneurship', 'professional development', 'marketing', 'industry insight'],
+};
+
+describe('post description enrichment', () => {
+  it('leaves a post whose title already has its own em-dash clause exactly as it was', () => {
+    const html = postPage(
+      '2008',
+      'Last Chad Standing — built by fighters and gamers',
+      'Built by fighters and gamers. Coming 2025.',
+    );
+    expect(enrichPostMeta(html, '2008', VIDEO)).toBe(html);
+  });
+
+  it('replaces the per-author template with title, format, author and topics — every tag, both JSON-LD nodes', () => {
+    const out = enrichPostMeta(postPage('3052', 'Business', POST_TEMPLATE('LiberoArbitro')), '3052', VIDEO);
+    expect(out).not.toContain('join the decentralized creator network');
+    for (const tag of DESCRIPTION_TAGS) {
+      const v = valueOf(out, tag);
+      expect(v).toContain('Watch &quot;Business&quot;, a video by LiberoArbitro on Riftn');
+      expect(v).toContain('Topics: business, entrepreneurship');
+    }
+    const ld = jsonLd(out);
+    expect(ld['@graph'][0].description).toContain('Watch "Business", a video by LiberoArbitro on Riftn');
+    expect(ld['@graph'][1].description).toBe(ld['@graph'][0].description);
+    expect(ld['@graph'][0].description.length).toBeLessThanOrEqual(DESCRIPTION_MAX);
+    const branded = 'Business | a video by LiberoArbitro on Riftn';
+    for (const tag of TITLE_TAGS) expect(valueOf(out, tag)).toBe(attr(branded));
+    expect(ld['@graph'][0].headline).toBe(branded);
+  });
+
+  it('gives two bodyless posts by one author different descriptions', () => {
+    const a = enrichPostMeta(postPage('3052', 'Business', POST_TEMPLATE('LiberoArbitro')), '3052', VIDEO);
+    const b = enrichPostMeta(
+      postPage('3073', 'Markets today', POST_TEMPLATE('LiberoArbitro')),
+      '3073',
+      { postType: 'video', category: ['finance'] },
+    );
+    expect(valueOf(a, 'description')).not.toBe(valueOf(b, 'description'));
+  });
+
+  it('still rewrites when the post record could not be fetched, reading the format off og:video', () => {
+    const video = enrichPostMeta(postPage('3052', 'Business', POST_TEMPLATE('LiberoArbitro')), '3052', null);
+    expect(valueOf(video, 'description')).toContain('a video by LiberoArbitro');
+    expect(valueOf(video, 'description')).not.toContain('Topics:');
+    const text = enrichPostMeta(postPage('77', 'Hello', POST_TEMPLATE('X'), false), '77', null);
+    expect(valueOf(text, 'description')).toContain('Read &quot;Hello&quot;, a post by X on Riftn');
+  });
+
+  it('names the format from the record for audio and photo posts', () => {
+    const audio = enrichPostMeta(postPage('1', 'Set', POST_TEMPLATE('DJ'), false), '1', { postType: 'feed-audio' });
+    expect(valueOf(audio, 'description')).toContain('Listen to &quot;Set&quot;, an audio post by DJ');
+    const photo = enrichPostMeta(postPage('2', 'Pic', POST_TEMPLATE('P'), false), '2', { postType: 'feed-images' });
+    expect(valueOf(photo, 'description')).toContain('See &quot;Pic&quot;, a photo post by P');
+  });
+
+  it('retitles an "Untitled" upload so siblings from one account stop sharing a <title>', () => {
+    const out = enrichPostMeta(
+      postPage('3145', 'Untitled', POST_TEMPLATE('A&K1618')),
+      '3145',
+      { postType: 'video', category: ['cars'] },
+    );
+    for (const tag of TITLE_TAGS) expect(valueOf(out, tag)).toBe('Video #3145 by A&K1618 on Riftn');
+    const ld = jsonLd(out);
+    expect(ld['@graph'][0].headline).toBe('Video #3145 by A&K1618 on Riftn');
+    expect(ld['@graph'][1].name).toBe('Video #3145 by A&K1618 on Riftn');
+    expect(valueOf(out, 'description')).toBe(
+      'Watch video #3145 by A&K1618 on Riftn, the open source, user-owned social network. Topics: cars.',
+    );
+  });
+
+  it('caps the description and escapes it for each context', () => {
+    const title = `Price is $1 & "cheap" <now> ${'x'.repeat(40)}`;
+    const out = enrichPostMeta(postPage('9', title, POST_TEMPLATE('Q "the" <Seller>')), '9', {
+      postType: 'video',
+      category: Array.from({ length: 5 }, (_, i) => `topic number ${i} with a long name`),
+    });
+    const ld = jsonLd(out);
+    expect(ld['@graph'][0].description.length).toBeLessThanOrEqual(DESCRIPTION_MAX);
+    expect(ld['@graph'][0].description).toContain('Watch "Price is $1 & "cheap" <now>');
+    expect(ld['@graph'][0].description).toContain('by Q "the" <Seller> on Riftn');
+    const v = valueOf(out, 'description');
+    expect(v).toContain('&quot;cheap&quot; &lt;now&gt;');
+    expect(v).not.toMatch(/[<>]/);
+    // "$1" in the copy must never be read as a replacement pattern.
+    expect(v).toContain('$1');
+  });
+});
+
+describe('post titles that say nothing', () => {
+  const AUTHORED: Nft = { postType: 'video', displayName: 'davyJones' };
+
+  it.each([
+    ['a camera filename', 'VID-20220824-WA0031.mp4'],
+    ['a trimmed clip', 'trim.5576BE10-E8CE-4D03-AB21-BEDA77457ED6.MOV'],
+    ['an emoji reaction', '😂😜'],
+    ['a placeholder', 'test'],
+    ['a single letter', 'F'],
+  ])('replaces %s with the id, format and author', (_label, junk) => {
+    const out = enrichPostMeta(postPage('122', junk, 'thorrrr 🤔😂'), '122', AUTHORED);
+    const expected = 'Video #122 by davyJones on Riftn';
+    for (const tag of TITLE_TAGS) expect(valueOf(out, tag)).toBe(expected);
+    expect(out).toContain(`<h1>${expected}</h1>`);
+    expect(out).toContain(`alt="${expected}"`);
+    expect(jsonLd(out)['@graph'][0].headline).toBe(expected);
+  });
+
+  it('leaves no trace of the filename anywhere on the page', () => {
+    const junk = 'VID-20220824-WA0031.mp4';
+    const out = enrichPostMeta(postPage('122', junk, 'thorrrr 🤔😂'), '122', AUTHORED);
+    expect(out).not.toContain(junk);
+  });
+
+  it('keeps the real body text — only the title was useless', () => {
+    const out = enrichPostMeta(postPage('122', 'VID-20220824-WA0031.mp4', 'thorrrr 🤔😂'), '122', AUTHORED);
+    for (const tag of DESCRIPTION_TAGS) expect(valueOf(out, tag)).toBe(attr('thorrrr 🤔😂'));
+  });
+
+  it('reads the author off the JSON-LD when there is no record and no template', () => {
+    // The description is an emoji too, so there is no caption to fall back on.
+    const out = enrichPostMeta(postPage('122', '😂', '🔥🔥', true, 'Mart Vader'), '122', null);
+    expect(valueOf(out, 'title')).toBe('Video #122 by Mart Vader on Riftn');
+  });
+
+  it('leaves a title that only looks filename-ish but reads as a sentence', () => {
+    const title = 'How we shipped v2.0';
+    const out = enrichPostMeta(postPage('900', title, 'a real caption'), '900', AUTHORED);
+    expect(valueOf(out, 'title')).toBe(attr(`${title} | a video by davyJones on Riftn`));
+  });
+
+  // Live /app/post/3419 on 2026-09-29: the fn titled it with its own
+  // fallback while the post carries a 140-character caption.
+  const CAPTION =
+    'Exquisite watercolor of a Royal Haveli. A noble couple shares a quiet moment in a sun-drenched courtyard, reflecting on an ancient manuscrip';
+  const SULTAN: Nft = { postType: 'feed-images', minterDisplayName: 'Sultan', mintername: 'umerkhan', description: CAPTION };
+
+  it("titles the fn's `Post #N by X` stand-in with the caption's opening words", () => {
+    const out = enrichPostMeta(postPage('3419', 'Post #3419 by Sultan on Riftn', CAPTION, false, 'Sultan'), '3419', SULTAN);
+    const expected = 'Exquisite watercolor of a Royal Haveli. A noble couple…';
+    for (const tag of TITLE_TAGS) expect(valueOf(out, tag)).toBe(expected);
+    expect(out).toContain(`<h1>${expected}</h1>`);
+    expect(jsonLd(out)['@graph'][0].headline).toBe(expected);
+    expect(out).not.toContain('Post #3419');
+  });
+
+  it('uses the caption for a junk title too, with the author when it fits', () => {
+    const out = enrichPostMeta(postPage('7', 'IMG_2231.jpg', 'Sunset at the pier', false, 'Sultan'), '7', {
+      ...SULTAN,
+      description: 'Sunset at the pier',
+    });
+    expect(valueOf(out, 'title')).toBe('Sunset at the pier | a photo post by Sultan on Riftn');
+  });
+
+  it('reads the caption off the meta description when there is no record', () => {
+    const out = enrichPostMeta(postPage('3419', 'Post #3419 by Sultan on Riftn', CAPTION, false, 'Sultan'), '3419', null);
+    expect(valueOf(out, 'title')).toBe('Exquisite watercolor of a Royal Haveli. A noble couple…');
+  });
+
+  it("falls back to the format and id when the fn's stand-in has no caption behind it", () => {
+    const out = enrichPostMeta(
+      postPage('5373', 'Post #5373 by akcil on Riftn', POST_TEMPLATE('akcil'), false, 'akcil'),
+      '5373',
+      { postType: 'feed-audio', minterDisplayName: 'akcil', mintername: 'akcil', description: '' },
+    );
+    expect(valueOf(out, 'title')).toBe('Audio post #5373 by akcil on Riftn');
+    // …and the description no longer quotes the stand-in back at itself.
+    expect(valueOf(out, 'description')).not.toContain('Post #5373 by akcil');
+  });
+});
+
+describe('short post titles that collide', () => {
+  it('names the author and format so two people who both typed "stream" differ', () => {
+    const a = enrichPostMeta(postPage('10', 'stream', 'body a', true, 'davyJones'), '10', {
+      postType: 'video',
+      displayName: 'davyJones',
+    });
+    const b = enrichPostMeta(postPage('11', 'stream', 'body b', true, 'Mart Vader'), '11', {
+      postType: 'video',
+      displayName: 'Mart Vader',
+    });
+    expect(valueOf(a, 'title')).toBe(attr('stream | a video by davyJones on Riftn'));
+    expect(valueOf(b, 'title')).toBe(attr('stream | a video by Mart Vader on Riftn'));
+    expect(valueOf(a, 'title')).not.toBe(valueOf(b, 'title'));
+  });
+
+  it('falls back to the shorter suffix rather than overrunning the title limit', () => {
+    const title = 'Give someone stuck in the rain an Umbrella';
+    const out = enrichPostMeta(postPage('12', title, 'body', true, 'Bartholomew'), '12', {
+      postType: 'feed-images',
+      displayName: 'Bartholomew',
+    });
+    const value = valueOf(out, 'title');
+    expect(value).toBe(attr(`${title} | Bartholomew on Riftn`));
+    expect(value.length).toBeLessThanOrEqual(70);
+  });
+
+  it('leaves the JSON-LD author alone when the post is titled with their name', () => {
+    const out = enrichPostMeta(postPage('7', 'davyJones', 'body', true, 'davyJones'), '7', {
+      postType: 'video',
+      displayName: 'davyJones',
+    });
+    const ld = jsonLd(out);
+    expect(ld['@graph'][0].headline).toBe('davyJones | a video by davyJones on Riftn');
+    expect(ld['@graph'][1].name).toBe('davyJones | a video by davyJones on Riftn');
+    expect(ld['@graph'][0].author.name).toBe('davyJones');
+  });
+
+  it('never claims an author the page does not name', () => {
+    const anonymous = postPage('2376', 'Stream', 'body', false).replace(/,"author":\{[^}]*\}/, '');
+    const out = enrichPostMeta(anonymous, '2376', null);
+    expect(out).not.toContain('someone');
+    expect(valueOf(out, 'title')).toBe('Stream');
+  });
+
+  it('titles an untitled post by id alone when nobody is named', () => {
+    const anonymous = postPage('2376', '😂', '👍', false).replace(/,"author":\{[^}]*\}/, '');
+    const out = enrichPostMeta(anonymous, '2376', null);
+    expect(valueOf(out, 'title')).toBe('Post #2376 on Riftn');
+    expect(out).not.toContain('someone');
+  });
+
+  it('leaves a greeting alone as a title but still names the author', () => {
+    const out = enrichPostMeta(postPage('16', 'Hello', 'body', true, 'davyJones'), '16', {
+      postType: 'video',
+      displayName: 'davyJones',
+    });
+    expect(valueOf(out, 'title')).toBe(attr('Hello | a video by davyJones on Riftn'));
+  });
+
+  it('leaves a title long enough that no suffix fits', () => {
+    const title = 'Everything we learned building a user-owned social network in public';
+    const html = postPage('13', title, 'body', true, 'davyJones');
+    expect(enrichPostMeta(html, '13', { postType: 'video', displayName: 'davyJones' })).toBe(html);
+  });
+
+  it('disambiguates the fourteen posts that all said "Promote Riftn"', () => {
+    const out = enrichPostMeta(postPage('14', 'Promote Riftn', 'body', true, 'davyJones'), '14', {
+      postType: 'video',
+      displayName: 'davyJones',
+    });
+    expect(valueOf(out, 'title')).toBe(attr('Promote Riftn | a video by davyJones on Riftn'));
+  });
+
+  it('does not brand a title that already carries the brand', () => {
+    const html = postPage('15', 'Shipping day one on Riftn', 'body', true, 'davyJones');
+    expect(enrichPostMeta(html, '15', { postType: 'video', displayName: 'davyJones' })).toBe(html);
+  });
+});
+
+describe('profile description enrichment', () => {
+  it('adds the handle to the bio-less template so two accounts with one display name differ', () => {
+    const a = enrichProfileMeta(profilePage('shubham223', PROFILE_TEMPLATE('shubham')), 'shubham223');
+    const b = enrichProfileMeta(profilePage('shubham_new2', PROFILE_TEMPLATE('shubham')), 'shubham_new2');
+    for (const tag of DESCRIPTION_TAGS) {
+      expect(valueOf(a, tag)).toContain('Connect with shubham (@shubham223) on Riftn');
+    }
+    expect(valueOf(a, 'description')).not.toBe(valueOf(b, 'description'));
+    expect(a).not.toContain('open source alternative to legacy media');
+  });
+
+  it('does not repeat a display name that is just the handle', () => {
+    const out = enrichProfileMeta(profilePage('aaron', PROFILE_TEMPLATE('aaron')), 'aaron');
+    expect(valueOf(out, 'description')).toMatch(/^Connect with @aaron on Riftn/);
+  });
+
+  it('appends the handle to a bio too short to describe the page, and leaves a real bio alone', () => {
+    const short = enrichProfileMeta(profilePage('lcfc', 'DHB ❤'), 'lcfc');
+    expect(valueOf(short, 'description')).toBe('DHB ❤, @lcfc on Riftn, the open source, user-owned social network.');
+    const bio = 'Football, crypto and coffee. Building on Riftn since 2023, one clip at a time.';
+    expect(bio.length).toBeGreaterThanOrEqual(PROFILE_DESCRIPTION_MIN);
+    const long = profilePage('fan', bio);
+    expect(enrichProfileMeta(long, 'fan')).toBe(long);
+  });
+});
+
+describe('profile titles', () => {
+  const withPerson = (handle: string, name: string) =>
+    profilePage(handle, 'A bio long enough to be left exactly as it was written, thanks.')
+      .replace('</head>', `<script type="application/ld+json">${JSON.stringify({ '@context': 'https://schema.org', '@type': 'Person', name, url: `https://riftn.com/${handle}` })}</script>\n</head>`)
+      .replace('</html>', `<body><h1>@${handle} on Riftn — posts, videos &amp; profile</h1></body></html>`);
+
+  it('leads with the display name people search for, from the Person JSON-LD', () => {
+    // /c0chraniz3r is Jesse Cochran; nothing in the title said so.
+    const out = enrichProfileMeta(withPerson('c0chraniz3r', 'Jesse Cochran'), 'c0chraniz3r');
+    expect(valueOf(out, 'title')).toBe('Jesse Cochran (@c0chraniz3r) on Riftn');
+    expect(out).toContain('<h1>Jesse Cochran (@c0chraniz3r) on Riftn</h1>');
+  });
+
+  it('prefers the account record the caller passes', () => {
+    const out = enrichProfileMeta(withPerson('almondbloom', 'x'), 'almondbloom', 'Ahmad Rasheed');
+    expect(valueOf(out, 'title')).toBe('Ahmad Rasheed (@almondbloom) on Riftn');
+  });
+
+  it('keeps the handle title when the name is just the handle, or missing', () => {
+    expect(valueOf(enrichProfileMeta(withPerson('akcil', 'akcil'), 'akcil'), 'title'))
+      .toBe('@akcil on Riftn — posts, videos &amp; profile');
+    expect(valueOf(enrichProfileMeta(profilePage('lcfc', 'DHB ❤'), 'lcfc'), 'title'))
+      .toBe('@lcfc on Riftn — posts, videos &amp; profile');
+  });
+
+  it('keeps a very long name inside the title limit, cut at a word', () => {
+    const out = enrichProfileMeta(withPerson('dao', 'The Very Long Official Name Of A Decentralised Autonomous Organisation'), 'dao');
+    const title = valueOf(out, 'title');
+    expect(title.length).toBeLessThanOrEqual(70);
+    expect(title).toMatch(/\w…$/);
+  });
+
+  it('escapes a name the fn would have escaped', () => {
+    const out = enrichProfileMeta(withPerson('q', 'Q "the" <Seller>'), 'q');
+    expect(valueOf(out, 'title')).toBe('Q &quot;the&quot; &lt;Seller&gt; (@q) on Riftn');
+  });
+});
+
+describe('homepage description', () => {
+  it('is the sentence index.html carries, so the bot and browser variants agree', () => {
+    const browser = INDEX_HTML.match(/<meta name="description" content="([^"]*)">/)![1];
+    expect(HOME_DESCRIPTION).toBe(browser);
+  });
+});
+
+describe('wiring', () => {
+  it('runs after normalisation and before the card swap; the homepage rewrite sits by the title alignment', () => {
+    const normalise = WORKER.indexOf('html = normalizeProxiedMeta(html);');
+    const post = WORKER.indexOf('html = enrichPostMeta(html,');
+    const profile = WORKER.indexOf('html = enrichProfileMeta(html,');
+    const cardSwap = WORKER.indexOf('const cardKey = ');
+    expect(normalise).toBeGreaterThan(-1);
+    expect(post).toBeGreaterThan(normalise);
+    expect(profile).toBeGreaterThan(post);
+    expect(cardSwap).toBeGreaterThan(profile);
+    const titleAlign = WORKER.indexOf('html = html.replaceAll(HOME_TITLE_LEGACY, HOME_TITLE);');
+    const descAlign = WORKER.indexOf('escFnAttr(HOME_DESCRIPTION)');
+    expect(titleAlign).toBeGreaterThan(-1);
+    expect(descAlign).toBeGreaterThan(titleAlign);
+    expect(WORKER.indexOf('escJsonText(HOME_DESCRIPTION)')).toBeGreaterThan(descAlign);
+  });
+
+  /**
+   * The gate that shipped #1408 as a no-op. enrichPostMeta had its internal
+   * `if (!templated) return` removed so the title work could reach a post with
+   * body text — but the call site carried the same condition, so the function
+   * was still never called for one. Live, every filename title survived a
+   * green CI run and a clean deploy.
+   */
+  it('calls enrichPostMeta for every post, with the record — its comments are the page', () => {
+    const call = WORKER.slice(
+      WORKER.indexOf('const proxiedPostId = '),
+      WORKER.indexOf('} else if (proxiedHandle) {'),
+    );
+    expect(call).toContain('if (proxiedPostId) {');
+    expect(call).not.toMatch(/if \(proxiedPostId && POST_DESCRIPTION_TEMPLATE\.test\(html\)\)/);
+    expect(call).toContain('const record = await fetchPostRecord(proxiedPostId);');
+    expect(call).toContain('enrichPostMeta(html, proxiedPostId, record)');
+    expect(call).toContain('commentsHtml(record)');
+  });
+
+  it('does not reinstate the early return that made the title work unreachable', () => {
+    const fn = WORKER.slice(
+      WORKER.indexOf('function enrichPostMeta(html, postId, nft) {'),
+      WORKER.indexOf('function profileTitle(html, handle, displayName) {'),
+    );
+    // The description half still needs a template; the title half must not.
+    const earlyReturn = fn.indexOf('if (!templated) return out;');
+    const titleWork = fn.indexOf('const untitled = placeholder && !caption;');
+    expect(titleWork).toBeGreaterThan(-1);
+    expect(earlyReturn).toBeGreaterThan(titleWork);
+  });
+});
+
+/**
+ * The fn writes its template a third time, as the page's only paragraph, and
+ * the rewrites above are all attribute-scoped or JSON-scoped — so the meta went
+ * out specific while the prose a crawler actually reads stayed identical across
+ * every bodyless post and every bio-less profile. 6 of 20 posts sampled live on
+ * 2026-09-16 still carried it, matching the 32% the description census found,
+ * and those are the same pages sitting in "Crawled - currently not indexed".
+ *
+ * The markup below is the deployed fn's, fetched from it directly rather than
+ * guessed: a bare `<p>` straight after the `<h1>`.
+ */
+describe('the body paragraph, not just the head', () => {
+  const bodyPost = (title: string, description: string, author = 'LiberoArbitro') => `<!DOCTYPE html>
+<html lang="en"><head>
+  <title>${attr(title)}</title>
+  <meta name="description" content="${attr(description)}">
+  <meta property="og:description" content="${attr(description)}">
+</head><body>
+  <h1>${attr(title)}</h1>
+  <p>${attr(description)}</p>
+  <p><a class="dh-cta" href="https://riftn.com/app/post/1?app=1">View on Riftn</a></p>
+</body></html>`;
+
+  const bodyProfile = (handle: string, description: string) => `<!DOCTYPE html>
+<html lang="en"><head>
+  <title>@${handle} on Riftn</title>
+  <meta name="description" content="${attr(description)}">
+</head><body>
+  <h1>@${handle}</h1>
+  <p>${attr(description)}</p>
+</body></html>`;
+
+  const paragraph = (html: string) => html.match(/<p>([^<]*)<\/p>/)![1];
+
+  it('rewrites the post paragraph, leaving nothing of the template on the page', () => {
+    const html = bodyPost('Hop!!!!!!!;', POST_TEMPLATE('LiberoArbitro'));
+    const out = enrichPostMeta(html, '3372', { postType: 'video', category: ['fun'] });
+    expect(out).not.toContain('join the decentralized creator network');
+    expect(paragraph(out)).toBe(valueOf(out, 'og:description'));
+    expect(paragraph(out)).toContain('Hop!!!!!!!;');
+  });
+
+  it('gives two bodyless posts by one author different paragraphs', () => {
+    const one = enrichPostMeta(bodyPost('Sunrise over Kadikoy', POST_TEMPLATE('Araf')), '1', VIDEO);
+    const two = enrichPostMeta(bodyPost('Ferry to the islands', POST_TEMPLATE('Araf')), '2', VIDEO);
+    expect(paragraph(one)).not.toBe(paragraph(two));
+  });
+
+  it('leaves a real body alone — it is better copy than anything built here', () => {
+    const real = 'Bu yoldan dönenler oldu, mum gibi sönenler oldu.';
+    const out = enrichPostMeta(bodyPost('Yorgun Demokrat', real, 'Araf'), '4', VIDEO);
+    expect(paragraph(out)).toBe(attr(real));
+  });
+
+  it('rewrites the bio-less profile paragraph', () => {
+    const out = enrichProfileMeta(bodyProfile('0x000dc', PROFILE_TEMPLATE('0x000dc')), '0x000dc');
+    expect(out).not.toContain('open source alternative to legacy media');
+    expect(paragraph(out)).toContain('@0x000dc');
+  });
+
+  it('leaves a short bio in the body even though the meta pads it', () => {
+    // The meta gets the handle appended so the description is not five
+    // characters long; the page keeps the words the person wrote.
+    const out = enrichProfileMeta(bodyProfile('shubham223', 'DHB ❤'), 'shubham223');
+    expect(paragraph(out)).toBe(attr('DHB ❤'));
+    expect(valueOf(out, 'description')).toContain('@shubham223');
+  });
+
+  it('is a no-op on a page it has already rewritten', () => {
+    const once = enrichPostMeta(bodyPost('Hop!!!!!!!;', POST_TEMPLATE('LiberoArbitro')), '3372', VIDEO);
+    expect(enrichPostMeta(once, '3372', VIDEO)).toBe(once);
+  });
+});

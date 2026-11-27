@@ -1,0 +1,77 @@
+import { useTranslation as _useCopy } from 'react-i18next';
+import { useState } from 'react';
+import Plus from "@/components/ui/cut-icons/add";
+
+import { Button } from '@/components/ui/button';
+import { useAuth } from '@/contexts/AuthContext';
+import { useEvents } from '@/hooks/use-events';
+import type { CommunityEvent } from '@/hooks/use-events';
+import { EventCard } from '@/components/app/events/EventCard';
+import { CreateEventDrawer } from '@/components/app/events/CreateEventDrawer';
+import { EventDetailDrawer } from '@/components/app/events/EventDetailDrawer';
+import { AppState } from '@/components/app/AppState';
+
+interface CommunityEventsProps {
+  communityId: string;
+  /** May file an event here at all: the community create_events right. */
+  canCreate: boolean;
+}
+
+export function CommunityEvents({ communityId, canCreate }: CommunityEventsProps) {
+  const { t: _copy } = _useCopy();
+  const { isAuthenticated, openLoginModal } = useAuth();
+  const [createOpen, setCreateOpen] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState<CommunityEvent | null>(null);
+  const { data: events = [], isLoading } = useEvents(communityId);
+
+  const upcoming = events.filter(e => new Date(e.starts_at) >= new Date());
+  const past = events.filter(e => new Date(e.starts_at) < new Date());
+
+  const handleCreate = () => {
+    if (!isAuthenticated) { openLoginModal(); return; }
+    setCreateOpen(true);
+  };
+
+  return (
+    <div className="space-y-4">
+      {canCreate && (
+        <Button onClick={handleCreate} variant="outline" size="sm" className="rounded-xl border-white/10 text-white gap-1.5">
+          <Plus className="w-4 h-4" />{_copy("copy.7a9f7d429145", { defaultValue: "Create Event" })}</Button>
+      )}
+
+      {isLoading ? (
+        <div className="space-y-3">
+          {[1, 2].map(i => <div key={i} className="h-48 rounded-xl theme-skeleton animate-pulse" />)}
+        </div>
+      ) : events.length === 0 ? (
+        <AppState icon="events" title={_copy("copy.de54ef8dc9c2", { defaultValue: "No events yet" })} description={_copy("copy.008ad4d946bb", { defaultValue: "Community events will appear here." })} size="section" />
+      ) : (
+        <>
+          {upcoming.length > 0 && (
+            <div>
+              <h3 className="text-xs font-medium text-zinc-500 uppercase mb-2">{_copy("copy.5f1a2542e4e4", { defaultValue: "Upcoming" })}</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {upcoming.map(e => <EventCard key={e.id} event={e} onClick={() => setSelectedEvent(e)} />)}
+              </div>
+            </div>
+          )}
+          {past.length > 0 && (
+            <div>
+              <h3 className="text-xs font-medium text-zinc-500 uppercase mb-2 mt-4">{_copy("copy.ca1530e8d701", { defaultValue: "Past" })}</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {past.map(e => <EventCard key={e.id} event={e} onClick={() => setSelectedEvent(e)} />)}
+              </div>
+            </div>
+          )}
+        </>
+      )}
+
+      <CreateEventDrawer open={createOpen} onOpenChange={setCreateOpen} communityId={communityId} />
+      <EventDetailDrawer
+        event={selectedEvent}
+        open={!!selectedEvent}
+        onOpenChange={(open) => { if (!open) setSelectedEvent(null); }}
+      />
+    </div>
+  );
+}

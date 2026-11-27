@@ -1,0 +1,461 @@
+import { canonicalTierName } from '@/lib/staking-badges';
+/**
+ * SuperPowers — spending a badge on reach
+ * =======================================
+ * A badge buys quiet things: a cheaper DHB rate, a bigger posting allowance,
+ * more weight on a reaction. SuperPowers is the loud half. Every holder gets
+ * an allowance of boosts each fortnight, and a boost puts one of their posts
+ * in the slot at the top of the home feed.
+ *
+ * Thirteen tiers grant twelve powers. Every rung improves the allowance,
+ * window, or share of voice; most also unlock a new way to spend that reach.
+ *
+ * Two things worth knowing before touching this:
+ *
+ * **The slot rotates; it is not a pin.** A fortnight is 20,160 minutes and the
+ * ladder hands out more than that as soon as a few thousand badges exist. When
+ * several boosts are live the viewer is dealt one weighted by the booster's
+ * tier, so a Megalodon's turns up fourteen times as often as a Crab's. The
+ * promise is "thirty minutes at the top", which holds; what varies is share of
+ * voice. Never write copy that promises sole possession of the slot.
+ *
+ * **Nothing here derives the ladder.** `fetchSuperpowerTiers` serves it. The
+ * client draws a badge from a live wallet read that deliberately over-reports
+ * (`useSelfBadge` takes `max(server, live)` so a badge cannot vanish
+ * mid-stake), so a client-side table would promise an allowance the server
+ * will not grant — the same trap the DHB gateway discount has.
+ *
+ * `apiCall` resolves against the bare origin here, so every path below starts
+ * `/api/`. Mobile's `env.API_URL` already ends in `/api` and its copy of this
+ * file must not — copying a path across verbatim gives `/api/api/…`.
+ */
+
+import { apiCall } from './core';
+
+/** Keys are stable and stored on bookings; renaming one is a migration. */
+export type SuperPowerKey =
+  | 'boost'
+  | 'second_wind'
+  | 'comment_anchor'
+  | 'trend_jacker'
+  | 'timeline_bomber'
+  | 'signal_flare'
+  | 'flak_jacket'
+  | 'precision_strike'
+  | 'harpoon'
+  | 'team_up'
+  | 'front_row'
+  | 'deep_current';
+
+export interface SuperPowerInfo {
+  key: SuperPowerKey;
+  label: string;
+  summary: string;
+  /** Badge tier this unlocks at, matching the art in `@/lib/staking-badges`. */
+  tier: string | null;
+  /** False while a power is published but not yet built. */
+  available: boolean;
+  /** Whether this account's tier reaches it. Absent on the public ladder. */
+  unlocked?: boolean;
+}
+
+export interface SuperPowerBooking {
+  id: string;
+  /** Null for powers that act on a comment, stage, or category. */
+  tokenId: number | null;
+  power: SuperPowerKey;
+  startsAt: string;
+  endsAt: string;
+  minutes: number;
+  /** Tier at booking time, frozen — not necessarily the tier worn now. */
+  tier: string;
+  status: 'active' | 'completed' | 'cancelled';
+  /** The stage a Front Row is lifting. Null for every other power. */
+  stageId?: string | null;
+  /** The category a Trend Jacker is lifting. Null for every other power. */
+  category?: string | null;
+  /** Legacy pooled-boost contributors retained for older booking records. */
+  contributors?: { address: string; tier: string; minutes: number }[];
+  /**
+   * Whose post it landed on.
+   *
+   * The holder's own address for every power but Deep Current, which is a
+   * gift. Optional for the same deploy-skew reason as the flare counters.
+   */
+  beneficiary?: string;
+  /** Times this boost has been dealt to a viewer. */
+  served: number;
+  live: boolean;
+  /** Delivery receipt for Signal Flare. Null or absent for every other power. */
+  signalDeliveryStatus?: 'pending' | 'processing' | 'sent' | 'failed' | null;
+  /** Followers who received the in-app Signal Flare notification. */
+  signalRecipients?: number | null;
+}
+
+export interface SuperPowerStatus {
+  cycle: number;
+  cycleStartedAt: string;
+  /** When the next allowance lands. The same moment for everybody. */
+  cycleEndsAt: string;
+  cycleDays: number;
+  tier: string | null;
+  /** The personal entitlement or Team Up balance that earned this allowance. */
+  badgeBalance: number;
+  boostsPerCycle: number;
+  boostsUsed: number;
+  boostsLeft: number;
+  /**
+   * The Signal Flare pot — a SECOND allowance the same size as the boost one,
+   * spent independently.
+   *
+   * Optional because a client can be newer than the API it is talking to, and
+   * the fallback has to be the boost count rather than zero: showing an
+   * Octopus "no flares left" on a deploy skew takes the power away.
+   */
+  signalsPerCycle?: number;
+  signalsUsed?: number;
+  signalsLeft?: number;
+  minutesPerBoost: number;
+  /** Share of the slot when several boosts run at once. */
+  slotWeight: number;
+  powers: SuperPowerInfo[];
+  bookings: SuperPowerBooking[];
+}
+
+export interface SuperPowerTierRow {
+  name: string | null;
+  minBadgeBalance: number;
+  boostsPerCycle: number;
+  minutesPerBoost: number;
+  slotWeight: number;
+}
+
+export interface SuperPowerLadder {
+  cycleDays: number;
+  cycleEndsAt: string;
+  tiers: SuperPowerTierRow[];
+  powers: SuperPowerInfo[];
+}
+
+export interface TeamUpMember {
+  address: string;
+  username: string | null;
+  displayName: string | null;
+  avatarImageUrl: string | null;
+  ownBadgeBalance: number;
+  joinedAt: string;
+}
+
+export interface TeamUpJoinRequest {
+  address: string;
+  username: string | null;
+  displayName: string | null;
+  avatarImageUrl: string | null;
+  message: string;
+  requestedAt: string;
+}
+
+export interface TeamUpTeam {
+  id: string;
+  name: string;
+  /** Who the team is for, in the owner's words. Empty when they wrote nothing. */
+  description: string;
+  /** A private team turns a join into a request the owner approves. */
+  isPrivate: boolean;
+  ownerAddress: string;
+  memberCount: number;
+  maxMembers: number;
+  pooledBadgeBalance: number;
+  tier: string | null;
+  members: TeamUpMember[];
+  /** How many people are waiting on the owner. */
+  pendingCount: number;
+  /** Who is waiting — only present for the owner. */
+  joinRequests?: TeamUpJoinRequest[];
+  /** For a viewer outside the team: whether they have already asked to join. */
+  myRequestPending?: boolean;
+}
+
+export interface TeamUpSettings {
+  description?: string;
+  isPrivate?: boolean;
+}
+
+export interface TeamUpCreateInput extends TeamUpSettings {
+  name: string;
+}
+
+/** What a private team answers a join with: nothing about membership has changed yet. */
+export interface TeamUpJoinRequested {
+  requested: true;
+  team: TeamUpTeam;
+}
+
+export async function fetchMyTeamUp(): Promise<TeamUpTeam | null> {
+  const response = await apiCall<{ result: TeamUpTeam | null }>('/api/superpowers/team-up', {
+    requiresAuth: true,
+  });
+  return response.result ?? null;
+}
+
+export async function fetchTeamUpTeams(query = ''): Promise<TeamUpTeam[]> {
+  const suffix = query.trim() ? `?q=${encodeURIComponent(query.trim())}` : '';
+  const response = await apiCall<{ result: TeamUpTeam[] }>(`/api/superpowers/team-up/teams${suffix}`);
+  return response.result ?? [];
+}
+
+export async function createTeamUp(input: TeamUpCreateInput): Promise<TeamUpTeam> {
+  const response = await apiCall<{ result: TeamUpTeam }>('/api/superpowers/team-up', {
+    method: 'POST',
+    body: { ...input },
+    requiresAuth: true,
+  });
+  return response.result;
+}
+
+/** Owner only. Opening a private team up clears its queue: anyone can then join at once. */
+export async function updateTeamUp(settings: TeamUpSettings): Promise<TeamUpTeam> {
+  const response = await apiCall<{ result: TeamUpTeam }>('/api/superpowers/team-up', {
+    method: 'PATCH',
+    body: { ...settings },
+    requiresAuth: true,
+  });
+  return response.result;
+}
+
+/** A public team takes you in at once; a private one answers `{ requested: true }`. */
+export async function joinTeamUp(teamId: string, message?: string): Promise<TeamUpTeam | TeamUpJoinRequested> {
+  const response = await apiCall<{ result: TeamUpTeam | TeamUpJoinRequested }>(
+    `/api/superpowers/team-up/${encodeURIComponent(teamId)}/join`,
+    { method: 'POST', body: message?.trim() ? { message: message.trim() } : {}, requiresAuth: true },
+  );
+  return response.result;
+}
+
+export async function cancelTeamUpRequest(teamId: string): Promise<void> {
+  await apiCall(`/api/superpowers/team-up/${encodeURIComponent(teamId)}/join`, {
+    method: 'DELETE',
+    requiresAuth: true,
+  });
+}
+
+export async function approveTeamUpRequest(teamId: string, address: string): Promise<TeamUpTeam> {
+  const response = await apiCall<{ result: TeamUpTeam }>(
+    `/api/superpowers/team-up/${encodeURIComponent(teamId)}/requests/${encodeURIComponent(address)}/approve`,
+    { method: 'POST', requiresAuth: true },
+  );
+  return response.result;
+}
+
+export async function denyTeamUpRequest(teamId: string, address: string): Promise<TeamUpTeam> {
+  const response = await apiCall<{ result: TeamUpTeam }>(
+    `/api/superpowers/team-up/${encodeURIComponent(teamId)}/requests/${encodeURIComponent(address)}/deny`,
+    { method: 'POST', requiresAuth: true },
+  );
+  return response.result;
+}
+
+export async function leaveTeamUp(): Promise<void> {
+  await apiCall('/api/superpowers/team-up', { method: 'DELETE', requiresAuth: true });
+}
+
+export async function removeTeamUpMember(teamId: string, address: string): Promise<TeamUpTeam> {
+  const response = await apiCall<{ result: TeamUpTeam }>(
+    `/api/superpowers/team-up/${encodeURIComponent(teamId)}/members/${encodeURIComponent(address)}`,
+    { method: 'DELETE', requiresAuth: true },
+  );
+  return response.result;
+}
+
+/** The category holding the trending slot, or null when nothing is running. */
+export interface TrendingTopic {
+  category: string;
+  bookingId: string;
+  tier: string;
+  endsAt: string;
+}
+
+/**
+ * Which category was paid onto the trending list right now.
+ *
+ * Public. Its own read rather than part of `/superpowers/slot` — that one
+ * deals a POST and this a category name, and the list it lands on is not in
+ * the Riftn API at all: it is computed in the browser from Supabase.
+ */
+export async function fetchTrendingTopic(): Promise<TrendingTopic | null> {
+  const response = await apiCall<{ result: TrendingTopic | null }>(
+    '/api/superpowers/trending-topic',
+  );
+  return response?.result ?? null;
+}
+
+/** The stage holding the front row, or null when nothing is running. */
+export interface FrontRow {
+  stageId: string;
+  bookingId: string;
+  tier: string;
+  endsAt: string;
+}
+
+/**
+ * Which stage tops the stages rail right now.
+ *
+ * Public and unauthenticated — a stage is public by construction, so there is
+ * nothing here to gate on a viewer. Its own read rather than part of
+ * `/superpowers/slot`, because that one deals a POST and this deals a stage id
+ * from a different database.
+ */
+export async function fetchFrontRow(): Promise<FrontRow | null> {
+  const response = await apiCall<{ result: FrontRow | null }>('/api/superpowers/front-row');
+  return response?.result ?? null;
+}
+
+export interface BoostSlot {
+  tokenId: number;
+  bookingId: string;
+  power: SuperPowerKey;
+  tier: string;
+  endsAt: string;
+  booster: string;
+}
+
+/** This account's tier, allowance and bookings. */
+export async function fetchSuperpowerStatus(): Promise<SuperPowerStatus> {
+  const response = await apiCall<{ result: SuperPowerStatus }>('/api/superpowers', {
+    requiresAuth: true,
+  });
+  return { ...currentTier(response.result), powers: response.result.powers.map(currentTier), bookings: response.result.bookings.map(currentTier) };
+}
+
+/** The published ladder. Public — no badge needed to read what one buys. */
+export async function fetchSuperpowerTiers(): Promise<SuperPowerLadder> {
+  const response = await apiCall<{ result: SuperPowerLadder }>('/api/superpowers/tiers');
+  return { ...response.result, tiers: response.result.tiers.map(row => ({ ...row, name: canonicalTierName(row.name) })), powers: response.result.powers.map(currentTier) };
+}
+
+/**
+ * The boosted post to show this viewer, or null when nothing is running.
+ *
+ * Each call is an independent weighted draw, so the cache window on the caller
+ * *is* the rotation: cache for five minutes and a viewer sees one boost per
+ * refresh. Do not cache it for the session.
+ *
+ * Deliberately unauthenticated at this layer — `apiCall` still sends a token
+ * when one is present, which the server uses only to avoid showing someone
+ * their own boost. A signed-out viewer gets the slot too.
+ */
+export async function fetchBoostSlot(): Promise<BoostSlot | null> {
+  const response = await apiCall<{ result: BoostSlot | null }>('/api/superpowers/slot');
+  return response.result ?? null;
+}
+
+export interface QueuedBoost extends BoostSlot {
+  startsAt: string;
+}
+
+/**
+ * Every live boost this viewer can see, oldest first. The home feed shows the
+ * first at the top and each next one three posts further down; when the oldest
+ * ends the rest move up. Includes the viewer's own boosts.
+ */
+export async function fetchBoostQueue(): Promise<QueuedBoost[]> {
+  const response = await apiCall<{ result: QueuedBoost[] }>('/api/superpowers/slots');
+  return response.result ?? [];
+}
+
+/**
+ * Spend a boost on one of your posts.
+ *
+ * `power` must suit the post's age — Boost under a week, Second Wind over it.
+ * The server refuses the wrong one rather than silently correcting it, because
+ * the two cost the same boost and mean different things.
+ */
+export async function bookBoost(
+  tokenId: number,
+  power: SuperPowerKey = 'boost',
+  startAt?: string,
+  aim?: {
+    /** `precision_strike` — the account whose followers to reach. */
+    targetAccount?: string;
+    /** `harpoon` — badge tier NAMES, never balances. The ladder is dollar-pegged. */
+    targetTiers?: string[];
+    /** `comment_anchor` — YOUR comment, in somebody else's thread. */
+    commentId?: string;
+    /** `front_row` — a Stage you host, live or scheduled. */
+    stageId?: string;
+    /** `trend_jacker` — a category you already post in. */
+    category?: string;
+  },
+): Promise<SuperPowerBooking> {
+  const body: Record<string, unknown> = { tokenId, power };
+  if (startAt) body.startAt = startAt;
+  if (aim?.targetAccount) body.targetAccount = aim.targetAccount;
+  if (aim?.targetTiers?.length) body.targetTiers = aim.targetTiers;
+  if (aim?.commentId) body.commentId = aim.commentId;
+  if (aim?.stageId) body.stageId = aim.stageId;
+  if (aim?.category) body.category = aim.category;
+
+  const response = await apiCall<{ result: SuperPowerBooking }>('/api/superpowers/boost', {
+    method: 'POST',
+    body,
+    requiresAuth: true,
+  });
+  return response.result;
+}
+
+/**
+ * Wait briefly for the asynchronous Signal Flare fan-out receipt.
+ *
+ * Booking a flare must not wait on thousands of notification writes, so the
+ * API returns the booking first and records the final recipient count shortly
+ * afterwards. Polling the existing status read keeps that work asynchronous
+ * without replacing the honest result with the boost-only `minutes` field.
+ */
+export async function waitForSignalFlareReceipt(
+  bookingId: string,
+  attempts = 20,
+  intervalMs = 500,
+): Promise<number | null> {
+  for (let attempt = 0; attempt < attempts; attempt += 1) {
+    try {
+      const status = await fetchSuperpowerStatus();
+      const booking = status.bookings.find(row => row.id === bookingId);
+      if (booking?.signalDeliveryStatus === 'sent') return booking.signalRecipients ?? 0;
+      if (booking?.signalDeliveryStatus === 'failed') return null;
+    } catch {
+      // The flare is already booked. A transient receipt read must not turn
+      // that success into an error toast; keep trying, then fall back cleanly.
+    }
+    if (attempt < attempts - 1) {
+      await new Promise(resolve => setTimeout(resolve, intervalMs));
+    }
+  }
+  return null;
+}
+
+/**
+ * Cancel a boost.
+ *
+ * `refunded` is false once the window has opened — a boost that has been in
+ * the slot has been seen, and giving it back would make a fifteen-minute
+ * allowance an unlimited one in five-second pieces. Say which happened rather
+ * than reporting a flat success.
+ */
+export async function cancelBoost(bookingId: string): Promise<{ refunded: boolean }> {
+  const response = await apiCall<{ result: { refunded: boolean } }>(
+    `/api/superpowers/boost/${encodeURIComponent(bookingId)}`,
+    { method: 'DELETE', requiresAuth: true },
+  );
+  return response.result;
+}
+
+// Refusals carry the server's own sentence — "That post is over a week old —
+// use Second Wind to bring it back", "You have used all 2 of your boosts this
+// cycle". `apiCall` throws with that string as the message, so show it. Mapping
+// it back to a code to look up a second wording only gives the two places to
+// disagree.
+
+/** A cached API ladder can predate the badge rename. */
+function currentTier<T extends { tier: string | null }>(row: T): T {
+  return { ...row, tier: canonicalTierName(row.tier) ?? null };
+}

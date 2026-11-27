@@ -1,0 +1,348 @@
+/**
+ * Browser Notifications Hook
+ * ==========================
+ * Manages browser notification permissions and delivery via localStorage persistence.
+ * Permission is only requested on explicit user action (safe pattern).
+ *
+ * There are two pieces of state here and they are not the same thing:
+ *
+ *  - the **browser's permission** for this origin ('default' | 'granted' |
+ *    'denied'). Only the browser can change it, a page can ask once, and a
+ *    recorded 'denied' makes `requestPermission()` resolve instantly with no
+ *    UI at all — nothing in the app can undo it.
+ *  - our **stored flag**, the on/off the reader controls from Settings.
+ *
+ * Delivery needs both, so anything that shows this state to a reader has to
+ * read the permission too — otherwise it happily reports "on" for a browser
+ * that is silently dropping every notification.
+ */
+
+import { useState, useCallback, useEffect, useRef, useSyncExternalStore } from 'react';
+import { isQuietNow } from '@/lib/quiet-hours';
+import {
+  getWebPushFailureReason,
+  getWebPushState,
+  probeNotificationDisplay,
+  subscribeToWebPush,
+  subscribeWebPushState,
+  unsubscribeFromWebPush,
+  type WebPushState,
+} from '@/lib/web-push';
+
+/** The hook mounts on several surfaces; the reconcile below is once per load. */
+let reconciledThisLoad = false;
+
+const STORAGE_KEY = 'dehub_browser_notifications';
+const LAST_SEEN_KEY = 'dehub_notifications_last_seen';
+
+/** Same-tab change signal — `storage` only fires in the *other* tabs. */
+const ENABLED_EVENT = 'dehub:browser-notifications-changed';
+
+/** Raised after the native prompt answers, since not every browser has the
+ *  Permissions API to report it. */
+const PERMISSION_EVENT = 'dehub:notification-permission-changed';
+
+export function getStoredEnabled(): boolean {
+  try {
+    return localStorage.getItem(STORAGE_KEY) === 'true';
+  } catch {
+    return false;
+  }
+}
+
+export function setStoredEnabled(enabled: boolean): void {
+  try {
+    if (enabled) {
+      localStorage.setItem(STORAGE_KEY, 'true');
+    } else {
+      localStorage.removeItem(STORAGE_KEY);
+    }
+  } catch {}
+
+  // Subscribe the browser itself, not just this tab.
+  //
+  // This lives here rather than in the hook's setEnabled because every surface
+  // that flips the switch calls this function directly — the soft-ask toast,
+  // Settings, the notifications sheet — and none of them called setEnabled.
+  // So the subscribe existed and never once ran: turning notifications on gave
+  // you the test notification and then silence, because `new Notification()`
+  // needs the page open and nothing had registered for push. Putting it at the
+  // one place the flag actually changes is what stops that happening again.
+  //
+  // Fire-and-forget: push either works or it does not, and the in-tab path is
+  // unaffected either way.
+  try {
+    if (enabled) {
+      void subscribeToWebPush();
+    } else {
+      void unsubscribeFromWebPush();
+    }
+  } catch { /* unsupported browser — isWebPushSupported guards inside */ }
+  // The flag is now driven from three surfaces (the soft-ask toast, Settings →
+  // Notifications, the notifications-page sheet). Without this they only
+  // re-read on mount, so one would sit showing the opposite of the truth.
+  try {
+    window.dispatchEvent(new Event(ENABLED_EVENT));
+  } catch {}
+}
+
+function subscribeStoredEnabled(onChange: () => void): () => void {
+  window.addEventListener(ENABLED_EVENT, onChange);
+  window.addEventListener('storage', onChange);
+  return () => {
+    window.removeEventListener(ENABLED_EVENT, onChange);
+    window.removeEventListener('storage', onChange);
+  };
+}
+
+/** The stored on/off flag, kept in sync across every surface that shows it. */
+export function useStoredEnabled(): boolean {
+  return useSyncExternalStore(subscribeStoredEnabled, getStoredEnabled, () => false);
+}
+
+/**
+ * What push actually managed to do in this browser.
+ *
+ * The stored flag and the permission both say what *should* happen; only this
+ * says whether a subscription exists. A surface that shows the switch needs it,
+ * or it reports "on" for a browser that has refused to register.
+ *
+ * Resolved by the reconcile below, which runs once per page load wherever the
+ * notifications bell is mounted.
+ */
+export function useWebPushState(): WebPushState {
+  return useSyncExternalStore(subscribeWebPushState, getWebPushState, () => 'unknown' as const);
+}
+
+/**
+ * The browser's own words for why it could not display a notification.
+ *
+ * Rides the same event as the state because it is set in the same breath —
+ * there is no path that changes one without the other.
+ */
+export function useWebPushFailureReason(): string | null {
+  return useSyncExternalStore(subscribeWebPushState, getWebPushFailureReason, () => null);
+}
+
+export function getLastSeenTimestamp(): number {
+  try {
+    return Number(localStorage.getItem(LAST_SEEN_KEY)) || 0;
+  } catch {
+    return 0;
+  }
+}
+
+export function setLastSeenTimestamp(ts: number) {
+  try {
+    localStorage.setItem(LAST_SEEN_KEY, String(ts));
+  } catch {}
+}
+
+/** 'unsupported' covers browsers with no Notification API (iOS Safari in a tab). */
+export type BrowserNotificationPermission = NotificationPermission | 'unsupported';
+
+export function readNotificationPermission(): BrowserNotificationPermission {
+  if (typeof Notification === 'undefined') return 'unsupported';
+  return Notification.permission;
+}
+
+/**
+ * The browser's permission for this origin, kept current.
+ *
+ * A reader who blocked us by accident fixes it in the browser's own UI (the
+ * padlock menu, site settings), which fires nothing in the page. The
+ * Permissions API reports the change live where it exists; the visibility and
+ * focus listeners cover the rest, so coming back from a settings tab is enough
+ * to un-stick the switch.
+ */
+export function useNotificationPermission(): BrowserNotificationPermission {
+  const [permission, setPermission] = useState<BrowserNotificationPermission>(readNotificationPermission);
+
+  useEffect(() => {
+    let cancelled = false;
+    let status: PermissionStatus | undefined;
+    const sync = () => {
+      if (!cancelled) setPermission(readNotificationPermission());
+    };
+
+    // Safari only grew navigator.permissions recently and still rejects some
+    // names, so this is strictly an upgrade over the event listeners below.
+    navigator.permissions
+      ?.query({ name: 'notifications' as PermissionName })
+      .then((result) => {
+        if (cancelled) return;
+        status = result;
+        result.addEventListener('change', sync);
+        sync();
+      })
+      .catch(() => {});
+
+    window.addEventListener(PERMISSION_EVENT, sync);
+    document.addEventListener('visibilitychange', sync);
+    window.addEventListener('focus', sync);
+
+    return () => {
+      cancelled = true;
+      status?.removeEventListener('change', sync);
+      window.removeEventListener(PERMISSION_EVENT, sync);
+      document.removeEventListener('visibilitychange', sync);
+      window.removeEventListener('focus', sync);
+    };
+  }, []);
+
+  return permission;
+}
+
+export function useBrowserNotifications() {
+  const isEnabled = useStoredEnabled();
+  // Track shown notification IDs to avoid duplicates within a session
+  const shownRef = useRef<Set<string>>(new Set());
+
+  // Subscribing moved into setStoredEnabled, which is what every surface
+  // actually calls. This stays as the hook-shaped way in.
+  const setEnabled = useCallback((enabled: boolean) => {
+    setStoredEnabled(enabled);
+  }, []);
+
+  // Re-assert the subscription once per page load.
+  //
+  // A push subscription is not permanent: the browser rotates it, clearing site
+  // data drops it, and a rotated VAPID key invalidates it. The event for that
+  // is `pushsubscriptionchange` in the service worker, but the worker cannot
+  // act on it — re-registering needs the Riftn bearer token, which lives in
+  // localStorage where a worker cannot reach. So it is reconciled here instead,
+  // on the next visit. subscribeToWebPush already reuses a subscription that is
+  // still valid, so the usual case is one cheap check and no network write.
+  //
+  // "Once per load" used to mean once per *attempt*, and the flag was set
+  // before the await — so a reconcile that failed never ran again for the life
+  // of the tab. That is not a rare corner: this is a single-page app whose tabs
+  // stay open for days, and the reconcile fires at mount, which can be before
+  // the wallet has produced the bearer token that /api/push/token requires. One
+  // unlucky boot and the browser holds no registration until someone finds the
+  // switch and turns it off and on. So the flag is now set only when the
+  // subscription is actually in place, and a failure is retried when the reader
+  // comes back to the tab — which is both free and the moment they are most
+  // likely to have just signed in.
+  useEffect(() => {
+    if (!isEnabled || reconciledThisLoad) return;
+
+    let cancelled = false;
+    const attempt = async () => {
+      if (cancelled || reconciledThisLoad || document.hidden) return;
+      // Nothing to retry for a browser that cannot do push, or one holding no
+      // permission: both answer locally, change only through an event we
+      // already listen for, and would otherwise retry on every focus forever.
+      const state = getWebPushState();
+      if (state === 'unsupported' || state === 'off') return;
+      if (await subscribeToWebPush()) reconciledThisLoad = true;
+    };
+
+    void attempt();
+    window.addEventListener('focus', attempt);
+    document.addEventListener('visibilitychange', attempt);
+    return () => {
+      cancelled = true;
+      window.removeEventListener('focus', attempt);
+      document.removeEventListener('visibilitychange', attempt);
+    };
+  }, [isEnabled]);
+
+  /**
+   * @param onClick Where clicking the notification should take the reader.
+   *   Without one, a delivered notification is inert — clicking it does not even
+   *   raise the tab it came from, which reads as the notification being broken.
+   *   The tab is focused first so the navigation happens somewhere visible.
+   * @param tag The OS-level identity of the card. Defaults to `id`, which is
+   *   right when the id is the thing being announced. Pass it separately for a
+   *   surface that keeps ONE standing card and rewrites it — public chat sends
+   *   a fresh id every time (so the once-only guard above lets it through) with
+   *   a fixed tag (so each digest replaces the last instead of stacking behind
+   *   it).
+   */
+  const showNotification = useCallback((
+    title: string,
+    body: string,
+    icon?: string,
+    id?: string,
+    onClick?: () => void,
+    tag?: string,
+  ) => {
+    // Only show when tab is not focused, permission granted, and feature enabled
+    if (!document.hidden) return;
+    if (!getStoredEnabled()) return;
+    // Quiet hours were written to localStorage but never read until now, so
+    // this setting had no effect on delivery at all.
+    if (isQuietNow()) return;
+    if (typeof Notification === 'undefined') return;
+    if (Notification.permission !== 'granted') return;
+    if (id && shownRef.current.has(id)) return;
+
+    try {
+      const notification = new Notification(title, {
+        body,
+        icon: icon || '/favicon.ico',
+        tag: tag || id, // prevents duplicate OS-level notifications with same tag
+      });
+      if (id) shownRef.current.add(id);
+
+      if (onClick) {
+        notification.onclick = () => {
+          try { window.focus(); } catch {}
+          notification.close();
+          onClick();
+        };
+      }
+
+      // Auto-close after 5 seconds
+      setTimeout(() => notification.close(), 5000);
+    } catch {}
+  }, []);
+
+  return { isEnabled, setEnabled, showNotification };
+}
+
+/**
+ * Fire one notification right now, ignoring the tab-hidden and quiet-hours
+ * rules that gate real ones — this is the reader asking to see one.
+ *
+ * Returns false when the browser could not display it, and that answer is only
+ * worth anything because it now goes through the service worker. The page's
+ * own `new Notification()` CONSTRUCTS quite happily on a machine whose OS is
+ * blocking the browser, so the old version reported success over a channel
+ * that showed nothing - which is exactly how a reader sat for seven months
+ * with a switch that looked on and never delivered anything.
+ */
+export async function showTestNotification(title: string, body: string): Promise<boolean> {
+  // Goes through the service worker, not `new Notification()`. The page
+  // constructor succeeds on a machine whose OS is blocking the browser, so
+  // it reported success over a channel that displayed nothing.
+  return probeNotificationDisplay(title, body);
+}
+
+/**
+ * Request notification permission.
+ *
+ * Returns what the browser actually recorded. 'default' is a real outcome and
+ * is NOT the same as 'denied': it means the reader waved the prompt away — or
+ * never engaged with Chrome's quiet variant, the little crossed-out bell in
+ * the address bar — so nothing was decided and asking again later is legal.
+ * This used to collapse to 'denied', which told people their browser was
+ * blocking notifications when it wasn't.
+ */
+export async function requestNotificationPermission(): Promise<BrowserNotificationPermission> {
+  if (typeof Notification === 'undefined') return 'unsupported';
+
+  try {
+    const result = await Notification.requestPermission();
+    // Tell every mounted control what the answer was: the settings switch has
+    // to show a fresh 'denied' immediately, and only Chrome and Firefox would
+    // otherwise report it through the Permissions API.
+    try {
+      window.dispatchEvent(new Event(PERMISSION_EVENT));
+    } catch {}
+    return result;
+  } catch {
+    return 'unsupported';
+  }
+}

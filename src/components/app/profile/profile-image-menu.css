@@ -1,0 +1,13 @@
+/* A file dragged over the profile picture or banner (useProfileImageMenu). */
+[data-profile-image-target][data-drag-over] {
+  outline: 2px dashed rgb(255 255 255 / 0.85);
+  outline-offset: -4px;
+}
+[data-profile-image-target][data-drag-over]::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgb(0 0 0 / 0.35);
+  pointer-events: none;
+  border-radius: inherit;
+}

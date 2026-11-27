@@ -1,0 +1,157 @@
+import { useTranslation as _useCopy } from 'react-i18next';
+import { useSurfaceDraft } from '@/hooks/use-surface-draft';
+/**
+ * ForwardMessageDialog
+ * ====================
+ * Lets the user pick a conversation to forward a DM message to.
+ * Mirrors the mobile ForwardPickerModal.
+ */
+
+import { useMemo, useState } from 'react';
+import { CornerUpRight } from "lucide-react";
+import Search from "@/components/ui/cut-icons/search";
+import X from "@/components/ui/cut-icons/close";
+
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useConversations } from '@/hooks/use-messages';
+import { buildAvatarUrl } from '@/lib/media-url';
+import { AppState } from '@/components/app/AppState';
+import { BadgedName } from '@/components/app/BadgedName';
+import { translateCopy as _translateCopy } from '@/i18n/copy';
+import type { DeHubConversation } from '@/lib/api/dehub';
+
+interface ForwardMessageDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  /** Called with the target conversation id when the user picks one. */
+  onSelect: (targetConversationId: string) => void;
+  /** Conversation id the message is being forwarded FROM (excluded from the list). */
+  excludeConversationId?: string;
+}
+
+function convName(conv: DeHubConversation): string {
+  if (conv.isGroup || conv.groupInfo) return conv.groupInfo?.name || _translateCopy("copy.34ca0e766088", { defaultValue: "Group" });
+  const other = conv.otherUser || conv.participants?.[0];
+  return (
+    other?.displayName ||
+    (other as any)?.display_name ||
+    other?.username ||
+    (other?.address ? `${other.address.slice(0, 6)}...${other.address.slice(-4)}` : _translateCopy("copy.b512d97e7cbf", { defaultValue: "User" }))
+  );
+}
+
+export function ForwardMessageDialog({
+  open,
+  onOpenChange,
+  onSelect,
+  excludeConversationId,
+}: ForwardMessageDialogProps) {
+  const { t: _copy } = _useCopy();
+  const { conversations, isLoading } = useConversations();
+  const [search, setSearch] = useSurfaceDraft("components/app/chat/ForwardMessageDialog.tsx:search", '');
+
+  const filtered = useMemo(() => {
+    const list = conversations.filter(
+      (c) => (c.id || (c as any)._id) !== excludeConversationId,
+    );
+    const q = search.trim().toLowerCase();
+    if (!q) return list;
+    return list.filter((c) => convName(c).toLowerCase().includes(q));
+  }, [conversations, search, excludeConversationId]);
+
+  const handleSelect = (conv: DeHubConversation) => {
+    const id = conv.id || (conv as any)._id;
+    if (!id) return;
+    onSelect(id);
+    onOpenChange(false);
+    setSearch.complete(search, '');
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="bg-zinc-900 border-zinc-700 text-white max-w-sm p-0 overflow-hidden">
+        <DialogHeader className="px-4 pt-4 pb-2">
+          <DialogTitle className="text-white text-base">{_copy("copy.1850b44d877b", { defaultValue: "Forward to" })}</DialogTitle>
+        </DialogHeader>
+
+        {/* Search */}
+        <div data-search-surface className="mx-4 mb-2 flex items-center gap-2 rounded-xl bg-zinc-800 px-3 py-2">
+          <Search className="w-4 h-4 text-zinc-500 flex-shrink-0" />
+          <input
+            type="search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder={_copy("copy.bd2b64636d36", { defaultValue: "Search conversations…" })}
+            className="flex-1 bg-transparent text-sm text-white placeholder:text-zinc-500 outline-none"
+          />
+          {search && (
+            <button onClick={() => setSearch.complete(search, '')} className="text-zinc-500 hover:text-white">
+              <X className="w-4 h-4" />
+            </button>
+          )}
+        </div>
+
+        {/* List */}
+        <div className="max-h-[50vh] overflow-y-auto pb-4">
+          {isLoading ? (
+            <p className="text-center text-sm text-zinc-500 py-8">{_copy("copy.ba3bbbe10d8b", { defaultValue: "Loading…" })}</p>
+          ) : filtered.length === 0 ? (
+            <AppState
+              icon={search ? 'search' : 'messages'}
+              title={search ? _copy("copy.7cd3bc2fc162", { defaultValue: "No conversations found" }) : _copy("copy.0d60084f056e", { defaultValue: "No conversations yet" })}
+              kind={search ? 'search-empty' : 'empty'}
+              size="drawer"
+            />
+          ) : (
+            filtered.map((conv) => {
+              const other = conv.otherUser || conv.participants?.[0];
+              const name = convName(conv);
+              const avatarUrl = buildAvatarUrl(
+                other?.address || '',
+                other?.avatarImageUrl || (other as any)?.avatarUrl,
+              );
+              return (
+                <button
+                  key={conv.id || (conv as any)._id}
+                  type="button"
+                  onClick={() => handleSelect(conv)}
+                  className="flex w-full items-center gap-3 px-4 py-2.5 hover:bg-zinc-800 transition-colors text-left"
+                >
+                  <Avatar className="w-9 h-9 flex-shrink-0">
+                    {avatarUrl && <AvatarImage src={avatarUrl} />}
+                    <AvatarFallback className="bg-zinc-700 text-white text-xs font-medium">
+                      {(name.startsWith('0x') ? name.charAt(2) : name.charAt(0)).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  {/* A group has no single holder, so only a one-to-one row wears a badge. */}
+                  {conv.isGroup || conv.groupInfo ? (
+                    <span className="flex-1 min-w-0 truncate text-sm font-medium text-white">
+                      {name}
+                    </span>
+                  ) : (
+                    <BadgedName
+                      badgeBalance={(other as { badgeBalance?: number } | undefined)?.badgeBalance}
+                      lookupId={other?.username || other?.address}
+                      username={other?.username}
+                      className="truncate text-sm font-medium text-white"
+                      wrapperClassName="flex-1 min-w-0"
+                    >
+                      {name}
+                    </BadgedName>
+                  )}
+                  <CornerUpRight className="w-4 h-4 text-zinc-500 flex-shrink-0" />
+                </button>
+              );
+            })
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}

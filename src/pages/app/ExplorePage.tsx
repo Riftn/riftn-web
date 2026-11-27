@@ -1,0 +1,1269 @@
+import { useTranslation as _useCopy } from 'react-i18next';
+import { useSurfaceDraft, draftIdentity } from '@/hooks/use-surface-draft';
+import { BrandIcon, ThemedIcon } from '@/components/app/war/WarHudIcon';
+import { AppState } from '@/components/app/AppState';
+import { useContext, useState, useMemo, useEffect, useCallback, useRef, useLayoutEffect, memo, startTransition, type CSSProperties } from 'react';
+import { getDocumentScrollTop } from '@/lib/document-scroll';
+import { SEOHead } from '@/components/SEOHead';
+import { HUB_ROUTE_META } from '@/lib/seo/route-meta';
+import { SwipeableCarousel } from '@/components/app/SwipeableCarousel';
+import { WhatsHappening } from '@/components/app/WhatsHappening';
+import { NewMembersBento } from '@/components/app/NewMembersBento';
+import { SearchPeopleCards } from '@/components/app/search/SearchPeopleCards';
+import { MobileWhoToFollowCarousel } from '@/components/app/mobile';
+import { PageBody, PageIsland, PageTabs, usePhonePill } from '@/components/app/page-kit/PageKit';
+import { useDebouncedValue } from '@/hooks/use-debounced-value';
+import { useTranslation } from 'react-i18next';
+import searchIcon from '@/assets/icons/search-icon.png';
+import search3dIcon from '@/assets/icons/search-3d-icon.webp';
+import trendingFireIcon from '@/assets/icons/trending-fire-icon.png';
+import { useSearchParams, useNavigate, useLocation } from 'react-router-dom';
+import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
+import { Loader2 } from "lucide-react";
+import Trash2 from "@/components/ui/cut-icons/delete";
+
+import Search from "@/components/ui/cut-icons/search";
+import SlidersHorizontal from "@/components/ui/cut-icons/settings";
+import X from "@/components/ui/cut-icons/close";
+
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { EXPLORE_TABS } from '@/constants/app.constants';
+import {
+  SearchFilterPanel,
+  DEFAULT_SEARCH_FILTERS,
+  countActiveSearchFilters,
+  type SearchFilterState,
+} from '@/components/app/search/SearchFilterPanel';
+import { applySorting, filterByDate, filterByContentType } from '@/lib/feed-utils';
+import { cn } from '@/lib/utils';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useAuth } from '@/contexts/AuthContext';
+import { CachedPageActiveContext } from '@/contexts/CachedPageActiveContext';
+import { useAppTheme } from '@/contexts/ThemeContext';
+import { AuthGate } from '@/components/app/AuthGate';
+import { 
+  useDeHubSearch, 
+  useSearchAnalytics,
+  getTypeForTab,
+  getPostTypeForTab, 
+  extractUniqueCreators,
+  mapAccountToCreator,
+  flattenSearchAccounts,
+  flattenSearchVideos,
+  type SearchCreator 
+} from '@/hooks/use-dehub-search';
+import { useSearchHistory } from '@/hooks/use-search-history';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { useStagedCount } from '@/hooks/use-staged-count';
+import { useDeHubUserSearch } from '@/hooks/use-dehub-user-search';
+
+// content-visibility for below-fold result cards — browser skips their
+// layout/paint until they approach the viewport (matches HomeFeed's pattern).
+const OFFSCREEN_RESULT_STYLE: CSSProperties = {
+  contentVisibility: 'auto',
+  containIntrinsicSize: 'auto 320px',
+};
+// A card that is still to be drawn (see useStagedCount) holds its place.
+const PENDING_RESULT_STYLE: CSSProperties = { minHeight: 320 };
+/** Cards drawn with the results themselves; the rest follow without holding the page. */
+const FIRST_RESULT_CARDS = 3;
+import { buildAvatarUrl } from '@/lib/media-url';
+import { getMediaUrl, getCategories, searchNFTs, type DeHubNFT, type DeHubCategory } from '@/lib/api/dehub';
+import { VideoCard } from '@/components/app/cards/VideoCard';
+import { ImageCard } from '@/components/app/cards/ImageCard';
+import { PostCard } from '@/components/app/cards/PostCard';
+import { mapNFTToVideoItem, mapNFTToImagePost, getContentType } from '@/hooks/use-dehub-feed';
+import { useDexScreenerSearchMulti } from '@/hooks/use-dexscreener';
+import { useContractToTicker } from '@/hooks/use-contract-to-ticker';
+import { useCmcMarketCap } from '@/hooks/use-cmc-market-cap';
+import { CashtagPriceCard } from '@/components/app/CashtagPriceCard';
+import { useStockQuote } from '@/hooks/use-stock-quote';
+import { StockPriceCard } from '@/components/app/StockPriceCard';
+import { CashtagResultSwitcher } from '@/components/app/CashtagResultSwitcher';
+import { DhbListingSoonCard } from '@/components/app/DhbListingSoonCard';
+import { isDhbListingQuery } from '@/lib/market/dhb-listing';
+import type { VideoItem, ImagePost } from '@/types/feed.types';
+import { recordTickerSearch } from '@/lib/ticker-search-tracker';
+import { scrollDocumentTo } from '@/lib/document-scroll';
+import { ExploreCategoryWords, ExplorePhoneHome } from '@/components/app/explore/ExplorePhoneHome';
+import { TrendingEarned } from '@/components/app/explore/TrendingEarned';
+import { ExploreRadioShows } from '@/components/app/explore/ExploreRadioShows';
+import { orderByInterests, useFeedInterests } from '@/lib/feed-interests';
+
+import { formatCount } from '@/lib/format-count';
+// Brand-related search terms where @d should be pinned first
+const BRAND_QUERIES = ['d', 'de', 'deh', 'dehu', 'dehub'];
+
+/**
+ * Search input isolated from the page: it owns the text locally so each
+ * keystroke re-renders only this tiny component, and pushes the value up
+ * inside startTransition — the full-page derived re-render becomes
+ * interruptible instead of blocking typing on mid-range devices.
+ */
+const ExploreSearchInput = memo(function ExploreSearchInput({
+  value,
+  onChange,
+  placeholder,
+  trailing,
+  bare = false,
+}: {
+  value: string;
+  onChange: (next: string) => void;
+  placeholder: string;
+  /** Quiet icon actions at the field's right end. */
+  trailing?: React.ReactNode;
+  /** Drawn as the phone pill's own line: no box, no leading icon. */
+  bare?: boolean;
+}) {
+  const [local, setLocal] = useSurfaceDraft("src/pages/app/ExplorePage.tsx:local", value);
+  const lastPushedRef = useRef(value);
+
+  // Adopt external changes (URL ?q= init, programmatic clears) without
+  // fighting our own in-flight transition pushes.
+  useEffect(() => {
+    if (value !== lastPushedRef.current) {
+      setLocal.initialize(value);
+      lastPushedRef.current = value;
+    }
+  }, [value, setLocal]);
+
+  const push = (next: string) => {
+    setLocal(next);
+    lastPushedRef.current = next;
+    startTransition(() => onChange(next));
+  };
+
+  if (bare) {
+    return (
+      <div data-explore-pill-search className="flex min-w-0 flex-1 items-center">
+        <input
+          type="text"
+          inputMode="search"
+          enterKeyHint="search"
+          value={local}
+          onChange={(e) => push(e.target.value)}
+          placeholder={placeholder}
+          aria-label={placeholder}
+          className="h-9 min-w-0 flex-1 bg-transparent px-1 text-[15px] text-white outline-none placeholder:text-zinc-500"
+        />
+        <div className="flex shrink-0 items-center pr-1">{trailing}</div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative flex-1">
+      <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500" />
+      <Input
+        data-search-surface
+        value={local}
+        onChange={(e) => push(e.target.value)}
+        placeholder={placeholder}
+        aria-label={placeholder}
+        className={cn(
+          'w-full pl-12 h-[48px] text-ellipsis bg-zinc-800 border-zinc-700 rounded-xl text-white placeholder:text-zinc-500 focus:border-zinc-600 text-sm sm:text-base',
+          trailing ? 'pr-12' : 'pr-4',
+        )}
+      />
+      <div className="absolute right-1.5 top-1/2 -translate-y-1/2 flex items-center">
+        {/* No clear button: the keyboard's own clear does the job. */}
+        {trailing}
+      </div>
+    </div>
+  );
+});
+
+export default function ExplorePage() {
+  const { t: _copy } = _useCopy();
+  const { t } = useTranslation();
+  const { theme, themeChoice } = useAppTheme();
+  const isLightTheme = (theme === 'light' || themeChoice === 'system-light');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { walletAddress, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const isPageActive = useContext(CachedPageActiveContext);
+  
+  const [activeTab, setActiveTab] = useState('all');
+  const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
+  const [showFilters, setShowFilters] = useState(false);
+  const [exploreCategoryId, setExploreCategoryId] = useState<string | null>(null);
+  const [categoryLimit, setCategoryLimit] = useState(24);
+  const [filters, setFilters] = useState<SearchFilterState>(DEFAULT_SEARCH_FILTERS);
+
+  // Topics picked while signing up go first in every category bar.
+  const feedInterests = useFeedInterests();
+  const putInterestsFirst = useCallback((list: DeHubCategory[]) => orderByInterests(list, feedInterests), [feedInterests]);
+  // Fetch categories for the carousel
+  const { data: exploreCategories = [] } = useQuery({
+    queryKey: ['dehub-categories'],
+    queryFn: getCategories,
+    select: putInterestsFirst,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  // Category browse feed (when a category is selected, not searching)
+  const categoryBrowseFeed = useInfiniteQuery({
+    queryKey: ['explore-category-feed', exploreCategoryId],
+    queryFn: async ({ pageParam = 0 }) => {
+      const result = await searchNFTs({
+        page: pageParam,
+        unit: 15,
+        category: exploreCategoryId || undefined,
+        sortMode: 'new',
+        status: 'minted',
+      });
+      return {
+        items: result.data || [],
+        page: pageParam,
+        hasMore: result.has_more,
+      };
+    },
+    getNextPageParam: (lastPage) => lastPage.hasMore ? lastPage.page + 1 : undefined,
+    initialPageParam: 0,
+    enabled: !!exploreCategoryId && !searchQuery.trim(),
+    staleTime: 1000 * 60 * 2,
+  });
+
+  const categoryFeedItems = useMemo(() => {
+    if (!categoryBrowseFeed.data?.pages) return [];
+    const allNfts = categoryBrowseFeed.data.pages.flatMap(p => p.items || []);
+    return allNfts.map((nft, index) => {
+      const contentType = getContentType(nft);
+      if (contentType === 'video' || contentType === 'audio') {
+        return { type: 'video' as const, item: mapNFTToVideoItem(nft, index) };
+      } else {
+        return { type: 'image' as const, item: mapNFTToImagePost(nft, index) };
+      }
+    });
+  }, [categoryBrowseFeed.data]);
+  const categoryCardsDrawn = useStagedCount(categoryFeedItems.length, FIRST_RESULT_CARDS, exploreCategoryId ?? '');
+
+  // Infinite scroll for category browse
+  const categoryLoaderRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!exploreCategoryId || searchQuery.trim()) return;
+    const el = categoryLoaderRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && categoryBrowseFeed.hasNextPage && !categoryBrowseFeed.isFetchingNextPage) {
+          categoryBrowseFeed.fetchNextPage();
+        }
+      },
+      { threshold: 0.1, rootMargin: '200px' }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [exploreCategoryId, searchQuery, categoryBrowseFeed.hasNextPage, categoryBrowseFeed.isFetchingNextPage, categoryBrowseFeed.fetchNextPage]);
+
+  // Search history hook
+  const { recentSearches, addToHistory, removeFromHistory, clearHistory } = useSearchHistory();
+  const isMobile = useIsMobile();
+  
+  // Search analytics mutation
+  const { mutate: logSearch } = useSearchAnalytics();
+
+  // Scroll to top on mount unless there's an active search with cached scroll
+  // CRITICAL: Use useLayoutEffect to reset scroll BEFORE browser paints (prevents flash of wrong position)
+  useLayoutEffect(() => {
+    // A section hash (`#new-members`) names its own scroll target; the effect
+    // further down settles on it once the section exists, so neither restoring
+    // nor resetting the position applies here.
+    if (location.hash) return;
+    const urlQuery = searchParams.get('q') || '';
+    const cachedScroll = sessionStorage.getItem('EXPLORE_SCROLL_POSITION');
+    
+    // Helper to reset all scroll contexts
+    const scrollTo = (value: number) => {
+      window.scrollTo(0, value);
+      document.documentElement.scrollTop = value;
+      document.body.scrollTop = value;
+    };
+    
+    if (urlQuery && cachedScroll) {
+      // Restore scroll only if there's an active search query
+      const scrollY = parseInt(cachedScroll, 10);
+      scrollTo(scrollY);
+      // Extra attempt after paint for lazy content
+      requestAnimationFrame(() => scrollTo(scrollY));
+    } else {
+      // Always start at top when no search query
+      scrollTo(0);
+      sessionStorage.removeItem('EXPLORE_SCROLL_POSITION');
+      // Extra attempts to fight browser restoration
+      requestAnimationFrame(() => scrollTo(0));
+      setTimeout(() => scrollTo(0), 0);
+    }
+  }, []); // Only run on mount
+
+  // Sync search query FROM URL only on mount / back-navigation
+  // (not on every searchParams change, which causes circular updates)
+  const initializedFromUrl = useRef(false);
+  useEffect(() => {
+    if (!initializedFromUrl.current) {
+      initializedFromUrl.current = true;
+      return; // Already set in useState initializer
+    }
+    // Skip if we triggered this URL change ourselves
+    if (weSetParams.current) {
+      weSetParams.current = false;
+      return;
+    }
+    // Handle browser back/forward navigation
+    const urlQuery = searchParams.get('q') || '';
+    if (urlQuery !== searchQuery) {
+      setSearchQuery(urlQuery);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
+
+  // Update URL when search query changes (one-way: state → URL)
+  const prevUrlQuery = useRef(searchParams.get('q') || '');
+  const weSetParams = useRef(false);
+  useEffect(() => {
+    const trimmed = searchQuery.trim();
+    if (trimmed.length >= 3) {
+      if (prevUrlQuery.current !== trimmed) {
+        prevUrlQuery.current = trimmed;
+        weSetParams.current = true;
+        setSearchParams({ q: trimmed }, { replace: true });
+      }
+    } else if (prevUrlQuery.current) {
+      prevUrlQuery.current = '';
+      weSetParams.current = true;
+      setSearchParams({}, { replace: true });
+    }
+  }, [searchQuery, setSearchParams]);
+
+  // Add to history and log analytics only after 1.5 seconds of inactivity (complete words)
+  const stableQuery = useDebouncedValue(searchQuery, 1500);
+  const hasLoggedRef = useRef<string | null>(null);
+  
+  useEffect(() => {
+    if (stableQuery.trim().length >= 3 && hasLoggedRef.current !== stableQuery.trim()) {
+      hasLoggedRef.current = stableQuery.trim();
+      // Add to local history
+      addToHistory(stableQuery.trim());
+      // Log analytics (fire and forget)
+      logSearch({ 
+        query: stableQuery.trim(), 
+        type: getTypeForTab(activeTab) || 'all',
+      });
+    }
+  }, [stableQuery, activeTab, addToHistory, logSearch]);
+
+  // Debounced query for short searches (1 second wait for 1-2 chars)
+  const debouncedShortQuery = useDebouncedValue(searchQuery, 1000);
+  // Debounced query for full searches (300ms) — single source of truth for all hooks
+  const debouncedFullQuery = useDebouncedValue(searchQuery, 300);
+  
+  // Determine search mode based on query length
+  const trimmedQuery = searchQuery.trim();
+  const isCashtagQuery = trimmedQuery.startsWith('$');
+  const minSearchLength = isCashtagQuery ? 2 : 3;
+  const isShortSearch = !isCashtagQuery && trimmedQuery.length >= 1 && trimmedQuery.length <= 2 && debouncedShortQuery.trim().length >= 1;
+  const isFullSearch = trimmedQuery.length >= minSearchLength;
+  const isSearching = isFullSearch || isShortSearch;
+  
+  // For short queries (1-2 chars), only search people
+  const effectiveSearchType = isShortSearch ? 'accounts' : getTypeForTab(activeTab);
+  // CRITICAL: Use debounced values for ALL hooks to prevent race conditions
+  // Previously, raw searchQuery was passed to some hooks while useDeHubSearch debounced internally,
+  // causing results from different hooks to be out of sync (flashing between old/new results)
+  const baseEffectiveQuery = isShortSearch ? debouncedShortQuery : debouncedFullQuery;
+  const isDebouncingSearch = trimmedQuery !== baseEffectiveQuery.trim();
+
+  // Resolve contract addresses (0x...) to ticker symbols via DexScreener
+  const { resolvedTicker, isResolving: isResolvingContract } = useContractToTicker(baseEffectiveQuery);
+  
+  // If a contract address resolved to a ticker, use that instead
+  const effectiveQuery = resolvedTicker || baseEffectiveQuery;
+
+  // Explore stays mounted on other routes. Their scroll events and scrolls
+  // inside a panel must never overwrite the position of these search results.
+  useLayoutEffect(() => {
+    if (!isPageActive) return;
+    if (!isSearching) {
+      sessionStorage.removeItem('EXPLORE_SCROLL_POSITION');
+      return;
+    }
+
+    const handleScroll = ({ target }: Event) => {
+      // Body scroll does not bubble, so listen in capture and accept only
+      // page scrolling, including browsers that scroll the document itself.
+      if (target !== document && target !== document.body && target !== document.documentElement) return;
+      sessionStorage.setItem('EXPLORE_SCROLL_POSITION', String(getDocumentScrollTop()));
+    };
+
+    document.addEventListener('scroll', handleScroll, { passive: true, capture: true });
+    return () => document.removeEventListener('scroll', handleScroll, { capture: true });
+  }, [isPageActive, isSearching]);
+
+  // `/app/explore#new-members` is where the Live Stats heading sends people.
+  // The browser's own anchor jump never happens here: this page is a cached
+  // instance that does not remount on a client-side navigation, and the bento
+  // only exists once the roster has loaded, so the id is not in the document
+  // when the URL changes. Poll briefly for it, then settle it just under the
+  // sticky search bento; when nobody joined recently it never renders and this
+  // gives up quietly. Keyed on the navigation entry so clearing a search later
+  // does not jump back to it — one navigation, one scroll.
+  const settledHashKey = useRef<string | null>(null);
+  useEffect(() => {
+    if (location.hash !== '#new-members' || !/^\/(app\/)?explore\/?$/.test(location.pathname)) return;
+    if (isSearching || settledHashKey.current === location.key) return;
+    settledHashKey.current = location.key;
+    let attempts = 0;
+    let timer: number | undefined;
+    const settle = () => {
+      const el = document.getElementById('new-members');
+      if (!el) {
+        if (attempts++ < 20) timer = window.setTimeout(settle, 150);
+        return;
+      }
+      const nav = document.querySelector<HTMLElement>('[data-explore-page] [data-feed-nav-outer]');
+      const stuckTop = nav ? parseFloat(getComputedStyle(nav).top) || 0 : 0;
+      el.style.scrollMarginTop = `${nav ? stuckTop + nav.offsetHeight + 8 : 0}px`;
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+    settle();
+    return () => window.clearTimeout(timer);
+  }, [location.hash, location.key, location.pathname, isSearching]);
+
+  // API search hook - using new universal search
+  const {
+    data: searchData,
+    isLoading: isSearchLoading,
+    isPlaceholderData: isSearchPlaceholder,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    error: searchError,
+  } = useDeHubSearch({
+    query: effectiveQuery,
+    type: effectiveSearchType ?? 'videos',
+    postType: isShortSearch ? undefined : getPostTypeForTab(activeTab),
+    address: walletAddress || undefined,
+    enabled: isSearching,
+    minQueryLength: isShortSearch ? 1 : 3,
+  });
+
+  // Additional account search specifically for "All" tab
+  // The primary query requests content only; fetch the full people list once.
+  // Keep the larger people list rather than the combined endpoint's top five.
+  const {
+    data: allTabAccountData,
+    isLoading: isAllTabAccountLoading,
+    isPlaceholderData: isAllTabAccountPlaceholder,
+  } = useDeHubSearch({
+    query: effectiveQuery,
+    type: 'accounts',
+    address: walletAddress || undefined,
+    enabled: isSearching && activeTab === 'all' && !isShortSearch,
+    minQueryLength: 3,
+  });
+
+  // Exact username lookup - always try exact match to prioritize @username
+  const {
+    data: exactUser,
+    isLoading: isUserLoading,
+    isUsernameQuery,
+  } = useDeHubUserSearch({
+    query: effectiveQuery,
+    enabled: isSearching && (activeTab === 'all' || activeTab === 'people'),
+    forceExactLookup: true, // Always try exact lookup to surface @username matches first
+  });
+
+  // $DHB is not trading yet: its search shows the listing-soon card rather
+  // than a pinned price or "no results".
+  const isDhbQuery = isSearching && (isDhbListingQuery(effectiveQuery) || isDhbListingQuery(baseEffectiveQuery));
+
+  // Check if this is a brand-related search term
+  const isBrandQuery = BRAND_QUERIES.includes(effectiveQuery.trim().toLowerCase());
+
+  // DexScreener cashtag price lookup
+  const { data: dexPairs = [], isLoading: isDexLoading } = useDexScreenerSearchMulti(effectiveQuery, isSearching);
+  
+  // CoinMarketCap market cap (overrides DexScreener when available)
+  const { data: cmcData } = useCmcMarketCap(effectiveQuery, isSearching);
+
+  // Stock quote lookup (stocks first priority)
+  const { data: stockData, isLoading: isStockLoading } = useStockQuote(effectiveQuery, isSearching);
+
+  // Always fetch @d specifically for brand queries (d, de, deh, dehu, dehub)
+  const {
+    data: brandUser,
+    isLoading: isBrandUserLoading,
+  } = useDeHubUserSearch({
+    query: 'd', // Always look up the actual @d account
+    enabled: isSearching && isBrandQuery && (activeTab === 'all' || activeTab === 'people'),
+    forceExactLookup: true,
+  });
+
+  // Process search results from the new universal search API
+  const searchResults = useMemo(() => {
+    // Get accounts directly from universal search (People tab or when type=accounts)
+    const accounts = flattenSearchAccounts(searchData) || [];
+    
+    // Get accounts from the dedicated All-tab account search
+    const allTabAccounts = isAllTabAccountPlaceholder ? [] : (flattenSearchAccounts(allTabAccountData) || []);
+    
+    // For short search, don't include video results
+    const videos = isShortSearch ? [] : (flattenSearchVideos(searchData) || []);
+    
+    // Map both account sources to SearchCreator format
+    const accountCreators = accounts.map(mapAccountToCreator);
+    const allTabAccountCreators = allTabAccounts.map(mapAccountToCreator);
+    
+    // Also extract creators from video results for backwards compatibility (not for short search)
+    const videoCreators = isShortSearch ? [] : extractUniqueCreators(videos) || [];
+    
+    // Combine and dedupe users by ID AND handle (same user may have different IDs from different sources)
+    const userMap = new Map<string, SearchCreator>();
+    const seenHandles = new Set<string>();
+    
+    const addUser = (u: SearchCreator) => {
+      if (!u || !u.id) return;
+      const handleLower = u.handle.toLowerCase();
+      // Skip if we already have this user by ID or handle
+      if (userMap.has(u.id) || seenHandles.has(handleLower)) return;
+      userMap.set(u.id, u);
+      seenHandles.add(handleLower);
+    };
+    
+    accountCreators.forEach(addUser);
+    allTabAccountCreators.forEach(addUser);
+    videoCreators.forEach(addUser);
+    
+    // Add exact user match if found
+    if (exactUser) {
+      addUser(exactUser);
+    }
+    
+    // Check if this is a brand-related search
+    const queryLower = effectiveQuery.trim().toLowerCase();
+    const preferredAddress = queryLower.replace(/^@+/, '') === 'mal'
+      ? '0xec4e2c7417f781b35d830671f013b3b91f29ba64'
+      : null;
+    const isBrandQueryLocal = BRAND_QUERIES.includes(queryLower);
+    
+    // For brand queries, ensure the real @d (from brandUser lookup) is in the map
+    if (isBrandQueryLocal && brandUser && brandUser.id) {
+      const handleLower = brandUser.handle.toLowerCase();
+      // Remove any existing entry with the same handle but different ID
+      if (seenHandles.has(handleLower) && !userMap.has(brandUser.id)) {
+        for (const [id, u] of userMap) {
+          if (u.handle.toLowerCase() === handleLower) {
+            userMap.delete(id);
+            break;
+          }
+        }
+      }
+      userMap.set(brandUser.id, brandUser);
+      seenHandles.add(handleLower);
+    }
+    
+    // Convert to array and sort
+    let peopleResults = Array.from(userMap.values());
+    
+    // For brand queries, pin @d at the top
+    if (isBrandQueryLocal && brandUser && brandUser.id) {
+      peopleResults = peopleResults.filter(u => u.id !== brandUser.id);
+      peopleResults = [brandUser, ...peopleResults];
+    } else {
+      // Normal sorting: exact username match first
+      peopleResults.sort((a, b) => {
+        const preferred = Number(b.id.toLowerCase() === preferredAddress) - Number(a.id.toLowerCase() === preferredAddress);
+        if (preferred) return preferred;
+        const aHandle = a.handle.replace('@', '').toLowerCase();
+        const bHandle = b.handle.replace('@', '').toLowerCase();
+        // Exact match goes first
+        if (aHandle === queryLower && bHandle !== queryLower) return -1;
+        if (bHandle === queryLower && aHandle !== queryLower) return 1;
+        // Then by handle starting with query
+        if (aHandle.startsWith(queryLower) && !bHandle.startsWith(queryLower)) return -1;
+        if (bHandle.startsWith(queryLower) && !aHandle.startsWith(queryLower)) return 1;
+        return 0;
+      });
+    }
+    
+    // Narrow and order the posts with the same helpers the feeds use, so a
+    // filter row means the same thing here as it does on Home.
+    let filteredPosts = videos.filter(p => p && (p.id || p.tokenId));
+
+    if (filters.category) {
+      const wanted = filters.category.toLowerCase();
+      filteredPosts = filteredPosts.filter(nft => {
+        const cat = nft.category;
+        if (!cat) return false;
+        const list = Array.isArray(cat) ? cat : [cat];
+        return list.some(c => String(c).toLowerCase() === wanted);
+      });
+    }
+
+    filteredPosts = filterByContentType(filteredPosts, {
+      ppv: filters.ppv,
+      w2e: filters.w2e,
+      locked: filters.locked,
+    });
+    filteredPosts = filterByDate(filteredPosts, filters.date);
+
+    // Search comes back in relevance order; the page reads chronologically
+    // unless someone picks another sort.
+    filteredPosts = applySorting(filteredPosts, filters.sort);
+
+    return {
+      users: peopleResults.filter(u => u && u.id),
+      posts: filteredPosts,
+      total: searchData?.pages?.[0]?.total || 0,
+    };
+  }, [searchData, allTabAccountData, isAllTabAccountPlaceholder, exactUser, brandUser, isShortSearch, effectiveQuery, filters]);
+
+  const handlePeopleCardClick = useCallback((handle: string) => addToHistory(`@${handle}`, 'user'), [addToHistory]);
+
+  const activeFilterCount = countActiveSearchFilters(filters);
+
+  const resetFilters = () => setFilters(DEFAULT_SEARCH_FILTERS);
+
+  // A new search heading must never show rows from the previous query.
+  const showLoading = isDebouncingSearch || isSearchLoading || isSearchPlaceholder || isUserLoading;
+
+  // Infinite scroll ref
+  const loadMoreRef = useRef<HTMLDivElement>(null);
+  const isFetchingRef = useRef(false);
+
+  // Infinite scroll observer
+  useEffect(() => {
+    if (!isSearching || showLoading || activeTab === 'people') return;
+    
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const first = entries[0];
+        if (first.isIntersecting && hasNextPage && !isFetchingRef.current) {
+          isFetchingRef.current = true;
+          fetchNextPage().finally(() => {
+            isFetchingRef.current = false;
+          });
+        }
+      },
+      { threshold: 0.1, rootMargin: '100px' }
+    );
+
+    const currentRef = loadMoreRef.current;
+    if (currentRef) {
+      observer.observe(currentRef);
+    }
+
+    return () => {
+      if (currentRef) observer.unobserve(currentRef);
+    };
+  }, [isSearching, showLoading, activeTab, hasNextPage, fetchNextPage]);
+
+  // Map NFTs to feed items
+  const mappedFeedItems = useMemo(() => {
+    return searchResults.posts.map((nft, index) => {
+      const contentType = getContentType(nft);
+      if (contentType === 'video' || contentType === 'audio') {
+        return { type: 'video' as const, item: mapNFTToVideoItem(nft, index) };
+      } else {
+        return { type: 'image' as const, item: mapNFTToImagePost(nft, index) };
+      }
+    });
+  }, [searchResults.posts]);
+
+  // The first cards come up with the results; the rest are drawn right after
+  // in slices, so a page of fifteen cards no longer freezes the screen.
+  const resultCardsDrawn = useStagedCount(mappedFeedItems.length, FIRST_RESULT_CARDS, `${effectiveQuery}|${activeTab}`);
+
+  const showResults = isSearching && !showLoading && (searchResults.users.length > 0 || searchResults.posts.length > 0);
+  const hasPriceResult = !!stockData?.found || dexPairs.length > 0;
+  // Supplemental lookups can settle after the main search. Wait for them
+  // before declaring the results empty.
+  const isWaitingForSearch = isResolvingContract
+    || isAllTabAccountLoading
+    || (activeTab === 'all' && !isShortSearch && isAllTabAccountPlaceholder)
+    || isBrandUserLoading
+    || isDexLoading
+    || isStockLoading;
+  const canShowEmptySearch = isSearching && !showLoading && !searchError
+    && !isDhbQuery && !hasPriceResult
+    && searchResults.users.length === 0 && searchResults.posts.length === 0;
+
+  // Track ticker searches when cashtag results appear
+  const trackedTickerRef = useRef<string>('');
+  useEffect(() => {
+    const sym = effectiveQuery.trim();
+    if (sym.startsWith('$') && sym.length >= 2 && (stockData?.found || dexPairs.length > 0)) {
+      const clean = sym.replace(/^\$/, '').toUpperCase();
+      if (clean !== trackedTickerRef.current) {
+        trackedTickerRef.current = clean;
+        recordTickerSearch(clean);
+      }
+    }
+  }, [effectiveQuery, stockData, dexPairs]);
+
+  // The search island stays pinned on screen when the mobile chrome slides
+  // away (see the "Mobile chrome" block in index.css). The kit island takes no
+  // data-nav-hide prop, so mark its outer element directly.
+  const islandHostRef = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
+    islandHostRef.current?.querySelector('[data-feed-nav-outer]')?.setAttribute('data-nav-hide', 'pin');
+  }, []);
+
+  const phonePill = usePhonePill();
+  // On phones the type tabs sit behind the sliders button with the filters,
+  // so a lit button also counts a type other than All.
+  const optionCount = activeFilterCount + (phonePill && activeTab !== 'all' ? 1 : 0);
+  const exploreTabs = (
+    <PageTabs
+      value={activeTab}
+      onChange={setActiveTab}
+      tabs={EXPLORE_TABS.map((tab) => ({
+        id: tab.value,
+        label: <span className="sr-only">{t(`explore.${tab.value}`)}</span>,
+        icon: <tab.icon className="h-4 w-4" aria-hidden="true" />,
+      }))}
+      className="[&>button]:flex-1 [&>button]:justify-center"
+    />
+  );
+  const filterToggle = (
+    <button
+      type="button"
+      data-explore-filter-toggle
+      onClick={() => setShowFilters(!showFilters)}
+      aria-label={t('explorePage.filters')}
+      aria-expanded={showFilters}
+      title={t('explorePage.filters')}
+      className={cn(
+        'relative h-8 w-8 flex items-center justify-center transition-colors',
+        showFilters || optionCount > 0 ? 'text-white' : 'text-zinc-500 [@media(hover:hover)]:hover:text-white',
+      )}
+    >
+      {/* Open: the sliders spin into a glowing X that closes the
+          panel, the same turn the home pill's toggle makes into
+          its back arrow. */}
+      <AnimatePresence initial={false}>
+        {showFilters && (
+          <motion.span
+            key="glow"
+            aria-hidden
+            data-explore-filter-glow
+            initial={{ opacity: 0, scale: 0.6 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.6 }}
+            transition={{ duration: 0.25, ease: 'easeInOut' }}
+            className="pointer-events-none absolute inset-0 rounded-full blur-[3px]"
+            style={{ background: 'radial-gradient(closest-side, color-mix(in srgb, currentColor var(--explore-glow-core, 65%), transparent), color-mix(in srgb, currentColor var(--explore-glow-edge, 20%), transparent) 60%, transparent)' }}
+          />
+        )}
+      </AnimatePresence>
+      <AnimatePresence mode="wait" initial={false}>
+        {showFilters ? (
+          <motion.span
+            key="close"
+            initial={{ rotate: -180, opacity: 0 }}
+            animate={{ rotate: 0, opacity: 1 }}
+            exit={{ rotate: 180, opacity: 0 }}
+            transition={{ duration: 0.25, ease: 'easeInOut' }}
+            className="relative z-10 flex"
+          >
+            <X className="h-[18px] w-[18px]" />
+          </motion.span>
+        ) : (
+          <motion.span
+            key="sliders"
+            initial={{ rotate: 180, opacity: 0 }}
+            animate={{ rotate: 0, opacity: 1 }}
+            exit={{ rotate: -180, opacity: 0 }}
+            transition={{ duration: 0.25, ease: 'easeInOut' }}
+            className="relative z-10 flex"
+          >
+            <SlidersHorizontal className="h-[18px] w-[18px]" />
+          </motion.span>
+        )}
+      </AnimatePresence>
+      {optionCount > 0 && !showFilters && (
+        <span className="absolute top-0 right-0 min-w-[14px] h-[14px] px-0.5 flex items-center justify-center bg-red-500 text-white text-[9px] font-bold rounded-full leading-none">
+          {formatCount(optionCount)}
+        </span>
+      )}
+    </button>
+  );
+
+  return (
+    <div className="min-h-screen" data-explore-page>
+      <SEOHead title={t('explore.seoTitle')} description={t('explore.seoDescription')} url={HUB_ROUTE_META.explore.url} jsonLd={{ '@context': 'https://schema.org', '@type': 'CollectionPage', name: 'Explore Riftn', url: HUB_ROUTE_META.explore.url, description: _copy("copy.68f66b1f5bba", { defaultValue: "Discover trending content, creators and topics on Riftn." }), isPartOf: { '@type': 'WebSite', name: 'Riftn', url: 'https://riftn.com' } }} />
+      <h1 className="sr-only">{_copy("copy.e556e95a6b25", { defaultValue: "Explore Riftn — Decentralised Social Media, Censorship Resistant & Freedom of Speech" })}</h1>
+      {/* Search Header - Bento Style.
+
+          `data-nav-hide="pin"` keeps this one on screen when the rest of the
+          mobile chrome slides away on a scroll-down: it is the search box, and
+          scrolling a few results down is exactly when someone reaches back for
+          it to change the query. It still moves — up by the header's height,
+          so it lands flush at the top rather than hanging in the gap the
+          header left. See the "Mobile chrome" block in index.css. */}
+      <div ref={islandHostRef} className="contents">
+        <PageIsland
+          icon="search"
+          title={t('nav.explore')}
+          tabs={phonePill ? undefined : exploreTabs}
+          pillLine={phonePill ? (
+            <ExploreSearchInput
+              bare
+              value={searchQuery}
+              onChange={setSearchQuery}
+              placeholder={t('explorePage.searchPlaceholder')}
+              trailing={filterToggle}
+            />
+          ) : undefined}
+          drawerOpen={phonePill ? showFilters : undefined}
+        >
+          {phonePill ? (
+            // Phones: the pill is just the search, over everything. The
+            // sliders button pulls the options out under it: what to search
+            // (all, people, posts...) and the filters.
+            <>
+              {exploreTabs}
+              <SearchFilterPanel filters={filters} onChange={setFilters} onReset={resetFilters} />
+            </>
+          ) : (
+            <>
+              {/* The filter toggle is a plain icon inside the search field, the
+                  same quiet treatment as the messages search. */}
+              <ExploreSearchInput
+                value={searchQuery}
+                onChange={setSearchQuery}
+                placeholder={t('explorePage.searchPlaceholder')}
+                trailing={filterToggle}
+              />
+            <AnimatePresence initial={false}>
+              {showFilters && (
+                <motion.div
+                  key="search-filters"
+                  initial={{ opacity: 0, y: -6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }}
+                  transition={{ duration: 0.18 }}
+                >
+                  <SearchFilterPanel
+                    filters={filters}
+                    onChange={setFilters}
+                    onReset={resetFilters}
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
+            </>
+          )}
+        </PageIsland>
+      </div>
+
+      {/* Content */}
+      <PageBody>
+        <AnimatePresence mode="wait">
+          {isSearching ? (
+            <motion.div
+              key="search-results"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="space-y-2"
+            >
+              {/* Search Results Header */}
+              <div data-page-bento className="bg-zinc-900 rounded-2xl p-4 sm:p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h2 className="text-lg sm:text-xl font-bold text-white break-all">
+                      {t('explorePage.resultsFor', { query: searchQuery })}
+                    </h2>
+                    {!showLoading && searchResults.total > 0 && (
+                      <p className="text-zinc-500 text-sm mt-1">
+                        {t('explorePage.resultsFound', { count: formatCount(searchResults.total) } as Record<string, string>)}
+                      </p>
+                    )}
+                  </div>
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className="text-zinc-400 hover:text-white transition-colors"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+
+                {/* Contract address resolving indicator */}
+                {!isDebouncingSearch && isResolvingContract && (
+                  <div className="flex items-center gap-2 px-4 py-3 rounded-2xl bg-zinc-900/80 border border-zinc-800/50 text-sm text-muted-foreground">
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>{_copy("copy.614d15e703a1", { defaultValue: "Resolving contract address…" })}</span>
+                  </div>
+                )}
+
+                {/* Resolved ticker badge */}
+                {!isDebouncingSearch && resolvedTicker && !isResolvingContract && /^0x[a-f0-9]{40}$/i.test(baseEffectiveQuery.trim()) && (
+                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-zinc-800/60 border border-zinc-700/40 text-xs text-muted-foreground mb-1">
+                    <span className="truncate max-w-[120px] font-mono">{baseEffectiveQuery.trim().slice(0, 6)}…{baseEffectiveQuery.trim().slice(-4)}</span>
+                    <span>→</span>
+                    <span className="font-semibold text-foreground">{resolvedTicker}</span>
+                  </div>
+                )}
+
+                {/* Stock / Crypto Cashtag Result Switcher */}
+                {!isDebouncingSearch && (isDhbQuery ? (
+                  <DhbListingSoonCard />
+                ) : hasPriceResult && (
+                  <CashtagResultSwitcher
+                    stockData={stockData ?? null}
+                    dexPairs={dexPairs}
+                    cmcData={cmcData}
+                    symbol={effectiveQuery.trim()}
+                  />
+                ))}
+
+                {/* Loading State */}
+                {(showLoading || (canShowEmptySearch && isWaitingForSearch)) && (
+                  <div className="flex items-center justify-center py-12">
+                    <div className="flex items-center gap-3 text-zinc-400">
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      <span>{t('explorePage.searching')}</span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Error State */}
+                {!isDebouncingSearch && searchError && (
+                  <div className="text-center py-8">
+                    <p className="text-red-400">{t('explorePage.searchError')}</p>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="mt-3 border-zinc-700 text-white hover:bg-zinc-800"
+                      onClick={() => window.location.reload()}
+                    >
+                      {t('explorePage.retry')}
+                    </Button>
+                  </div>
+                )}
+
+                {/* People Results */}
+                {showResults && (activeTab === 'all' || activeTab === 'people') && searchResults.users.length > 0 && (
+                  <div className="mb-6">
+                    <h3 className="text-sm text-zinc-400 uppercase tracking-wider mb-3">
+                      {t('explorePage.people')} ({searchResults.users.length})
+                    </h3>
+                    <SearchPeopleCards
+                      users={activeTab === 'people' ? searchResults.users : searchResults.users.slice(0, 10)}
+                      layout={activeTab === 'people' ? 'grid' : 'row'}
+                      onProfileClick={handlePeopleCardClick}
+                    />
+                    {activeTab === 'all' && searchResults.users.length > 10 && (
+                      <button
+                        onClick={() => setActiveTab('people')}
+                        className="text-white text-sm mt-3 hover:underline"
+                      >
+                        {t('explorePage.viewAllPeople', { count: searchResults.users.length })}
+                      </button>
+                    )}
+                  </div>
+                )}
+
+                {/* Content Results - Using Feed Cards */}
+                {showResults && activeTab !== 'people' && mappedFeedItems.length > 0 && (
+                  <div className="space-y-4">
+                    <h3 className="text-sm text-zinc-400 uppercase tracking-wider mb-3">
+                      {activeTab === 'all' ? t('explorePage.content') : activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} ({mappedFeedItems.length}{hasNextPage ? '+' : ''})
+                    </h3>
+                    
+                    {/* Feed Cards */}
+                    <div className="space-y-4">
+                      {mappedFeedItems.map((feedItem, index) => {
+                        // Off-screen results skip layout/paint until scrolled
+                        // near (same technique as the home feed).
+                        const drawn = index < resultCardsDrawn;
+                        const cvStyle = !drawn ? PENDING_RESULT_STYLE : index < 3 ? undefined : OFFSCREEN_RESULT_STYLE;
+                        if (feedItem.type === 'video') {
+                          const video = feedItem.item as VideoItem;
+                          return (
+                            <div key={video.id} style={cvStyle}>
+                              {drawn && <VideoCard video={video} />}
+                            </div>
+                          );
+                        } else {
+                          const image = feedItem.item as ImagePost;
+                          return (
+                            <div key={image.id} style={cvStyle}>
+                              {drawn && <ImageCard post={image} />}
+                            </div>
+                          );
+                        }
+                      })}
+                    </div>
+
+                    {/* Infinite scroll trigger */}
+                    <div ref={loadMoreRef} className="h-10 flex items-center justify-center">
+                      {isFetchingNextPage && (
+                        <div className="flex items-center gap-2 text-zinc-400">
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          <span className="text-sm">{t('explorePage.loadingMore')}</span>
+                        </div>
+                      )}
+                      {!hasNextPage && mappedFeedItems.length > 0 && (
+                        <p className="text-zinc-500 text-sm">{t('explorePage.noMoreResults')}</p>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* No Results */}
+                {canShowEmptySearch && !isWaitingForSearch && (
+                  <div className="text-center py-8">
+                    <p className="text-zinc-400">{t('explorePage.noResultsFor', { query: searchQuery })}</p>
+                    <p className="text-zinc-500 text-sm mt-1">{t('explorePage.tryDifferent')}</p>
+                    {isUsernameQuery && (
+                      <p className="text-zinc-500 text-sm mt-2">
+                        {t('explorePage.tipRemoveAt')}
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          ) : (
+            <motion.div
+              key="default-content"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="space-y-2"
+            >
+              {/* Phones: the categories are a line of words under the pill,
+                  the lit one underlined. Desktop keeps its chip bento. */}
+              {phonePill && exploreCategories.length > 0 && (
+                <ExploreCategoryWords
+                  categories={exploreCategories}
+                  value={exploreCategoryId}
+                  onChange={(id) => {
+                    setExploreCategoryId(id);
+                    scrollDocumentTo(0);
+                  }}
+                />
+              )}
+
+              {/* Category Carousel */}
+              {!phonePill && exploreCategories.length > 0 && (
+                <div data-page-bento className="bg-zinc-900 rounded-2xl p-1">
+                  <div data-fade-edges>
+                  <SwipeableCarousel className="flex gap-2 overflow-x-auto scrollbar-hide">
+                    <button
+                      onClick={() => setExploreCategoryId(null)}
+                      className={cn(
+                        'flex-shrink-0 px-4 py-2 rounded-xl text-sm font-medium transition-all whitespace-nowrap',
+                        !exploreCategoryId
+                          ? cn(
+                              'text-white bg-gradient-to-br from-white/20 via-white/10 to-white/5 backdrop-blur-xl border border-white/30',
+                              isLightTheme
+                                ? 'shadow-[0_2px_8px_rgba(0,0,0,0.1),inset_0_1px_0_rgba(255,255,255,0.2)]'
+                                : 'shadow-[0_4px_16px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.4)]'
+                            )
+                          : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white'
+                      )}
+                    >{_copy("copy.a52ace420f21", { defaultValue: "All" })}</button>
+                    {exploreCategories.slice(0, categoryLimit).map((cat) => (
+                      <button
+                        key={cat.id}
+                        onClick={() => {
+                          setExploreCategoryId(cat.id);
+                          scrollDocumentTo(0);
+                        }}
+                        className={cn(
+                          'flex-shrink-0 px-4 py-2 rounded-xl text-sm font-medium transition-all whitespace-nowrap',
+                          exploreCategoryId === cat.id
+                            ? cn(
+                                'text-white bg-gradient-to-br from-white/20 via-white/10 to-white/5 backdrop-blur-xl border border-white/30',
+                                isLightTheme
+                                  ? 'shadow-[0_2px_8px_rgba(0,0,0,0.1),inset_0_1px_0_rgba(255,255,255,0.2)]'
+                                  : 'shadow-[0_4px_16px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.4)]'
+                              )
+                            : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white'
+                        )}
+                      >
+                        {cat.name}
+                      </button>
+                    ))}
+                    {categoryLimit < exploreCategories.length && (
+                      <button className="flex-shrink-0 px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap bg-zinc-800 text-white"
+                        onClick={() => setCategoryLimit(limit => limit + 24)}>
+                        {t('common.loadMore', { defaultValue: 'Load more' })}
+                      </button>
+                    )}
+                  </SwipeableCarousel>
+                  </div>
+                </div>
+              )}
+
+              {/* Category Browse Feed */}
+              {exploreCategoryId ? (
+                <div
+                  data-page-bento={phonePill ? undefined : true}
+                  className={phonePill ? 'pt-2' : 'bg-zinc-900 rounded-2xl p-4 sm:p-6'}
+                >
+                  {/* Phones name the category in the lit word above already. */}
+                  {!phonePill && (
+                  <h2 className="text-lg sm:text-xl font-bold text-white mb-4">
+                    {exploreCategories.find(c => c.id === exploreCategoryId)?.name || exploreCategoryId}
+                  </h2>
+                  )}
+                  
+                  {categoryBrowseFeed.isLoading ? (
+                    <div className="flex items-center justify-center py-12">
+                      <div className="flex items-center gap-3 text-zinc-400">
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                        <span>{t('explorePage.searching')}</span>
+                      </div>
+                    </div>
+                  ) : categoryBrowseFeed.isError && categoryFeedItems.length === 0 ? (
+                    <AppState
+                      kind="error"
+                      title={t('common.failedToLoad')}
+                      primaryAction={{ label: t('common.retry'), onClick: () => void categoryBrowseFeed.refetch() }}
+                    />
+                  ) : categoryFeedItems.length === 0 ? (
+                    <AppState
+                      icon="search"
+                      title={_copy("copy.9b5b63048faa", { defaultValue: "No content found in this category" })}
+                      description={_copy("copy.cc4d2b473cad", { defaultValue: "Try another category or check back later." })}
+                      kind="search-empty"
+                      size="section"
+                    />
+                  ) : (
+                    <div className="space-y-4">
+                      {categoryFeedItems.map((feedItem, index) => {
+                        const drawn = index < categoryCardsDrawn;
+                        const cvStyle = !drawn ? PENDING_RESULT_STYLE : index < 3 ? undefined : OFFSCREEN_RESULT_STYLE;
+                        if (feedItem.type === 'video') {
+                          const video = feedItem.item as VideoItem;
+                          return <div key={video.id} style={cvStyle}>{drawn && <VideoCard video={video} />}</div>;
+                        } else {
+                          const image = feedItem.item as ImagePost;
+                          return <div key={image.id} style={cvStyle}>{drawn && <ImageCard post={image} />}</div>;
+                        }
+                      })}
+                      <div ref={categoryLoaderRef} className="h-10 flex items-center justify-center">
+                        {categoryBrowseFeed.isFetchingNextPage && (
+                          <div className="flex items-center gap-2 text-zinc-400">
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                            <span className="text-sm">{t('explorePage.loadingMore')}</span>
+                          </div>
+                        )}
+                        {!categoryBrowseFeed.hasNextPage && categoryFeedItems.length > 0 && (
+                          <p className="text-zinc-500 text-sm">{t('explorePage.noMoreResults')}</p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : phonePill ? (
+                <>
+                <ExplorePhoneHome
+                  categories={exploreCategories}
+                  onCategory={(id) => {
+                    setExploreCategoryId(id);
+                    scrollDocumentTo(0);
+                  }}
+                  recentSearches={recentSearches}
+                  onSearch={setSearchQuery}
+                  onRemoveSearch={removeFromHistory}
+                  onClearSearches={clearHistory}
+                />
+                {/* The week's top videos by reactions, PPV or tips. */}
+                <TrendingEarned phone />
+                </>
+              ) : (
+                <>
+                  {/* Recent Searches Bento — only once there is a search to
+                      show; an empty box would take the top of the page. */}
+                  {recentSearches.length > 0 && <div data-page-bento className="bg-zinc-900 rounded-2xl p-4 sm:p-6">
+                    <div className="flex items-center justify-between mb-4">
+                        <h2 className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
+                        <BrandIcon src={search3dIcon} alt={_copy("copy.27392df73ae0", { defaultValue: "Search explore icon" })} className="w-8 h-8 sm:w-9 sm:h-9 object-contain" />
+                        {t('explorePage.searchHistory')}
+                      </h2>
+                      {recentSearches.length > 0 && (
+                        <button
+                          onClick={clearHistory}
+                          className="text-zinc-500 hover:text-white text-sm flex items-center gap-1 transition-colors"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                          {t('explorePage.clearHistory')}
+                        </button>
+                      )}
+                    </div>
+                    {recentSearches.length > 0 ? (
+                      <div className="flex flex-wrap gap-2">
+                        <AnimatePresence initial={false}>
+                        {recentSearches.map((term) => (
+                          /* Phones: swipe a chip sideways to drop it, as well
+                             as the X. Desktop keeps the X only. */
+                          <motion.div
+                            key={term}
+                            layout
+                            drag={isMobile ? 'x' : false}
+                            dragSnapToOrigin
+                            dragElastic={0.6}
+                            onDragEnd={(_, info) => {
+                              if (Math.abs(info.offset.x) > 72 || Math.abs(info.velocity.x) > 600) removeFromHistory(term);
+                            }}
+                            exit={{ opacity: 0, scale: 0.85, transition: { duration: 0.15 } }}
+                            style={isMobile ? { touchAction: 'pan-y' } : undefined}
+                            className="group flex items-center bg-zinc-800 hover:bg-zinc-700 rounded-xl transition-colors max-w-full"
+                          >
+                            <button
+                              onClick={() => setSearchQuery(term)}
+                              className="px-3 sm:px-4 py-2 text-white text-sm text-left break-all"
+                            >
+                              {term}
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                removeFromHistory(term);
+                              }}
+                              className="pr-3 pl-1 py-2 text-zinc-500 hover:text-white transition-colors"
+                            >
+                              <X className="w-3.5 h-3.5" />
+                            </button>
+                          </motion.div>
+                        ))}
+                        </AnimatePresence>
+                      </div>
+                    ) : null}
+                  </div>}
+
+                  {/* People to follow, as cover cards, the same row the feed
+                      carries. Nothing renders while it loads or when there is
+                      nobody left to suggest. */}
+                  <MobileWhoToFollowCarousel surface="explore" />
+
+                  {/* Trending Bento — same component as sidebar */}
+                  <WhatsHappening showCountrySelector surface="explore" />
+
+                  {/* The week's top videos by reactions, PPV or tips. */}
+                  <TrendingEarned phone={false} />
+
+                  {/* Radio shows on air and coming up, with a way to start one. */}
+                  <ExploreRadioShows boxed />
+
+                  {/* New members, last on the page: it is the one bento here
+                      whose contents change by the day, so it is worth scrolling
+                      to and worth coming back for. Renders nothing when nobody
+                      joined recently. */}
+                  <NewMembersBento />
+                </>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </PageBody>
+    </div>
+  );
+}

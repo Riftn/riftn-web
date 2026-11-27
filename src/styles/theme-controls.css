@@ -1,0 +1,402 @@
+@import './search-fields.css';
+
+/* Standalone fallbacks sit outside the app shell's black baseline. The generic
+   background/foreground tokens default to light, so set the dark baselines
+   explicitly before applying the canvas page veil. */
+html:is([data-theme='system'], [data-theme='immersive'], [data-theme='minimal']) [data-theme-page-surface] {
+  background-color: #000;
+  color: #fff;
+}
+
+html[data-theme='light'] [data-theme-page-surface] {
+  background-color: var(--paper);
+  color: var(--ink);
+}
+
+html[data-system-tone="light"] [data-theme-page-surface] {
+  background-color: var(--paper);
+  color: var(--ink);
+}
+
+html:is([data-theme='glass'], [data-theme='cosmic'], [data-theme='hazy'], [data-theme='swarms'], [data-theme='lavalamp'], [data-theme='winter'], [data-theme='war'], [data-theme='osaka'], [data-theme='jungle'], [data-theme='island'], [data-theme='hacker'], [data-theme='horror']) [data-theme-page-surface] {
+  background-color: rgb(var(--glass-tint) / var(--glass-regular));
+  color: #fff;
+}
+
+/* Shared and handwritten controls use the same finish within each theme. */
+/* Media tiles own their clipping; a button rim must never frame the picture. */
+[data-media-tile] {
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+html:is([data-theme='system'], [data-theme='immersive'], [data-theme='minimal'], [data-theme='light']) {
+  --control-fill: rgba(255,255,255,0.12);
+  --control-raised: rgba(255,255,255,0.24);
+  --control-sheen: linear-gradient(160deg, rgba(255,255,255,0.20), rgba(255,255,255,0.05));
+  --control-edge: rgba(255,255,255,0.30);
+  --control-ink: #fff;
+  --control-shadow: inset 0 1px 0 rgba(255,255,255,0.45), inset 0 -1px 0 rgba(255,255,255,0.10);
+}
+
+html:is([data-theme='system'], [data-theme='immersive'], [data-theme='minimal'], [data-system-tone="light"]) {
+  --control-fill: rgba(255,255,255,0.12);
+  --control-raised: rgba(255,255,255,0.24);
+  --control-sheen: linear-gradient(160deg, rgba(255,255,255,0.20), rgba(255,255,255,0.05));
+  --control-edge: rgba(255,255,255,0.30);
+  --control-ink: #fff;
+  --control-shadow: inset 0 1px 0 rgba(255,255,255,0.45), inset 0 -1px 0 rgba(255,255,255,0.10);
+}
+/* Light controls are flat: a quiet ink wash with a hairline, no bevel or
+   gradient. The raised white sheen read as a stack of floating, shadowed
+   pills on paper, and made a selected chip look the same as its neighbours. */
+html[data-theme='light'] {
+  --control-fill: rgba(0,0,0,0.05);
+  --control-raised: rgba(0,0,0,0.09);
+  --control-sheen: linear-gradient(transparent, transparent);
+  --control-edge: rgba(0,0,0,0.10);
+  --control-ink: #1a1a1a;
+  --control-shadow: none;
+}
+html[data-system-tone="light"] {
+  --control-fill: rgba(11,11,13,0.05);
+  --control-raised: rgba(11,11,13,0.09);
+  --control-sheen: linear-gradient(transparent, transparent);
+  --control-edge: rgba(11,11,13,0.10);
+  --control-ink: #0b0b0d;
+  --control-shadow: none;
+}
+html[data-theme='minimal'] {
+  --control-fill: #000;
+  --control-raised: #171717;
+  --control-sheen: none;
+  --control-edge: rgba(255,255,255,0.22);
+  --control-shadow: none;
+}
+
+/* Navigation Create uses paper and ink on Light, including its nested label.
+   The older dark-CTA rule otherwise leaves the label white on this pale fill. */
+html[data-theme='light'] [data-nav-create] {
+  background: var(--control-sheen), var(--control-fill) !important;
+  border: 1px solid var(--control-edge) !important;
+  box-shadow: var(--control-shadow) !important;
+}
+html[data-system-tone="light"] [data-nav-create] {
+  background: var(--control-sheen), var(--control-fill) !important;
+  box-shadow: var(--control-shadow) !important;
+}
+html[data-theme='light'] [data-nav-create],
+html[data-theme='light'] [data-nav-create] :is(div, span, svg) {
+  color: var(--control-ink) !important;
+}
+html[data-system-tone="light"] [data-nav-create],
+html[data-system-tone="light"] [data-nav-create] :is(div, span, svg) {
+  color: var(--control-ink) !important;
+}
+html[data-theme='light'] [data-nav-create] svg {
+  stroke: var(--control-ink) !important;
+}
+html[data-system-tone="light"] [data-nav-create] svg {
+  stroke: var(--control-ink) !important;
+}
+html[data-theme='light'] [data-nav-create] > div[aria-hidden='true'] {
+  display: none;
+}
+html[data-theme='light'] [data-nav-create] .animate-spin {
+  border-color: var(--control-edge) !important;
+  border-top-color: var(--control-ink) !important;
+}
+html[data-system-tone="light"] [data-nav-create] .animate-spin {
+  border-color: var(--control-edge) !important;
+  border-top-color: var(--control-ink) !important;
+}
+html:is([data-theme='system'], [data-theme='immersive'], [data-theme='minimal'], [data-theme='light'])
+  :is(#app-root, [data-theme-page-surface], [role='dialog'], [role='alertdialog'], [data-vaul-drawer])
+  :is(
+    [data-theme-button]:is([data-button-variant='default'], [data-button-variant='glass'], [data-button-variant='secondary'], [data-button-variant='outline']),
+    :is(button, a[role='button']):is([class^='bg-white'], [class*=' bg-white'], [class^='bg-black'], [class*=' bg-black'], [class^='bg-zinc-'], [class*=' bg-zinc-'], [class^='from-white/'], [class*=' from-white/'])
+  ):not([data-keep-dark]):not([data-keep-white]):not([data-on-media]):not([data-video-bare]):not([data-video-topbar] *):not([data-video-inline-tools] *):not([data-audio-player] *):not([class*='aspect-']):not([role='tab']):not([data-switch-track]):not(:empty) {
+  background: var(--control-sheen), var(--control-fill) !important;
+  border: 1px solid var(--control-edge) !important;
+  box-shadow: var(--control-shadow) !important;
+  color: var(--control-ink) !important;
+  backdrop-filter: blur(12px);
+}
+html:is([data-theme='system'], [data-theme='immersive'], [data-theme='minimal'], [data-system-tone="light"])
+  :is(#app-root, [data-theme-page-surface], [role='dialog'], [role='alertdialog'], [data-vaul-drawer])
+  :is(
+    [data-theme-button]:is([data-button-variant='default'], [data-button-variant='glass'], [data-button-variant='secondary'], [data-button-variant='outline']),
+    :is(button, a[role='button']):is([class^='bg-white'], [class*=' bg-white'], [class^='bg-black'], [class*=' bg-black'], [class^='bg-zinc-'], [class*=' bg-zinc-'], [class^='from-white/'], [class*=' from-white/'])
+  ):not([data-keep-dark]):not([data-keep-white]):not([data-on-media]):not([data-video-bare]):not([data-video-topbar] *):not([data-video-inline-tools] *):not([data-audio-player] *):not([class*='aspect-']):not([role='tab']):not([data-switch-track]):not(:empty) {
+  background: var(--control-sheen), var(--control-fill) !important;
+  box-shadow: var(--control-shadow) !important;
+  color: var(--control-ink) !important;
+  backdrop-filter: blur(12px);
+}
+html:is([data-theme='system'], [data-theme='immersive'], [data-theme='minimal'], [data-theme='light'])
+  :is(#app-root, [data-theme-page-surface], [role='dialog'], [role='alertdialog'], [data-vaul-drawer])
+  :is(
+    [data-theme-button]:is([data-button-variant='default'], [data-button-variant='glass'], [data-button-variant='secondary'], [data-button-variant='outline']),
+    :is(button, a[role='button']):is([class^='bg-white'], [class*=' bg-white'], [class^='bg-black'], [class*=' bg-black'], [class^='bg-zinc-'], [class*=' bg-zinc-'], [class^='from-white/'], [class*=' from-white/'])
+  ):not([data-keep-dark]):not([data-keep-white]):not([data-on-media]):not([data-video-bare]):not([data-video-topbar] *):not([data-video-inline-tools] *):not([data-audio-player] *):not([class*='aspect-']):not([role='tab']):not([data-switch-track]):not(:empty)
+  :is(.text-black, .text-white, .text-zinc-900, .text-zinc-800, .text-zinc-700, svg):not([data-audio-player] *) {
+  color: var(--control-ink) !important;
+}
+html:is([data-theme='system'], [data-theme='immersive'], [data-theme='minimal'], [data-system-tone="light"])
+  :is(#app-root, [data-theme-page-surface], [role='dialog'], [role='alertdialog'], [data-vaul-drawer])
+  :is(
+    [data-theme-button]:is([data-button-variant='default'], [data-button-variant='glass'], [data-button-variant='secondary'], [data-button-variant='outline']),
+    :is(button, a[role='button']):is([class^='bg-white'], [class*=' bg-white'], [class^='bg-black'], [class*=' bg-black'], [class^='bg-zinc-'], [class*=' bg-zinc-'], [class^='from-white/'], [class*=' from-white/'])
+  ):not([data-keep-dark]):not([data-keep-white]):not([data-on-media]):not([data-video-bare]):not([data-video-topbar] *):not([data-video-inline-tools] *):not([data-audio-player] *):not([class*='aspect-']):not([role='tab']):not([data-switch-track]):not(:empty)
+  :is(.text-black, .text-white, .text-zinc-900, .text-zinc-800, .text-zinc-700, svg):not([data-audio-player] *) {
+  color: var(--control-ink) !important;
+}
+
+/* These shared layers also sit inside icon actions, bubbles and tab controls;
+   their old white gradient bypassed the button material rules. */
+html:is([data-theme='system'], [data-theme='immersive'], [data-theme='minimal'], [data-theme='light'])
+  [data-theme-control-surface]:not([data-on-media]):not([data-on-media] *):not([data-keep-dark]):not([data-keep-dark] *):not([data-keep-white]):not([data-keep-white] *) {
+  background: var(--control-sheen), var(--control-fill) !important;
+  border: 1px solid var(--control-edge) !important;
+  box-shadow: var(--control-shadow) !important;
+  color: var(--control-ink) !important;
+  backdrop-filter: blur(12px);
+}
+html:is([data-theme='system'], [data-theme='immersive'], [data-theme='minimal'], [data-system-tone="light"])
+  [data-theme-control-surface]:not([data-on-media]):not([data-on-media] *):not([data-keep-dark]):not([data-keep-dark] *):not([data-keep-white]):not([data-keep-white] *) {
+  background: var(--control-sheen), var(--control-fill) !important;
+  box-shadow: var(--control-shadow) !important;
+  color: var(--control-ink) !important;
+  backdrop-filter: blur(12px);
+}
+html:is([data-theme='system'], [data-theme='immersive'], [data-theme='minimal'], [data-theme='light'])
+  [data-theme-control-active] > [data-theme-control-surface]:not([data-on-media] *):not([data-keep-dark] *):not([data-keep-white] *) {
+  background: var(--control-sheen), var(--control-raised) !important;
+}
+html:is([data-theme='system'], [data-theme='immersive'], [data-theme='minimal'], [data-system-tone="light"])
+  [data-theme-control-active] > [data-theme-control-surface]:not([data-on-media] *):not([data-keep-dark] *):not([data-keep-white] *) {
+  background: var(--control-sheen), var(--control-raised) !important;
+}
+html:is([data-theme='glass'], [data-theme='cosmic'], [data-theme='hazy'], [data-theme='swarms'], [data-theme='lavalamp'], [data-theme='winter'], [data-theme='war'], [data-theme='osaka'], [data-theme='jungle'], [data-theme='island'], [data-theme='hacker'], [data-theme='horror'])
+  [data-theme-control-surface]:not([data-on-media]):not([data-on-media] *):not([data-keep-dark]):not([data-keep-dark] *) {
+  background: var(--glass-highlight), var(--theme-control-fill, rgb(var(--glass-tint) / var(--glass-regular))) !important;
+  border-color: transparent !important;
+  box-shadow: var(--glass-edge-flat) !important;
+  backdrop-filter: var(--glass-blur) !important;
+}
+html:is([data-theme='system'], [data-theme='immersive'], [data-theme='minimal'], [data-theme='light'], [data-theme='glass'], [data-theme='cosmic'], [data-theme='hazy'], [data-theme='swarms'], [data-theme='lavalamp'], [data-theme='winter'], [data-theme='war'], [data-theme='osaka'], [data-theme='jungle'], [data-theme='island'], [data-theme='hacker'], [data-theme='horror'])
+  [data-theme-control-surface]:not([data-on-media]):not([data-on-media] *):not([data-keep-dark]):not([data-keep-dark] *)::before,
+html:is([data-theme='system'], [data-theme='immersive'], [data-theme='minimal'], [data-theme='light'], [data-theme='glass'], [data-theme='cosmic'], [data-theme='hazy'], [data-theme='swarms'], [data-theme='lavalamp'], [data-theme='winter'], [data-theme='war'], [data-theme='osaka'], [data-theme='jungle'], [data-theme='island'], [data-theme='hacker'], [data-theme='horror'])
+  [data-theme-control-surface]:not([data-on-media]):not([data-on-media] *):not([data-keep-dark]):not([data-keep-dark] *)::after {
+  background-image: none !important;
+}
+html:is([data-theme='system'], [data-theme='immersive'], [data-theme='minimal'], [data-system-tone="light"], [data-theme='glass'], [data-theme='cosmic'], [data-theme='hazy'], [data-theme='swarms'], [data-theme='lavalamp'], [data-theme='winter'], [data-theme='war'], [data-theme='osaka'], [data-theme='jungle'], [data-theme='island'], [data-theme='hacker'], [data-theme='horror'])
+  [data-theme-control-surface]:not([data-on-media]):not([data-on-media] *):not([data-keep-dark]):not([data-keep-dark] *)::before, html:is([data-theme='system'], [data-theme='immersive'], [data-theme='minimal'], [data-system-tone="light"], [data-theme='glass'], [data-theme='cosmic'], [data-theme='hazy'], [data-theme='swarms'], [data-theme='lavalamp'], [data-theme='winter'], [data-theme='war'], [data-theme='osaka'], [data-theme='jungle'], [data-theme='island'], [data-theme='hacker'], [data-theme='horror'])
+  [data-theme-control-surface]:not([data-on-media]):not([data-on-media] *):not([data-keep-dark]):not([data-keep-dark] *)::after {
+  background-image: none !important;
+}
+html:is([data-theme='glass'], [data-theme='cosmic'], [data-theme='hazy'], [data-theme='swarms'], [data-theme='lavalamp'], [data-theme='winter'], [data-theme='war'], [data-theme='osaka'], [data-theme='jungle'], [data-theme='island'], [data-theme='hacker'], [data-theme='horror'])
+  [data-theme-control-active] > [data-theme-control-surface]:not([data-on-media] *):not([data-keep-dark] *) {
+  background: var(--glass-highlight), var(--theme-control-raised) !important;
+}
+
+/* Each navigation header already frosts everything behind it. Blurring its moving
+   selection again can leave a horizontal compositor seam inside the pill
+   after a tab or scroll transition. Keep the themed fill and rim, with one
+   backdrop sample owned by the bar on desktop and phone alike. */
+html[data-theme] :is([data-feed-nav], [data-kit-island], [data-feed-nav-outer] > [data-page-bento]) [data-theme-control-surface]:not(#_):not(#_) {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+/* Side-panel controls use the stationary panel's frost. Their selection,
+   hover and pressed layers keep their fill and rim without another sample. */
+html[data-theme][data-theme] [data-side-panel]
+  :is(button, a, [data-theme-control-surface], [data-sidebar-active-indicator]):not(#_):not(#_) {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+/* Except the side-panel "View all" capsule: it is frosted liquid glass, not a
+   clear pane. A thin tint with no blur read as a see-through window. */
+html:is([data-theme='glass'], [data-theme='cosmic'], [data-theme='hazy'], [data-theme='swarms'], [data-theme='lavalamp'], [data-theme='winter'], [data-theme='war'], [data-theme='osaka'], [data-theme='jungle'], [data-theme='island'], [data-theme='hacker'], [data-theme='horror'])
+  [data-side-panel] [data-view-all] [data-theme-control-surface]:not(#_):not(#_):not(#_) {
+  -webkit-backdrop-filter: blur(20px) saturate(1.8) !important;
+  backdrop-filter: blur(20px) saturate(1.8) !important;
+}
+html:is([data-theme='glass'], [data-theme='cosmic'], [data-theme='hazy'], [data-theme='swarms'], [data-theme='lavalamp'], [data-theme='winter'], [data-theme='jungle'], [data-theme='island'], [data-theme='hacker'], [data-theme='horror'])
+  [data-side-panel] [data-view-all] [data-theme-control-surface]:not(#_):not(#_):not(#_) {
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 0.16), rgb(255 255 255 / 0.05)),
+    linear-gradient(var(--theme-control-fill, rgb(var(--glass-tint) / 0.36)), var(--theme-control-fill, rgb(var(--glass-tint) / 0.36))),
+    rgb(var(--glass-tint) / 0.6) !important;
+  border: 1px solid rgb(255 255 255 / 0.22) !important;
+  box-shadow:
+    inset 0 1px 1px rgb(255 255 255 / 0.24),
+    0 4px 14px rgb(0 0 0 / 0.35) !important;
+}
+
+/* System dark has no canvas behind its side panels, so the same capsule
+   there is the floating-glass tint with a soft sheen rather than a faint
+   white wash. */
+html[data-theme='system']:not([data-system-tone='light'])
+  [data-side-panel] [data-view-all] [data-theme-control-surface]:not(#_):not(#_):not(#_) {
+  background-color: var(--float-glass, rgb(9 9 11 / 0.72)) !important;
+  background-image: linear-gradient(160deg, rgb(255 255 255 / 0.16), rgb(255 255 255 / 0.04)) !important;
+  border: 1px solid rgb(255 255 255 / 0.16) !important;
+  backdrop-filter: var(--float-glass-blur, blur(24px) saturate(160%)) !important;
+}
+
+/* Requests moves between cached routes and a scroll-clipped feed. Its parent
+   panels already own the frost; a second backdrop layer on each action can
+   retain an empty compositor surface when the cached page becomes visible. */
+html[data-theme][data-theme] [data-requests-page] [data-theme-button]:not(#_):not(#_) {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+/* Chat pills sit over a changing thread. Preserve their tint and rim without
+   sampling the scrolling thread or the composer again for each control. */
+html[data-theme][data-theme] :is([data-chat-header], [data-drop-attach]:has([data-chat-composer-input]))
+  [data-theme-button]:not(#_):not(#_),
+html[data-theme] :is([data-chat-jump], [data-chat-day-pill] > span, [data-chat-unread-marker] > span:not([data-unread-hairline])) {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+/* Bubble actions keep the theme's label colour when their white active
+   material is replaced by the shared tinted surface. */
+html:is([data-theme='system'], [data-theme='immersive'], [data-theme='minimal'], [data-theme='light'])
+  [data-theme-control-label]:not([data-on-media] *):not([data-keep-dark] *):not([data-keep-white] *) {
+  color: var(--control-ink) !important;
+}
+html:is([data-theme='system'], [data-theme='immersive'], [data-theme='minimal'], [data-system-tone="light"])
+  [data-theme-control-label]:not([data-on-media] *):not([data-keep-dark] *):not([data-keep-white] *) {
+  color: var(--control-ink) !important;
+}
+html:is([data-theme='glass'], [data-theme='cosmic'], [data-theme='hazy'], [data-theme='swarms'], [data-theme='lavalamp'], [data-theme='winter'], [data-theme='war'], [data-theme='osaka'], [data-theme='jungle'], [data-theme='island'], [data-theme='hacker'], [data-theme='horror'])
+  [data-theme-control-label]:not([data-on-media] *):not([data-keep-dark] *) {
+  color: var(--theme-control-foreground, #fff) !important;
+}
+
+/* Bespoke themes keep their own grain, corners and edge recipes on ordinary
+   controls as well as panels. Explicit CTA, follow and filter roles retain
+   their accent treatments. */
+html[data-theme='war'] {
+  --theme-control-foreground: rgb(var(--war-sand) / 0.94);
+  --theme-control-radius: 0;
+}
+html[data-theme='osaka'] {
+  --theme-control-foreground: rgb(var(--osaka-mist));
+  --theme-control-radius: var(--osaka-r-chip);
+}
+html[data-theme='jungle'] {
+  --theme-control-foreground: rgb(var(--jungle-bone));
+  --theme-control-radius: var(--jungle-r-chip);
+}
+html:is([data-theme='war'], [data-theme='osaka'], [data-theme='jungle'])
+  :is(#app-root, [data-theme-page-surface], [role='dialog'], [role='alertdialog'], [data-vaul-drawer])
+  :is(
+    [data-theme-button]:is([data-button-variant='default'], [data-button-variant='glass'], [data-button-variant='secondary'], [data-button-variant='outline']),
+    :is(button, a[role='button']):is([class^='bg-white'], [class*=' bg-white'], [class^='bg-black'], [class*=' bg-black'], [class^='bg-zinc-'], [class*=' bg-zinc-'], [class^='from-white/'], [class*=' from-white/']),
+    [data-theme-control-surface]
+  ):not([data-primary-cta]):not([data-follow-btn]):not([data-filter-chip]):not([data-comment-send]):not([data-keep-white]):not([data-keep-white] *):not([data-keep-dark]):not([data-keep-dark] *):not([data-on-media]):not([data-on-media] *):not([data-video-bare]):not([data-video-topbar] *):not([data-video-inline-tools] *):not([data-audio-player] *):not([class*='aspect-']):not([role='tab']):not([data-switch-track]):not(:empty) {
+  background: var(--glass-highlight), var(--theme-control-fill, rgb(var(--glass-tint) / var(--glass-regular))) !important;
+  border-color: transparent !important;
+  border-radius: var(--theme-control-radius) !important;
+  box-shadow: var(--glass-edge-flat) !important;
+  backdrop-filter: var(--glass-blur) !important;
+  color: var(--theme-control-foreground) !important;
+}
+html:is([data-theme='war'], [data-theme='osaka'], [data-theme='jungle'])
+  :is(#app-root, [data-theme-page-surface], [role='dialog'], [role='alertdialog'], [data-vaul-drawer])
+  [data-theme-control-active] > [data-theme-control-surface]:not([data-on-media] *):not([data-keep-dark] *) {
+  background: var(--glass-highlight), var(--theme-control-raised) !important;
+}
+html:is([data-theme='war'], [data-theme='osaka'], [data-theme='jungle'])
+  :is(#app-root, [data-theme-page-surface], [role='dialog'], [role='alertdialog'], [data-vaul-drawer])
+  :is(
+    [data-theme-button]:is([data-button-variant='default'], [data-button-variant='glass'], [data-button-variant='secondary'], [data-button-variant='outline']),
+    :is(button, a[role='button']):is([class^='bg-white'], [class*=' bg-white'], [class^='bg-black'], [class*=' bg-black'], [class^='bg-zinc-'], [class*=' bg-zinc-'], [class^='from-white/'], [class*=' from-white/']),
+    [data-theme-control-surface]
+  ):not([data-primary-cta]):not([data-follow-btn]):not([data-filter-chip]):not([data-comment-send]):not([data-keep-white]):not([data-keep-white] *):not([data-keep-dark]):not([data-keep-dark] *):not([data-on-media]):not([data-on-media] *):not([data-video-bare]):not([data-video-topbar] *):not([data-video-inline-tools] *):not([data-audio-player] *):not([class*='aspect-']):not([role='tab']):not([data-switch-track]):not(:empty)
+  :is(span, svg):not([data-audio-player] *) {
+  color: var(--theme-control-foreground) !important;
+}
+
+
+/* Light themes: the selected chip (written bg-white + dark text for dark
+   themes) becomes solid ink with white type, so it stands apart from the flat
+   idle chips instead of turning into the same pale pill (white type on a
+   white sheen in System Light). Two extra ids beat the control material. */
+html:is([data-theme='light'], [data-system-tone='light'])
+  :is(#app-root, [data-theme-page-surface], [role='dialog'], [role='alertdialog'], [data-vaul-drawer])
+  :is(button, a, [role='button']).bg-white:is(.text-black, .text-zinc-900, .text-zinc-950):not([data-keep-white]):not([data-on-media]):not([data-on-media] *):not([data-media-full] *):not(#_):not(#_) {
+  background: #111114 !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  color: #fff !important;
+}
+html:is([data-theme='light'], [data-system-tone='light'])
+  :is(#app-root, [data-theme-page-surface], [role='dialog'], [role='alertdialog'], [data-vaul-drawer])
+  :is(button, a, [role='button']).bg-white:is(.text-black, .text-zinc-900, .text-zinc-950):not([data-keep-white]):not([data-on-media]):not([data-on-media] *):not([data-media-full] *):not(#_):not(#_)
+  :is([class*='text-black'], [class*='text-zinc-'], .text-white, svg) {
+  color: rgba(255,255,255,0.86) !important;
+}
+
+
+/* Poll duration chips and the composer's song / video sound quick picks: the
+   picked one must read as picked in every theme, so it stays a solid chip
+   (white on dark and glass themes, ink on light) instead of the shared
+   control material. Three extra ids beat that material. */
+html :is([data-poll-duration], [data-mix-pick])[aria-pressed='true']:not(#_):not(#_):not(#_) {
+  background: #fff !important;
+  border: 1px solid #fff !important;
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.35), 0 0 14px rgba(255,255,255,0.3) !important;
+  color: #09090b !important;
+  backdrop-filter: none !important;
+}
+html:is([data-theme='light'], [data-system-tone='light']) :is([data-poll-duration], [data-mix-pick])[aria-pressed='true']:not(#_):not(#_):not(#_) {
+  background: #111114 !important;
+  border-color: #111114 !important;
+  box-shadow: none !important;
+  color: #fff !important;
+}
+html [data-poll-duration][aria-pressed='true']:not(#_):not(#_):not(#_) svg {
+  color: inherit !important;
+  stroke: currentColor !important;
+}
+
+/* The song / video sound sliders: a filled track that reads on every theme
+   (some themes tint the shared slider's fill nearly to the card colour). */
+html [data-sound-mixer] [data-slider-range] {
+  background: #fff;
+}
+html:is([data-theme='light'], [data-system-tone='light']) [data-sound-mixer] [data-slider-range] {
+  background: #111114;
+}
+
+/* Composer ALT pill (AltTextEditor). It sits on the photo, so it keeps the same
+   look on every theme: dark outlined while empty, solid white with a tick once
+   alt text is saved. The control material would otherwise repaint both. */
+html [data-alt-text]:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border-radius: 0.5rem !important;
+}
+html [data-alt-text='empty']:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) {
+  background: rgba(0,0,0,0.7) !important;
+  border: 1px solid rgba(255,255,255,0.3) !important;
+  box-shadow: none !important;
+  color: #fff !important;
+}
+html [data-alt-text='set']:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) {
+  background: #fff !important;
+  border: 1px solid #fff !important;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.35) !important;
+  color: #09090b !important;
+}
+html [data-alt-text='set']:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) :is(svg, svg *) {
+  color: #09090b !important;
+  stroke: currentColor !important;
+}

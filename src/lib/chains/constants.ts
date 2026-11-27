@@ -1,0 +1,118 @@
+/**
+ * Chain & token constants aligned with dehub-stream-backend config/constants.ts
+ */
+
+import type { ChainId } from '@/components/app/ChainSelector';
+import {
+  ROBINHOOD_CHAIN_ID,
+  ROBINHOOD_ENABLED,
+  ROBINHOOD_TOKENS,
+  DHB_ROBINHOOD_PENDING_BRIDGE_ADDRESS,
+  IS_DHB_LIVE_ON_ROBINHOOD,
+} from '@/lib/chains/robinhood';
+
+// Re-exported rather than redeclared: `lib/chains/solana.ts` is where Solana's
+// ids, RPC, explorer and pending DHB mint live, and two copies of a chain id
+// is how one of them quietly becomes wrong.
+export { SOLANA_MAINNET_CHAIN_ID, SOLANA_DEVNET_CHAIN_ID } from '@/lib/chains/solana';
+import {
+  SOLANA_MAINNET_CHAIN_ID,
+  SOLANA_DEVNET_CHAIN_ID,
+  SOLANA_TOKENS,
+  NATIVE_SOL_MINT,
+  dhbSolanaMint,
+} from '@/lib/chains/solana';
+
+export const SOLANA_CHAIN_IDS: readonly number[] = [SOLANA_MAINNET_CHAIN_ID, SOLANA_DEVNET_CHAIN_ID];
+
+export function isSolanaChain(chainId: number): boolean {
+  return SOLANA_CHAIN_IDS.includes(chainId);
+}
+
+export function isEvmChain(chainId: number): boolean {
+  return !isSolanaChain(chainId);
+}
+
+export interface SupportedLockToken {
+  symbol: string;
+  name: string;
+  address: string;
+  chainId: ChainId | typeof SOLANA_MAINNET_CHAIN_ID;
+  decimals: number;
+}
+
+/** Production lock-content tokens (mirrors backend supportedTokensForLockContent) */
+export const SUPPORTED_LOCK_TOKENS: SupportedLockToken[] = [
+  // Base
+  { symbol: 'DHB', name: 'Riftn', address: '0xD20ab1015f6a2De4a6FdDEbAB270113F689c2F7c', chainId: 8453, decimals: 18 },
+  { symbol: 'USDC', name: 'USD Coin', address: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913', chainId: 8453, decimals: 6 },
+  { symbol: 'USDT', name: 'Tether', address: '0xfde4C96c8593536E31F229EA8f37b2ADa2699bb2', chainId: 8453, decimals: 6 },
+  { symbol: 'WETH', name: 'Wrapped Ether', address: '0x4200000000000000000000000000000000000006', chainId: 8453, decimals: 18 },
+  // BNB
+  { symbol: 'DHB', name: 'Riftn', address: '0x680D3113caf77B61b510f332D5Ef4cf5b41A761D', chainId: 56, decimals: 18 },
+  { symbol: 'USDT', name: 'Tether', address: '0x55d398326f99059fF775485246999027B3197955', chainId: 56, decimals: 18 },
+  { symbol: 'USDC', name: 'USD Coin', address: '0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d', chainId: 56, decimals: 18 },
+  { symbol: 'DOGE', name: 'Dogecoin', address: '0xbA2aE424d960c26247Dd6c32edC70B295c744C43', chainId: 56, decimals: 8 },
+  // Ethereum mainnet
+  { symbol: 'DHB', name: 'Riftn', address: '0x99BB69Ee1BbFC7706C3ebb79b21C5B698fe58EC0', chainId: 1, decimals: 18 },
+  { symbol: 'USDC', name: 'USD Coin', address: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', chainId: 1, decimals: 6 },
+  { symbol: 'USDT', name: 'Tether', address: '0xdAC17F958D2ee523a2206206994597C13D831ec7', chainId: 1, decimals: 6 },
+  // Solana. DHB is listed only once its SPL mint actually exists — the same
+  // rule Robinhood's bridged DHB follows below, and for the same reason: a
+  // lock token with no mint behind it is an option that fails at send time.
+  { symbol: 'SOL', name: 'Solana', address: NATIVE_SOL_MINT, chainId: SOLANA_MAINNET_CHAIN_ID, decimals: 9 },
+  { symbol: 'USDT', name: 'Tether', address: SOLANA_TOKENS.USDT, chainId: SOLANA_MAINNET_CHAIN_ID, decimals: 6 },
+  { symbol: 'USDC', name: 'USD Coin', address: SOLANA_TOKENS.USDC, chainId: SOLANA_MAINNET_CHAIN_ID, decimals: 6 },
+  ...(dhbSolanaMint()
+    ? ([{
+        symbol: 'DHB',
+        name: 'Riftn',
+        address: dhbSolanaMint()!,
+        chainId: SOLANA_MAINNET_CHAIN_ID,
+        decimals: 9,
+      }] as SupportedLockToken[])
+    : []),
+  // Robinhood Chain. ETH is the gas token here, so it is spendable directly —
+  // the v3 controller reads the zero address as native. USDT and USDC are the
+  // bridged L1 tokens and carry 6 decimals, unlike BNB Chain where both are 18.
+  ...(ROBINHOOD_ENABLED
+    ? ([
+        { symbol: 'ETH', name: 'Ether', address: ROBINHOOD_TOKENS.ETH, chainId: ROBINHOOD_CHAIN_ID, decimals: 18 },
+        { symbol: 'WETH', name: 'Wrapped Ether', address: ROBINHOOD_TOKENS.WETH, chainId: ROBINHOOD_CHAIN_ID, decimals: 18 },
+        { symbol: 'USDT', name: 'Tether', address: ROBINHOOD_TOKENS.USDT, chainId: ROBINHOOD_CHAIN_ID, decimals: 6 },
+        { symbol: 'USDC', name: 'USD Coin', address: ROBINHOOD_TOKENS.USDC, chainId: ROBINHOOD_CHAIN_ID, decimals: 6 },
+        // DHB is listed only once it has actually been bridged.
+        ...(IS_DHB_LIVE_ON_ROBINHOOD
+          ? [{
+              symbol: 'DHB',
+              name: 'Riftn',
+              address: DHB_ROBINHOOD_PENDING_BRIDGE_ADDRESS,
+              chainId: ROBINHOOD_CHAIN_ID,
+              decimals: 18,
+            }]
+          : []),
+      ] as SupportedLockToken[])
+    : []),
+];
+
+export function getLockTokensForChain(chainId: number): SupportedLockToken[] {
+  return SUPPORTED_LOCK_TOKENS.filter((t) => t.chainId === chainId);
+}
+
+export function findLockToken(symbol: string, chainId: number): SupportedLockToken | undefined {
+  return SUPPORTED_LOCK_TOKENS.find(
+    (t) => t.symbol.toUpperCase() === symbol.toUpperCase() && t.chainId === chainId,
+  );
+}
+
+export function isValidEvmAddress(address: string): boolean {
+  return /^0x[0-9a-fA-F]{40}$/.test(address.trim());
+}
+
+/** EVM chains that support on-chain minting via StreamCollection */
+export const MINTING_EVM_CHAIN_IDS: ChainId[] = [
+  8453,
+  56,
+  1,
+  ...(ROBINHOOD_ENABLED ? [ROBINHOOD_CHAIN_ID] : []),
+];

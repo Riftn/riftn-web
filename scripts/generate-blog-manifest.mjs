@@ -1,0 +1,439 @@
+/**
+ * generate-blog-manifest.mjs
+ * ==========================
+ * Runs at buildStart (vite.config.ts blogManifestPlugin) and regenerates every
+ * bot-facing blog artifact from the single source of truth in src/data +
+ * src/data/blogSource.ts (generator-only — article bodies never ship in the
+ * runtime JS bundle):
+ *
+ *   public/blog-manifest.json        — post metadata consumed by the ssr-seo
+ *                                      edge function (title/excerpt/dates/banner)
+ *   public/blog-content/<slug>.json  — per-post article body rendered to HTML
+ *                                      (`html`, inlined by the edge fn so
+ *                                      Googlebot gets the full text) PLUS the
+ *                                      raw markdown (`md`) the SPA fetches on
+ *                                      demand and renders client-side
+ *   src/data/blog-metadata.generated.ts — content-free post metadata arrays;
+ *                                      the ONLY blog data the runtime bundles
+ *   public/sitemap-static.xml        — blog <url> entries refreshed with real
+ *                                      lastmod dates (canonical /guides/<slug>)
+ *   public/rss.xml                   — latest 20 posts
+ *
+ * Blog data lives in TypeScript modules, so we bundle a tiny entry with esbuild
+ * (already a vite dependency) and import the result — no ts-node required.
+ */
+
+import { build } from 'esbuild';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+import path from 'node:path';
+import fs from 'node:fs';
+import { CONSOLIDATED_GUIDES, MILESTONE_REDIRECTS, RETIRED_GUIDES, LOCALIZED_GUIDE_REDIRECTS, cleanBlogSlug } from '../src/lib/blog-redirects.js';
+
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const PUBLIC = path.join(ROOT, 'public');
+const APP_URL = 'https://riftn.com';
+// Hand-built React guide pages that also live under /guides/ — never touch
+// their sitemap entries and never treat them as manifest posts. The two older
+// ones now 301 into a post (CONSOLIDATED_GUIDES), so their rows are dropped.
+const STANDALONE_GUIDES = new Set([
+  'best-decentralized-streaming-apps',
+]);
+
+// ---------------------------------------------------------------- load posts
+// Mirrors the SPA's resolution exactly: BlogPost.tsx serves
+// `getNewPostBySlug(slug) || getPostBySlug(slug)`, so the manifest must be the
+// slug-level UNION of newPosts and blogUtils posts (newPosts win on collision).
+// Building from getPublishedPosts() alone 404'd 17 live newPosts articles.
+async function loadBlogData() {
+  const outfile = path.join(ROOT, 'node_modules', '.cache', 'dehub-blog-data.mjs');
+  fs.mkdirSync(path.dirname(outfile), { recursive: true });
+  await build({
+    stdin: {
+      contents: [
+        `import { getPublishedPosts, getLatestPost, withPostAuthor } from '@/data/blogSource';`,
+        `import { newPosts as sourceNewPosts, excludedTitles } from '@/data/newPosts';`,
+        `const newPosts = sourceNewPosts.map(withPostAuthor);`,
+        `const bySlug = new Map();`,
+        `for (const p of getPublishedPosts()) if (!p.status || p.status === 'published') bySlug.set(p.slug, p);`,
+        `for (const p of newPosts) if (!p.status || p.status === 'published') bySlug.set(p.slug, p);`,
+        `export const posts = [...bySlug.values()];`,
+        `export const publishedPosts = getPublishedPosts();`,
+        `export const latestPost = getLatestPost();`,
+        `export { newPosts, excludedTitles };`,
+      ].join('\n'),
+      resolveDir: ROOT,
+      loader: 'ts',
+    },
+    bundle: true,
+    format: 'esm',
+    platform: 'node',
+    outfile,
+    alias: { '@': path.join(ROOT, 'src') },
+    logLevel: 'silent',
+  });
+  const mod = await import(`${pathToFileURL(outfile).href}?t=${Date.now()}`);
+  return mod;
+}
+
+function applyManifestDisplayOverrides(posts) {
+  // Display overrides applied by useBlogData.ts at runtime — keep titles/dates
+  // in the manifest consistent with what users see in the SPA.
+  return posts.map((p) => {
+    if (p.title === 'Entrepreneurial Spirit: Co-Founders Launch TikTok Agency') return { ...p, publishedAt: '2024-01-09T12:00:00.000Z' };
+    if (p.title === 'Back in Action: Riftn V2 Trading Resumes on Gate.io') return { ...p, publishedAt: '2023-02-16T12:00:00.000Z' };
+    if (p.title === 'Faster and Sleeker: UI Overhaul and 200% Backend Speed Boost') {
+      return { ...p, title: 'Faster and Sleeker: major app upgrade reveals UI Overhaul and 200% Backend Speed Boost', publishedAt: '2024-10-28T12:00:00.000Z' };
+    }
+    if (p.title === 'Revolutionizing Access: On-Chain Tradable Subscriptions Launch') return { ...p, publishedAt: '2024-10-30T12:00:00.000Z' };
+    if (p.slug === 'scaling-new-heights-livepeer-integration-for-50k-concurrent-viewers---a-dehub-milestone-from-q1-2025') {
+      return { ...p, title: 'Scaling New Heights: Livepeer Integration for initially 50k+ Concurrent Viewers With Unlimited Viewer abilities as we scale up.' };
+    }
+    if (p.slug === 'dhb-tradable-on-coinbase-soon') return { ...p, title: 'Confirmed! $DHB To Be Available Directly On Coinbase CEX' };
+    return p;
+  });
+}
+
+// ------------------------------------------------------------- mini markdown
+import { mdToHtml } from './markdown-html.mjs';
+// --------------------------------------------------------------------- emit
+const blogData = await loadBlogData();
+
+// Milestone posts superseded by a hand-written article on the same event. The
+// SPA already hid them from the blog index via `excludedTitles`, but this
+// generator builds from the slug-level union of blogSource and newPosts and
+// never consulted that list — so each one was still written to blog-content/,
+// still given a sitemap row, and still served at its own URL. Orphan pages,
+// submitted to Google, duplicating the posts that replaced them.
+//
+// The edge worker 301s these to their counterpart (same map, imported below),
+// so dropping them here is what stops us submitting a URL we redirect. Six
+// further posts are excluded from the index with no counterpart to redirect
+// to; those stay in the manifest deliberately — see blog-redirects.js.
+const redirectedSlugs = new Set(Object.keys(MILESTONE_REDIRECTS));
+const kept = blogData.posts.filter((p) => !redirectedSlugs.has(p.slug));
+const droppedCount = blogData.posts.length - kept.length;
+if (droppedCount !== redirectedSlugs.size) {
+  // A slug in the map that matches no post is a typo that would otherwise fail
+  // silently: the worker would 301 a URL the generator still publishes.
+  const missing = [...redirectedSlugs].filter((s) => !blogData.posts.some((p) => p.slug === s));
+  throw new Error(`[blog-manifest] MILESTONE_REDIRECTS keys match no post: ${missing.join(', ')}`);
+}
+// Every redirect target must itself still be published, or the 301 lands on a 404.
+for (const [from, to] of Object.entries(MILESTONE_REDIRECTS)) {
+  if (!kept.some((p) => p.slug === to)) {
+    throw new Error(`[blog-manifest] redirect target missing: ${from} -> ${to}`);
+  }
+}
+
+// Retired guides: the post is deleted from source and the edge worker 301s its
+// URL to an app page. If one is ever re-added, the 301 would swallow it — the
+// exact orphan the milestone map exists to prevent — so fail the build loudly.
+for (const from of Object.keys(RETIRED_GUIDES)) {
+  if (blogData.posts.some((p) => p.slug === from)) {
+    throw new Error(`[blog-manifest] retired guide is published again: ${from}`);
+  }
+}
+
+// Standalone guides folded into a post: the post has to exist, or the 301
+// lands on a 404.
+for (const [from, to] of Object.entries(CONSOLIDATED_GUIDES)) {
+  if (!kept.some((p) => p.slug === to)) {
+    throw new Error(`[blog-manifest] consolidation target missing: ${from} -> ${to}`);
+  }
+}
+
+for (const [from, { slug }] of Object.entries(LOCALIZED_GUIDE_REDIRECTS)) {
+  if (blogData.posts.some(post => post.slug === from) || !kept.some(post => post.slug === slug)) {
+    throw new Error(`[blog-manifest] invalid localized guide redirect: ${from} -> ${slug}`);
+  }
+}
+
+// Publish every post under its clean slug (see cleanBlogSlug). Everything above
+// this line works on the long source slugs, which stay the internal key; from
+// here on the clean one is the URL. Two posts landing on one clean slug would
+// make one of them unreachable, so that fails the build.
+const renameSlug = (p) => {
+  if (redirectedSlugs.has(p.slug)) return p;
+  const slug = cleanBlogSlug(p.slug);
+  return slug === p.slug ? p : { ...p, slug };
+};
+// Links between posts point at the published address too, so a reader (or a
+// crawler) never takes a redirect hop to get from one post to the next.
+const relinkGuides = (md) => typeof md === 'string'
+  ? md.replace(/(\/guides\/)([a-z0-9-]+)/g, (_, prefix, s) => prefix + (MILESTONE_REDIRECTS[s] || cleanBlogSlug(s)))
+  : md;
+const posts = applyManifestDisplayOverrides(kept)
+  .map(renameSlug)
+  .map((p) => ({ ...p, content: relinkGuides(p.content) }));
+{
+  const owners = new Map();
+  for (const p of posts) {
+    if (owners.has(p.slug)) throw new Error(`[blog-manifest] two posts share the slug ${p.slug}`);
+    owners.set(p.slug, p);
+  }
+}
+const sorted = [...posts].sort(
+  (a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
+);
+
+// Pixel size of a banner under public/, read from the file header (PNG IHDR or
+// the first JPEG SOF marker). The edge worker uses it to fit the post's own
+// image into a 1200x630 share card: a banner already near that shape is
+// cropped to fill, anything wider, taller or squarer is padded so the text on
+// it is not cut off. Null for anything it cannot read, which the worker treats
+// as "crop to fill".
+function bannerSize(src) {
+  if (!src || !src.startsWith('/')) return null;
+  let buf;
+  try { buf = fs.readFileSync(path.join(PUBLIC, decodeURIComponent(src.split('?')[0]))); } catch { return null; }
+  if (buf.length > 24 && buf.readUInt32BE(0) === 0x89504e47) {
+    return { width: buf.readUInt32BE(16), height: buf.readUInt32BE(20) };
+  }
+  if (buf[0] === 0xff && buf[1] === 0xd8) {
+    let i = 2;
+    while (i + 9 < buf.length) {
+      if (buf[i] !== 0xff) { i++; continue; }
+      const marker = buf[i + 1];
+      const len = buf.readUInt16BE(i + 2);
+      if (marker >= 0xc0 && marker <= 0xcf && ![0xc4, 0xc8, 0xcc].includes(marker)) {
+        return { width: buf.readUInt16BE(i + 7), height: buf.readUInt16BE(i + 5) };
+      }
+      i += 2 + len;
+    }
+  }
+  return null;
+}
+
+// 1. manifest (metadata only — shape consumed by CLOUDFLARE_WORKER_SEO.js)
+const manifest = sorted.map((p) => ({
+  slug: p.slug,
+  title: p.title,
+  seoTitle: p.seoTitle || undefined,
+  seoDescription: p.seoDescription || undefined,
+  excerpt: p.excerpt || '',
+  author: p.author?.name || 'Riftn Team',
+  publishedAt: p.publishedAt,
+  updatedAt: p.updatedAt || undefined,
+  bannerImage: p.bannerImage || undefined,
+  bannerImageAlt: p.bannerImageAlt || undefined,
+  ...(() => {
+    const size = bannerSize(p.bannerImage);
+    return size ? { bannerWidth: size.width, bannerHeight: size.height } : {};
+  })(),
+  readingTime: p.readingTime || undefined,
+  tags: p.tags && p.tags.length ? p.tags : undefined,
+}));
+fs.writeFileSync(path.join(PUBLIC, 'blog-manifest.json'), JSON.stringify(manifest));
+
+// 2. per-post rendered bodies
+const contentDir = path.join(PUBLIC, 'blog-content');
+fs.rmSync(contentDir, { recursive: true, force: true });
+fs.mkdirSync(contentDir, { recursive: true });
+for (const p of sorted) {
+  const html = mdToHtml(p.content);
+  const wordCount = html.replace(/<[^>]+>/g, ' ').split(/\s+/).filter(Boolean).length;
+  fs.writeFileSync(
+    path.join(contentDir, `${p.slug}.json`),
+    // `html` feeds the SEO pipelines (ssr-seo edge fn + CF worker) — keep it
+    // exactly as before. `md` is the raw markdown (post-overrides, same string
+    // the SPA used to bundle) fetched on demand by BlogPost.tsx.
+    JSON.stringify({ slug: p.slug, title: p.title, html, md: p.content, wordCount })
+  );
+}
+
+// 2a. runtime metadata module — every post object the SPA needs, with the
+//     bodies stripped (content: ''). This is the ONLY blog data the runtime
+//     bundles; article markdown is fetched from blog-content/<slug>.json.
+{
+  const stripContent = (p) => ({
+    ...p,
+    content: '',
+    excerpt: p.excerpt ?? '',
+    bannerImage: p.bannerImage ?? '',
+    bannerImageAlt: p.bannerImageAlt ?? '',
+    author: p.author ?? { name: 'Riftn Team' },
+    tags: Array.isArray(p.tags) ? p.tags : [],
+    readingTime: p.readingTime ?? 0,
+    featured: !!p.featured,
+  });
+  const ser = (v) => JSON.stringify(v, null, 2);
+  const metaTs = `// AUTO-GENERATED by scripts/generate-blog-manifest.mjs — DO NOT EDIT.
+// Regenerated at buildStart (vite.config.ts blogManifestPlugin) from the
+// generator-only full-content modules (src/data/blogSource.ts et al).
+// Every post here has content: '' — BlogPost.tsx fetches the markdown body
+// on demand from /blog-content/<slug>.json (md field).
+import type { BlogPost } from '@/types/blog';
+
+// getPublishedPosts() corpus: overrides applied, published only, newest first.
+export const blogPostsMetadata: BlogPost[] = ${ser(blogData.publishedPosts.map(renameSlug).map(stripContent))};
+
+// src/data/newPosts.ts array, source order preserved (getNewPostBySlug wins
+// over blogPostsMetadata on slug collisions — same as the old runtime).
+// The /docs/blog list corpus (getAllBlogListPosts) is combined from these two
+// arrays at runtime in blogUtils.ts — metadata-only logic, no third copy here.
+export const newPostsMetadata: BlogPost[] = ${ser(blogData.newPosts.map(renameSlug).map(stripContent))};
+
+// getLatestPost() result — docs home hero.
+export const latestPostMetadata: BlogPost | undefined = ${blogData.latestPost ? ser(stripContent(renameSlug(blogData.latestPost))) : 'undefined'};
+
+export const excludedTitles: string[] = ${ser(blogData.excludedTitles)};
+`;
+  const metaPath = path.join(ROOT, 'src', 'data', 'blog-metadata.generated.ts');
+  // Only rewrite when the content changes so the vite dev server doesn't see a
+  // touched module (and trigger a reload loop) on every start.
+  const prev = fs.existsSync(metaPath) ? fs.readFileSync(metaPath, 'utf8') : '';
+  if (prev !== metaTs) fs.writeFileSync(metaPath, metaTs);
+}
+
+// 2b. docs pages — public/dehub-docs-content.txt is the full docs text with
+//     ===-fenced section headers. Split it into per-route JSON so the edge fn
+//     can serve real documentation text to bots instead of the SPA shell
+//     (11 sitemap docs URLs were presenting as homepage duplicates).
+//
+//     HEADS UP: that .txt no longer exists in the repo, so this whole block is
+//     currently a no-op and public/docs-content/*.json is maintained BY HAND
+//     against src/i18n/en.ts. It drifts silently when it is not — /docs/dapps
+//     was serving crawlers 1,309 words of a page that had grown to ~6,000,
+//     missing Stages, communities, the wallet, bounties and the allowance
+//     entirely, because the copy moved on and the snapshot did not. If you
+//     change a docs page, change the matching JSON in the same PR, or restore
+//     the .txt source and let this run again.
+const DOCS_SECTION_TO_ROUTE = {
+  'OVERVIEW': 'overview',
+  "D'APP - A COMPLETE ECOSYSTEM": 'dapps',
+  'GAMES': 'games',
+  // No section exists for this in the source txt yet, so token-overview.json is
+  // hand-authored. Kept mapped so a regen warns instead of silently dropping it.
+  'CURRENCY OVERVIEW': 'token/overview',
+  'TOKEN ECONOMICS & EMISSIONS': 'token/economics',
+  'STAKING': 'token/stake',
+  'ROADMAP': 'roadmap',
+  'FAQ - FREQUENTLY ASKED QUESTIONS': 'faq',
+  'TEAM': 'team',
+  'CONTACT': 'contact',
+  'PRIVACY POLICY': 'privacy',
+  'LEGAL DISCLAIMER': 'terms',
+};
+const docsTxtPath = path.join(PUBLIC, 'dehub-docs-content.txt');
+const docsRoutes = [];
+if (fs.existsSync(docsTxtPath)) {
+  const docsDir = path.join(PUBLIC, 'docs-content');
+  fs.rmSync(docsDir, { recursive: true, force: true });
+  fs.mkdirSync(docsDir, { recursive: true });
+  const lines = fs.readFileSync(docsTxtPath, 'utf8').replace(/\r\n/g, '\n').split('\n');
+  const sections = new Map();
+  let current = null;
+  for (let i = 0; i < lines.length; i++) {
+    if (/^={10,}$/.test(lines[i].trim())) {
+      const name = (lines[i + 1] || '').trim();
+      if (name && /^={10,}$/.test((lines[i + 2] || '').trim())) {
+        current = name;
+        sections.set(current, []);
+        i += 2;
+        continue;
+      }
+      continue;
+    }
+    if (current) sections.get(current).push(lines[i]);
+  }
+  for (const [name, route] of Object.entries(DOCS_SECTION_TO_ROUTE)) {
+    const body = sections.get(name);
+    if (!body) { console.warn(`[blog-manifest] docs section missing: ${name}`); continue; }
+    const html = mdToHtml(body.join('\n'));
+    const wordCount = html.replace(/<[^>]+>/g, ' ').split(/\s+/).filter(Boolean).length;
+    fs.writeFileSync(
+      path.join(docsDir, `${route.replace(/\//g, '-')}.json`),
+      JSON.stringify({ route, section: name, html, wordCount })
+    );
+    docsRoutes.push(route);
+  }
+}
+
+// 3. sitemap-static.xml — drop every /guides/<slug> blog entry, re-append fresh
+//    ones with real lastmod (standalone guide pages keep their hand-set entries)
+const xmlEsc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+const smPath = path.join(PUBLIC, 'sitemap-static.xml');
+let sm = fs.readFileSync(smPath, 'utf8');
+sm = sm.replace(
+  /\s*<url>\s*<loc>https:\/\/riftn\.com\/guides\/([^<]+)<\/loc>[\s\S]*?<\/url>/g,
+  (block, slug) => (STANDALONE_GUIDES.has(decodeURIComponent(slug.trim())) ? block : '')
+);
+const blogUrls = sorted.map((p) => {
+  const lastmod = p.updatedAt || p.publishedAt;
+  return `  <url>\n    <loc>${APP_URL}/guides/${xmlEsc(encodeURIComponent(p.slug))}</loc>\n    <lastmod>${xmlEsc(lastmod)}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.7</priority>\n  </url>`;
+}).join('\n');
+sm = sm.replace(/\s*<\/urlset>\s*$/, `\n${blogUrls}\n</urlset>\n`);
+
+// 3b. docs URLs: the hand-written sitemap listed phantom routes
+//     (/docs/quick-start, /docs/token-economics) that don't exist in the SPA.
+//     Replace all /docs/* entries (except /docs and /docs/blog) with the real
+//     route list: extracted-content routes + curated meta-only routes.
+// Every real, indexable /docs route, mirroring the route table in DocsSurface.tsx.
+// Deliberately excluded:
+//   - ComingSoonPage placeholders (token, website, app, dehub, x, instagram,
+//     architecture, configuration, data-models, auth, webhooks, best-practices,
+//     troubleshooting, examples) — no content to index.
+//   - depin / e2e-encryption / ai-toolkits — consolidated into /docs/dapps and now
+//     redirect there; redirects don't belong in a sitemap.
+//   - quickstart — noindexed at the edge (worker DOCS_COMING_SOON).
+//   - installation / endpoints — redirect to /dehub-app and /connect.
+const DOCS_META_ONLY = [
+  'overview', 'dapps', 'games',
+  'token/overview', 'token/economics', 'token/utility', 'token/where-to-buy',
+  'token/governance', 'token/stake', 'token/bridge',
+  'advertising', 'team', 'security', 'roadmap', 'contact',
+  'terms', 'terms-of-service', 'privacy', 'guidelines',
+  'brand-assets', 'brand-guidelines', 'featured-in',
+  'faq', 'donate',
+  // Developer docs (src/data/developer-docs.json).
+  'developers', 'developers/mini-apps', 'auth', 'webhooks', 'endpoints', 'examples', 'troubleshooting',
+];
+const allDocsRoutes = [...new Set([...docsRoutes, ...DOCS_META_ONLY])];
+// Each docs row keeps the lastmod it already carries: the date that page's copy
+// last changed, which this script cannot see — a CI checkout dates every file
+// "now", and a sitemap stamping every page with today's date teaches Google to
+// ignore its lastmod.
+const docsLastmod = new Map(
+  [...sm.matchAll(/<loc>https:\/\/riftn\.com\/docs\/([^<]+)<\/loc>\s*<lastmod>([^<]+)<\/lastmod>/g)]
+    .map(([, route, lastmod]) => [route.trim(), lastmod.trim()]),
+);
+sm = sm.replace(
+  /\s*<url>\s*<loc>https:\/\/riftn\.com\/docs\/([^<]+)<\/loc>[\s\S]*?<\/url>/g,
+  (block, sub) => (sub.trim() === 'blog' ? block : '')
+);
+const docsUrls = allDocsRoutes.map((r) => {
+  const lastmod = docsLastmod.has(r) ? `\n    <lastmod>${xmlEsc(docsLastmod.get(r))}</lastmod>` : '';
+  return `  <url>\n    <loc>${APP_URL}/docs/${r}</loc>${lastmod}\n    <changefreq>monthly</changefreq>\n    <priority>0.6</priority>\n  </url>`;
+}).join('\n');
+sm = sm.replace(/\s*<\/urlset>\s*$/, `\n${docsUrls}\n</urlset>\n`);
+fs.writeFileSync(smPath, sm);
+
+// 4. rss.xml — latest 20
+const rfc822 = (iso) => new Date(iso).toUTCString();
+const items = sorted.slice(0, 20).map((p) => `    <item>
+      <title>${xmlEsc(p.title)}</title>
+      <description>${xmlEsc(p.seoDescription || p.excerpt || '')}</description>
+      <link>${APP_URL}/guides/${xmlEsc(encodeURIComponent(p.slug))}</link>
+      <guid>${APP_URL}/guides/${xmlEsc(encodeURIComponent(p.slug))}</guid>
+      <pubDate>${rfc822(p.publishedAt)}</pubDate>
+      <dc:creator>${xmlEsc(p.author?.name || 'Riftn Team')}</dc:creator>
+    </item>`).join('\n');
+const rss = `<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Riftn Blog</title>
+    <description>News, product updates and Web3 guides from Riftn, the open source, user-owned social platform.</description>
+    <link>${APP_URL}/docs/blog</link>
+    <atom:link href="${APP_URL}/rss.xml" rel="self" type="application/rss+xml"/>
+    <language>en-US</language>
+    <copyright>Copyright ${new Date(sorted[0]?.publishedAt || Date.now()).getFullYear()} Riftn</copyright>
+    <managingEditor>dev@riftn.com (Riftn Team)</managingEditor>
+    <webMaster>dev@riftn.com (Riftn Team)</webMaster>
+    <lastBuildDate>${rfc822(sorted[0]?.publishedAt || Date.now())}</lastBuildDate>
+${items}
+  </channel>
+</rss>
+`;
+fs.writeFileSync(path.join(PUBLIC, 'rss.xml'), rss);
+
+console.log(`[blog-manifest] ${manifest.length} posts → manifest, blog-content/ (html+md), blog-metadata.generated.ts, sitemap-static.xml, rss.xml`);

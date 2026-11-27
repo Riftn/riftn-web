@@ -1,0 +1,3266 @@
+import { useTranslation as _useCopy } from 'react-i18next';
+import type { StudioEdits } from '../lib/studioPaint';
+import { useDraftState } from '@/hooks/use-draft-state';
+import { draftIdentity } from '@/hooks/use-surface-draft';
+import { useAccountDraftKey } from '@/hooks/use-draft-state';
+import { readCurrentDraft, readDraft, writeDraft, clearDraft, flushDrafts } from '@/lib/draft-cache';
+import { beginPostLanding, preparePostLanding } from '@/lib/post-landing';
+import { useState, useRef, useCallback, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import i18next from 'i18next';
+import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+import { ownKeyHeaders } from '@/lib/api/dehub/own-key-headers';
+import type { Json } from '@/integrations/supabase/types';
+import { withWalletHeader } from '@/lib/supabase-wallet-client';
+import { toast } from 'sonner';
+import { saveRemixSettings, type RemixPolicy } from '@/lib/remix-links';
+import { buyTokensLabel, dhbText } from '@/lib/dhb-toast';
+import { createLogger } from '@/lib/logger';
+
+const mintLogger = createLogger('PostForm.handlePost');
+import { useCreatorPlansLite } from '@/hooks/use-creator-plans';
+import { createQuiz, isQuizDraftValid, type QuizDraft } from '@/lib/api/dehub/quiz';
+import { setPhotoTags as savePhotoTags, type PhotoTag } from '@/lib/api/dehub/photo-tags';
+import { mintPost, createPoll, getMintFee, getPostQuota, quotePostCharge, keepPostOffChain, AuthenticationError, PaymentRequiredError, UploadHttpError, type MintFeeQuoteResponse, type MintResponse, type PostQuotaStatus, type ShopLink } from '@/lib/api/dehub';
+import { videoEditsPayload, hasVideoEdits } from '../lib/video-edits';
+import { startDraftVideo, isDraftUsable, type DraftVideoUpload, type DraftVideoSnapshot } from '../lib/draft-video';
+import { usePostProcessingStore } from '@/store/postProcessingStore';
+// Cheap localStorage reads, no wallet stack — safe to import statically even
+// though the mint helpers below cannot be (see the note under this import).
+import { isSmartWalletSession } from '@/lib/connection-source';
+import { applyEditsToImageFile } from '@/lib/filters';
+import { dripTimes, isLater } from '@/features/post/lib/post-spacing';
+import { startDraftImage, resolveDraftImages } from '../lib/draftImages';
+import { MEDIA_LIMITS } from '@/constants/post.constants';
+import { createVoiceRecorder, voiceRecordingBlob, voiceRecordingFile } from '@/lib/voice-recording';
+import { splitTitleFromText } from '@/features/post/lib/title-split';
+import { shrinkComicPages } from '@/lib/comic-pages';
+import type { ComicBorder } from '@/lib/comic-borders';
+import { getComicImageLimitForBadge, getPostMediaAllowanceForAccount, getPostImageLimitForBadge, MAX_IMAGE_UPLOAD_BYTES, MAX_REQUEST_IMAGE_BYTES } from '@/lib/post-image-allowance';
+// NOTE: mint/bounty helpers reach wallet/contract code (wagmi + web3auth).
+// usePostForm is reachable from eager UI (PostModal is used by the sidebar /
+// bottom nav / feed), so those helpers are dynamically imported inside
+// handlePost to keep the wallet stack out of the entry bundle
+// (scripts/check-entry-bundle.mjs fails the build otherwise). Only the light
+// chain-config constants are imported statically.
+import { usePostingChain } from '@/hooks/use-posting-chain';
+import { isSolanaChain } from '@/lib/chains/constants';
+import { postUploadChainId } from '@/lib/post-upload-chain';
+import { connectSolanaWallet } from '@/lib/solana/wallet';
+import { broadcastSolanaMint } from '@/lib/solana/mint';
+import { confirmEvmMint } from '@/lib/api/dehub/solana';
+import { extractAvatarPath, buildAvatarUrl } from '@/lib/media-url';
+import { useOptimisticPosts } from '@/hooks/use-optimistic-posts';
+import { useAuth } from '@/contexts/AuthContext';
+import { buildStreamInfo } from '../lib/stream-info';
+import { parsePpvPreviewSeconds } from '../lib/ppv-preview';
+import { attachShopListings } from '@/lib/attach-shop-listings';
+import { crossPost } from '@/lib/multipost';
+import { useCrossPostStore } from '@/store/crossPostStore';
+import type { MediaFile, Currency, PostFormState, PostFormActions, PostFormComputed, AudioFile, LiveMode, PollData, LiveStreamHandoff } from '../types';
+import type { FilterSettings, CropSettings } from '../types/filters';
+import type { Draft } from '../components/DraftsSheet';
+import type { TextPost, ImagePost, VideoItem } from '@/types/feed.types';
+import type { DeHubNFT, PostVisibility, QuotePolicy, ReplyPolicy } from '@/lib/api/dehub/types';
+import type { PostChainId } from '@/components/app/ChainSelector';
+import { normalizeCategoryList } from '@/lib/category-names';
+import { trackFirstPost } from '@/lib/analytics';
+import { extractUrlsFromText } from '@/lib/api/link-preview';
+import { restoreFormattedEditor } from '@/lib/editor-text';
+import { translateDraft, rememberTranslateLang } from '@/features/post/post-translate';
+import { LANGUAGE_NAMES } from '@/hooks/use-user-language';
+
+// Title switch preference. The old key was also written whenever Article or
+// Comic was picked, which left the title stuck on for plain posts; the new
+// key starts everyone back at off.
+const SHOW_TITLE_PREF_KEY = 'post_show_title_v2';
+
+// Storage key for drafts
+const DRAFTS_STORAGE_KEY = 'post_drafts';
+const ACTIVE_DRAFT_KEY = 'post_active_draft';
+
+/**
+ * How long the chain step waits on the wallet before it says so, and before it
+ * stops waiting altogether.
+ *
+ * The hint has to arrive while the creator is still watching the bar — long
+ * enough that a wallet answering normally never shows it, short enough that
+ * nobody sits on 99% wondering. The give-up point is generous by comparison:
+ * a slow bundler or a user reading the transaction in their wallet must not
+ * lose a mint that was always going to land.
+ */
+const MINT_STALL_HINT_MS = 12_000;
+const MINT_WALLET_TIMEOUT_MS = 90_000;
+
+/**
+ * A fee is a price, so it reads as one: trailing zeros trimmed, and never in
+ * exponent form — a native-token fee on a cheap chain is small enough that
+ * String() would render it as "1.7e-7".
+ */
+function formatFeeAmount(amount: number): string {
+  if (amount >= 1) return amount.toFixed(2).replace(/\.?0+$/, '');
+  return amount.toFixed(8).replace(/\.?0+$/, '');
+}
+
+/** A failure message this file has already put into the reader's language. */
+class PostCopyError extends Error {}
+
+interface ActiveDraft {
+  text: string;
+  titleText: string;
+  showTitle: boolean;
+  /** Absent on drafts saved before ratings existed, which read as safe. */
+  isMature?: boolean;
+  /** Absent on drafts saved before Kids Mode existed, which read as not-for-kids. */
+  isForKids?: boolean;
+  /** The Shop board. Absent on drafts saved before it existed. */
+  shopLinks?: ShopLink[];
+  /** Store listings picked for the board, by id. */
+  shopListingIds?: string[];
+  selectedCategory: string;
+  /** Absent on drafts saved while the switch was removed. */
+  isSubscribersOnly?: boolean;
+  isPPV: boolean;
+  ppvAmount: string;
+  ppvPreviewSeconds?: string;
+  ppvCurrency: Currency;
+  isWatch2Earn: boolean;
+  w2eViews: string;
+  w2eComments: string;
+  w2eTotal: string;
+  w2eCurrency: Currency;
+  isTokenGated: boolean;
+  tokenContract: string;
+  tokenSymbol: string;
+  tokenAmount: string;
+  /** Absent on drafts saved before polls were kept. */
+  poll?: PollData | null;
+  /** ISO string; absent on drafts saved before schedules were kept. */
+  scheduledDate?: string | null;
+}
+
+function loadActiveDraft(key: string | null): ActiveDraft | null {
+  try {
+    const stored = key ? readDraft(key) : null;
+    if (stored) return JSON.parse(stored);
+  } catch {}
+  return null;
+}
+
+function saveActiveDraft(key: string | null, draft: ActiveDraft): void {
+  try { if (key) { writeDraft(key, JSON.stringify(draft)); flushDrafts(); } } catch {}
+}
+
+function clearActiveDraft(key: string | null): void {
+  try { if (key) { clearDraft(key); flushDrafts(); } } catch {}
+}
+
+// Load drafts from localStorage (sync fallback for initial render)
+const loadDraftsLocal = (key: string | null): Draft[] => {
+  try {
+    const stored = key ? localStorage.getItem(key) : null;
+    if (stored) {
+      const drafts = JSON.parse(stored);
+      return drafts.map((d: any) => ({ ...d, createdAt: new Date(d.createdAt) }));
+    }
+  } catch (e) {
+    console.error('Failed to load drafts:', e);
+  }
+  return [];
+};
+
+// Save drafts to localStorage (backup)
+const saveDraftsLocal = (key: string | null, drafts: Draft[]) => {
+  try {
+    if (key) localStorage.setItem(key, JSON.stringify(drafts));
+  } catch (e) {
+    console.error('Failed to save drafts:', e);
+  }
+};
+
+// Load drafts from Supabase
+const loadDraftsFromDb = async (walletAddress: string): Promise<Draft[]> => {
+  try {
+    // post_drafts RLS keys ENTIRELY off the x-wallet-address header — without
+    // withWalletHeader the policy compares against NULL, SELECT returns zero
+    // rows, and every write is refused. This sync was silently dead. The
+    // address is lowercased to match what mobile writes.
+    const { data, error } = await withWalletHeader(
+      supabase
+        .from('post_drafts')
+        .select('*')
+        .eq('wallet_address', walletAddress.toLowerCase())
+        .order('created_at', { ascending: false })
+        .limit(10),
+      walletAddress,
+    );
+    if (error) throw error;
+    if (data && data.length > 0) {
+      return data.map((d: any) => ({
+        id: d.id,
+        text: d.text || '',
+        createdAt: new Date(d.created_at),
+        hasImage: d.has_image || false,
+        hasVideo: d.has_video || false,
+        hasAudio: (d.metadata as any)?.hasAudio || false,
+        articleBody: (d.metadata as any)?.articleBody || undefined,
+        articleTitle: (d.metadata as any)?.articleTitle || (d.metadata as any)?.titleText || undefined,
+        articleImageData: (d.metadata as any)?.articleImageData || undefined,
+        socialImageData: (d.metadata as any)?.socialImageData || undefined,
+        // Mobile writes its settings under metadata.monetization/categories and
+        // has no payload; those drafts restore as text, which is what they were
+        // before this key existed.
+        payload: (d.metadata as any)?.payload || undefined,
+      }));
+    }
+  } catch (e) {
+    console.error('Failed to load drafts from DB:', e);
+  }
+  return [];
+};
+
+// Save a single draft to Supabase
+const saveDraftToDb = async (walletAddress: string, draft: Draft): Promise<string | null> => {
+  try {
+    const { data, error } = await withWalletHeader(
+      supabase
+        .from('post_drafts')
+        .insert({
+          wallet_address: walletAddress.toLowerCase(),
+          text: draft.text,
+          has_image: draft.hasImage,
+          has_video: draft.hasVideo,
+          // selected_category is a real column mobile reads — a category-only
+          // web draft opened on a phone came back with no category at all.
+          selected_category: draft.payload?.selectedCategory || '',
+          metadata: {
+            hasAudio: draft.hasAudio,
+            articleBody: draft.articleBody,
+            articleTitle: draft.articleTitle,
+            articleImageData: draft.articleImageData,
+            socialImageData: draft.socialImageData,
+            payload: draft.payload,
+            // Read by mobile, which has no notion of `payload`.
+            titleText: draft.payload?.titleText || '',
+            categories: normalizeCategoryList(draft.payload?.selectedCategory ? [draft.payload.selectedCategory] : []),
+            source: 'web',
+            // The column is jsonb; the generated Json type won't take an
+            // interface with optional keys without this.
+          } as unknown as Json,
+        })
+        .select('id')
+        .single(),
+      walletAddress,
+    );
+    if (error) throw error;
+    return data?.id || null;
+  } catch (e) {
+    console.error('Failed to save draft to DB:', e);
+    return null;
+  }
+};
+
+// Delete a draft from Supabase
+const deleteDraftFromDb = async (id: string, walletAddress: string) => {
+  try {
+    await withWalletHeader(
+      supabase.from('post_drafts').delete().eq('id', id),
+      walletAddress,
+    );
+  } catch (e) {
+    console.error('Failed to delete draft from DB:', e);
+  }
+};
+
+interface UsePostFormReturn {
+  state: PostFormState & {
+    scheduledDate: Date | null;
+    /** "One post each": minutes between the photos' posts, or null for one post. */
+    dripGap: number | null;
+    drafts: Draft[];
+    isRecording: boolean;
+    recordingTime: number;
+    chainId: PostChainId;
+    isCameraModalOpen: boolean;
+    selectedCategory: string;
+    showTitle: boolean;
+    titleText: string;
+    shouldMint: boolean;
+    isMature: boolean;
+    isForKids: boolean;
+    shopLinks: ShopLink[];
+    shopListingIds: string[];
+    /** The attached video's early upload, or null when there is none. */
+    draftVideo: DraftVideoSnapshot | null;
+  };
+  actions: PostFormActions & {
+    setScheduledDate: (date: Date | null) => void;
+    setDripGap: (gap: number | null) => void;
+    saveDraft: (article?: { body: string; title: string; imageData?: string; socialData?: string }, replaceId?: string) => void;
+    loadDraft: (draft: Draft) => void;
+    deleteDraft: (id: string) => void;
+    startRecording: () => void;
+    stopRecording: () => void;
+    setSelectedCategory: import('@/hooks/use-draft-state').DraftSetter<string>;
+    setShowTitle: (show: boolean) => void;
+    setShowTitlePref: (show: boolean) => void;
+    setShouldMint: (value: boolean) => void;
+    setIsMature: (value: boolean) => void;
+    setIsForKids: (value: boolean) => void;
+    setShopLinks: (links: ShopLink[]) => void;
+    setShopListingIds: (ids: string[]) => void;
+    setTitleText: (text: string) => void;
+    insertEmoji: (emoji: string) => void;
+    insertGif: (gifUrl: string) => void;
+    openCameraCapture: () => void;
+    closeCameraCapture: () => void;
+    handleCameraVideoRecorded: (videoBlob: Blob) => void;
+    handleCameraPhotoCaptured: (imageBlob: Blob) => void;
+  };
+  computed: PostFormComputed;
+  refs: {
+    imageInputRef: React.RefObject<HTMLInputElement>;
+    videoInputRef: React.RefObject<HTMLInputElement>;
+    audioInputRef: React.RefObject<HTMLInputElement>;
+    editorRef: React.RefObject<HTMLDivElement>;
+  };
+}
+
+export function usePostForm(
+  onClose: () => void,
+  /**
+   * Called instead of closing when a live post's mint comes back with a
+   * stream. The composer stays where it is and the broadcast console opens
+   * over it — going live is one form now, not two.
+   */
+  onLiveStreamReady?: (stream: LiveStreamHandoff) => void,
+  draftScope = "post:new",
+  /**
+   * Set when this composer is writing a quote. The quote goes out through
+   * /quote_post with the same media, rating and mint choices as any post;
+   * what a quote cannot carry (paywalls, bounty, schedule, live, shop) is
+   * hidden by the modal and never sent.
+   */
+  quotedPost?: DeHubNFT | null,
+  /** The new post's token id, once the server has it (a duet links itself to its source here). */
+  onPosted?: (tokenId: string) => void,
+  composerOpen = true,
+): UsePostFormReturn {
+  const { t: _copy } = _useCopy();
+  const isQuoting = !!quotedPost;
+  const navigate = useNavigate();
+  const { t } = useTranslation();
+  const { addOptimisticPost } = useOptimisticPosts();
+  const { user, connectionSource, refreshSession, openLoginModal, requestWalletUnlock } = useAuth();
+  // The creator's own plans are what a subscriber-gated post is gated on.
+  const { planIds: myPlanIds } = useCreatorPlansLite(user?.address);
+
+  // Restore active draft from localStorage
+  const activeKey = useAccountDraftKey(`${ACTIVE_DRAFT_KEY}:${draftScope}`);
+  const draftsKey = useAccountDraftKey(DRAFTS_STORAGE_KEY);
+  const savedDraft = useRef(loadActiveDraft(activeKey));
+  const d = savedDraft.current;
+
+  // Form state — initialize from saved draft if available
+  // Keep the previous quote text key so unfinished quotes survive the composer change.
+  const textScope = quotedPost
+    ? `field:${JSON.stringify(['components/app/modals/QuotePostModal.tsx:content', draftIdentity(quotedPost)])}`
+    : draftScope + ":text";
+  const [text, setText] = useDraftState(textScope, d?.text ?? '');
+  const [isSubscribersOnly, setIsSubscribersOnly] = useState(d?.isSubscribersOnly ?? false);
+  const [media, setMedia] = useState<MediaFile[]>([]);
+  const [isPPV, setIsPPV] = useState(d?.isPPV ?? false);
+  const [ppvAmount, setPpvAmount] = useDraftState(draftScope + ":ppvAmount", d?.ppvAmount ?? '');
+  const [ppvPreviewSeconds, setPpvPreviewSeconds] = useDraftState(draftScope + ":ppvPreviewSeconds", d?.ppvPreviewSeconds ?? '');
+  // DHB, not USD: a USD-priced PPV ships with no contract address, and both
+  // clients' unlock flows refuse it — a paywall nobody can pay through.
+  const [ppvCurrency, setPpvCurrency] = useState<Currency>(d?.ppvCurrency ?? 'DHB');
+  const [isWatch2Earn, setIsWatch2Earn] = useState(d?.isWatch2Earn ?? false);
+  const [w2eViews, setW2eViews] = useDraftState(draftScope + ":w2eViews", d?.w2eViews ?? '');
+  const [w2eComments, setW2eComments] = useDraftState(draftScope + ":w2eComments", d?.w2eComments ?? '');
+  const [w2eTotal, setW2eTotal] = useDraftState(draftScope + ":w2eTotal", d?.w2eTotal ?? '');
+  const [w2eCurrency, setW2eCurrency] = useState<Currency>(d?.w2eCurrency ?? 'USD');
+  const [isTokenGated, setIsTokenGated] = useState(d?.isTokenGated ?? false);
+  const [tokenContract, setTokenContract] = useDraftState(draftScope + ":tokenContract", d?.tokenContract ?? '');
+  const [tokenSymbol, setTokenSymbol] = useDraftState(draftScope + ":tokenSymbol", d?.tokenSymbol ?? 'DHB');
+  const [tokenAmount, setTokenAmount] = useDraftState(draftScope + ":tokenAmount", d?.tokenAmount ?? '');
+  const [liveMode, setLiveMode] = useState<LiveMode>(null);
+  const [poll, setPoll] = useDraftState<PollData | null>(draftScope + ":poll", d?.poll ?? null);
+  /** Create Post > Quiz: questions attached to the post once it is out. */
+  const [quiz, setQuiz] = useState<QuizDraft | null>(null);
+  /** People tagged on the photos, by photo index; saved once the post is out. */
+  const [photoTags, setPhotoTags] = useState<PhotoTag[]>([]);
+  // The content warning being written: null is "none", '' is "toggled on, still empty".
+  const [contentWarning, setContentWarning] = useState<string | null>(null);
+  /** The comic's border preset; null is the theme's own foil. */
+  const [comicBorder, setComicBorder] = useState<ComicBorder | null>(null);
+  // The poster closed the $TICKER / address card, so the post goes out without one.
+  const [hideAssetCards, setHideAssetCards] = useState(false);
+  // The links whose preview card the poster closed with its X. Goes out with
+  // the post, so the feed draws no card for them either.
+  const [hiddenLinkPreviews, setHiddenLinkPreviews] = useState<string[]>([]);
+  /** 'comic' when the Comic tab is open: photos post as collector cards. */
+  const [postLayout, setPostLayout] = useState<'comic' | null>(null);
+  // Who may quote the post. Anyone, unless the creator narrows it.
+  const [quotePolicy, setQuotePolicy] = useState<QuotePolicy>('public');
+  // Who may reply. Anyone, unless the creator narrows it.
+  const [replyPolicy, setReplyPolicy] = useState<ReplyPolicy>('public');
+  // Who may stitch a video post. null follows the account's setting.
+  const [stitchPolicy, setStitchPolicy] = useState<RemixPolicy | null>(null);
+  // Who may see the post. Everyone, unless the creator narrows it; fixed once posted.
+  const [visibility, setVisibility] = useState<PostVisibility>('public');
+  const [isEnhancing, setIsEnhancing] = useState(false);
+  // AI menu > Translate: what the draft said before, kept so it can be undone
+  // until the post goes out or the writer types over the translation.
+  const [translation, setTranslation] = useState<{ original: string; translated: string; from: string | null } | null>(null);
+  const [isPosting, setIsPosting] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  /**
+   * The mint has been waiting on the wallet long enough to say so.
+   *
+   * Drives the progress bar text and the escape hatch beside it; false the
+   * moment the wallet answers, the wait is abandoned, or the post fails.
+   */
+  const [mintAwaitingWallet, setMintAwaitingWallet] = useState(false);
+  /**
+   * Set for as long as a mint is in flight. Calling it publishes the post
+   * off-chain and lets the composer close — see the chain step in handlePost.
+   * A ref because the resolver belongs to one attempt, and rebuilding
+   * handlePost every time a mint starts would be a real cost for no gain.
+   */
+  const abandonMintRef = useRef<(() => void) | null>(null);
+  /**
+   * Idempotency key for the post currently being submitted, kept next to the
+   * payload it belongs to — see the `attemptSignature` block in handlePost.
+   * A ref, not state: re-sending must not wait on a render, and changing it
+   * must never re-run anything.
+   */
+  const postAttemptRef = useRef<{ signature: string; key: string } | null>(null);
+  
+  const [dripGap, setDripGap] = useState<number | null>(null);
+  const [scheduledDate, setScheduledDate] = useState<Date | null>(() => {
+    if (!d?.scheduledDate) return null;
+    const when = new Date(d.scheduledDate);
+    // A restored schedule in the past would have the post rejected on send.
+    return Number.isNaN(when.getTime()) || when.getTime() <= Date.now() ? null : when;
+  });
+  const [drafts, setDrafts] = useState<Draft[]>(() => loadDraftsLocal(draftsKey));
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordingTime, setRecordingTime] = useState(0);
+  const { chainId } = usePostingChain();
+  const [selectedCategory, setSelectedCategory] = useDraftState<string>(draftScope + ":selectedCategory", () => {
+    // Active draft category takes priority, then saved defaults
+    if (d?.selectedCategory) return d.selectedCategory;
+    try { return localStorage.getItem('post_default_categories') || ''; } catch { return ''; }
+  });
+  const categorySavedRef = useRef(false);
+  const [showTitle, setShowTitle] = useState(() => {
+    if (d?.showTitle != null) return d.showTitle;
+    try { return localStorage.getItem(SHOW_TITLE_PREF_KEY) === 'true'; } catch { return false; }
+  });
+  const [titleText, setTitleText] = useDraftState(draftScope + ":titleText", d?.titleText ?? '');
+
+  // Only the Title switch itself remembers the choice. Picking Article or
+  // Comic turns the title on for that post alone, so a plain post opened
+  // later still starts with the title off.
+  const handleSetShowTitle = useCallback((value: boolean) => {
+    setShowTitle(value);
+    try { localStorage.setItem(SHOW_TITLE_PREF_KEY, String(value)); } catch {}
+  }, []);
+
+  /**
+   * Whether this post goes on-chain.
+   *
+   * Off by default on the built-in wallet, which is the whole point: a first
+   * post then needs no wallet, no password and no gas, and lands in the feed
+   * the moment the upload finishes. On by default for an external wallet —
+   * that user already has a wallet, it prompts for itself, and they pay their
+   * own gas, so there is nothing to spare them.
+   *
+   * The choice is remembered per browser once made either way.
+   */
+  const [shouldMint, setShouldMint] = useState(() => {
+    try {
+      const stored = localStorage.getItem('post_should_mint');
+      if (stored === 'true' || stored === 'false') return stored === 'true';
+    } catch { /* private mode — fall through to the default */ }
+    return !isSmartWalletSession();
+  });
+
+  const handleSetShouldMint = useCallback((value: boolean) => {
+    setShouldMint(value);
+    try { localStorage.setItem('post_should_mint', String(value)); } catch {}
+  }, []);
+
+  /**
+   * The creator's own content rating.
+   *
+   * Deliberately NOT remembered between posts, unlike the mint and title
+   * toggles: a sticky "mature" would keep marking safe posts long after the
+   * one that needed it, and a sticky "safe" is worse — it makes the declaration
+   * something you forget rather than something you make.
+   */
+  const [isMature, setIsMature] = useState(d?.isMature === true);
+
+  /**
+   * Published for children — the Kids Mode allowlist.
+   *
+   * Same reasoning as the rating above and pointing the other way: it is reset
+   * after every post rather than remembered, because a flag that stays on is a
+   * flag that eventually marks something nobody meant to put in front of a
+   * child. A creator who posts for kids every time taps it every time.
+   */
+  const [isForKids, setIsForKids] = useState(d?.isForKids === true);
+
+  /**
+   * The two are mutually exclusive, enforced here as well as on the server.
+   * Marking a post mature after marking it for kids is the realistic order —
+   * the mature switch is the last row — and leaving both on would send a
+   * payload the API rejects with an error the creator cannot act on.
+   */
+  useEffect(() => {
+    if (isMature && isForKids) setIsForKids(false);
+  }, [isMature, isForKids]);
+
+  /**
+   * The creator's Shop board — affiliate and shop links for this post.
+   *
+   * Restored from the draft, unlike the mature switch: these are URLs somebody
+   * typed by hand, and losing three of them to a reload is exactly what a
+   * draft exists to prevent.
+   */
+  const [shopLinks, setShopLinks] = useDraftState<ShopLink[]>(draftScope + ":shopLinks",
+    Array.isArray(d?.shopLinks) ? d.shopLinks : [],
+  );
+
+  /**
+   * The creator's own store listings picked for the board, by id.
+   *
+   * Held as ids rather than rows because they are attached in Supabase after
+   * the mint returns a tokenId — there is nothing to attach to before then, so
+   * the composer only carries the choice.
+   */
+  const [shopListingIds, setShopListingIds] = useState<string[]>(
+    Array.isArray(d?.shopListingIds) ? d.shopListingIds : [],
+  );
+
+  /**
+   * Bounty locks DHB through the mint transaction itself, so a post that never
+   * goes on-chain cannot carry one. Rather than let the two settings contradict
+   * each other, bounty wins and the mint row goes read-only.
+   */
+  const mintRequired = isWatch2Earn;
+  const effectiveShouldMint = shouldMint || mintRequired;
+
+  /**
+   * What the mint will cost, quoted by the server.
+   *
+   * Only sponsored sessions are charged, so an external wallet never asks.
+   * A null quote means "could not price it" and is treated as free rather than
+   * as a blocker — see mintOnChainWithFee.
+   */
+  const [mintFee, setMintFee] = useState<MintFeeQuoteResponse | null>(null);
+  useEffect(() => {
+    if (!effectiveShouldMint || !isSmartWalletSession() || isSolanaChain(chainId)) {
+      setMintFee(null);
+      return;
+    }
+    let cancelled = false;
+    getMintFee(chainId).then((quote) => {
+      if (!cancelled) setMintFee(quote);
+    });
+    return () => { cancelled = true; };
+  }, [effectiveShouldMint, chainId]);
+
+  const mintFeeLabel = mintFee?.chargeable && mintFee.amount > 0
+    ? `${formatFeeAmount(mintFee.amount)} ${mintFee.symbol}`
+    : null;
+
+  /**
+   * Today's free posting allowance, and what is left of it.
+   *
+   * Read once when the composer opens and refreshed after a post lands, so
+   * the counter in the action bar is honest without asking the server on
+   * every keystroke. Null means "could not read it" and shows nothing —
+   * never a zero, which would read as "you are out".
+   */
+  const address = user?.address;
+  const activeAddress = useRef(address);
+  activeAddress.current = address;
+  const [quotaRead, setQuotaRead] = useState<{ address: string; quota: PostQuotaStatus | null } | null>(null);
+  const postQuota = quotaRead && quotaRead.address === address ? quotaRead.quota : null;
+  const fallback = getPostMediaAllowanceForAccount(user);
+  const mediaUploadLimit = postQuota?.mediaBytesPerDay ?? fallback.bytes;
+  const mediaUploadTier = (postQuota ? postQuota.tier : fallback.tier) || 'base';
+  const mediaUploadLimitLabel = `${Number((mediaUploadLimit / (1024 ** 3)).toFixed(1))}GB`;
+  const refreshPostQuota = useCallback(() => {
+    if (!address || activeAddress.current !== address) return;
+    getPostQuota().then(quota => {
+      if (activeAddress.current === address) setQuotaRead({ address, quota });
+    });
+  }, [address]);
+  useEffect(() => {
+    if (!address) {
+      setQuotaRead(null);
+      return;
+    }
+    let cancelled = false;
+    // A payment whose settle call was lost last session is re-sent here,
+    // before the allowance is read — otherwise the creator would be told
+    // they still owe for a post they have already paid for.
+    import('@/lib/post-quota-settle')
+      .then((m) => m.flushPendingSettlements())
+      .catch(() => {})
+      .then(() => getPostQuota())
+      .then((quota) => {
+        if (!cancelled && activeAddress.current === address) setQuotaRead({ address, quota });
+      });
+    return () => { cancelled = true; };
+  }, [address]);
+
+  const [isGeneratingThumbnail, setIsGeneratingThumbnail] = useState(false);
+
+  /**
+   * The attached video, already on its way to the server — see
+   * lib/draft-video. Keyed on the file itself, so removing or replacing the
+   * video, or the composer going away, aborts it; closing the sheet with the
+   * video still attached does not, because the composer stays mounted and the
+   * video is still there on the next open. Quotes keep the old flow.
+   */
+  const draftVideoRef = useRef<DraftVideoUpload | null>(null);
+  const [draftVideo, setDraftVideo] = useState<DraftVideoSnapshot | null>(null);
+  const attachedVideoFile = media.find((m) => m.type === 'video')?.file ?? null;
+  const signedInForDraft = !!user?.address;
+  useEffect(() => {
+    if (!attachedVideoFile || isQuoting || !signedInForDraft) return;
+    const upload = startDraftVideo(attachedVideoFile, 'video', {
+      onRejected: (message) => toast.error(message),
+    });
+    draftVideoRef.current = upload;
+    setDraftVideo(upload.getSnapshot());
+    const unsubscribe = upload.subscribe(setDraftVideo);
+    return () => {
+      unsubscribe();
+      upload.abort();
+      if (draftVideoRef.current === upload) draftVideoRef.current = null;
+      setDraftVideo(null);
+    };
+  }, [attachedVideoFile, isQuoting, signedInForDraft]);
+
+  // Photos go up as they are attached or edited, so Post only sends ids.
+  useEffect(() => {
+    if (isQuoting || !signedInForDraft) return;
+    if (media.some((m) => m.type !== 'image')) return;
+    for (const m of media) startDraftImage(m.file);
+  }, [media, isQuoting, signedInForDraft]);
+
+  // Auto-save active draft to localStorage whenever text fields change.
+  // Debounced: JSON.stringify + synchronous localStorage.setItem on EVERY
+  // keystroke costs main-thread time exactly while the user is typing. An
+  // unmount-only flush (below) persists the tail of what was typed so a
+  // hard navigation within the 500ms window can't lose it.
+  const activeSnapshotJson = JSON.stringify({
+    text, titleText, showTitle, isMature, isForKids, shopLinks, shopListingIds,
+    selectedCategory, isSubscribersOnly, isPPV, ppvAmount, ppvPreviewSeconds, ppvCurrency,
+    isWatch2Earn, w2eViews, w2eComments, w2eTotal, w2eCurrency,
+    isTokenGated, tokenContract, tokenSymbol, tokenAmount,
+    poll, scheduledDate: scheduledDate ? scheduledDate.toISOString() : null,
+  });
+  const latestActiveSnapshot = useRef(activeSnapshotJson);
+  latestActiveSnapshot.current = activeSnapshotJson;
+  const persistDraftRef = useRef<(() => void) | null>(null);
+  useEffect(() => {
+    const persistDraft = () => {
+      const draft: ActiveDraft = {
+        text, titleText, showTitle, isMature, isForKids, shopLinks, shopListingIds,
+        selectedCategory, isSubscribersOnly, isPPV, ppvAmount, ppvPreviewSeconds, ppvCurrency,
+        isWatch2Earn, w2eViews, w2eComments, w2eTotal, w2eCurrency,
+        isTokenGated, tokenContract, tokenSymbol, tokenAmount,
+        poll,
+        scheduledDate: scheduledDate ? scheduledDate.toISOString() : null,
+      };
+      // Only save if there's meaningful content
+      const hasContent = text.length || titleText.length ||
+        selectedCategory || isPPV || isWatch2Earn || isTokenGated || isSubscribersOnly ||
+        shopLinks.length > 0 || shopListingIds.length > 0 || poll || scheduledDate;
+      if (hasContent) {
+        saveActiveDraft(activeKey, draft);
+      } else {
+        clearActiveDraft(activeKey);
+      }
+    };
+    persistDraftRef.current = persistDraft;
+    const timer = setTimeout(persistDraft, 500);
+    // NOTE: this cleanup runs on every keystroke (dep change) — it must ONLY
+    // clear the timer here, never persist, or the debounce is defeated. The
+    // unmount-only flush lives in the effect below.
+    return () => clearTimeout(timer);
+  }, [text, titleText, showTitle, isMature, isForKids, shopLinks, shopListingIds,
+    selectedCategory, isSubscribersOnly, isPPV, ppvAmount, ppvPreviewSeconds, ppvCurrency,
+    isWatch2Earn, w2eViews, w2eComments, w2eTotal, w2eCurrency,
+    isTokenGated, tokenContract, tokenSymbol, tokenAmount, poll, scheduledDate]);
+
+  // Page exits do not always unmount React before the browser stops work.
+  useEffect(() => {
+    const flush = () => persistDraftRef.current?.();
+    const hide = () => { if (document.visibilityState === 'hidden') flush(); };
+    window.addEventListener('pagehide', flush);
+    document.addEventListener('visibilitychange', hide);
+    return () => { flush(); window.removeEventListener('pagehide', flush); document.removeEventListener('visibilitychange', hide); };
+  }, []);
+
+  // Refs
+  const imageInputRef = useRef<HTMLInputElement>(null);
+  const videoInputRef = useRef<HTMLInputElement>(null);
+  const audioInputRef = useRef<HTMLInputElement>(null);
+  const editorRef = useRef<HTMLDivElement>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const recordingRequest = useRef<symbol | null>(null);
+  const recordingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Computed values
+  const hasVideo = media.some(m => m.type === 'video');
+  const hasImage = media.some(m => m.type === 'image');
+  const hasAudio = media.some(m => m.type === 'audio');
+  const isShort = hasVideo && media.some(m => m.type === 'video' && m.duration && m.duration < 90);
+  const hasMusicVideo = media.some(m => m.type === 'video' && m.isMusicVideo);
+  const isLive = liveMode !== null;
+  const canConfigurePpvPreview = hasVideo && !isLive && !isQuoting && visibility === 'public'
+    && !user?.isPrivate && !isMature && !isTokenGated && !isSubscribersOnly && !isWatch2Earn
+    && !contentWarning?.trim() && !media.some(item => item.type === 'video' && item.destructSeconds);
+
+  const getPostDestinations = useCallback(() => {
+    const destinations: string[] = ['Home'];
+    if (hasImage) destinations.push('Images');
+    if (hasAudio) destinations.push('Music');
+    if (hasVideo) {
+      destinations.push('Videos');
+      if (isShort) destinations.push('Shorts');
+      if (hasMusicVideo) destinations.push('Music');
+    }
+    if (isLive) destinations.push('Live');
+    // Remove duplicate Music entries
+    return [...new Set(destinations)];
+  }, [hasImage, hasAudio, hasVideo, isShort, hasMusicVideo, isLive]);
+
+  const destinations = getPostDestinations();
+  const pollIsValid = poll !== null && poll.question.trim().length > 0 && poll.options.filter(o => o.text.trim()).length >= 2;
+  // Enough in the composer to publish or save. Drafts key off this, so running
+  // out of posts for the day still leaves the draft path open.
+  const quizIsValid = isQuizDraftValid(quiz);
+  const hasContent = Boolean((text.trim() || media.length > 0 || isLive || pollIsValid || quizIsValid) && !isGeneratingThumbnail);
+  const canPost = hasContent;
+
+  // Actions
+  const processImageFiles = useCallback((files: File[]) => {
+    // Can't add images if there's already a video
+    if (hasVideo) {
+      toast.error(_copy("copy.babc49029a3a", { defaultValue: "Remove the video first to add images" }));
+      return;
+    }
+
+    const currentImageCount = media.filter(m => m.type === 'image').length;
+    const imageLimit = postLayout === 'comic'
+      ? getComicImageLimitForBadge(user?.badgeBalance, user?.username, user?.badgeLock)
+      : getPostImageLimitForBadge(user?.badgeBalance, user?.username, user?.badgeLock);
+    const availableSlots = imageLimit - currentImageCount;
+    
+    if (availableSlots <= 0) {
+      toast.error(_copy("copy.06ff3b9cf286", { defaultValue: "Maximum {{value1}} images allowed for your badge tier", value1: imageLimit }));
+      return;
+    }
+
+    const imageFiles = files.filter(f => f.type.startsWith('image/'));
+    // Images share the creator's general media upload ceiling.
+    const imageByteLimit = Math.min(MAX_IMAGE_UPLOAD_BYTES, mediaUploadLimit);
+    const imageLimitMb = imageByteLimit / 1_000_000;
+    const oversized = imageFiles.filter(f => f.size > imageByteLimit);
+    if (oversized.length > 0) {
+      // Without this check an oversized file uploaded for minutes and died at
+      // the XHR timeout with a generic failure.
+      toast.error(
+        postQuota?.tier
+          ? t('toasts.image_too_large_tier', { limit: imageLimitMb, tier: postQuota.tier })
+          : t('toasts.image_too_large_untiered', { limit: imageLimitMb }),
+      );
+    }
+    let requestImageBytes = media.filter(m => m.type === 'image').reduce((total, m) => total + m.file.size, 0);
+    const eligibleFiles = imageFiles.filter(file => file.size <= imageByteLimit).slice(0, availableSlots);
+    const filesToAdd = eligibleFiles.filter(file => {
+      if (requestImageBytes + file.size > MAX_REQUEST_IMAGE_BYTES) return false;
+      requestImageBytes += file.size;
+      return true;
+    });
+    if (filesToAdd.length < eligibleFiles.length) {
+      toast.error(_copy("copy.18b277756657", { defaultValue: "Images in one upload must total 100 MB or less" }));
+    }
+
+    if (files.length > availableSlots) {
+      toast.info(`Only ${availableSlots} image${availableSlots > 1 ? 's' : ''} added (max ${imageLimit})`);
+    }
+
+    filesToAdd.forEach(file => {
+      const preview = URL.createObjectURL(file);
+      setMedia(prev => [...prev, { file, preview, type: 'image' }]);
+    });
+  }, [hasVideo, media, postLayout, user?.badgeBalance, user?.badgeLock, user?.username, mediaUploadLimit, postQuota?.tier, t, _copy]);
+    
+  const handleImageSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+    processImageFiles(Array.from(files));
+    e.target.value = '';
+  }, [processImageFiles]);
+
+  const processVideoFile = useCallback(async (file: File, replace = false) => {
+    // Can't add video if there are already images
+    if (hasImage && !replace) {
+      toast.error(_copy("copy.e38adb0be028", { defaultValue: "Remove images first to add a video" }));
+      return;
+    }
+
+    // Can't add more than 1 video
+    if (hasVideo && !replace) {
+      toast.error(_copy("copy.ffbd0be1d6f7", { defaultValue: "Only 1 video allowed per post" }));
+      return;
+    }
+
+    if (file.size > mediaUploadLimit) {
+      // Without this an oversized video uploaded for up to 8 minutes and died
+      // at the XHR timeout with a generic failure.
+      toast.error(_copy("copy.8be9a68e0703", { defaultValue: "Video is too large — your {{value1}} tier allows {{value2}}", value1: mediaUploadTier, value2: mediaUploadLimitLabel }));
+      return;
+    }
+
+    const preview = URL.createObjectURL(file);
+
+    // Move existing text to title field when adding video. Whatever does not
+    // fit the title cap stays behind as the description rather than being lost.
+    if (text.trim() && !titleText.trim()) {
+      const { title, description } = splitTitleFromText(text);
+      setTitleText(title);
+      setText(description);
+      if (editorRef.current) {
+        restoreFormattedEditor(editorRef.current, description);
+      }
+    }
+    
+    // Instantly show the video in the media list with a loading state
+    // This makes the UI feel fast while heavy thumbnail generation runs in background
+    setMedia([{ 
+      file, 
+      preview, 
+      type: 'video', 
+    }]);
+
+    setIsGeneratingThumbnail(true);
+
+    // Background: load metadata + generate thumbnail, then update the entry
+    const video = document.createElement('video');
+    video.preload = 'auto';
+    video.muted = true;
+    video.playsInline = true;
+    video.setAttribute('webkit-playsinline', '');
+    // NOTE: do NOT set crossOrigin on blob URLs — it taints the canvas on some mobile browsers
+    video.src = preview;
+
+    try {
+      // Wait for video metadata — 15s timeout for slow mobile devices
+      const duration = await new Promise<number>((resolve, reject) => {
+        const timeout = setTimeout(() => reject(new Error('Metadata load timeout')), 15000);
+        video.onloadedmetadata = () => { clearTimeout(timeout); resolve(video.duration); };
+        video.onerror = () => { clearTimeout(timeout); reject(new Error('Failed to load video')); };
+        video.load(); // ensure loading starts on mobile
+      });
+
+      // Generate thumbnail from video frame
+      let thumbnailUrl: string | undefined;
+      let thumbnailBlob: Blob | undefined;
+
+      try {
+        const seekTime = Math.min(1, duration * 0.1);
+
+        // Timeout for seek — mobile browsers sometimes never fire onseeked
+        await new Promise<void>((resolve) => {
+          const timeout = setTimeout(resolve, 5000); // resolve anyway after 5s
+          video.onseeked = () => { clearTimeout(timeout); resolve(); };
+          video.currentTime = seekTime;
+        });
+
+        const canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth || 640;
+        canvas.height = video.videoHeight || 360;
+        const ctx = canvas.getContext('2d');
+
+        if (ctx && canvas.width > 0 && canvas.height > 0) {
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+          const blob = await new Promise<Blob | null>((resolve) => {
+            canvas.toBlob(resolve, 'image/jpeg', 0.85);
+          });
+
+          // Only store if blob is valid and non-empty
+          if (blob && blob.size > 0) {
+            thumbnailBlob = blob;
+            thumbnailUrl = URL.createObjectURL(blob);
+            console.log('[Video] Auto-generated thumbnail:', { width: canvas.width, height: canvas.height, size: blob.size });
+          } else {
+            console.warn('[Video] canvas.toBlob returned empty blob — skipping auto thumbnail');
+          }
+        }
+      } catch (err) {
+        console.warn('[Video] Failed to generate thumbnail:', err);
+        toast.error(_copy("copy.4b91a991a6d5", { defaultValue: "Could not generate thumbnail automatically. You can add one manually." }));
+      }
+
+      // Update the media entry with duration + thumbnail
+      setMedia(prev => prev.map(m => 
+        m.file === file ? { 
+          ...m, 
+          duration,
+          thumbnail: thumbnailUrl,
+          thumbnailBlob,
+          isAutoThumbnail: !!thumbnailUrl,
+        } : m
+      ));
+    } catch (err) {
+      console.warn('[Video] Failed to load video metadata:', err);
+      toast.error(_copy("copy.6925145d1695", { defaultValue: "Could not process video. Try a different file." }));
+    } finally {
+      setIsGeneratingThumbnail(false);
+    }
+  }, [hasImage, hasVideo, text, titleText, editorRef, mediaUploadLimit, mediaUploadLimitLabel, mediaUploadTier, setText, setTitleText, _copy]);
+
+  const handleVideoSelect = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    await processVideoFile(files[0]);
+    e.target.value = '';
+  }, [processVideoFile]);
+
+  const removeMedia = useCallback((index: number) => {
+    setMedia(prev => {
+      const item = prev[index];
+      URL.revokeObjectURL(item.preview);
+      if (item.audio) URL.revokeObjectURL(item.audio.url);
+      if (item.thumbnail) URL.revokeObjectURL(item.thumbnail);
+      return prev.filter((_, i) => i !== index);
+    });
+  }, []);
+
+  const moveMedia = useCallback((from: number, to: number) => {
+    setMedia(prev => {
+      if (from === to || from < 0 || to < 0 || from >= prev.length || to >= prev.length) return prev;
+      const next = [...prev];
+      next.splice(to, 0, ...next.splice(from, 1));
+      return next;
+    });
+  }, []);
+
+  const processAudioFile = useCallback((file: File) => {
+    if (file.size > mediaUploadLimit) {
+      toast.error(_copy("copy.7de82e4f914f", { defaultValue: "Audio is too large — your {{value1}} tier allows {{value2}}", value1: mediaUploadTier, value2: mediaUploadLimitLabel }));
+      return;
+    }
+    const url = URL.createObjectURL(file);
+
+    // Move existing text to title field when adding audio. Whatever does not
+    // fit the title cap stays behind as the description rather than being lost.
+    if (text.trim() && !titleText.trim()) {
+      const { title, description } = splitTitleFromText(text);
+      setTitleText(title);
+      setText(description);
+      if (editorRef.current) {
+        restoreFormattedEditor(editorRef.current, description);
+      }
+    }
+    
+    // Create audio element to get duration
+    const audioEl = new Audio(url);
+    audioEl.onloadedmetadata = () => {
+      const duration = Math.round(audioEl.duration);
+      
+      if (hasImage) {
+        // There is no upload path for raw audio on a feed-images post —
+        // /user_mint reads every file on one as an image, so the old
+        // "Audio added to images" parked a blob that vanished at post time.
+        URL.revokeObjectURL(url);
+        toast.info(_copy("copy.43fd30914e36", { defaultValue: "Audio can't ride an image post — use the sound picker to attach an existing audio post as its soundtrack." }));
+      } else {
+        // Standalone audio post
+        setMedia(prev => [...prev, { file, preview: url, type: 'audio', duration }]);
+        toast.success(_copy("copy.8697acaccf6a", { defaultValue: "Audio uploaded" }));
+      }
+    };
+  }, [hasImage, text, titleText, editorRef, mediaUploadLimit, mediaUploadLimitLabel, mediaUploadTier, setText, setTitleText, _copy]);
+
+  const handleFileDrop = useCallback((files: FileList) => {
+    const fileArray = Array.from(files);
+    
+    // Separate files by type
+    const imageFiles = fileArray.filter(f => f.type.startsWith('image/'));
+    const videoFiles = fileArray.filter(f => f.type.startsWith('video/'));
+    const audioFiles = fileArray.filter(f => f.type.startsWith('audio/'));
+    
+    // Process based on what was dropped
+    if (videoFiles.length > 0) {
+      processVideoFile(videoFiles[0]);
+    } else if (imageFiles.length > 0) {
+      processImageFiles(imageFiles);
+    }
+    
+    // Audio can be added alongside images
+    if (audioFiles.length > 0 && (hasImage || imageFiles.length > 0)) {
+      // Wait a tick for images to be added first
+      setTimeout(() => processAudioFile(audioFiles[0]), 100);
+    } else if (audioFiles.length > 0 && !hasVideo && !videoFiles.length) {
+      processAudioFile(audioFiles[0]);
+    }
+  }, [processVideoFile, processImageFiles, processAudioFile, hasImage, hasVideo]);
+
+  const addAudioToMedia = useCallback((index: number, audio: AudioFile) => {
+    setMedia(prev => prev.map((m, i) => 
+      i === index ? { ...m, audio } : m
+    ));
+  }, []);
+
+  const removeAudioFromMedia = useCallback((index: number) => {
+    setMedia(prev => prev.map((m, i) => {
+      if (i === index && m.audio) {
+        URL.revokeObjectURL(m.audio.url);
+        return { ...m, audio: undefined };
+      }
+      return m;
+    }));
+  }, []);
+
+  const toggleMusicVideo = useCallback((index: number) => {
+    setMedia(prev => prev.map((m, i) => 
+      i === index && m.type === 'video' ? { ...m, isMusicVideo: !m.isMusicVideo } : m
+    ));
+  }, []);
+
+  const addThumbnailToMedia = useCallback(async (index: number, thumbnailUrl: string) => {
+    // Fetch the blob from URL for upload and create a NEW blob URL
+    let thumbnailBlob: Blob | undefined;
+    let newThumbnailUrl = thumbnailUrl;
+    
+    try {
+      const response = await fetch(thumbnailUrl);
+      thumbnailBlob = await response.blob();
+      newThumbnailUrl = URL.createObjectURL(thumbnailBlob);
+    } catch (err) {
+      console.warn('[Thumbnail] Failed to fetch blob:', err);
+    }
+    
+    setMedia(prev => prev.map((m, i) => {
+      if (i === index && (m.type === 'video' || m.type === 'audio')) {
+        // Only revoke if we have a previous thumbnail that we created
+        if (m.thumbnail && m.thumbnailBlob) {
+          URL.revokeObjectURL(m.thumbnail);
+        }
+        return { 
+          ...m, 
+          thumbnail: newThumbnailUrl, 
+          thumbnailBlob,
+          isAutoThumbnail: false,
+        };
+      }
+      return m;
+    }));
+  }, []);
+
+  const removeThumbnailFromMedia = useCallback((index: number) => {
+    setMedia(prev => prev.map((m, i) => {
+      if (i === index && m.thumbnail) {
+        URL.revokeObjectURL(m.thumbnail);
+        return { ...m, thumbnail: undefined, thumbnailBlob: undefined, isAutoThumbnail: false };
+      }
+      return m;
+    }));
+  }, []);
+
+  const applyFilterToMedia = useCallback((index: number, settings: FilterSettings, presetId?: string) => {
+    setMedia(prev => prev.map((m, i) => 
+      i === index ? { ...m, filterSettings: settings, filterPresetId: presetId } : m
+    ));
+  }, []);
+
+  const clearFilterFromMedia = useCallback((index: number) => {
+    setMedia(prev => prev.map((m, i) => 
+      i === index ? { ...m, filterSettings: undefined, filterPresetId: undefined } : m
+    ));
+  }, []);
+
+  const applyCropToMedia = useCallback((index: number, settings: CropSettings) => {
+    setMedia(prev => prev.map((m, i) => 
+      i === index ? { ...m, cropSettings: settings } : m
+    ));
+  }, []);
+
+  const clearCropFromMedia = useCallback((index: number) => {
+    setMedia(prev => prev.map((m, i) => 
+      i === index ? { ...m, cropSettings: undefined } : m
+    ));
+  }, []);
+
+  const replaceVideoFile = useCallback(async (file: File) => {
+    if (!file.type.startsWith('video/')) {
+      toast.error(_copy("post.replaceVideo.notVideo", { defaultValue: "Choose a video file" }));
+      return;
+    }
+    await processVideoFile(file, true);
+  }, [processVideoFile, _copy]);
+
+  const updateMediaItem = useCallback((index: number, patch: Partial<MediaFile>) => {
+    setMedia(prev => prev.map((m, i) => (i === index ? { ...m, ...patch } : m)));
+  }, []);
+
+  const applyTrimToMedia = useCallback((index: number, trimStart: number, trimEnd: number) => {
+    setMedia(prev => prev.map((m, i) => {
+      if (i !== index) return m;
+      // The whole clip kept is no trim.
+      const whole = trimStart < 0.05 && (!m.duration || m.duration - trimEnd < 0.05);
+      return whole ? { ...m, trimStart: undefined, trimEnd: undefined } : { ...m, trimStart, trimEnd };
+    }));
+  }, []);
+
+  /**
+   * Swap an image's bytes for an edited copy — the annotator's exit.
+   *
+   * Filter and crop settings are dropped on purpose: the annotator was handed
+   * a copy with those already flattened in, so leaving them set would apply
+   * them a second time, once more at post. The old preview URL is revoked here
+   * rather than in the component, since this is the moment it stops being
+   * anyone's `src`.
+   */
+  const replaceImageFile = useCallback((index: number, file: File, studio?: { original: File; edits: StudioEdits }) => {
+    if (!file.type.startsWith('image/')) {
+      toast.error(_copy("copy.94377a89a9e4", { defaultValue: "Choose an image file" }));
+      return;
+    }
+    if (file.size > MEDIA_LIMITS.MAX_FILE_SIZE) {
+      toast.error(_copy("copy.4482222e374c", { defaultValue: "{{value1}} is too large — images are capped at {{value2}}MB", value1: file.name, value2: Math.round(MEDIA_LIMITS.MAX_FILE_SIZE / (1024 * 1024)) }));
+      return;
+    }
+    setMedia(prev => prev.map((m, i) => {
+      if (i !== index) return m;
+      if (m.preview?.startsWith('blob:')) URL.revokeObjectURL(m.preview);
+      return {
+        ...m,
+        file,
+        preview: URL.createObjectURL(file),
+        filterSettings: undefined,
+        filterPresetId: undefined,
+        cropSettings: undefined,
+        // A studio edit keeps the original to edit again; a new picture drops it.
+        studioOriginal: studio?.original,
+        studioEdits: studio?.edits,
+      };
+    }));
+  }, [_copy]);
+
+  /** Adds comic pages, shrinking big art first so 50 pages fit one upload. */
+  const addComicPages = useCallback(async (files: File[]) => {
+    const images = files.filter(f => f.type.startsWith('image/'));
+    if (!images.length) return;
+    processImageFiles(await shrinkComicPages(images));
+  }, [processImageFiles]);
+
+  /** Comic page caption for one image; blank clears it. */
+  const setMediaCaption = useCallback((index: number, caption: string) => {
+    setMedia(prev => prev.map((m, i) => (i === index ? { ...m, caption: caption || undefined } : m)));
+  }, []);
+
+  /** Alt text for one attached image or video; blank clears it. */
+  const setMediaDescription = useCallback((index: number, description: string) => {
+    setMedia(prev => prev.map((m, i) => (i === index ? { ...m, description: description.trim() || undefined } : m)));
+  }, []);
+
+  const handleAudioSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    processAudioFile(files[0]);
+    e.target.value = '';
+  }, [processAudioFile]);
+
+  const handleEnhanceWithAI = useCallback(async (mode: 'spellcheck' | 'grammar' | 'style' = 'spellcheck', style?: string) => {
+    if (!text.trim()) {
+      toast.error(_copy("copy.9034a5022016", { defaultValue: "Enter some text first" }));
+      return;
+    }
+    setIsEnhancing(true);
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('enhance-text', {
+        body: { text: text.trim(), mode, style },
+        headers: ownKeyHeaders(),
+      });
+
+      if (error) {
+        console.error('Enhancement error:', error);
+        toast.error(_copy("copy.b14f4609b8d3", { defaultValue: "Failed to process text" }));
+        return;
+      }
+
+      if (data?.enhancedText) {
+        setText(data.enhancedText);
+        // Update the editor content as well
+        if (editorRef.current) {
+          restoreFormattedEditor(editorRef.current, data.enhancedText);
+        }
+        toast.success(mode === 'spellcheck' ? _copy("copy.7d61d28cb660", { defaultValue: "Spell checked!" }) : _copy("copy.e116b32c9c80", { defaultValue: "Style applied!" }));
+      } else if (data?.error) {
+        toast.error(data.error);
+      }
+    } catch (err) {
+      console.error('Enhancement error:', err);
+      toast.error(_copy("copy.b14f4609b8d3", { defaultValue: "Failed to process text" }));
+    } finally {
+      setIsEnhancing(false);
+    }
+  }, [text, setText, _copy]);
+
+  const writeDraft = useCallback((next: string) => {
+    setText(next);
+    if (editorRef.current) restoreFormattedEditor(editorRef.current, next);
+  }, [setText]);
+
+  const handleTranslateDraft = useCallback(async (lang: string) => {
+    const typed = text.trim();
+    if (!typed) {
+      toast.error(_copy("copy.9034a5022016", { defaultValue: "Enter some text first" }));
+      return;
+    }
+    rememberTranslateLang(lang);
+    setIsEnhancing(true);
+    try {
+      const result = await translateDraft(typed, lang);
+      if (result.same) {
+        toast(_copy("copy.d80d30a1c7fd", { defaultValue: "Already in {{language}}", language: LANGUAGE_NAMES[lang] ?? lang }));
+        return;
+      }
+      // Undo goes back to the first words, however many times it is translated.
+      setTranslation((prev) => ({
+        original: prev && prev.translated === text ? prev.original : text,
+        translated: result.text,
+        from: prev && prev.translated === text ? prev.from : result.from,
+      }));
+      writeDraft(result.text);
+    } catch (err) {
+      console.error('Draft translation error:', err);
+      toast.error(_copy("copy.037091068590", { defaultValue: "Translation failed" }));
+    } finally {
+      setIsEnhancing(false);
+    }
+  }, [text, writeDraft, _copy]);
+
+  const undoTranslateDraft = useCallback(() => {
+    if (!translation) return;
+    writeDraft(translation.original);
+    setTranslation(null);
+  }, [translation, writeDraft]);
+
+  // The Undo line only stands for the translation as it came back.
+  const translatedDraft = translation && translation.translated === text ? translation : null;
+
+  const insertFormatting = useCallback((format: 'bold' | 'italic' | 'mention') => {
+    const editor = editorRef.current;
+    if (!editor) return;
+
+    // Focus the editor first
+    editor.focus();
+
+    // Use execCommand for WYSIWYG formatting
+    switch (format) {
+      case 'bold':
+        document.execCommand('bold', false);
+        break;
+      case 'italic':
+        document.execCommand('italic', false);
+        break;
+      case 'mention':
+        document.execCommand('insertText', false, '@');
+        break;
+    }
+
+    // execCommand fires the editor's input event, which records the text with
+    // links as full addresses. innerText would save each 🔗 chip as "🔗".
+  }, []);
+
+  const insertEmoji = useCallback((emoji: string) => {
+    const editor = editorRef.current;
+    if (!editor) {
+      // Fallback: just append to text
+      setText(prev => prev + emoji);
+      return;
+    }
+
+    // Focus and insert at cursor position. The editor's input event records
+    // the new text; innerText here would save each 🔗 chip as "🔗".
+    editor.focus();
+    if (!document.execCommand('insertText', false, emoji)) setText(prev => prev + emoji);
+  }, [setText]);
+
+  const insertGif = useCallback((gifUrl: string) => {
+    // For now, GIFs can be added as media attachments
+    // We'll create a temporary image file from the GIF URL
+    toast.info(_copy("copy.d0f6e501c24e", { defaultValue: "GIF support coming soon!" }));
+    // TODO: Download GIF and add as media
+  }, [_copy]);
+
+  // Camera modal state
+  const [isCameraModalOpen, setIsCameraModalOpen] = useState(false);
+
+  const openCameraCapture = useCallback(() => {
+    setIsCameraModalOpen(true);
+  }, []);
+
+  const closeCameraCapture = useCallback(() => {
+    setIsCameraModalOpen(false);
+  }, []);
+
+  const handleCameraVideoRecorded = useCallback(async (videoBlob: Blob) => {
+    // Create a File from the blob for processVideoFile
+    const videoFile = new File([videoBlob], `camera-recording-${Date.now()}.webm`, { 
+      type: videoBlob.type || 'video/webm' 
+    });
+    await processVideoFile(videoFile);
+  }, [processVideoFile]);
+
+  const handleCameraPhotoCaptured = useCallback((imageBlob: Blob) => {
+    // Create a File from the blob for processImageFiles
+    const imageFile = new File([imageBlob], `camera-photo-${Date.now()}.png`, { 
+      type: 'image/png' 
+    });
+    processImageFiles([imageFile]);
+  }, [processImageFiles]);
+
+  const resetForm = useCallback(() => {
+    // A completed request must not reset a newer composition made while it ran.
+    if (latestActiveSnapshot.current !== activeSnapshotJson) return;
+    // Belt and braces — the signature check in handlePost already refuses to
+    // reuse this key for different content, but the post is out, so there is
+    // nothing left for it to deduplicate against.
+    postAttemptRef.current = null;
+    setText.complete(text, '');
+    setMedia([]);
+    setIsSubscribersOnly(false);
+    setIsPPV(false);
+    setPpvAmount.complete(ppvAmount, '');
+    setPpvPreviewSeconds.complete(ppvPreviewSeconds, '');
+    setPpvCurrency('USD');
+    setIsWatch2Earn(false);
+    setW2eViews.complete(w2eViews, '');
+    setW2eComments.complete(w2eComments, '');
+    setW2eTotal.complete(w2eTotal, '');
+    setW2eCurrency('USD');
+    setIsTokenGated(false);
+    setTokenContract.complete(tokenContract, '');
+    setTokenSymbol.complete(tokenSymbol, 'DHB');
+    setTokenAmount.complete(tokenAmount, '');
+    setLiveMode(null);
+    setPoll.complete(poll, null);
+    setQuiz(null);
+    setPhotoTags([]);
+    setContentWarning(null);
+    setHideAssetCards(false);
+    setHiddenLinkPreviews([]);
+    setPostLayout(null);
+    setComicBorder(null);
+    setQuotePolicy('public');
+    setReplyPolicy('public');
+    setStitchPolicy(null);
+    setVisibility('public');
+    setScheduledDate(null);
+    setDripGap(null);
+    setTitleText.complete(titleText, '');
+    // Cleared per post, deliberately. A board is usually specific to what was
+    // just posted, and one that quietly carries over ends up on content it has
+    // nothing to do with.
+    setShopLinks.complete(shopLinks, []);
+    setShopListingIds([]);
+    // Same reasoning, and it matters more here: this decides whether the post
+    // is shown at all. The composer is mounted behind a one-way latch, so hook
+    // state outlives publish-close-reopen — leaving this set meant the post
+    // after a mature one was minted contentRating: 'mature' and kept off every
+    // public feed, with the switch reading off unless the composer was looked
+    // at closely. The file's own note on this switch says a sticky flag is the
+    // failure to avoid.
+    setIsMature(false);
+    setIsForKids(false);
+    // Only persist category if user explicitly saved defaults
+    if (!categorySavedRef.current) {
+      setSelectedCategory.complete(selectedCategory, '');
+      try { localStorage.removeItem('post_default_categories'); } catch {}
+    }
+    categorySavedRef.current = false;
+    persistDraftRef.current = null;
+    // Compare fresh disk state as another tab may have continued this draft.
+    if (activeKey && readCurrentDraft(activeKey) === activeSnapshotJson) clearActiveDraft(activeKey);
+  }, [activeSnapshotJson, activeKey, setPoll, setPpvAmount, setPpvPreviewSeconds, setSelectedCategory, setShopLinks, setText, setTitleText, setTokenAmount, setTokenContract, setTokenSymbol, setW2eComments, setW2eTotal, setW2eViews, poll, ppvAmount, ppvPreviewSeconds, selectedCategory, text, titleText, tokenAmount, tokenContract, w2eComments, w2eTotal, w2eViews, shopLinks, tokenSymbol]);
+
+  // Load drafts from DB on mount
+  useEffect(() => {
+    if (!user?.address) return;
+    loadDraftsFromDb(user.address).then((dbDrafts) => {
+      if (dbDrafts.length === 0) return;
+      // Fold the server's drafts in rather than replacing the list. The old
+      // assignment threw away anything saved while signed out or offline — and
+      // then wrote that loss straight into localStorage.
+      setDrafts((local) => {
+        const seen = new Set(dbDrafts.map((d) => d.id));
+        const merged = [...dbDrafts, ...local.filter((d) => !seen.has(d.id))]
+          .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+          .slice(0, 10);
+        saveDraftsLocal(draftsKey, merged);
+        return merged;
+      });
+    });
+  }, [user?.address]);
+
+  // Drafts actions
+  // replaceId swaps an opened draft for its edited copy instead of keeping both.
+  const saveDraft = useCallback((article?: { body: string; title: string; imageData?: string; socialData?: string }, replaceId?: string) => {
+    const newDraft: Draft = {
+      id: Date.now().toString(),
+      text,
+      createdAt: new Date(),
+      hasImage: hasImage,
+      hasVideo: hasVideo,
+      hasAudio: hasAudio,
+      articleBody: article?.body,
+      articleTitle: article?.title,
+      articleImageData: article?.imageData,
+      socialImageData: article?.socialData,
+      payload: {
+        titleText, showTitle, selectedCategory, isMature, isForKids, isSubscribersOnly,
+        isPPV, ppvAmount, ppvPreviewSeconds, ppvCurrency,
+        isWatch2Earn, w2eViews, w2eComments, w2eTotal, w2eCurrency,
+        isTokenGated, tokenContract, tokenSymbol, tokenAmount,
+        poll,
+        scheduledDate: scheduledDate ? scheduledDate.toISOString() : null,
+        chainId,
+        shopLinks,
+        shopListingIds,
+        visibility,
+        contentWarning,
+        quotePolicy,
+        replyPolicy,
+      },
+    };
+    const updatedDrafts = [newDraft, ...drafts.filter(d => d.id !== replaceId)].slice(0, 10);
+    setDrafts(updatedDrafts);
+    saveDraftsLocal(draftsKey, updatedDrafts);
+    // Persist to DB
+    if (user?.address) {
+      if (replaceId) deleteDraftFromDb(replaceId, user.address);
+      saveDraftToDb(user.address, newDraft).then((dbId) => {
+        if (!dbId) return;
+        const useSavedId = (list: Draft[]) => list.some(draft => draft.id === dbId)
+          ? list.filter(draft => draft.id !== newDraft.id)
+          : list.map(draft => draft.id === newDraft.id ? { ...draft, id: dbId } : draft);
+
+        // The next composer merges this backup with the server list. Leaving
+        // the temporary id on disk makes one saved draft look like two.
+        const stored = loadDraftsLocal(draftsKey);
+        if (stored.some(draft => draft.id === newDraft.id)) {
+          saveDraftsLocal(draftsKey, useSavedId(stored));
+        }
+        setDrafts(useSavedId);
+      });
+    }
+  }, [text, hasImage, hasVideo, hasAudio, drafts, draftsKey, user?.address,
+    titleText, showTitle, selectedCategory, isMature, isForKids, isSubscribersOnly,
+    isPPV, ppvAmount, ppvPreviewSeconds, ppvCurrency, isWatch2Earn, w2eViews, w2eComments, w2eTotal,
+    w2eCurrency, isTokenGated, tokenContract, tokenSymbol, tokenAmount, poll,
+    scheduledDate, chainId, shopLinks, shopListingIds,
+    visibility, contentWarning, quotePolicy, replyPolicy]);
+
+  const loadDraft = useCallback((draft: Draft) => {
+    setText(draft.text);
+    if (editorRef.current) {
+      restoreFormattedEditor(editorRef.current, draft.text);
+    }
+    // Everything else the draft carried. A missing key means the draft predates
+    // that setting (or came from mobile), so the composer's default stands —
+    // but a key that IS present must be applied even when it is false or empty,
+    // or turning a switch off and saving would not stick.
+    const p = draft.payload;
+    if (!p) return;
+    if (p.titleText !== undefined) setTitleText(p.titleText);
+    if (p.showTitle !== undefined) setShowTitle(p.showTitle);
+    if (p.selectedCategory !== undefined) setSelectedCategory(p.selectedCategory);
+    if (p.isMature !== undefined) setIsMature(p.isMature);
+    if (p.isForKids !== undefined) setIsForKids(p.isForKids);
+    if (p.isSubscribersOnly !== undefined) setIsSubscribersOnly(p.isSubscribersOnly);
+    if (p.isPPV !== undefined) setIsPPV(p.isPPV);
+    if (p.ppvAmount !== undefined) setPpvAmount(p.ppvAmount);
+    setPpvPreviewSeconds(p.ppvPreviewSeconds ?? '');
+    if (p.ppvCurrency !== undefined) setPpvCurrency(p.ppvCurrency);
+    if (p.isWatch2Earn !== undefined) setIsWatch2Earn(p.isWatch2Earn);
+    if (p.w2eViews !== undefined) setW2eViews(p.w2eViews);
+    if (p.w2eComments !== undefined) setW2eComments(p.w2eComments);
+    if (p.w2eTotal !== undefined) setW2eTotal(p.w2eTotal);
+    if (p.w2eCurrency !== undefined) setW2eCurrency(p.w2eCurrency);
+    if (p.isTokenGated !== undefined) setIsTokenGated(p.isTokenGated);
+    if (p.tokenContract !== undefined) setTokenContract(p.tokenContract);
+    if (p.tokenSymbol !== undefined) setTokenSymbol(p.tokenSymbol);
+    if (p.tokenAmount !== undefined) setTokenAmount(p.tokenAmount);
+    if (p.poll !== undefined) setPoll(p.poll ?? null);
+    if (p.shopLinks !== undefined) setShopLinks(p.shopLinks as ShopLink[]);
+    if (p.shopListingIds !== undefined) setShopListingIds(p.shopListingIds);
+    if (p.visibility !== undefined) setVisibility(p.visibility);
+    if (p.contentWarning !== undefined) setContentWarning(p.contentWarning);
+    if (p.quotePolicy !== undefined) setQuotePolicy(p.quotePolicy);
+    if (p.replyPolicy !== undefined) setReplyPolicy(p.replyPolicy);
+    if (p.scheduledDate !== undefined) {
+      // A schedule that has come and gone is not a schedule. Dropping it means
+      // the post goes out now instead of being rejected for a past time.
+      const when = p.scheduledDate ? new Date(p.scheduledDate) : null;
+      setScheduledDate(when && !Number.isNaN(when.getTime()) && when.getTime() > Date.now() ? when : null);
+    }
+  }, [setPoll, setPpvAmount, setPpvPreviewSeconds, setSelectedCategory, setShopLinks, setText, setTitleText, setTokenAmount, setTokenContract, setTokenSymbol, setW2eComments, setW2eTotal, setW2eViews]);
+
+  const deleteDraft = useCallback((id: string) => {
+    const updatedDrafts = drafts.filter(d => d.id !== id);
+    setDrafts(updatedDrafts);
+    saveDraftsLocal(draftsKey, updatedDrafts);
+    if (user?.address) deleteDraftFromDb(id, user.address); // Remove from DB
+  }, [drafts, user?.address]);
+
+  // Audio recording functions
+  useEffect(() => {
+    if (!composerOpen) {
+      setIsRecording(false);
+      setRecordingTime(0);
+    }
+    return () => {
+      recordingRequest.current = null;
+      const recorder = mediaRecorderRef.current;
+      mediaRecorderRef.current = null;
+      if (recorder) {
+        recorder.onstop = null;
+        recorder.onerror = null;
+        if (recorder.state !== 'inactive') recorder.stop();
+        recorder.stream.getTracks().forEach(track => track.stop());
+      }
+      if (recordingIntervalRef.current) {
+        clearInterval(recordingIntervalRef.current);
+        recordingIntervalRef.current = null;
+      }
+    };
+  }, [composerOpen]);
+
+  const startRecording = useCallback(async () => {
+    if (recordingRequest.current || mediaRecorderRef.current) return;
+    const request = Symbol();
+    recordingRequest.current = request;
+    let stream: MediaStream | undefined;
+    const resetRecording = () => {
+      stream?.getTracks().forEach(track => track.stop());
+      mediaRecorderRef.current = null;
+      if (recordingIntervalRef.current) {
+        clearInterval(recordingIntervalRef.current);
+        recordingIntervalRef.current = null;
+      }
+      setRecordingTime(0);
+      setIsRecording(false);
+    };
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      if (recordingRequest.current !== request) {
+        stream.getTracks().forEach(track => track.stop());
+        return;
+      }
+      const mediaRecorder = createVoiceRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
+      const chunks: Blob[] = [];
+      const startedAt = performance.now();
+
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          chunks.push(event.data);
+        }
+      };
+
+      mediaRecorder.onstop = () => {
+        resetRecording();
+        const audioBlob = voiceRecordingBlob(chunks, mediaRecorder.mimeType);
+        if (!audioBlob.size) return;
+        const audioUrl = URL.createObjectURL(audioBlob);
+        // Live WebM recorders may write an indefinite metadata duration.
+        const duration = Math.max(1, Math.round((performance.now() - startedAt) / 1000));
+        if (hasImage) {
+          setMedia(prev => prev.map(m =>
+            m.type === 'image' ? { ...m, audio: { blob: audioBlob, url: audioUrl, duration } } : m
+          ));
+          toast.success(_copy("copy.57cc482b01a5", { defaultValue: "Audio added to images" }));
+        } else {
+          const file = voiceRecordingFile(audioBlob);
+          setMedia(prev => [...prev, { file, preview: audioUrl, type: 'audio', duration }]);
+          toast.success(_copy("copy.a1c44e01b157", { defaultValue: "Audio recorded" }));
+        }
+      };
+
+      mediaRecorder.onerror = () => {
+        mediaRecorder.onstop = null;
+        resetRecording();
+      };
+      mediaRecorder.start();
+      setIsRecording(true);
+
+      // Start timer
+      recordingIntervalRef.current = setInterval(() => {
+        setRecordingTime(prev => prev + 1);
+      }, 1000);
+
+      toast.success(_copy("copy.be3f4838b198", { defaultValue: "Recording started" }));
+    } catch (err) {
+      if (recordingRequest.current !== request) return;
+      resetRecording();
+      console.error('Failed to start recording:', err);
+      toast.error(_copy("copy.d82a155e3482", { defaultValue: "Could not access microphone. Please check permissions." }));
+    } finally {
+      if (recordingRequest.current === request) recordingRequest.current = null;
+    }
+  }, [hasImage, _copy]);
+
+  const stopRecording = useCallback(() => {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+      mediaRecorderRef.current.stop();
+      setIsRecording(false);
+    }
+  }, []);
+
+  const handlePost = useCallback(async (extra?: { soundtrackTag?: string; articleBody?: string; articleImage?: File; socialImage?: File }) => {
+    if (isPosting) return;
+
+    if (scheduledDate && (!Number.isFinite(scheduledDate.getTime()) || scheduledDate.getTime() <= Date.now())) {
+      toast.error(_copy("copy.ebfef07e2d2b", { defaultValue: "Pick a time in the future." }));
+      return;
+    }
+    if (liveMode === 'video' && scheduledDate && scheduledDate.getTime() < Date.now() + 30 * 60 * 1000) {
+      toast.error(_copy("copy.154ab8682fce", { defaultValue: "Schedule the livestream at least 30 minutes from now." }));
+      return;
+    }
+
+    // Validate required fields
+    if (!text.trim() && media.length === 0 && !liveMode && !pollIsValid) {
+      toast.error(_copy("copy.26fc0b87a364", { defaultValue: "Add some content first" }));
+      return;
+    }
+
+    // A post for mentioned people only needs somebody mentioned. The server
+    // refuses one without (VISIBILITY_NEEDS_MENTION); say so before uploading.
+    if (visibility === 'direct' && !liveMode && !isQuoting && !/@[a-zA-Z0-9_]{1,30}\b/.test(text)) {
+      toast.error(t('postVisibility.needsMention'));
+      return;
+    }
+
+    setIsPosting(true);
+
+    /*
+     * A stage opens from this form, not from a second one.
+     *
+     * Picking Stages used to close the composer and hand over the Stages
+     * create sheet, which asked for the title and description all over again.
+     * It is the same setup — a name, a blurb, a cover — so it happens here,
+     * exactly like a live video stream does. The one difference is that a
+     * stage is a room, not a post: nothing is minted, so this returns before
+     * the mint path below rather than running through it.
+     */
+    if (liveMode === 'townhall') {
+      try {
+        const stageTitle = (titleText.trim() || text.trim().split('\n')[0] || '').slice(0, 100);
+        if (!stageTitle) {
+          toast.error(_copy("copy.8856ffa71a21", { defaultValue: "Give the stage a title first" }));
+          return;
+        }
+        const stageDescription = titleText.trim() ? text.trim() : '';
+
+        // The attached image or clip becomes the room's cover. A failed upload
+        // must not cost the host the stage — open it bare and say so.
+        let coverImageUrl: string | null = null;
+        const image = media.find((m) => m.type === 'image');
+        const clip = media.find((m) => m.type === 'video');
+        // A clip stands in as its own poster frame: the room shows a still,
+        // and the frame the composer already generated is that still.
+        const coverFile: Blob | undefined = image?.file ?? clip?.thumbnailBlob;
+        if (coverFile) {
+          try {
+            const ext = image ? (image.file.name.split('.').pop()?.toLowerCase() || 'jpg') : 'jpg';
+            const path = `stages/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+            const { error: uploadErr } = await supabase.storage
+              .from('community-media')
+              .upload(path, coverFile, { cacheControl: '31536000' });
+            if (uploadErr) throw uploadErr;
+            coverImageUrl = supabase.storage.from('community-media').getPublicUrl(path).data.publicUrl;
+          } catch (err) {
+            console.error('[Stage] Cover upload failed:', err);
+            toast.error(_copy("copy.712735778ca2", { defaultValue: "Cover image failed to upload — going live without it" }));
+          }
+        }
+
+        // Imported on use, never statically: the composer is measured against
+        // the entry bundle, and a static edge into the stage stack puts Agora
+        // and the whole room on the boot path.
+        const { createStageNow, scheduleStage, openStageModal } = await import('@/contexts/StageContext');
+        const space = scheduledDate
+          ? await scheduleStage({ title: stageTitle, description: stageDescription || undefined, coverImageUrl, scheduledAt: scheduledDate.toISOString() })
+          : await createStageNow(stageTitle, stageDescription || undefined, coverImageUrl);
+        if (!space) return;
+
+        resetForm();
+        onClose();
+        if (scheduledDate) {
+          toast.success(_copy("copy.0d1536855c7e", { defaultValue: "Stage scheduled" }));
+          navigate('/stages');
+        } else {
+          openStageModal('live');
+        }
+      } finally {
+        setIsPosting(false);
+      }
+      return;
+    }
+
+    try {
+      // Determine post type based on media
+      let postType: 'video' | 'feed-images' | 'feed-simple' | 'live' | 'feed-audio' = 'feed-simple';
+      if (liveMode) {
+        postType = 'live';
+      } else if (hasVideo) {
+        postType = 'video';
+      } else if (hasAudio && !hasImage) {
+        // Standalone audio post (no images attached). 'feed-audio' is the
+        // server's canonical audio type (and the only one mobile filters on) —
+        // 'audio' was stored verbatim and split the audio catalogue in two.
+        postType = 'feed-audio';
+      } else if (hasImage) {
+        postType = 'feed-images';
+      }
+
+      const postingOnSolana = isSolanaChain(chainId);
+      const uploadChainId = postUploadChainId(chainId, effectiveShouldMint);
+      const uploadOnSolana = isSolanaChain(uploadChainId);
+
+      if (isQuoting && uploadOnSolana) {
+        toast.error(_copy("copy.20cd34f41ecd", { defaultValue: "Quotes post on Base — switch chain to quote this post" }));
+        setIsPosting(false);
+        return;
+      }
+
+      if (postingOnSolana && isWatch2Earn) {
+        toast.error(_copy("copy.f8b1ff604858", { defaultValue: "Bounty is not available on Solana" }));
+        setIsPosting(false);
+        return;
+      }
+
+      // Same guard, and it needs to be here for the same reason bounty's is.
+      //
+      // buildStreamInfo drops the plan ids on Solana and PostAccessToggles
+      // hides the Subscribers row there, but neither resets the state — so
+      // turning it on while composing on Base and then switching the chain
+      // published subscriber-only content publicly, with no error and nothing
+      // on screen still claiming it was gated. Refusing is right rather than
+      // silently posting it open: the creator asked for a gate.
+      if (postingOnSolana && isSubscribersOnly) {
+        toast.error(_copy("copy.712076af20f7", { defaultValue: "Subscriber-only posts are not available on Solana" }));
+        setIsPosting(false);
+        return;
+      }
+
+      // Wallet/contract modules load on demand (see import note at top).
+      const [
+        { getWeb3AuthSigner, mintOnChain, mintOnChainWithFee },
+        { mintWithBounty, calculateTotalBounty, getDHBBalance },
+      ] = await Promise.all([
+        import('@/lib/contracts/stream-collection'),
+        import('@/lib/contracts/stream-controller'),
+      ]);
+
+      // Publishing off-chain touches no wallet at all.
+      //
+      // getWeb3AuthSigner is getWalletAddress under another name, and on a
+      // built-in wallet it raises the unlock dialog — which is why posting has
+      // always asked for the password before anything was even uploaded. The
+      // backend takes the minter from the authenticated session and only reads
+      // the `minter` field for Solana, so an EVM post needs no address from
+      // here; the account's own address is sent for continuity of the logs.
+      let minterAddress: string;
+      if (uploadOnSolana) {
+        minterAddress = await connectSolanaWallet();
+      } else if (effectiveShouldMint) {
+        minterAddress = await getWeb3AuthSigner();
+      } else {
+        minterAddress = user?.address || '';
+      }
+      console.log('[Mint] Minter address:', minterAddress, 'chainId:', chainId, 'mint:', effectiveShouldMint);
+
+      // Monetization → streamInfo, shared with Go Live so both composers write
+      // the same shape (see features/post/lib/stream-info.ts).
+      const access = buildStreamInfo({
+        chainId,
+        isTokenGated,
+        tokenAmount,
+        tokenContract,
+        tokenSymbol,
+        isPPV,
+        ppvAmount,
+        ppvCurrency,
+        isWatch2Earn,
+        w2eTotal,
+        w2eViews,
+        w2eComments,
+        isSubscribersOnly,
+        myPlanIds,
+      });
+
+      if (access.error) {
+        toast.error(access.error);
+        setIsPosting(false);
+        return;
+      }
+
+      const { streamInfo, subscriberPlanIds } = access;
+      const previewSeconds = parsePpvPreviewSeconds(ppvPreviewSeconds);
+      if (canConfigurePpvPreview && streamInfo.isPayPerView && previewSeconds) {
+        streamInfo.payPerViewPreviewSeconds = previewSeconds;
+      }
+      const hasBounty = !!access.bounty;
+
+      // The bounty is locked through the mint transaction, so the tokens have
+      // to be there before anything is uploaded — a post that advertises a
+      // bounty with nothing behind it is worse than a post that never went out.
+      if (access.bounty) {
+        const totalBounty = calculateTotalBounty(
+          access.bounty.amount,
+          access.bounty.viewers,
+          access.bounty.commenters,
+        );
+        const balance = await getDHBBalance(minterAddress, chainId as import('@/components/app/ChainSelector').ChainId);
+        const balanceNum = Number(balance) / 1e18;
+
+        if (balanceNum < totalBounty) {
+          toast.error(dhbText(_copy("copy.ba0ad677202d", { defaultValue: "Insufficient DHB balance. Need {{value1}} DHB but have {{value2}} DHB", value1: totalBounty, value2: balanceNum.toFixed(2) })));
+          setIsPosting(false);
+          return;
+        }
+      }
+
+      // Get media files, baking the composer's image edits into the bytes
+      // that upload. The editors only STORE settings; without this pass the
+      // original file shipped and every filter/crop silently vanished.
+      const files = await Promise.all(
+        media.map((m) =>
+          m.type === 'image'
+            ? applyEditsToImageFile(m.file, m.filterSettings, m.cropSettings)
+            : m.file,
+        ),
+      );
+      
+      // Get thumbnail for video and audio posts - use stored blob if available
+      let thumbnail: Blob | undefined;
+      const needsThumbnail = hasVideo || (postType === 'feed-audio');
+      const thumbnailSource = hasVideo ? media[0] : media.find(m => m.type === 'audio');
+      
+      if (needsThumbnail && thumbnailSource) {
+        if (thumbnailSource.thumbnailBlob && thumbnailSource.thumbnailBlob.size > 0) {
+          thumbnail = thumbnailSource.thumbnailBlob;
+        } else if (thumbnailSource.thumbnail) {
+          // Fallback: convert thumbnail URL to blob
+          try {
+            const thumbResponse = await fetch(thumbnailSource.thumbnail);
+            const fetchedBlob = await thumbResponse.blob();
+            if (fetchedBlob.size > 0) thumbnail = fetchedBlob;
+          } catch (err) {
+            console.warn('[Mint] Failed to fetch thumbnail blob:', err);
+          }
+        }
+
+        // Last-resort: generate thumbnail on-the-fly if still missing (video only)
+        if (!thumbnail && hasVideo && thumbnailSource.file) {
+          console.warn('[Mint] No thumbnail available, attempting last-resort generation');
+          try {
+            const video = document.createElement('video');
+            video.preload = 'auto';
+            video.muted = true;
+            video.playsInline = true;
+            video.setAttribute('webkit-playsinline', '');
+            video.src = thumbnailSource.preview;
+            video.load();
+            await new Promise<void>((resolve, reject) => {
+              const timeout = setTimeout(() => reject(new Error('Video load timeout')), 12000);
+              video.onloadeddata = () => { clearTimeout(timeout); resolve(); };
+              video.onerror = () => { clearTimeout(timeout); reject(new Error('Failed to load video')); };
+            });
+            const seekTime = Math.min(1, (video.duration || 0) * 0.1);
+            video.currentTime = seekTime;
+            await new Promise<void>((resolve) => {
+              const timeout = setTimeout(resolve, 4000);
+              video.onseeked = () => { clearTimeout(timeout); resolve(); };
+            });
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth || 640;
+            canvas.height = video.videoHeight || 360;
+            const ctx = canvas.getContext('2d');
+            if (ctx) {
+              ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+              const blob = await new Promise<Blob | null>((resolve) => {
+                canvas.toBlob(resolve, 'image/jpeg', 0.85);
+              });
+              if (blob && blob.size > 0) {
+                thumbnail = blob;
+                console.log('[Mint] Last-resort thumbnail generated:', blob.size);
+              }
+            }
+          } catch (err) {
+            console.error('[Mint] Last-resort thumbnail generation failed:', err);
+          }
+        }
+
+        // Video posts MUST have a thumbnail; audio posts can optionally have one
+        if (!thumbnail && hasVideo) {
+          toast.error(_copy("copy.dc66efe388fe", { defaultValue: "Could not generate thumbnail. Please add a custom thumbnail and try again." }));
+          setIsPosting(false);
+          return;
+        }
+      }
+
+      console.log('[Mint] Minting post:', {
+        name: text.trim().slice(0, 100) || '',
+        postType,
+        streamInfo,
+        filesCount: files.length,
+        hasThumbnail: !!thumbnail,
+        hasBounty,
+        minterAddress,
+      });
+
+      // Step 1: Call the mint API to get signature
+      // Dismiss any existing toast to avoid overlap
+      toast.dismiss('mint-progress');
+      toast.loading(_copy("copy.daf0d93824fa", { defaultValue: "Uploading content" }), { id: 'mint-progress', duration: Infinity });
+      setUploadProgress(5);
+      
+      // Determine title and description based on post type
+      let postTitle = '';
+      let postDescription = '';
+
+      if (postType === 'video' || postType === 'feed-audio') {
+        // Video/Audio: use explicit title field, fallback to description as title
+        if (titleText.trim()) {
+          // 140 matches the input's maxLength, the edit endpoint's cap, and
+          // mobile — slicing to 100 silently lost the tail of a valid title.
+          postTitle = titleText.trim().slice(0, 140);
+          postDescription = text.trim();
+        } else {
+          // No title provided — the front of the text becomes the title and
+          // the rest carries on into the description instead of being dropped.
+          const borrowed = splitTitleFromText(text);
+          postTitle = borrowed.title || ' ';
+          postDescription = borrowed.description;
+        }
+      } else if (showTitle && titleText.trim()) {
+        // Text/Image posts with explicit title
+        postTitle = titleText.trim().slice(0, 140);
+        postDescription = text.trim();
+      } else {
+        // Image/Text posts: no title, everything goes to description
+        postTitle = ' ';
+        postDescription = text.trim();
+      }
+
+      // Append soundtrack tag if provided (image/video posts with attached sound)
+      if (extra?.soundtrackTag && !postDescription.includes('[soundtrack:')) {
+        postDescription = postDescription
+          ? `${postDescription}\n${extra.soundtrackTag}`
+          : extra.soundtrackTag;
+      }
+
+      // Hashtags the author typed become categories as well, so the tag is
+      // filterable — but the text goes out exactly as written.
+      //
+      // This used to strip them out and tidy the whitespace they left behind,
+      // which made a typed tag indistinguishable from one picked in the
+      // category selector: both ended up as invisible metadata, and the tags
+      // an author had deliberately written simply vanished from their own
+      // post. Where a tag appears is the author's decision, not ours — a
+      // picked category stays out of sight, a typed one stays where it was
+      // put, and the feed renders it as a link.
+      const hashtagRegex = /#([A-Za-z][A-Za-z0-9_]{0,49})/g;
+      const extractedTags = new Set<string>();
+      for (const match of (postDescription.matchAll(hashtagRegex))) {
+        extractedTags.add(match[1]);
+      }
+      for (const match of (postTitle.matchAll(hashtagRegex))) {
+        extractedTags.add(match[1]);
+      }
+
+      const submittedDescription = postDescription;
+      const submittedTitle = postTitle;
+
+      // Merge extracted hashtags into categories
+      const baseCategories = normalizeCategoryList(selectedCategory ? [selectedCategory] : []);
+      if (baseCategories.length === 0) baseCategories.push('General');
+      const hashtagCategories = Array.from(extractedTags).map(t => t.charAt(0).toUpperCase() + t.slice(1).toLowerCase());
+      const mergedCategories = normalizeCategoryList([...baseCategories, ...hashtagCategories]);
+
+      /**
+       * Can this account actually pay for the mint?
+       *
+       * Checked before the upload commits so a creator who is short of DHB
+       * publishes off-chain in one pass rather than uploading, failing at the
+       * transfer and having to start again. Coming up short is not an error:
+       * the post goes out unminted and a top-up sheet appears afterwards, from
+       * which the post can be minted later.
+       */
+      let feeForMint: MintFeeQuoteResponse | null = null;
+      let mintingThisPost = effectiveShouldMint;
+      let shortfall: MintFeeQuoteResponse | null = null;
+
+      if (mintingThisPost && !postingOnSolana && isSmartWalletSession()) {
+        feeForMint = mintFee ?? (await getMintFee(chainId));
+        if (feeForMint?.chargeable && feeForMint.amount > 0) {
+          // The quote's own coin: BNB / ETH by default, DHB if switched back.
+          // A balance that could not be read must not decide the post's fate;
+          // let the transfer itself be the judge.
+          const { mintFeeShortfall } = await import('@/lib/mint-fee-balance');
+          const short = await mintFeeShortfall(
+            feeForMint,
+            minterAddress,
+            chainId as import('@/components/app/ChainSelector').ChainId,
+          );
+          if (short) {
+            if (mintRequired) {
+              // A bounty post must mint — downgrading here would publish a
+              // post advertising a bounty with no tokens locked behind it.
+              toast.error(
+                _copy("copy.a9b0f4f416f0", { defaultValue: "Insufficient {{value1}} for the mint fee — top up to publish this bounty post.", value1: feeForMint.symbol }),
+                { id: 'mint-progress' },
+              );
+              setIsPosting(false);
+              return;
+            }
+            console.log(`[Mint] Short of ${feeForMint.symbol} for the mint fee — publishing off-chain`);
+            shortfall = feeForMint;
+            mintingThisPost = false;
+          }
+        }
+      }
+
+      /**
+       * Does this post fit in today's free allowance, and if not, can it be
+       * paid for?
+       *
+       * Asked before the upload starts. The server checks the same thing
+       * again and is the authority — this exists so that being short of DHB
+       * costs a moment rather than a gigabyte of upload, and so the message
+       * says what is actually wrong instead of surfacing a bare 402.
+       *
+       * A quote that could not be fetched lets the post through. Losing a
+       * post to a failed price check would be the worse bug.
+       */
+      const uploadBytes =
+        files.reduce((sum, f) => sum + (f?.size || 0), 0) + (thumbnail?.size || 0);
+      const quotaCost = await quotePostCharge(postType, uploadBytes);
+
+      if (quotaCost?.chargeable && quotaCost.amountDhb > 0) {
+        const { readDhbBalance } = await import('@/lib/dhb-payment');
+        const held = await readDhbBalance();
+        const owed = quotaCost.amountDhb + (postQuota?.outstandingDhb ?? 0);
+        const tierToast = {
+          id: 'tier-visibility',
+          action: { label: buyTokensLabel, onClick: () => navigate('/app/buy') },
+          duration: 10000,
+        };
+
+        if (held < owed) {
+          toast.info(_copy("copy.d26789df47bf", { defaultValue: "Climb tiers to increase your visibility and get more feeds on the post per day" }), {
+            ...tierToast,
+            description: dhbText(
+              _copy("copy.81ded5297863", { defaultValue: "This post costs {{value1}} tokens and you hold {{value2}}.", value1: owed.toLocaleString(), value2: Math.floor(held).toLocaleString() }),
+            ),
+          });
+          setIsPosting(false);
+          setUploadProgress(0);
+          return;
+        }
+        toast.info(_copy("copy.d26789df47bf", { defaultValue: "Climb tiers to increase your visibility and get more feeds on the post per day" }), tierToast);
+      }
+
+      /**
+       * The key that makes this upload safe to repeat.
+       *
+       * Keyed on the payload rather than "the composer is open", so a retry of
+       * the same post reuses it and the server hands back the post the lost
+       * attempt already created — while a post whose text or media changed at
+       * all gets a fresh key and publishes normally. Without that check, a
+       * failed attempt followed by a *different* post would have been answered
+       * with the first post and silently dropped the second.
+       *
+       * Built from `media`, the files the creator picked — NOT from `files`,
+       * which for an edited image is re-encoded per attempt by
+       * applyEditsToImageFile into a `new File(...)` whose lastModified is the
+       * moment it was made. Signing over that would mint a new key on every
+       * retry and deduplicate nothing.
+       */
+      const attemptSignature = [
+        postType,
+        chainId,
+        submittedTitle,
+        submittedDescription,
+        scheduledDate?.toISOString() || '',
+        extra?.articleBody || '',
+        extra?.articleImage ? `${extra.articleImage.name}:${extra.articleImage.size}:${extra.articleImage.lastModified}` : '',
+        extra?.socialImage ? `${extra.socialImage.name}:${extra.socialImage.size}:${extra.socialImage.lastModified}` : '',
+        media
+          .map((m) =>
+            [
+              m.file.name,
+              m.file.size,
+              m.file.lastModified,
+              JSON.stringify(m.filterSettings ?? null),
+              JSON.stringify(m.cropSettings ?? null),
+            ].join(':'),
+          )
+          .join(','),
+      ].join('|');
+
+      if (postAttemptRef.current?.signature !== attemptSignature) {
+        postAttemptRef.current = {
+          signature: attemptSignature,
+          key:
+            typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+              ? crypto.randomUUID()
+              // Older Safari / non-secure contexts have no randomUUID.
+              : `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}`,
+        };
+      }
+
+      const mintParams: Parameters<typeof mintPost>[0] = {
+        name: submittedTitle,
+        description: submittedDescription,
+        quotedTokenId: isQuoting ? Number(quotedPost!.tokenId) : undefined,
+        articleBody: isQuoting ? undefined : extra?.articleBody,
+        articleImage: extra?.articleImage,
+        socialImage: extra?.socialImage,
+        postType,
+        chainId: uploadChainId,
+        category: mergedCategories,
+        streamInfo,
+        files: files.length > 0 ? files : undefined,
+        thumbnail,
+        minterAddress,
+        mintOptOut: !mintingThisPost,
+        scheduledAt: !liveMode && !isQuoting && scheduledDate ? scheduledDate.toISOString() : undefined,
+        scheduledFor: liveMode === 'video' && scheduledDate ? scheduledDate.toISOString() : undefined,
+        idempotencyKey: postAttemptRef.current.key,
+        contentRating: isMature ? 'mature' : undefined,
+        // Only ever sent as true — absent is what "not kids content" means, so
+        // a false would store a second representation of the same state.
+        forKids: isForKids ? true : undefined,
+        // Sent with the mint rather than PATCHed after it, so a live post is
+        // already carrying its board when the stream comes up.
+        shopLinks: shopLinks.length ? shopLinks : undefined,
+        // What we are ABOUT to attach. The attach itself needs the tokenId
+        // this call returns, so the count goes on the token now and the rows
+        // land a moment later — see the attach step below.
+        shopListingCount: shopListingIds.length || undefined,
+        plans: subscriberPlanIds,
+        // Alt text in the order the files upload, which is the order the post
+        // shows them. Audio has nothing to see, so it takes no slot.
+        mediaDescriptions: media.some(m => m.description)
+          ? media.filter(m => m.type !== 'audio').map(m => m.description || '')
+          : undefined,
+        spoilerText: contentWarning?.trim() || undefined,
+        hideAssetCards: hideAssetCards || undefined,
+        // Only the closed links still in the text: one deleted since needs no flag.
+        hiddenLinkPreviews: (() => {
+          const inText = new Set(extractUrlsFromText(text));
+          const closed = hiddenLinkPreviews.filter((url) => inText.has(url));
+          return closed.length ? closed : undefined;
+        })(),
+        // Self-destructing video post: the server deletes it when time is up.
+        destruct: media[0]?.type === 'video' && !liveMode && !isQuoting ? media[0].destructSeconds ?? undefined : undefined,
+        // A comic: the photos show as collector cards, a caption per page.
+        layout: postLayout === 'comic' && hasImage && !liveMode && !isQuoting ? 'comic' : undefined,
+        mediaCaptions: postLayout === 'comic' && media.some(m => m.caption?.trim())
+          ? media.filter(m => m.type === 'image').map(m => m.caption?.trim() || '')
+          : undefined,
+        comicBorder: postLayout === 'comic' ? comicBorder ?? undefined : undefined,
+        quotePolicy,
+        replyPolicy,
+        // A livestream and a quote are always public.
+        visibility: liveMode || isQuoting ? undefined : visibility,
+      };
+      const uploadWithFile = (percent: number) => setUploadProgress(Math.round(percent * 0.6)); // XHR bytes map to 0-60%
+
+      /**
+       * The video went up as a draft while the caption was being written. Wait
+       * for its bytes (usually long done), then mint with only the thumbnail.
+       * A draft the server has lost or already spent comes back 409
+       * DRAFT_UNAVAILABLE and the post goes again the old way, file and all.
+       */
+      const draft = postType === 'video' && !isQuoting && media[0]?.type === 'video'
+        && draftVideoRef.current?.file === media[0].file ? draftVideoRef.current : null;
+      let draftVideoId: string | null = null;
+      if (draft && isDraftUsable(draft.getSnapshot())) {
+        const showDraftUpload = (snapshot: DraftVideoSnapshot) =>
+          setUploadProgress(Math.max(5, Math.round(snapshot.uploadPercent * 0.6)));
+        showDraftUpload(draft.getSnapshot());
+        const stopShowing = draft.subscribe(showDraftUpload);
+        try {
+          draftVideoId = await draft.uploaded;
+        } finally {
+          stopShowing();
+        }
+        if (draftVideoId && !isDraftUsable(draft.getSnapshot())) draftVideoId = null;
+      }
+
+      // Trims are cut on the server from the draft upload; a post that has to
+      // send the file itself goes up whole, and says so.
+      const trimmed = media[0]?.type === 'video' && (media[0].trimStart !== undefined || hasVideoEdits(media[0].videoEdits));
+      const warnUntrimmed = () => {
+        if (trimmed) toast.info(_copy("post.trim.notApplied", { defaultValue: "This video was posted without your trim and edits." }));
+      };
+
+      /**
+       * "One post each" (Requests 86e8907b): every photo becomes its own post,
+       * one every `dripGap` minutes from the time picked (or now). The first
+       * one that is due now goes straight out; the rest wait in Planned. Each
+       * photo has its own key, so tapping Post again after a failure halfway
+       * picks up where it stopped instead of posting the first ones twice.
+       */
+      if (dripGap && postType === 'feed-images' && !isQuoting && !liveMode && postLayout !== 'comic' && !mintingThisPost && files.length > 1) {
+        const times = dripTimes(scheduledDate ?? new Date(), files.length, dripGap);
+        const imageMedia = media.filter(m => m.type === 'image');
+        const baseKey = postAttemptRef.current.key;
+        for (let i = 0; i < files.length; i++) {
+          toast.loading(_copy("postSpacing.dripProgress", { defaultValue: "Planning post {{n}} of {{total}}", n: i + 1, total: files.length }), { id: 'mint-progress', duration: Infinity });
+          setUploadProgress(Math.round((i / files.length) * 100));
+          const at = times[i];
+          const description = imageMedia[i]?.description;
+          await mintPost(
+            {
+              ...mintParams,
+              files: [files[i]],
+              draftImageIds: undefined,
+              mediaDescriptions: description ? [description] : undefined,
+              layout: undefined,
+              mediaCaptions: undefined,
+              comicBorder: undefined,
+              scheduledAt: isLater(at) ? at.toISOString() : undefined,
+              spacing: 'skip',
+              idempotencyKey: `${baseKey}-${i}`,
+            },
+            () => {},
+          );
+        }
+        const last = times[times.length - 1];
+        toast.success(_copy("postSpacing.dripDone", { defaultValue: "{{count}} posts planned. Last one {{when}}", count: files.length, when: last.toLocaleString() }), { id: 'mint-progress' });
+        resetForm();
+        onClose();
+        return;
+      }
+
+      let mintResponse: MintResponse;
+      if (draftVideoId) {
+        try {
+          mintResponse = await mintPost(
+            {
+              ...mintParams,
+              files: undefined,
+              draftVideoId,
+              trimStart: media[0]?.trimStart,
+              trimEnd: media[0]?.trimEnd,
+              videoEdits: videoEditsPayload(media[0]?.videoEdits) ?? undefined,
+            },
+            (percent) => setUploadProgress(Math.max(55, Math.round(percent * 0.6))),
+          );
+        } catch (err) {
+          if (!(err instanceof UploadHttpError && err.status === 409 && err.code === 'DRAFT_UNAVAILABLE')) throw err;
+          console.warn('[Mint] Draft video unavailable — uploading the file with the post');
+          setUploadProgress(5);
+          mintResponse = await mintPost(mintParams, uploadWithFile);
+          warnUntrimmed();
+        }
+      } else if (postType === 'feed-images' && !isQuoting) {
+        // Photos uploaded while the caption was written go by id; a 409 means
+        // the server lost one, so the post goes again with every file.
+        const early = await resolveDraftImages(files);
+        if (early) {
+          try {
+            mintResponse = await mintPost(
+              { ...mintParams, files: early.send.length ? early.send : undefined, draftImageIds: early.ids },
+              (percent) => setUploadProgress(Math.max(30, Math.round(percent * 0.6))),
+            );
+          } catch (err) {
+            if (!(err instanceof UploadHttpError && err.status === 409 && err.code === 'DRAFT_UNAVAILABLE')) throw err;
+            console.warn('[Mint] Draft photo unavailable — uploading the files with the post');
+            setUploadProgress(5);
+            mintResponse = await mintPost(mintParams, uploadWithFile);
+          }
+        } else {
+          mintResponse = await mintPost(mintParams, uploadWithFile);
+        }
+      } else {
+        mintResponse = await mintPost(mintParams, uploadWithFile);
+        warnUntrimmed();
+      }
+
+      console.log('[Mint] API response:', JSON.stringify(mintResponse, null, 2));
+
+      if (!mintResponse.createdTokenId) {
+        console.error('[Mint] Missing token ID in API response');
+        throw new Error('Invalid response from backend - missing token ID');
+      }
+      onPosted?.(String(mintResponse.createdTokenId));
+      // A Supabase row of its own, so it cannot ride on the mint. Reported, not thrown: the post is up.
+      if (stitchPolicy && postType === 'video' && !mintResponse.duplicate) {
+        void saveRemixSettings({ tokenId: String(mintResponse.createdTokenId), allowStitch: stitchPolicy }).catch(() => {
+          toast.error(_copy("remixLinks.stitch.settingFailed", { defaultValue: "Your post is up, but its stitch setting was not saved. Change it from Edit post." }));
+        });
+      }
+
+      /**
+       * Put the picked store listings on the post, now that it has a tokenId.
+       *
+       * Not awaited into the failure path on purpose: the post is published by
+       * this point, and a Supabase hiccup must not throw a creator onto an
+       * error screen for something they can fix from the post's edit sheet.
+       * A partial result is reported rather than swallowed, so nobody is left
+       * wondering where their products went.
+       *
+       * Skipped for a `duplicate` — that post is the earlier send's, and its
+       * listings were attached then.
+       */
+      if (shopListingIds.length && !mintResponse.duplicate) {
+        // The account address, not `minterAddress` — on a Solana post that is
+        // a base58 mint wallet, while the token's `minter` and the identity
+        // stream-products checks against are both the EVM account.
+        void attachShopListings(mintResponse.createdTokenId, shopListingIds, user?.address || null)
+          .then(({ failed }) => {
+            if (failed > 0) {
+              toast.error(
+                failed === shopListingIds.length
+                  ? _copy("copy.d163cccd48f0", { defaultValue: "Your post is up, but its shop items could not be attached. Add them from Edit post." })
+                  : _copy("copy.17027391d32d", { defaultValue: "Your post is up. {{count}} shop items could not be attached — add them from Edit post.", count: failed }),
+              );
+            }
+          });
+      }
+
+      // Never for a followers-only or direct post: another network would publish
+      // it to everyone there.
+      if (!mintResponse.duplicate && !liveMode && !isQuoting && visibility === 'public') {
+        void crossPost({
+          text: [submittedTitle, submittedDescription].filter(Boolean).join('\n\n'),
+          files: files.filter((f): f is File => f instanceof File),
+          accountIds: useCrossPostStore.getState().selected,
+          scheduledAt: mintResponse.scheduled ? (mintResponse.scheduledAt ? new Date(mintResponse.scheduledAt) : scheduledDate) : null,
+          tokenId: mintResponse.createdTokenId,
+          wallet: user?.address ?? null,
+        });
+      }
+
+      // A repeat of a post this composer already published: the first attempt's
+      // response was lost, not its post, and the server handed back the token
+      // that exists rather than making a second one. `alreadyMinted` means that
+      // token is on chain as well, so there is no signature in this response
+      // and nothing left to send — carry on with the chain step switched off,
+      // which also keeps the checks below from reading its absence as an error.
+      const alreadyOnChain = !!(mintResponse.duplicate && mintResponse.alreadyMinted);
+      if (alreadyOnChain) {
+        console.log('[Mint] Duplicate of an already-minted post — skipping the chain step');
+        mintingThisPost = false;
+      }
+
+      // /quote_post always signs for a mint. A quote published off-chain is
+      // kept the same way a post whose wallet never answered is: marked
+      // deliberately off-chain so the expiry sweep leaves it up — and no
+      // wallet is ever asked for.
+      if (isQuoting && !mintingThisPost && !alreadyOnChain && !mintResponse.duplicate) {
+        await keepPostOffChain(mintResponse.createdTokenId);
+      }
+
+      const isSolanaMint = !!(mintResponse.isSolana && mintResponse.transaction && mintResponse.mintAddress);
+
+      if (uploadOnSolana && !isSolanaMint && !alreadyOnChain) {
+        throw new PostCopyError(
+          mintResponse.isSolana
+            ? _copy("copy.84b7e19c6085", { defaultValue: "Solana mint data incomplete from server. Please try again." })
+            : _copy("copy.4a840d259f17", { defaultValue: "Solana minting is not enabled on the server. Contact support or try an EVM chain." }),
+        );
+      }
+
+      // Only the on-chain path needs a signature. A post published off-chain
+      // is complete as soon as this call returns — the backend serves it from
+      // status 'signed', which every feed already accepts.
+      if (mintingThisPost && !isSolanaMint && (!mintResponse.v || !mintResponse.r || !mintResponse.s)) {
+        console.error('[Mint] Missing signature components in API response');
+        throw new Error('Invalid signature data from backend - missing v, r, or s');
+      }
+
+      // The poll rides on the post, whatever else the post carries (photos,
+      // a video, a quote). Its clock starts when the post goes out.
+      const attachPoll = async (startsAt: number) => {
+        const createdTokenId = typeof mintResponse.createdTokenId === 'string' ? parseInt(mintResponse.createdTokenId, 10) : mintResponse.createdTokenId;
+        // The quiz and the photo tags ride on the post the same way.
+        if (quiz && quizIsValid && createdTokenId) {
+          await createQuiz(createdTokenId, quiz).catch((quizErr) => {
+            console.warn('[Mint] Quiz creation failed:', quizErr);
+            toast.error(_copy('quiz.attachFailed', { defaultValue: 'Your post is up, but the quiz could not be added' }));
+          });
+        }
+        const imageCount = media.filter((m) => m.type === 'image').length;
+        const tags = photoTags.filter((tag) => tag.i < imageCount);
+        if (tags.length && createdTokenId) {
+          await savePhotoTags(createdTokenId, tags).catch((tagErr) => console.warn('[Mint] Photo tags failed:', tagErr));
+        }
+        if (!poll || !pollIsValid) return;
+        try {
+          const validOptions = poll.options.filter(o => o.text.trim()).map(o => o.text.trim());
+          const expiresAt = new Date(startsAt + (poll.duration ?? 24) * 3600 * 1000).toISOString();
+          await createPoll({
+            tokenId: typeof mintResponse.createdTokenId === 'string' ? parseInt(mintResponse.createdTokenId, 10) : mintResponse.createdTokenId,
+            question: poll.question.trim(),
+            options: validOptions,
+            expiresAt,
+            isMultipleChoice: poll.isMultipleChoice ?? false,
+          });
+        } catch (pollErr) {
+          console.warn('[Mint] Poll creation failed:', pollErr);
+        }
+      };
+
+      // Scheduled: the server parked the token at status 'scheduled' and the
+      // cron publishes it later — skip the chain step entirely. Gate on the
+      // RESPONSE, not the picker: a date the server rejected (e.g. already in
+      // the past by submit time) publishes now, and claiming "scheduled"
+      // for it would be a lie.
+      if (mintResponse.scheduled) {
+        const when = mintResponse.scheduledAt ? new Date(mintResponse.scheduledAt) : scheduledDate;
+        // The poll goes on now; its clock starts at the scheduled time.
+        await attachPoll(when ? when.getTime() : Date.now());
+        toast.success(
+          when && mintResponse.spaced
+            ? _copy("postSpacing.spacedToast", { defaultValue: "Spaced out: goes out {{value1}}", value1: when.toLocaleString() })
+            : when ? _copy("copy.ef58a8022edc", { defaultValue: "Post scheduled for {{value1}}", value1: when.toLocaleString() }) : _copy("copy.0ae4cb6e00b3", { defaultValue: "Post scheduled for later" }),
+          { id: 'mint-progress' },
+        );
+        resetForm();
+        onClose();
+        return;
+      }
+
+      // Step 2: Execute on-chain minting.
+      //
+      // Skipped wholesale when the creator turned minting off: no contract
+      // call, no signature, no wallet prompt. The post is already live, so
+      // everything after this block — the optimistic feed entry, the poll, the
+      // category counts — runs exactly the same either way.
+      let txHash: string | undefined;
+      /**
+       * The wallet never came back and we stopped waiting. The post is still
+       * published — only the chain leg is missing.
+       */
+      let mintAbandoned = false;
+
+      if (mintingThisPost) {
+        setUploadProgress(65);
+        toast.loading(_copy("copy.678f5f6b6dfd", { defaultValue: "Publishing post" }), { id: 'mint-progress', duration: Infinity });
+
+        // Slowly creep progress from 69→99% while waiting for chain confirmation
+        // Faster initially, then decelerates as it approaches 99%
+        let simulatedProgress = 69;
+        const progressInterval = setInterval(() => {
+          const remaining = 99 - simulatedProgress;
+          // Exponential deceleration: move a fraction of remaining distance
+          const step = remaining > 4
+            ? Math.random() * 3 + 1.5   // 1.5-4.5% per tick when far from 99
+            : Math.random() * 0.3 + 0.1; // 0.1-0.4% per tick near 95-99%
+          simulatedProgress += step;
+          if (simulatedProgress >= 99) {
+            simulatedProgress = 99;
+            clearInterval(progressInterval);
+          }
+          setUploadProgress(Math.round(simulatedProgress));
+        }, 1200);
+
+        /**
+         * A way out of a wallet prompt that never arrives.
+         *
+         * Nothing in this leg has a wall clock of its own. An external wallet
+         * signs through wagmi's sendTransaction, which resolves when the user
+         * taps confirm and otherwise never — so a prompt that opened behind
+         * the browser, or in a wallet app that was swapped away from, parks
+         * the composer on 99% for good. That is what creators reported, and
+         * three minutes later the expiry sweep takes the post down with it.
+         *
+         * So: after MINT_STALL_HINT_MS the bar says what it is waiting for and
+         * offers a way out, and after MINT_WALLET_TIMEOUT_MS the wait ends on
+         * its own. Either way the post is kept, and everything after this
+         * block runs exactly as it does for a post published off-chain by
+         * choice.
+         */
+        const stallHint = setTimeout(() => setMintAwaitingWallet(true), MINT_STALL_HINT_MS);
+        let abandon: () => void = () => {};
+        const abandoned = new Promise<'abandoned'>((resolve) => {
+          abandon = () => resolve('abandoned');
+        });
+        abandonMintRef.current = abandon;
+        const giveUp = setTimeout(abandon, MINT_WALLET_TIMEOUT_MS);
+
+        let mintConfirmed: Promise<string> | undefined;
+
+        // The wallet leg as one promise, so it can be raced against the two
+        // timers above instead of awaited with no way to stop.
+        const signMint = (async (): Promise<{ hash: string; confirmed?: Promise<string> }> => {
+          if (isSolanaMint) {
+            toast.loading(_copy("copy.25ea9ade0b10", { defaultValue: "Waiting for Phantom" }), { id: 'mint-progress', duration: Infinity });
+            const solResult = await broadcastSolanaMint({
+              transactionBase64: mintResponse.transaction!,
+              mintAddress: mintResponse.mintAddress!,
+              tokenId: mintResponse.createdTokenId,
+              chainId,
+              walletAddress: minterAddress,
+            });
+            if (solResult.confirmWarning) {
+              toast.warning(solResult.confirmWarning, { duration: 10000 });
+            }
+            return { hash: solResult.signature };
+          }
+
+          if (hasBounty) {
+            toast.loading(_copy("copy.8088b64eba1a", { defaultValue: "Approving tokens" }), { id: 'mint-progress', duration: Infinity });
+
+            return {
+              hash: await mintWithBounty({
+                tokenId: mintResponse.createdTokenId,
+                timestamp: mintResponse.timestamp!,
+                v: mintResponse.v!,
+                r: mintResponse.r!,
+                s: mintResponse.s!,
+                uri: mintResponse.uri,
+                bountyAmount: parseFloat(w2eTotal),
+                countOfViewers: w2eViews.trim() !== '' ? parseInt(w2eViews) : 10,
+                countOfCommentors: w2eComments.trim() !== '' ? parseInt(w2eComments) : 0,
+                chainId: chainId as import('@/components/app/ChainSelector').ChainId,
+              }),
+            };
+          }
+
+          // The fee, when there is one, rides in the same user operation as
+          // the mint — one signature, one sponsored transaction. With nothing
+          // to charge this is exactly the old mintOnChain call.
+          const mintResult = await mintOnChainWithFee(
+            {
+              tokenId: mintResponse.createdTokenId,
+              timestamp: mintResponse.timestamp!,
+              v: mintResponse.v!,
+              r: mintResponse.r!,
+              s: mintResponse.s!,
+              uri: mintResponse.uri,
+              chainId: chainId as import('@/components/app/ChainSelector').ChainId,
+            },
+            feeForMint,
+          );
+          return { hash: mintResult.hash, confirmed: mintResult.confirmed };
+        })();
+
+        // Once the race is lost nothing is awaiting this promise, so a late
+        // rejection would land as an unhandled one. A late *success* is fine
+        // and needs nothing from us: the mint is on chain, and the indexer
+        // clears mintOptOut when it confirms.
+        signMint.catch(() => {});
+
+        try {
+          const outcome = await Promise.race([signMint, abandoned]);
+          if (outcome === 'abandoned') {
+            mintAbandoned = true;
+          } else {
+            txHash = outcome.hash;
+            mintConfirmed = outcome.confirmed;
+          }
+        } finally {
+          clearInterval(progressInterval);
+          clearTimeout(stallHint);
+          clearTimeout(giveUp);
+          abandonMintRef.current = null;
+          setMintAwaitingWallet(false);
+        }
+
+        if (mintAbandoned) {
+          // Awaited, unlike most of the tidying in this function: until the
+          // backend knows the mint is not coming, the post is a 'signed' token
+          // on a three-minute fuse.
+          console.log('[Mint] Gave up waiting on the wallet — keeping the post off-chain');
+          await keepPostOffChain(mintResponse.createdTokenId);
+        }
+
+        // Fire-and-forget: EVM confirmation + backend polling
+        if (mintConfirmed && txHash) {
+          mintConfirmed
+            .then((confirmedHash) =>
+              confirmEvmMint({
+                tokenId: mintResponse.createdTokenId,
+                txHash: confirmedHash,
+                chainId: chainId as number,
+              }),
+            )
+            .catch((err) => {
+              // Best-effort nudge only: the backend indexer picks the post up from
+              // the chain regardless, so a timed-out wait(1) or a non-2xx confirm-mint
+              // must NOT surface a user-facing error — the post has already landed and
+              // "Posted successfully" was already shown. Matches the silent sibling
+              // branch below. See usePostForm confirm-mint notes.
+              console.warn('[Mint] Background confirmation failed (post still lands):', err);
+            });
+        } else if (!isSolanaMint && txHash) {
+          confirmEvmMint({
+            tokenId: mintResponse.createdTokenId,
+            txHash,
+            chainId: chainId as number,
+          }).catch((err) => console.warn('[Mint] confirm-mint queue failed:', err));
+        }
+
+        console.log('[Mint] Transaction hash:', txHash);
+      } // end of the on-chain mint
+      setUploadProgress(100);
+      toast.dismiss('mint-progress');
+      if (mintAbandoned) {
+        // Not an error, and deliberately not phrased as one: the post is up.
+        toast.success(_copy("copy.29cac0bde471", { defaultValue: "Posted, but not minted" }), {
+          description:
+            _copy("copy.65a8301a457d", { defaultValue: "Your wallet never confirmed the mint, so the post was published without it. Mint it any time from the post menu." }),
+          duration: 12000,
+        });
+      } else {
+        toast.success(_copy("copy.eb1d942a2e5a", { defaultValue: "Posted successfully" }));
+      }
+      trackFirstPost(user?.address);
+
+      if (mintResponse.homeFeedRestricted) {
+        toast.warning(_copy("copy.5b4f3729a48e", { defaultValue: "Home feed limit reached" }), {
+          description: t('postComposer.homeFeedRestrictedDescription'),
+          duration: 12000,
+        });
+      }
+
+      /**
+       * The bill, for a post that went past the free allowance.
+       *
+       * Fired after the post has landed and deliberately not awaited. The
+       * post is published either way, so holding the composer open on a
+       * wallet prompt would make a paid post feel like it might still fail —
+       * and the creator already saw this price before they uploaded.
+       *
+       * Declining leaves the bill open, which is exactly what blocks the
+       * NEXT paid post. That is the collection lever, not an oversight.
+       */
+      const quotaBill = mintResponse.quota;
+      if (quotaBill?.amountDhb && quotaBill.recipient) {
+        const owed = quotaBill.amountDhb;
+        const treasury = quotaBill.recipient;
+        void (async () => {
+          try {
+            const { payDhb } = await import('@/lib/dhb-payment');
+            const { settleWithRetry } = await import('@/lib/post-quota-settle');
+            toast.loading(dhbText(_copy("copy.468f8a27a4c1", { defaultValue: "Paying {{value1}} DHB", value1: owed.toLocaleString() })), {
+              id: 'post-quota-pay',
+              duration: Infinity,
+            });
+            const payment = await payDhb(owed, treasury, {
+              context: 'Post allowance',
+              expectedSigner: user?.address,
+              shortfallMessage: (amount, has) =>
+                t('postComposer.postCostShortfall', { amount: amount.toLocaleString(), held: has.toLocaleString() }),
+            });
+            const settled = await settleWithRetry(payment.txHash, payment.chainId);
+            if (settled) {
+              toast.success(dhbText(_copy("copy.056be4d72f24", { defaultValue: "Paid {{value1}} DHB for this post", value1: owed.toLocaleString() })), {
+                id: 'post-quota-pay',
+                duration: 6000,
+              });
+            } else {
+              // The DHB has left the wallet. Never offer a retry here — the
+              // transfer is the part that cannot be repeated safely, and the
+              // hash is stashed and re-sent on its own.
+              toast.info(_copy("copy.9b032dc30cbb", { defaultValue: "Payment sent — still confirming" }), {
+                id: 'post-quota-pay',
+                description: t('postComposer.paymentConfirmingDescription'),
+                duration: 10000,
+              });
+            }
+          } catch (err) {
+            toast.error(_copy("copy.9cf8505b1521", { defaultValue: "This post is unpaid" }), {
+              id: 'post-quota-pay',
+              description:
+                err instanceof Error
+                  ? err.message
+                  : t('postComposer.transferIncomplete'),
+              duration: 12000,
+            });
+          } finally {
+            refreshPostQuota();
+          }
+        })();
+      } else {
+        refreshPostQuota();
+      }
+
+      // Offered after the post has landed, never in front of it: being short
+      // of DHB costs the creator the mint, not the post. A toast rather than a
+      // dialog because the composer closes on success — and because nothing
+      // here needs acknowledging.
+      if (shortfall) {
+        toast.info(_copy("copy.c94920b1b46e", { defaultValue: "Posted — but not minted" }), {
+          description: _copy("copy.183a6f2db673", { defaultValue: "Minting costs {{value1}} {{value2}} and your balance is short. Top up and you can mint it from the post's menu any time.", value1: formatFeeAmount(shortfall.amount), value2: shortfall.symbol }),
+          action: shortfall.isNative
+            ? { label: _copy("copy.79f52e0ce619", { defaultValue: "Top up" }), onClick: () => navigate('/app/wallet') }
+            : { label: t('postComposer.getTokens'), onClick: () => navigate('/app/buy') },
+          duration: 12000,
+        });
+      }
+
+      if (liveMode === 'video' && scheduledDate) {
+        if (!mintResponse.stream?._id) throw new Error('Stream entity missing from mint response');
+        toast.success(_copy("copy.d5ddf917d361", { defaultValue: "Livestream scheduled for {{value1}}", value1: scheduledDate.toLocaleString() }), { id: 'mint-progress' });
+        resetForm();
+        onClose();
+        navigate('/app');
+        return;
+      }
+
+      // Create optimistic post using the real token ID so it matches the API feed item
+      const optimisticId = String(mintResponse.createdTokenId);
+      // Its card waits out of sight until the composer closes (lib/post-landing).
+      // A post that goes on air opens the live console instead of landing.
+      if (!isQuoting && !(liveMode && onLiveStreamReady)) preparePostLanding(optimisticId);
+      const username = user?.username || user?.displayName || 'You';
+      // Use proper avatar resolution - extract path from all possible fields and build CDN URL
+      // This matches the exact pattern used in ProfilePage and other components
+      const rawAvatarPath = extractAvatarPath(user as Record<string, any>);
+      const avatar = buildAvatarUrl(user?.address || '', rawAvatarPath);
+      
+      if (hasVideo && media[0]) {
+        // Video post
+        const videoPost: VideoItem = {
+          id: optimisticId,
+          type: 'video',
+          thumbnail: media[0].thumbnail || media[0].preview,
+          videoUrl: media[0].preview,
+          duration: media[0].duration ? `${Math.floor(media[0].duration / 60)}:${String(Math.floor(media[0].duration % 60)).padStart(2, '0')}` : '0:00',
+          title: titleText.trim() || text.trim().split('\n')[0] || '',
+          description: text.trim(),
+          channel: username,
+          channelAvatar: avatar || '', // Must be string for VideoItem type
+          verified: false,
+          views: '0',
+          uploadedAgo: _copy("copy.66f53417d3b7", { defaultValue: "Just now" }),
+          creatorId: user?.address,
+          creatorUsername: username,
+          creatorBadgeBalance: user?.badgeBalance,
+          createdAt: new Date().toISOString(),
+          isLiked: false,
+          likeCount: 0,
+          dislikeCount: 0,
+          commentCount: 0,
+          isOptimistic: true,
+        };
+        addOptimisticPost({ id: optimisticId, type: 'video', data: videoPost, createdAt: new Date() });
+        // The post is up; its transcode is not. The dock follows it from here,
+        // wherever the creator goes next.
+        if (!liveMode) {
+          usePostProcessingStore.getState().start({
+            tokenId: optimisticId,
+            thumbnail: media[0].thumbnail || undefined,
+          });
+        }
+      } else if (postType === 'feed-audio' && media.some(m => m.type === 'audio')) {
+        // Music post: it used to fall through to the text card below, which
+        // showed only the name and "Just now" until a reload.
+        const track = media.find(m => m.type === 'audio')!;
+        const seconds = track.duration || 0;
+        const audioPost: VideoItem = {
+          id: optimisticId,
+          type: 'video',
+          thumbnail: track.thumbnail || '',
+          audioUrl: track.preview,
+          audioDuration: seconds,
+          isAudio: true,
+          duration: `${Math.floor(seconds / 60)}:${String(Math.floor(seconds % 60)).padStart(2, '0')}`,
+          title: submittedTitle.trim(),
+          description: submittedDescription,
+          channel: username,
+          channelAvatar: avatar || '',
+          verified: false,
+          views: '0',
+          uploadedAgo: _copy("copy.66f53417d3b7", { defaultValue: "Just now" }),
+          creatorId: user?.address,
+          creatorUsername: username,
+          creatorBadgeBalance: user?.badgeBalance,
+          createdAt: new Date().toISOString(),
+          isLiked: false,
+          likeCount: 0,
+          dislikeCount: 0,
+          commentCount: 0,
+          isOptimistic: true,
+        };
+        addOptimisticPost({ id: optimisticId, type: 'video', data: audioPost, createdAt: new Date() });
+      } else if (hasImage && media[0]) {
+        // Image post
+        const imagePost: ImagePost = {
+          id: optimisticId,
+          type: 'image',
+          username,
+          verified: false,
+          avatar: avatar || '', // Must be string for ImagePost type
+          image: media[0].preview,
+          imageUrls: media.filter(m => m.type === 'image').map(m => m.preview),
+          title: titleText.trim() || text.trim().split('\n')[0] || '',
+          description: text.trim(),
+          likes: 0,
+          dislikes: 0,
+          caption: text.trim(),
+          comments: 0,
+          views: '0',
+          timeAgo: _copy("copy.66f53417d3b7", { defaultValue: "Just now" }),
+          creatorId: user?.address,
+          creatorUsername: username,
+          creatorBadgeBalance: user?.badgeBalance,
+          isLiked: false,
+          createdAt: new Date().toISOString(),
+          isOptimistic: true,
+          ...(isQuoting ? { isQuotePost: true, quotedPost } : {}),
+        };
+        addOptimisticPost({ id: optimisticId, type: 'image', data: imagePost, createdAt: new Date() });
+      } else {
+        // Text post
+        const textPost: TextPost = {
+          id: optimisticId,
+          type: 'post',
+          author: {
+            id: user?.address || '',
+            name: user?.displayName || username,
+            handle: `@${username}`,
+            verified: false,
+            avatarSeed: avatar || undefined,
+            badgeBalance: user?.badgeBalance,
+          },
+          content: text.trim(),
+          views: '0',
+          createdAt: new Date().toISOString(),
+          stats: {
+            comments: 0,
+            reposts: 0,
+            likes: 0,
+            dislikes: 0,
+          },
+          // An article lands as its article card, not as a bare summary line.
+          ...(!isQuoting && extra?.articleBody ? {
+            title: titleText.trim(),
+            articleBody: extra.articleBody,
+            articleImageUrl: extra.articleImage ? URL.createObjectURL(extra.articleImage) : undefined,
+          } : {}),
+          isOptimistic: true,
+          ...(isQuoting ? { isQuotePost: true, quotedPost } : {}),
+        };
+        addOptimisticPost({ id: optimisticId, type: 'post', data: textPost, createdAt: new Date() });
+      }
+      
+      await attachPoll(Date.now());
+
+      resetForm();
+
+      // Increment trending category counts in DB
+      try {
+        const catsToIncrement = mergedCategories.filter(c => c.toLowerCase() !== 'general' && c.trim() !== '');
+        for (const cat of catsToIncrement) {
+          await supabase.rpc('increment_category_count', { p_name: cat });
+        }
+      } catch (catErr) {
+        console.warn('[Mint] Failed to increment category counts:', catErr);
+      }
+
+      /*
+       * A live post does not end at the feed — it ends on air.
+       *
+       * The same mint that published the post provisioned the stream and
+       * handed back its key, so there is nothing left to set up: the console
+       * opens over the composer on these credentials. Going live used to mean
+       * filling this form and then filling a second sheet that asked for the
+       * title, description and cover all over again.
+       *
+       * Falls through to the normal close if the server sent no stream back,
+       * which is a live post with no stream behind it — better to land on the
+       * feed than on a console with nothing to publish to.
+       */
+      const provisioned = mintResponse.stream;
+      if (liveMode && onLiveStreamReady && provisioned?.streamKey && provisioned?._id) {
+        onLiveStreamReady({
+          tokenId: String(mintResponse.createdTokenId),
+          streamKey: provisioned.streamKey,
+          ingestUrl: provisioned.ingestUrl || '',
+          playbackUrl: `https://riftn.com/app/post/${mintResponse.createdTokenId}`,
+          streamId: String(provisioned._id),
+          playbackId: provisioned.playbackId,
+          provider: provisioned.provider,
+        });
+        return;
+      }
+
+      // The new post lands at the top of the feed in the viewer's chosen
+      // style (lib/post-landing); a morph starts from the composer itself.
+      if (!isQuoting) beginPostLanding(optimisticId, document.querySelector<HTMLElement>('[data-post-modal]'));
+
+      // The phone keyboard goes with the composer, so the feed is not left
+      // shifted up under it while the new post lands.
+      if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
+      onClose();
+
+      // A quote stays where it was written: the optimistic card above already
+      // shows it at the top of the feed or the creator's own profile.
+      if (isQuoting) return;
+
+      // Navigate to home to show the new post
+      navigate('/app');
+    } catch (error) {
+      console.error('[Mint] Failed to mint post:', error);
+      try { console.error('[Mint] Error details:', JSON.stringify(error, null, 2)); } catch {}
+      toast.dismiss('mint-progress');
+      // Extract nested error messages from wallet/provider errors
+      let errorMsg = 'Unknown error';
+      let stackTrace: string | undefined;
+      if (error instanceof Error) {
+        errorMsg = error.message;
+        stackTrace = error.stack;
+      } else if (typeof error === 'string') {
+        errorMsg = error;
+      } else if (error && typeof error === 'object') {
+        const e = error as Record<string, any>;
+        errorMsg = e.message || e.shortMessage || e.reason || 
+                   e.error?.message || e.data?.message || 
+                   (() => { try { return JSON.stringify(error).slice(0, 200); } catch { return 'Unknown error'; } })();
+        stackTrace = e.stack;
+      }
+      // Log mint failure to backend for debugging
+      mintLogger.error(errorMsg, {
+        postType: hasVideo ? 'video' : hasAudio ? 'feed-audio' : hasImage ? 'feed-images' : 'feed-simple',
+        chainId,
+        hadBounty: !!(isWatch2Earn && w2eTotal && w2eViews),
+      }, error instanceof Error ? error : undefined);
+
+      // "No wallet connected" after a wagmi session means the WalletConnect/injected
+      // connection dropped (e.g. wallet app was closed mid-flow). Show a targeted message
+      // with a reconnect action instead of the raw technical error.
+      const isWalletGone = errorMsg.toLowerCase().includes('no wallet connected') ||
+        errorMsg.toLowerCase().includes('please sign in first');
+      // The built-in wallet's key only lives in memory, so this fires on the
+      // first post after any page refresh — i.e. constantly. A red "Post failed"
+      // reads as "you were signed out", which is exactly what it isn't.
+      // aa-utils normally has the unlock dialog opening by the time we get here;
+      // the toast carries its own Unlock action anyway, because a locked-wallet
+      // message with nothing to press is a dead end with no way out of it.
+      const isWalletLocked = errorMsg.toLowerCase().includes('wallet is locked');
+      const isSolanaWalletIssue =
+        isSolanaChain(chainId) ||
+        errorMsg.toLowerCase().includes('phantom') ||
+        errorMsg.toLowerCase().includes('solana');
+      const isGasFunds = !isSolanaWalletIssue && (
+        errorMsg === 'INSUFFICIENT_GAS_FUNDS' ||
+        errorMsg.toLowerCase().includes('insufficient funds') ||
+        errorMsg.toLowerCase().includes('insufficient balance') ||
+        errorMsg.toLowerCase().includes('gas required exceeds allowance')
+      );
+
+      // The quoted post's author does not let this account quote it
+      // (dehub-stream-backend src/repost/quote-policy). Nothing to retry.
+      const isQuoteRefused = isQuoting && (
+        errorMsg.includes('can quote this post') || errorMsg.includes('does not allow quotes')
+      );
+
+      if (isQuoteRefused) {
+        toast.error(t('quotePolicy.refused'));
+      } else if (error instanceof PaymentRequiredError) {
+        // The allowance turned this post down. The server writes this sentence
+        // for the creator, so it is shown verbatim — and the only useful next
+        // step is DHB, not "try again".
+        toast.error(dhbText(_copy("copy.822a61fab463", { defaultValue: "You've used today's free posting allowance" })), {
+          description: dhbText(error.message),
+          action: { label: t('postComposer.getTokens'), onClick: () => navigate('/app/buy') },
+          duration: 12000,
+        });
+        refreshPostQuota();
+      // Still gated on wagmi: a smart wallet's gas is sponsored, so the same
+      // error there means the paymaster ran dry, and telling that user to buy
+      // ETH would be wrong advice.
+      } else if (isGasFunds && connectionSource === 'wagmi') {
+        // The one failure with an obvious next step and, until now, no way to
+        // take it: "add ETH and try again" with nothing to press, on a screen
+        // whose text the user is afraid of losing. /app/buy sells the gas
+        // tokens on Base by card, so it is the honest destination — and saying
+        // the draft is kept matters more here than anywhere else, because this
+        // is the branch people reported retyping their post after.
+        const gasName = chainId === 56 ? 'BNB' : 'ETH';
+        const chainName = chainId === 56 ? 'BNB' : chainId === 1 ? 'Ethereum' : 'Base';
+        toast.error(_copy("copy.ee980688bc72", { defaultValue: "Not enough {{value1}} for gas on {{value2}}", value1: gasName, value2: chainName }), {
+          description: _copy("copy.dc326b074aa2", { defaultValue: "Your draft is still here — top up and press Post again." }),
+          action: { label: _copy("copy.e09a7a558dd5", { defaultValue: "Get {{value1}}", value1: gasName }), onClick: () => navigate('/app/buy') },
+          duration: 12000,
+        });
+      } else if (isWalletLocked) {
+        // Not a failure the user caused, and not a sign-out. Tell them what the
+        // prompt is for, that nothing was lost, and — the part that was missing
+        // — give them a way to open it if it did not appear on its own.
+        toast.info(_copy("copy.3765b36cd611", { defaultValue: "Unlock your wallet to finish posting" }), {
+          description: _copy("copy.69c3741c70c7", { defaultValue: "Your draft is still here — tap Post again once unlocked." }),
+          action: { label: _copy("copy.4ac709aa58bc", { defaultValue: "Unlock" }), onClick: requestWalletUnlock },
+          duration: 8000,
+        });
+      } else if (isWalletGone && connectionSource === 'wagmi') {
+        // Wallet connection dropped mid-session. The silent reconnect effect in AuthContext
+        // will have already triggered a logout with a toast. Just silently swallow this error
+        // to avoid showing a second confusing toast on top of the logout one.
+        console.warn('[Post] Wallet gone during post attempt — auth context handling logout');
+      } else if (isWalletGone) {
+        // Neither a smart wallet that needs unlocking nor a wagmi session that
+        // dropped, so there is genuinely nothing to sign with. Say that in
+        // words the user can act on: the raw provider error that used to land
+        // here reads as "you are logged out" to someone whose name and avatar
+        // are still on screen, which is how this turned into support tickets.
+        toast.error(_copy("copy.24b68dfa4df2", { defaultValue: "Please sign in again to post" }), {
+          description: _copy("copy.5f04aef31bf0", { defaultValue: "Your draft is still here." }),
+          action: { label: _copy("copy.bfd402b2f6f3", { defaultValue: "Sign in" }), onClick: () => openLoginModal() },
+          duration: 10000,
+        });
+      } else if (error instanceof AuthenticationError) {
+        // The session died while the user was composing. Recover it in place:
+        // showing "Post failed: …" here is what forced people to sign out and
+        // back in just to publish, and it discards the draft in the process.
+        const toastId = toast.loading(_copy("copy.8430e6a7cb5c", { defaultValue: "Session expired — restoring…" }));
+        const recovered = await refreshSession(true);
+        toast.dismiss(toastId);
+
+        if (recovered) {
+          toast.error(_copy("copy.256aa3af7b5b", { defaultValue: "Session restored — tap Post to try again." }), {
+            description: _copy("copy.5f04aef31bf0", { defaultValue: "Your draft is still here." }),
+            duration: 8000,
+          });
+        } else {
+          toast.error(_copy("copy.24b68dfa4df2", { defaultValue: "Please sign in again to post" }), {
+            description: _copy("copy.5f04aef31bf0", { defaultValue: "Your draft is still here." }),
+            action: { label: _copy("copy.bfd402b2f6f3", { defaultValue: "Sign in" }), onClick: () => openLoginModal() },
+            duration: 10000,
+          });
+        }
+      } else {
+        // Server, wallet and SDK messages are English; other readers get the
+        // translated sentence rather than a reason they cannot read.
+        const language = i18next.resolvedLanguage || i18next.language || 'en';
+        const readsEnglish = language === 'en' || language.startsWith('en-');
+        toast.error(error instanceof PostCopyError || readsEnglish
+          ? _copy("copy.209e2e6fd656", { defaultValue: "Post failed: {{value1}}", value1: errorMsg })
+          : _copy("copy.06bcf36e88e7", { defaultValue: "Post failed. Please try again." }));
+      }
+    } finally {
+      setIsPosting(false);
+      setUploadProgress(0);
+      // Belt and braces for the paths that never reached the chain step's own
+      // cleanup — a failed upload leaves no wallet to wait for.
+      abandonMintRef.current = null;
+      setMintAwaitingWallet(false);
+    }
+  }, [
+    // Everything the body reads. handlePost is only rebuilt when one of these
+    // changes, so anything left out is frozen at whatever it was when the last
+    // listed value moved — usually the creator's final keystroke. That is how a
+    // shop link added after the caption was typed reached the mint as
+    // `undefined`: the post went up with an empty board and nothing said so.
+    // Add the dependency when you read new state in here.
+    text, media, isSubscribersOnly, isPPV, ppvAmount, ppvPreviewSeconds, ppvCurrency, canConfigurePpvPreview,
+    isWatch2Earn, w2eViews, w2eComments, w2eTotal,
+    isTokenGated, tokenContract, tokenSymbol, tokenAmount, liveMode, scheduledDate, dripGap,
+    hasVideo, hasImage, hasAudio, isPosting, resetForm, onClose, navigate, addOptimisticPost, user,
+    showTitle, titleText, connectionSource, poll, pollIsValid, quiz, quizIsValid, photoTags, chainId,
+    refreshSession, openLoginModal, requestWalletUnlock,
+    effectiveShouldMint, mintFee, isMature, isForKids,
+    selectedCategory, shopLinks, shopListingIds, myPlanIds,
+    postQuota?.outstandingDhb, refreshPostQuota, onLiveStreamReady,
+    isQuoting, quotedPost, contentWarning, hideAssetCards, hiddenLinkPreviews, postLayout, comicBorder, quotePolicy, replyPolicy, visibility, stitchPolicy,
+    , _copy
+  ]);
+
+  /**
+   * Stop waiting for the wallet and publish the post as it stands.
+   *
+   * A no-op unless a mint is actually in flight, so a stale click after the
+   * wallet answered cannot un-mint anything.
+   */
+  const abandonMint = useCallback(() => {
+    abandonMintRef.current?.();
+  }, []);
+
+  return {
+    state: {
+      text,
+      media,
+      isSubscribersOnly,
+      isPPV,
+      ppvAmount,
+      ppvPreviewSeconds,
+      canConfigurePpvPreview,
+      ppvCurrency,
+      isWatch2Earn,
+      w2eViews,
+      w2eComments,
+      w2eTotal,
+      w2eCurrency,
+      isTokenGated,
+      tokenContract,
+      tokenSymbol,
+      tokenAmount,
+      liveMode,
+      poll,
+      quiz,
+      photoTags,
+      contentWarning,
+      hideAssetCards,
+      hiddenLinkPreviews,
+      postLayout,
+      comicBorder,
+      quotePolicy,
+      replyPolicy,
+      stitchPolicy,
+      visibility,
+      isEnhancing,
+      translatedDraft,
+      isPosting,
+      uploadProgress,
+      draftVideo,
+      mintAwaitingWallet,
+
+      scheduledDate,
+      dripGap,
+      drafts,
+      isRecording,
+      recordingTime,
+      chainId,
+      isCameraModalOpen,
+      selectedCategory,
+      showTitle,
+      titleText,
+      shouldMint,
+      isMature,
+      isForKids,
+      shopLinks,
+      shopListingIds,
+    },
+    actions: {
+      setText,
+      setMedia,
+      setIsSubscribersOnly,
+      setIsPPV,
+      setPpvAmount,
+      setPpvPreviewSeconds,
+      setPpvCurrency,
+      setIsWatch2Earn,
+      setW2eViews,
+      setW2eComments,
+      setW2eTotal,
+      setW2eCurrency,
+      setIsTokenGated,
+      setTokenContract,
+      setTokenSymbol,
+      setTokenAmount,
+      setLiveMode,
+      setPoll,
+      setQuiz,
+      setPhotoTags,
+      setContentWarning,
+      setHideAssetCards,
+      setHiddenLinkPreviews,
+      setQuotePolicy,
+      setStitchPolicy,
+      setReplyPolicy,
+      setVisibility,
+      handleImageSelect,
+      addImageFiles: processImageFiles,
+      handleVideoSelect,
+      handleFileDrop,
+      removeMedia,
+      moveMedia,
+      handleAudioSelect,
+      addAudioToMedia,
+      removeAudioFromMedia,
+      toggleMusicVideo,
+      addThumbnailToMedia,
+      removeThumbnailFromMedia,
+      applyFilterToMedia,
+      clearFilterFromMedia,
+      applyCropToMedia,
+      clearCropFromMedia,
+      applyTrimToMedia,
+      replaceImageFile,
+      replaceVideoFile,
+      updateMediaItem,
+      setMediaDescription,
+      setMediaCaption,
+      setPostLayout,
+      setComicBorder,
+      addComicPages,
+      handleEnhanceWithAI,
+      handleTranslateDraft,
+      undoTranslateDraft,
+      insertFormatting,
+      handlePost,
+      abandonMint,
+      resetForm,
+      setScheduledDate,
+      setDripGap,
+      saveDraft,
+      loadDraft,
+      deleteDraft,
+      startRecording,
+      stopRecording,
+      setSelectedCategory,
+      markCategorySaved: () => { categorySavedRef.current = true; },
+      setShowTitle,
+      setShowTitlePref: handleSetShowTitle,
+      setShouldMint: handleSetShouldMint,
+      setIsMature,
+      setIsForKids,
+      setShopLinks,
+      setShopListingIds,
+      setTitleText,
+      insertEmoji,
+      insertGif,
+      openCameraCapture,
+      closeCameraCapture,
+      handleCameraVideoRecorded,
+      handleCameraPhotoCaptured,
+    },
+    computed: {
+      hasVideo,
+      hasImage,
+      hasAudio,
+      isShort,
+      destinations,
+      canPost,
+      hasContent,
+      mintFeeLabel,
+      mintRequired,
+      postQuota,
+    },
+    refs: {
+      imageInputRef,
+      videoInputRef,
+      audioInputRef,
+      editorRef,
+    },
+  };
+}

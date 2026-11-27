@@ -1,0 +1,464 @@
+import { API_ORIGIN } from '@/lib/api/api-origin';
+/**
+ * Where a given live stream's bytes come from.
+ *
+ * Riftn runs two ingests. Livepeer is the original; MediaMTX on our own
+ * droplet is the cheap one — Livepeer bills delivery per viewer-hour, which is
+ * the only part of the streaming bill that grows with an audience.
+ *
+ * The provider is read off the STREAM, never off the build. A deploy flag
+ * would break every broadcast that was already running at cutover, and break
+ * them again on rollback; a stream that carries its own provider survives
+ * both. Streams that predate the field have none and are Livepeer by
+ * definition, which is why the fallback here is a constant and not an env var.
+ *
+ * Kept free of imports on purpose. The feed card needs these URLs
+ * synchronously on first render, the same reason `playback-id.ts` is its own
+ * module — anything this file pulls in lands on the boot path.
+ */
+
+export type LiveProvider = 'livepeer' | 'mediamtx';
+
+/** Host of the self-hosted ingest. No scheme — it is always HTTPS. */
+const MEDIAMTX_HOST = import.meta.env.VITE_MEDIAMTX_HOST || '';
+
+/** Just enough of a stream to resolve its URLs. */
+export interface LiveStreamRef {
+  provider?: string | null;
+  playbackId?: string | null;
+  streamKey?: string | null;
+}
+
+export function liveProviderOf(stream: LiveStreamRef | null | undefined): LiveProvider {
+  return stream?.provider === 'mediamtx' && MEDIAMTX_HOST ? 'mediamtx' : 'livepeer';
+}
+
+/**
+ * WHIP publish endpoint, plus the credential the self-hosted path needs.
+ *
+ * On MediaMTX the path is the playbackId — a value every viewer already has —
+ * so the stream key travels as a credential instead of as the address. It goes
+ * in a header rather than the query string so it stays out of access logs and
+ * out of anything that records a URL. MediaMTX reads `user:pass` from a bearer
+ * token precisely because some publishers (OBS) have only one field.
+ */
+export function whipEndpointFor(
+  stream: LiveStreamRef,
+): { url?: string; token?: string } {
+  if (liveProviderOf(stream) !== 'mediamtx') return {};
+  return {
+    // `/publish`, not `/whip`: nginx serves the same WHIP endpoint under both
+    // names, and the client uses the one that client-side HTTPS filters do
+    // not forge 403s for. Every field 403 arrived with zero packets at nginx,
+    // MediaMTX or Cloudflare's edge while the same device's other POSTs to
+    // the same hosts landed — something on the device kills URLs containing
+    // /whip before they leave it.
+    url: `https://${MEDIAMTX_HOST}/${stream.playbackId}/publish`,
+    token: `dehub:${stream.streamKey ?? ''}`,
+  };
+}
+
+/**
+ * Whether this browser can reach the self-hosted ingest at all.
+ *
+ * The ingest is a bare droplet IP — the one Riftn host not behind Cloudflare,
+ * because WebRTC cannot ride the proxy — and some ISPs null-route whole
+ * hosting ranges, so a client there connects to everything except this. The
+ * failure is a silent packet drop, which a fetch reports only by hanging, so
+ * the probe caps its own wait. `no-cors` on purpose: any response at all,
+ * opaque included, proves the network path; only a network error or the
+ * timeout says it is closed. With no host configured the answer is true —
+ * every stream is Livepeer then and the question never matters.
+ */
+/**
+ * Why the last probe / TURN lookup failed, as `ErrorName: message`, empty
+ * while none has. Kept as bare exports (this module must stay import-free —
+ * boot path) so the go-live telemetry can report them: the field failure
+ * under investigation is a browser whose probe and TURN fetches both die
+ * while the SAME requests visibly arrive and get answered at nginx — the
+ * error name is the only thing that distinguishes an abort from a network
+ * throw from a response that never surfaced.
+ */
+export let lastProbeFailure = '';
+export let lastTurnFailure = '';
+
+const describeFailure = (error: unknown): string => {
+  const e = error as { name?: string; message?: string } | null;
+  return `${e?.name || 'Error'}: ${String(e?.message || '').slice(0, 120)}`;
+};
+
+/**
+ * 15s, not 4s: AbortSignal.timeout measures WALL time, and this runs in
+ * parallel with the wallet stack, whose synchronous crypto blocks the main
+ * thread for seconds at a stretch. When the thread unblocks, an expired
+ * abort timer is processed ahead of a response that arrived mid-block — so a
+ * short cap "times out" answers nginx logged as served instantly, the probe
+ * reads unreachable, and the mint flees to Livepeer (observed in the field:
+ * every misrouted mint, on a browser where the same fetch passes from an
+ * idle console). The result is consumed after the mint round-trip anyway,
+ * so the longer cap costs nothing.
+ */
+export async function probeIngestReachable(timeoutMs = 15_000): Promise<boolean> {
+  if (!MEDIAMTX_HOST) return true;
+  try {
+    await fetch(`https://${MEDIAMTX_HOST}/`, {
+      method: 'GET',
+      mode: 'no-cors',
+      cache: 'no-store',
+      signal: AbortSignal.timeout(timeoutMs),
+    });
+    lastProbeFailure = '';
+    return true;
+  } catch (error) {
+    lastProbeFailure = describeFailure(error);
+    return false;
+  }
+}
+
+/**
+ * Memory of the last direct connect that died on the network, because a
+ * passing probe is not proof. The DPI-throttled ISPs the probe exists for
+ * intermittently let one small GET through while never carrying the WHIP
+ * POST — a broadcaster there passes the probe, mints self-hosted, and dies
+ * seconds later, identically on every retry (observed three times in six
+ * minutes from one phone on 2026-08-31). So a network-shaped failure of a
+ * DIRECT connect leaves a marker, the mint prefers Livepeer while one is
+ * fresh, and a later successful direct connect clears it. A deployed TURN
+ * relay outranks the marker at both decision points, exactly as it outranks
+ * the probe. localStorage rather than component state so the marker survives
+ * the reload-and-retry loop a stuck creator actually performs; every touch
+ * is wrapped because Safari private mode throws on any storage access.
+ */
+const INGEST_FAILURE_KEY = 'dehub.ingest.unreachable-at';
+const INGEST_FAILURE_WINDOW_MS = 24 * 3600 * 1000;
+
+export function markIngestUnreachable(): void {
+  try {
+    localStorage.setItem(INGEST_FAILURE_KEY, String(Date.now()));
+  } catch {
+    /* storage unavailable — the mint just falls back to trusting the probe */
+  }
+}
+
+export function clearIngestUnreachable(): void {
+  try {
+    localStorage.removeItem(INGEST_FAILURE_KEY);
+  } catch {
+    /* nothing to clear where nothing could be written */
+  }
+}
+
+export function hadRecentIngestFailure(): boolean {
+  try {
+    const at = Number(localStorage.getItem(INGEST_FAILURE_KEY));
+    return Number.isFinite(at) && at > 0 && Date.now() - at < INGEST_FAILURE_WINDOW_MS;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * The same memory for the RELAYED path. The relay rides Cloudflare, and an
+ * edge that refuses a client's SDP POST refuses it identically on every retry
+ * (observed 2026-08-31: WHIP 403s that never reached nginx, from a phone
+ * whose JSON API calls passed in the same minute). Without this record,
+ * "a relay is deployed" permanently outvotes the device's own evidence that
+ * the relay is unusable from where it stands — and the mint keeps sending a
+ * blocked creator down the same dead end instead of falling back to Livepeer.
+ */
+// `.v2`: the relay endpoint changed shape (/whip → /publish), and every
+// marker written before that was evidence against a URL the client no longer
+// sends — a device that only ever failed on the filtered /whip path deserves
+// a clean try at /publish rather than 24h steered away from a fixed route.
+const RELAY_FAILURE_KEY = 'dehub.ingest.relay-failed-at.v2';
+
+export function markRelayFailed(): void {
+  try {
+    localStorage.setItem(RELAY_FAILURE_KEY, String(Date.now()));
+  } catch {
+    /* storage unavailable — the mint just falls back to trusting the probe */
+  }
+}
+
+export function clearRelayFailed(): void {
+  try {
+    localStorage.removeItem(RELAY_FAILURE_KEY);
+  } catch {
+    /* nothing to clear where nothing could be written */
+  }
+}
+
+export function hadRecentRelayFailure(): boolean {
+  try {
+    const at = Number(localStorage.getItem(RELAY_FAILURE_KEY));
+    return Number.isFinite(at) && at > 0 && Date.now() - at < INGEST_FAILURE_WINDOW_MS;
+  } catch {
+    return false;
+  }
+}
+
+/** WHEP subscribe endpoint. Playback is ungated — watching costs no round-trip. */
+export function whepEndpointFor(stream: LiveStreamRef): string | undefined {
+  if (liveProviderOf(stream) !== 'mediamtx') return undefined;
+  return `https://${MEDIAMTX_HOST}/${stream.playbackId}/whep`;
+}
+
+/**
+ * Signaling relay for networks where the probe above fails.
+ *
+ * Rides api.dehub.io — Cloudflare-proxied, already in the CSP, and proven
+ * reachable from the exact phones whose direct WHIP never arrived (their API
+ * calls landed in the same minute). nginx forwards ONLY
+ * /live-edge/{path}/(whip|whep) to MediaMTX's loopback signaling port; the
+ * media itself never passes through it — a few KB of SDP text does, which is
+ * why fronting it with the proxy is fine where fronting video is not.
+ *
+ * Signaling alone moves nothing: a network that cannot reach the ingest for
+ * a POST usually cannot carry UDP media to it either. The relay path is only
+ * whole once fetchTurnServers() below returns a relay for the media leg.
+ */
+const EDGE_SIGNALING_BASE = `${API_ORIGIN}/live-edge`;
+
+export function edgeWhipEndpointFor(
+  stream: LiveStreamRef,
+): { url?: string; token?: string } {
+  if (liveProviderOf(stream) !== 'mediamtx') return {};
+  return {
+    // Same "/publish" naming as the direct host, for the same reason: the
+    // path token /whip is what the on-device filters key on.
+    url: `${EDGE_SIGNALING_BASE}/${stream.playbackId}/publish`,
+    token: `dehub:${stream.streamKey ?? ''}`,
+  };
+}
+
+export function edgeWhepEndpointFor(stream: LiveStreamRef): string | undefined {
+  if (liveProviderOf(stream) !== 'mediamtx') return undefined;
+  return `${EDGE_SIGNALING_BASE}/${stream.playbackId}/whep`;
+}
+
+/**
+ * Where a viewer's hang-up goes.
+ *
+ * A session's own URL on the ingest host answers the browser's preflight
+ * with a bare 404, so a DELETE sent there never leaves the browser: every
+ * viewer who left logged a CORS error and the server kept the session until
+ * it timed out. The signaling edge fronts the same server and takes the
+ * hang-up for a session wherever it was opened.
+ */
+export function whepHangUpUrl(resource: string): string {
+  if (!MEDIAMTX_HOST) return resource;
+  try {
+    const url = new URL(resource);
+    if (url.host === MEDIAMTX_HOST && /^\/[^/]+\/whep\/[^/]+$/.test(url.pathname)) {
+      return `${EDGE_SIGNALING_BASE}${url.pathname}`;
+    }
+  } catch {
+    // Not an absolute URL: leave it as given.
+  }
+  return resource;
+}
+
+/**
+ * TURN relay servers for the media leg, or [] when no relay is deployed.
+ *
+ * The API answers with coturn REST credentials (expiry-stamp username, HMAC
+ * credential, 6h TTL) and the relay URIs; an unconfigured backend answers an
+ * empty list and callers skip the relay path entirely. Cached for the
+ * session — the credential outlives any broadcast this tab will start, and
+ * asking once keeps this safe to call at every decision point.
+ */
+let turnServersPromise: Promise<RTCIceServer[]> | null = null;
+
+export function fetchTurnServers(): Promise<RTCIceServer[]> {
+  if (!turnServersPromise) {
+    turnServersPromise = (async () => {
+      try {
+        const res = await fetch(`${API_ORIGIN}/api/live/turn-credentials`, {
+          // 15s for the same reason as the probe above: a main thread blocked
+          // by wallet crypto lets a short abort timer beat an already-arrived
+          // response, and "no relay available" here silently reroutes mints.
+          signal: AbortSignal.timeout(15_000),
+        });
+        if (!res.ok) {
+          lastTurnFailure = `HTTP ${res.status}`;
+          return [];
+        }
+        const body = (await res.json()) as { iceServers?: RTCIceServer[] };
+        lastTurnFailure = '';
+        return Array.isArray(body.iceServers) ? body.iceServers : [];
+      } catch (error) {
+        // A failed lookup must never break the direct path; it only means
+        // "no relay available right now".
+        lastTurnFailure = describeFailure(error);
+        turnServersPromise = null;
+        return [];
+      }
+    })();
+  }
+  return turnServersPromise;
+}
+
+/**
+ * The self-hosted server's AAC copy of a stream: `{playbackId}-aac`.
+ *
+ * The ingest forwards the broadcaster's Opus audio untouched, and Safari plays
+ * Opus in HLS at no layer — natively or through Media Source. On Safari a
+ * self-hosted stream therefore had no HLS route at all, where Livepeer's
+ * transcoded ladder always had one. The server makes this copy on demand
+ * (audio re-encoded, video untouched) and only while someone reads it.
+ */
+const AAC_COPY_SUFFIX = '-aac';
+
+let opusHlsVerdict: boolean | undefined;
+
+/**
+ * Whether this browser can play the Opus audio in a self-hosted HLS ladder.
+ * hls.js plays through Media Source Extensions; where they take Opus in MP4
+ * (Chrome, Firefox, Edge) the original ladder plays. Where they do not, or
+ * there is no Media Source at all (older iOS), only the AAC copy will.
+ */
+function hlsPlaysOpus(): boolean {
+  if (opusHlsVerdict !== undefined) return opusHlsVerdict;
+  try {
+    const w = globalThis as any;
+    const sources = [w.MediaSource, w.ManagedMediaSource].filter(Boolean);
+    opusHlsVerdict = sources.some((ms: any) => ms.isTypeSupported?.('audio/mp4; codecs="opus"'));
+  } catch {
+    opusHlsVerdict = false;
+  }
+  return opusHlsVerdict;
+}
+
+/** True for a URL on the server's AAC copy — which, unlike the original, native HLS can play. */
+export function isAacCopyUrl(url: string | undefined): boolean {
+  return !!url && new RegExp(`/[^/]+${AAC_COPY_SUFFIX}/[^/]+\\.m3u8`).test(url);
+}
+
+/**
+ * Open the connection to the ingest as soon as a self-hosted live turns up in
+ * anything the page lists, before any player asks for it. It is its own host
+ * (not behind the CDN the rest of the site rides), so the first request to it
+ * otherwise pays the DNS lookup and the TLS handshake in front of the stream:
+ * two to three round trips. `crossorigin` because the players fetch without
+ * credentials, and a connection opened with them is a different one.
+ */
+let ingestPreconnected = false;
+function preconnectIngest(): void {
+  if (ingestPreconnected || !MEDIAMTX_HOST || typeof document === 'undefined') return;
+  ingestPreconnected = true;
+  try {
+    const link = document.createElement('link');
+    link.rel = 'preconnect';
+    link.href = `https://${MEDIAMTX_HOST}`;
+    link.crossOrigin = 'anonymous';
+    document.head.appendChild(link);
+  } catch {
+    /* A hint only. */
+  }
+}
+
+/** HLS ladder — the fallback WHEP drops to, and what non-WebRTC clients get. */
+export function hlsUrlFor(stream: LiveStreamRef): string | undefined {
+  const playbackId = stream?.playbackId;
+  if (!playbackId) return undefined;
+  if (liveProviderOf(stream) !== 'mediamtx') {
+    return `https://livepeercdn.studio/hls/${playbackId}/index.m3u8`;
+  }
+  preconnectIngest();
+  return hlsPlaysOpus()
+    ? `https://${MEDIAMTX_HOST}/${playbackId}/index.m3u8`
+    : `https://${MEDIAMTX_HOST}/${playbackId}${AAC_COPY_SUFFIX}/index.m3u8`;
+}
+
+/**
+ * Broadcasts the creator marked as a big event, by playbackId.
+ *
+ * A big event plays over HLS from about ten segments behind live, never over
+ * WebRTC: the ingest serves an HLS crowd from one muxer however many are
+ * watching, and the deep buffer rides out a bad network instead of stalling.
+ *
+ * The feed threads one playback value through its mappers — the HLS URL — so
+ * rather than add a field to every mapper and card, the mappers note the mode
+ * here as they build that URL and the players ask by URL. The app does the
+ * same in libs/sharedLivePlayer.ts.
+ */
+const bigEventPlaybackIds = new Set<string>();
+
+export function noteLatencyMode(
+  stream: (LiveStreamRef & { settings?: { latencyMode?: string } | null }) | null | undefined,
+): void {
+  const id = stream?.playbackId;
+  if (!id) return;
+  if (stream?.settings?.latencyMode === 'event') bigEventPlaybackIds.add(id);
+  else bigEventPlaybackIds.delete(id);
+}
+
+/** Whether the stream behind this HLS URL is a big event. */
+export function isBigEventPlayback(url: string | undefined): boolean {
+  const id = liveSourceFromHlsUrl(url)?.playbackId;
+  return !!id && bigEventPlaybackIds.has(id);
+}
+
+/**
+ * hls.js settings for a big event: no low-latency parts, and a live sync point
+ * about ten segments back (PeerTube's high-latency mode does the same), with
+ * room to drift to twenty before it jumps forward.
+ */
+export const BIG_EVENT_HLS_CONFIG = {
+  lowLatencyMode: false,
+  liveSyncDurationCount: 10,
+  liveMaxLatencyDurationCount: 20,
+} as const;
+
+/**
+ * Poster frame. Livepeer renders one; MediaMTX does not, so a self-hosted
+ * stream has no thumbnail and callers must fall back to the post's own image
+ * rather than pointing an <img> at a 404.
+ */
+export function liveThumbnailFor(stream: LiveStreamRef): string | undefined {
+  if (!stream?.playbackId) return undefined;
+  if (liveProviderOf(stream) === 'mediamtx') return undefined;
+  return `https://livepeercdn.studio/hls/${stream.playbackId}/thumbnail.jpg`;
+}
+
+/**
+ * Recovers the provider and playback id from a stream's HLS URL.
+ *
+ * The feed threads exactly one playback value through its mappers — the HLS
+ * URL — and the WebRTC route has always reused it rather than adding a second.
+ * That stays true here, but the shape is no longer one shape: Livepeer puts
+ * the id after `/hls/`, the self-hosted server puts it at the root of its own
+ * host. A parser that knows only the first quietly returns null for every
+ * self-hosted stream, and null means "no WebRTC available" — so the cheap
+ * ingest would silently never use the sub-second path it exists to provide.
+ */
+export function liveSourceFromHlsUrl(
+  url: string | undefined,
+): { provider: LiveProvider; playbackId: string } | null {
+  if (!url) return null;
+
+  const livepeer = /\/hls\/([^/?#]+)\//.exec(url);
+  if (livepeer?.[1]) return { provider: 'livepeer', playbackId: livepeer[1] };
+
+  // Parsed rather than pattern-matched: the host is configuration, and a
+  // hostname interpolated into a regex brings its own escaping problem for no
+  // benefit when a URL parser answers the question directly.
+  if (MEDIAMTX_HOST) {
+    try {
+      const parsed = new URL(url);
+      if (parsed.host === MEDIAMTX_HOST) {
+        const segment = parsed.pathname.split('/').filter(Boolean)[0];
+        // The AAC copy is the same broadcast; WebRTC and everything else keyed
+        // by playbackId want the original path.
+        const id = segment?.endsWith(AAC_COPY_SUFFIX)
+          ? segment.slice(0, -AAC_COPY_SUFFIX.length)
+          : segment;
+        if (id) return { provider: 'mediamtx', playbackId: id };
+      }
+    } catch {
+      // Not an absolute URL — nothing to resolve.
+    }
+  }
+
+  return null;
+}

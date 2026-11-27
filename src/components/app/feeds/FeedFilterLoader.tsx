@@ -1,0 +1,123 @@
+import { useTranslation as _useCopy } from 'react-i18next';
+/**
+ * Feed Filter Loader
+ * ==================
+ * The loader that owns the middle feed column while a filter toggle's request
+ * is in flight. Paired with `useFeedFilterTransition` — see that hook for why
+ * `isLoading` alone can't drive this.
+ *
+ * Two variants:
+ *
+ *  - War theme: a panel-sized cut-down of the boot sequence (WarPreloader).
+ *    Deliberately CSS-only — no THREE.js, no second WebGL context. The boot
+ *    globe plays once per session; this can fire a dozen times while somebody
+ *    tries out sort options, so it has to stay cheap. Kept as-is — it is the
+ *    war theme's own chrome, not a generic spinner.
+ *  - Everything else: a single glass card carrying the animated Riftn mark,
+ *    the same wait the rest of the app shows for a whole view.
+ *
+ * The loader REPLACES the list rather than overlaying it. Unmounting ~30 feed
+ * cards is what removes the render stall people were reading as a freeze; an
+ * overlay would leave every card mounted and still re-render them all in one
+ * commit when the response landed.
+ */
+
+import { useAppTheme } from '@/contexts/ThemeContext';
+import { cn } from '@/lib/utils';
+import { DeHubLoader } from '@/components/app/DeHubLoader';
+
+/** Cells in the indeterminate meter. Purely decorative; no progress is known. */
+const MINI_CELL_COUNT = 22;
+const MINI_CELLS = Array.from({ length: MINI_CELL_COUNT }, (_, i) => i);
+/** Per-cell stagger, in ms. Turns the shared keyframe into a marching wave. */
+const CELL_STAGGER_MS = 55;
+
+interface FeedFilterLoaderProps {
+  /** Announced to screen readers. Visible only in the default variant. */
+  label?: string;
+  className?: string;
+}
+
+export function FeedFilterLoader({
+  label: labelProp,
+  className,
+}: FeedFilterLoaderProps) {
+  const { t: _copy } = _useCopy();
+  const label = labelProp ?? _copy("copy.ab24417e0ae4", { defaultValue: "Updating feed" });
+  const { theme } = useAppTheme();
+
+  if (theme === 'war') {
+    return <WarFilterLoader label={label} className={className} />;
+  }
+
+  return (
+    <div
+      role="status"
+      aria-live="polite"
+      aria-busy="true"
+      data-feed-filter-loader
+      className={cn(
+        'flex min-h-[260px] flex-col items-center justify-center gap-4 rounded-xl',
+        'border border-white/[0.08] bg-white/[0.02] backdrop-blur-[24px]',
+        className,
+      )}
+    >
+      <DeHubLoader size={56} className="relative -top-1" />
+      {/* text-zinc-400 rather than an opacity utility: `.dehub-loader-mark`
+          animates opacity, which would override it. */}
+      <p className="dehub-loader-mark text-xs uppercase tracking-[0.18em] text-zinc-400">{label}</p>
+    </div>
+  );
+}
+
+/**
+ * Compact War variant. Every hook here is styled in war-theme.css section 19;
+ * the component only ever renders it under `html[data-theme='war']`, which is
+ * why the CSS there is unscoped (same convention as the boot panel).
+ */
+function WarFilterLoader({
+  label,
+  className,
+}: {
+  label: string;
+  className?: string;
+}) {
+  const { t: _copy } = _useCopy();
+  return (
+    <div
+      role="status"
+      aria-live="polite"
+      aria-busy="true"
+      data-war-mini-boot
+      className={className}
+    >
+      {/* The only text in the live region — the HUD copy below is decoration
+          and would otherwise be announced on every single filter tap. */}
+      <span className="sr-only">{label}</span>
+
+      <span aria-hidden="true" data-war-mini-bracket="tl" />
+      <span aria-hidden="true" data-war-mini-bracket="tr" />
+      <span aria-hidden="true" data-war-mini-bracket="bl" />
+      <span aria-hidden="true" data-war-mini-bracket="br" />
+      <span aria-hidden="true" data-war-mini-sweep />
+
+      <div aria-hidden="true" data-war-mini-frame>
+        <p data-war-mini-kicker>{_copy("copy.5e57e90565ce", { defaultValue: "RIFTN // TACTICAL NETWORK" })}</p>
+        <p data-war-mini-title>{_copy("copy.dbe84c320006", { defaultValue: "RETASKING SENSORS" })}</p>
+
+        <div data-war-mini-bar>
+          {MINI_CELLS.map((cell) => (
+            <span
+              key={cell}
+              style={{ animationDelay: `${cell * CELL_STAGGER_MS}ms` }}
+            />
+          ))}
+        </div>
+
+        <p data-war-mini-sub>{_copy("copy.38c65fb481e0", { defaultValue: "REACQUIRING TARGETS · STAND BY" })}</p>
+      </div>
+    </div>
+  );
+}
+
+export default FeedFilterLoader;

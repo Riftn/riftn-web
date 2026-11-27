@@ -1,0 +1,197 @@
+import { useTranslation as _useCopy } from 'react-i18next';
+import { useSurfaceDraft, draftIdentity } from '@/hooks/use-surface-draft';
+/**
+ * Community Members tab
+ * ======================
+ * The public roster. Every moderation action moved into the Manage panel, which
+ * is where the join queue, the ban list and the per-member actions now live —
+ * this tab just shows who is here and offers moderators a way in.
+ */
+
+import { useMemo, useState } from 'react';
+import { Crown, Shield } from "lucide-react";
+import VolumeX from "@/components/ui/cut-icons/mute";
+
+import User from "@/components/ui/cut-icons/profile";
+import Settings2 from "@/components/ui/cut-icons/settings";
+
+import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import type { Community, CommunityMember } from '@/hooks/use-communities';
+import { usePendingCommunityMembers } from '@/hooks/use-communities';
+import { useCommunityAbilities, isAdminBadgeHidden } from '@/hooks/use-community-admin';
+import { useDeHubProfile } from '@/hooks/use-dehub-profile';
+import { BadgedName } from '@/components/app/BadgedName';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { AppState } from '@/components/app/AppState';
+import { profilePath } from '@/lib/profile-path';
+
+interface CommunityMembersProps {
+  members: CommunityMember[];
+  community: Community;
+  membership: CommunityMember | null | undefined;
+  onManage: () => void;
+}
+
+const PAGE_SIZE = 30;
+
+function MemberRow({ member, anonymous }: { member: CommunityMember; anonymous: boolean }) {
+  const navigate = useNavigate();
+  const { t } = useTranslation();
+  const { data: profile } = useDeHubProfile({ userId: member.wallet_address });
+
+  const roleIcon = member.role === 'owner'
+    ? <Crown className="w-3.5 h-3.5 text-amber-400" />
+    : member.role === 'admin' && !anonymous
+    ? <Shield className="w-3.5 h-3.5 text-blue-400" />
+    : null;
+
+  const displayName = profile?.name || `${member.wallet_address.slice(0, 6)}...${member.wallet_address.slice(-4)}`;
+  const handle = profile?.handle;
+  const avatarUrl = profile?.avatarUrl;
+  const isMuted = !!member.muted_until && new Date(member.muted_until).getTime() > Date.now();
+  const title = member.role === 'admin' && !anonymous
+    ? (member.custom_title || t('communities.admin', { defaultValue: 'Admin' }))
+    : null;
+
+  return (
+    <button
+      onClick={() => { if (handle) navigate(profilePath(handle.replace('@', ''))); }}
+      className="w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-white/[0.06] transition-colors text-left"
+    >
+      <div className="w-9 h-9 rounded-lg bg-white/[0.08] flex items-center justify-center overflow-hidden flex-shrink-0">
+        {avatarUrl ? (
+          <img src={avatarUrl} alt="" className="w-full h-full object-cover" />
+        ) : (
+          <User className="w-4 h-4 text-zinc-500" />
+        )}
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-1.5">
+          <BadgedName
+            badgeBalance={profile?.badgeBalance}
+            username={handle}
+            className="text-white text-sm font-medium"
+          >
+            {displayName}
+          </BadgedName>
+          {roleIcon}
+          {isMuted && (
+            <span className="flex items-center gap-1 text-amber-400 text-[10px] px-1.5 py-0.5 rounded-md bg-amber-500/10">
+              <VolumeX className="w-3 h-3" />
+              {t('communities.muted', { defaultValue: 'Muted' })}
+            </span>
+          )}
+        </div>
+        {handle && <span className="text-zinc-500 text-xs">{handle}</span>}
+      </div>
+      {title ? (
+        <span className="text-zinc-500 text-xs flex-shrink-0">{title}</span>
+      ) : member.role === 'owner' ? (
+        <span className="text-zinc-500 text-xs flex-shrink-0 capitalize">{member.role}</span>
+      ) : null}
+    </button>
+  );
+}
+
+export function CommunityMembers({ members, community, membership, onManage }: CommunityMembersProps) {
+  const { t: _copy } = _useCopy();
+  const { t } = useTranslation();
+  const abilities = useCommunityAbilities(community, membership);
+  const [query, setQuery] = useSurfaceDraft("components/app/communities/CommunityMembers.tsx:query", '', draftIdentity(community));
+  const [visible, setVisible] = useState(PAGE_SIZE);
+
+  // Only moderators can read the queue, so only ask for it when it will resolve.
+  const { data: pendingMembers = [] } = usePendingCommunityMembers(
+    abilities.can('restrict_members') ? community.id : undefined,
+  );
+
+  const roleOrder: Record<string, number> = { owner: 0, admin: 1, member: 2 };
+  const sorted = useMemo(
+    () => [...members].sort((a, b) => (roleOrder[a.role] ?? 3) - (roleOrder[b.role] ?? 3)),
+    [members],
+  );
+
+  // Search matches the address here; name/handle live behind per-row profile
+  // lookups that this list deliberately does not block on.
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return sorted;
+    return sorted.filter(m => m.wallet_address.toLowerCase().includes(q));
+  }, [sorted, query]);
+
+  return (
+    <div className="space-y-3">
+      {abilities.canManage && (
+        <div className="flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-white/[0.04] p-3">
+          <div className="min-w-0">
+            <div className="text-white text-sm font-medium">
+              {t('communities.manageMembers', { defaultValue: 'Manage members' })}
+            </div>
+            <div className="text-zinc-500 text-xs">
+              {pendingMembers.length > 0
+                ? t('communities.pendingRequestsShort', {
+                    defaultValue: '{{count}} request(s) waiting for approval',
+                    count: pendingMembers.length,
+                  })
+                : t('communities.manageMembersHint', {
+                    defaultValue: 'Roles, restrictions, invite links and recent actions',
+                  })}
+            </div>
+          </div>
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={onManage}
+            className="rounded-xl h-9 px-3 gap-1.5 bg-white/10 border border-white/20 text-white hover:bg-white/15 flex-shrink-0"
+          >
+            <Settings2 className="w-3.5 h-3.5" />
+            {t('communities.manageButton', { defaultValue: 'Manage' })}
+            {pendingMembers.length > 0 && (
+              <span data-unread-chip className="min-w-[18px] h-[18px] px-1 flex items-center justify-center bg-red-500 text-white text-[10px] font-bold rounded-full leading-none">
+                {pendingMembers.length > 99 ? '99+' : pendingMembers.length}
+              </span>
+            )}
+          </Button>
+        </div>
+      )}
+
+      {members.length > PAGE_SIZE && (
+        <Input
+          type="search"
+          value={query}
+          onChange={e => { setQuery(e.target.value); setVisible(PAGE_SIZE); }}
+          placeholder={t('communities.searchMembers', { defaultValue: 'Search by wallet address...' })}
+          className="rounded-xl bg-white/[0.06] border-white/[0.1] text-white placeholder:text-zinc-600"
+        />
+      )}
+
+      <div className="space-y-1">
+        {filtered.slice(0, visible).map(member => (
+          <MemberRow key={member.id} member={member} anonymous={isAdminBadgeHidden(member, abilities)} />
+        ))}
+      </div>
+
+      {filtered.length === 0 && (
+        <AppState
+          icon={query ? 'search' : 'subscriptions'}
+          title={t('communities.noMembersFound', { defaultValue: 'No members found' })}
+          description={query ? _copy("copy.d9be081cbe4e", { defaultValue: "Try a different wallet address." }) : _copy("copy.03745f37dded", { defaultValue: "Members will appear here after they join." })}
+          kind={query ? 'search-empty' : 'empty'}
+          size="compact"
+        />
+      )}
+
+      {visible < filtered.length && (
+        <Button
+          variant="ghost"
+          onClick={() => setVisible(v => v + PAGE_SIZE)}
+          className="w-full rounded-xl h-9 text-zinc-400 hover:text-white border border-white/[0.08]"
+        >
+          {t('communities.showMore', { defaultValue: 'Show more' })}
+        </Button>
+      )}
+    </div>
+  );
+}

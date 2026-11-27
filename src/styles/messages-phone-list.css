@@ -1,0 +1,203 @@
+/* /app/messages on phones (under 1024px) only: the clean list.
+   No cards: round photos, a thin line between chats that starts at the text,
+   an unread dot on the left edge and the time in the theme colour, and a
+   two-line preview. Inside a chat: solid round bubbles with no outline,
+   yours filled (the theme colour deepened for white text, black on System
+   Light), theirs grey, a 4px tail corner on the last one of a run. Same
+   colours as the app (components/DM/MessageBubble.tsx). The tabs keep their
+   underline. Computers and riftn.com/chat never get [data-msg-phone-b]. */
+
+@media (max-width: 1023px) {
+  [data-msg-phone-b] {
+    --pb-accent: color-mix(in srgb, var(--tint-accent, rgb(161 161 170)) 70%, white);
+    --pb-accent-ink: #0b0b0c;
+    --pb-tile: rgb(255 255 255 / 0.08);
+    --pb-tile-ink: #fff;
+    --pb-field-line: rgb(255 255 255 / 0.14);
+    --pb-muted: rgb(161 161 170);
+    --pb-line: rgb(255 255 255 / 0.08);
+    --pb-me: color-mix(in srgb, var(--tint-accent, rgb(161 161 170)) 72%, black);
+    --pb-me-ink: #fff;
+    --pb-them: rgb(255 255 255 / 0.1);
+    --pb-them-ink: #fff;
+  }
+  html[data-theme='system'] [data-msg-phone-b] {
+    --pb-accent: #fff;
+    --pb-me: #46464d;
+    --pb-them: #1f1f23;
+  }
+  html:is([data-system-tone='light'], [data-theme='light'], [data-theme='minimal']) [data-msg-phone-b] {
+    --pb-accent: #0b0b0c;
+    --pb-accent-ink: #fff;
+    --pb-tile: #efeff1;
+    --pb-tile-ink: #0b0b0c;
+    --pb-field-line: rgb(11 11 13 / 0.14);
+    --pb-muted: rgb(107 107 116);
+    --pb-line: rgb(11 11 13 / 0.08);
+    --pb-me: #0b0b0c;
+    --pb-me-ink: #fff;
+    --pb-them: #efeff1;
+    --pb-them-ink: #0b0b0c;
+  }
+  html[data-theme='hazy'] [data-msg-phone-b] {
+    --pb-accent: #b9abff;
+    --pb-me: #7569b5;
+  }
+  html[data-theme='osaka'] [data-msg-phone-b] {
+    --pb-accent: #ff6fb1;
+    --pb-me: #b8507f;
+  }
+
+  /* ---- The list ---- */
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-phone-b] [data-chat-list-scroll] {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    padding-top: 2px !important;
+  }
+  [data-msg-phone-b] [data-chat-list-body] { gap: 0 !important; }
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-phone-b] [data-chat-list-scroll] .overflow-hidden:has(> .flex > .w-full > [data-chat-list-row]) { border-radius: 0; }
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-phone-b] [data-chat-list-scroll] :is([data-chat-list-row], [data-chat-list-body] > button) {
+    position: relative;
+    min-height: 76px;
+    padding: 10px 16px 10px 16px !important;
+    gap: 12px !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-phone-b] [data-chat-list-scroll] :is([data-chat-list-row], [data-chat-list-body] > button):active,
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-phone-b] [data-chat-list-scroll] [data-chat-list-row]:is([data-selected], [data-bulk-checked='true']) {
+    background: var(--pb-line) !important;
+  }
+  /* The line between chats starts where the text does (16 + 52 + 12). */
+  [data-msg-phone-b] [data-chat-list-scroll] :is([data-chat-list-row], [data-chat-list-body] > button)::after {
+    content: '';
+    position: absolute;
+    left: 80px;
+    right: 0;
+    bottom: 0;
+    height: 1px;
+    background: var(--pb-line);
+    pointer-events: none;
+  }
+  /* Unread: a dot on the left edge instead of the lit bar. */
+  html:not(#_):not(#_) [data-msg-phone-b] [data-chat-list-row][data-unread]::before {
+    content: '';
+    position: absolute;
+    left: 5px;
+    top: 50%;
+    width: 7px;
+    height: 7px;
+    margin-top: -3.5px;
+    border-radius: 999px;
+    background: var(--pb-accent);
+    box-shadow: none;
+  }
+
+  /* Photos: 52px squares with button-like corners (10px), same as the app. */
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-phone-b] [data-chat-list-row] :is(.w-12.h-12) {
+    width: 52px !important;
+    height: 52px !important;
+  }
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-phone-b] [data-chat-list-row] [data-chat-row-avatar] { border-radius: 10px !important; }
+  /* Text: name 16px, time 13px (theme colour when unread), preview up to two
+     lines, softer once read. */
+  [data-msg-phone-b] [data-chat-list-row] .font-semibold,
+  [data-msg-phone-b] [data-chat-list-row] [data-conversation-name] { font-size: 16px; }
+  html:not(#_):not(#_):not(#_) [data-msg-phone-b] [data-chat-list-row] :is(.tabular-nums, [data-room-last-at]):not(.unread-count-chip__number, [data-reaction-alert-total]) {
+    font-size: 13px;
+    color: var(--pb-muted) !important;
+  }
+  html:not(#_):not(#_):not(#_) [data-msg-phone-b] [data-chat-list-row][data-unread] :is(.tabular-nums, [data-room-last-at]):not(.unread-count-chip__number, [data-reaction-alert-total]) {
+    color: var(--pb-accent) !important;
+    font-weight: 600;
+  }
+  html:not(#_):not(#_):not(#_) [data-msg-phone-b] [data-chat-list-row] p {
+    margin-top: 2px;
+    font-size: 14px;
+    line-height: 1.35;
+    white-space: normal;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  html:not(#_):not(#_):not(#_) [data-msg-phone-b] [data-chat-list-row]:not([data-unread]) p.font-normal,
+  html:not(#_):not(#_):not(#_) [data-msg-phone-b] [data-chat-list-row]:not([data-unread]) p[data-room-preview] {
+    color: var(--pb-muted) !important;
+  }
+  /* Statuses ride above the list, in line with the rows. */
+  /* Status faces get the same squared-off corners as the chat photos. */
+  html:not(#_):not(#_):not(#_) [data-msg-phone-b] [data-status-tile] :is(img.h-\[60px\], .h-\[60px\], .h-\[60px\] *) { border-radius: 12px !important; }
+  html:not(#_):not(#_):not(#_) [data-msg-phone-b] [data-status-tile] .h-\[22px\] { border-radius: 6px !important; }
+  html:not(#_):not(#_):not(#_) [data-msg-phone-b] [data-status-row] { margin: 0 !important; padding: 4px 14px 6px !important; }
+
+  /* ---- Inside a chat ---- */
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-phone-b] [data-dm-bubble] {
+    position: relative;
+    border: 0 !important;
+    border-radius: 20px !important;
+    padding: 8px 14px !important;
+    font-size: 15px;
+    line-height: 1.36;
+  }
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-phone-b] [data-dm-bubble='me'] {
+    background: var(--pb-me) !important;
+    color: var(--pb-me-ink) !important;
+  }
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-phone-b] [data-dm-bubble='them'] {
+    background: var(--pb-them) !important;
+    color: var(--pb-them-ink) !important;
+  }
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-phone-b] [data-dm-bubble] :is(p, span, div):not([data-dm-bubble-keep]) { color: inherit !important; }
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-phone-b] [data-dm-bubble] a { color: inherit !important; text-decoration: underline; }
+  /* Back-to-back bubbles from one side hug: the corners between them tighten. */
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-phone-b] [data-dm-bubble='me']:not([data-dm-bubble-first]) { border-top-right-radius: 6px !important; }
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-phone-b] [data-dm-bubble='me']:not([data-dm-bubble-last]) { border-bottom-right-radius: 6px !important; }
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-phone-b] [data-dm-bubble='them']:not([data-dm-bubble-first]) { border-top-left-radius: 6px !important; }
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-phone-b] [data-dm-bubble='them']:not([data-dm-bubble-last]) { border-bottom-left-radius: 6px !important; }
+  /* The last one in a run keeps a small 4px tail corner. */
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-phone-b] [data-dm-bubble='me'][data-dm-bubble-last] { border-bottom-right-radius: 4px !important; }
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-phone-b] [data-dm-bubble='them'][data-dm-bubble-last] { border-bottom-left-radius: 4px !important; }
+  [data-msg-phone-b] [data-cozy-meta] { font-size: 11.5px; margin-top: 4px; }
+
+  /* ---- The + bar and its drawer ---- */
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-phone-b] [data-chat-plus]:not([aria-expanded='true']) {
+    background: var(--pb-tile) !important;
+    color: var(--pb-tile-ink) !important;
+  }
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-phone-b] [data-chat-plus] { border-radius: 10px !important; }
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-phone-b] [data-chat-tray] [data-tray-cell],
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-phone-b] [data-chat-tray] [data-tray-cell] > button {
+    background: transparent !important;
+    border-color: transparent !important;
+    box-shadow: none !important;
+    color: var(--pb-tile-ink) !important;
+  }
+  @media (hover: hover) and (prefers-reduced-motion: no-preference) {
+    [data-msg-phone-b] [data-chat-tray] [data-tray-cell] > button {
+      transition: transform 150ms ease, opacity 150ms ease;
+    }
+    [data-msg-phone-b] [data-chat-tray] [data-tray-cell] > button:hover:not(:disabled) { transform: scale(1.06); }
+  }
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-phone-b] [data-chat-jump] {
+    background: color-mix(in srgb, hsl(var(--background)) 82%, transparent) !important;
+    -webkit-backdrop-filter: blur(18px) saturate(150%) !important;
+    backdrop-filter: blur(18px) saturate(150%) !important;
+  }
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-phone-b] [data-chat-jump] [data-jump-orb] { background: transparent !important; }
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-phone-b] [data-chat-bar-b] > div { border-radius: 12px !important; }
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-phone-b] [data-chat-tray] [data-tray-cell] > span { color: var(--pb-tile-ink) !important; }
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-phone-b] [data-chat-bar-b] > div { border-color: var(--pb-field-line) !important; background: transparent !important; }
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-phone-b] [data-chat-send] { border-radius: 8px !important; background: var(--pb-accent) !important; color: var(--pb-accent-ink) !important; }
+}
+
+html:is([data-system-tone='light'], [data-theme='light']):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_)
+  [data-dm-edit-field] {
+  background: hsl(var(--background)) !important;
+  color: hsl(var(--foreground)) !important;
+  caret-color: currentColor;
+}

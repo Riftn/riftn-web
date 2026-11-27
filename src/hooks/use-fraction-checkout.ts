@@ -1,0 +1,382 @@
+import { useTranslation as _useCopy } from 'react-i18next';
+/**
+ * Fraction Checkout
+ * =================
+ * Every write in the fraction market that moves value, against the
+ * `fraction-checkout` edge function.
+ *
+ * The rules are the ones live-checkout established for store orders, and they
+ * are here for the same reason — the fraction panel used to break all of them:
+ *
+ * - **The client never prices anything.** The server quotes the DHB amount off
+ *   the listing row. The old drawer multiplied in the browser and sent
+ *   whatever came out.
+ * - **The client never writes a trade.** The server reads the transfer back
+ *   off-chain first. Trade rows used to be an open INSERT that any caller
+ *   could make, naming any two addresses.
+ * - **A quote is not a promise.** The seller's on-chain balance is re-read at
+ *   quote time, so a listing whose fractions have since moved is refused
+ *   before the buyer pays rather than after.
+ *
+ * The part that is specific to fractions: a trade is a swap with two legs, and
+ * without an escrow contract one of them lands second. So each mutation here
+ * settles exactly one leg, and the leg it settles is verified on-chain before
+ * the row moves. `useOpenTrades` is the other half — it is what turns "the
+ * seller said they would send them" into a tracked obligation with a deadline.
+ */
+
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import i18n from 'i18next';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { getAuthToken } from '@/lib/api/dehub/core';
+import { toast } from 'sonner';
+import { createLogger } from '@/lib/logger';
+import { invalidateFractionQueries, type FractionListing, type FractionOffer, type FractionTrade } from './use-fraction-marketplace';
+import type { ChainId } from '@/components/app/ChainSelector';
+import { translateCopy as _translateCopy } from '@/i18n/copy';
+
+const logger = createLogger('FractionCheckout');
+
+export interface FractionQuote {
+  listingId: string;
+  tokenId: string;
+  chainId: number;
+  quantity: number;
+  available: number;
+  pricePerFraction: number;
+  dhbAmount: number;
+  sellerAddress: string;
+  /** The seller's live on-chain balance, or null if the read failed. */
+  sellerBalance: number | null;
+  tokenAddress: string;
+  collectionAddress: string;
+  settleWindowHours: number;
+  /** A price-0 giveaway: claim instead of paying. */
+  free?: boolean;
+  /** DHB is ERC20Pausable; a transfer would revert while this is true. */
+  paymentsFrozen: boolean;
+}
+
+export interface PostSnapshot {
+  title?: string;
+  imageUrl?: string;
+  type?: string;
+  creatorAddress?: string;
+  creatorUsername?: string;
+}
+
+function authHeaders(walletAddress: string | null): Record<string, string> {
+  const token = getAuthToken();
+  if (!walletAddress || !token) return {};
+  return { 'x-wallet-address': walletAddress.toLowerCase(), 'x-dehub-token': token };
+}
+
+async function callFraction<T>(
+  body: Record<string, unknown>,
+  walletAddress: string | null,
+): Promise<T> {
+  const { data, error } = await supabase.functions.invoke('fraction-checkout', {
+    body,
+    headers: authHeaders(walletAddress),
+  });
+  // On a non-2xx, supabase-js sets `data` to null and hands you a
+  // FunctionsHttpError whose message is the literal string "Edge Function
+  // returned a non-2xx status code" — the response body is on `error.context`,
+  // which is an unread Response. Reading `data` for the server's message
+  // therefore found nothing and every failure in the whole fraction market
+  // surfaced that string instead of the reason.
+  if (error) {
+    const context = (error as { context?: Response }).context;
+    let detail: string | undefined;
+    if (context) {
+      try {
+        detail = (await context.json())?.error;
+      } catch {
+        // Body was not JSON — fall through to the generic message.
+      }
+    }
+    throw new Error(detail || error.message || _translateCopy("copy.cfce761befa8", { defaultValue: "Request failed" }));
+  }
+  if ((data as { error?: string })?.error) throw new Error((data as { error: string }).error);
+  return data as T;
+}
+
+/**
+ * Submit a settlement leg, retrying while the receipt is still propagating.
+ *
+ * The transaction is already on-chain by the time this runs. Giving up on the
+ * first 202 would strand a real transfer with nothing recording it, so a
+ * "not found yet" is a reason to ask again, not a failure — and if it never
+ * lands, the hash goes in the error so the user has it to hand.
+ */
+async function confirmWithRetry<T>(
+  body: Record<string, unknown>,
+  walletAddress: string | null,
+  txHash: string,
+  stranded: 'paid' | 'sent',
+): Promise<T> {
+  let lastError = _translateCopy("copy.96165bbfc9cb", { defaultValue: "Could not confirm the transaction" });
+  for (let attempt = 0; attempt < 10; attempt++) {
+    try {
+      return await callFraction<T>({ ...body, txHash }, walletAddress);
+    } catch (err) {
+      lastError = (err as Error).message;
+      if (!/not found yet/i.test(lastError)) throw err;
+      await new Promise(r => setTimeout(r, 3000));
+    }
+  }
+  logger.error('confirm timed out', { hash: txHash });
+  throw new Error(stranded === 'paid'
+    ? _translateCopy("copy.c683f074accd", { defaultValue: "{{value1}}. Your payment went through — send this transaction to the seller: {{value2}}", value1: lastError, value2: txHash })
+    : _translateCopy("copy.3d739114b158", { defaultValue: "{{value1}}. The fractions were sent — send this transaction to the buyer: {{value2}}", value1: lastError, value2: txHash }));
+}
+
+/**
+ * Create a listing.
+ *
+ * Goes through the server rather than straight to Supabase so the seller's
+ * on-chain balance is checked first — including against what they have already
+ * listed and what they already owe on an unsettled sale. Without that, the same
+ * 1000 fractions can back ten listings and nine buyers pay for nothing.
+ */
+export function useCreateListing() {
+  const queryClient = useQueryClient();
+  const { walletAddress } = useAuth();
+
+  return useMutation({
+    mutationFn: (params: {
+      tokenId: string;
+      quantity: number;
+      pricePerFraction: number;
+      chainId?: number;
+      post?: PostSnapshot;
+    }) =>
+      callFraction<{ success: boolean; listing: FractionListing; balance: number }>(
+        {
+          action: 'list',
+          tokenId: params.tokenId,
+          quantity: params.quantity,
+          pricePerFraction: params.pricePerFraction,
+          chainId: params.chainId || 8453,
+          post: params.post || {},
+        },
+        walletAddress,
+      ),
+    onSuccess: (data) => invalidateFractionQueries(queryClient, data.listing?.token_id),
+    onError: (e: Error) => toast.error(e.message),
+  });
+}
+
+/** Buy fractions from a listing: quote → pay DHB → server verifies. */
+export function useFractionPurchase() {
+  const { t: _copy } = _useCopy();
+  const queryClient = useQueryClient();
+  const { walletAddress } = useAuth();
+
+  const getQuote = useMutation({
+    mutationFn: (params: { listingId: string; quantity: number }) =>
+      callFraction<FractionQuote>(
+        { action: 'quote', listingId: params.listingId, quantity: params.quantity },
+        walletAddress,
+      ),
+  });
+
+  const buy = useMutation({
+    mutationFn: async (quote: FractionQuote) => {
+      if (quote.paymentsFrozen) {
+        throw new Error(i18n.t('tokenErrors.transfersPausedPurchase'));
+      }
+
+      // Imported at call time: the fraction panel is reachable from the post
+      // page, and scripts/check-entry-bundle.mjs fails the build if the wallet
+      // stack lands in the entry chunk.
+      const { sendERC20Token } = await import('@/lib/wallet/send');
+      const result = await sendERC20Token(
+        quote.tokenAddress,
+        quote.sellerAddress,
+        String(quote.dhbAmount),
+        18,
+        quote.chainId as ChainId,
+      );
+      if (!result?.hash) throw new Error(_translateCopy("copy.1f204df4182c", { defaultValue: "Transaction was not submitted" }));
+
+      return confirmWithRetry<{ success: boolean; trade: FractionTrade }>(
+        { action: 'confirm', listingId: quote.listingId, quantity: quote.quantity },
+        walletAddress,
+        result.hash,
+        'paid',
+      );
+    },
+    onSuccess: (data) => {
+      invalidateFractionQueries(queryClient, data.trade?.token_id);
+      toast.success(_copy("copy.ac7d69cdcaf6", { defaultValue: "Paid — the seller has been asked to send your fractions" }));
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  /**
+   * Claim from a free (price 0) listing. Nothing is paid: the server reserves
+   * the fractions and the owner is asked to approve by sending them.
+   */
+  const claim = useMutation({
+    mutationFn: (params: { listingId: string; quantity: number }) =>
+      callFraction<{ success: boolean; trade: FractionTrade }>(
+        { action: 'claim', listingId: params.listingId, quantity: params.quantity },
+        walletAddress,
+      ),
+    onSuccess: (data) => {
+      invalidateFractionQueries(queryClient, data.trade?.token_id);
+      toast.success(_copy('fractions.claimSent'));
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  return { getQuote, buy, claim };
+}
+
+/** A claim on a free listing: nothing was paid, the owner approves or declines. */
+export function isFreeClaim(trade: Pick<FractionTrade, 'price_per_fraction' | 'total_dhb' | 'tx_hash'>): boolean {
+  return Number(trade.price_per_fraction) === 0 && Number(trade.total_dhb) === 0 && !trade.tx_hash;
+}
+
+/**
+ * Settle the leg you owe.
+ *
+ * Both directions land here because they are the same shape: move the thing
+ * you owe on-chain, then have the server read it back. Which asset moves is
+ * the only difference.
+ */
+export function useSettleTrade() {
+  const { t: _copy } = _useCopy();
+  const queryClient = useQueryClient();
+  const { walletAddress } = useAuth();
+
+  /** Seller side: send the fractions a buyer has already paid for. */
+  const deliver = useMutation({
+    mutationFn: async (trade: FractionTrade) => {
+      if (!walletAddress) throw new Error(_translateCopy("copy.f18cf7e132aa", { defaultValue: "Sign in to settle this trade" }));
+      const { transferFractions } = await import('@/lib/contracts/fraction-transfer');
+      const result = await transferFractions(
+        trade.token_id,
+        walletAddress,
+        trade.buyer_address,
+        trade.quantity,
+        (trade.chain_id || 8453) as ChainId,
+      );
+      if (!result?.hash) throw new Error(_translateCopy("copy.1f204df4182c", { defaultValue: "Transaction was not submitted" }));
+
+      return confirmWithRetry<{ success: boolean; trade: FractionTrade }>(
+        { action: 'deliver', tradeId: trade.id },
+        walletAddress,
+        result.hash,
+        'sent',
+      );
+    },
+    onSuccess: (data) => {
+      invalidateFractionQueries(queryClient, data.trade?.token_id);
+      if (data.trade && isFreeClaim(data.trade)) toast.success(_copy('fractions.claimApproved'));
+      else toast.success(_copy("copy.2579be0056a3", { defaultValue: "Delivered — the trade is settled" }));
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  /** Buyer side: pay for fractions a seller has already delivered. */
+  const pay = useMutation({
+    mutationFn: async (params: { trade: FractionTrade; tokenAddress: string }) => {
+      const { trade, tokenAddress } = params;
+      const { sendERC20Token } = await import('@/lib/wallet/send');
+      const result = await sendERC20Token(
+        tokenAddress,
+        trade.seller_address,
+        String(trade.quantity * trade.price_per_fraction),
+        18,
+        (trade.chain_id || 8453) as ChainId,
+      );
+      if (!result?.hash) throw new Error(_translateCopy("copy.1f204df4182c", { defaultValue: "Transaction was not submitted" }));
+
+      return confirmWithRetry<{ success: boolean; trade: FractionTrade }>(
+        { action: 'pay-trade', tradeId: trade.id },
+        walletAddress,
+        result.hash,
+        'paid',
+      );
+    },
+    onSuccess: (data) => {
+      invalidateFractionQueries(queryClient, data.trade?.token_id);
+      toast.success(_copy("copy.8066dc7e1263", { defaultValue: "Paid — the trade is settled" }));
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  /** Owner side of a free claim: say no, and the fractions go back on the listing. */
+  const decline = useMutation({
+    mutationFn: (trade: FractionTrade) =>
+      callFraction<{ success: boolean; trade: FractionTrade }>(
+        { action: 'decline-claim', tradeId: trade.id },
+        walletAddress,
+      ).then((res) => ({ ...res, tokenId: trade.token_id })),
+    onSuccess: (data) => {
+      invalidateFractionQueries(queryClient, data.tokenId);
+      toast.success(_copy('fractions.claimDeclined'));
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  return { deliver, pay, decline };
+}
+
+/**
+ * Respond to an offer.
+ *
+ * An offer is an unfunded bid, so accepting means the seller moves first — the
+ * mirror of a listing sale. The transfer is verified before the offer is marked
+ * accepted, which is what makes the buyer's resulting payment obligation real.
+ */
+export function useOfferResponse() {
+  const { t: _copy } = _useCopy();
+  const queryClient = useQueryClient();
+  const { walletAddress } = useAuth();
+
+  const accept = useMutation({
+    mutationFn: async (offer: FractionOffer) => {
+      if (!walletAddress) throw new Error(_translateCopy("copy.c8f4628f861e", { defaultValue: "Sign in to accept this offer" }));
+      const { transferFractions } = await import('@/lib/contracts/fraction-transfer');
+      const result = await transferFractions(
+        offer.token_id,
+        walletAddress,
+        offer.buyer_address,
+        offer.quantity,
+        (offer.chain_id || 8453) as ChainId,
+      );
+      if (!result?.hash) throw new Error(_translateCopy("copy.1f204df4182c", { defaultValue: "Transaction was not submitted" }));
+
+      return confirmWithRetry<{ success: boolean; trade: FractionTrade }>(
+        { action: 'accept-offer', offerId: offer.id },
+        walletAddress,
+        result.hash,
+        'sent',
+      );
+    },
+    onSuccess: (data) => {
+      invalidateFractionQueries(queryClient, data.trade?.token_id);
+      toast.success(_copy("copy.466d81c34cf4", { defaultValue: "Sent — the buyer has been asked to pay" }));
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const reject = useMutation({
+    mutationFn: (params: { offerId: string; tokenId: string }) =>
+      callFraction<{ success: boolean }>(
+        { action: 'reject-offer', offerId: params.offerId },
+        walletAddress,
+      ).then(() => params),
+    onSuccess: (params) => {
+      invalidateFractionQueries(queryClient, params.tokenId);
+      toast.success(_copy("copy.83d7538eeb56", { defaultValue: "Offer rejected" }));
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  return { accept, reject };
+}

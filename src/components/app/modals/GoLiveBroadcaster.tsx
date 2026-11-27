@@ -1,0 +1,3021 @@
+import { useTranslation as _useCopy } from 'react-i18next';
+/**
+ * Go Live Broadcaster
+ * ===================
+ * The capture surface for browser-native livestreaming: grabs the webcam or a
+ * screen share, publishes it to Livepeer over WHIP, and gives the creator the
+ * controls they need while live. This is what removes the OBS requirement —
+ * the RTMP credentials path still exists beside it for anyone running a real
+ * encoder.
+ *
+ * Loaded dynamically by GoLiveModal so the WebRTC code only reaches people who
+ * actually pick one of the browser capture options.
+ */
+
+import { LiveDot } from '@/components/app/live/LiveDot';
+import { useState, useRef, useEffect, useCallback, lazy, Suspense } from 'react';
+import { useTranslation } from 'react-i18next';
+import { SwitchCamera, Cable, ScreenShare, ScreenShareOff, PictureInPicture2, Move, Wand2, Palette, Heart, Loader2, AlertTriangle, SignalLow, LayoutTemplate, Layers, SlidersHorizontal } from "lucide-react";
+import UserPlus from "@/components/ui/cut-icons/add-account";
+import MicOff from "@/components/ui/cut-icons/mic-off";
+import Video from "@/components/ui/cut-icons/video";
+import VideoOff from "@/components/ui/cut-icons/video-off";
+import Eye from "@/components/ui/cut-icons/visibility";
+import Users from "@/components/ui/cut-icons/communities";
+import Music from "@/components/ui/cut-icons/music";
+import Radio from "@/components/ui/cut-icons/live";
+
+import Mic from "@/components/ui/cut-icons/mic";
+import MessageSquare from "@/components/ui/cut-icons/messages";
+import StudioIcon from "@/components/ui/cut-icons/command";
+import X from "@/components/ui/cut-icons/close";
+
+import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
+import { useIsMobile } from '@/hooks/use-mobile';
+import {
+  publishToWhip,
+  WhipHttpError,
+  type WhipHealth,
+  type WhipSession,
+  type WhipState,
+  type VideoEncoding,
+} from '@/lib/livepeer/whip';
+import { openCaptureCard, encodingForTrack } from '@/lib/livepeer/capture-card';
+import {
+  displaySurfaceOf,
+  hearSharedAudioLocally,
+  isSharedTabAudioSuppressed,
+  liveSharedTabAudio,
+  requestDisplayCapture,
+  requestSharedTabCapture,
+  setHearSharedAudioLocally,
+  tuneDisplayTrack,
+} from '@/lib/livepeer/display-capture';
+import {
+  composeCameraBubble,
+  BUBBLE_CORNERS,
+  type BubbleCorner,
+  type CameraBubble,
+} from '@/lib/livepeer/compositor';
+import { startVideoEffect, type VideoEffectStage } from '@/lib/livepeer/video-effects';
+import {
+  backgroundRemovalSupported,
+  startBackgroundStage,
+  type BackgroundMode,
+  type BackgroundOptions,
+  type BackgroundStage,
+} from '@/lib/studio/background';
+import { createGuestMixer } from '@/lib/livepeer/guest-mixer';
+import { createProgramOutput } from '@/lib/studio/program';
+import { createAudioDesk, DESK_CHANNELS, type AudioDesk, type DeskChannel, type GateStrength } from '@/lib/studio/audio-desk';
+import {
+  SCENES,
+  cardForScene,
+  loadSceneCustoms,
+  saveSceneCustoms,
+  sceneMutesMic,
+  type SceneCustom,
+  type SceneId,
+} from '@/lib/studio/scenes';
+import { loadImage } from '@/lib/studio/sources';
+import { AudioPanel, BackgroundPicker, ScenesPanel, SourcesPanel, type DeskState } from '@/components/app/live/studio-deck/StudioDeckPanels';
+import { useStudioSources } from '@/components/app/live/studio-deck/use-studio-sources';
+import { useOverlayPainter } from '@/hooks/use-overlay-painter';
+import { getMyOverlay, saveMyOverlay } from '@/lib/api/dehub/live-overlay';
+import { useCoStreamHost } from '@/hooks/use-costream-host';
+import { CoStreamHostPanel } from '@/components/app/live/costream/CoStreamHostPanel';
+import { CoStreamBattleBar } from '@/components/app/live/costream/CoStreamBattleBar';
+import { useBattleTally } from '@/hooks/use-battle-tally';
+import { useAuth } from '@/contexts/AuthContext';
+import type { VideoEffectId } from '@/constants/video-effects.constants';
+import { VideoEffectSelector } from '@/components/app/live/VideoEffectSelector';
+import { useVoiceEffects } from '@/hooks/use-voice-effects';
+import type { VoiceEffectId } from '@/constants/voice-effects.constants';
+import { VoiceEffectSelector } from '@/components/app/stages/VoiceEffectSelector';
+import { SoundboardPanel } from '@/components/app/shared/SoundboardPanel';
+import { DhbAmount } from '@/components/app/DhbAmount';
+import { EndStreamConfirmDialog } from '@/components/app/modals/EndStreamConfirmDialog';
+import { getLiveStream, updateStreamThumbnail } from '@/lib/api/dehub/livestream';
+import { useQuery } from '@tanstack/react-query';
+import { getNFTInfo } from '@/lib/api/dehub/feed';
+import { resolveLikeCount } from '@/lib/engagement';
+import { useStreamAudience } from '@/hooks/use-stream-audience';
+import { BroadcasterViewersSheet } from '@/components/app/live/BroadcasterViewersSheet';
+import { LiveReactionFlow } from '@/components/app/live/LiveReactionFlow';
+import { createLogger } from '@/lib/logger';
+import {
+  whipEndpointFor,
+  edgeWhipEndpointFor,
+  probeIngestReachable,
+  fetchTurnServers,
+  markIngestUnreachable,
+  clearIngestUnreachable,
+  hadRecentIngestFailure,
+  markRelayFailed,
+  clearRelayFailed,
+} from '@/lib/live-ingest';
+
+import { formatCount } from '@/lib/format-count';
+// The chat is a heavy component (mentions, voice notes, realtime) and most
+// broadcasts never open it, so it stays out of the broadcaster chunk.
+const LivePostChat = lazy(() =>
+  import('@/components/app/cards/LivePostChat').then((m) => ({ default: m.LivePostChat }))
+);
+
+const logger = createLogger('GoLiveBroadcaster');
+
+/**
+ * Where the top edge of the broadcast chrome sits, on both sides.
+ *
+ * A single value because the live chip, the audience and the close button all
+ * have to share a baseline — they were on three different offsets, which is
+ * what made the corner look crooked. The env() term keeps all of it clear of a
+ * notch or a punch-hole camera; on a phone the status bar was sitting on top of
+ * the live chip.
+ */
+const TOP_CHROME_Y = 'top-[max(0.75rem,env(safe-area-inset-top))]';
+
+/**
+ * The glass a floating pill is made of, per the design system block at the top
+ * of index.css: white-on-white translucency and a blur, never a colour fill.
+ * Monochrome is the rule here — the only hue on this screen is the live dot,
+ * because "on air" is semantic state.
+ */
+const GLASS_PILL =
+  'inline-flex h-8 items-center rounded-xl border border-white/20 bg-white/10 px-3 backdrop-blur-xl';
+
+/**
+ * How often the console asks the API for viewers, likes and tips.
+ *
+ * Deliberately unhurried: these are glanceable numbers on a panel the host has
+ * open for an hour, and the alternative — the activity log — always returns
+ * the OLDEST hundred entries ascending, so it freezes on a busy stream and
+ * cannot be used as a live feed.
+ */
+const CONSOLE_POLL_MS = 15_000;
+
+/*
+ * When the outgoing picture counts as starved.
+ *
+ * Under about five frames a second a viewer is not watching a stream, they
+ * are watching a slideshow; under ~150 kbit/s the encoder has given up on
+ * the picture to protect the voice, which is what WebRTC does first. The
+ * numbers are deliberately far below "not great" — this warning is for a
+ * broadcast that is failing, not one that is merely soft.
+ */
+const STARVED_FPS = 5;
+const STARVED_KBPS = 150;
+/** Consecutive bad samples before it is called (3s each — see whip.ts). */
+const STARVED_SAMPLES = 2;
+
+/**
+ * Poster-frame capture cadence.
+ *
+ * The first grab waits for the scene to settle — a camera opens on a dark,
+ * still-exposing frame, and a screen share often opens on the picker's own
+ * afterimage. After that it is slow on purpose: the point is a listing that
+ * looks like the stream, not a live preview, and every capture is a round
+ * trip the broadcast does not otherwise need.
+ */
+const POSTER_FIRST_DELAY_MS = 12_000;
+const POSTER_INTERVAL_MS = 3 * 60_000;
+/** Listings render this into an aspect-video card; the original is waste. */
+const POSTER_WIDTH = 640;
+
+interface GoLiveBroadcasterProps {
+  streamKey: string;
+  /**
+   * Which ingest this stream lives on, and its public id. The self-hosted
+   * path addresses a stream by playbackId and sends the key as a credential,
+   * so the key alone is no longer enough to build the endpoint.
+   */
+  playbackId?: string;
+  provider?: string;
+  /**
+   * A display capture taken in the modal, from the click that started go-live.
+   * getDisplayMedia needs transient user activation and the mint that follows
+   * runs 15-30s, so the picker cannot be opened from here on mount — a screen
+   * broadcast has to arrive already captured. Null for a camera broadcast.
+   */
+  initialScreenStream?: MediaStream | null;
+  /**
+   * Broadcast from the capture card picked (and remembered) on the Go Live
+   * sheet instead of the front camera. See lib/livepeer/capture-card.
+   */
+  captureCard?: boolean;
+  /**
+   * The Mongo ObjectId of the stream — what every /api/live/{id}/* route
+   * takes, and never the NFT tokenId. Without it the console has no counts to
+   * show and the chat has nothing to key on.
+   */
+  streamId?: string;
+  /**
+   * The POST's tokenId. Distinct from `streamId` above and not
+   * interchangeable: the chat room is keyed on the post, because that is the
+   * id the viewers' side has too.
+   */
+  tokenId?: string;
+  /** Fired when the creator ends the broadcast; the parent runs API teardown. */
+  onEnd: () => void;
+  /**
+   * Fired the first time the WHIP session actually reaches 'live'. The parent
+   * uses it to tell a broadcast that aired apart from a launch that never did —
+   * ending the latter discards its post instead of leaving a dead live card.
+   */
+  onLive?: () => void;
+  /**
+   * Called once, when every route to the self-hosted ingest has failed before
+   * any media flowed. Resolves with the same stream re-provisioned on Livepeer;
+   * the broadcaster publishes there on the capture it already has. Before this
+   * the creator got an error and had to tap Go Live again.
+   */
+  onSelfHostedUnreachable?: () => Promise<{
+    streamKey: string;
+    playbackId?: string;
+    provider?: string;
+  } | null>;
+}
+
+type Phase = 'starting' | 'connecting' | 'live' | 'reconnecting' | 'error';
+type CaptureMode = 'camera' | 'screen' | 'card';
+
+/** 720p is the sweet spot: 1080p routinely exceeds a phone's upstream. */
+const VIDEO_CONSTRAINTS: MediaTrackConstraints = {
+  width: { ideal: 1280 },
+  height: { ideal: 720 },
+  frameRate: { ideal: 30 },
+};
+
+/**
+ * The same 720p, stood on its end.
+ *
+ * A phone asked for 1280×720 hands back a landscape frame, so a creator
+ * holding their phone upright published a wide picture with themselves in a
+ * letterboxed strip down the middle — and every viewer got that shape too,
+ * because what the camera captures is what goes on the wire. Asking for
+ * 720×1280 on a portrait screen makes the broadcast the shape of the phone
+ * that is filming it.
+ */
+const PORTRAIT_VIDEO_CONSTRAINTS: MediaTrackConstraints = {
+  width: { ideal: 720 },
+  height: { ideal: 1280 },
+  frameRate: { ideal: 30 },
+};
+
+/**
+ * Read at capture time rather than once at module load: a phone rotated to
+ * landscape mid-session should film landscape, and the constraint is only
+ * consulted when a track is (re)opened.
+ */
+function cameraConstraints(): MediaTrackConstraints {
+  if (typeof window === 'undefined') return VIDEO_CONSTRAINTS;
+  const portrait = window.innerHeight > window.innerWidth;
+  return portrait ? PORTRAIT_VIDEO_CONSTRAINTS : VIDEO_CONSTRAINTS;
+}
+
+/**
+ * Screens ask for 1080p where the camera asks for 720p: a downscaled desktop
+ * turns small text into mush, and the whole point of this path is showing a
+ * game, a chart or an editor. WebRTC drops the bitrate on its own when the
+ * uplink can't hold it, so the ceiling costs nothing on a weak connection.
+ */
+const SCREEN_CONSTRAINTS: MediaTrackConstraints = {
+  width: { ideal: 1920 },
+  height: { ideal: 1080 },
+  frameRate: { ideal: 30 },
+};
+
+const AUDIO_CONSTRAINTS: MediaTrackConstraints = {
+  echoCancellation: true,
+  noiseSuppression: true,
+  autoGainControl: true,
+};
+
+/**
+ * Audio inputs that are not a person talking into a microphone: capture
+ * cards, HDMI/line inputs, loopback devices. The voice processing above is
+ * built for speech — on a console or game feed the noise gate opens and
+ * closes on the music and the gain control pumps, which comes through as
+ * crackle and pops. These inputs get the signal untouched, in stereo, and
+ * skip the voice-effect graph (which is mono by construction).
+ */
+const LINE_LEVEL_INPUT = /capture|cam ?link|elgato|avermedia|magewell|blackmagic|hdmi|usb ?video|line[ -]?in|loopback|stereo mix|what u hear|vb-?audio|cable (output|input)|virtual/i;
+
+const RAW_AUDIO_CONSTRAINTS: MediaTrackConstraints = {
+  echoCancellation: false,
+  noiseSuppression: false,
+  autoGainControl: false,
+  channelCount: { ideal: 2 },
+};
+
+function isLineLevelInput(track: MediaStreamTrack): boolean {
+  return LINE_LEVEL_INPUT.test(track.label ?? '');
+}
+
+function formatElapsed(seconds: number): string {
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = seconds % 60;
+  const pad = (n: number) => n.toString().padStart(2, '0');
+  return h > 0 ? `${h}:${pad(m)}:${pad(s)}` : `${pad(m)}:${pad(s)}`;
+}
+
+/**
+ * The failure shapes that mean the network ate the request — the WHIP POST
+ * aborted on its own cap, or died without ever getting a response — as
+ * opposed to a camera or permission problem. One definition, because two
+ * things key off it: the error copy must not blame the camera, and a direct
+ * self-hosted connect dying this way leaves the unreachable marker that
+ * steers the next mint to Livepeer.
+ */
+function isNetworkShapedError(error: unknown): boolean {
+  const name = (error as DOMException)?.name;
+  return name === 'TimeoutError' || name === 'AbortError' || error instanceof TypeError;
+}
+
+/**
+ * Whether a publish attempt failed in a way that condemns the PATH rather
+ * than the request. Network-shaped failures obviously qualify. So does an
+ * HTTP refusal with any status our own ingest never sends: it answers 401
+ * (bad key — the same credentials fail everywhere) and 406 (unsupported
+ * media) and nothing else, so anything different came from a middlebox or
+ * edge speaking in the server's place — observed as 403s that never reached
+ * nginx. Those repeat identically on every retry, which is exactly what the
+ * fallback markers exist to break.
+ */
+function isPathDeadError(error: unknown): boolean {
+  if (isNetworkShapedError(error)) return true;
+  return (
+    error instanceof WhipHttpError && error.status !== 401 && error.status !== 406
+  );
+}
+
+/**
+ * How long after a publish is accepted a dead connection still means the media
+ * never started, rather than a working broadcast that lost its network.
+ *
+ * Signaling and media do not travel together: the offer is an HTTPS POST, the
+ * media is UDP to a bare address or a TURN relay. So the exchange can succeed
+ * in full — 201, answer applied — on a network that then carries not one media
+ * byte. That is not hypothetical: on 2026-08-31 the owner's own desktop
+ * published to Livepeer cleanly and sent zero bytes, and the same shape
+ * reproduced synthetically from that machine while every leg of the self-hosted
+ * path verified from it. ICE gives up within roughly fifteen seconds of the
+ * answer, so a failure inside this window is that; a failure after it is a live
+ * broadcast dropping, which must never be restarted underneath the creator.
+ */
+const MEDIA_FAILURE_WINDOW_MS = 20_000;
+
+/** Turns the DOM's terse permission errors into something a creator can act on. */
+function describeMediaError(error: unknown): string {
+  if (error instanceof WhipHttpError && isPathDeadError(error)) {
+    return 'Something on this network blocked the broadcast. Tap Go Live again — the retry takes a different route.';
+  }
+  if (isNetworkShapedError(error)) {
+    return 'Could not reach the streaming server. Check your connection or try again on another network (a VPN often helps).';
+  }
+  const name = (error as DOMException)?.name;
+  switch (name) {
+    case 'NotAllowedError':
+    case 'SecurityError':
+      return 'Camera and microphone access was blocked. Allow it in your browser settings, then try again.';
+    case 'NotFoundError':
+    case 'OverconstrainedError':
+      return 'No camera or microphone was found on this device.';
+    case 'NotReadableError':
+      return 'Your camera or capture card is already in use by another app (like OBS or Elgato Studio). Close it and try again.';
+    default:
+      return error instanceof Error ? error.message : 'Could not start your camera.';
+  }
+}
+
+interface AudioMix {
+  ctx: AudioContext;
+  track: MediaStreamTrack;
+}
+
+/**
+ * WHIP publishes ONE audio track, but a screen share brings the tab's own
+ * audio along beside the mic — and a game stream with no game audio is not a
+ * game stream. Web Audio is the only way to sum two live tracks in a browser.
+ *
+ * Nothing here touches the mic's `enabled` flag: a disabled MediaStreamTrack
+ * feeds silence into its source node, so the existing mute button goes on
+ * working on the mic track while the system audio keeps flowing.
+ */
+function mixAudio(tracks: MediaStreamTrack[]): AudioMix | null {
+  const Ctor =
+    window.AudioContext ??
+    (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+  if (!Ctor || tracks.length < 2) return null;
+
+  try {
+    const ctx = new Ctor();
+    const destination = ctx.createMediaStreamDestination();
+    tracks.forEach((track) => {
+      ctx.createMediaStreamSource(new MediaStream([track])).connect(destination);
+    });
+    // Built after an await rather than inside the click, so the autoplay
+    // policy can hand back a suspended context — which emits pure silence.
+    void ctx.resume().catch(() => undefined);
+
+    const track = destination.stream.getAudioTracks()[0] ?? null;
+    if (!track) {
+      void ctx.close().catch(() => undefined);
+      return null;
+    }
+    return { ctx, track };
+  } catch (error) {
+    logger.warn('Audio mixing failed; publishing the microphone alone', error);
+    return null;
+  }
+}
+
+const DESK_STORAGE_KEY = 'dehub.studio.desk.v1';
+
+/** The mixer settings a creator left last time, so their levels carry over. */
+function loadDeskState(): DeskState {
+  const fallback: DeskState = {
+    volume: { mic: 1, game: 1, clip: 1 },
+    muted: { mic: false, game: false, clip: false },
+    gate: 'off',
+  };
+  try {
+    const raw = JSON.parse(window.localStorage.getItem(DESK_STORAGE_KEY) || 'null');
+    if (!raw || typeof raw !== 'object') return fallback;
+    const volume = { ...fallback.volume };
+    for (const c of DESK_CHANNELS) {
+      const v = Number(raw.volume?.[c]);
+      if (Number.isFinite(v)) volume[c] = Math.min(2, Math.max(0, v));
+    }
+    const gate: GateStrength = raw.gate === 'low' || raw.gate === 'high' ? raw.gate : 'off';
+    // Mutes are not remembered: starting a stream muted by accident is worse
+    // than re-muting a channel.
+    return { volume, muted: fallback.muted, gate };
+  } catch {
+    return fallback;
+  }
+}
+
+function saveDeskState(state: DeskState) {
+  try {
+    window.localStorage.setItem(DESK_STORAGE_KEY, JSON.stringify({ volume: state.volume, gate: state.gate }));
+  } catch {
+    /* private mode: levels simply are not remembered */
+  }
+}
+
+export function GoLiveBroadcaster({
+  streamKey,
+  playbackId,
+  provider,
+  initialScreenStream = null,
+  captureCard = false,
+  streamId,
+  tokenId,
+  onEnd,
+  onLive,
+  onSelfHostedUnreachable,
+}: GoLiveBroadcasterProps) {
+  const { t: _copy } = _useCopy();
+  const { t } = useTranslation();
+  const [phase, setPhase] = useState<Phase>('starting');
+  const [errorMessage, setErrorMessage] = useState('');
+  const [micOn, setMicOn] = useState(true);
+  const [hasMic, setHasMic] = useState(true);
+  const [videoOn, setVideoOn] = useState(true);
+  const [facingMode, setFacingMode] = useState<'user' | 'environment'>('user');
+  // Seeded from the prop so the first paint already reads as a screen share
+  // (no mirrored self-view frame, no "Starting camera…" on a desktop capture).
+  const [captureMode, setCaptureMode] = useState<CaptureMode>(
+    initialScreenStream ? 'screen' : captureCard ? 'card' : 'camera'
+  );
+  // Preview mirroring keyed to what the TRACK reports, not what was requested:
+  // facingMode is an ideal constraint, so "environment" can be satisfied by a
+  // second front camera (two-webcam desktops) — which would un-mirror a
+  // still-front-facing self-view if the requested value drove the transform.
+  const [mirror, setMirror] = useState(!initialScreenStream && !captureCard);
+  const [bubbleOn, setBubbleOn] = useState(false);
+  const [bubbleCorner, setBubbleCorner] = useState<BubbleCorner>('bottom-right');
+  const [hasMultipleCameras, setHasMultipleCameras] = useState(false);
+  const [elapsed, setElapsed] = useState(0);
+  const [isEnding, setIsEnding] = useState(false);
+  const [confirmEnd, setConfirmEnd] = useState(false);
+  /*
+   * What viewers are actually receiving.
+   *
+   * The preview above is the camera, not the broadcast, so it stays flawless
+   * while the encoder starves — and the host has no way to tell. On
+   * 2026-09-01 a phone published 74 frames in 77 seconds at ~37 kbit/s and
+   * its one viewer watched a frozen picture, left after seventeen seconds and
+   * came back twice; the console showed a healthy stream throughout. Null
+   * until the first sample lands, which is a couple of seconds after 'live'.
+   */
+  const [health, setHealth] = useState<WhipHealth | null>(null);
+  const [starved, setStarved] = useState(false);
+  // Only one drawer of extras at a time — the broadcast preview is the point
+  // of this panel and two open boards would push it off a laptop screen.
+  const [openPanel, setOpenPanel] = useState<'none' | 'voice' | 'looks' | 'sounds' | 'chat' | 'guests' | 'scenes' | 'sources' | 'audio'>(
+    'none'
+  );
+  const [effect, setEffect] = useState<VoiceEffectId>('none');
+  const [switchingEffect, setSwitchingEffect] = useState(false);
+  const [videoLook, setVideoLook] = useState<VideoEffectId>('none');
+  const [switchingLook, setSwitchingLook] = useState(false);
+  /*
+   * System background blur, which is a capability of the camera rather than
+   * one of our looks: the OS separates the person from the room and we only
+   * ask for it. Null until a camera reports on it, and stays null on hardware
+   * that cannot — which is most of it, so the row is hidden by default rather
+   * than shown broken.
+   */
+  const [backgroundBlur, setBackgroundBlur] = useState<boolean | null>(null);
+
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+  // Sits between this screen and the WHIP sender; transparent until a guest
+  // is on screen, then it sends host-plus-guests instead.
+  const [guestMixer] = useState(createGuestMixer);
+  // The studio's last stage: scene cards, extra sources and burned-in widgets
+  // over whatever the broadcaster puts on air. See lib/studio/program.
+  const [program] = useState(createProgramOutput);
+  const [programActive, setProgramActive] = useState(false);
+  useEffect(() => program.onActiveChange(setProgramActive), [program]);
+  const programPreviewRef = useRef<HTMLVideoElement | null>(null);
+  // One mixer for mic, game audio and clips; null where Web Audio is missing,
+  // and the old mix-on-demand path carries on.
+  const deskRef = useRef<AudioDesk | null>(null);
+  const [desk, setDesk] = useState<AudioDesk | null>(null);
+  const [deskState, setDeskState] = useState<DeskState>(loadDeskState);
+  const [hearSharedTab, setHearSharedTab] = useState(hearSharedAudioLocally);
+  const [changingSharedTabMonitor, setChangingSharedTabMonitor] = useState(false);
+  const [activeScene, setActiveScene] = useState<SceneId | null>(null);
+  const [sceneBusy, setSceneBusy] = useState(false);
+  const [sceneCustoms, setSceneCustoms] = useState<Partial<Record<SceneId, SceneCustom>>>(loadSceneCustoms);
+  const sceneMutedMicRef = useRef(false);
+  const deskStateRef = useRef(deskState);
+  deskStateRef.current = deskState;
+  const sessionRef = useRef<WhipSession | null>(null);
+  const wakeLockRef = useRef<WakeLockSentinel | null>(null);
+  // One lock for every video-source change — flip, share, unshare. Two of them
+  // interleaving would swap tracks out from under each other and orphan a
+  // capture (hardware light on, attached to nothing).
+  const videoSwapRef = useRef(false);
+  // micTrackRef is what gets PUBLISHED: the output of the voice-effect graph,
+  // not the microphone itself. The raw capture is kept beside it because it is
+  // the thing that must be stopped to release the hardware, and the thing the
+  // mute button disables (muting the published track would take the soundboard
+  // down with it).
+  const micTrackRef = useRef<MediaStreamTrack | null>(null);
+  const rawMicStreamRef = useRef<MediaStream | null>(null);
+  const screenStreamRef = useRef<MediaStream | null>(null);
+  const systemAudioRef = useRef<MediaStreamTrack | null>(null);
+  const audioMixRef = useRef<AudioMix | null>(null);
+  // The canvas composite and the webcam it draws, held apart from the published
+  // stream: while the bubble is on, what goes out is the canvas, and both the
+  // screen track and this camera are sources rather than senders.
+  const bubbleRef = useRef<CameraBubble | null>(null);
+  const bubbleCameraRef = useRef<MediaStreamTrack | null>(null);
+  // The look canvas and the camera it draws, on the same borrowing terms as the
+  // bubble: while a look is on, what goes out is the canvas and the camera
+  // underneath is a source rather than a sender. Stopping the wrong one of
+  // these blanks the broadcast, so they are held apart on purpose.
+  const lookStageRef = useRef<VideoEffectStage | null>(null);
+  const lookSourceRef = useRef<MediaStreamTrack | null>(null);
+  // Background removal runs between the camera and the look's canvas: the
+  // look stage's source is this stage's output while it is on.
+  const bgStageRef = useRef<BackgroundStage | null>(null);
+  const bgModeRef = useRef<BackgroundMode>('none');
+  const bgOptionsRef = useRef<BackgroundOptions>({});
+  const [bgMode, setBgMode] = useState<BackgroundMode>('none');
+  // The handed-over capture is consumed exactly once, on mount.
+  const initialScreenRef = useRef<MediaStream | null>(initialScreenStream);
+  // Mirrors for the async swap paths, which run long after their closures were
+  // created and must not act on a stale toggle.
+  const videoOnRef = useRef(true);
+  const facingModeRef = useRef<'user' | 'environment'>('user');
+  const videoLookRef = useRef<VideoEffectId>('none');
+  const captureModeRef = useRef<CaptureMode>(
+    initialScreenStream ? 'screen' : captureCard ? 'card' : 'camera'
+  );
+  // The card's own picture and sound, held like a screen share: the bubble
+  // composites over it and teardown has to release it by hand.
+  const cardStreamRef = useRef<MediaStream | null>(null);
+  // Read once on mount, like the handed-over screen.
+  const captureCardRef = useRef(captureCard);
+  const videoEncodingRef = useRef<VideoEncoding | undefined>(undefined);
+  useEffect(() => { videoOnRef.current = videoOn; }, [videoOn]);
+  useEffect(() => { facingModeRef.current = facingMode; }, [facingMode]);
+  useEffect(() => { videoLookRef.current = videoLook; }, [videoLook]);
+  useEffect(() => { captureModeRef.current = captureMode; }, [captureMode]);
+  // Read through a ref so the connect effect (whose dep list is deliberately
+  // frozen) never restarts the ingest because the parent re-rendered.
+  const onLiveRef = useRef(onLive);
+  useEffect(() => { onLiveRef.current = onLive; }, [onLive]);
+  const onSelfHostedUnreachableRef = useRef(onSelfHostedUnreachable);
+  useEffect(() => { onSelfHostedUnreachableRef.current = onSelfHostedUnreachable; }, [onSelfHostedUnreachable]);
+
+  /** Feature detection, not a device check: undefined on iOS and on Android. */
+  const canShareScreen = typeof navigator?.mediaDevices?.getDisplayMedia === 'function';
+
+  /*
+   * Turns samples into a verdict.
+   *
+   * Two consecutive bad samples, not one: a keyframe request, a camera flip
+   * and the first seconds after 'live' all dip briefly, and a warning that
+   * blinks on every hiccup is one a host learns to ignore. Recovery is
+   * immediate on the other hand — a stream that has come back should say so
+   * at once.
+   *
+   * The first slide into starvation is logged at warn level so it reaches
+   * client_error_logs. `limitation` is the part worth having: it separates
+   * an uplink that cannot carry the picture from a phone that cannot encode
+   * it, which no amount of reasoning from a bitrate alone can do.
+   */
+  const badSamplesRef = useRef(0);
+  const reportedStarvedRef = useRef(false);
+  const reportHealth = useCallback((sample: WhipHealth) => {
+    setHealth(sample);
+
+    // A camera the host deliberately switched off sends zero frames, which is
+    // the same reading as a collapsed uplink and none of the same problem.
+    const bad =
+      videoOnRef.current && (sample.fps < STARVED_FPS || sample.videoKbps < STARVED_KBPS);
+    badSamplesRef.current = bad ? badSamplesRef.current + 1 : 0;
+
+    if (!bad) {
+      reportedStarvedRef.current = false;
+      setStarved(false);
+      return;
+    }
+    if (badSamplesRef.current < STARVED_SAMPLES) return;
+
+    setStarved(true);
+    if (!reportedStarvedRef.current) {
+      reportedStarvedRef.current = true;
+      const screenTrack = screenStreamRef.current?.getVideoTracks()[0];
+      logger.warn('broadcast starved', {
+        fps: sample.fps,
+        videoKbps: sample.videoKbps,
+        audioKbps: sample.audioKbps,
+        limitation: sample.limitation,
+        rttMs: sample.rttMs,
+        visibility: document.visibilityState,
+        ...(screenTrack && {
+          displaySurface: displaySurfaceOf(screenTrack),
+          displayMuted: screenTrack.muted,
+          displayState: screenTrack.readyState,
+        }),
+      });
+    }
+  }, []);
+  // Held in a ref because the publish closure is built once per attempt and
+  // must not be rebuilt (and the ingest restarted) when this identity changes.
+  const reportHealthRef = useRef(reportHealth);
+  useEffect(() => { reportHealthRef.current = reportHealth; }, [reportHealth]);
+
+  /**
+   * The room, from the host's side: who is watching, what they have given.
+   * Until now the only way to see any of it was to open the post in a second
+   * tab, which is also the only place the chat lived.
+   */
+  const { data: console_ } = useQuery({
+    queryKey: ['broadcast-console', streamId],
+    queryFn: () => getLiveStream(streamId as string),
+    enabled: !!streamId && (phase === 'live' || phase === 'reconnecting'),
+    refetchInterval: CONSOLE_POLL_MS,
+    staleTime: CONSOLE_POLL_MS,
+  });
+  const { data: postLikes } = useQuery({
+    queryKey: ['live-broadcast-post-likes', tokenId],
+    queryFn: async () => resolveLikeCount(await getNFTInfo(tokenId!)),
+    enabled: !!tokenId && (phase === 'live' || phase === 'reconnecting'),
+    refetchInterval: CONSOLE_POLL_MS,
+    staleTime: CONSOLE_POLL_MS,
+  });
+  const room = console_?.result as
+    | {
+        totalViews?: number;
+        peakViewers?: number;
+        viewerCount?: number;
+        likes?: number;
+        totalTips?: number;
+      }
+    | undefined;
+
+  /*
+   * How many people are in the room right now.
+   *
+   * This used to read `peakViewers ?? totalViews` under the word "watching",
+   * and neither is that. `peakViewers` is a high-water mark that only climbs;
+   * `totalViews` counts JOINS, so one viewer whose connection drops and comes
+   * back is two people, then three.
+   *
+   * Computed in the shared hook rather than here, because the chat panel two
+   * inches below this used to print a completely different number under a
+   * people icon — the platform-wide chat online count — and a host reading the
+   * two together had no way to tell which one was their audience.
+   */
+  const watching = useStreamAudience(streamId, phase === 'live' || phase === 'reconnecting') ?? 0;
+  const [viewersOpen, setViewersOpen] = useState(false);
+
+  // The Stages voice-effect graph, reused as-is: mic → effect chain →
+  // MediaStreamDestination. The broadcast publishes that destination rather
+  // than the microphone, which is what lets effects switch and soundboard
+  // clips mix in without the WHIP session noticing.
+  const {
+    processStream,
+    rebuildEffect,
+    cleanup: cleanupVoice,
+    setRawMicEnabled,
+    injectSound,
+    stopInjectedSound,
+    getProcessedStream,
+  } = useVoiceEffects();
+
+  const probeCameras = useCallback(() => {
+    navigator.mediaDevices
+      ?.enumerateDevices()
+      .then((devices) => {
+        setHasMultipleCameras(
+          devices.filter((d) => d.kind === 'videoinput').length > 1
+        );
+      })
+      .catch(() => undefined);
+  }, []);
+
+  // The mount-time probe runs before camera permission is granted, when
+  // browsers report at most one placeholder device per kind — on a first-ever
+  // broadcast it always says "one camera", hiding the flip button on the
+  // phones it was built for. Re-probed after getUserMedia succeeds (when the
+  // answer is real) and on devicechange.
+  useEffect(() => {
+    probeCameras();
+    const md = navigator.mediaDevices;
+    if (!md?.addEventListener) return;
+    md.addEventListener('devicechange', probeCameras);
+    return () => md.removeEventListener('devicechange', probeCameras);
+  }, [probeCameras]);
+
+  const releaseWakeLock = useCallback(() => {
+    wakeLockRef.current?.release().catch(() => undefined);
+    wakeLockRef.current = null;
+  }, []);
+
+  // The browser silently releases the lock whenever the page is hidden, but
+  // the sentinel object stays truthy — without tracking its 'release' event
+  // the visibilitychange re-acquire below would short-circuit on the stale
+  // ref and never request a new lock (the exact scenario it exists for).
+  const acquireWakeLock = useCallback(async () => {
+    try {
+      const sentinel = (await navigator.wakeLock?.request('screen')) ?? null;
+      if (sentinel) {
+        sentinel.addEventListener('release', () => {
+          if (wakeLockRef.current === sentinel) wakeLockRef.current = null;
+        });
+      }
+      wakeLockRef.current = sentinel;
+    } catch {
+      /* Unsupported or denied — streaming still works, screen may sleep. */
+    }
+  }, []);
+
+  /** Retires the composite and the webcam feeding it. Other inputs survive. */
+  const releaseBubble = useCallback(() => {
+    bubbleRef.current?.stop();
+    bubbleRef.current = null;
+    bubbleCameraRef.current?.stop();
+    bubbleCameraRef.current = null;
+  }, []);
+
+  /**
+   * Retires the look canvas.
+   *
+   * `restore` puts the camera underneath back on air first, which is what
+   * turning a look off means. Teardown passes false: the session is closing,
+   * so the camera has nowhere to go back to and is stopped here instead — or
+   * its light stays on until the page unloads.
+   *
+   * The order matters. The camera is spliced back into the sender BEFORE the
+   * canvas track is stopped, so there is no frame where the session is holding
+   * a dead track.
+   */
+  const releaseLook = useCallback(async (restore: boolean) => {
+    const stage = lookStageRef.current;
+    const source = lookSourceRef.current;
+    if (!stage) return;
+    lookStageRef.current = null;
+    lookSourceRef.current = null;
+    // The background stage feeds the look's canvas, so it goes with it. Its
+    // mode is remembered and comes back when the camera does.
+    bgStageRef.current?.stop();
+    bgStageRef.current = null;
+
+    const stream = streamRef.current;
+    const session = sessionRef.current;
+    if (restore && stream && session && source) {
+      await session.replaceTrack('video', source);
+      const canvasTrack = stream.getVideoTracks()[0];
+      if (canvasTrack) stream.removeTrack(canvasTrack);
+      stream.addTrack(source);
+      source.enabled = videoOnRef.current;
+      if (videoRef.current) videoRef.current.srcObject = stream;
+    } else {
+      source?.stop();
+    }
+    stage.stop();
+  }, []);
+
+  const teardown = useCallback(async () => {
+    releaseWakeLock();
+    releaseBubble();
+    // Before the stream's own tracks are stopped below: with a look on, the
+    // camera is NOT in that stream — the canvas is — so it would otherwise
+    // survive the teardown with its light on.
+    await releaseLook(false);
+    // The guests' mix goes with the session: nothing is left to send it to.
+    guestMixer.release();
+    await guestMixer.stop();
+    program.release();
+    await program.stop();
+    await sessionRef.current?.stop();
+    sessionRef.current = null;
+    streamRef.current?.getTracks().forEach((t) => t.stop());
+    streamRef.current = null;
+    // The mic and the screen capture are held outside the published stream
+    // (mixing replaces the published audio track with a synthesised one), so
+    // they need retiring by hand or the hardware light stays on.
+    micTrackRef.current?.stop();
+    micTrackRef.current = null;
+    // cleanupVoice closes the effect graph's context but never touches the
+    // capture feeding it — the hardware is released here or not at all.
+    cleanupVoice();
+    rawMicStreamRef.current?.getTracks().forEach((t) => t.stop());
+    rawMicStreamRef.current = null;
+    screenStreamRef.current?.getTracks().forEach((t) => t.stop());
+    screenStreamRef.current = null;
+    cardStreamRef.current?.getTracks().forEach((t) => t.stop());
+    cardStreamRef.current = null;
+    systemAudioRef.current = null;
+    audioMixRef.current?.track.stop();
+    void audioMixRef.current?.ctx.close().catch(() => undefined);
+    audioMixRef.current = null;
+    deskRef.current?.close();
+    deskRef.current = null;
+  }, [releaseWakeLock, releaseBubble, releaseLook, cleanupVoice, guestMixer, program]);
+
+  /**
+   * Captures the mic and runs it through the voice-effect graph. What comes
+   * back is the graph's output — the track that gets published — and it is
+   * also the destination the soundboard mixes clips into, which is why a
+   * sound effect is heard by viewers even while the host is muted.
+   *
+   * A graph failure is survivable: fall back to the bare capture and lose the
+   * effects rather than the broadcast.
+   */
+  const acquireMic = useCallback(
+    async (existing?: MediaStream | null): Promise<MediaStreamTrack | null> => {
+      // The camera path already prompted for audio alongside video and passes
+      // that capture in; the screen path has to ask for the mic on its own.
+      let raw = existing ?? null;
+      if (!raw) {
+        try {
+          raw = await navigator.mediaDevices.getUserMedia({ audio: AUDIO_CONSTRAINTS });
+        } catch (error) {
+          logger.warn('Microphone unavailable; broadcasting without it', error);
+          return null;
+        }
+      }
+      const rawTrack = raw.getAudioTracks()[0];
+      if (!rawTrack) return null;
+      rawMicStreamRef.current = raw;
+
+      if (isLineLevelInput(rawTrack)) {
+        // Capture card or line input: strip the speech processing the prompt
+        // applied, ask for stereo, and tell the encoder it is music so Opus
+        // does not treat it as a voice call. Published as-is, no effect graph.
+        try {
+          await rawTrack.applyConstraints(RAW_AUDIO_CONSTRAINTS);
+        } catch (error) {
+          logger.warn('Could not switch the capture input to raw audio', error);
+        }
+        try {
+          rawTrack.contentHint = 'music';
+        } catch {
+          /* older engines expose contentHint read-only */
+        }
+        logger.info('Line-level audio input detected; publishing raw stereo', {
+          label: rawTrack.label,
+        });
+        return rawTrack;
+      }
+
+      try {
+        return await processStream(raw, 'none');
+      } catch (error) {
+        logger.warn('Voice effect graph failed; publishing the raw microphone', error);
+        return raw.getAudioTracks()[0] ?? null;
+      }
+    },
+    [processStream]
+  );
+
+  /**
+   * Rebuilds the published audio from the sources that exist right now and
+   * swaps it into the live session — mic alone, system audio alone, or the two
+   * summed. Runs on every screen-share transition.
+   *
+   * Note the ceiling: WHIP only ever has the senders it was opened with, so a
+   * broadcast that started with no audio at all (screen share, mic denied,
+   * silent capture) cannot grow one later without a renegotiation.
+   */
+  const applySystemAudio = useCallback(async (systemTrack: MediaStreamTrack | null) => {
+    const previous = audioMixRef.current;
+    const mic = micTrackRef.current;
+    // Remembered so a voice-effect switch, which produces a brand-new mic
+    // track, can rebuild the same mix without being handed the share again.
+    systemAudioRef.current = systemTrack;
+
+    // With the desk, the published track never changes: only its inputs do.
+    const deskNow = deskRef.current;
+    if (deskNow) {
+      deskNow.setInput('mic', mic);
+      deskNow.setInput('game', systemTrack);
+      // Re-render so the mixer shows which channels have something on them.
+      setDeskState((s) => ({ ...s }));
+      return;
+    }
+
+    const mix = systemTrack && mic ? mixAudio([mic, systemTrack]) : null;
+    audioMixRef.current = mix;
+    const next = mix?.track ?? mic ?? systemTrack ?? null;
+
+    await sessionRef.current?.replaceTrack('audio', next);
+
+    // Keep the preview stream honest — teardown stops what it holds.
+    const stream = streamRef.current;
+    if (stream) {
+      stream.getAudioTracks().forEach((t) => stream.removeTrack(t));
+      if (next) stream.addTrack(next);
+    }
+
+    // Only ever retires a synthesised mix; the mic and the system track are
+    // owned by their capture and stopped with it.
+    if (previous) {
+      previous.track.stop();
+      void previous.ctx.close().catch(() => undefined);
+    }
+  }, []);
+
+  /**
+   * Puts `track` on air and into the preview, retiring what it replaces.
+   *
+   * `stopPrevious` is off exactly once: switching the camera bubble on swaps
+   * the canvas composite in while the screen track it is drawing from stays
+   * live. Stopping it there would blank the very source being composited.
+   */
+  const swapVideoTrack = useCallback(
+    async (track: MediaStreamTrack, stopPrevious = true): Promise<boolean> => {
+      const stream = streamRef.current;
+      const session = sessionRef.current;
+      if (!stream || !session) return false;
+
+      /*
+       * With a look on, the published track is the look's canvas and it never
+       * changes hands: a camera flip hands the canvas a new SOURCE instead, so
+       * viewers keep the same sender and the look survives the switch. The
+       * canvas track must not be retired down there — it is what is on air.
+       */
+      const stage = lookStageRef.current;
+      if (stage) {
+        // With the background on, the new camera gets its own background
+        // stage and the canvas follows that instead of the bare camera.
+        const oldBg = bgStageRef.current;
+        if (oldBg) {
+          try {
+            const nextBg = await startBackgroundStage(track, bgModeRef.current, bgOptionsRef.current);
+            await stage.setSource(nextBg.track);
+            bgStageRef.current = nextBg;
+          } catch (error) {
+            logger.warn('Background removal could not follow the camera switch', error);
+            await stage.setSource(track);
+            bgStageRef.current = null;
+          }
+          oldBg.stop();
+        } else {
+          await stage.setSource(track);
+        }
+        const previousSource = lookSourceRef.current;
+        lookSourceRef.current = track;
+        if (stopPrevious) previousSource?.stop();
+        track.enabled = videoOnRef.current;
+        return true;
+      }
+
+      // Into the live session first so viewers never see a gap, then retire the
+      // old track and splice the new one into the preview.
+      await session.replaceTrack('video', track);
+
+      const old = stream.getVideoTracks()[0];
+      if (old) {
+        stream.removeTrack(old);
+        if (stopPrevious) old.stop();
+      }
+      stream.addTrack(track);
+      track.enabled = videoOnRef.current;
+      session.syncVideoEnabled();
+      if (videoRef.current) videoRef.current.srcObject = stream;
+      return true;
+    },
+    []
+  );
+
+
+  /**
+   * Turns a look on, off, or swaps one for another.
+   *
+   * Only the first and last of those touch the published track. Changing look
+   * while one is already running is an assignment inside the canvas, which is
+   * why the picker feels instant and why viewers never see a reconnect for it.
+   */
+  const applyLook = useCallback(
+    async (next: VideoEffectId) => {
+      setVideoLook(next);
+      videoLookRef.current = next;
+
+      // A look is a camera treatment. The picker is not rendered during a
+      // share, so this only catches the race where one starts under an open
+      // panel — the look is re-applied when the share ends. Read through the
+      // ref because stopScreenShare calls this in the same tick it flips the
+      // mode, when the state closure still says 'screen'.
+      if (captureModeRef.current !== 'camera') return;
+      if (videoSwapRef.current) return;
+      if (!streamRef.current || !sessionRef.current) return;
+
+      const running = lookStageRef.current;
+      // With the background on, "no look" still needs the canvas — the
+      // background is drawn through it — so the look is only cleared.
+      if (running && (next !== 'none' || bgStageRef.current)) {
+        running.setEffect(next);
+        return;
+      }
+
+      videoSwapRef.current = true;
+      setSwitchingLook(true);
+      try {
+        if (next === 'none') {
+          await releaseLook(true);
+          return;
+        }
+
+        const camera = streamRef.current.getVideoTracks()[0];
+        if (!camera) return;
+
+        const stage = await startVideoEffect({ source: camera, effect: next });
+        // No permission prompt here, but the first frame is still a tick away:
+        // End Stream may have run underneath it.
+        if (!streamRef.current || !sessionRef.current) {
+          stage.stop();
+          return;
+        }
+
+        await sessionRef.current.replaceTrack('video', stage.track);
+        streamRef.current.removeTrack(camera);
+        streamRef.current.addTrack(stage.track);
+        stage.track.enabled = videoOnRef.current;
+        if (videoRef.current) videoRef.current.srcObject = streamRef.current;
+
+        lookStageRef.current = stage;
+        // Borrowed, not adopted: the camera keeps running as the canvas's
+        // source and is only stopped by releaseLook or by teardown.
+        lookSourceRef.current = camera;
+      } catch (error) {
+        logger.warn('Could not apply that look', error);
+        setVideoLook('none');
+        videoLookRef.current = 'none';
+      } finally {
+        setSwitchingLook(false);
+        videoSwapRef.current = false;
+      }
+    },
+    [releaseLook]
+  );
+
+  /** The camera itself, wherever it currently sits in the chain. */
+  const liveCameraTrack = useCallback(
+    (): MediaStreamTrack | null =>
+      lookSourceRef.current ?? streamRef.current?.getVideoTracks()[0] ?? null,
+    []
+  );
+
+  /*
+   * System background blur.
+   *
+   * Read when the panel opens rather than at capture: it is the only moment
+   * the answer is needed and it is always current, since flipping to a
+   * different camera changes it. A capability list with fewer than two entries
+   * means the camera has an opinion we cannot change, which is the common case
+   * — so the row stays hidden rather than rendering a dead toggle.
+   */
+  useEffect(() => {
+    if (openPanel !== 'looks') return;
+    const camera = liveCameraTrack();
+    const capabilities = (
+      camera as unknown as { getCapabilities?: () => { backgroundBlur?: boolean[] } } | null
+    )?.getCapabilities?.();
+    if (!capabilities?.backgroundBlur || capabilities.backgroundBlur.length < 2) {
+      setBackgroundBlur(null);
+      return;
+    }
+    const settings = (
+      camera as unknown as { getSettings?: () => { backgroundBlur?: boolean } } | null
+    )?.getSettings?.();
+    setBackgroundBlur(Boolean(settings?.backgroundBlur));
+  }, [openPanel, liveCameraTrack]);
+
+  const toggleBackgroundBlur = useCallback(async () => {
+    const camera = liveCameraTrack();
+    if (!camera || backgroundBlur === null) return;
+    const next = !backgroundBlur;
+    try {
+      await camera.applyConstraints({
+        advanced: [{ backgroundBlur: next }],
+      } as unknown as MediaTrackConstraints);
+      setBackgroundBlur(next);
+    } catch (error) {
+      // The OS can refuse — another app holding the effect, or a camera that
+      // advertised the control and then declined it. Leave the toggle where it
+      // was rather than lying about the picture going out.
+      logger.warn('The camera refused the background blur request', error);
+    }
+  }, [backgroundBlur, liveCameraTrack]);
+
+  /**
+   * Background removal on the camera: blur, a colour or a picture behind the
+   * creator. It rides the look's canvas — the canvas is the stable published
+   * track — so turning it on starts a pass-through look if none is running,
+   * and the canvas's source becomes the background stage's output.
+   */
+  const applyBackgroundRef = useRef<((mode: BackgroundMode, opts?: BackgroundOptions) => Promise<void>) | null>(null);
+  const applyBackground = useCallback(
+    async (mode: BackgroundMode, opts: BackgroundOptions = {}) => {
+      bgModeRef.current = mode;
+      bgOptionsRef.current = { ...bgOptionsRef.current, ...opts };
+      setBgMode(mode);
+      if (captureModeRef.current !== 'camera') return;
+      if (!streamRef.current || !sessionRef.current) return;
+
+      const running = bgStageRef.current;
+      if (mode === 'none') {
+        if (!running) return;
+        bgStageRef.current = null;
+        const camera = lookSourceRef.current;
+        if (camera) await lookStageRef.current?.setSource(camera);
+        running.stop();
+        if (videoLookRef.current === 'none') await releaseLook(true);
+        return;
+      }
+      if (running) {
+        running.setMode(mode, bgOptionsRef.current);
+        return;
+      }
+      if (videoSwapRef.current) return;
+      videoSwapRef.current = true;
+      setSwitchingLook(true);
+      try {
+        if (!lookStageRef.current) {
+          const camera = streamRef.current.getVideoTracks()[0];
+          if (!camera) return;
+          const stage = await startVideoEffect({ source: camera, effect: videoLookRef.current });
+          if (!streamRef.current || !sessionRef.current) {
+            stage.stop();
+            return;
+          }
+          await sessionRef.current.replaceTrack('video', stage.track);
+          streamRef.current.removeTrack(camera);
+          streamRef.current.addTrack(stage.track);
+          stage.track.enabled = videoOnRef.current;
+          if (videoRef.current) videoRef.current.srcObject = streamRef.current;
+          lookStageRef.current = stage;
+          lookSourceRef.current = camera;
+        }
+        const camera = lookSourceRef.current;
+        const stage = lookStageRef.current;
+        if (!camera || !stage) return;
+        const bg = await startBackgroundStage(camera, mode, bgOptionsRef.current);
+        if (!lookStageRef.current) {
+          bg.stop();
+          return;
+        }
+        await stage.setSource(bg.track);
+        bgStageRef.current = bg;
+      } catch (error) {
+        logger.warn('Background removal could not start', error);
+        bgModeRef.current = 'none';
+        setBgMode('none');
+        toast.error(t('studioDeck.background.failed'));
+      } finally {
+        setSwitchingLook(false);
+        videoSwapRef.current = false;
+      }
+    },
+    [releaseLook, t]
+  );
+  applyBackgroundRef.current = applyBackground;
+
+  const releaseScreenCapture = useCallback(() => {
+    screenStreamRef.current?.getTracks().forEach((t) => t.stop());
+    screenStreamRef.current = null;
+    setHearSharedTab(hearSharedAudioLocally());
+  }, []);
+
+  /**
+   * Back to the webcam. Also the landing point for the browser's own "Stop
+   * sharing" bar, which ends the track behind our back — so a machine with no
+   * webcam has to degrade to a blanked sender rather than a frozen desktop
+   * frame the creator can't see they're still publishing.
+   */
+  const stopScreenShare = useCallback(async () => {
+    if (videoSwapRef.current) return;
+    if (!streamRef.current || !sessionRef.current) return;
+    videoSwapRef.current = true;
+
+    let camera: MediaStreamTrack | null = null;
+    try {
+      // A live camera bubble is already holding a webcam. Promote it to the
+      // full frame rather than prompting for a second one and leaving the
+      // first running — claiming it here also keeps releaseBubble off it.
+      const promoted = bubbleCameraRef.current;
+      bubbleCameraRef.current = null;
+
+      const capture = promoted
+        ? null
+        : await navigator.mediaDevices
+            .getUserMedia({
+              video: { ...cameraConstraints(), facingMode: facingModeRef.current },
+              audio: false,
+            })
+            .catch(() => null);
+      camera = promoted ?? capture?.getVideoTracks()[0] ?? null;
+
+      // Teardown may have run while getUserMedia was prompting.
+      if (!streamRef.current || !sessionRef.current) return;
+
+      if (camera) {
+        if (!(await swapVideoTrack(camera))) return;
+        setMirror(camera.getSettings?.().facingMode !== 'environment');
+        camera = null; // adopted into the stream — must not be stopped below
+      } else {
+        logger.warn('No camera to fall back to after screen sharing stopped');
+        await sessionRef.current.replaceTrack('video', null);
+        setVideoOn(false);
+      }
+
+      releaseBubble();
+      setBubbleOn(false);
+      await applySystemAudio(null);
+      releaseScreenCapture();
+      captureModeRef.current = 'camera';
+      setCaptureMode('camera');
+    } catch (error) {
+      logger.warn('Returning to the camera failed', error);
+    } finally {
+      camera?.stop();
+      videoSwapRef.current = false;
+    }
+
+    // Re-dress the camera in whatever look the creator was wearing before the
+    // share. Outside the lock above, because applyLook takes it too.
+    if (videoLookRef.current !== 'none' && captureModeRef.current === 'camera') {
+      await applyLook(videoLookRef.current);
+    }
+    if (bgModeRef.current !== 'none' && captureModeRef.current === 'camera') {
+      await applyBackgroundRef.current?.(bgModeRef.current, bgOptionsRef.current);
+    }
+  }, [swapVideoTrack, applySystemAudio, releaseScreenCapture, releaseBubble, applyLook]);
+
+  /** Ends the share when the creator uses the browser's own stop-sharing bar. */
+  const watchForShareStop = useCallback(
+    (track: MediaStreamTrack) => {
+      track.addEventListener('ended', () => {
+        if (screenStreamRef.current?.getVideoTracks()[0] !== track) return;
+        logger.info('Screen share ended from the browser bar');
+        void stopScreenShare();
+      });
+    },
+    [stopScreenShare]
+  );
+
+  /**
+   * Opens the picker and puts the chosen screen, window or tab on air. Safe to
+   * call from the control bar because the click is its own user activation —
+   * unlike mount, which is minutes past the one that started go-live.
+   */
+  const startScreenShare = useCallback(async () => {
+    if (videoSwapRef.current) return;
+    if (!streamRef.current || !sessionRef.current) return;
+    videoSwapRef.current = true;
+
+    let display: MediaStream | null = null;
+    try {
+      display = await requestDisplayCapture(SCREEN_CONSTRAINTS);
+      const track = display.getVideoTracks()[0] ?? null;
+      if (!track) return;
+
+      // Teardown, or an End Stream, may have run while the picker was open.
+      if (!streamRef.current || !sessionRef.current) return;
+      // Sharing implies showing: without this the swap would inherit a paused
+      // video toggle and publish a black frame the controls claim is live.
+      videoOnRef.current = true;
+      // A look treats a camera, not a desktop — and swapVideoTrack would
+      // otherwise feed the share straight into the canvas. Released only now
+      // the picker has returned, so dismissing it leaves the look untouched.
+      await releaseLook(true);
+      if (!(await swapVideoTrack(track))) return;
+
+      screenStreamRef.current = display;
+      watchForShareStop(track);
+      await applySystemAudio(display.getAudioTracks()[0] ?? null);
+      const tabAudio = liveSharedTabAudio(display);
+      if (tabAudio) setHearSharedTab(!isSharedTabAudioSuppressed(tabAudio));
+
+      setMirror(false);
+      setVideoOn(true);
+      captureModeRef.current = 'screen';
+      setCaptureMode('screen');
+      display = null; // adopted — must not be stopped below
+    } catch (error) {
+      // Dismissing the picker throws NotAllowedError; that is a normal "no".
+      logger.info('Screen share not started', error);
+    } finally {
+      display?.getTracks().forEach((t) => t.stop());
+      videoSwapRef.current = false;
+    }
+  }, [swapVideoTrack, applySystemAudio, watchForShareStop, releaseLook]);
+
+  const changeSharedTabMonitor = async (hear: boolean) => {
+    if (videoSwapRef.current) return;
+    const previous = screenStreamRef.current;
+    if (!previous || !liveSharedTabAudio(previous)) {
+      setHearSharedAudioLocally(hear);
+      setHearSharedTab(hear);
+      return;
+    }
+
+    videoSwapRef.current = true;
+    setChangingSharedTabMonitor(true);
+
+    let replacement: MediaStream | null = null;
+    let bubble: CameraBubble | null = null;
+    try {
+      replacement = await requestSharedTabCapture(SCREEN_CONSTRAINTS, hear);
+      const track = replacement.getVideoTracks()[0];
+      const audio = replacement.getAudioTracks()[0];
+      const previousBubble = bubbleRef.current;
+      const camera = bubbleCameraRef.current;
+      const previousVideo = previousBubble?.track ?? previous.getVideoTracks()[0];
+      if (previousBubble && camera) {
+        bubble = await composeCameraBubble({ screen: track, camera, corner: bubbleCorner });
+      }
+      const currentDesk = deskRef.current;
+      if (screenStreamRef.current !== previous || !currentDesk) return;
+      if (!liveSharedTabAudio(replacement)) throw new Error('The replacement tab share ended');
+      if (!(await swapVideoTrack(bubble?.track ?? track, false))) return;
+
+      // Keep the original capture live until the new game input is connected
+      // to the same published mixer output.
+      if (screenStreamRef.current !== previous) return;
+      try {
+        if (!liveSharedTabAudio(replacement)) throw new Error('The replacement tab share ended');
+        currentDesk.setInput('game', audio);
+      } catch (error) {
+        await swapVideoTrack(previousVideo, false);
+        throw error;
+      }
+      systemAudioRef.current = audio;
+      screenStreamRef.current = replacement;
+      watchForShareStop(track);
+      if (bubble) {
+        previousBubble?.stop();
+        bubbleRef.current = bubble;
+        bubble = null;
+      }
+      replacement = null;
+      previous.getTracks().forEach((oldTrack) => oldTrack.stop());
+      setHearSharedAudioLocally(hear);
+      setHearSharedTab(hear);
+    } catch (error) {
+      if ((error as DOMException | null)?.name !== 'NotAllowedError') {
+        logger.warn('Could not change shared tab monitoring', error);
+        toast.error(t('studioDeck.audio.hearSharedFailed'));
+      }
+    } finally {
+      bubble?.stop();
+      replacement?.getTracks().forEach((track) => track.stop());
+      videoSwapRef.current = false;
+      setChangingSharedTabMonitor(false);
+      // The creator can stop the old share from the browser while the picker is open.
+      if (screenStreamRef.current?.getVideoTracks()[0]?.readyState === 'ended') {
+        void stopScreenShare();
+      }
+    }
+  };
+
+  /**
+   * The camera bubble: your face in the corner of the share, which is the
+   * layout every game stream uses. WebRTC carries one video track per sender,
+   * so the two captures are drawn into a canvas and the canvas is what gets
+   * published — see lib/livepeer/compositor for the frame pump.
+   */
+  const toggleCameraBubble = useCallback(async () => {
+    if (videoSwapRef.current) return;
+    // The bubble sits over whatever wide source is on air: a share or a card.
+    const screenTrack =
+      (screenStreamRef.current ?? cardStreamRef.current)?.getVideoTracks()[0] ?? null;
+    if (!streamRef.current || !sessionRef.current || !screenTrack) return;
+    videoSwapRef.current = true;
+
+    let camera: MediaStreamTrack | null = null;
+    try {
+      if (bubbleRef.current) {
+        // Back to the bare share. The screen track has been running underneath
+        // the composite the whole time, so it goes straight back on air.
+        if (!(await swapVideoTrack(screenTrack))) return;
+        releaseBubble();
+        setBubbleOn(false);
+        return;
+      }
+
+      // Over a capture card, "the camera" must be some OTHER video device:
+      // left to the browser's default it can hand back the card itself.
+      const cardId = cardStreamRef.current?.getVideoTracks()[0]?.getSettings?.().deviceId;
+      const faceCam = cardId
+        ? (await navigator.mediaDevices.enumerateDevices().catch(() => [])).find(
+            (d) => d.kind === 'videoinput' && d.deviceId && d.deviceId !== cardId
+          )
+        : undefined;
+      if (cardId && !faceCam) {
+        logger.warn('No webcam besides the capture card for the bubble');
+        return;
+      }
+      const capture = await navigator.mediaDevices
+        .getUserMedia({
+          video: faceCam
+            ? { ...VIDEO_CONSTRAINTS, deviceId: { exact: faceCam.deviceId } }
+            : { ...cameraConstraints(), facingMode: facingModeRef.current },
+          audio: false,
+        })
+        .catch(() => null);
+      camera = capture?.getVideoTracks()[0] ?? null;
+      if (!camera) {
+        logger.warn('No camera available for the bubble');
+        return;
+      }
+      if (!streamRef.current || !sessionRef.current) return;
+
+      const bubble = await composeCameraBubble({
+        screen: screenTrack,
+        camera,
+        corner: bubbleCorner,
+      });
+      // stopPrevious is false here and nowhere else: the outgoing screen track
+      // is the composite's own source and must keep running.
+      if (!(await swapVideoTrack(bubble.track, false))) {
+        bubble.stop();
+        return;
+      }
+
+      bubbleRef.current = bubble;
+      bubbleCameraRef.current = camera;
+      camera = null; // owned by the bubble now
+      setBubbleOn(true);
+    } catch (error) {
+      logger.warn('Camera bubble failed', error);
+    } finally {
+      camera?.stop();
+      videoSwapRef.current = false;
+    }
+  }, [swapVideoTrack, releaseBubble, bubbleCorner]);
+
+  const cycleBubbleCorner = useCallback(() => {
+    const next =
+      BUBBLE_CORNERS[(BUBBLE_CORNERS.indexOf(bubbleCorner) + 1) % BUBBLE_CORNERS.length];
+    setBubbleCorner(next);
+    // Applied straight to the running composite; the state is only for the UI.
+    bubbleRef.current?.setCorner(next);
+  }, [bubbleCorner]);
+
+  // Start the capture, then open the ingest session. Every await below
+  // re-checks `cancelled`, so an unmount mid-negotiation cleans up whatever
+  // had been acquired by that point instead of stranding a live session.
+  useEffect(() => {
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const handed = initialScreenRef.current;
+        // readyState guards the window between the modal's picker and this
+        // mount: 15-30s of minting, during which the creator can hit the
+        // browser's stop-sharing bar. A dead track means fall back to camera.
+        const screenTrack =
+          handed?.getVideoTracks().find((t) => t.readyState === 'live') ?? null;
+
+        let videoTrack: MediaStreamTrack | null = null;
+        let micTrack: MediaStreamTrack | null = null;
+        let systemAudio: MediaStreamTrack | null = null;
+
+        if (screenTrack) {
+          screenStreamRef.current = handed;
+          videoTrack = screenTrack;
+          tuneDisplayTrack(screenTrack);
+          // A shared game, screen or player tab needs the bitrate of a
+          // capture card, not the camera default, to stay smooth for viewers.
+          videoEncodingRef.current = encodingForTrack(screenTrack);
+          systemAudio = handed?.getAudioTracks()[0] ?? null;
+          const tabAudio = liveSharedTabAudio(handed);
+          if (tabAudio) setHearSharedTab(!isSharedTabAudioSuppressed(tabAudio));
+          // A denied mic must not sink a screen share — the tab's own audio is
+          // often the whole point. The camera path has no such fallback.
+          micTrack = await acquireMic();
+          if (cancelled) {
+            micTrack?.stop();
+            return;
+          }
+          setCaptureMode('screen');
+          setMirror(false);
+        } else if (captureCardRef.current) {
+          if (handed) handed.getTracks().forEach((t) => t.stop());
+          const card = await openCaptureCard();
+          if (cancelled) {
+            card.stream.getTracks().forEach((t) => t.stop());
+            return;
+          }
+          cardStreamRef.current = card.stream;
+          videoTrack = card.video;
+          // The card's sound rides where a screen share's tab audio does, so
+          // the mic (if one was picked) mixes over it the same way.
+          systemAudio = card.audio;
+          videoEncodingRef.current = encodingForTrack(card.video);
+          if (card.choice.micId) {
+            const mic = await navigator.mediaDevices
+              .getUserMedia({
+                audio: { ...AUDIO_CONSTRAINTS, deviceId: { exact: card.choice.micId } },
+              })
+              .catch((error) => {
+                logger.warn('Picked microphone unavailable; streaming the card alone', error);
+                return null;
+              });
+            micTrack = mic ? await acquireMic(mic) : null;
+          }
+          if (cancelled) {
+            card.stream.getTracks().forEach((t) => t.stop());
+            micTrack?.stop();
+            return;
+          }
+          logger.info('Capture card opened', {
+            label: card.video.label,
+            settings: card.video.getSettings?.(),
+            audio: card.audio?.label ?? null,
+            mic: Boolean(micTrack),
+          });
+          setCaptureMode('card');
+          setMirror(false);
+        } else {
+          if (handed) handed.getTracks().forEach((t) => t.stop());
+          const capture = await navigator.mediaDevices.getUserMedia({
+            video: { ...cameraConstraints(), facingMode },
+            audio: AUDIO_CONSTRAINTS,
+          });
+          if (cancelled) {
+            capture.getTracks().forEach((t) => t.stop());
+            return;
+          }
+          videoTrack = capture.getVideoTracks()[0] ?? null;
+          // One prompt covers both permissions, so the audio half is handed
+          // straight to the effect graph rather than captured a second time.
+          const rawAudio = capture.getAudioTracks()[0] ?? null;
+          micTrack = rawAudio ? await acquireMic(new MediaStream([rawAudio])) : null;
+          if (cancelled) {
+            capture.getTracks().forEach((t) => t.stop());
+            micTrack?.stop();
+            return;
+          }
+          setCaptureMode('camera');
+          setMirror(videoTrack?.getSettings?.().facingMode !== 'environment');
+          // Permission was just granted, so enumerateDevices now returns the
+          // real device list — re-probe for the flip button.
+          probeCameras();
+        }
+
+        micTrackRef.current = micTrack;
+        systemAudioRef.current = systemAudio;
+        setHasMic(!!micTrack);
+        setMicOn(!!micTrack);
+
+        // The desk owns the published sound from the first frame, so the
+        // creator's levels apply at once and a silent start can still gain
+        // sound later. Without Web Audio the old two-input mix carries on.
+        let builtDesk: AudioDesk | null = null;
+        try {
+          builtDesk = await createAudioDesk();
+        } catch (error) {
+          logger.warn('Audio desk unavailable; mixing the old way', error);
+        }
+        if (cancelled) {
+          builtDesk?.close();
+          return;
+        }
+        if (builtDesk) {
+          builtDesk.setInput('mic', micTrack);
+          builtDesk.setInput('game', systemAudio);
+          for (const c of DESK_CHANNELS) {
+            builtDesk.setVolume(c, deskStateRef.current.volume[c]);
+            builtDesk.setMuted(c, deskStateRef.current.muted[c]);
+          }
+          builtDesk.setGate(deskStateRef.current.gate);
+          deskRef.current = builtDesk;
+          setDesk(builtDesk);
+        }
+
+        const mix = !builtDesk && systemAudio && micTrack ? mixAudio([micTrack, systemAudio]) : null;
+        audioMixRef.current = mix;
+
+        const stream = new MediaStream();
+        if (videoTrack) stream.addTrack(videoTrack);
+        const audioTrack = builtDesk?.track ?? mix?.track ?? micTrack ?? systemAudio;
+        if (audioTrack) stream.addTrack(audioTrack);
+
+        streamRef.current = stream;
+        if (videoRef.current) videoRef.current.srcObject = stream;
+        if (screenTrack) watchForShareStop(screenTrack);
+        setPhase('connecting');
+
+        // Decide direct vs relayed at connect time, not mint time — the
+        // network the broadcast starts on is what matters, and a scheduled
+        // stream can start long after it was created. Reachable ingest means
+        // the probe answers in well under a second; only the blocked case
+        // pays the cap, and it was going nowhere without this anyway. When
+        // the ingest is unreachable AND a TURN relay is deployed, signaling
+        // rides the api.dehub.io edge and media rides the relay; with no
+        // relay the direct attempt proceeds and fails into the clear
+        // network-error copy rather than silently.
+        // Whether to relay is NOT gated on the probe. The probe false-passes
+        // on the exact DPI networks the relay exists for — a tiny GET to the
+        // ingest slips through intermittently while the WHIP POST never does
+        // (observed: three go-lives that all probed "reachable", zero of which
+        // ever reached nginx). So the relay is chosen on evidence that
+        // survives that: a fresh record of the direct path failing ON THIS
+        // DEVICE, or the probe actually admitting unreachability — and, either
+        // way, a direct attempt that dies network-shaped is retried over the
+        // relay before the creator sees an error.
+        // A route can also die AFTER the server accepts the publish, when the
+        // media leg never comes up — see MEDIA_FAILURE_WINDOW_MS. Both kinds of
+        // death mean the same thing to this device, so both leave the same
+        // marker and both get the same one retry over the other route.
+        const directBits = whipEndpointFor({ provider, playbackId, streamKey });
+        const relayBits = edgeWhipEndpointFor({ provider, playbackId, streamKey });
+        const turnServers = directBits.url ? await fetchTurnServers() : [];
+        if (cancelled) return;
+        const canRelay = Boolean(relayBits.url) && turnServers.length > 0;
+        const relayFirst =
+          canRelay && (hadRecentIngestFailure() || !(await probeIngestReachable()));
+        if (cancelled) return;
+        // warn, not info, so it ships to the error log: the field failure
+        // under investigation is a mediamtx stream publishing to the Livepeer
+        // default, with every static layer verified correct — this line says
+        // what the RUNTIME actually decided, and where provider stood.
+        logger.warn('connect route', {
+          provider: provider || '(empty)',
+          direct: directBits.url || '(none)',
+          relay: relayBits.url || '(none)',
+          turnCount: turnServers.length,
+          relayFirst,
+        });
+
+        // One media-leg recovery per broadcast. The two routes are the same
+        // two the signaling fallback uses, and a route whose media has
+        // already died is not worth a third attempt.
+        let mediaRecoveryUsed = false;
+
+        // The last way out for a self-hosted start: every route has failed
+        // before a byte of media, so the same stream moves to Livepeer and
+        // publishes there on the capture already running — once per broadcast.
+        // Resolves false when there is nothing to move or the move failed, and
+        // the caller shows its error as before.
+        let livepeerFallbackUsed = false;
+        const fallBackToLivepeer = async (dead: WhipSession | null): Promise<boolean> => {
+          const ask = onSelfHostedUnreachableRef.current;
+          if (livepeerFallbackUsed || !ask || !directBits.url) return false;
+          livepeerFallbackUsed = true;
+          setPhase('connecting');
+          await dead?.stop().catch(() => undefined);
+          if (program.unwrap(guestMixer.unwrap(sessionRef.current)) === dead) sessionRef.current = null;
+          if (cancelled) return true;
+          try {
+            const moved = await ask();
+            if (cancelled) return true;
+            if (!moved?.streamKey || moved.provider === 'mediamtx') return false;
+            logger.warn('self-hosted ingest unreachable; publishing on Livepeer');
+            const next = await publishToWhip({
+              streamKey: moved.streamKey,
+              stream,
+              videoEncoding: videoEncodingRef.current,
+              onHealth: (sample) => {
+                if (!cancelled) reportHealthRef.current(sample);
+              },
+              onStateChange: (state: WhipState, detail) => {
+                if (cancelled) return;
+                if (state === 'live') {
+                  setPhase('live');
+                  onLiveRef.current?.();
+                } else if (state === 'reconnecting') setPhase('reconnecting');
+                else if (state === 'failed') {
+                  setPhase('error');
+                  setErrorMessage(detail || t('goLive.connectionFailed'));
+                  void teardown();
+                }
+              },
+            });
+            if (cancelled) {
+              await next.stop();
+              return true;
+            }
+            sessionRef.current = guestMixer.wrap(program.wrap(next, stream), stream);
+            await acquireWakeLock();
+            return true;
+          } catch (error) {
+            logger.error('Livepeer fallback failed', {}, error);
+            return false;
+          }
+        };
+
+        const openSession = async (viaRelay: boolean): Promise<WhipSession> => {
+          const endpointBits = viaRelay ? relayBits : directBits;
+          const relayIce = viaRelay ? turnServers : undefined;
+          // Direct self-hosted signaling, no relay in front of it — the one
+          // path whose success or failure teaches this device something.
+          const directSelfHosted = Boolean(endpointBits.url) && !relayIce;
+          // Per attempt, because the failure handler below has to tell "media
+          // never started" from "media was flowing and stopped" for THIS
+          // connection, and a recovery opens a second one behind it.
+          let opened: WhipSession | null = null;
+          let acceptedAt = 0;
+          let sawLive = false;
+
+          const session = await publishToWhip({
+            streamKey,
+            stream,
+            videoEncoding: videoEncodingRef.current,
+            // Named explicitly, NEVER spread: endpointBits carries `url`, but
+            // publishToWhip's option is `endpoint` — `...endpointBits` passed
+            // a key the function ignores, `endpoint` stayed undefined, and
+            // EVERY self-hosted publish fell to the Livepeer default URL with
+            // a key Livepeer had never heard of (the catalyst's 403 "Request
+            // not allowed" seen on every failing device). A spread bypasses
+            // the excess-property check, which is why typecheck never said a
+            // word — the whole self-hosted browser publish path was dead from
+            // the day it shipped.
+            endpoint: endpointBits.url,
+            token: endpointBits.token,
+            iceServers: relayIce,
+            onHealth: (sample) => {
+              if (!cancelled) reportHealthRef.current(sample);
+            },
+            onStateChange: (state: WhipState, detail) => {
+              if (cancelled) return;
+              if (state === 'live') {
+                sawLive = true;
+                // A byte actually arrived: whatever this device remembered
+                // about the path it just used being dead is stale.
+                if (directSelfHosted) clearIngestUnreachable();
+                else if (viaRelay && endpointBits.url) clearRelayFailed();
+                setPhase('live');
+                onLiveRef.current?.();
+              } else if (state === 'reconnecting') setPhase('reconnecting');
+              else if (state === 'failed') {
+                // The server accepted the broadcast and the media never
+                // followed. That condemns the ROUTE exactly as a refused POST
+                // does, but the signaling side never sees it — which is how
+                // this used to dead-end on an error screen with no marker and
+                // no retry, leaving the creator to loop on the same dead path.
+                const mediaDied =
+                  !sawLive &&
+                  acceptedAt > 0 &&
+                  Date.now() - acceptedAt < MEDIA_FAILURE_WINDOW_MS;
+                const mediaNeverStarted = Boolean(endpointBits.url) && mediaDied;
+                if (mediaNeverStarted) {
+                  if (viaRelay) markRelayFailed();
+                  else markIngestUnreachable();
+                  const other = !viaRelay;
+                  const otherIsOpen = other ? canRelay : Boolean(directBits.url);
+                  if (!mediaRecoveryUsed && otherIsOpen) {
+                    mediaRecoveryUsed = true;
+                    void recoverMediaOver(opened, other);
+                    return;
+                  }
+                } else if (mediaDied) {
+                  // The LIVEPEER escape hatch died at its media leg. That is
+                  // evidence the refuge does not work from here — so forget
+                  // whatever this device remembered against the self-hosted
+                  // routes, or the unreachable marker locks it onto a Livepeer
+                  // that can never carry its video for the rest of the 24h
+                  // window (observed: a creator looping on dead Livepeer
+                  // mints while the ingest answered their probes fine).
+                  clearIngestUnreachable();
+                  clearRelayFailed();
+                }
+                const showFailure = () => {
+                  setPhase('error');
+                  setErrorMessage(
+                    mediaDied
+                      ? 'This network blocked the video from leaving your device. Tap Go Live again — the retry takes a different route.'
+                      : detail || 'The broadcast connection failed.'
+                  );
+                  // Nothing left to try, so holding the camera, mic and wake
+                  // lock on a dead error screen is pure leak (hardware light
+                  // on, phone kept awake). Stop the local capture; the End
+                  // button still runs the backend teardown.
+                  void teardown();
+                };
+                // Both self-hosted routes are spent and no media ever flowed:
+                // the stream itself moves to Livepeer before anything is shown.
+                if (mediaNeverStarted) {
+                  void fallBackToLivepeer(opened).then((moved) => {
+                    if (!moved && !cancelled) showFailure();
+                  });
+                  return;
+                }
+                showFailure();
+              }
+            },
+          });
+          acceptedAt = Date.now();
+          opened = session;
+          return session;
+        };
+
+        /**
+         * Move a dead media leg onto the other route.
+         *
+         * Only the WHIP session is retired — the camera, the microphone and the
+         * effect graph are left exactly as they are, so the creator sees
+         * "Connecting…" again rather than a restarted preview and a second
+         * permission prompt. openSession above reaches forward to this; the two
+         * are mutually recursive by one hop and the order cannot satisfy both.
+         */
+        const recoverMediaOver = async (
+          dead: WhipSession | null,
+          viaRelay: boolean
+        ): Promise<void> => {
+          setPhase('connecting');
+          await dead?.stop().catch(() => undefined);
+          if (program.unwrap(guestMixer.unwrap(sessionRef.current)) === dead) sessionRef.current = null;
+          if (cancelled) return;
+          try {
+            const next = await openSession(viaRelay);
+            if (cancelled) {
+              await next.stop();
+              return;
+            }
+            sessionRef.current = guestMixer.wrap(program.wrap(next, stream), stream);
+            await acquireWakeLock();
+          } catch (error) {
+            logger.error('Media fallback failed', { viaRelay }, error);
+            if (isPathDeadError(error)) {
+              if (viaRelay) markRelayFailed();
+              else markIngestUnreachable();
+            }
+            if (cancelled) return;
+            if (await fallBackToLivepeer(null)) return;
+            setPhase('error');
+            setErrorMessage(describeMediaError(error));
+            void teardown();
+          }
+        };
+
+        let session: WhipSession;
+        try {
+          try {
+            session = await openSession(relayFirst);
+          } catch (error) {
+            // Only a self-hosted attempt that died path-shaped teaches this
+            // device anything or has anywhere else to go; every other failure
+            // (bad key, camera, a Livepeer stream) just propagates.
+            if (!directBits.url || !isPathDeadError(error)) throw error;
+            if (relayFirst) {
+              // The relay died first. Remember it — the next mint must not let
+              // "a relay is deployed" outvote this device's own evidence again
+              // — then give the direct path one shot: the relay was chosen on
+              // a probe or an old marker, and both lie in both directions.
+              markRelayFailed();
+              if (cancelled) return;
+              try {
+                session = await openSession(false);
+              } catch (directError) {
+                if (isPathDeadError(directError)) markIngestUnreachable();
+                throw directError;
+              }
+            } else {
+              // The signaling POST died pointed straight at the ingest.
+              // Remember it — a stuck creator retries in a loop, and the next
+              // mint should know — then reach for the relay this device was
+              // too optimistic to use the first time.
+              markIngestUnreachable();
+              if (cancelled) return;
+              if (!canRelay) throw error;
+              try {
+                session = await openSession(true);
+              } catch (relayError) {
+                if (isPathDeadError(relayError)) markRelayFailed();
+                throw relayError;
+              }
+            }
+          }
+        } catch (error) {
+          // Every self-hosted route refused the publish. Before the creator
+          // sees anything, the same stream moves to Livepeer and goes out
+          // there; only if that fails too does the error below surface.
+          if (!cancelled && (await fallBackToLivepeer(null))) return;
+          throw error;
+        }
+
+        if (cancelled) {
+          await session.stop();
+          return;
+        }
+        sessionRef.current = guestMixer.wrap(program.wrap(session, stream), stream);
+
+        // Without this a phone screen-locks mid-stream and the broadcast dies.
+        await acquireWakeLock();
+      } catch (error) {
+        // A refused publish carries the responder's fingerprint — every field
+        // observed 403 arrived with zero packets at our servers or the edge,
+        // so the final URL, content type and body of whatever answered are
+        // the only evidence of what is actually intercepting these requests.
+        logger.error(
+          'Failed to start broadcast',
+          error instanceof WhipHttpError
+            ? {
+                streamKey: !!streamKey,
+                whipStatus: error.status,
+                whipRequestedUrl: error.requestedUrl,
+                whipFinalUrl: error.finalUrl,
+                whipContentType: error.contentType,
+                whipBody: error.bodySnippet,
+              }
+            : { streamKey: !!streamKey },
+          error,
+        );
+        if (cancelled) return;
+        setPhase('error');
+        setErrorMessage(describeMediaError(error));
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+      void teardown();
+    };
+    // facingMode deliberately excluded: switching cameras swaps the track in
+    // place (see flipCamera) rather than restarting the whole ingest session.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [streamKey, teardown, acquireWakeLock, acquireMic, probeCameras, watchForShareStop]);
+
+  // Re-acquire the wake lock when the tab comes back to the foreground; the
+  // browser drops it on visibility change and will not restore it itself.
+  // 'reconnecting' counts as live here: backgrounding often bumps the
+  // connection to 'disconnected', and no further visibilitychange fires once
+  // it recovers — gating on 'live' alone would never re-acquire.
+  useEffect(() => {
+    const onVisibility = () => {
+      if (document.visibilityState !== 'visible') return;
+      if (wakeLockRef.current || (phase !== 'live' && phase !== 'reconnecting')) return;
+      void acquireWakeLock();
+    };
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => document.removeEventListener('visibilitychange', onVisibility);
+  }, [phase, acquireWakeLock]);
+
+  // Closing the tab must end the stream, not strand it until Livepeer's
+  // ingest timeout. pagehide fires on iOS where beforeunload does not.
+  useEffect(() => {
+    const onPageHide = () => {
+      void sessionRef.current?.stop();
+      streamRef.current?.getTracks().forEach((t) => t.stop());
+      micTrackRef.current?.stop();
+      screenStreamRef.current?.getTracks().forEach((t) => t.stop());
+    };
+    window.addEventListener('pagehide', onPageHide);
+    return () => window.removeEventListener('pagehide', onPageHide);
+  }, []);
+
+  // Elapsed timer, started once media is actually flowing.
+  useEffect(() => {
+    if (phase !== 'live' && phase !== 'reconnecting') return;
+    const id = setInterval(() => setElapsed((s) => s + 1), 1000);
+    return () => clearInterval(id);
+  }, [phase]);
+
+  /**
+   * Poster frame.
+   *
+   * A stream with no cover renders as an empty grey box everywhere it is
+   * listed, and most streams have none — nothing in the go-live flow ever
+   * required a picture. So the broadcast supplies its own: a frame off the
+   * video actually being published, shortly after it connects and then every
+   * few minutes, which also keeps the listing honest when the scene changes.
+   *
+   * Taken from the preview element rather than the track, so it captures
+   * whatever the compositor is publishing (camera bubble over a screen share
+   * included) — exactly what a viewer sees. Best-effort throughout: a failure
+   * here is a stale poster, never a broken broadcast, so nothing is surfaced
+   * to the creator.
+   */
+  useEffect(() => {
+    if (phase !== 'live' || !streamId) return;
+    let cancelled = false;
+
+    const capture = async () => {
+      // The studio's output when it is drawing, else the plain preview.
+      const video = programPreviewRef.current?.videoWidth ? programPreviewRef.current : videoRef.current;
+      if (cancelled || !video || !video.videoWidth) return;
+      // A hidden tab stops feeding the element — the best a capture gets there
+      // is the last painted frame, and the worst is a blank one.
+      if (document.hidden) return;
+
+      const width = Math.min(POSTER_WIDTH, video.videoWidth);
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = Math.round((video.videoHeight / video.videoWidth) * width);
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      const blob = await new Promise<Blob | null>((resolve) =>
+        canvas.toBlob(resolve, 'image/jpeg', 0.7)
+      );
+      if (cancelled || !blob) return;
+
+      try {
+        await updateStreamThumbnail(streamId, blob);
+      } catch (error) {
+        logger.info('Poster frame upload failed', error);
+      }
+    };
+
+    const first = window.setTimeout(() => void capture(), POSTER_FIRST_DELAY_MS);
+    const repeat = window.setInterval(() => void capture(), POSTER_INTERVAL_MS);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(first);
+      window.clearInterval(repeat);
+    };
+  }, [phase, streamId]);
+
+  const toggleMic = () => {
+    // Muting happens at the RAW capture, upstream of the effect graph — never
+    // on the published track. The published track is the graph's output, which
+    // also carries soundboard clips and, when a screen is shared, the system
+    // audio; disabling it would take all of that off air with the voice.
+    if (!rawMicStreamRef.current) return;
+    const next = !micOn;
+    setRawMicEnabled(next);
+    setMicOn(next);
+  };
+
+  /**
+   * Voice effects rebuild the graph on a fresh AudioContext rather than
+   * re-patching the live one, because the pitch effects need the phase-vocoder
+   * worklet loaded at build time — switching in place silently drops to the
+   * warbly delay-line shifter. A rebuild yields a NEW output track, so the
+   * published audio has to be rebuilt around it too.
+   */
+  const changeEffect = async (id: VoiceEffectId) => {
+    if (switchingEffect || id === effect) return;
+    setSwitchingEffect(true);
+    const previous = effect;
+    setEffect(id);
+    try {
+      const track = await rebuildEffect(id);
+      if (!track) {
+        setEffect(previous);
+        return;
+      }
+      micTrackRef.current = track;
+      // The rebuild reuses the same raw capture, which keeps its enabled flag,
+      // so a muted host stays muted across a switch.
+      await applySystemAudio(systemAudioRef.current);
+    } catch (error) {
+      logger.warn('Voice effect switch failed', error);
+      setEffect(previous);
+    } finally {
+      setSwitchingEffect(false);
+    }
+  };
+
+  /**
+   * Soundboard clips ride the published track — see SoundboardPanel. Without a
+   * graph (mic denied, or the fallback to the bare capture) injectSound is a
+   * no-op, so this fails loudly instead of lighting a pad that plays nothing.
+   */
+  const playClip = useCallback(
+    async (blob: Blob) => {
+      if (!getProcessedStream()) throw new Error('No voice graph to mix into');
+      await injectSound(blob);
+    },
+    [injectSound, getProcessedStream]
+  );
+
+  const toggleVideo = () => {
+    const track = streamRef.current?.getVideoTracks()[0];
+    if (!track) return;
+    track.enabled = !track.enabled;
+    // With a look on, the published track is a canvas: disabling that alone
+    // would leave the camera capturing — and its indicator light on — behind a
+    // black frame. The source has to follow it down.
+    if (lookSourceRef.current) lookSourceRef.current.enabled = track.enabled;
+    sessionRef.current?.syncVideoEnabled();
+    setVideoOn(track.enabled);
+  };
+
+  const flipCamera = async () => {
+    // Only meaningful with a live capture and session. Without these guards a
+    // press during 'Starting camera…' — or racing End Stream while getUserMedia
+    // is still prompting — orphaned the freshly acquired track: attached to
+    // nothing, stopped by nothing, camera light on until full page unload.
+    if (videoSwapRef.current) return;
+    if (!streamRef.current || !sessionRef.current) return;
+    videoSwapRef.current = true;
+    const next = facingMode === 'user' ? 'environment' : 'user';
+    let newTrack: MediaStreamTrack | null = null;
+    try {
+      const replacement = await navigator.mediaDevices.getUserMedia({
+        video: { ...cameraConstraints(), facingMode: next },
+        audio: false,
+      });
+      newTrack = replacement.getVideoTracks()[0] ?? null;
+      if (!newTrack) return;
+      // Re-check: teardown may have run while getUserMedia was prompting.
+      if (!streamRef.current || !sessionRef.current) return;
+
+      if (!(await swapVideoTrack(newTrack))) return;
+      setMirror(newTrack.getSettings?.().facingMode !== 'environment');
+      setFacingMode(next);
+      newTrack = null; // adopted into the stream — must not be stopped below
+    } catch (error) {
+      logger.warn('Camera flip failed', error);
+    } finally {
+      // Any bail-out or throw after acquisition lands here with the track
+      // still set — stop it so the second camera doesn't stay captured.
+      newTrack?.stop();
+      videoSwapRef.current = false;
+    }
+  };
+
+  const handleEnd = async () => {
+    setConfirmEnd(false);
+    setIsEnding(true);
+    await teardown();
+    onEnd();
+  };
+
+  const isScreen = captureMode === 'screen';
+  const isCard = captureMode === 'card';
+  // Screen shares and capture cards are both a landscape picture of something
+  // other than the host: no mirroring, no looks, no flip, bubble allowed.
+  const isWide = isScreen || isCard;
+
+  const statusLabel =
+    phase === 'starting'
+      ? isScreen
+        ? 'Starting screen share…'
+        : isCard
+          ? 'Starting capture card…'
+          : 'Starting camera…'
+      : phase === 'connecting'
+        ? 'Connecting…'
+        : phase === 'reconnecting'
+          ? 'Reconnecting…'
+          : phase === 'live'
+            ? 'LIVE'
+            : 'Offline';
+
+  /*
+   * On a phone the broadcast IS the screen.
+   *
+   * The preview used to be a 16:9 card in a sheet with the controls stacked
+   * under it, which on a phone meant a wide letterboxed strip of the creator
+   * with two thirds of the display given over to chrome. Full-bleed instead:
+   * the camera fills the device, in the device's own shape, and the controls
+   * float over the picture. A screen share keeps `object-contain` even here —
+   * cropping a desktop to a phone's aspect would cut the sides off the thing
+   * being demonstrated.
+   *
+   * Desktop is untouched: there the card is the right answer, and a portrait
+   * video filling a monitor is not.
+   */
+  const fullBleed = useIsMobile();
+
+  const { walletAddress, user } = useAuth();
+  const onAir = phase === 'live' || phase === 'reconnecting';
+  const coStream = useCoStreamHost({
+    wallet: walletAddress,
+    username: user?.username,
+    streamId,
+    mixer: guestMixer,
+    live: onAir,
+  });
+  // The preview shows what viewers get: the composite, once anyone joins.
+  const mixing = onAir && coStream.onScreen.length > 0;
+  const mixPreviewRef = useRef<HTMLVideoElement | null>(null);
+  useEffect(() => {
+    const el = mixPreviewRef.current;
+    if (!el) return;
+    el.srcObject = mixing ? guestMixer.preview() : null;
+  }, [mixing, guestMixer, coStream.onScreen.length]);
+  const guestNudge = coStream.incoming.length + coStream.requests.length;
+  useBattleTally(walletAddress, coStream.state, coStream.role === 'host');
+
+  /* ───────────── Studio: mixer, scenes, sources, widgets ───────────── */
+
+  const updateDesk = (change: (s: DeskState) => DeskState) => {
+    setDeskState((prev) => {
+      const next = change(prev);
+      saveDeskState(next);
+      return next;
+    });
+  };
+  const setChannelVolume = (channel: DeskChannel, volume: number) => {
+    deskRef.current?.setVolume(channel, volume);
+    updateDesk((s) => ({ ...s, volume: { ...s.volume, [channel]: volume } }));
+  };
+  const setChannelMuted = (channel: DeskChannel, muted: boolean) => {
+    deskRef.current?.setMuted(channel, muted);
+    updateDesk((s) => ({ ...s, muted: { ...s.muted, [channel]: muted } }));
+  };
+  const setGate = (gate: GateStrength) => {
+    deskRef.current?.setGate(gate);
+    updateDesk((s) => ({ ...s, gate }));
+  };
+
+  const studioSources = useStudioSources(program, desk, onAir);
+
+  /** A scene that muted the mic gives it back when the creator moves on. */
+  const restoreSceneMic = () => {
+    if (!sceneMutedMicRef.current) return;
+    sceneMutedMicRef.current = false;
+    if (rawMicStreamRef.current) {
+      setRawMicEnabled(true);
+      setMicOn(true);
+    }
+  };
+
+  const sceneDefaults = (id: SceneId) => ({
+    title: t(`studioDeck.scenes.names.${id}`),
+    subtitle: SCENES[id].kind === 'card' ? t(`studioDeck.scenes.subtitles.${id}`) : undefined,
+  });
+
+  const sceneStartedAtRef = useRef(0);
+  const showCard = async (id: SceneId, customs: Partial<Record<SceneId, SceneCustom>>) => {
+    const custom = customs[id];
+    const image = custom?.image ? await loadImage(custom.image).catch(() => null) : null;
+    program.setCard(cardForScene(id, custom, sceneDefaults(id), image, sceneStartedAtRef.current));
+  };
+
+  const applyScene = async (id: SceneId) => {
+    if (sceneBusy) return;
+    const def = SCENES[id];
+    setSceneBusy(true);
+    try {
+      if (def.kind === 'card') {
+        sceneStartedAtRef.current = Date.now();
+        await showCard(id, sceneCustoms);
+        if (sceneMutesMic(id, sceneCustoms[id])) {
+          if (micOn && rawMicStreamRef.current) {
+            sceneMutedMicRef.current = true;
+            setRawMicEnabled(false);
+            setMicOn(false);
+          }
+        } else {
+          restoreSceneMic();
+        }
+      } else {
+        // Layout first, card off last: the card covers the switch, so viewers
+        // never see the picker or a frame of the old layout.
+        if (def.layout === 'camera') {
+          if (captureModeRef.current === 'screen') await stopScreenShare();
+          else if (captureModeRef.current === 'card' && bubbleRef.current) await toggleCameraBubble();
+        } else if (def.layout === 'screen-bubble') {
+          if (captureModeRef.current === 'camera') await startScreenShare();
+          if (captureModeRef.current !== 'camera' && !bubbleRef.current) await toggleCameraBubble();
+        }
+        program.setCard(null);
+        restoreSceneMic();
+      }
+      setActiveScene(id);
+    } finally {
+      setSceneBusy(false);
+    }
+  };
+
+  const customizeScene = (id: SceneId, change: SceneCustom) => {
+    const next = { ...sceneCustoms, [id]: { ...sceneCustoms[id], ...change } };
+    setSceneCustoms(next);
+    if (!saveSceneCustoms(next)) toast.error(t('studioDeck.imageTooLarge'));
+    // The card on air follows the edit.
+    if (activeScene === id && SCENES[id].kind === 'card') void showCard(id, next);
+  };
+
+  // Widgets burned into the video. "In my video" is the same switch OBS
+  // users flip: while it is on, Riftn viewers' apps stop drawing their own
+  // copy, so nobody sees an alert twice.
+  const { data: myOverlay, refetch: refetchMyOverlay } = useQuery({
+    queryKey: ['my-overlay'],
+    queryFn: getMyOverlay,
+    enabled: Boolean(streamId),
+    staleTime: 30_000,
+  });
+  const burnWidgets = myOverlay?.renderIn === 'video';
+  const setBurnWidgets = async (on: boolean) => {
+    if (!myOverlay) return;
+    try {
+      await saveMyOverlay({
+        renderIn: on ? 'video' : 'app',
+        widgets: myOverlay.widgets,
+        verticalCrop: myOverlay.verticalCrop ?? null,
+      });
+      await refetchMyOverlay();
+    } catch {
+      toast.error(t('studioDeck.widgets.failed'));
+    }
+  };
+  const painter = useOverlayPainter({
+    streamId: streamId ?? null,
+    tokenId: tokenId ?? null,
+    creator: walletAddress ?? null,
+    enabled: onAir && burnWidgets,
+  });
+  useEffect(() => {
+    program.setPainter(onAir && burnWidgets && painter ? painter.paint : null);
+  }, [program, painter, onAir, burnWidgets]);
+
+  useEffect(() => {
+    const el = programPreviewRef.current;
+    if (!el) return;
+    el.srcObject = programActive ? program.preview() : null;
+  }, [programActive, program]);
+
+  const baseSettings = program.base()?.getSettings?.();
+  const frameAspect =
+    baseSettings?.width && baseSettings?.height ? baseSettings.width / baseSettings.height : 16 / 9;
+
+  return (
+    <div className={cn(fullBleed ? 'absolute inset-0 bg-black' : 'space-y-4 pb-4')}>
+      <div className={cn(!fullBleed && 'flex items-start gap-4')}>
+      <div
+        className={cn(
+          'overflow-hidden bg-black',
+          fullBleed ? 'absolute inset-0' : 'relative aspect-video w-full min-w-0 flex-1 rounded-2xl'
+        )}
+      >
+        {/* muted + playsInline: iOS Safari refuses to autoplay otherwise, and
+            without playsInline it hijacks the video into fullscreen.
+            object-contain for a screen share — cover crops a 16:10 desktop's
+            edges off, which is where the taskbar and the chat window live. */}
+        <video
+          ref={videoRef}
+          autoPlay
+          muted
+          playsInline
+          className={cn(
+            'h-full w-full',
+            isWide ? 'object-contain' : 'object-cover',
+            mirror && 'scale-x-[-1]',
+            !videoOn && 'opacity-0'
+          )}
+        />
+
+        {mixing && (
+          <video
+            ref={mixPreviewRef}
+            autoPlay
+            muted
+            playsInline
+            className="absolute inset-0 h-full w-full bg-black object-contain"
+          />
+        )}
+
+        {/* The studio's output — scene card, sources and widgets over the
+            picture — is what viewers get, so it is what the creator sees. */}
+        {programActive && (
+          <video
+            ref={programPreviewRef}
+            autoPlay
+            muted
+            playsInline
+            className="absolute inset-0 h-full w-full bg-black object-contain"
+          />
+        )}
+
+        <LiveReactionFlow streamId={streamId} enabled={phase === 'live' || phase === 'reconnecting'} bottom={fullBleed ? 100 : 24} />
+
+        {onAir && (
+          <CoStreamBattleBar
+            state={coStream.state}
+            streamId={streamId}
+            className="absolute left-1/2 top-[calc(max(0.75rem,env(safe-area-inset-top))+5.5rem)] z-20 -translate-x-1/2"
+          />
+        )}
+
+        {!videoOn && phase !== 'error' && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-zinc-500">
+            <VideoOff className="h-8 w-8" />
+            <span className="text-xs">{isScreen ? _copy("copy.2d8c4ec9bd45", { defaultValue: "Screen paused" }) : isCard ? _copy("copy.fedc5cda305d", { defaultValue: "Capture paused" }) : _copy("copy.ce3ef7450f8e", { defaultValue: "Camera off" })}</span>
+          </div>
+        )}
+
+        {(phase === 'starting' || phase === 'connecting') && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-black/60">
+            <Loader2 className="h-7 w-7 animate-spin text-white" />
+            <span className="text-sm text-white">{statusLabel}</span>
+          </div>
+        )}
+
+        {phase === 'error' && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-black/80 px-6 text-center">
+            <AlertTriangle className="h-7 w-7 text-amber-400" />
+            <p className="text-sm text-white">{errorMessage}</p>
+          </div>
+        )}
+
+        {(phase === 'live' || phase === 'reconnecting') && (
+          /* One row, one baseline. This used to be three absolutely-positioned
+             clusters at top-3, top-12 and top-[4.75rem] with three different
+             heights, so nothing on the top edge lined up with anything else and
+             the right-hand control sat lower than the left. Everything that
+             belongs on that edge is now h-8 and shares TOP_CHROME_Y, which also
+             clears the notch — a phone's status bar was landing on the chip. */
+          <div className={cn('absolute left-3 z-20 flex h-9 items-center gap-2', TOP_CHROME_Y)}>
+            <span
+              data-keep-dark
+              className={cn(
+                'flex h-8 items-center gap-1.5 rounded-xl px-3 text-[11px] font-semibold tracking-wide',
+                phase === 'live' ? 'bg-black/80 text-white' : 'bg-amber-500/90 text-black',
+              )}
+            >
+              {phase === 'live' ? <LiveDot /> : <span aria-hidden="true" className="size-1.5 rounded-full bg-current" />}
+              {statusLabel}
+            </span>
+
+            {/* The audience rides beside the live chip rather than on its own
+                line below it — it is the number a host looks for first, and a
+                second row of floating text over a moving picture is noise. */}
+            {streamId && (
+              <button type="button" className={cn(GLASS_PILL, 'gap-1.5 text-[11px] text-white')}
+                aria-label={t('liveAudience.viewers', 'Viewers')} aria-haspopup="dialog" onClick={() => setViewersOpen(true)}>
+                <Eye className="h-3.5 w-3.5" />
+                {watching}
+              </button>
+            )}
+
+            <span className={cn(GLASS_PILL, 'font-mono text-[11px] text-white')}>
+              {formatElapsed(elapsed)}
+            </span>
+          </div>
+        )}
+
+        {isScreen && phase !== 'error' && (
+          <span className="absolute right-3 top-[calc(max(0.75rem,env(safe-area-inset-top))+3rem)] flex items-center gap-1.5 rounded-xl border border-white/20 bg-white/10 px-2.5 py-1 text-[11px] text-white backdrop-blur-xl">
+            <ScreenShare className="h-3 w-3" />{_copy("copy.8a1f9acdfd25", { defaultValue: "Sharing screen" })}</span>
+        )}
+
+        {isCard && phase !== 'error' && (
+          <span className="absolute right-3 top-[calc(max(0.75rem,env(safe-area-inset-top))+3rem)] flex items-center gap-1.5 rounded-xl border border-white/20 bg-white/10 px-2.5 py-1 text-[11px] text-white backdrop-blur-xl">
+            <Cable className="h-3 w-3" />{_copy("copy.4a1bd4a3aaf3", { defaultValue: "Capture card" })}</span>
+        )}
+      </div>
+        {/* On a computer the chat sits beside the picture. Under it, it
+            landed below the fold of the sheet and was clipped at 45vh, so a
+            host on a laptop could not read their own room. */}
+        {!fullBleed && openPanel === 'chat' && tokenId && (
+          <aside className="flex w-80 shrink-0 flex-col [&>div]:mt-0">
+            <Suspense
+              fallback={
+                <div className="flex items-center justify-center py-10">
+                  <Loader2 className="h-5 w-5 animate-spin text-white/60" />
+                </div>
+              }
+            >
+              <LivePostChat tokenId={tokenId} streamId={streamId ?? undefined} isHost menuInDrawer />
+            </Suspense>
+          </aside>
+        )}
+      </div>
+
+      <div
+        className={cn(
+          'flex items-center justify-center gap-3',
+          // Floating over the picture, nothing behind them. The row can outgrow
+          // a narrow phone once screen share, bubble and flip are all showing,
+          // so it scrolls sideways rather than wrapping into the video.
+          fullBleed &&
+            'absolute inset-x-0 bottom-0 z-10 overflow-x-auto px-4 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-10 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'
+        )}
+      >
+        <ControlButton
+          floating={fullBleed}
+          active={micOn}
+          onClick={toggleMic}
+          disabled={phase === 'error' || !hasMic}
+          label={
+            !hasMic
+              ? _copy("copy.87c132fee0b3", { defaultValue: "No microphone available" })
+              : micOn
+                ? _copy("copy.2d1be6900bbe", { defaultValue: "Mute microphone" })
+                : _copy("copy.a22cb32b0734", { defaultValue: "Unmute microphone" })
+          }
+        >
+          {micOn && hasMic ? <Mic className="h-5 w-5" /> : <MicOff className="h-5 w-5" />}
+        </ControlButton>
+
+        <ControlButton
+          floating={fullBleed}
+          active={videoOn}
+          onClick={toggleVideo}
+          disabled={phase === 'error'}
+          label={
+            videoOn
+              ? isScreen
+                ? _copy("copy.d49fd331d185", { defaultValue: "Pause the screen share" })
+                : isCard
+                  ? _copy("copy.c7ce89b32897", { defaultValue: "Pause the capture card" })
+                  : _copy("copy.2050f56db225", { defaultValue: "Turn camera off" })
+              : isScreen
+                ? _copy("copy.3dd6e75d3b63", { defaultValue: "Resume the screen share" })
+                : isCard
+                  ? _copy("copy.05d0e1b9a76e", { defaultValue: "Resume the capture card" })
+                  : _copy("copy.95e9fb569c93", { defaultValue: "Turn camera on" })
+          }
+        >
+          {videoOn ? <Video className="h-5 w-5" /> : <VideoOff className="h-5 w-5" />}
+        </ControlButton>
+
+        {canShareScreen && !isCard && (
+          <ControlButton
+            floating={fullBleed}
+            active={!isScreen}
+            onClick={isScreen ? stopScreenShare : startScreenShare}
+            disabled={phase === 'error'}
+            label={isScreen ? _copy("copy.1e8e2445dc09", { defaultValue: "Stop sharing and go back to camera" }) : _copy("copy.190735ff385e", { defaultValue: "Share your screen" })}
+          >
+            {isScreen ? (
+              <ScreenShareOff className="h-5 w-5" />
+            ) : (
+              <ScreenShare className="h-5 w-5" />
+            )}
+          </ControlButton>
+        )}
+
+        {isWide && (
+          <ControlButton
+            floating={fullBleed}
+            // Same convention as the share button: the tinted state is the
+            // one you click to switch off, not an error.
+            active={!bubbleOn}
+            onClick={toggleCameraBubble}
+            disabled={phase === 'error'}
+            label={bubbleOn ? _copy("copy.83736d7503b7", { defaultValue: "Hide your camera bubble" }) : _copy("copy.60f7f5222038", { defaultValue: "Show your camera in the corner" })}
+          >
+            <PictureInPicture2 className="h-5 w-5" />
+          </ControlButton>
+        )}
+
+        {isWide && bubbleOn && (
+          <ControlButton
+            floating={fullBleed}
+            active
+            onClick={cycleBubbleCorner}
+            disabled={phase === 'error'}
+            label={_copy("copy.4cd408ca6d21", { defaultValue: "Move the camera bubble to another corner" })}
+          >
+            <Move className="h-5 w-5" />
+          </ControlButton>
+        )}
+
+        {hasMultipleCameras && !isWide && (
+          <ControlButton
+            floating={fullBleed}
+            active
+            onClick={flipCamera}
+            disabled={phase === 'error' || !videoOn}
+            label={_copy("copy.43f019ea1334", { defaultValue: "Switch camera" })}
+          >
+            <SwitchCamera className="h-5 w-5" />
+          </ControlButton>
+        )}
+
+        {/* Looks treat the camera, so the button goes where the camera controls
+            are and leaves with them when a share takes the frame. */}
+        {!isWide && (
+          <ControlButton
+            floating={fullBleed}
+            active={openPanel !== 'looks'}
+            onClick={() => setOpenPanel((p) => (p === 'looks' ? 'none' : 'looks'))}
+            disabled={phase === 'error'}
+            label={t('videoLooks.button')}
+          >
+            <Palette className="h-5 w-5" />
+          </ControlButton>
+        )}
+
+        <ControlButton
+          floating={fullBleed}
+          active={openPanel !== 'voice'}
+          onClick={() => setOpenPanel((p) => (p === 'voice' ? 'none' : 'voice'))}
+          disabled={phase === 'error' || !hasMic}
+          label={hasMic ? _copy("copy.0aafad250841", { defaultValue: "Voice effects" }) : _copy("copy.b2accc174e44", { defaultValue: "Voice effects need a microphone" })}
+        >
+          <Wand2 className="h-5 w-5" />
+        </ControlButton>
+
+        <ControlButton
+          floating={fullBleed}
+          active={openPanel !== 'sounds'}
+          onClick={() => setOpenPanel((p) => (p === 'sounds' ? 'none' : 'sounds'))}
+          disabled={phase === 'error' || !hasMic}
+          label={hasMic ? _copy("copy.07ff885c843a", { defaultValue: "Soundboard" }) : _copy("copy.9cd12c3c2540", { defaultValue: "The soundboard needs a microphone" })}
+        >
+          <Music className="h-5 w-5" />
+        </ControlButton>
+
+        <ControlButton
+          floating={fullBleed}
+          active={openPanel !== 'scenes'}
+          onClick={() => setOpenPanel((p) => (p === 'scenes' ? 'none' : 'scenes'))}
+          disabled={phase === 'error' || !onAir}
+          label={t('studioDeck.scenes.title')}
+        >
+          <LayoutTemplate className="h-5 w-5" />
+        </ControlButton>
+
+        <ControlButton
+          floating={fullBleed}
+          active={openPanel !== 'sources'}
+          onClick={() => setOpenPanel((p) => (p === 'sources' ? 'none' : 'sources'))}
+          disabled={phase === 'error' || !onAir}
+          label={t('studioDeck.sources.title')}
+        >
+          <Layers className="h-5 w-5" />
+        </ControlButton>
+
+        <ControlButton
+          floating={fullBleed}
+          active={openPanel !== 'audio'}
+          onClick={() => setOpenPanel((p) => (p === 'audio' ? 'none' : 'audio'))}
+          disabled={phase === 'error'}
+          label={t('studioDeck.audio.title')}
+        >
+          <SlidersHorizontal className="h-5 w-5" />
+        </ControlButton>
+
+        {streamId && (
+          <ControlButton
+            floating={fullBleed}
+            active={openPanel !== 'chat'}
+            onClick={() => setOpenPanel((p) => (p === 'chat' ? 'none' : 'chat'))}
+            disabled={phase === 'error'}
+            label={_copy("copy.1c7cc7287ca8", { defaultValue: "Live chat" })}
+          >
+            <MessageSquare className="h-5 w-5" />
+          </ControlButton>
+        )}
+
+        {streamId && (
+          <span className="relative inline-flex shrink-0">
+            <ControlButton
+              floating={fullBleed}
+              active={openPanel !== 'guests'}
+              onClick={() => setOpenPanel((p) => (p === 'guests' ? 'none' : 'guests'))}
+              disabled={phase === 'error'}
+              label={t('costream.title', { defaultValue: 'Guests' })}
+            >
+              <UserPlus className="h-5 w-5" />
+            </ControlButton>
+            {guestNudge > 0 && (
+              <span className="pointer-events-none absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-white px-1 text-[10px] font-semibold text-black">
+                {guestNudge}
+              </span>
+            )}
+          </span>
+        )}
+
+        {/* A new tab: leaving this page would end the broadcast. */}
+        <ControlButton
+          floating={fullBleed}
+          active
+          onClick={() => window.open('/live-studio', '_blank', 'noopener')}
+          label={t('liveStudio.open')}
+        >
+          <StudioIcon className="h-5 w-5" />
+        </ControlButton>
+      </div>
+
+      {/* The room, at a glance. Only once media is flowing — before that every
+          number is zero and reads as a failure rather than a fresh start.
+          Full-bleed drops `watching` from this row: it has moved up beside the
+          live chip, where a host looks first, and printing it twice on one
+          screen is how the two numbers came to disagree in the first place. */}
+      {streamId && (phase === 'live' || phase === 'reconnecting') && (
+        <div
+          className={cn(
+            'flex items-center justify-center gap-4 text-[11px] text-zinc-400',
+            // A second line under the top row, on the same left margin and the
+            // same 8px rhythm, so the corner reads as one stack rather than
+            // three things that happen to be near each other.
+            fullBleed &&
+              'absolute left-3 top-[calc(max(0.75rem,env(safe-area-inset-top))+3rem)] z-20 justify-start text-white/80 [filter:drop-shadow(0_1px_3px_rgb(0_0_0/0.9))]'
+          )}
+        >
+          {!fullBleed && (
+            <button type="button" className="flex items-center gap-1.5" disabled={!streamId}
+              aria-label={t('liveAudience.viewers', 'Viewers')} aria-haspopup="dialog" onClick={() => setViewersOpen(true)}>
+              <Users className="h-3.5 w-3.5" />
+              {watching}{_copy("copy.dcb8e1a4fcaa", { defaultValue: " watching" })}
+            </button>
+          )}
+          <span className="flex items-center gap-1.5 leading-none">
+            <Heart className="h-3.5 w-3.5 shrink-0" />
+            <span className="tabular-nums">{formatCount(postLikes ?? room?.likes ?? 0)}</span>
+          </span>
+          {/* No gift icon: the DHB coin already says what this number is, and
+              two glyphs around one figure read as two separate stats. */}
+          <DhbAmount
+            amount={<span className="tabular-nums">{room?.totalTips ?? 0}</span>}
+            iconClassName="h-3.5 w-3.5"
+            className="gap-1.5 leading-none"
+          />
+        </div>
+      )}
+
+      {/* What viewers are getting, when it stops being what the preview shows.
+          Sits in the same place on both layouts, under the room numbers, so a
+          host glancing at the corner sees it without hunting. */}
+      {starved && (phase === 'live' || phase === 'reconnecting') && (
+        <div
+          className={cn(
+            'flex items-start gap-2 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-[11px] text-amber-200',
+            fullBleed &&
+              'absolute left-3 right-3 top-[calc(max(0.75rem,env(safe-area-inset-top))+5.5rem)] z-20'
+          )}
+        >
+          <SignalLow className="mt-px h-3.5 w-3.5 shrink-0" />
+          <span>
+            {health?.limitation === 'cpu'
+              ? _copy("copy.4315d2b20d81", { defaultValue: "This device cannot encode the video fast enough — viewers are seeing a frozen picture. Closing other apps will help." })
+              : _copy("copy.e39f372d587a", { defaultValue: "Your upload has dropped — viewers are seeing a frozen picture even though your preview looks fine. Moving closer to the router or switching networks will help." })}
+            {health ? ` (${health.fps} fps · ${health.videoKbps} kbps)` : ''}
+          </span>
+        </div>
+      )}
+
+      {/* A shade, not a slab. The chat used to open as a blurred black card
+          sitting on top of the broadcast; on a phone that is a third of the
+          picture gone. Instead the foot of the frame darkens into a gradient
+          and the messages read straight off it. Pointer-transparent, so the
+          control row underneath still takes taps. */}
+      {openPanel === 'chat' && tokenId && fullBleed && (
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-3/5 bg-gradient-to-t from-black/85 via-black/45 to-transparent"
+        />
+      )}
+
+      {openPanel === 'chat' && tokenId && fullBleed && (
+        <div
+          // Above the floating controls, not below the video — there is no
+          // "below the video" once the video is the whole screen. Bottom-
+          // aligned so a quiet room keeps the composer where a busy one has
+          // it, rather than floating the pair up the frame. A computer shows
+          // the chat beside the picture instead (above).
+          className="absolute inset-x-3 bottom-24 z-20 flex max-h-[55vh] flex-col justify-end"
+        >
+          <Suspense
+            fallback={
+              <div className="flex items-center justify-center py-10">
+                <Loader2 className="h-5 w-5 animate-spin text-white/60" />
+              </div>
+            }
+          >
+            {/* isHost: the same panel viewers see on the post page, plus the
+                host's pin control. Keyed on the POST's tokenId, which is what
+                the post page uses — this panel used to pass the stream's Mongo
+                ObjectId, so host and audience named different rooms and only
+                shared a conversation because the backend ignored the room and
+                put everyone in the platform chat. */}
+            <LivePostChat tokenId={tokenId} streamId={streamId ?? undefined} isHost overlay />
+          </Suspense>
+        </div>
+      )}
+
+      {openPanel === 'voice' && (
+        <div
+          className={cn(
+            'rounded-xl border border-white/10 bg-white/5 p-3',
+            fullBleed && 'absolute inset-x-3 bottom-24 z-20 bg-black/80 backdrop-blur-xl',
+            switchingEffect && 'pointer-events-none opacity-60'
+          )}
+        >
+          <VoiceEffectSelector activeEffect={effect} onSelect={(id) => void changeEffect(id)} />
+          <p className="mt-2 text-[11px] text-zinc-500">{_copy("copy.73d1216aba0a", { defaultValue: "Viewers hear the effect; your own captions and transcripts still read the unprocessed microphone." })}</p>
+        </div>
+      )}
+
+      {openPanel === 'looks' && (
+        <div
+          className={cn(
+            'rounded-xl border border-white/10 bg-white/5 p-3',
+            fullBleed && 'absolute inset-x-3 bottom-24 z-20 bg-black/80 backdrop-blur-xl',
+            switchingLook && 'pointer-events-none opacity-60'
+          )}
+        >
+          <VideoEffectSelector
+            activeEffect={videoLook}
+            onSelect={(id) => void applyLook(id)}
+            backgroundBlur={backgroundBlur}
+            onToggleBackgroundBlur={() => void toggleBackgroundBlur()}
+          />
+          <p className="mt-2 text-[11px] text-zinc-500">{t('videoLooks.hint')}</p>
+          {backgroundRemovalSupported() && (
+            <BackgroundPicker
+              mode={bgMode}
+              color={bgOptionsRef.current.color ?? '#00b140'}
+              onChange={(mode, opts) => void applyBackground(mode, opts)}
+            />
+          )}
+        </div>
+      )}
+
+      {openPanel === 'scenes' && (
+        <div
+          className={cn(
+            'rounded-xl border border-white/10 bg-white/5 p-3',
+            fullBleed && 'absolute inset-x-3 bottom-24 z-20 max-h-[60vh] overflow-y-auto bg-black/80 backdrop-blur-xl'
+          )}
+        >
+          <ScenesPanel
+            active={activeScene}
+            customs={sceneCustoms}
+            busy={sceneBusy}
+            canShareScreen={canShareScreen || isCard}
+            burnWidgets={burnWidgets}
+            onBurnWidgets={(on) => void setBurnWidgets(on)}
+            onSelect={(id) => void applyScene(id)}
+            onCustomize={customizeScene}
+          />
+        </div>
+      )}
+
+      {openPanel === 'sources' && (
+        <div
+          className={cn(
+            'rounded-xl border border-white/10 bg-white/5 p-3',
+            fullBleed && 'absolute inset-x-3 bottom-24 z-20 max-h-[60vh] overflow-y-auto bg-black/80 backdrop-blur-xl'
+          )}
+        >
+          <SourcesPanel sources={studioSources} frameAspect={frameAspect} streamTokenId={tokenId} />
+        </div>
+      )}
+
+      {openPanel === 'audio' && (
+        <div
+          className={cn(
+            'rounded-xl border border-white/10 bg-white/5 p-3',
+            fullBleed && 'absolute inset-x-3 bottom-24 z-20 max-h-[60vh] overflow-y-auto bg-black/80 backdrop-blur-xl'
+          )}
+        >
+          <AudioPanel
+            desk={desk}
+            state={deskState}
+            onVolume={setChannelVolume}
+            onMute={setChannelMuted}
+            onGate={setGate}
+            hearSharedTab={hearSharedTab}
+            changingSharedTabMonitor={changingSharedTabMonitor}
+            onHearSharedTab={changeSharedTabMonitor}
+          />
+        </div>
+      )}
+
+      {openPanel === 'guests' && (
+        <div
+          className={cn(
+            'rounded-xl border border-white/10 bg-white/5 p-3',
+            fullBleed && 'absolute inset-x-3 bottom-24 z-20 max-h-[60vh] overflow-y-auto bg-black/80 backdrop-blur-xl'
+          )}
+        >
+          <CoStreamHostPanel co={coStream} />
+        </div>
+      )}
+
+      {/* Kept mounted while hidden so the custom-sound list and the volume the
+          host set survive closing the board mid-broadcast. */}
+      <SoundboardPanel
+        isVisible={openPanel === 'sounds'}
+        onClose={() => setOpenPanel('none')}
+        playClip={playClip}
+        stopClip={stopInjectedSound}
+        errorMessage="Could not play that — your microphone feed is not running"
+      />
+
+      {/* Leaving the broadcast, top-right, on the same baseline as the live
+          chip opposite it.
+          This was a red "End" pill, which broke the design system twice over:
+          coloured button fills are not used anywhere on Riftn, and it made the
+          most destructive control on the screen the brightest thing on it. It
+          is a glass circle now, the same glass as every other floating control,
+          and the confirmation dialog is what stops an accidental end — not a
+          loud colour. Square h-9/w-9 so it is a real 36px tap target and
+          matches the h-8 pills' optical weight rather than sitting lower than
+          them. */}
+      <button
+        onClick={() => setConfirmEnd(true)}
+        disabled={isEnding}
+        aria-label={_copy("copy.08c35c8d1c2c", { defaultValue: "End the broadcast" })}
+        className={cn(
+          'flex items-center justify-center gap-2 font-medium transition-colors disabled:opacity-60',
+          fullBleed
+            ? cn(
+                'absolute right-3 z-20 h-9 w-9 rounded-xl border border-white/20 bg-white/10 text-white backdrop-blur-xl active:bg-white/20',
+                TOP_CHROME_Y
+              )
+            : 'h-14 w-full gap-2 rounded-xl border border-red-500/30 bg-red-500/10 text-sm text-red-300 hover:bg-red-500/20'
+        )}
+      >
+        {isEnding ? (
+          <Loader2 className="h-4 w-4 animate-spin" />
+        ) : fullBleed ? (
+          <X className="h-[18px] w-[18px]" />
+        ) : (
+          <Radio className="h-4 w-4" />
+        )}
+        {fullBleed ? null : isEnding ? _copy("copy.3677a36e467e", { defaultValue: "Ending…" }) : _copy("copy.ee288ef2bd85", { defaultValue: "End Stream" })}
+      </button>
+
+      {streamId && <BroadcasterViewersSheet streamId={streamId} open={viewersOpen} onOpenChange={setViewersOpen} live />}
+      <EndStreamConfirmDialog
+        open={confirmEnd}
+        onOpenChange={setConfirmEnd}
+        onConfirm={() => void handleEnd()}
+      />
+    </div>
+  );
+}
+
+function ControlButton({
+  active,
+  onClick,
+  disabled,
+  label,
+  floating,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  disabled?: boolean;
+  label: string;
+  /**
+   * Sitting on top of the video rather than under it. The pill and its border
+   * are dropped — over a moving picture they read as clutter — and the icon
+   * carries a shadow instead, which is what keeps it legible against a bright
+   * frame now that nothing is behind it.
+   */
+  floating?: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      aria-label={label}
+      title={label}
+      className={cn(
+        'flex shrink-0 items-center justify-center rounded-xl transition-colors disabled:opacity-40',
+        floating
+          ? cn(
+              'h-12 w-12 [filter:drop-shadow(0_1px_3px_rgb(0_0_0/0.9))]',
+              active ? 'text-white active:text-white/70' : 'text-red-400 active:text-red-300'
+            )
+          : cn(
+              'h-12 w-12 border',
+              active
+                ? 'border-white/20 bg-white/10 text-white hover:bg-white/20'
+                : 'border-red-500/40 bg-red-500/20 text-red-300 hover:bg-red-500/30'
+            )
+      )}
+    >
+      {children}
+    </button>
+  );
+}

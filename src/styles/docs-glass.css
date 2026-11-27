@@ -1,0 +1,151 @@
+/* ============================================================================
+   DOCS GLASS — appearance themes with a live animated canvas
+   (cosmic / hazy / swarms / lavalamp / winter / war / osaka / jungle / island /
+   hacker / horror — the same list as DOCS_CANVAS_THEMES in lib/docs-theme.ts,
+   which src/test/docs-theme-lists.test.ts keeps in step).
+
+   On these themes the docs surface goes transparent so the app's shader canvas
+   shows through, and the docs chrome + content sit on it as liquid-glass bentos
+   (reusing the app's own --glass-* tokens from index.css:852). Text is light.
+
+   Docs is pinned to `.dark` under canvas themes (see lib/docs-theme.ts), so the
+   docs-dark.css `!important` override wall is active — these rules include the
+   pinned `.dark` in the selector to reach (0,4,1) specificity and win where they
+   must. Imported AFTER docs-dark.css.
+
+   Perf: an animated canvas re-samples every backdrop-filter layer each frame, so
+   we keep the number of glass (blurred) layers per viewport small — a handful of
+   card bentos + one blog reading panel + header + sidebar. Dense inner surfaces
+   (code panels, tables) render as flat translucent tint with NO blur.
+   ============================================================================ */
+
+/* The canvas-theme scope, repeated per rule for specificity control. */
+
+/* 1. Reveal the canvas: the opaque paper/black root goes transparent. */
+html:is([data-theme="glass"], [data-theme="cosmic"], [data-theme="hazy"], [data-theme="swarms"], [data-theme="lavalamp"], [data-theme="winter"], [data-theme="war"], [data-theme="osaka"], [data-theme="jungle"], [data-theme="island"], [data-theme="hacker"], [data-theme="horror"]) .docs-root {
+  background: transparent !important;
+  background-image: none !important;
+}
+
+/* 2. Light copy tuned for legibility over a busy background. The docs-dark
+   blanket already forces most text white; we brighten secondary/muted text so
+   it survives over the animated canvas showing through the glass. */
+html:is([data-theme="glass"], [data-theme="cosmic"], [data-theme="hazy"], [data-theme="swarms"], [data-theme="lavalamp"], [data-theme="winter"], [data-theme="war"], [data-theme="osaka"], [data-theme="jungle"], [data-theme="island"], [data-theme="hacker"], [data-theme="horror"]).dark .docs-root {
+  --foreground: 0 0% 97%;
+  --muted-foreground: 0 0% 80%;
+  --card-foreground: 0 0% 97%;
+  --popover-foreground: 0 0% 97%;
+  --secondary-foreground: 0 0% 97%;
+  --accent-foreground: 0 0% 97%;
+  --sidebar-foreground: 0 0% 97%;
+}
+html:is([data-theme="glass"], [data-theme="cosmic"], [data-theme="hazy"], [data-theme="swarms"], [data-theme="lavalamp"], [data-theme="winter"], [data-theme="war"], [data-theme="osaka"], [data-theme="jungle"], [data-theme="island"], [data-theme="hacker"], [data-theme="horror"]).dark .docs-root .text-muted-foreground {
+  color: hsl(0 0% 80%) !important;
+}
+/* A soft ink halo keeps copy legible everywhere — including raw prose that sits
+   directly on the canvas (pages without a card wrapper) where a bright patch of
+   nebula would otherwise wash out white text. Cheap (no compositing layer). */
+html:is([data-theme="glass"], [data-theme="cosmic"], [data-theme="hazy"], [data-theme="swarms"], [data-theme="lavalamp"], [data-theme="winter"], [data-theme="war"], [data-theme="osaka"], [data-theme="jungle"], [data-theme="island"], [data-theme="hacker"], [data-theme="horror"]).dark .docs-root
+  :is(h1, h2, h3, h4, h5, h6, p, li, a, span, strong, em, blockquote, td, th, label):not(.text-transparent) {
+  text-shadow: 0 1px 2px rgb(0 0 0 / 0.55);
+}
+
+/* 3. Liquid-glass surfaces — the propagating core. Every existing card / muted
+   panel / shadcn <Card> plus the tagged header, sidebar and blog reading panel
+   become one frosted-glass bento. Guarded so nothing nested inside the reading
+   panel (or opted out via data-docs-solid) gets a second stacked blur. Panels
+   nested inside another glass card are flattened by the rule after this. */
+html:is([data-theme="glass"], [data-theme="cosmic"], [data-theme="hazy"], [data-theme="swarms"], [data-theme="lavalamp"], [data-theme="winter"], [data-theme="war"], [data-theme="osaka"], [data-theme="jungle"], [data-theme="island"], [data-theme="hacker"], [data-theme="horror"]).dark .docs-root
+  :is(.bg-card, .bg-muted, .bg-secondary, .docs-glass, [class*="Card"], [data-docs-header], [data-docs-sidebar], [data-docs-reading-panel]):not([data-docs-reading-panel] *):not([data-docs-solid]):not([data-docs-header] *):not([data-docs-sidebar] *) {
+  background: var(--glass-highlight), rgb(var(--glass-tint) / var(--glass-regular)) !important;
+  backdrop-filter: var(--glass-blur) !important;
+  border-color: transparent !important;
+  box-shadow: var(--glass-edge) !important;
+}
+
+/* A panel nested inside a glass card (a stat tile in a Card, a docs-glass row
+   inside a docs-glass section) is a flat tint riding on its parent's glass, not
+   a second backdrop-filter layer. /docs/dapps alone nests dozens of these, and
+   every stacked blur re-samples the animated canvas each frame.
+
+   It restates the surface rule's guards plus one more compound, so it outranks
+   that rule on nested panels. War is left out: war-theme.css paints its own
+   olive plates on every docs panel, nested or not, and those must keep
+   winning. */
+html:is([data-theme="glass"], [data-theme="cosmic"], [data-theme="hazy"], [data-theme="swarms"], [data-theme="lavalamp"], [data-theme="winter"], [data-theme="war"], [data-theme="osaka"], [data-theme="jungle"], [data-theme="island"], [data-theme="hacker"], [data-theme="horror"]):not([data-theme="war"]).dark .docs-root
+  :is(.bg-card, .docs-glass, [class*="Card"]) :is(.bg-card, .bg-muted, .bg-secondary, .docs-glass, [class*="Card"]):not([data-docs-reading-panel] *):not([data-docs-solid]):not([data-docs-header] *):not([data-docs-sidebar] *) {
+  background: rgb(var(--glass-tint) / 0.28) !important;
+  backdrop-filter: none !important;
+  border-color: rgb(255 255 255 / 0.08) !important;
+  box-shadow: none !important;
+}
+
+/* Keep the fixed controls readable while an article or mobile drawer scrolls. */
+.docs-root [data-docs-header]:not(#_) {
+  background: hsl(var(--background) / 0.96) !important;
+  isolation: isolate;
+}
+
+/* Header + sidebar are thinner glass so page content reads as the primary
+   surface; they also drop their `backdrop-blur-sm` default (replaced above). */
+html:is([data-theme="glass"], [data-theme="cosmic"], [data-theme="hazy"], [data-theme="swarms"], [data-theme="lavalamp"], [data-theme="winter"], [data-theme="war"], [data-theme="osaka"], [data-theme="jungle"], [data-theme="island"], [data-theme="hacker"], [data-theme="horror"]).dark .docs-root [data-docs-header],
+html:is([data-theme="glass"], [data-theme="cosmic"], [data-theme="hazy"], [data-theme="swarms"], [data-theme="lavalamp"], [data-theme="winter"], [data-theme="war"], [data-theme="osaka"], [data-theme="jungle"], [data-theme="island"], [data-theme="hacker"], [data-theme="horror"]).dark .docs-root [data-docs-sidebar],
+html:is([data-theme="glass"], [data-theme="cosmic"], [data-theme="hazy"], [data-theme="swarms"], [data-theme="lavalamp"], [data-theme="winter"], [data-theme="war"], [data-theme="osaka"], [data-theme="jungle"], [data-theme="island"], [data-theme="hacker"], [data-theme="horror"]).dark .docs-root [data-docs-subnav] {
+  background: var(--glass-highlight), rgb(var(--glass-tint) / 0.55) !important;
+}
+
+/* The on-this-page sub-nav stacks directly under the header, so it takes the
+   same thin glass above and only a hairline to separate the two. */
+html:is([data-theme="glass"], [data-theme="cosmic"], [data-theme="hazy"], [data-theme="swarms"], [data-theme="lavalamp"], [data-theme="winter"], [data-theme="war"], [data-theme="osaka"], [data-theme="jungle"], [data-theme="island"], [data-theme="hacker"], [data-theme="horror"]).dark .docs-root [data-docs-subnav] {
+  backdrop-filter: var(--glass-blur);
+  border-bottom-color: rgb(255 255 255 / 0.12) !important;
+}
+
+/* Phones and touch devices: --glass-blur is none there (index.css touch
+   block), so the thin header/sidebar glass rises to the regular panel smoke. */
+@media (max-width: 767px), (pointer: coarse) {
+  html:is([data-theme="glass"], [data-theme="cosmic"], [data-theme="hazy"], [data-theme="swarms"], [data-theme="lavalamp"], [data-theme="winter"], [data-theme="war"], [data-theme="osaka"], [data-theme="jungle"], [data-theme="island"], [data-theme="hacker"], [data-theme="horror"]).dark .docs-root :is([data-docs-header], [data-docs-sidebar], [data-docs-subnav]) {
+    background: var(--glass-highlight), rgb(var(--glass-tint) / var(--glass-regular)) !important;
+  }
+}
+
+/* 4. The blog reading panel — one big glass sheet for the raw-prose article
+   body (which has no card wrapper), so the article is always legible over the
+   canvas. `padding`/`radius` make it read as a page bento. */
+html:is([data-theme="glass"], [data-theme="cosmic"], [data-theme="hazy"], [data-theme="swarms"], [data-theme="lavalamp"], [data-theme="winter"], [data-theme="war"], [data-theme="osaka"], [data-theme="jungle"], [data-theme="island"], [data-theme="hacker"], [data-theme="horror"]).dark .docs-root [data-docs-reading-panel] {
+  border-radius: 1.25rem;
+  padding: clamp(1.25rem, 3.5vw, 2.5rem);
+  margin-top: 1rem;
+}
+
+/* 5. Dense inner surfaces render flat (no extra blur): code/pre panels and
+   tables get a translucent dark tint for contrast, riding on the glass behind
+   them. This is what keeps card-dense pages (e.g. Dapp) from stacking dozens of
+   simultaneous backdrop-filters. */
+html:is([data-theme="glass"], [data-theme="cosmic"], [data-theme="hazy"], [data-theme="swarms"], [data-theme="lavalamp"], [data-theme="winter"], [data-theme="war"], [data-theme="osaka"], [data-theme="jungle"], [data-theme="island"], [data-theme="hacker"], [data-theme="horror"]).dark .docs-root :is(pre, code) {
+  background: rgb(0 0 0 / 0.34) !important;
+  backdrop-filter: none !important;
+  border: 1px solid rgb(255 255 255 / 0.08) !important;
+  color: hsl(0 0% 90%) !important;
+}
+html:is([data-theme="glass"], [data-theme="cosmic"], [data-theme="hazy"], [data-theme="swarms"], [data-theme="lavalamp"], [data-theme="winter"], [data-theme="war"], [data-theme="osaka"], [data-theme="jungle"], [data-theme="island"], [data-theme="hacker"], [data-theme="horror"]).dark .docs-root code {
+  border-width: 0 !important;
+}
+html:is([data-theme="glass"], [data-theme="cosmic"], [data-theme="hazy"], [data-theme="swarms"], [data-theme="lavalamp"], [data-theme="winter"], [data-theme="war"], [data-theme="osaka"], [data-theme="jungle"], [data-theme="island"], [data-theme="hacker"], [data-theme="horror"]).dark .docs-root :is(table, thead, tbody, tr, th, td) {
+  background-color: rgb(0 0 0 / 0.22) !important;
+  border-color: rgb(255 255 255 / 0.10) !important;
+}
+html:is([data-theme="glass"], [data-theme="cosmic"], [data-theme="hazy"], [data-theme="swarms"], [data-theme="lavalamp"], [data-theme="winter"], [data-theme="war"], [data-theme="osaka"], [data-theme="jungle"], [data-theme="island"], [data-theme="hacker"], [data-theme="horror"]).dark .docs-root :is(thead tr, th) {
+  background-color: rgb(0 0 0 / 0.34) !important;
+}
+
+/* Inputs / search on glass — translucent, not the opaque zinc slab. */
+html:is([data-theme="glass"], [data-theme="cosmic"], [data-theme="hazy"], [data-theme="swarms"], [data-theme="lavalamp"], [data-theme="winter"], [data-theme="war"], [data-theme="osaka"], [data-theme="jungle"], [data-theme="island"], [data-theme="hacker"], [data-theme="horror"]).dark .docs-root :is(input, textarea, select) {
+  background-color: rgb(0 0 0 / 0.28) !important;
+  border-color: rgb(255 255 255 / 0.14) !important;
+}
+
+/* Faint light hairlines instead of the dark-theme gray dividers. */
+html:is([data-theme="glass"], [data-theme="cosmic"], [data-theme="hazy"], [data-theme="swarms"], [data-theme="lavalamp"], [data-theme="winter"], [data-theme="war"], [data-theme="osaka"], [data-theme="jungle"], [data-theme="island"], [data-theme="hacker"], [data-theme="horror"]).dark .docs-root :is([class*="border-t"], [class*="border-b"], [class*="border-border"], hr) {
+  border-color: rgb(255 255 255 / 0.12) !important;
+}

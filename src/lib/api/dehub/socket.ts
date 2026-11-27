@@ -1,0 +1,451 @@
+/**
+ * Riftn LiveChat Socket.IO client
+ *
+ * Connects to the `/livechat` namespace with polling transport, upgrading to
+ * websocket. Uses non-prefixed event names (sendMessage, joinRoom, …) with
+ * redundant payload fields for API compatibility.
+ *
+ * ── One connection per room, and why ──────────────────────────────────────
+ * The gateway keeps a SINGLE room per socket: `joinRoom` leaves whatever the
+ * connection was in before, and `sendMessage` posts to `socket.data.roomId`,
+ * ignoring any room named in the payload (deliberately — otherwise a client
+ * could post into a stream it is not watching).
+ *
+ * So a tab cannot be in two rooms on one connection. It has to be: the
+ * platform chat sits in the sidebar while a live stream's own chat is open on
+ * the page, and with a shared socket the last surface to join silently stole
+ * the room from the other — a line typed under a broadcast landed in the
+ * global chat, and platform traffic appeared under the stream. That is the
+ * "mixing up two chats" viewers were reporting.
+ *
+ * Each room therefore gets its own connection, keyed by room id. Listeners are
+ * registered per room too, so a live chat never sees the platform's messages.
+ */
+
+import type { ChatRefusalPayload } from '@/lib/chat-refusal';
+import { waitForChatRoom } from '@/lib/chat-delivery';
+import { io, Socket } from 'socket.io-client';
+import { DEHUB_API_BASE, getAuthToken, ensureFreshToken } from './core';
+import { reviveOnReturn } from '@/lib/socket-revive';
+
+export const GLOBAL_ROOM = 'global';
+
+/** roomId → its own connection. */
+const sockets = new Map<string, Socket>();
+const joinedStreamSockets = new WeakSet<Socket>();
+const roomJoinedEvents = ['roomJoined', 'livechat:roomJoined'];
+let currentToken: string | null = null;
+
+const keyOf = (roomId?: string) => roomId || GLOBAL_ROOM;
+
+/** Get or create the connection that carries one room. */
+export function getSocket(roomId?: string): Socket {
+  const key = keyOf(roomId);
+  const token = getAuthToken();
+
+  if (currentToken !== token) {
+    const prev = currentToken;
+    currentToken = token;
+    rekeySockets(prev, token);
+  }
+
+  const existing = sockets.get(key);
+  if (existing) return existing;
+
+  const socket = io(`${DEHUB_API_BASE}/livechat`, {
+    // Read on every handshake, not once: see handshakeAuth.
+    auth: handshakeAuth,
+    query: token ? { token } : {},
+    transports: ['polling', 'websocket'],
+    upgrade: true,
+    forceNew: true,
+    autoConnect: true,
+    reconnection: true,
+    reconnectionDelay: 1000,
+    reconnectionDelayMax: 5000,
+    // Never give up. A chat that stopped after twenty tries stayed dead until
+    // the tab was hidden and shown again, which on a streamer's always-open
+    // page is never: viewers' lines simply stopped arriving.
+    reconnectionAttempts: Infinity,
+    timeout: 20000,
+  });
+
+  sockets.set(key, socket);
+  reviveOnReturn(socket);
+
+  socket.on('connect', () => {
+    console.log('[LiveChat Socket] Connected:', key, socket.id);
+    // A reconnect drops the server-side room membership, so re-join. Only this
+    // connection's own room — it can hold no other.
+    if (roomRefCounts.get(key)) emitJoin(socket, key);
+  });
+
+  socket.on('disconnect', (reason) => {
+    joinedStreamSockets.delete(socket);
+    console.log('[LiveChat Socket] Disconnected:', key, reason);
+    // The server closing us is the one drop Socket.IO does not retry by itself.
+    if (reason === 'io server disconnect') {
+      setTimeout(() => { if (sockets.get(key) === socket && !socket.connected) socket.connect(); }, 2000);
+    }
+  });
+
+  socket.on('connect_error', (err) => {
+    console.warn('[LiveChat Socket] Connection error:', key, err.message);
+  });
+
+  if (key.startsWith('stream:')) {
+    const joined = (data: { room?: { roomId?: string } }) => {
+      if (data?.room?.roomId === key) joinedStreamSockets.add(socket);
+    };
+    for (const event of roomJoinedEvents) socket.on(event, joined);
+  }
+
+  const pongHandler = (data: any) => {
+    if (data?.connected && roomRefCounts.get(key)) emitJoin(socket, key);
+    // Signed in here but the server took this connection as a guest: its
+    // handshake carried a token that had already expired. Sign it back in.
+    if (data?.isAuthenticated === false) signBackIn(socket);
+  };
+  socket.on('pong', pongHandler);
+  socket.on('livechat:pong', pongHandler);
+
+  const errorHandler = (data: any) => {
+    console.error('[LiveChat Socket] Error:', key, data);
+  };
+  socket.on('error', errorHandler);
+  socket.on('livechat:error', errorHandler);
+
+  return socket;
+}
+
+/**
+ * The token for a (re)connect, read at the moment of the handshake.
+ *
+ * It used to be fixed when the connection was made and only updated when
+ * something else happened to ask for a socket. After a laptop sleep or a
+ * network drop the connection came back on its own with the token it had,
+ * long expired, and the server took it as a guest: every message then failed
+ * with "Authentication required" until the page was reloaded.
+ */
+function handshakeAuth(cb: (data: Record<string, string>) => void) {
+  if (!getAuthToken()) { cb({}); return; }
+  ensureFreshToken()
+    .then((token) => cb({ token }))
+    .catch(() => { const token = getAuthToken(); cb(token ? { token } : {}); });
+}
+
+/** Connections already asked to sign back in, so a refusal cannot loop. */
+const signInTried = new WeakMap<Socket, string>();
+
+/** Sign a connection that came back as a guest in again, in place. */
+function signBackIn(socket: Socket) {
+  if (!getAuthToken() || !socket.id || signInTried.get(socket) === socket.id) return;
+  signInTried.set(socket, socket.id);
+  ensureFreshToken()
+    .then((token) => { if (socket.connected) socket.emit('livechat:authenticate', { token }); })
+    .catch(() => { /* signed out for real; the send path says so */ });
+}
+
+/** The current token for a payload, so the server can sign a guest connection in on the spot. */
+function withToken<T extends Record<string, unknown>>(payload: T): T & { token?: string } {
+  const token = getAuthToken();
+  return token ? { ...payload, token } : payload;
+}
+
+/** The wallet a JWT was issued to, or '' when it cannot be read. */
+function tokenAddress(token: string | null): string {
+  if (!token) return '';
+  try {
+    const part = token.split('.')[1] || '';
+    const json = JSON.parse(atob(part.replace(/-/g, '+').replace(/_/g, '/')));
+    return String(json?.address || json?.sub || '').toLowerCase();
+  } catch {
+    return '';
+  }
+}
+
+/**
+ * Carry every open connection over to a new token, in place.
+ *
+ * The access token rotates every fifteen minutes. Each rotation used to
+ * disconnect and drop every room's connection, while the chats on screen kept
+ * their listeners on the old, now closed, ones: a stream's chat went silent a
+ * quarter of an hour in and stayed that way until something remounted it.
+ *
+ * The same person's fresh token only has to be used on the next handshake, so
+ * the connection is left alone. A different person (sign in, sign out, profile
+ * switch) reconnects the SAME socket under the new identity, so every listener
+ * stays attached and the room is re-joined on connect.
+ */
+function rekeySockets(prev: string | null, next: string | null) {
+  const sameUser = !!prev && !!next && tokenAddress(prev) !== '' && tokenAddress(prev) === tokenAddress(next);
+  for (const s of sockets.values()) {
+    // `auth` reads the token itself on every handshake; only the query copy is fixed.
+    s.io.opts.query = next ? { token: next } : {};
+    if (sameUser) continue;
+    if (s.connected) s.io.engine?.close();
+  }
+}
+
+// Support both legacy and namespaced event names — the backend listens on both.
+function emitJoin(socket: Socket, key: string) {
+  socket.emit('joinRoom', { roomId: key });
+  socket.emit('livechat:joinRoom', { roomId: key });
+}
+
+/** Reuse the room's socket and wait for its join after a connection drop. */
+export function waitForLiveChatSend(socket: Socket, roomId: string): Promise<boolean> {
+  const stream = roomId.startsWith('stream:');
+  return waitForChatRoom(
+    socket,
+    () => sockets.get(roomId) === socket && (!stream || joinedStreamSockets.has(socket)),
+    stream ? roomJoinedEvents : ['connect'],
+    () => emitJoin(socket, roomId),
+  );
+}
+
+/**
+ * Reference-counted room membership.
+ *
+ * Several components can render the same room at once (SidebarChat and the
+ * public chat page both show `global`), and they share that room's connection,
+ * so the join/leave only fires for the first and last of them.
+ */
+const roomRefCounts = new Map<string, number>();
+
+/** Join a livechat room (ref-counted). */
+export function joinRoom(roomId?: string) {
+  const key = keyOf(roomId);
+  const next = (roomRefCounts.get(key) || 0) + 1;
+  roomRefCounts.set(key, next);
+  if (next === 1) {
+    console.log('[LiveChat Socket] Joining room', key);
+    const socket = getSocket(key);
+    // Not connected yet: the connect handler joins as soon as it is.
+    if (socket.connected) emitJoin(socket, key);
+  }
+}
+
+/** Leave the room (ref-counted — only leaves when the last subscriber goes). */
+export function leaveRoom(roomId?: string) {
+  const key = keyOf(roomId);
+  const current = roomRefCounts.get(key) || 0;
+  const next = Math.max(0, current - 1);
+  if (next === 0) {
+    roomRefCounts.delete(key);
+    const socket = sockets.get(key);
+    if (socket) {
+      console.log('[LiveChat Socket] Leaving room', key);
+      socket.emit('leaveRoom', { roomId: key });
+      // A stream's room is done with when its last viewer surface unmounts, and
+      // the tab may open a great many of them over a session. The platform room
+      // stays connected: it is opened and closed constantly from the sidebar.
+      if (key !== GLOBAL_ROOM) {
+        socket.disconnect();
+        sockets.delete(key);
+      }
+    }
+  } else {
+    roomRefCounts.set(key, next);
+  }
+}
+
+/** Send a message into one room. */
+export function emitSendMessage(payload: {
+  roomId?: string;
+  content: string;
+  messageType?: 'text' | 'media' | 'gif' | 'audio';
+  imageUrl?: string;
+  audioUrl?: string;
+  audioDuration?: number;
+  replyTo?: string;
+  mentions?: Array<{ address: string; username?: string }>;
+}) {
+  const roomId = keyOf(payload.roomId);
+  const s = getSocket(roomId);
+
+  // Redundant fields for API compatibility. The server posts to the room this
+  // connection joined and ignores these, but older builds read them.
+  const sendPayload: Record<string, unknown> = {
+    roomId,
+    room_id: roomId,
+    content: payload.content,
+    message: payload.content,
+    text: payload.content,
+    messageType: payload.messageType || 'text',
+    type: payload.messageType || 'text',
+  };
+
+  if (payload.replyTo) sendPayload.replyTo = payload.replyTo;
+  if (payload.mentions?.length) sendPayload.mentions = payload.mentions;
+  if (payload.audioUrl) sendPayload.audioUrl = payload.audioUrl;
+  if (payload.audioDuration != null) sendPayload.audioDuration = payload.audioDuration;
+  if (payload.imageUrl) {
+    sendPayload.media = [{
+      url: payload.imageUrl,
+      type: 'image',
+    }];
+  }
+
+  console.log('[LiveChat Socket] Sending message:', sendPayload);
+  // The token rides along so a connection that lost its sign-in heals on the
+  // send itself. Only on the event the server reads, and never logged.
+  s.emit('sendMessage', sendPayload);
+  s.emit('livechat:sendMessage', withToken(sendPayload));
+}
+
+/** Subscribe to one room's events on both the prefixed and bare event names. */
+function subscribe(roomId: string | undefined, events: string[], cb: (...args: any[]) => void): () => void {
+  const s = getSocket(keyOf(roomId));
+  for (const e of events) s.on(e, cb);
+  return () => { for (const e of events) s.off(e, cb); };
+}
+
+/** Subscribe to new messages in a room. Returns unsubscribe fn. */
+export function onLiveChatMessage(roomId: string | undefined, cb: (msg: unknown) => void): () => void {
+  return subscribe(roomId, ['newMessage', 'livechat:newMessage'], (data: unknown) => cb(data));
+}
+
+/** Subscribe to the room-joined event (initial data). Returns unsubscribe fn. */
+export function onRoomJoined(roomId: string | undefined, cb: (data: {
+  room: unknown;
+  messages: unknown[];
+  yourUser: unknown;
+  /** Platform chat staff: only a super moderator can ban, mute or kick them. */
+  staff?: string[];
+  isBanned: boolean;
+  canSendMessages: boolean;
+}) => void): () => void {
+  return subscribe(roomId, ['roomJoined', 'livechat:roomJoined'], cb);
+}
+
+/**
+ * Edit one of your own messages.
+ *
+ * Author-gated server-side, so there is nothing to check here beyond being
+ * signed in; a request for someone else's message comes back on the error
+ * channel rather than silently succeeding.
+ */
+export function emitEditMessage(roomId: string | undefined, messageId: string, content: string) {
+  const s = getSocket(keyOf(roomId));
+  const payload = { messageId, content };
+  s.emit('editMessage', payload);
+  s.emit('livechat:editMessage', withToken(payload));
+}
+
+/** Delete a message — your own, or anyone's if you moderate the room. */
+export function emitDeleteMessage(roomId: string | undefined, messageId: string) {
+  const s = getSocket(keyOf(roomId));
+  const payload = { messageId };
+  s.emit('deleteMessage', payload);
+  s.emit('livechat:deleteMessage', withToken(payload));
+}
+
+/** Subscribe to message edited events */
+export function onMessageEdited(roomId: string | undefined, cb: (msg: unknown) => void): () => void {
+  return subscribe(roomId, ['messageEdited', 'livechat:messageEdited'], (data: unknown) => cb(data));
+}
+
+/** Subscribe to message deleted events */
+export function onMessageDeleted(roomId: string | undefined, cb: (data: { messageId: string }) => void): () => void {
+  return subscribe(roomId, ['messageDeleted', 'livechat:messageDeleted'], cb);
+}
+
+/** A stream's creator or their moderator timed someone out of, or banned them from, this room. */
+export function onStreamModeration(
+  roomId: string | undefined,
+  cb: (data: { address: string; action: 'timeout' | 'ban'; seconds?: number }) => void,
+): () => void {
+  return subscribe(roomId, ['livechat:userModerated'], (data: any) => {
+    const address = String(data?.address || '').toLowerCase();
+    if (!address || (data?.roomId && data.roomId !== roomId)) return;
+    cb({ address, action: data?.action === 'ban' ? 'ban' : 'timeout', seconds: Number(data?.seconds) || undefined });
+  });
+}
+
+/**
+ * Subscribe to the gateway's error channel.
+ *
+ * Edits and deletes are fire-and-forget emits, so a refusal (not your message,
+ * message already gone) arrives here or nowhere.
+ */
+export function onLiveChatError(roomId: string | undefined, cb: (data: ChatRefusalPayload) => void): () => void {
+  return subscribe(roomId, ['error', 'livechat:error'], (data: unknown) =>
+    cb((data || {}) as ChatRefusalPayload),
+  );
+}
+
+/** Subscribe to reaction updates */
+export function onReactionUpdated(roomId: string | undefined, cb: (data: unknown) => void): () => void {
+  return subscribe(roomId, ['reactionUpdated', 'livechat:reactionUpdated'], cb);
+}
+
+/** Subscribe to ban/unban events */
+export function onUserBanned(roomId: string | undefined, cb: (data: { message: string }) => void): () => void {
+  return subscribe(roomId, ['userBanned', 'livechat:userBanned'], cb);
+}
+
+export function onUserUnbanned(roomId: string | undefined, cb: (data: { message: string }) => void): () => void {
+  return subscribe(roomId, ['userUnbanned', 'livechat:userUnbanned'], cb);
+}
+
+/** Add/remove reactions — backend may require roomId and namespaced events */
+export function emitAddReaction(roomId: string, messageId: string, emoji: string) {
+  const key = keyOf(roomId);
+  const s = getSocket(key);
+  const payload = { roomId: key, room_id: key, messageId, emoji };
+  console.log('[LiveChat Socket] Emitting addReaction', payload);
+  s.emit('addReaction', payload);
+  s.emit('livechat:addReaction', withToken(payload));
+}
+
+export function emitRemoveReaction(roomId: string, messageId: string, emoji: string) {
+  const key = keyOf(roomId);
+  const s = getSocket(key);
+  const payload = { roomId: key, room_id: key, messageId, emoji };
+  s.emit('removeReaction', payload);
+  s.emit('livechat:removeReaction', withToken(payload));
+}
+
+/** Typing indicator */
+export function emitTyping(roomId: string | undefined, isTyping: boolean) {
+  getSocket(keyOf(roomId)).emit('typing', { isTyping });
+}
+
+/** Ping keep-alive */
+export function emitPing(roomId?: string) {
+  getSocket(keyOf(roomId)).emit('ping');
+}
+
+/** Subscribe to all of one room's socket events for debugging. */
+export function debugSocketEvents(roomId?: string): () => void {
+  const key = keyOf(roomId);
+  const s = getSocket(key);
+  const handler = (eventName: string, ...args: unknown[]) => {
+    console.log(`[LiveChat DEBUG ${key}] Event: "${eventName}"`, args.length > 0 ? args[0] : '');
+  };
+  s.onAny(handler);
+  // Pass the specific handler to offAny so we don't strip other listeners.
+  return () => { s.offAny(handler); };
+}
+
+/** Disconnect every room's connection. */
+export function disconnectSocket() {
+  for (const [key, s] of sockets) {
+    s.disconnect();
+    console.log('[LiveChat Socket] Disconnected and cleared', key);
+  }
+  sockets.clear();
+  roomRefCounts.clear();
+  currentToken = null;
+}
+
+/** Request message history via REST (socket doesn't have a history event) */
+export function requestMessageHistory(_roomId: string, _limit?: number): Promise<unknown[]> {
+  // History is fetched via REST API, not socket
+  return Promise.resolve([]);
+}
+
+// Legacy exports for compatibility
+export const MSG_EVENTS = ['newMessage', 'livechat:newMessage'] as const;
+export const PRESENCE_EVENTS = ['userJoined', 'userLeft', 'livechat:userJoined', 'livechat:userLeft'] as const;

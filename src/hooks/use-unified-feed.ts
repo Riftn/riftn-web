@@ -1,0 +1,1119 @@
+/**
+ * Unified Feed Hook
+ * =================
+ * Fetches mixed content (videos, images, text posts) from the unified /api/feed endpoint.
+ * All feed loads go directly to the Riftn API. TanStack Query handles client-side caching.
+ * 
+ * @module hooks/use-unified-feed
+ */
+
+import { noteCoAuthors } from '@/lib/co-author-store';
+import { isSignInWall, noteSignInWall } from '@/lib/sign-in-wall';
+import { useEffect, useMemo, useState } from 'react';
+import { useInfiniteQuery, useQuery, useQueryClient, keepPreviousData, type QueryClient } from '@tanstack/react-query';
+import { getAuthToken, isTokenExpired, ensureFreshToken, DEHUB_CDN_BASE, getMediaUrl, type DeHubNFT, getBlockList, getNFTInfo } from '@/lib/api/dehub';
+import { buildAvatarUrl, buildImageUrl, buildVideoUrl, buildHlsUrl, buildFeedImageUrls, extractAvatarPath } from '@/lib/media-url';
+import { formatDuration, formatViews, formatTimeAgo } from '@/lib/feed-utils';
+import { resolveLikeCount, resolveDislikeCount, resolveMyReaction, resolveReactionCounts, resolveViewCount } from '@/lib/engagement';
+import { mergeLiveCounts, type RawFeedRow } from '@/lib/live-counts';
+import { hlsUrlFor, liveProviderOf, noteLatencyMode } from '@/lib/live-ingest';
+import { extractReplayUrl } from '@/lib/live-replay';
+import type { VideoItem, ImagePost, TextPost } from '@/types/feed.types';
+import type { ContentRating } from '@/lib/api/dehub/types';
+import { BLOCKED_POST_IDS } from '@/constants/post.constants';
+import { useAuth } from '@/contexts/AuthContext';
+import { memoizeFeedRow } from '@/lib/memoize-feed-row';
+import { displayPostTitle } from '@/lib/post-caption';
+import { isAnonymousFeedResponse } from '@/lib/feed-response-auth';
+
+const DEHUB_API_BASE = API_ORIGIN;
+
+import { parseSoundtrackTag } from '@/lib/soundtrack';
+import { toStoryboard } from '@/lib/storyboard';
+import { storedVideoAspect, storedVideoSizeShown } from '@/lib/video-aspect';
+import { translateCopy as _translateCopy } from '@/i18n/copy';
+import { duetOfPost } from '@/lib/duet';
+import { API_ORIGIN } from '@/lib/api/api-origin';
+export { parseSoundtrackTag } from '@/lib/soundtrack';
+
+const stripSoundtrackTag = (text?: string | null) => text?.replace(/\[soundtrack:[^\]]*\]/g, '').trim() || undefined;
+// Videos can carry an attached sound as a [soundtrack:…] tag — play it, don't print it.
+function videoSoundtrack(text?: string | null) {
+  const soundtrack = parseSoundtrackTag(text);
+  if (!soundtrack.soundtrackUrl) return {};
+  return { ...soundtrack, soundtrackTokenId: text?.match(/\[soundtrack:(\d+)/)?.[1] };
+}
+
+// ===========================================================================
+// TYPES
+// ===========================================================================
+
+export interface UnifiedFeedParams {
+  page?: number;
+  limit?: number;
+  sortBy?: 'views' | 'likes' | 'createdAt' | 'tips' | 'comments' | 'random' | 'score';
+  sortOrder?: 'asc' | 'desc';
+  /** One type, or a comma list of them (the named Home filters). */
+  postType?: 'all' | 'video' | 'short' | 'feed-images' | 'feed-simple' | 'live' | 'audio' | 'feed-audio' | 'article' | `${string},${string}`;
+  status?: 'minted' | 'signed' | 'all' | 'pending' | 'failed';
+  search?: string;
+  owner?: string;
+  category?: string;
+  minter?: string;
+  /** @deprecated Viewer context is now extracted from JWT Bearer token */
+  address?: string;
+  isPPV?: boolean;
+  isLocked?: boolean;
+  hasBounty?: boolean;
+  hasPlans?: boolean;
+  range?: 'day' | 'week' | 'month' | 'year';
+  from?: string;
+  to?: string;
+  shuffleSeed?: string;
+  maxPerCreator?: number;
+  /** When true, only returns content from accounts the authenticated user follows. Requires JWT. */
+  followingOnly?: boolean;
+  /** Trending's PPV / Tips tabs: rank by what posts earned; only posts that earned something. */
+  earned?: 'tips' | 'ppv';
+}
+
+// Keep the Home query and index.html's early feed request on the same page.
+export const HOME_FEED_PAGE_SIZE = 10;
+
+export interface UnifiedFeedItem {
+  tokenId: number;
+  ppvPreview?: { ready?: boolean };
+  name: string;
+  description?: string;
+  articleBody?: string;
+  /** Article cover key (nfts/images/<id>-article-1.jpg). */
+  articleImageUrl?: string;
+  imageUrl: string;
+  imageUrls?: string[];
+  videoUrl?: string;
+  /** HLS master playlist key, on public posts with a rendition ready. */
+  hlsUrl?: string;
+  minter: string;
+  owner?: string;
+  postType: 'video' | 'feed-images' | 'feed-simple' | 'live' | 'audio' | 'feed-audio';
+  status?: string;
+  /** Async video transcode state, written optimistically before the CDN file
+   *  exists. Absent on posts predating this field — treat as 'done'. */
+  transcodingStatus?: 'pending' | 'on' | 'done' | 'failed';
+  /** Seek-preview sprite sheet, raw — read through toStoryboard. */
+  storyboard?: unknown;
+  /** Upload-time probe, raw — read through storedVideoAspect. */
+  videoInfo?: unknown;
+  category?: string[];
+  /** Absent means safe — see ContentRating. */
+  contentRating?: ContentRating;
+  /** Alt text, one per piece of media in display order (gallery images by position, a video first). */
+  mediaDescriptions?: string[];
+  /** 'comic' shows the gallery as collector cards. */
+  layout?: 'comic';
+  /** Comic captions, one per page in display order. */
+  mediaCaptions?: string[];
+  /** The comic's border preset; absent is the theme foil. */
+  comicBorder?: string;
+  /** The poster closed the market card for the $TICKER / address in the text, so no surface draws one. */
+  hideAssetCards?: boolean;
+  /** Links in the text whose preview card the poster closed, so no surface draws one. */
+  hiddenLinkPreviews?: string[];
+  /** People tagged on the photos. */
+  imageTags?: { address?: string; username: string; i: number; x: number; y: number }[];
+  /** A quiz hangs off this post (GET /quiz/:tokenId). */
+  hasQuiz?: boolean;
+  /** Content warning: the post opens collapsed behind this one line. */
+  spoilerText?: string;
+  /** Who may quote it; absent means anyone. */
+  quotePolicy?: 'public' | 'followers' | 'nobody';
+  /** A quote whose quoted author took their post back out of it. */
+  quoteRevoked?: boolean;
+  /** Who may reply; absent means anyone. */
+  replyPolicy?: 'public' | 'followers' | 'following' | 'mentioned';
+  /** Who may see it; absent means everyone. */
+  visibility?: 'public' | 'followers' | 'direct';
+  /** Published for children — see the field on BaseFeedItem. */
+  forKids?: boolean;
+  /** Signed-in viewers only — read totalViews via resolveViewCount instead. */
+  views: number;
+  /** Every viewer, signed in or not. The count to display. */
+  totalViews?: number;
+  totalVotes?: {
+    for: number;
+    against: number;
+  };
+  likes?: number;
+  dislikes?: number;
+  commentCount: number;
+  videoDuration?: number;
+  minterUsername?: string;
+  /** Some API responses use 'mintername' instead of 'minterUsername' */
+  mintername?: string;
+  minterDisplayName?: string;
+  minterAvatarUrl?: string;
+  minterAboutMe?: string;
+  minterStaked?: number;
+  is_w2e?: boolean;
+  streamInfo?: {
+    isLockContent: boolean;
+    lockContentAmount?: number;
+    lockContentTokenSymbol?: string;
+    lockContentContractAddress?: string;
+    lockContentChainIds?: number[];
+    isPayPerView: boolean;
+    payPerViewAmount?: number;
+    payPerViewTokenSymbol?: string;
+    isAddBounty: boolean;
+    addBountyFirstXViewers?: number | string;
+    addBountyFirstXComments?: number | string;
+    addBountyAmount?: number;
+    addBountyTokenSymbol?: string;
+    addBountyChainId?: number;
+  };
+  plansDetails?: Array<{
+    id: number;
+    title: string;
+    price: number;
+    alreadySubscribed?: boolean;
+  }>;
+  isLiked?: boolean;
+  isDisliked?: boolean;
+  isSaved?: boolean;
+  isOwner?: boolean;
+  isUnlocked?: boolean;
+  isReposted?: boolean;
+  minterUser?: {
+    address?: string;
+    username?: string;
+    displayName?: string;
+    avatarImageUrl?: string;
+    isVerified?: boolean;
+    badgeBalance?: number;
+    hideBadgeAndBalance?: boolean;
+  };
+  minterFollowers?: number;
+  minterFollowings?: number;
+  stream?: {
+    _id?: string;
+    streamId?: string;
+    playbackId?: string;
+    streamKey?: string;
+    status?: string;
+    isActive?: boolean;
+    viewerCount?: number;
+    title?: string;
+    category?: string;
+    playbackUrl?: string;
+    /** Set the first time the stream went on air — absent means it never did. */
+    startedAt?: string;
+    /** Captured replay of a finished stream; playable only at status 'ready'. */
+    recording?: {
+      status?: string;
+      url?: string;
+      durationSec?: number;
+      truncated?: boolean;
+    };
+  };
+  createdAt: string;
+  updatedAt?: string;
+  audioUrl?: string;
+  audioDuration?: number;
+  totalReposts?: number;
+  reposts?: number;
+  quotes?: number;
+  ppvBuyerCount?: number;
+  /** Backend-computed total DHB tipped on this post — absent (not 0) on posts
+   *  with no tips yet; see usePostTipCount for why this matters as a floor. */
+  totalTips?: number;
+  /** What PPV unlocks of the post paid; sent only on the `earned=ppv` ranking. */
+  ppvEarnings?: number;
+}
+
+export interface UnifiedFeedResponse {
+  status: boolean;
+  signal?: boolean;
+  visibleResult?: UnifiedFeedItem[];
+  authenticated?: boolean;
+  result: UnifiedFeedItem[];
+  pagination: {
+    page: number;
+    limit: number;
+    totalCount: number;
+    totalPages: number;
+    hasMore: boolean;
+  };
+  shuffleSeed?: string;
+}
+
+// ===========================================================================
+// BLOCKLIST
+// ===========================================================================
+
+/** Hardcoded fallback usernames/display names to filter out from feeds */
+const BLOCKED_CREATORS_FALLBACK = [
+  'monkey d luffy',
+  'monkey d. luffy',
+  'monkeydluffy',
+  'monkey_d_luffy',
+];
+
+function isBlockedCreator(item: UnifiedFeedItem, dynamicBlockedAddresses?: Set<string>): boolean {
+  if (dynamicBlockedAddresses && dynamicBlockedAddresses.has(item.minter?.toLowerCase())) {
+    return true;
+  }
+  const displayName = (item.minterDisplayName || '').toLowerCase();
+  const username = (item.minterUsername || '').toLowerCase();
+  return BLOCKED_CREATORS_FALLBACK.some(blocked => 
+    displayName.includes(blocked) || username.includes(blocked)
+  );
+}
+
+function isBlockedPost(item: UnifiedFeedItem): boolean {
+  return BLOCKED_POST_IDS.includes(item.tokenId);
+}
+
+// ===========================================================================
+// MAPPERS
+// ===========================================================================
+
+/**
+ * Map unified feed item to VideoItem
+ */
+export const mapToVideoItem = memoizeFeedRow(mapVideoItem);
+export const mapToImagePost = memoizeFeedRow(mapImagePost);
+export const mapToTextPost = memoizeFeedRow(mapTextPost);
+
+function mapVideoItem(item: UnifiedFeedItem, index: number): VideoItem {
+  const id = String(item.tokenId);
+  
+  // A live post carries no imageUrl of its own — its poster lives on the
+  // nested stream, refreshed by the broadcaster while the stream runs. Reading
+  // only the token fields is what left live cards with a blank cover.
+  const thumbnail =
+    (item.postType === 'live' ? getMediaUrl((item.stream as any)?.thumbnail) : undefined) ||
+    buildImageUrl(item.tokenId, item.imageUrl);
+
+  const isAudioPost = item.postType === 'audio' || item.postType === 'feed-audio';
+  // A finished stream leaves a plain mp4 replay on the CDN once its capture
+  // reports ready. Handing that to the card is what makes a past live playable
+  // in the feed instead of a permanent "Live ended" poster.
+  const replayUrl = item.postType === 'live' ? extractReplayUrl(item.stream) : undefined;
+  const replayDurationSec = item.postType === 'live' ? item.stream?.recording?.durationSec : undefined;
+  const videoUrl = item.postType === 'live'
+    ? replayUrl
+    : isAudioPost
+      ? undefined
+      : (item.videoUrl?.startsWith('http') ? item.videoUrl : buildVideoUrl(item.tokenId));
+  
+  // Build audio URL from API audioUrl field, fallback to videoUrl for audio posts
+  const rawAudioSource = item.audioUrl || (isAudioPost ? item.videoUrl : undefined);
+  const audioUrl = isAudioPost && rawAudioSource
+    ? (rawAudioSource.startsWith('http') ? rawAudioSource : `https://dehubcdn.ams3.cdn.digitaloceanspaces.com/${rawAudioSource.replace(/^\/+/, '')}`)
+    : undefined;
+  const rawAvatarPath = extractAvatarPath(item);
+  const channelAvatar = rawAvatarPath 
+    ? buildAvatarUrl(item.minter, rawAvatarPath) || 'user'
+    : 'user';
+  
+  const isPPV = item.streamInfo?.isPayPerView ?? false;
+  const isW2E = item.streamInfo?.isAddBounty || item.is_w2e || false;
+  const isLocked = item.streamInfo?.isLockContent ?? false;
+  
+  return {
+    id,
+    type: 'video',
+    thumbnail,
+    videoUrl,
+    hlsUrl: buildHlsUrl(item.hlsUrl),
+    audioUrl,
+    audioDuration: isAudioPost ? item.audioDuration : undefined,
+    isAudio: isAudioPost,
+    duration: formatDuration(isAudioPost ? item.audioDuration : (item.videoDuration ?? replayDurationSec)),
+    durationSeconds: (isAudioPost ? item.audioDuration : (item.videoDuration ?? replayDurationSec)) || 0,
+    title: displayPostTitle(item.name, stripSoundtrackTag(item.description)),
+    description: stripSoundtrackTag(item.description),
+    ...(isAudioPost ? {} : videoSoundtrack(item.description)),
+    channel: item.minterUser?.displayName || item.minterDisplayName || item.minterUsername || item.mintername || _translateCopy("copy.056823642989", { defaultValue: "Unknown Creator" }),
+    channelAvatar,
+    verified: false,
+    views: formatViews(resolveViewCount(item)),
+    uploadedAgo: formatTimeAgo(item.createdAt),
+    status: item.status,
+    transcodingStatus: item.transcodingStatus,
+    storyboard: toStoryboard(item.storyboard),
+    storedAspect: storedVideoAspect(item.videoInfo),
+    storedAspectShown: storedVideoSizeShown(item.videoInfo),
+    newPostId: (item as any).newPostId,
+    articleSlug: (item as any).articleSlug,
+    creatorId: item.minter,
+    creatorUsername: item.minterUsername || item.mintername,
+    creatorBadgeBalance: item.minterUser?.hideBadgeAndBalance ? 0 : item.minterUser?.badgeBalance,
+    creatorPaymentsDisabled: item.minterUser?.hideBadgeAndBalance === true,
+    isLiked: item.isLiked ?? false,
+    isDisliked: item.isDisliked ?? false,
+    myReaction: resolveMyReaction(item),
+    reactionCounts: resolveReactionCounts(item),
+    likeCount: resolveLikeCount(item),
+    dislikeCount: resolveDislikeCount(item),
+    commentCount: item.commentCount || 0,
+    ppvBuyerCount: item.ppvBuyerCount || 0,
+    isPPV,
+    ppvPrice: item.streamInfo?.payPerViewAmount,
+    ppvPreviewReady: item.ppvPreview?.ready === true,
+    ppvCurrency: item.streamInfo?.payPerViewTokenSymbol || 'DHB',
+    isW2E,
+    isLocked,
+    lockedPrice: item.streamInfo?.lockContentAmount,
+    lockedCurrency: item.streamInfo?.lockContentTokenSymbol || 'DHB',
+    lockedTokenAddress: item.streamInfo?.lockContentContractAddress,
+    lockedChainId: item.streamInfo?.lockContentChainIds?.[0],
+    subscriberPlans: item.plansDetails,
+    bountyViews: Number(item.streamInfo?.addBountyFirstXViewers) || undefined,
+    bountyComments: Number(item.streamInfo?.addBountyFirstXComments) || undefined,
+    bountyAmount: item.streamInfo?.addBountyAmount,
+    bountyCurrency: item.streamInfo?.addBountyTokenSymbol || 'DHB',
+    createdAt: item.createdAt,
+    isOwner: item.isOwner ?? false,
+    isUnlocked: item.isUnlocked ?? false,
+    repostCount: (item.totalReposts || item.reposts || 0) + (item.quotes || 0),
+    isReposted: item.isReposted ?? false,
+    categories: Array.isArray(item.category) ? item.category : item.category ? [item.category] : [],
+    contentRating: item.contentRating,
+    mediaDescriptions: item.mediaDescriptions,
+    layout: item.layout,
+    mediaCaptions: item.mediaCaptions,
+    comicBorder: item.comicBorder,
+    hideAssetCards: item.hideAssetCards,
+    hiddenLinkPreviews: item.hiddenLinkPreviews,
+    imageTags: item.imageTags,
+    hasQuiz: item.hasQuiz,
+    spoilerText: item.spoilerText,
+    quotePolicy: item.quotePolicy,
+    visibility: item.visibility,
+    quoteRevoked: item.quoteRevoked,
+    replyPolicy: item.replyPolicy,
+    forKids: item.forKids,
+    duetOf: duetOfPost(item as any),
+    isLivePost: item.postType === 'live',
+    isShort: (item.postType as string) === 'short',
+    liveStatus: item.stream?.status,
+    liveIsActive: item.stream?.isActive,
+    livePlaybackId: item.stream?.playbackId,
+    livePlaybackUrl: item.stream?.playbackUrl,
+    // The HLS ladder the feed card plays. `playbackUrl` off the API is often
+    // absent for a self-hosted stream, so derive from the playbackId the same
+    // way the post page does — otherwise the card falls back to a poster and
+    // the stream only appears after a click-through.
+    livePlaybackUrls: (() => {
+      noteLatencyMode(item.stream as any);
+      const hls = hlsUrlFor(item.stream as any);
+      if (!hls) return item.stream?.playbackUrl ? [item.stream.playbackUrl] : undefined;
+      return liveProviderOf(item.stream as any) === 'mediamtx'
+        ? [hls]
+        : [hls, `https://livepeercdn.com/hls/${item.stream?.playbackId}/index.m3u8`];
+    })(),
+    isLiveNow: item.postType === 'live'
+      && (item.stream as any)?.isActive !== false
+      && ['live', 'active'].includes(String(item.stream?.status || '').toLowerCase()),
+    liveStreamId: item.stream?._id || item.stream?.streamId,
+    totalTips: item.totalTips ?? 0,
+  };
+}
+
+/**
+ * Map unified feed item to ImagePost
+ */
+function mapImagePost(item: UnifiedFeedItem, index: number): ImagePost {
+  const id = String(item.tokenId);
+  
+  const imageUrls = buildFeedImageUrls(item.imageUrls, undefined, (item as { imageSizes?: unknown }).imageSizes);
+  const image = imageUrls?.[0] || buildImageUrl(item.tokenId, item.imageUrl);
+  
+  const rawAvatarPath = extractAvatarPath(item);
+  const avatar = rawAvatarPath 
+    ? buildAvatarUrl(item.minter, rawAvatarPath) || 'user'
+    : 'user';
+  
+  const soundtrack = parseSoundtrackTag(item.description);
+  const cleanDescription = item.description?.replace(/\[soundtrack:[^\]]*\]/, '').trim() || undefined;
+
+  return {
+    id,
+    type: 'image',
+    username: item.minterUser?.displayName || item.minterDisplayName || item.minterUsername || item.mintername || 'unknown',
+    verified: false,
+    avatar,
+    image,
+    imageUrls,
+    title: displayPostTitle(item.name, cleanDescription),
+    description: cleanDescription,
+    ...soundtrack,
+    likes: resolveLikeCount(item),
+    dislikes: resolveDislikeCount(item),
+    caption: item.description || item.name || '',
+    comments: item.commentCount || 0,
+    views: formatViews(resolveViewCount(item)).replace(' views', ''),
+    timeAgo: formatTimeAgo(item.createdAt),
+    status: item.status,
+    newPostId: (item as any).newPostId,
+    articleSlug: (item as any).articleSlug,
+    creatorId: item.minter,
+    creatorUsername: item.minterUsername || item.mintername,
+    creatorBadgeBalance: item.minterUser?.hideBadgeAndBalance ? 0 : item.minterUser?.badgeBalance,
+    creatorPaymentsDisabled: item.minterUser?.hideBadgeAndBalance === true,
+    isLiked: item.isLiked ?? false,
+    isDisliked: item.isDisliked ?? false,
+    myReaction: resolveMyReaction(item),
+    reactionCounts: resolveReactionCounts(item),
+    ppvBuyerCount: item.ppvBuyerCount || 0,
+    createdAt: item.createdAt,
+    isPPV: item.streamInfo?.isPayPerView ?? false,
+    ppvPrice: item.streamInfo?.payPerViewAmount,
+    ppvCurrency: item.streamInfo?.payPerViewTokenSymbol || 'DHB',
+    isW2E: item.streamInfo?.isAddBounty || item.is_w2e || false,
+    isLocked: item.streamInfo?.isLockContent ?? false,
+    lockedPrice: item.streamInfo?.lockContentAmount,
+    lockedCurrency: item.streamInfo?.lockContentTokenSymbol || 'DHB',
+    lockedTokenAddress: item.streamInfo?.lockContentContractAddress,
+    lockedChainId: item.streamInfo?.lockContentChainIds?.[0],
+    subscriberPlans: item.plansDetails,
+    bountyViews: Number(item.streamInfo?.addBountyFirstXViewers) || undefined,
+    bountyComments: Number(item.streamInfo?.addBountyFirstXComments) || undefined,
+    bountyAmount: item.streamInfo?.addBountyAmount,
+    bountyCurrency: item.streamInfo?.addBountyTokenSymbol || 'DHB',
+    isOwner: item.isOwner ?? false,
+    isUnlocked: item.isUnlocked ?? false,
+    repostCount: (item.totalReposts || item.reposts || 0) + (item.quotes || 0),
+    isReposted: item.isReposted ?? false,
+    categories: Array.isArray(item.category) ? item.category : item.category ? [item.category] : [],
+    contentRating: item.contentRating,
+    mediaDescriptions: item.mediaDescriptions,
+    layout: item.layout,
+    mediaCaptions: item.mediaCaptions,
+    comicBorder: item.comicBorder,
+    hideAssetCards: item.hideAssetCards,
+    hiddenLinkPreviews: item.hiddenLinkPreviews,
+    imageTags: item.imageTags,
+    hasQuiz: item.hasQuiz,
+    spoilerText: item.spoilerText,
+    quotePolicy: item.quotePolicy,
+    visibility: item.visibility,
+    quoteRevoked: item.quoteRevoked,
+    replyPolicy: item.replyPolicy,
+    forKids: item.forKids,
+    isQuotePost: !!(item as any).isQuotePost,
+    quotedPost: (item as any).quotedPost || null,
+    totalTips: item.totalTips ?? 0,
+  };
+}
+
+/**
+ * Map unified feed item to TextPost
+ */
+function mapTextPost(item: UnifiedFeedItem, index: number): TextPost {
+  const id = String(item.tokenId);
+  
+  const rawAvatarPath = extractAvatarPath(item);
+  const avatarUrl = rawAvatarPath 
+    ? buildAvatarUrl(item.minter, rawAvatarPath) || item.minter
+    : item.minter;
+  
+  // Determine if the name is a meaningful title (not empty/whitespace/placeholder)
+  const rawName = item.name || '';
+  // A sound only rides photos/videos; a stray tag (photo removed after adding a song) must not print.
+  const rawDescription = (item.description || '').replace(/\[soundtrack:[^\]]*\]/g, '').trim();
+  const trimmedName = rawName.trim();
+  const trimmedDesc = rawDescription.trim();
+  // Title is meaningful only if it exists, differs from description, and isn't just the
+  // start of the description (API often copies the first line of description into name).
+  const hasMeaningfulTitle = trimmedName.length > 0 
+    && trimmedName !== trimmedDesc 
+    && !trimmedDesc.startsWith(trimmedName);
+
+  return {
+    id,
+    type: 'post',
+    author: {
+      id: item.minter,
+      name: item.minterUser?.displayName || item.minterDisplayName || item.minterUsername || item.mintername || _translateCopy("copy.b764cdc0eab7", { defaultValue: "Unknown" }),
+      handle: item.minterUsername || item.mintername || item.minter,
+      avatarSeed: avatarUrl,
+      verified: false,
+      badgeBalance: item.minterUser?.hideBadgeAndBalance ? 0 : item.minterUser?.badgeBalance,
+      paymentsDisabled: item.minterUser?.hideBadgeAndBalance === true,
+    },
+    title: hasMeaningfulTitle ? trimmedName : undefined,
+    content: trimmedDesc || (hasMeaningfulTitle ? '' : trimmedName) || '',
+    rawName,
+    rawDescription,
+    articleBody: item.articleBody,
+    articleImageUrl: item.articleImageUrl ? buildFeedImageUrls([item.articleImageUrl])?.[0] : undefined,
+    articleSlug: (item as any).articleSlug,
+    createdAt: item.createdAt,
+    views: formatViews(resolveViewCount(item)).replace(' views', ''),
+    status: item.status,
+    newPostId: (item as any).newPostId,
+    stats: {
+      comments: item.commentCount || 0,
+      reposts: (item.totalReposts || item.reposts || 0) + (item.quotes || 0),
+      likes: resolveLikeCount(item),
+      dislikes: resolveDislikeCount(item),
+    },
+    isLiked: item.isLiked ?? false,
+    isDisliked: item.isDisliked ?? false,
+    myReaction: resolveMyReaction(item),
+    reactionCounts: resolveReactionCounts(item),
+    isReposted: item.isReposted ?? false,
+    isQuotePost: !!(item as any).isQuotePost,
+    quotedPost: (item as any).quotedPost || null,
+    categories: Array.isArray(item.category) ? item.category : item.category ? [item.category] : [],
+    contentRating: item.contentRating,
+    mediaDescriptions: item.mediaDescriptions,
+    layout: item.layout,
+    mediaCaptions: item.mediaCaptions,
+    comicBorder: item.comicBorder,
+    hideAssetCards: item.hideAssetCards,
+    hiddenLinkPreviews: item.hiddenLinkPreviews,
+    imageTags: item.imageTags,
+    hasQuiz: item.hasQuiz,
+    spoilerText: item.spoilerText,
+    quotePolicy: item.quotePolicy,
+    visibility: item.visibility,
+    quoteRevoked: item.quoteRevoked,
+    replyPolicy: item.replyPolicy,
+    forKids: item.forKids,
+    communityAlertPending: (item as any).communityAlertStatus === 'pending',
+    isLocked: item.streamInfo?.isLockContent ?? false,
+    lockedPrice: item.streamInfo?.lockContentAmount,
+    lockedCurrency: item.streamInfo?.lockContentTokenSymbol || 'DHB',
+    lockedTokenAddress: item.streamInfo?.lockContentContractAddress,
+    lockedChainId: item.streamInfo?.lockContentChainIds?.[0],
+    subscriberPlans: item.plansDetails,
+    isOwner: item.isOwner ?? false,
+    isUnlocked: item.isUnlocked ?? false,
+    totalTips: item.totalTips ?? 0,
+  };
+}
+
+// ===========================================================================
+// API CALL
+// ===========================================================================
+
+/**
+ * A live post whose stream never went on air — the shape a failed or abandoned
+ * Go Live launch leaves behind: a minted token with a stream row that has no
+ * `startedAt`. Those are the only live posts the feed hides. A stream that
+ * aired belongs in the feed like any other post, live while it runs and as its
+ * replay afterwards.
+ */
+function isUnairedLivePost(item: { postType?: string; stream?: { startedAt?: string } }): boolean {
+  return item.postType === 'live' && !item.stream?.startedAt;
+}
+
+/**
+ * True when `params` describe exactly the request the index.html boot script
+ * issued (page=1&limit=10&sortBy=createdAt&sortOrder=desc&status=all, no
+ * other filters). Must stay in lockstep with the inline <script> in index.html.
+ */
+function isBootDefaultFeedParams(params: UnifiedFeedParams): boolean {
+  return (
+    params.page === 1 &&
+    params.limit === HOME_FEED_PAGE_SIZE &&
+    params.sortBy === 'createdAt' &&
+    params.sortOrder === 'desc' &&
+    params.status === 'all' &&
+    (params.postType === undefined || params.postType === 'all') &&
+    !params.minter && !params.search && !params.owner && !params.category &&
+    params.isPPV === undefined && params.isLocked === undefined &&
+    params.hasBounty === undefined && params.hasPlans === undefined &&
+    !params.range && !params.from && !params.to &&
+    !params.shuffleSeed && params.maxPerCreator === undefined &&
+    !params.followingOnly && !params.earned
+  );
+}
+
+/**
+ * The wallet whose engagement state a feed response describes. Read straight
+ * from localStorage (not React state) so boot-time prefetch and the mounted
+ * hook derive the same value and therefore the same query key.
+ */
+export function getFeedViewer(): string | null {
+  if (typeof window === 'undefined') return null;
+  return localStorage.getItem('dehub_wallet')?.toLowerCase() || null;
+}
+
+/**
+ * Per-viewer fields the API adds to every item once it recognises the caller.
+ * A response for a logged-in viewer carries at least one of these somewhere in
+ * the page; a response where none appears was served anonymously.
+ */
+function isAnonymousResponse(response: UnifiedFeedResponse): boolean {
+  return isAnonymousFeedResponse(response as unknown as Parameters<typeof isAnonymousFeedResponse>[0]);
+}
+
+async function fetchUnifiedFeedFromAPI(
+  params: UnifiedFeedParams = {},
+  viewer: string | null = getFeedViewer(),
+  signal = false,
+  visibleTokenIds: readonly number[] = [],
+): Promise<UnifiedFeedResponse> {
+  // Adopt the boot-time feed fetch from index.html (started at HTML-parse time,
+  // ~1.5s before React mounts — LCP audit 7/14) for the first default page-1
+  // request. One-shot: on param mismatch, HTTP error, or stripped inline script
+  // (preview mirrors) the promise is null/absent and we fall through to fetch.
+  if (typeof window !== 'undefined') {
+    const w = window as unknown as {
+      __DEHUB_FEED__?: Promise<UnifiedFeedResponse | null> | null;
+      __DEHUB_FEED_VIEWER__?: string | null;
+    };
+    const boot = w.__DEHUB_FEED__;
+    if (!signal && boot && isBootDefaultFeedParams(params)) {
+      w.__DEHUB_FEED__ = null;
+      // The boot script publishes the viewer its request was authenticated as.
+      // Adopting another viewer's page (usually the anonymous one, when the
+      // stored token had already expired) is how a logged-in user ends up with
+      // every post rendered unliked: /api/feed answers an unauthenticated
+      // caller with 200 and NO isLiked field, and the mappers read that as
+      // "not liked" while the counts stay correct.
+      const bootViewer = w.__DEHUB_FEED_VIEWER__ ?? null;
+      const bootResponse = bootViewer === viewer ? await boot.catch(() => null) : null;
+      if (bootResponse && !(viewer && isAnonymousResponse(bootResponse))) return bootResponse;
+    }
+  }
+
+  const url = new URL('/api/feed', DEHUB_API_BASE);
+  if (signal) url.searchParams.set('signal', 'true');
+  const visible = [...new Set(visibleTokenIds)].filter(id => Number.isSafeInteger(id) && id > 0).slice(0, 20);
+  if (signal && visible.length) url.searchParams.set('visibleTokenIds', visible.join(','));
+  
+  if (params.page !== undefined) url.searchParams.set('page', String(params.page));
+  if (params.limit !== undefined) url.searchParams.set('limit', String(params.limit));
+  if (params.sortBy) url.searchParams.set('sortBy', params.sortBy);
+  if (params.sortOrder) url.searchParams.set('sortOrder', params.sortOrder);
+  if (params.postType && params.postType !== 'all') url.searchParams.set('postType', params.postType);
+  if (params.status) url.searchParams.set('status', params.status);
+  if (params.minter) url.searchParams.set('minter', params.minter);
+  if (params.search) url.searchParams.set('search', params.search);
+  if (params.owner) url.searchParams.set('owner', params.owner);
+  if (params.category) url.searchParams.set('category', params.category);
+  if (params.isPPV !== undefined) url.searchParams.set('isPPV', String(params.isPPV));
+  if (params.isLocked !== undefined) url.searchParams.set('isLocked', String(params.isLocked));
+  if (params.hasBounty !== undefined) url.searchParams.set('hasBounty', String(params.hasBounty));
+  if (params.hasPlans !== undefined) url.searchParams.set('hasPlans', String(params.hasPlans));
+  if (params.range) url.searchParams.set('range', params.range);
+  if (params.from) url.searchParams.set('from', params.from);
+  if (params.to) url.searchParams.set('to', params.to);
+  if (params.shuffleSeed) url.searchParams.set('shuffleSeed', params.shuffleSeed);
+  if (params.maxPerCreator !== undefined) url.searchParams.set('maxPerCreator', String(params.maxPerCreator));
+  if (params.followingOnly) url.searchParams.set('followingOnly', 'true');
+  if (params.earned) url.searchParams.set('earned', params.earned);
+  
+  // /api/feed never 401s — an expired or revoked token is answered with 200 and
+  // a body stripped of every per-viewer field. Nothing downstream can tell that
+  // apart from "this user liked nothing", so the session has to be made good
+  // BEFORE the request goes out rather than repaired after a 401 that never
+  // comes. requestFeed() is the single retryable attempt.
+  const requestFeed = async (token: string | null): Promise<UnifiedFeedResponse> => {
+    // No Content-Type on this bodyless GET: it would force a CORS preflight.
+    const headers: HeadersInit = {
+      'Accept': 'application/json',
+    };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
+    const response = await fetch(url.toString(), { headers });
+    if (!response.ok) {
+      throw new Error(`Feed API error: ${response.status}`);
+    }
+    return response.json();
+  };
+
+  let token = getAuthToken();
+  if (token && isTokenExpired()) {
+    // Refresh failures (revoked session, offline) fall through as anonymous —
+    // the feed itself must still render.
+    token = await ensureFreshToken().catch(() => null);
+  }
+
+  const result = await requestFeed(token);
+
+  // Belt and braces: the client's expiry bookkeeping can disagree with the
+  // server (a login response without `expiresIn` leaves isTokenExpired() on a
+  // 24h guess). If we believed we were authenticated and the page came back
+  // with no viewer fields at all, the token was dead — refresh once and refetch
+  // so the cache never stores someone else's engagement state.
+  if (viewer && token && (isAnonymousResponse(result) || isSignInWall(result))) {
+    const fresh = await ensureFreshToken().catch(() => null);
+    if (fresh && fresh !== token) return requestFeed(fresh);
+  }
+
+  noteSignInWall(result);
+  return result;
+}
+
+// ===========================================================================
+// HOOK
+// ===========================================================================
+
+interface UseUnifiedFeedOptions extends Omit<UnifiedFeedParams, 'page'> {
+  enabled?: boolean;
+}
+
+/**
+ * Core page loader shared by useUnifiedFeed and prefetchUnifiedFeed so the
+ * boot-time prefetch caches exactly what the hook would fetch.
+ */
+async function loadUnifiedFeedPage(args: {
+  params: Omit<UnifiedFeedParams, 'page' | 'limit'>;
+  limit: number;
+  pageParam: number;
+  viewer?: string | null;
+  blockedAddresses?: Set<string>;
+  shuffleSeedRef?: { current: string };
+}) {
+  const { params, limit, pageParam, viewer = getFeedViewer(), blockedAddresses, shuffleSeedRef } = args;
+
+  // For random sort: reuse the seed from the first page response for stable pagination
+  const queryParams = { ...params };
+  if (params.sortBy === 'random' && pageParam > 1 && shuffleSeedRef?.current) {
+    queryParams.shuffleSeed = shuffleSeedRef.current;
+  }
+
+  const response = await fetchUnifiedFeedFromAPI({
+    ...queryParams,
+    page: pageParam,
+    limit,
+  }, viewer);
+  noteCoAuthors(response);
+
+  // Store the shuffleSeed from the first page for subsequent pages
+  if (params.sortBy === 'random' && response.shuffleSeed && pageParam === 1 && shuffleSeedRef) {
+    shuffleSeedRef.current = response.shuffleSeed;
+  }
+
+  // Filter out blocked creators and live posts that never aired.
+  // Normalize timestamp fields so downstream mappers/cache always get a real ISO date.
+  const filteredItems = (response.result || [])
+    .map(item => ({
+      ...item,
+      createdAt: item.createdAt || item.updatedAt || (item as any).created_at || (item as any).updated_at || '',
+    }))
+    .filter(item => !isBlockedCreator(item, blockedAddresses) && !isBlockedPost(item) && !isUnairedLivePost(item));
+
+  // Enrich quote posts that are missing their quotedPost data
+  const needsEnrich: { idx: number; item: any }[] = [];
+  for (let i = 0; i < filteredItems.length; i++) {
+    const item = filteredItems[i];
+    const raw = item as any;
+    if (raw.isQuotePost && raw.quotedTokenId && !raw.quotedPost) {
+      needsEnrich.push({ idx: i, item: raw });
+    }
+  }
+  if (needsEnrich.length > 0) {
+    const BATCH_SIZE = 5;
+    for (let b = 0; b < needsEnrich.length; b += BATCH_SIZE) {
+      const batch = needsEnrich.slice(b, b + BATCH_SIZE);
+      const settled = await Promise.allSettled(
+        batch.map(({ item }) => getNFTInfo(String(item.quotedTokenId)))
+      );
+      settled.forEach((outcome, i) => {
+        if (outcome.status === 'fulfilled' && outcome.value) {
+          filteredItems[batch[i].idx] = { ...batch[i].item, quotedPost: outcome.value };
+        }
+      });
+    }
+  }
+
+  return {
+    items: filteredItems,
+    pagination: response.pagination,
+    page: pageParam,
+    shuffleSeed: response.shuffleSeed,
+  };
+}
+
+/**
+ * Find a post in any already-cached unified-feed page (home, explore, profile
+ * tabs — every param variant of the ['unified-feed', …] infinite query).
+ * Lets detail views (SinglePostPage) paint instantly with the object the feed
+ * already holds while the authoritative fetch runs behind it.
+ */
+export function findCachedFeedPost(
+  queryClient: QueryClient,
+  tokenId: string | number,
+): UnifiedFeedItem | undefined {
+  const idNum = Number(tokenId);
+  if (!Number.isFinite(idNum)) return undefined;
+  for (const query of queryClient.getQueryCache().findAll({ queryKey: ['unified-feed'] })) {
+    const data = query.state.data as { pages?: Array<{ items?: UnifiedFeedItem[] }> } | undefined;
+    if (!data?.pages) continue;
+    for (const page of data.pages) {
+      const hit = page.items?.find(item => Number(item.tokenId) === idNum);
+      if (hit) return hit;
+    }
+  }
+  return undefined;
+}
+
+/**
+ * Warm the feed cache before React mounts (called from App.tsx module scope
+ * on cold loads of / and /app). Mirrors useUnifiedFeed's option
+ * normalization so the queryKey hashes identically; staleTime matches the
+ * hook, so the mounted hook adopts the prefetched page instead of refetching.
+ */
+export function prefetchUnifiedFeed(queryClient: QueryClient, options: UseUnifiedFeedOptions = {}) {
+  const { enabled: _enabled = true, limit = 20, ...params } = options;
+  // AuthProvider seeds walletAddress from this same localStorage key, so the
+  // key computed here matches the one the mounted hook computes.
+  const viewer = getFeedViewer();
+  return queryClient.prefetchInfiniteQuery({
+    queryKey: ['unified-feed', params, limit, viewer],
+    queryFn: async ({ pageParam = 1 }) => {
+      const page = await loadUnifiedFeedPage({ params, limit, pageParam, viewer });
+      mergeLiveCounts(queryClient, page.items);
+      return page;
+    },
+    initialPageParam: 1,
+    staleTime: 1000 * 60 * 5,
+    gcTime: 1000 * 60 * 30,
+  });
+}
+
+/**
+ * Hook to fetch unified feed with infinite scroll
+ */
+export function useUnifiedFeed(options: UseUnifiedFeedOptions = {}) {
+  const queryClient = useQueryClient();
+  const { enabled = true, limit = 20, ...params } = options;
+  const { isAuthenticated, walletAddress } = useAuth();
+  
+  // Fetch dynamic block list for authenticated users
+  const { data: blockList } = useQuery({
+    queryKey: ['block-list'],
+    queryFn: getBlockList,
+    enabled: isAuthenticated,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+  });
+
+  // Muted authors are hidden from the feed the same way blocked ones are.
+  //
+  // The mute hook prunes the cached pages so the post vanishes where it sits,
+  // but nothing read the list afterwards — so the next refetch (pull to
+  // refresh, the new-posts pill, a filter change, any post reaction that
+  // invalidates the feed) brought them straight back. A mute that survives
+  // until the next refresh is not a mute.
+  const { data: muteList } = useQuery({
+    queryKey: ['mute-list'],
+    queryFn: async () => (await import('@/lib/api/dehub/mutes')).getMuteList(),
+    enabled: isAuthenticated,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+  });
+
+  const blockedAddresses = useMemo(() => {
+    const hidden = new Set<string>();
+    for (const u of blockList ?? []) hidden.add(u.address.toLowerCase());
+    for (const u of muteList ?? []) hidden.add(u.address.toLowerCase());
+    if (!hidden.size) return undefined;
+    return hidden;
+  }, [blockList, muteList]);
+
+  
+  // Track shuffleSeed across pages for random sort stable pagination
+  const shuffleSeedRef = { current: '' };
+
+  // Per-viewer flags (isLiked, isSaved, isUnlocked…) are part of the response,
+  // so they are part of the cache identity. Without this, a page fetched while
+  // logged out — or with a token the server had already expired — stays cached
+  // under the same key after sign-in and renders the user's own likes as
+  // inactive, with the counts still correct. The profile tab has always keyed
+  // on the viewer (['dehub-user-content', userId, viewerAddress]), which is why
+  // the same post shows liked there and unliked here.
+  const viewer = walletAddress?.toLowerCase() || null;
+
+  return useInfiniteQuery({
+    queryKey: ['unified-feed', params, limit, viewer],
+    queryFn: async ({ pageParam = 1 }) => {
+      const page = await loadUnifiedFeedPage({ params, limit, pageParam, viewer, blockedAddresses, shuffleSeedRef });
+      mergeLiveCounts(queryClient, page.items);
+      return page;
+    },
+    getNextPageParam: (lastPage) => {
+      if (lastPage.pagination?.hasMore === true) {
+        return lastPage.page + 1;
+      }
+      if (lastPage.pagination?.hasMore === false) {
+        return undefined;
+      }
+      const itemCount = lastPage.items?.length || 0;
+      return itemCount >= limit ? lastPage.page + 1 : undefined;
+    },
+    initialPageParam: 1,
+    enabled,
+    staleTime: 1000 * 60 * 5,
+    gcTime: 1000 * 60 * 30,
+    refetchOnWindowFocus: false,
+    refetchOnMount: true,
+    refetchOnReconnect: true,
+    retry: 2,
+    placeholderData: keepPreviousData,
+  });
+}
+
+/** Rows pulled per head poll. Also the ceiling on the count the pill can show. */
+const NEW_POSTS_HEAD_SIZE = 20;
+
+/**
+ * How often the visible head is re-checked while the feed is on screen.
+ * The response is also merged into every cached copy of each post, so views
+ * and reactions move on screen without the reader refreshing the page.
+ */
+export const LIVE_ENGAGEMENT_POLL_MS = 45_000;
+
+export interface NewPostAuthor {
+  address: string;
+  name: string;
+  avatarUrl?: string;
+}
+
+const NO_AUTHORS: NewPostAuthor[] = [];
+
+interface UseNewPostsSignalOptions extends Omit<UnifiedFeedParams, 'page'> {
+  /**
+   * Poll only while the feed is actually on screen. PersistentPageCache keeps
+   * HomeFeed mounted for the whole session, so without a route gate this runs
+   * every minute from every other page too.
+   */
+  enabled?: boolean;
+  /**
+   * Whether position in this list means time. The pill is suppressed when it
+   * does not — but the poll still runs, because refreshing the counts on the
+   * cards already rendered is worth doing under every sort.
+   */
+  chronological?: boolean;
+  /** `createdAt` of the newest post currently rendered. */
+  newestCreatedAt?: string;
+  /** Read the viewport at poll time; scrolling does not create more requests. */
+  getVisibleTokenIds?: () => readonly number[];
+}
+
+/**
+ * Reports how many posts newer than the ones on screen exist, so the feed can
+ * offer a "N new posts" pill instead of leaving the reader on a timeline that
+ * quietly went stale.
+ *
+ * The list query deliberately never refetches on focus — pulling the feed out
+ * from under someone mid-scroll loses their place. That's right for the list
+ * and wrong for knowing whether anything happened, so this polls the head of
+ * the same feed on its own key and renders nothing from it. The reader decides
+ * when the list moves.
+ *
+ * Comparison is on `createdAt`, not on ids: a post is visible at status
+ * `signed` before it mints and the reaper cron recycles its tokenId, so ids
+ * aren't stable enough to test identity across two fetches.
+ */
+export function useNewPostsSignal(options: UseNewPostsSignalOptions = {}) {
+  const { enabled = true, chronological = true, newestCreatedAt, getVisibleTokenIds, ...params } = options;
+  const { walletAddress } = useAuth();
+  const queryClient = useQueryClient();
+  const viewer = walletAddress?.toLowerCase() || null;
+
+  // The feed enables this the moment its own first page lands, so a head
+  // request then would only fetch that page again. Hold the first poll back
+  // one interval; after that it runs on the normal schedule.
+  const [armed, setArmed] = useState(false);
+  useEffect(() => {
+    if (!enabled || armed) return;
+    const timer = setTimeout(() => setArmed(true), LIVE_ENGAGEMENT_POLL_MS);
+    return () => clearTimeout(timer);
+  }, [enabled, armed]);
+
+  const { data } = useQuery({
+    queryKey: ['unified-feed-head', params, viewer],
+    queryFn: () =>
+      fetchUnifiedFeedFromAPI({ ...params, page: 1, limit: NEW_POSTS_HEAD_SIZE }, viewer, true, getVisibleTokenIds?.()),
+    enabled: enabled && armed,
+    refetchInterval: LIVE_ENGAGEMENT_POLL_MS,
+    // A backgrounded tab shouldn't keep hitting the API to update a pill
+    // nobody can see.
+    refetchIntervalInBackground: false,
+    staleTime: LIVE_ENGAGEMENT_POLL_MS / 2,
+    gcTime: 5 * 60_000,
+    retry: 1,
+  });
+
+  // The rows this poll already paid for carry current counts for the head of
+  // the feed — the cards the reader is most likely looking at. Folding them in
+  // is what makes views and likes move without a refresh; the pill below is the
+  // same request's other job. See mergeLiveCounts.
+  useEffect(() => {
+    // UnifiedFeedItem declares its counts; RawFeedRow is the untyped object the
+    // cache actually holds. Neither is a subtype of the other, hence the hop.
+    const rows = data ? [...data.result, ...(data.visibleResult ?? [])] as unknown as RawFeedRow[] : undefined;
+    if (rows?.length) mergeLiveCounts(queryClient, rows);
+  }, [data, queryClient]);
+
+  return useMemo(() => {
+    const newest = chronological && newestCreatedAt ? Date.parse(newestCreatedAt) : NaN;
+    if (!data || Number.isNaN(newest)) return { newPostCount: 0, atCap: false, newPostAuthors: NO_AUTHORS, latestNewAt: 0 };
+
+    let latestNewAt = 0;
+    // Only count rows the list would actually render. A stranded "live" post
+    // from a failed stream launch never enters the feed (loadUnifiedFeedPage
+    // drops it) yet sits at the head of the chronological sort indefinitely —
+    // counting it would make the pill claim new posts that clicking can never
+    // surface.
+    // Both lists, for the same reason the feed itself reads both: a muted
+    // author's post counted towards the pill and then was not there when it
+    // was tapped.
+    const blockList = queryClient.getQueryData<Array<{ address: string }>>(['block-list']);
+    const muteList = queryClient.getQueryData<Array<{ address: string }>>(['mute-list']);
+    const hidden = new Set<string>();
+    for (const u of blockList ?? []) hidden.add(u.address.toLowerCase());
+    for (const u of muteList ?? []) hidden.add(u.address.toLowerCase());
+    const blockedAddresses = hidden.size ? hidden : undefined;
+
+    const newer = (data.result || []).filter((item) => {
+      if (
+        isUnairedLivePost(item) ||
+        isBlockedPost(item) ||
+        isBlockedCreator(item, blockedAddresses)
+      ) {
+        return false;
+      }
+      // Same normalisation loadUnifiedFeedPage applies, so a row missing
+      // createdAt doesn't read as epoch zero and get counted as old.
+      const raw =
+        item.createdAt || item.updatedAt || (item as any).created_at || (item as any).updated_at;
+      const stamp = raw ? Date.parse(raw) : NaN;
+      if (Number.isNaN(stamp) || stamp <= newest) return false;
+      latestNewAt = Math.max(latestNewAt, stamp);
+      return true;
+    });
+
+    // The faces on the pill: the newest few distinct authors, newest first.
+    const newPostAuthors: NewPostAuthor[] = [];
+    for (const item of newer) {
+      const address = item.minter?.toLowerCase();
+      if (!address || newPostAuthors.some((a) => a.address === address)) continue;
+      const avatarPath = extractAvatarPath(item);
+      newPostAuthors.push({
+        address,
+        name: item.minterUser?.displayName || item.minterDisplayName || item.minterUsername || item.mintername || '',
+        avatarUrl: avatarPath ? buildAvatarUrl(item.minter, avatarPath) : undefined,
+      });
+      if (newPostAuthors.length === 3) break;
+    }
+
+    return {
+      newPostCount: newer.length,
+      // Every row came back newer, so there are likely more than were fetched.
+      atCap: newer.length >= NEW_POSTS_HEAD_SIZE,
+      newPostAuthors,
+      /** createdAt (ms) of the newest post counted; a tapped chip stays away
+       *  until a post newer than this one turns up. */
+      latestNewAt,
+    };
+  }, [data, newestCreatedAt, chronological, queryClient]);
+}

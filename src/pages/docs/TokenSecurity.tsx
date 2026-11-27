@@ -1,0 +1,59 @@
+import { useTranslation as _useCopy } from 'react-i18next';
+import React from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Shield, Bug } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
+
+const TokenSecurity = () => {
+  const { t: _copy } = _useCopy();
+  const { t } = useLanguage();
+
+  return (
+    <div className="max-w-4xl mx-auto space-y-8">
+      <div>
+        <h1 className="text-4xl font-bold text-foreground mb-4">{t('tokenSecurity.title')}</h1>
+        <p className="text-lg text-muted-foreground leading-relaxed">{t('tokenSecurity.subtitle')}</p>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-xl">{t('tokenSecurity.contractSecurity')}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-6">
+            <div className="flex items-start space-x-4 p-4 bg-muted rounded-lg border">
+              <Shield className="w-6 h-6 text-foreground mt-1 flex-shrink-0" />
+              <div>
+                <h4 className="font-semibold text-foreground mb-1">{t('tokenSecurity.audit')}</h4>
+                <p className="text-muted-foreground">
+                  <a href="https://skynet.certik.com/projects/dehub?__cf_chl_rt_tk=N_M44mFcDWKtLmLVGNEC1rDps5hWVdQyhr3m1jLOTNM-1748707726-1.0.1.1-dfgolPAmeQ8KnvRDO3y0pFse0jC2Q1ro5bKRvE5WJPo" target="_blank" rel="noopener noreferrer" className="text-primary hover:text-primary/80 underline">{_copy("copy.d31dc978d07c", { defaultValue: "Certik" })}</a>
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-start space-x-4 p-4 bg-muted rounded-lg border">
+              <Bug className="w-6 h-6 text-foreground mt-1 flex-shrink-0" />
+              <div>
+                <h4 className="font-semibold text-foreground mb-1">{t('tokenSecurity.bugBounty')}</h4>
+                <p className="text-muted-foreground">
+                  <a href="mailto:dev@riftn.com" className="text-primary hover:text-primary/80 underline">{_copy("copy.886e533d7364", { defaultValue: "dev@riftn.com" })}</a>
+                </p>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="docs-glass">
+        <CardHeader>
+          <CardTitle className="text-xl text-foreground">{t('tokenSecurity.disclaimer')}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-muted-foreground leading-relaxed text-sm">{t('tokenSecurity.disclaimerText')}</p>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
+export default TokenSecurity;

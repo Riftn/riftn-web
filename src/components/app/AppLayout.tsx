@@ -1,0 +1,765 @@
+import { useTranslation as _useCopy } from 'react-i18next';
+import { NotificationsDrawer } from './NotificationsDrawer';
+import { MagneticDockEntry } from './MagneticDockEntry';
+import React, { Suspense, useState, useEffect, useRef, useLayoutEffect, type ReactNode } from 'react';
+import { Outlet, useLocation, useMatch, useNavigationType } from 'react-router-dom';
+import { AppSidebar } from './AppSidebar';
+import { MobileBottomNav } from './MobileBottomNav';
+import { useIsDesktopViewport } from '@/hooks/use-is-desktop';
+
+// The right rail (search, chat, trending, suggestions) renders only from lg up
+// and already returned null below that — but as a static import its code sat
+// in every phone's entry bundle. Lazy, and mounted only on a desktop viewport,
+// so a phone never downloads it. Desktop kicks the fetch off here, at module
+// evaluation, so the chunk is in flight before React mounts and the rail
+// arrives a beat behind the rest of the shell instead of a round trip later.
+import { HomeRightSidebarSkeleton } from './PageSkeletons';
+const loadRightSidebar = () => import('./RightSidebar').then(m => ({ default: m.RightSidebar }));
+const RightSidebar = React.lazy(loadRightSidebar);
+if (typeof window !== 'undefined' && window.matchMedia?.('(min-width: 1024px)').matches) {
+  loadRightSidebar().catch(() => { /* React.lazy retries on render */ });
+}
+
+/**
+ * Same width as the rail's root (RightSidebar.tsx: `w-72 xl:w-80`),
+ * so the column layout is final from the first commit. With a null fallback
+ * the middle column briefly took the rail's width too and snapped back when
+ * the chunk landed — a visible jump of the welcome panel on every desktop
+ * first visit, and Lighthouse desktop scored it as 0.125 of layout shift.
+ */
+// Draws the same rail skeleton as the boot HTML and the shell fallback, so
+// the rail never blanks out between them and the real rail (it used to be an
+// empty spacer here: skeleton → blank → skeleton-ish → real).
+const RailPlaceholder = HomeRightSidebarSkeleton;
+
+function DesktopRightRail() {
+  const isDesktop = useIsDesktopViewport();
+  if (!isDesktop) return null;
+  return (
+    <Suspense fallback={<RailPlaceholder />}>
+      <ProfileRimColors />
+      <RightSidebar />
+    </Suspense>
+  );
+}
+import { StickyNavHideSync } from './StickyNavHideSync';
+import { PillRouteMotion } from './PillRouteMotion';
+import { GlobalDropZoneProvider, useGlobalDropZone } from '@/hooks/use-global-drop-zone';
+// Direct import, NOT the '@/hooks' barrel: the barrel re-exports every hook
+// (TV player, etc.), so importing it here would drag all of them — and their
+// dependencies — into the eager entry bundle. This once cost 540 kB of hls.js.
+import { RadioPlayerProvider } from '@/hooks/use-radio-player';
+import { CoinPlacementProvider } from '@/hooks/use-coin-placement';
+import { SidebarCollapseProvider, useSidebarCollapse } from '@/contexts/SidebarCollapseContext';
+import { AutoplayProvider } from '@/contexts/AutoplayContext';
+import { AnimationsProvider } from '@/contexts/AnimationsContext';
+import { ShortsEnabledProvider } from '@/contexts/ShortsEnabledContext';
+import { OnboardingChecklistProvider } from '@/contexts/OnboardingChecklistContext';
+import { PiPProvider } from '@/contexts/PiPContext';
+import { ChartPiPProvider } from '@/contexts/ChartPiPContext';
+import { FloatingPiPOverlay } from '@/components/app/tv/FloatingPiPOverlay';
+import { useStoriesStore } from '@/store/storiesStore';
+import { FloatingChartPiPOverlay } from '@/components/app/charts/FloatingChartPiPOverlay';
+import { NewMemberRegistrar } from '@/components/app/NewMemberRegistrar';
+// Lazy: both are self-timed prompts that open seconds after load at the
+// earliest, so they have no business in the entry chunk.
+const UserFeedbackSurvey = React.lazy(() =>
+  import('@/components/app/UserFeedbackSurvey').then(m => ({ default: m.UserFeedbackSurvey }))
+);
+const ShippedFeatureNotificationModal = React.lazy(() =>
+  import('@/components/app/ShippedFeatureNotificationModal').then(m => ({ default: m.ShippedFeatureNotificationModal }))
+);
+// Lazy: the post composer is heavy (media handling) and only needed when the
+// user opens it. Create controls warm it on pointer/keyboard intent.
+const PostModal = React.lazy(() =>
+  import('@/features/post/PostModal').then(m => ({ default: m.PostModal }))
+);
+// Direct import, not the radio barrel — the barrel would drag the whole radio
+// suite (fullscreen visualizer, station cards, …) into the always-mounted chunk.
+// Lazy as well: it renders nothing until a station is playing, which takes a
+// tap, so there is no reason to parse it before first paint.
+const RadioMiniPlayer = React.lazy(() =>
+  import('@/components/app/radio/RadioMiniPlayer').then(m => ({ default: m.RadioMiniPlayer }))
+);
+// Only fetched once a video post is actually being prepared.
+const PostProcessingDock = React.lazy(() => import('@/components/app/PostProcessingDock'));
+// The live you minimised: hls.js and the window only load once one is.
+const LiveMiniPlayer = React.lazy(() => import('@/components/app/live/LiveMiniPlayer'));
+import { useLiveMini } from '@/lib/live-mini';
+import { StageMiniPlayer } from '@/components/app/spaces/StageMiniPlayer';
+import { StageRecordingMiniPlayer } from '@/components/app/stages/StageRecordingMiniPlayer';
+import { useAudioPostPoppedOut } from '@/lib/audio-post-popout';
+import { loadPostPage } from '@/lib/preload-post-page';
+
+// Mounted app-wide so a popped-out track survives navigation, but it renders
+// nothing until somebody pops one out — and until then its panel and waveform
+// were being parsed before first paint. Same treatment as the radio player's
+// fullscreen visualiser: reached only once there is a track to show.
+const AudioPostMiniPlayer = React.lazy(() =>
+  import('@/components/app/audio/AudioPostMiniPlayer').then((m) => ({
+    default: m.AudioPostMiniPlayer,
+  })),
+);
+// Spotify's corner player, same gate: nothing loads until a Spotify card's
+// Play is pressed.
+const SpotifyMiniPlayer = React.lazy(() =>
+  import('@/components/app/spotify/SpotifyMiniPlayer').then((m) => ({
+    default: m.SpotifyMiniPlayer,
+  })),
+);
+import { useSpotifyPlayer } from '@/lib/spotify-player';
+import { AudioSpacesModal } from '@/components/app/spaces/AudioSpacesModal';
+import { MinimizedAIChats } from '@/components/app/MinimizedAIChats';
+import { DmDockMount } from '@/components/app/chat/DmDockMount';
+
+import { PersistentPageCache, isCachedPageRoute } from './PersistentPageCache';
+import { useOwnProfileUrl } from '@/hooks/use-own-profile-url';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { isHomeFeedRoute } from '@/lib/home-routes';
+import { useRetainedPost, type RetainedPostEntry } from '@/lib/retained-post-surface';
+import { RetainedPostDock } from '@/components/app/feeds/RetainedPostSurface';
+import { QuietPostLoading } from '@/components/app/QuietPostLoading';
+import { getDocumentScrollTop, scrollDocumentTo } from '@/lib/document-scroll';
+import { rememberScroll, restoreDocumentScroll, savedScroll } from '@/lib/back-scroll';
+import { revealNavChrome } from '@/hooks/use-scroll-direction';
+import { GlobalFeedNav } from './GlobalFeedNav';
+import { ProfileRimColors } from './ProfileRimColors';
+import { GlobalFeedNavProvider } from '@/contexts/GlobalFeedNavContext';
+import { useFeedSwallowClip } from '@/hooks/use-feed-swallow-clip';
+import { useStageAlerts } from '@/hooks/use-stage-alerts';
+import { usePublicChatAlerts } from '@/hooks/use-public-chat-alerts';
+import { usePublicChatReadSync } from '@/hooks/use-public-chat-unread';
+import { cn } from '@/lib/utils';
+import { KidsModeGate } from '@/components/app/KidsModeGate';
+// Lazy: only rendered as the post overlay when a post is opened from home —
+// a whole page's worth of code that shouldn't ride in the entry bundle.
+const SinglePostPage = React.lazy(loadPostPage);
+// "Show when I'm online" presence — mounted for the whole session so the
+// green dot on Messages is right wherever this person is. Lazy: nothing on
+// first paint needs it.
+const OnlinePresenceHost = React.lazy(() => import('@/components/app/OnlinePresenceHost'));
+// The shorts feed a phone opens by swiping up out of a fullscreen video. Lazy
+// and mounted only from the first swipe on: the viewer and its five feed
+// queries are nothing to anyone who never makes the gesture.
+const BrainrotFeedHost = React.lazy(() => import('@/components/app/BrainrotFeedHost'));
+const StoriesHost = React.lazy(() => import('@/components/app/stories/StoriesHost'));
+import { useBrainrotEverOpened } from '@/lib/brainrot-feed';
+
+
+interface AppLayoutContentProps {
+  children?: ReactNode;
+}
+
+// Session storage keys
+const POST_OVERLAY_ORIGIN_KEY = 'post-overlay-origin';
+
+// The home feed is reachable at /app and at the clean feed-tab URLs
+// (/videos, /shorts) — all backed by the same cached HomePage. Layout that's
+// specific to the home feed (full-bleed mosaic, collapsed-mode global nav)
+// must treat all of them the same. The route list is shared with
+// LiveNowBar and HomeFeed — see lib/home-routes.
+
+// The post layer tracks <main>'s live box (the gap between the sidebars) via the
+// CSS vars published below — the same ones the login modal centers against.
+const POST_LAYER_LEFT = 'var(--app-main-left, 0px)';
+const POST_LAYER_WIDTH = 'var(--app-main-width, 100%)';
+
+function PostOverlayEffects({
+  overlayRef,
+  postId,
+}: {
+  overlayRef: React.RefObject<HTMLDivElement>;
+  postId: string | null;
+}) {
+  // Render this AFTER the overlay element: refs attach in tree order during
+  // the layout pass, so only a later sibling sees the element here.
+  useFeedSwallowClip(overlayRef, '[data-feed-nav]', []);
+  useLayoutEffect(() => {
+    if (overlayRef.current) overlayRef.current.scrollTop = 0;
+  }, [overlayRef, postId]);
+  return null;
+}
+
+function PostOverlayLoading() {
+  return (
+    <>
+      <div aria-hidden data-post-overlay-backdrop className="fixed top-0 bottom-0 z-10" style={{ left: POST_LAYER_LEFT, width: POST_LAYER_WIDTH }} />
+      <div data-post-overlay aria-busy="true" className="fixed top-0 bottom-0 z-10 pt-28" style={{ left: POST_LAYER_LEFT, width: POST_LAYER_WIDTH }}>
+        <QuietPostLoading />
+      </div>
+    </>
+  );
+}
+
+function RetainedPostOverlay({ entry }: { entry: RetainedPostEntry }) {
+  const ref = useRef<HTMLDivElement>(null);
+  return <>
+    <div aria-hidden data-post-overlay-backdrop className="fixed top-0 bottom-0 z-10" style={{ left: POST_LAYER_LEFT, width: POST_LAYER_WIDTH }} />
+    <div ref={ref} data-post-overlay data-scroll-nav-source className="fixed top-0 bottom-0 z-10 overflow-y-auto overscroll-contain"
+      style={{ left: POST_LAYER_LEFT, width: POST_LAYER_WIDTH, WebkitOverflowScrolling: 'touch' }}>
+      <div data-post-rise className="pt-24 lg:pt-14 px-2 sm:px-3 pb-24">
+        <RetainedPostDock entry={entry} />
+        {/* The existing card is already visible; only its optional details await code/data. */}
+        <ErrorBoundary compact resetKey={entry.id} label="Post">
+          <Suspense fallback={null}><SinglePostPage inOverlay detailsOnly /></Suspense>
+        </ErrorBoundary>
+      </div>
+    </div>
+    {/* After the scroller, never inside or before it: React attaches a ref in
+        the same pass that runs layout effects, in tree order, so an earlier
+        sibling or a child sees this ref as null and the pill clip never
+        attached (posts slid up past the pill on every canvas theme). */}
+    <PostOverlayEffects overlayRef={ref} postId={entry.id} />
+  </>;
+}
+
+function AppLayoutContent({ children }: AppLayoutContentProps) {
+  const { t: _copy } = _useCopy();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { isPostModalOpen, closePostModal, pendingFiles, clearPendingFiles, initialText, clearInitialText, initialCategory, clearInitialCategory, initialSound, clearInitialSound, openPostModal } = useGlobalDropZone();
+
+  // A post written somewhere on this origin that has no composer of its own —
+  // today that is Trenchstar opened straight at /trenchstar-game/, where the
+  // game IS dehub.io but is not this React app and so cannot reach the modal.
+  // It leaves the draft here and sends the tab to /app.
+  //
+  // In the ARCADE the same desk goes through the postMessage bridge instead:
+  // that frame is an opaque origin, so it has no localStorage of ours to
+  // write to, which is the whole reason the bridge exists.
+  //
+  // Only a fresh handoff counts. A draft that has sat in storage since some
+  // other day must not ambush somebody with a composer they did not ask for.
+  useEffect(() => {
+    const KEY = 'dehub.compose.draft';
+    let raw: string | null = null;
+    try {
+      raw = localStorage.getItem(KEY);
+      if (raw) localStorage.removeItem(KEY);
+    } catch {
+      return;
+    }
+    if (!raw) return;
+    try {
+      const draft = JSON.parse(raw) as { text?: unknown; at?: unknown };
+      const text = typeof draft?.text === 'string' ? draft.text.slice(0, 500).trim() : '';
+      const at = typeof draft?.at === 'number' ? draft.at : 0;
+      if (text && Date.now() - at < 120_000) openPostModal(text);
+    } catch {
+      // Unparseable is nothing to act on, and it has already been cleared.
+    }
+  }, [openPostModal]);
+
+  // PostModal mounts on first open, then stays mounted so its close animation
+  // isn't cut short. Create controls and post cards warm their chunks on intent.
+  const [postModalMounted, setPostModalMounted] = useState(false);
+  useEffect(() => {
+    if (isPostModalOpen) setPostModalMounted(true);
+  }, [isPostModalOpen]);
+  const { isCollapsed } = useSidebarCollapse();
+  // Before any route matching below: /<your username> is your cached profile.
+  useOwnProfileUrl();
+  const location = useLocation();
+  const navigationType = useNavigationType();
+  const mainRef = useRef<HTMLElement | null>(null);
+  // Gate for the corner player's chunk — see its lazy import above.
+  const hasPoppedOutAudio = useAudioPostPoppedOut();
+  const spotifyOpen = useSpotifyPlayer().current !== null;
+  const liveMiniOpen = useLiveMini() !== null;
+  const brainrotOpened = useBrainrotEverOpened();
+  const storiesMounted = useStoriesStore(st => st.mounted);
+
+  // "A stage you set a reminder for is starting soon / just started" — announced
+  // wherever you are in the app, so it mounts with the shell rather than on the
+  // stages page.
+  useStageAlerts();
+
+  // Public chat is opt-in and rate-limited by the reader — see the hook. Same
+  // reason as the stage alerts above: it has to reach you wherever you are,
+  // not only on the page that owns the feature.
+  usePublicChatAlerts();
+  usePublicChatReadSync();
+
+  // Expose the middle panel's live bounds (the gap between the left/right
+  // sidebars) as CSS vars so anything mounted outside AppLayout — the login
+  // modal, login-flow toasts — can center itself in that zone instead of
+  // the full viewport. Re-measured on every route and collapse change: the
+  // ResizeObserver alone missed the width change a route like /dex makes to
+  // <main>, so one visit left every sheet at the terminal's width until a
+  // window resize. Vars are removed on unmount so they don't go stale on routes
+  // without this layout (those fall back to viewport-wide CSS defaults).
+  //
+  // The trading terminal drops the right rail and widens the shell to 112rem,
+  // so its <main> is most of the screen. Sheets and the login modal must not
+  // follow it — they keep the column every other page has, centred where the
+  // terminal's <main> sits: the 80rem shell minus the left sidebar and the
+  // rail width for the current breakpoint (RightSidebar: w-72 xl:w-80).
+  const isWideMainRoute = location.pathname === '/dex' || location.pathname.startsWith('/dex/');
+  useLayoutEffect(() => {
+    const mainEl = mainRef.current;
+    if (!mainEl || typeof ResizeObserver === 'undefined') return;
+
+    const root = document.documentElement.style;
+    const standardColumnWidth = (rect: DOMRect) => {
+      const shell = Math.min(window.innerWidth, 1280);
+      const sidebar = rect.left - (mainEl.parentElement?.getBoundingClientRect().left ?? 0);
+      const w = window.innerWidth;
+      const rail = w >= 1280 ? 320 : w >= 1024 ? 288 : 0;
+      return Math.max(0, shell - sidebar - rail);
+    };
+    // Any write on <html> restyles every element: write only changes.
+    const write = (name: string, value: string) => {
+      if (root.getPropertyValue(name) !== value) root.setProperty(name, value);
+    };
+    const updateBounds = () => {
+      const rect = mainEl.getBoundingClientRect();
+      const width = isWideMainRoute ? Math.min(rect.width, standardColumnWidth(rect)) : rect.width;
+      const left = rect.left + (rect.width - width) / 2;
+      write('--app-main-left', `${left}px`);
+      write('--app-main-width', `${width}px`);
+      write('--app-main-center-x', `${left + width / 2}px`);
+    };
+
+    updateBounds();
+    const observer = new ResizeObserver(updateBounds);
+    observer.observe(mainEl);
+    window.addEventListener('resize', updateBounds);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('resize', updateBounds);
+    };
+  }, [location.pathname, isCollapsed]);
+  useEffect(() => () => {
+    const root = document.documentElement.style;
+    root.removeProperty('--app-main-left');
+    root.removeProperty('--app-main-width');
+    root.removeProperty('--app-main-center-x');
+  }, []);
+  // Disable browser's automatic scroll restoration globally
+  useEffect(() => {
+    if ('scrollRestoration' in history) {
+      history.scrollRestoration = 'manual';
+    }
+  }, []);
+
+  // Expose sidebar collapsed state on <html> for CSS theming (e.g., minimal mode grid)
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    document.documentElement.setAttribute('data-sidebar-collapsed', isCollapsed ? 'true' : 'false');
+  }, [isCollapsed]);
+  
+  // Track if we're on a post overlay route
+  const postMatch = useMatch('/app/post/:postId');
+  const videoMatch = useMatch('/app/video/:tokenId');
+  const isPostRoute = !!(postMatch || videoMatch);
+  
+  // Detect if this post was opened from the feed (overlay mode)
+  const routeState = location.state as { fromFeed?: boolean } | null;
+  const isFromFeed = !!routeState?.fromFeed;
+  const isOverlayPost = isPostRoute && isFromFeed;
+  
+  // Track if we came from home page (for overlay behavior)
+  const [cameFromHome, setCameFromHome] = useState(() => {
+    return sessionStorage.getItem(POST_OVERLAY_ORIGIN_KEY) === 'home';
+  });
+  const prevPathRef = useRef<string | null>(null);
+
+  // Remember whether the open post was reached from the home feed, and forget it
+  // as soon as the user leaves the home↔post pair. Marking the origin is what
+  // decides between the overlay (home stays mounted and visible underneath) and
+  // a standalone post page, so a stale marker would stack home behind posts
+  // opened from a profile or a community.
+  //
+  // There is deliberately no scroll bookkeeping here any more. The overlay is a
+  // fixed layer with its own scroller (see below), so opening a post never moves
+  // the feed's scroll position and there is nothing to save or restore — the feed
+  // is simply still where the user left it when the overlay closes. The old
+  // save/restore pair fought the browser with three rAFs, six timeouts and a
+  // MutationObserver over the whole body for a full second after every back
+  // navigation, which is what made returning to the feed lurch.
+  useEffect(() => {
+    const currentPath = location.pathname;
+    const prevPath = prevPathRef.current;
+    prevPathRef.current = currentPath;
+
+    if (isPostRoute && isHomeFeedRoute(prevPath)) {
+      setCameFromHome(true);
+      sessionStorage.setItem(POST_OVERLAY_ORIGIN_KEY, 'home');
+      return;
+    }
+    if (!isPostRoute && !isHomeFeedRoute(currentPath)) {
+      setCameFromHome(false);
+      sessionStorage.removeItem(POST_OVERLAY_ORIGIN_KEY);
+    }
+  }, [location.pathname, isPostRoute]);
+
+  // Scroll to top when navigating between cached pages (not the home feed,
+  // which keeps its position). `window.scrollTo` alone is a no-op in this app —
+  // body is the scrolling element — hence the shared helper.
+  //
+  // Layout effect, not an effect: an effect runs after paint, so the incoming
+  // page rendered one frame at the outgoing page's scroll offset and only then
+  // snapped to the top. That single frame is the lurch people read as the app
+  // stuttering on every navigation.
+  // The feed hides with display:none behind a profile or any other page, so
+  // the document loses its height and the scroll offset goes with it. Back
+  // used to land at the top of the feed. Keep the last offset the reader
+  // scrolled to and put it back, before paint, when the feed shows again.
+  // (A post opened from the feed is an overlay over a still-visible feed and
+  // never touches this offset.)
+  const onHomeFeed = isHomeFeedRoute(location.pathname);
+  const homeScrollTopRef = useRef(0);
+  useEffect(() => {
+    if (!onHomeFeed) return;
+    // The URL moves on the tap, before this listener is removed, and the page
+    // that replaces the feed can clamp the scroll on its way in.
+    const save = () => {
+      if (isHomeFeedRoute(window.location.pathname)) homeScrollTopRef.current = getDocumentScrollTop();
+    };
+    document.addEventListener('scroll', save, { capture: true, passive: true });
+    return () => document.removeEventListener('scroll', save, { capture: true });
+  }, [onHomeFeed]);
+  // Every history entry keeps its own scroll offset (lib/back-scroll), so
+  // Back lands where the reader left that page: the feed under a post they
+  // opened, a profile grid, Explore, a standalone post. Only the document
+  // scroller counts; the post overlay and other inner scrollers own theirs.
+  const scrollEntryKeyRef = useRef(location.key);
+  useEffect(() => {
+    const save = (e: Event) => {
+      const t = e.target;
+      if (t !== document && t !== document.body && t !== document.documentElement) return;
+      rememberScroll(scrollEntryKeyRef.current, getDocumentScrollTop());
+    };
+    document.addEventListener('scroll', save, { capture: true, passive: true });
+    return () => document.removeEventListener('scroll', save, { capture: true });
+  }, []);
+
+  const prevScrollPathRef = useRef(location.pathname);
+  useLayoutEffect(() => {
+    if (scrollEntryKeyRef.current === location.key) return;
+    scrollEntryKeyRef.current = location.key;
+    const prev = prevScrollPathRef.current;
+    const curr = location.pathname;
+    prevScrollPathRef.current = curr;
+
+    // Arriving on a page always shows the header, bottom nav and page pill
+    // (phones only): Back or a swipe back to the feed after a profile used to
+    // keep them hidden from the scroll on the page you left. A query-only
+    // push or replace (a feed filter, a picture id) is the same page.
+    if (prev !== curr || navigationType === 'POP') revealNavChrome();
+
+    // The overlay is its own scroller: never move the feed beneath it.
+    if (showHomePagePersisted) return;
+
+    // Back / Forward to an entry we have seen: put it back where it was.
+    const saved = savedScroll(location.key);
+    if (saved !== undefined) return restoreDocumentScroll(saved);
+
+    // A fresh visit to the feed (Home tab, logo): the feed hides with
+    // display:none behind other pages and loses its offset, so put back the
+    // last place the reader scrolled it to.
+    if (onHomeFeed) {
+      if (isHomeFeedRoute(prev)) return;
+      const top = homeScrollTopRef.current;
+      if (top > 0) return restoreDocumentScroll(top);
+      return;
+    }
+
+    // A fresh visit to any other kept-alive page starts at its top, before
+    // paint (an effect would show one frame at the old offset first).
+    if (prev !== curr && isCachedPageRoute(curr)) scrollDocumentTo(0);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- runs once per history entry
+  }, [location.key]);
+
+
+  
+  const navigatingFromHomeToPost = isPostRoute && isHomeFeedRoute(prevPathRef.current);
+  // Only persist home behind the post when navigation actually originated from home.
+  // Posts opened from communities/profiles/explore must not stack home underneath.
+  const cameFromHomeOverlay = sessionStorage.getItem(POST_OVERLAY_ORIGIN_KEY) === 'home';
+  const showHomePagePersisted = isPostRoute && isFromFeed && (navigatingFromHomeToPost || cameFromHomeOverlay || cameFromHome);
+
+  // Swallow the post overlay (post card + related feed) at the home nav pill's
+  // top edge under the glass themes — the pill peeks above this overlay, so its
+  // content must cut off there just like the home feed does. Re-attaches when
+  // the overlay mounts/unmounts. No-op when no pill is visible (mobile drawer /
+  // standalone post route).
+  const postOverlayRef = useRef<HTMLDivElement>(null);
+
+  // The overlay is its own scroll container, so it opens at the top by
+  // construction — no scroll-to-top race, and the feed's own scroll offset is
+  // never touched. Post → post (a related video, a quoted post) reuses the same
+  // layer, so reset it explicitly there, before paint.
+  const overlayPostId = postMatch?.params.postId ?? videoMatch?.params.tokenId ?? null;
+  const retainedPost = useRetainedPost(overlayPostId);
+
+  const isCached = isCachedPageRoute(location.pathname);
+  // Messages owns its viewport and scrollable nav clearance, both for the
+  // inbox and open chats. Outer padding would add a dead band below it.
+  const isMessagesRoute = location.pathname === '/app/messages';
+  // Dynamic routes: post overlay, single post, post info, or username profiles
+  const isDynamicRoute = !isCached && !showHomePagePersisted;
+
+  return (
+    <div id="app-root" className="min-h-screen bg-black text-white overflow-x-clip" style={{ touchAction: 'manipulation', overscrollBehavior: 'none' }}>
+      <div
+        className="flex w-full relative min-h-screen mx-auto"
+        style={{
+          // Full-bleed width only where the mosaic uses it (home feed).
+          // Other pages keep the readable 80rem cap even when collapsed,
+          // so long-form content doesn't stretch across ultrawide screens.
+          //
+          // Deliberately not transitioned. This carried
+          // `transition-[max-width] duration-500`, and max-width is a layout
+          // property: with the sidebar collapsed, every trip on or off the home
+          // feed relaid out the whole visible page on every frame for half a
+          // second — during the navigation that most needs to feel immediate.
+          // `will-change` could not help either, since the property is not
+          // compositable. The width now changes on the same frame as the route.
+          maxWidth: isWideMainRoute ? '112rem' : isCollapsed && (isHomeFeedRoute(location.pathname) || showHomePagePersisted) ? '100%' : '80rem',
+        }}
+      >
+        <AppSidebar isOpen={sidebarOpen} onOpenChange={setSidebarOpen} />
+        
+         <main ref={mainRef} data-main-panel data-post-route={isPostRoute ? '' : undefined} className={cn(
+          "flex-1 min-h-screen lg:pt-0 lg:pb-0 min-w-0 w-full bg-black pt-11 relative",
+          isMessagesRoute ? "pb-0" : "pb-16"
+         )}>
+          <GlobalFeedNavProvider>
+            {/* Global feed nav — only shown on the home feed in collapsed mode.
+                Rendered directly in <main>'s flow (no height-clamped wrapper) so
+                its own `sticky top-0` pins to the viewport top and the feed
+                scrolls cleanly behind its opaque bar, clipped at its bottom edge.
+                A shorter sticky wrapper would bound the sticky travel and let the
+                bar slide up instead of clipping. isCollapsed is desktop-only, so
+                on mobile/tablet the home page's own tab bar shows instead. */}
+            {(() => {
+              const isHome = isHomeFeedRoute(location.pathname);
+              if (isHome && isCollapsed) return <GlobalFeedNav />;
+              // Directly-loaded post/video pages have no home feed mounted
+              // underneath to supply the top pill, so render the shared feed nav
+              // here (post variant) as their top chrome. Suppressed for the
+              // from-feed overlay, which already shows the home pill above.
+              if (isPostRoute && !showHomePagePersisted) return <GlobalFeedNav postPage />;
+              return null;
+            })()}
+
+            {/* Persistent page cache — all visited pages stay mounted */}
+            <PersistentPageCache
+              keepHomeVisible={showHomePagePersisted}
+              overlayKey={overlayPostId}
+              retainedPostKey={showHomePagePersisted && retainedPost ? overlayPostId : null}
+            />
+          </GlobalFeedNavProvider>
+          
+          {/* Post overlay — renders on top when viewing a post from home. The
+              home page's sticky tab bar peeks above it (z-110 vs z-10) and its
+              toggle swaps to a back button, which is what makes the transition
+              feel seamless.
+
+              This element IS the post view — a fixed layer pinned over the middle
+              column with its own scroller. That is the whole trick. An in-flow
+              (or absolutely positioned) overlay shares the page scroller with the
+              feed mounted underneath it, so it opened at whatever offset the feed
+              happened to be at and only snapped to the top afterwards — when a
+              scroll-to-top fired at all. Owning the scroll means the post is at
+              its top on the first paint, and the feed's position survives
+              untouched for the trip back.
+
+              It reaches to `top-0`, under the mobile header rather than below it:
+              that header is translucent glass, so whatever sits beneath shows
+              through it, and while you are reading a post that has to be the post
+              — starting the layer at `top-11` left the home feed's text bleeding
+              through the header. The post's own clearance padding keeps its
+              content below the nav pill, and scrolling slides it under the glass
+              exactly like the feed does. */}
+          {showHomePagePersisted && retainedPost && <RetainedPostOverlay entry={retainedPost} />}
+          {showHomePagePersisted && !retainedPost && (
+            <Suspense fallback={<PostOverlayLoading />}>
+              {/* Backing for the post layer, deliberately a separate element from
+                  the scroller: the swallow clip cuts the scroller at the nav
+                  pill's top edge, and a clipped background takes its fill with
+                  it — leaving the feed visible through the translucent header
+                  above the pill.
+
+                  It is needed on every theme. The home feed stays MOUNTED AND
+                  VISIBLE underneath (PersistentPageCache keeps it that way so its
+                  sticky tab bar holds position), and it cannot be hidden with
+                  CSS: feed thumbnails carry `transition-all`, and a running CSS
+                  transition outranks even an `!important` visibility:hidden, so
+                  one thumbnail always survives the hide and floats over the post.
+
+                  NO COLOUR CLASS HERE — this is load-bearing. It shipped as
+                  `bg-black`, which every theme's untagged-slab safety net matches
+                  on `[class*='bg-black']`; those nets are scoped under #app-root,
+                  so they carry an id and beat any plain re-declaration no matter
+                  how many !importants it has. That turned this element — `fixed`,
+                  full height, sized to the middle column — into a full-height
+                  frosted panel behind the whole dedicated post page. The colour
+                  now comes from `background-color: inherit` in index.css, which
+                  resolves to <main>'s own background: black on the opaque themes,
+                  paper on light, transparent on every canvas theme, automatically
+                  and with no per-theme rule. Nothing class-based means no net can
+                  ever match it again. */}
+              <div
+                aria-hidden
+                data-post-overlay-backdrop
+                className="fixed top-0 bottom-0 z-10"
+                style={{ left: POST_LAYER_LEFT, width: POST_LAYER_WIDTH }}
+              />
+              <div
+                ref={postOverlayRef}
+                data-post-overlay
+                // This layer, not the document, is what moves while a post is
+                // open — the tag is what lets the mobile header and the sticky
+                // pills ride its scroll (see use-scroll-direction).
+                data-scroll-nav-source
+                className="fixed top-0 bottom-0 z-10 overflow-y-auto overscroll-contain"
+                style={{
+                  left: POST_LAYER_LEFT,
+                  width: POST_LAYER_WIDTH,
+                  WebkitOverflowScrolling: 'touch',
+                }}
+              >
+                <ErrorBoundary compact resetKey={location.pathname} label={_copy("copy.a5554622c655", { defaultValue: "Post" })}>
+                  <SinglePostPage inOverlay />
+                </ErrorBoundary>
+              </div>
+              {/* After the scroller so its ref is attached when the clip reads it. */}
+              <PostOverlayEffects overlayRef={postOverlayRef} postId={overlayPostId} />
+            </Suspense>
+          )}
+
+          {/* Dynamic routes (post pages, username profiles, etc.) use Outlet.
+              These render OUTSIDE PersistentPageCache's per-page boundaries, so
+              they get their own contained boundary — a throw while flicking
+              through profile tabs must not white-screen the whole app, and
+              resetKey=pathname lets it self-heal on the next navigation. */}
+          {isDynamicRoute && (
+            <ErrorBoundary compact resetKey={location.pathname}>
+              {children || <Outlet />}
+            </ErrorBoundary>
+          )}
+        </main>
+
+        {!isWideMainRoute && <DesktopRightRail />}
+      </div>
+      
+      <NotificationsDrawer />
+      <MagneticDockEntry />
+      <MobileBottomNav />
+      {/* Slides each page's sticky nav pill away with the header and bottom
+          nav — one subscription for the whole app, applied in CSS. */}
+      <StickyNavHideSync />
+      <PillRouteMotion />
+
+      <Suspense fallback={null}>
+        <RadioMiniPlayer />
+      </Suspense>
+      <StageMiniPlayer />
+      <StageRecordingMiniPlayer />
+      {/* Mounted always but lazily: it renders nothing until a video post is
+          being prepared, and keeps its store off the boot path. */}
+      <Suspense fallback={null}>
+        <PostProcessingDock />
+      </Suspense>
+      {hasPoppedOutAudio && (
+        <Suspense fallback={null}>
+          <AudioPostMiniPlayer />
+        </Suspense>
+      )}
+      {spotifyOpen && (
+        <Suspense fallback={null}>
+          <SpotifyMiniPlayer />
+        </Suspense>
+      )}
+      {liveMiniOpen && (
+        <Suspense fallback={null}>
+          <LiveMiniPlayer />
+        </Suspense>
+      )}
+      <AudioSpacesModal />
+      <MinimizedAIChats />
+      {/* DMs opened from a profile, a listing or a share sheet dock here
+          instead of navigating the reader off the page. */}
+      <DmDockMount />
+      <Suspense fallback={null}>
+        <OnlinePresenceHost />
+      </Suspense>
+      {brainrotOpened && (
+        <Suspense fallback={null}>
+          <BrainrotFeedHost />
+        </Suspense>
+      )}
+      {storiesMounted && (
+        <Suspense fallback={null}>
+          <StoriesHost />
+        </Suspense>
+      )}
+      
+      {postModalMounted && (
+        <Suspense fallback={null}>
+          <PostModal
+            isOpen={isPostModalOpen}
+            onClose={() => { closePostModal(); clearInitialText(); clearInitialCategory(); clearInitialSound(); }}
+            initialFiles={pendingFiles}
+            onFilesProcessed={clearPendingFiles}
+            initialText={initialText}
+            initialCategory={initialCategory}
+            initialSound={initialSound}
+          />
+        </Suspense>
+      )}
+    </div>
+  );
+}
+
+interface AppLayoutProps {
+  children?: ReactNode;
+}
+
+export function AppLayout({ children }: AppLayoutProps) {
+  return (
+    <SidebarCollapseProvider>
+      <AutoplayProvider>
+        <AnimationsProvider>
+          <ShortsEnabledProvider>
+            <PiPProvider>
+              <ChartPiPProvider>
+                <RadioPlayerProvider>
+                  <CoinPlacementProvider>
+                    <GlobalDropZoneProvider>
+                     {/* Inside the drop zone provider so the guided checklist's
+                         "make your first post" step can open the composer, and
+                         above the layout content so the rail bento, the
+                         settings row and the profile chip all read one copy of
+                         the progress row. */}
+                     <OnboardingChecklistProvider>
+                      {/* Inside the layout rather than around it, so the gate
+                          sits under the router and can read the location — and
+                          so the chrome is already mounted when it redirects,
+                          which keeps the redirect a navigation rather than a
+                          remount of the whole shell. */}
+                      <KidsModeGate>
+                        <AppLayoutContent>{children}</AppLayoutContent>
+                      </KidsModeGate>
+                      <FloatingPiPOverlay />
+                      <FloatingChartPiPOverlay />
+                      <Suspense fallback={null}>
+                        <UserFeedbackSurvey />
+                      </Suspense>
+                      <NewMemberRegistrar />
+                      <Suspense fallback={null}>
+                        <ShippedFeatureNotificationModal />
+                      </Suspense>
+                     </OnboardingChecklistProvider>
+                    </GlobalDropZoneProvider>
+                  </CoinPlacementProvider>
+                </RadioPlayerProvider>
+              </ChartPiPProvider>
+            </PiPProvider>
+          </ShortsEnabledProvider>
+        </AnimationsProvider>
+      </AutoplayProvider>
+    </SidebarCollapseProvider>
+  );
+}

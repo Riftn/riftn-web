@@ -1,0 +1,115 @@
+/**
+ * Text to dialogue — a multi-speaker scene in one pass.
+ *
+ * Not the same thing as looping the TTS endpoint per line and concatenating.
+ * The model reads the whole exchange at once, so speakers react to each other:
+ * timing, overlap and the emotional arc across the turns are what this buys,
+ * and none of it survives line-by-line synthesis.
+ *
+ * v3 only — no other model accepts a multi-speaker input.
+ */
+import {
+  audioResponse,
+  corsHeaders,
+  errorResponse,
+  getApiKey,
+  num,
+  readProviderError, ownElevenLabsFailure } from '../_shared/elevenlabs.ts';
+import { chargeForJob } from '../_shared/ai-payment-guard.ts';
+import { refuseForeignVoice } from '../_shared/voice-ownership.ts';
+
+const MAX_LINES = 50;
+const MAX_TOTAL_CHARS = 5000;
+
+interface DialogueInput {
+  text?: unknown;
+  voiceId?: unknown;
+}
+
+Deno.serve(async (req) => {
+  if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
+
+  // Free, but not open. "A fraction of a cent a run" is true of a two-second
+  // line and not of a 5,000-character v3 scene, which is what this actually
+  // allows — and it allowed it to anyone, unauthenticated and unlimited.
+  const charged = await chargeForJob(req, {
+    kind: 'tool',
+    ownKeyProvider: 'elevenlabs',
+    modelId: 'elevenlabs-dialogue',
+    actionType: 'elevenlabs-dialogue',
+    rateLimit: { limit: 40, windowMs: 60 * 60 * 1000 },
+    free: true,
+  });
+  if (!charged.ok) return charged.response;
+
+  try {
+    const { inputs, outputFormat, voiceSettings, seed } = (await req.json()) ?? {};
+
+    if (!Array.isArray(inputs) || inputs.length === 0) {
+      return errorResponse('At least one line of dialogue is required');
+    }
+    if (inputs.length > MAX_LINES) {
+      return errorResponse(`A scene can be at most ${MAX_LINES} lines`);
+    }
+
+    const lines = (inputs as DialogueInput[]).map((line) => ({
+      text: typeof line.text === 'string' ? line.text : '',
+      voice_id: typeof line.voiceId === 'string' ? line.voiceId : '',
+    }));
+
+    if (lines.some((l) => !l.text || !l.voice_id)) {
+      return errorResponse('Every line needs both text and a voice');
+    }
+
+    const totalChars = lines.reduce((sum, l) => sum + l.text.length, 0);
+    if (totalChars > MAX_TOTAL_CHARS) {
+      return errorResponse(`A scene can be at most ${MAX_TOTAL_CHARS} characters in total`);
+    }
+
+    // Every speaker in the scene, not just the first. A multi-speaker payload is
+    // the easiest place to slip one borrowed voice in among several owned ones.
+    const foreign = await refuseForeignVoice(lines.map((l) => l.voice_id), charged.wallet);
+    if (foreign) return foreign;
+
+    const apiKey = charged.ownKey ?? getApiKey();
+    if (!apiKey) return errorResponse('ElevenLabs API key not configured', 500);
+
+    const format = outputFormat === 'pcm_44100' ? 'pcm_44100' : 'mp3_44100_128';
+
+    const payload: Record<string, unknown> = {
+      inputs: lines,
+      model_id: 'eleven_v3',
+      settings: {
+        stability: num(voiceSettings?.stability, 0, 1, 0.5),
+        similarity_boost: num(voiceSettings?.similarity, 0, 1, 0.75),
+        use_speaker_boost: voiceSettings?.speakerBoost !== false,
+      },
+    };
+    if (Number.isInteger(seed)) payload.seed = seed;
+
+    const response = await fetch(
+      `https://api.elevenlabs.io/v1/text-to-dialogue?output_format=${format}`,
+      {
+        method: 'POST',
+        headers: { 'xi-api-key': apiKey, 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      },
+    );
+
+    if (!response.ok) {
+
+      if (charged.ownKey) { const own = await ownElevenLabsFailure(charged.wallet, response); if (own) return own; }
+      const errText = await response.text();
+      console.error('ElevenLabs dialogue error:', response.status, errText);
+      return errorResponse(readProviderError(errText, 'Dialogue generation failed'), 502);
+    }
+
+    return audioResponse(
+      await response.arrayBuffer(),
+      format === 'pcm_44100' ? 'audio/wav' : 'audio/mpeg',
+    );
+  } catch (err) {
+    console.error('elevenlabs-dialogue error:', err);
+    return errorResponse('Internal server error', 500);
+  }
+});

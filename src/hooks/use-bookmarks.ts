@@ -1,0 +1,530 @@
+import { useTranslation as _useCopy } from 'react-i18next';
+import { duetOfPost } from '@/lib/duet';
+import { useEffect, useState } from 'react';
+import { useInfiniteQuery, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { getSavedPosts, getLikedPosts, getWatchHistory, clearWatchHistory, toggleSavePost, DeHubNFT, getMediaUrl, getNFTInfo } from '@/lib/api/dehub';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
+import { buildAvatarUrl, buildImageUrl, buildVideoUrl, buildHlsUrl, buildFeedImageUrls } from '@/lib/media-url';
+import { formatDuration, formatViews, formatTimeAgo } from '@/lib/feed-utils';
+import { resolveViewCount } from '@/lib/engagement';
+import type { VideoItem, ImagePost, TextPost, FeedItem } from '@/types/feed.types';
+import { translateCopy as _translateCopy } from '@/i18n/copy';
+
+export type BookmarkType = 'all' | 'liked' | 'history' | 'folders' | 'recent' | 'ppv' | 'images' | 'videos' | 'text';
+
+const PAGE_SIZE = 20;
+
+// Helper functions (formatDuration, formatViews, formatTimeAgo) are now imported from @/lib/feed-utils
+
+// ============================================================================
+// MAPPERS - Convert DeHubNFT to feed card types
+// ============================================================================
+
+function detectPostType(nft: DeHubNFT): 'video' | 'image' | 'text' {
+  const postType = nft.postType || nft.media_type;
+  
+  if (postType === 'video' || nft.videoUrl) {
+    return 'video';
+  }
+  if (postType === 'image' || nft.imageUrl || nft.imageUrls?.length) {
+    return 'image';
+  }
+  return 'text';
+}
+
+function mapNFTToVideoItem(nft: DeHubNFT): VideoItem {
+  const id = String(nft.tokenId);
+  const thumbnail = buildImageUrl(nft.tokenId, nft.imageUrl || nft.thumbnail_url);
+  const videoUrl = buildVideoUrl(nft.tokenId);
+  const channelAvatar = nft.minterAvatarUrl 
+    ? buildAvatarUrl(nft.minter, nft.minterAvatarUrl) || 'user'
+    : 'user';
+  
+  return {
+    id,
+    type: 'video',
+    contentRating: nft.contentRating,
+    mediaDescriptions: nft.mediaDescriptions,
+    layout: nft.layout,
+    mediaCaptions: nft.mediaCaptions,
+    comicBorder: nft.comicBorder,
+    hideAssetCards: nft.hideAssetCards,
+    hiddenLinkPreviews: nft.hiddenLinkPreviews,
+    imageTags: nft.imageTags,
+    hasQuiz: nft.hasQuiz,
+    spoilerText: nft.spoilerText,
+    quotePolicy: nft.quotePolicy,
+    duetOf: duetOfPost(nft as any),
+    visibility: nft.visibility,
+    quoteRevoked: nft.quoteRevoked,
+    replyPolicy: nft.replyPolicy,
+    thumbnail,
+    videoUrl: videoUrl || nft.videoUrl,
+    hlsUrl: buildHlsUrl(nft.hlsUrl),
+    duration: formatDuration(nft.videoDuration || nft.duration),
+    title: nft.name || nft.title || nft.description?.split('\n')[0] || '',
+    channel: nft.minterDisplayName || nft.mintername || _translateCopy("copy.056823642989", { defaultValue: "Unknown Creator" }),
+    channelAvatar,
+    verified: false,
+    views: formatViews(resolveViewCount(nft)),
+    createdAt: nft.createdAt || nft.created_at,
+    uploadedAgo: formatTimeAgo(nft.createdAt || nft.created_at),
+    creatorId: nft.minter,
+    creatorUsername: nft.mintername,
+    creatorBadgeBalance: nft.minterUser?.hideBadgeAndBalance ? 0 : nft.minterUser?.badgeBalance,
+    creatorPaymentsDisabled: nft.minterUser?.hideBadgeAndBalance === true,
+    isLiked: nft.isLiked ?? false,
+    likeCount: nft.totalVotes?.for || nft.like_count || 0,
+    dislikeCount: nft.totalVotes?.against || 0,
+    commentCount: nft.commentCount || nft.comment_count || 0,
+    isPPV: nft.is_ppv || nft.streamInfo?.isPayPerView || false,
+    ppvPrice: nft.ppv_price || nft.streamInfo?.payPerViewAmount,
+    ppvPreviewReady: nft.ppvPreview?.ready === true,
+    ppvCurrency: nft.ppv_currency || nft.streamInfo?.payPerViewTokenSymbol || 'DHB',
+    isW2E: nft.is_w2e || nft.streamInfo?.isAddBounty || false,
+    bountyViews: nft.streamInfo?.addBountyFirstXViewers != null ? Number(nft.streamInfo.addBountyFirstXViewers) : undefined,
+    bountyComments: nft.streamInfo?.addBountyFirstXComments != null ? Number(nft.streamInfo.addBountyFirstXComments) : undefined,
+    bountyAmount: nft.streamInfo?.addBountyAmount,
+    bountyCurrency: nft.streamInfo?.addBountyTokenSymbol || 'DHB',
+    isLocked: nft.is_locked || nft.streamInfo?.isLockContent || false,
+    lockedPrice: nft.locked_price || nft.streamInfo?.lockContentAmount,
+    lockedCurrency: nft.locked_currency || nft.streamInfo?.lockContentTokenSymbol || 'DHB',
+    lockedTokenAddress: nft.streamInfo?.lockContentContractAddress,
+    lockedChainId: nft.streamInfo?.lockContentChainIds?.[0],
+    subscriberPlans: (nft as any).plansDetails,
+    isOwner: nft.isOwner ?? false,
+    isUnlocked: nft.isUnlocked ?? false,
+    chainId: nft.chainId,
+    totalTips: nft.totalTips ?? 0,
+  };
+}
+
+function mapNFTToImagePost(nft: DeHubNFT): ImagePost {
+  const id = String(nft.tokenId);
+  const imageUrls = buildFeedImageUrls(nft.imageUrls, undefined, (nft as { imageSizes?: unknown }).imageSizes);
+  const image = imageUrls?.[0] || buildImageUrl(nft.tokenId, nft.imageUrl || nft.thumbnail_url);
+  const avatar = nft.minterAvatarUrl 
+    ? buildAvatarUrl(nft.minter, nft.minterAvatarUrl) || 'user'
+    : 'user';
+  
+  return {
+    id,
+    type: 'image',
+    contentRating: nft.contentRating,
+    mediaDescriptions: nft.mediaDescriptions,
+    layout: nft.layout,
+    mediaCaptions: nft.mediaCaptions,
+    comicBorder: nft.comicBorder,
+    hideAssetCards: nft.hideAssetCards,
+    hiddenLinkPreviews: nft.hiddenLinkPreviews,
+    imageTags: nft.imageTags,
+    hasQuiz: nft.hasQuiz,
+    spoilerText: nft.spoilerText,
+    quotePolicy: nft.quotePolicy,
+    visibility: nft.visibility,
+    quoteRevoked: nft.quoteRevoked,
+    replyPolicy: nft.replyPolicy,
+    username: nft.mintername || nft.minterDisplayName || 'unknown',
+    verified: false,
+    avatar,
+    image,
+    imageUrls,
+    title: nft.name || nft.title,
+    description: nft.description,
+    likes: nft.totalVotes?.for || nft.like_count || 0,
+    dislikes: nft.totalVotes?.against || nft.dislike_count || 0,
+    caption: nft.description || nft.name || '',
+    comments: nft.commentCount || nft.comment_count || 0,
+    views: formatViews(resolveViewCount(nft)).replace(' views', ''),
+    createdAt: nft.createdAt || nft.created_at,
+    timeAgo: formatTimeAgo(nft.createdAt || nft.created_at),
+    creatorId: nft.minter,
+    creatorUsername: nft.mintername,
+    creatorBadgeBalance: nft.minterUser?.hideBadgeAndBalance ? 0 : nft.minterUser?.badgeBalance,
+    creatorPaymentsDisabled: nft.minterUser?.hideBadgeAndBalance === true,
+    isLiked: nft.isLiked ?? false,
+    isPPV: nft.is_ppv || nft.streamInfo?.isPayPerView || false,
+    ppvPrice: nft.ppv_price || nft.streamInfo?.payPerViewAmount,
+    ppvCurrency: nft.ppv_currency || nft.streamInfo?.payPerViewTokenSymbol || 'DHB',
+    isW2E: nft.is_w2e || nft.streamInfo?.isAddBounty || false,
+    isLocked: nft.is_locked || nft.streamInfo?.isLockContent || false,
+    lockedPrice: nft.locked_price || nft.streamInfo?.lockContentAmount,
+    lockedCurrency: nft.locked_currency || nft.streamInfo?.lockContentTokenSymbol || 'DHB',
+    lockedTokenAddress: nft.streamInfo?.lockContentContractAddress,
+    lockedChainId: nft.streamInfo?.lockContentChainIds?.[0],
+    subscriberPlans: (nft as any).plansDetails,
+    bountyViews: nft.streamInfo?.addBountyFirstXViewers != null ? Number(nft.streamInfo.addBountyFirstXViewers) : undefined,
+    bountyComments: nft.streamInfo?.addBountyFirstXComments != null ? Number(nft.streamInfo.addBountyFirstXComments) : undefined,
+    bountyAmount: nft.streamInfo?.addBountyAmount,
+    bountyCurrency: nft.streamInfo?.addBountyTokenSymbol || 'DHB',
+    isOwner: nft.isOwner ?? false,
+    isUnlocked: nft.isUnlocked ?? false,
+    chainId: nft.chainId,
+    totalTips: nft.totalTips ?? 0,
+  };
+}
+
+function mapNFTToTextPost(nft: DeHubNFT): TextPost {
+  const id = String(nft.tokenId);
+  const avatarUrl = nft.minterAvatarUrl 
+    ? buildAvatarUrl(nft.minter, nft.minterAvatarUrl) || nft.minter
+    : nft.minter;
+  
+  return {
+    id,
+    type: 'post',
+    contentRating: nft.contentRating,
+    mediaDescriptions: nft.mediaDescriptions,
+    layout: nft.layout,
+    mediaCaptions: nft.mediaCaptions,
+    comicBorder: nft.comicBorder,
+    hideAssetCards: nft.hideAssetCards,
+    hiddenLinkPreviews: nft.hiddenLinkPreviews,
+    imageTags: nft.imageTags,
+    hasQuiz: nft.hasQuiz,
+    spoilerText: nft.spoilerText,
+    quotePolicy: nft.quotePolicy,
+    visibility: nft.visibility,
+    quoteRevoked: nft.quoteRevoked,
+    replyPolicy: nft.replyPolicy,
+    author: {
+      id: nft.minter,
+      name: nft.minterDisplayName || nft.mintername || _translateCopy("copy.b764cdc0eab7", { defaultValue: "Unknown" }),
+      handle: nft.mintername || nft.minter,
+      avatarSeed: avatarUrl,
+      verified: false,
+      badgeBalance: nft.minterUser?.hideBadgeAndBalance ? 0 : nft.minterUser?.badgeBalance,
+      paymentsDisabled: nft.minterUser?.hideBadgeAndBalance === true,
+    },
+    content: nft.description || nft.name || '',
+    createdAt: nft.createdAt || nft.created_at || (nft as any).mintedAt || (nft as any).minted_at || (nft as any).updatedAt || (nft as any).updated_at || '',
+    views: formatViews(resolveViewCount(nft)).replace(' views', ''),
+    stats: {
+      comments: nft.commentCount || nft.comment_count || 0,
+      reposts: (nft.totalReposts || nft.reposts || 0) + (nft.quotes || 0),
+      likes: nft.totalVotes?.for || nft.like_count || 0,
+      dislikes: nft.totalVotes?.against || nft.dislike_count || 0,
+    },
+    isLocked: nft.is_locked || nft.streamInfo?.isLockContent || false,
+    lockedPrice: nft.locked_price || nft.streamInfo?.lockContentAmount,
+    lockedCurrency: nft.locked_currency || nft.streamInfo?.lockContentTokenSymbol || 'DHB',
+    lockedTokenAddress: nft.streamInfo?.lockContentContractAddress,
+    lockedChainId: nft.streamInfo?.lockContentChainIds?.[0],
+    subscriberPlans: (nft as any).plansDetails,
+    isOwner: nft.isOwner ?? false,
+    isUnlocked: nft.isUnlocked ?? false,
+    totalTips: nft.totalTips ?? 0,
+  };
+}
+
+function mapNFTToFeedItem(nft: DeHubNFT): FeedItem {
+  const contentType = detectPostType(nft);
+  
+  switch (contentType) {
+    case 'video':
+      return mapNFTToVideoItem(nft);
+    case 'image':
+      return mapNFTToImagePost(nft);
+    default:
+      return mapNFTToTextPost(nft);
+  }
+}
+
+// ============================================================================
+// MAIN HOOK
+// ============================================================================
+
+export function useBookmarks(type: BookmarkType = 'all', searchQuery: string = '') {
+  const { isAuthenticated, walletAddress } = useAuth();
+  const queryClient = useQueryClient();
+
+  // Saved posts query with infinite scroll
+  const savedQuery = useInfiniteQuery({
+    queryKey: ['bookmarks', 'saved', 'all'],
+    queryFn: async ({ pageParam = 1 }) => {
+      const response = await getSavedPosts(pageParam, PAGE_SIZE);
+      const data = response.result || [];
+      const hasMore = response.pagination?.hasMore ?? data.length >= PAGE_SIZE;
+      return {
+        items: data,
+        nextPage: hasMore ? pageParam + 1 : undefined,
+      };
+    },
+    getNextPageParam: (lastPage) => lastPage.nextPage,
+    initialPageParam: 1,
+    // 'folders' is served by BookmarkFoldersPanel off its own endpoint — this
+    // query would otherwise fetch the whole saved list behind an unused tab.
+    enabled: isAuthenticated && type !== 'liked' && type !== 'history' && type !== 'ppv' && type !== 'folders',
+    staleTime: 2 * 60 * 1000,
+  });
+
+  // Watch history query with infinite scroll
+  const historyQuery = useInfiniteQuery({
+    queryKey: ['bookmarks', 'history'],
+    queryFn: async ({ pageParam = 0 }) => {
+      const response = await getWatchHistory(pageParam, PAGE_SIZE, walletAddress || undefined);
+      const data = response.result || [];
+      return {
+        items: data,
+        nextPage: data.length >= PAGE_SIZE ? pageParam + 1 : undefined,
+      };
+    },
+    getNextPageParam: (lastPage) => lastPage.nextPage,
+    initialPageParam: 0,
+    enabled: isAuthenticated && type === 'history',
+    staleTime: 2 * 60 * 1000,
+  });
+
+  // Liked posts query with infinite scroll
+  const likedQuery = useInfiniteQuery({
+    queryKey: ['bookmarks', 'liked'],
+    queryFn: async ({ pageParam = 1 }) => {
+      const response = await getLikedPosts(pageParam, PAGE_SIZE);
+      const items = response.result || [];
+      const hasMore = response.pagination?.hasMore ?? items.length >= PAGE_SIZE;
+      const totalCount = response.pagination?.totalCount ?? items.length;
+      return {
+        items,
+        nextPage: hasMore ? pageParam + 1 : undefined,
+        totalCount,
+      };
+    },
+    getNextPageParam: (lastPage) => lastPage.nextPage,
+    initialPageParam: 1,
+    enabled: isAuthenticated && type === 'liked',
+    staleTime: 2 * 60 * 1000,
+  });
+
+  // Share purchase IDs with unlock checks; only hydrate one visible page.
+  const purchaseOptions = {
+    queryKey: ['ppv-purchases-lookup', walletAddress],
+    queryFn: async () => {
+      if (!walletAddress) return new Set<string>();
+      const { data, error } = await supabase.from('ppv_purchases')
+        .select('token_id').eq('buyer_address', walletAddress.toLowerCase())
+        .order('created_at', { ascending: false }).order('token_id', { ascending: true });
+      if (error) throw error;
+      return new Set((data || []).map(p => String(p.token_id)));
+    },
+    staleTime: 2 * 60 * 1000,
+  };
+  const ppvPurchasesQuery = useQuery({ ...purchaseOptions, enabled: !!walletAddress && isAuthenticated });
+  const purchasedTokenIds = ppvPurchasesQuery.data || new Set<string>();
+  const ppvQuery = useInfiniteQuery({
+    queryKey: ['bookmarks', 'ppv', 'paged', walletAddress],
+    initialPageParam: 0,
+    queryFn: async ({ pageParam }) => {
+      const ids = [...await queryClient.ensureQueryData(purchaseOptions)];
+      const page = ids.slice(pageParam, pageParam + PAGE_SIZE);
+      const nfts: Array<DeHubNFT | null> = new Array(page.length);
+      let cursor = 0;
+      await Promise.all(Array.from({ length: Math.min(4, page.length) }, async () => {
+        while (cursor < page.length) {
+          const index = cursor++;
+          nfts[index] = await getNFTInfo(page[index]).catch(() => null);
+        }
+      }));
+      return { items: nfts.filter(Boolean) as DeHubNFT[], nextPage: pageParam + PAGE_SIZE < ids.length ? pageParam + PAGE_SIZE : undefined };
+    },
+    getNextPageParam: (lastPage) => lastPage.nextPage,
+    enabled: isAuthenticated && (type === 'ppv' || type === 'all') && !!walletAddress,
+    staleTime: 2 * 60 * 1000,
+  });
+
+  // Use the appropriate query based on type
+  const isPPVTab = type === 'ppv';
+  const activeQuery = type === 'liked' ? likedQuery : type === 'history' ? historyQuery : savedQuery;
+  
+  // Flatten all pages into a single array
+  const savedNFTs = activeQuery.data?.pages.flatMap(page => page.items) || [];
+  const ppvNFTs = ppvQuery.data?.pages.flatMap(page => page.items) || [];
+  
+  let allNFTs: DeHubNFT[];
+  if (isPPVTab) {
+    allNFTs = ppvNFTs;
+  } else if (type === 'all') {
+    // Merge saved posts + PPV purchases, deduplicating by tokenId
+    const seenIds = new Set(savedNFTs.map(n => String(n.tokenId)));
+    const uniquePPV = ppvNFTs.filter(n => !seenIds.has(String(n.tokenId)));
+    allNFTs = [...savedNFTs, ...uniquePPV];
+  } else {
+    allNFTs = savedNFTs;
+  }
+  
+  // Map to feed items
+  let feedItems = allNFTs.map(mapNFTToFeedItem);
+  
+  // For PPV tab, mark all as unlocked (they're all purchased).
+  // For other tabs, only unlock PPV items the user has actually purchased.
+  feedItems = feedItems.map(item => {
+    if (item.type === 'post') return item;
+    const isPPVItem = ('isPPV' in item && item.isPPV);
+    if (!isPPVItem) return item;
+    
+    if (isPPVTab) {
+      return { ...item, isUnlocked: true };
+    }
+    // For non-PPV tabs: only unlock if user purchased this token
+    const hasPurchased = purchasedTokenIds.has(String(item.id));
+    if (hasPurchased) {
+      return { ...item, isUnlocked: true };
+    }
+    // Ensure PPV stays locked - don't let missing API flags bypass gating
+    return item;
+  });
+  
+  // Apply type filtering
+  if (type === 'images') {
+    feedItems = feedItems.filter(item => item.type === 'image');
+  } else if (type === 'videos') {
+    feedItems = feedItems.filter(item => item.type === 'video');
+  } else if (type === 'text') {
+    feedItems = feedItems.filter(item => item.type === 'post');
+  } else if (type === 'recent') {
+    feedItems = [...feedItems].sort((a, b) => {
+      const dateA = 'createdAt' in a ? new Date(a.createdAt || 0).getTime() : 0;
+      const dateB = 'createdAt' in b ? new Date(b.createdAt || 0).getTime() : 0;
+      return dateB - dateA;
+    });
+  }
+  
+  // Apply search filter
+  if (searchQuery.trim()) {
+    const lowerQuery = searchQuery.toLowerCase();
+    feedItems = feedItems.filter(item => {
+      if (item.type === 'video') {
+        return item.title.toLowerCase().includes(lowerQuery) ||
+               item.channel.toLowerCase().includes(lowerQuery);
+      }
+      if (item.type === 'image') {
+        return item.title?.toLowerCase().includes(lowerQuery) ||
+               item.description?.toLowerCase().includes(lowerQuery) ||
+               item.username.toLowerCase().includes(lowerQuery);
+      }
+      if (item.type === 'post') {
+        return item.content.toLowerCase().includes(lowerQuery) ||
+               item.author.name.toLowerCase().includes(lowerQuery);
+      }
+      return false;
+    });
+  }
+
+  const queryState = isPPVTab
+    ? { isLoading: ppvQuery.isLoading, isError: ppvQuery.isError, error: ppvQuery.error, refetch: ppvQuery.refetch, fetchNextPage: ppvQuery.fetchNextPage, hasNextPage: ppvQuery.hasNextPage, isFetchingNextPage: ppvQuery.isFetchingNextPage }
+    : { isLoading: activeQuery.isLoading, isError: activeQuery.isError, error: activeQuery.error, refetch: activeQuery.refetch, fetchNextPage: activeQuery.fetchNextPage, hasNextPage: activeQuery.hasNextPage, isFetchingNextPage: activeQuery.isFetchingNextPage };
+  if (type === 'all') {
+    queryState.hasNextPage = !!activeQuery.hasNextPage || !!ppvQuery.hasNextPage;
+    queryState.isFetchingNextPage = activeQuery.isFetchingNextPage || ppvQuery.isFetchingNextPage;
+    queryState.fetchNextPage = (async () => {
+      const results = await Promise.all([
+        activeQuery.hasNextPage ? activeQuery.fetchNextPage() : Promise.resolve(undefined),
+        ppvQuery.hasNextPage ? ppvQuery.fetchNextPage() : Promise.resolve(undefined),
+      ]);
+      return results[0] ?? results[1];
+    }) as typeof queryState.fetchNextPage;
+  }
+
+  return {
+    bookmarks: feedItems,
+    totalCount: allNFTs.length,
+    ...queryState,
+  };
+}
+
+export function useClearWatchHistory() {
+  const { t: _copy } = _useCopy();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: clearWatchHistory,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['bookmarks', 'history'] });
+      toast.success(_copy("copy.4c295ff782b6", { defaultValue: "Watch history cleared" }));
+    },
+    onError: () => {
+      toast.error(_copy("copy.00a9c07f6bd4", { defaultValue: "Failed to clear history" }));
+    },
+  });
+}
+
+/**
+ * Hook to manage bookmark state for a single post
+ */
+export function useBookmarkPost(tokenId: string | number) {
+  const { t: _copy } = _useCopy();
+  const { isAuthenticated, openLoginModal } = useAuth();
+  const queryClient = useQueryClient();
+  
+  // Check if this post is in the bookmarks. Every card in every mounted feed
+  // shares this one query — `select` collapses it to a boolean per card, so a
+  // bookmark toggle only re-renders the cards whose boolean actually flipped
+  // instead of every card in the app.
+  const { data: derivedBookmarked = false } = useInfiniteQuery({
+    queryKey: ['bookmarks', 'saved', 'all'],
+    queryFn: async ({ pageParam = 1 }) => {
+      const response = await getSavedPosts(pageParam, PAGE_SIZE);
+      return {
+        items: response.result || [],
+        nextPage: (response.pagination?.hasMore ?? (response.result?.length || 0) >= PAGE_SIZE) ? pageParam + 1 : undefined,
+      };
+    },
+    getNextPageParam: (lastPage) => lastPage.nextPage,
+    initialPageParam: 1,
+    enabled: isAuthenticated,
+    staleTime: 2 * 60 * 1000,
+    select: (data) =>
+      data.pages.some(page =>
+        page.items.some((nft: { tokenId: string | number }) => String(nft.tokenId) === String(tokenId))
+      ),
+  });
+
+  // Optimistic override: the icon flips the instant the user taps, while the
+  // server call + background list refresh happen behind it. Cleared once the
+  // refetched list agrees with the override.
+  const [override, setOverride] = useState<boolean | null>(null);
+  useEffect(() => {
+    if (override !== null && derivedBookmarked === override) setOverride(null);
+  }, [derivedBookmarked, override]);
+  const isBookmarked = override ?? derivedBookmarked;
+
+  const toggleMutation = useMutation({
+    mutationFn: (_vars: { next: boolean; onSaved?: () => void }) => toggleSavePost(tokenId),
+    onSuccess: (_data, { next, onSaved }) => {
+      // Background refresh of the saved lists only — liked/history/ppv are
+      // untouched by a save toggle, so don't tear those down.
+      queryClient.invalidateQueries({ queryKey: ['bookmarks', 'saved'] });
+      // Only on the save half of the toggle — un-bookmarking shouldn't offer to
+      // file the post anywhere.
+      if (next) onSaved?.();
+    },
+    onError: (_err, { next }) => {
+      setOverride(!next);
+      toast.error(_copy("copy.eb59ee20e10b", { defaultValue: "Failed to update bookmark" }));
+    },
+  });
+
+  /**
+   * @param onSaved Fired once the server confirms a *save* (never an un-save) —
+   *   used to offer folder selection after saving.
+   */
+  const toggleBookmark = (onSaved?: () => void) => {
+    if (!isAuthenticated) {
+      openLoginModal();
+      return;
+    }
+
+    const next = !isBookmarked;
+    setOverride(next);
+    toast.success(next ? _copy("copy.037df3bbbaee", { defaultValue: "Saved to bookmarks" }) : _copy("copy.e4d2fa5b248e", { defaultValue: "Removed from bookmarks" }));
+    toggleMutation.mutate({ next, onSaved });
+  };
+
+  return {
+    isBookmarked,
+    // Always false: the toggle is optimistic, so buttons should never dim or
+    // disable while the round-trip completes.
+    isLoading: false,
+    toggleBookmark,
+  };
+}

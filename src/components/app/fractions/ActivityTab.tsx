@@ -1,0 +1,174 @@
+import { tokenLabel } from '@/lib/token-label';
+/**
+ * Activity
+ * ========
+ * The tape: what has actually traded, market-wide.
+ *
+ * A market with no visible trade history gives a first-time seller nothing to
+ * price against — the listing grid only shows what people are *asking*, which
+ * is exactly the number that is wrong when nothing is selling. Settled trades
+ * are the only prices here that someone actually paid.
+ */
+
+import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
+import { DhbCoin } from '@/components/app/DhbAmount';
+import { useNavigate } from 'react-router-dom';
+import { Loader2, Activity, ArrowRight, Clock } from 'lucide-react';
+import { useRecentTrades, type FractionTrade } from '@/hooks/use-fraction-marketplace';
+import { truncateAddress } from '@/lib/api/token-holders';
+import { AppState } from '@/components/app/AppState';
+import { useTokenPrices } from '@/hooks/use-token-prices';
+import { cn } from '@/lib/utils';
+import dehubCoin from '@/assets/dehub-coin.png';
+
+import { formatCount } from '@/lib/format-count';
+// Takes the translator rather than calling the hook: this is a plain helper,
+// not a component.
+function relativeTime(iso: string, t: TFunction): string {
+  const ms = Date.now() - new Date(iso).getTime();
+  const mins = Math.floor(ms / 60_000);
+  if (mins < 1) return t('fractions.justNow');
+  if (mins < 60) return t('fractions.minutesAgo', { count: mins });
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return t('fractions.hoursAgo', { count: hours });
+  return t('fractions.daysAgo', { count: Math.floor(hours / 24) });
+}
+
+const STATUS_LABEL: Record<string, { key: string; className: string }> = {
+  settled: { key: 'fractions.statusSettled', className: 'text-emerald-300/80' },
+  awaiting_delivery: { key: 'fractions.statusAwaitingFractions', className: 'text-amber-300/80' },
+  awaiting_payment: { key: 'fractions.statusAwaitingPayment', className: 'text-amber-300/80' },
+};
+
+function TradeRow({ trade, onOpen }: { trade: FractionTrade; onOpen: () => void }) {
+  const { t } = useTranslation();
+  const status = STATUS_LABEL[trade.status] || STATUS_LABEL.settled;
+  const total = trade.quantity * trade.price_per_fraction;
+
+  return (
+    <button
+      onClick={onOpen}
+      className="w-full text-left rounded-xl border border-white/10 bg-white/5 p-3 hover:border-white/20 transition-colors"
+    >
+      <div className="flex items-center justify-between gap-2 mb-1.5">
+        <span className="text-xs text-white/60 truncate">{t('fractions.postNumber', { id: trade.token_id })}</span>
+        <span className="text-[10px] text-white/30 flex items-center gap-1 shrink-0">
+          <Clock className="w-3 h-3" />
+          {relativeTime(trade.created_at, t)}
+        </span>
+      </div>
+
+      <div className="flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-white font-medium text-sm">
+            {t('fractions.fractionCount', { count: trade.quantity })}
+          </p>
+          <p className="text-[11px] text-white/40 font-mono truncate flex items-center gap-1">
+            {truncateAddress(trade.seller_address)}
+            <ArrowRight className="w-3 h-3 shrink-0" />
+            {truncateAddress(trade.buyer_address)}
+          </p>
+        </div>
+        <div className="text-right shrink-0">
+          {total > 0 ? (
+            <p className="text-white font-semibold text-sm flex items-center gap-1 justify-end">
+              <img src={dehubCoin} alt={tokenLabel()} className="w-3.5 h-3.5" />
+              {total.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+            </p>
+          ) : (
+            <p className="text-white font-semibold text-sm">{t('fractions.freeBadge')}</p>
+          )}
+          <p className={cn('text-[10px]', status.className)}>{t(status.key)}</p>
+        </div>
+      </div>
+    </button>
+  );
+}
+
+export function ActivityTab() {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const { data: trades = [], isLoading, isError, isFetching, refetch } = useRecentTrades(40);
+  const { data: prices } = useTokenPrices();
+  const dhbUsd = prices?.DHB ?? 0;
+
+  // Last-traded price across settled trades. Asks tell you what people want;
+  // this tells you what someone paid.
+  const summary = useMemo(() => {
+    // `trade`, not `t` — `t` is the translator in this scope now.
+    const settled = trades.filter(trade => trade.status === 'settled');
+    if (!settled.length) return null;
+    const volume = settled.reduce((sum, trade) => sum + trade.quantity * trade.price_per_fraction, 0);
+    // Free giveaways are trades too, but they are not a price anyone paid.
+    const fractions = settled
+      .filter(trade => trade.price_per_fraction > 0)
+      .reduce((sum, trade) => sum + trade.quantity, 0);
+    return {
+      count: settled.length,
+      volume,
+      avgPrice: fractions > 0 ? volume / fractions : 0,
+    };
+  }, [trades]);
+
+  return (
+    <div className="space-y-4">
+      {summary && (
+        <div className="grid grid-cols-3 gap-2">
+          <div className="rounded-xl border border-white/10 bg-white/5 p-3">
+            <p className="text-[10px] text-white/40 uppercase tracking-wide">{t('fractions.trades')}</p>
+            <p className="text-white font-semibold">{formatCount(summary.count)}</p>
+          </div>
+          <div className="rounded-xl border border-white/10 bg-white/5 p-3">
+            <p className="text-[10px] text-white/40 uppercase tracking-wide">{t('fractions.volume')}</p>
+            <p className="text-white font-semibold">
+              {summary.volume.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+              <span className="text-[10px] text-white/40 ml-1"><DhbCoin /></span>
+            </p>
+          </div>
+          <div className="rounded-xl border border-white/10 bg-white/5 p-3">
+            <p className="text-[10px] text-white/40 uppercase tracking-wide">{t('fractions.avgPerFraction')}</p>
+            <p className="text-white font-semibold">
+              {summary.avgPrice.toLocaleString(undefined, { maximumFractionDigits: 3 })}
+              {dhbUsd > 0 && (
+                <span className="text-[10px] text-white/40 ml-1">
+                  ${(summary.avgPrice * dhbUsd).toFixed(4)}
+                </span>
+              )}
+            </p>
+          </div>
+        </div>
+      )}
+
+      {isLoading ? (
+        <div className="flex justify-center py-16">
+          <Loader2 className="w-6 h-6 text-white/30 animate-spin" />
+        </div>
+      ) : isError && trades.length === 0 ? (
+        // Cached trades stay on screen when a refresh fails; this is only for
+        // a first load that never arrived.
+        <AppState
+          kind="error"
+          title={t('common.failedToLoad')}
+          primaryAction={{ label: t('common.retry'), onClick: () => void refetch(), loading: isFetching }}
+        />
+      ) : trades.length === 0 ? (
+        <div className="text-center py-16">
+          <Activity className="w-10 h-10 text-white/15 mx-auto mb-3" />
+          <p className="text-white/40 text-sm">{t('fractions.nothingTradedYet')}</p>
+        </div>
+      ) : (
+        <div className="space-y-2">
+          {trades.map((trade) => (
+            <TradeRow
+              key={trade.id}
+              trade={trade}
+              onOpen={() => navigate(`/app/post/${trade.token_id}/info`)}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}

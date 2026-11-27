@@ -1,0 +1,468 @@
+import { useTranslation as _useCopy } from 'react-i18next';
+/**
+ * Feature Request Comments Hook
+ * ==============================
+ * Fetching, threading and reacting to comments on feature requests.
+ *
+ * These threads follow the post comment section's model on Supabase's tables:
+ * replies hang off `parent_id`, reactions ride the same nine-reaction ladder
+ * posts use, and your own row can be edited. What this is NOT is the same
+ * component — post comments live on the Riftn API behind a tokenId, and until
+ * feature requests move there this is a second implementation of one idea.
+ * Keeping the vocabulary identical is what will make that move cheap.
+ */
+
+import { useEffect } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
+import { getAccountSummaries, getAccountSummariesByUsernames, type CommentLikersResponse } from '@/lib/api/dehub';
+import type { AccountSummary } from '@/lib/api/dehub/users';
+import { ensureFreshToken } from '@/lib/api/dehub/core';
+import { dehubAuthHeaders } from '@/lib/ai-invoke';
+import { withWalletHeader } from '@/lib/supabase-wallet-client';
+import type { PostReaction } from '@/lib/reactions';
+import { isPositiveReaction } from '@/lib/reactions';
+import {
+  attachReactions,
+  type CommentMediaInput,
+  buildThreads,
+  resolveCommentAvatar,
+  type CommentReactionRow,
+  type CommentThread,
+  type ThreadCommentRow,
+  type ThreadedComment,
+} from '@/lib/comment-threads';
+import { translateCopy as _translateCopy } from '@/i18n/copy';
+import { patchFeatureRow } from '@/hooks/use-feature-requests';
+import { pingFeatureComments, watchFeatureComments } from '@/lib/feature-comment-live';
+
+export interface FeatureRequestComment extends ThreadedComment {
+  feature_request_id: string;
+}
+
+/** A top-level comment with its replies, oldest first, at one visible level. */
+export type FeatureRequestThread = CommentThread<FeatureRequestComment>;
+
+interface CommentRow extends ThreadCommentRow {
+  feature_request_id: string;
+}
+
+/**
+ * Comments and their reactions, threaded.
+ *
+ * Reactions are a second query rather than an embedded select: PostgREST would
+ * happily join them, but the join re-sends every reaction row on every refetch
+ * of the list, and the list refetches whenever a card's comments are opened.
+ * Two flat reads are smaller and cache independently.
+ */
+export function useFeatureRequestComments(featureRequestId: string | null) {
+  const { walletAddress } = useAuth();
+  const viewer = walletAddress?.toLowerCase() ?? null;
+  const queryClient = useQueryClient();
+
+  // Someone else commented, edited, deleted or reacted: read the thread again.
+  useEffect(() => {
+    if (!featureRequestId) return;
+    return watchFeatureComments(featureRequestId, () => {
+      void queryClient.invalidateQueries({ queryKey: ['feature-request-comments', featureRequestId] });
+    });
+  }, [featureRequestId, queryClient]);
+
+  return useQuery({
+    queryKey: ['feature-request-comments', featureRequestId, viewer],
+    queryFn: async (): Promise<FeatureRequestThread[]> => {
+      if (!featureRequestId) return [];
+
+      const { data, error } = await supabase
+        .from('feature_request_comments')
+        .select('*')
+        .eq('feature_request_id', featureRequestId)
+        .order('created_at', { ascending: true });
+      if (error) throw error;
+
+      const rows = (data || []) as unknown as CommentRow[];
+      if (rows.length === 0) return [];
+
+      const { data: reactionData, error: reactionError } = await supabase
+        .from('feature_request_comment_reactions')
+        .select('comment_id, wallet_address, reaction')
+        .in('comment_id', rows.map((row) => row.id));
+      // Reactions that cannot be read must not take the thread with them: the
+      // comments are the point, the tallies are decoration.
+      if (reactionError) console.warn('[features] comment reactions unavailable', reactionError);
+      const reactions = (reactionData || []) as unknown as CommentReactionRow[];
+
+      // One visible level of nesting, like every other comment surface here: a
+      // reply to a reply joins its root thread rather than starting its own.
+      return buildThreads(attachReactions(rows, reactions, viewer));
+    },
+    enabled: !!featureRequestId,
+    staleTime: 10_000,
+    // Safety net for missed pings and older app builds; paused in hidden tabs.
+    refetchInterval: 15_000,
+  });
+}
+
+/**
+ * Every distinct @handle in a comment, lowercased and capped, so one comment
+ * cannot fan out into an unbounded number of profile lookups.
+ */
+function mentionedHandles(text: string): string[] {
+  const found = new Set<string>();
+  for (const match of text.matchAll(/@([a-zA-Z0-9._]{1,30})/g)) {
+    found.add(match[1].toLowerCase());
+  }
+  return [...found].slice(0, 5);
+}
+
+/**
+ * Tell the people named in a comment.
+ *
+ * The database cannot do this. Postgres holds no profile table, so a trigger
+ * has an @handle and no way to turn it into an address — the same reason
+ * `community_here` and `stage_live` rows are written by the client.
+ *
+ * Best-effort by design: a handle that resolves to nobody, a lookup that
+ * fails, an insert that is refused — none of them may cost the commenter their
+ * comment, which is already saved by the time this runs.
+ */
+async function notifyMentions(params: {
+  content: string;
+  featureRequestId: string;
+  featureTitle: string | null;
+  actorAddress: string;
+  actorUsername: string | null;
+  actorAvatar: string | null;
+  skipAddresses: string[];
+}) {
+  const handles = mentionedHandles(params.content);
+  if (handles.length === 0) return;
+
+  const skip = new Set(params.skipAddresses.map((address) => address.toLowerCase()));
+  const recipients = new Set<string>();
+
+  const mentionedAccounts = await getAccountSummariesByUsernames(handles).catch(() => []);
+  mentionedAccounts.forEach(account => {
+    const address = account.address.toLowerCase();
+    if (address && !skip.has(address)) recipients.add(address);
+  });
+
+  if (recipients.size === 0) return;
+
+  try {
+    await withWalletHeader(
+      supabase.from('custom_notifications').insert(
+        [...recipients].map((address) => ({
+          recipient_address: address,
+          actor_address: params.actorAddress,
+          actor_username: params.actorUsername,
+          actor_avatar: params.actorAvatar,
+          type: 'feature_request_mention',
+          content: params.content.slice(0, 100),
+          reference_id: params.featureRequestId,
+          reference_title: params.featureTitle,
+        })),
+      ),
+      params.actorAddress,
+    );
+  } catch {
+    // The comment stands whether or not the mention row landed.
+  }
+}
+
+/**
+ * The assistant's trigger on this board, word-bounded.
+ *
+ * `@dehub` is deliberately not a trigger: it is a real user's handle, and the
+ * chat bot's original regex matched it — so every "@dehub" answered on that
+ * person's behalf. The same expression guards the server side; this copy only
+ * decides whether the call is worth making at all.
+ */
+const ASSISTANT_MENTION_RE = /(^|[^a-zA-Z0-9_])@assistant(?![a-zA-Z0-9_])/i;
+
+/**
+ * Ask the assistant to answer a comment that tagged it.
+ *
+ * The reply is written server-side as a real comment owned by the assistant
+ * account, so there is nothing to render here — only a refetch once it lands.
+ * The reply is written server-side, which sends no ping, so this waits on the
+ * call and pings for it once it lands.
+ */
+async function requestAssistantReply(commentId: string): Promise<void> {
+  await ensureFreshToken();
+  const { error } = await supabase.functions.invoke('feature-request-assistant', {
+    body: { commentId },
+    headers: dehubAuthHeaders(),
+  });
+  if (error) throw error;
+}
+
+export function useSubmitComment() {
+  const { t: _copy } = _useCopy();
+  const queryClient = useQueryClient();
+  const { walletAddress, user } = useAuth();
+
+  return useMutation({
+    mutationFn: async ({
+      featureRequestId,
+      content,
+      parentId,
+      featureTitle,
+      featureAuthorAddress,
+      parentAuthorAddress,
+      media,
+    }: {
+      featureRequestId: string;
+      content: string;
+      /** One photo, clip, audio file, voice note or GIF. */
+      media?: CommentMediaInput | null;
+      /** The comment being replied to, or nothing for a new thread. */
+      parentId?: string | null;
+      featureTitle?: string | null;
+      /** Skipped when telling mentions — the trigger already told these two. */
+      featureAuthorAddress?: string | null;
+      parentAuthorAddress?: string | null;
+    }) => {
+      if (!walletAddress) throw new Error(_translateCopy("copy.76d1efbeed2d", { defaultValue: "Not authenticated" }));
+      const address = walletAddress.toLowerCase();
+      const avatarPath = await resolveCommentAvatar(address, user?.avatarImageUrl, user?.username);
+      const text = content.trim();
+
+      const { data, error } = await supabase
+        .from('feature_request_comments')
+        .insert({
+          feature_request_id: featureRequestId,
+          wallet_address: address,
+          username: user?.username || null,
+          avatar: avatarPath,
+          content: text,
+          parent_id: parentId ?? null,
+          ...(media ? {
+            media_url: media.url,
+            media_type: media.type,
+            media_duration: media.duration ? Math.round(media.duration) : null,
+          } : {}),
+        })
+        .select()
+        .single()
+        .setHeader('x-wallet-address', address);
+
+      if (error) throw error;
+
+      // Deliberately outside the mutation's error path: the comment is written,
+      // and a failed mention lookup must not toast a failure over it.
+      void notifyMentions({
+        content: text,
+        featureRequestId,
+        featureTitle: featureTitle ?? null,
+        actorAddress: address,
+        actorUsername: user?.username || null,
+        actorAvatar: avatarPath,
+        skipAddresses: [address, featureAuthorAddress ?? '', parentAuthorAddress ?? ''].filter(Boolean),
+      });
+
+      return data;
+    },
+    onSuccess: (data, variables) => {
+      pingFeatureComments(variables.featureRequestId);
+      queryClient.invalidateQueries({ queryKey: ['feature-request-comments', variables.featureRequestId] });
+
+      // Tagging @assistant here gets an answer from the assistant itself, in
+      // Riftn's own voice. This board is where the people who reported things
+      // come back to ask whether the fix landed, and a question that sits
+      // unanswered until somebody scrolls past is the whole problem. Fire and
+      // forget: the comment is already saved, so a failed reply must not toast
+      // an error over it.
+      const newCommentId = (data as { id?: string } | null)?.id;
+      if (newCommentId && ASSISTANT_MENTION_RE.test(variables.content)) {
+        void requestAssistantReply(newCommentId)
+          .then(() => {
+            pingFeatureComments(variables.featureRequestId);
+            queryClient.invalidateQueries({
+              queryKey: ['feature-request-comments', variables.featureRequestId],
+            });
+          })
+          .catch(() => {
+            // No reply this time. The thread is unchanged and still theirs.
+          });
+      }
+
+      // Optimistically bump comment count without refetching the list (avoids reordering)
+      patchFeatureRow(queryClient, variables.featureRequestId, (fr) => ({ ...fr, comment_count: (fr.comment_count || 0) + 1 }));
+    },
+    onError: () => {
+      toast.error(_copy("copy.791ab06be905", { defaultValue: "Failed to post comment" }));
+    },
+  });
+}
+
+export function useEditComment() {
+  const { t: _copy } = _useCopy();
+  const queryClient = useQueryClient();
+  const { walletAddress } = useAuth();
+
+  return useMutation({
+    mutationFn: async ({ commentId, content }: { commentId: string; content: string; featureRequestId: string }) => {
+      if (!walletAddress) throw new Error(_translateCopy("copy.76d1efbeed2d", { defaultValue: "Not authenticated" }));
+      const { error } = await supabase
+        .from('feature_request_comments')
+        .update({ content: content.trim(), updated_at: new Date().toISOString() })
+        .eq('id', commentId)
+        .setHeader('x-wallet-address', walletAddress.toLowerCase());
+      if (error) throw error;
+    },
+    onSuccess: (_data, variables) => {
+      pingFeatureComments(variables.featureRequestId);
+      queryClient.invalidateQueries({ queryKey: ['feature-request-comments', variables.featureRequestId] });
+    },
+    onError: () => {
+      toast.error(_copy("copy.78443791af16", { defaultValue: "Failed to save comment" }));
+    },
+  });
+}
+
+export function useDeleteComment() {
+  const { t: _copy } = _useCopy();
+  const queryClient = useQueryClient();
+  const { walletAddress } = useAuth();
+
+  return useMutation({
+    mutationFn: async ({ commentId, featureRequestId }: { commentId: string; featureRequestId: string }) => {
+      if (!walletAddress) throw new Error(_translateCopy("copy.76d1efbeed2d", { defaultValue: "Not authenticated" }));
+
+      const { error } = await supabase
+        .from('feature_request_comments')
+        .delete()
+        .eq('id', commentId)
+        .setHeader('x-wallet-address', walletAddress.toLowerCase());
+
+      if (error) throw error;
+      return { featureRequestId };
+    },
+    onSuccess: (_data, variables) => {
+      pingFeatureComments(variables.featureRequestId);
+      queryClient.invalidateQueries({ queryKey: ['feature-request-comments', variables.featureRequestId] });
+      // Optimistically decrement comment count without refetching the list
+      patchFeatureRow(queryClient, variables.featureRequestId, (fr) => ({ ...fr, comment_count: Math.max(0, (fr.comment_count || 0) - 1) }));
+      toast.success(_copy("copy.7199a134a339", { defaultValue: "Comment deleted" }));
+    },
+    onError: () => {
+      toast.error(_copy("copy.c65a5314ca9e", { defaultValue: "Failed to delete comment" }));
+    },
+  });
+}
+
+/**
+ * Cast, change or clear a reaction on a comment.
+ *
+ * One row per viewer per comment: tapping the face you already wear clears it,
+ * tapping another replaces it. That is the polarity model posts use, with the
+ * upsert standing in for the API's vote swap.
+ */
+export function useReactToComment() {
+  const { t: _copy } = _useCopy();
+  const queryClient = useQueryClient();
+  const { walletAddress } = useAuth();
+
+  return useMutation({
+    mutationFn: async ({
+      commentId,
+      reaction,
+      current,
+    }: {
+      commentId: string;
+      reaction: PostReaction;
+      /** What this viewer already had on the comment, for the toggle. */
+      current: PostReaction | null;
+      featureRequestId: string;
+    }) => {
+      if (!walletAddress) throw new Error(_translateCopy("copy.76d1efbeed2d", { defaultValue: "Not authenticated" }));
+      const address = walletAddress.toLowerCase();
+
+      if (current === reaction) {
+        const { error } = await supabase
+          .from('feature_request_comment_reactions')
+          .delete()
+          .eq('comment_id', commentId)
+          .eq('wallet_address', address)
+          .setHeader('x-wallet-address', address);
+        if (error) throw error;
+        return;
+      }
+
+      const { error } = await supabase
+        .from('feature_request_comment_reactions')
+        .upsert({ comment_id: commentId, wallet_address: address, reaction }, {
+          onConflict: 'comment_id,wallet_address',
+        })
+        .setHeader('x-wallet-address', address);
+      if (error) throw error;
+    },
+    onSuccess: (_data, variables) => {
+      pingFeatureComments(variables.featureRequestId);
+      queryClient.invalidateQueries({ queryKey: ['feature-request-comments', variables.featureRequestId] });
+    },
+    onError: () => {
+      toast.error(_copy("copy.13931898084d", { defaultValue: "Failed to react" }));
+    },
+  });
+}
+
+/**
+ * Put one comment attachment in the shared `feature-media` bucket, under the
+ * commenter's own folder — the same bucket and layout request attachments use.
+ */
+export async function uploadFeatureCommentMedia(file: File, walletAddress: string): Promise<string> {
+  const ext = file.name.split('.').pop()?.toLowerCase().replace(/[^a-z0-9]/g, '') || 'bin';
+  const path = `${walletAddress.toLowerCase()}/comment-${Date.now()}.${ext}`;
+  const { error } = await supabase.storage
+    .from('feature-media')
+    .upload(path, file, { contentType: file.type || undefined, upsert: false, cacheControl: '31536000' });
+  if (error) throw error;
+  return supabase.storage.from('feature-media').getPublicUrl(path).data.publicUrl;
+}
+
+/**
+ * Who reacted positively to one Requests comment, in the likers sheet's shape.
+ *
+ * Unlike a post comment's list this one is public on the database side, but
+ * the sheet only opens from your own comment's thumb, same as on a post.
+ */
+export async function getFeatureCommentLikers(
+  commentId: string | number,
+  page = 0,
+  limit = 50,
+): Promise<CommentLikersResponse> {
+  const { data, error } = await supabase
+    .from('feature_request_comment_reactions')
+    .select('wallet_address, reaction, created_at')
+    .eq('comment_id', String(commentId))
+    .order('created_at', { ascending: false });
+  if (error) throw error;
+  const positive = (data || []).filter((row) => isPositiveReaction(row.reaction as PostReaction));
+  const slice = positive.slice(page * limit, page * limit + limit);
+  const accounts: AccountSummary[] = await getAccountSummaries(slice.map((row) => row.wallet_address)).catch(() => []);
+  const byAddress = new Map<string, AccountSummary>(accounts.map((account) => [account.address.toLowerCase(), account]));
+  return {
+    result: true,
+    canViewLikers: true,
+    data: slice.map((row) => {
+      const account = byAddress.get(row.wallet_address.toLowerCase());
+      return {
+        address: row.wallet_address,
+        username: account?.username ?? null,
+        displayName: account?.displayName ?? null,
+        avatarImageUrl: account?.avatarImageUrl ?? null,
+        badgeBalance: account?.badgeBalance ?? undefined,
+      };
+    }),
+    pagination: {
+      page,
+      limit,
+      totalCount: positive.length,
+      hasMore: (page + 1) * limit < positive.length,
+    },
+  } as CommentLikersResponse;
+}

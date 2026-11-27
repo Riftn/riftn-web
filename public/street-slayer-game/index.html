@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+	<title>STREET SLAYER</title>
+
+	<!-- Standardised web app manifest -->
+	<link rel="manifest" href="appmanifest.json" />
+
+	<!-- Allow fullscreen mode on iOS devices. (These are Apple specific meta tags.) -->
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, minimal-ui" />
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+	<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+	<link rel="apple-touch-icon" sizes="256x256" href="icon-256.png" />
+	<meta name="HandheldFriendly" content="true" />
+
+	<!-- Chrome for Android web app tags -->
+	<meta name="mobile-web-app-capable" content="yes" />
+	<link rel="shortcut icon" sizes="256x256" href="icon-256.png" />
+
+    <!-- All margins and padding must be zero for the canvas to fill the screen. -->
+	<style type="text/css">
+		* {
+			padding: 0;
+			margin: 0;
+		}
+		html, body {
+			background: #000;
+			color: #fff;
+			overflow: hidden;
+			touch-action: none;
+			-ms-touch-action: none;
+		}
+		canvas {
+			touch-action-delay: none;
+			touch-action: none;
+			-ms-touch-action: none;
+		}
+
+		/* Riftn: the exit chip below. Top CENTRE, and that is not arbitrary —
+		   every other edge of the 854x480 layout is spoken for. Top left is the
+		   portrait and life bar, bottom left the directional pad, bottom right
+		   the six action buttons, and top right the touch pause button. The band
+		   between the life bar and that pause button is the only empty strip,
+		   and letterbox scaling centres the canvas horizontally, so viewport
+		   centre lands in it at every aspect ratio. On a tall window it lands on
+		   the black bar above the game, which is better still. */
+		#dehub-exit {
+			position: fixed;
+			top: 10px;
+			left: 50%;
+			transform: translateX(-50%);
+			z-index: 10;
+			padding: 5px 14px;
+			border: 0;
+			border-radius: 999px;
+			background: rgba(0, 0, 0, 0.55);
+			box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+			color: #fff;
+			font: 600 11px/1 system-ui, -apple-system, "Segoe UI", sans-serif;
+			letter-spacing: 0.08em;
+			text-transform: uppercase;
+			opacity: 0.5;
+			cursor: pointer;
+			/* The canvas swallows touch-action, so say it again here or a tap on
+			   the chip is treated as a gesture on the game underneath. */
+			touch-action: manipulation;
+			transition: opacity 150ms ease;
+		}
+		#dehub-exit:hover,
+		#dehub-exit:focus-visible {
+			opacity: 1;
+			outline: none;
+			box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.45);
+		}
+
+		/* Riftn: boot screen. Construct 2's stock loader is a percentage in
+		   plain text over `loading-logo.png` — which is the Construct 2 engine
+		   cog, not this game. That is the first thing a player sees, so it is
+		   covered with the game's own wordmark and a real bar driven by the
+		   runtime's `loadingprogress`. The stock loader keeps drawing
+		   underneath; it is simply never visible. */
+		#dehub-boot {
+			position: fixed;
+			inset: 0;
+			z-index: 20;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+			gap: 26px;
+			background: #000;
+			transition: opacity 260ms ease;
+		}
+		#dehub-boot.is-done {
+			opacity: 0;
+			pointer-events: none;
+		}
+		#dehub-boot img {
+			width: min(62vw, 310px);
+			height: auto;
+			/* Pixel art. Point-sampled so the wordmark stays crisp rather than
+			   being smoothed the way the engine's own linear sampling would. */
+			image-rendering: pixelated;
+		}
+		#dehub-boot-track {
+			width: min(52vw, 260px);
+			height: 3px;
+			border-radius: 999px;
+			background: rgba(255, 255, 255, 0.14);
+			overflow: hidden;
+		}
+		#dehub-boot-bar {
+			height: 100%;
+			width: 0%;
+			border-radius: 999px;
+			background: #fff;
+			transition: width 180ms ease-out;
+		}
+
+		/* Riftn: portrait guard. The project is a fixed 854x480 landscape with
+		   its touch pad and action buttons placed for that shape, and letterbox
+		   scaling honours it — so in portrait the whole game shrinks to a strip
+		   across the middle with controls too small to hit. Orientation is set
+		   to "Any" in the project, so nothing upstream stops that happening.
+
+		   Advisory, not a lock: someone with orientation lock switched on
+		   cannot rotate, and refusing to let them play at all would be worse
+		   than a small game. Hence the dismiss. */
+		#dehub-rotate {
+			position: fixed;
+			inset: 0;
+			z-index: 30;
+			display: none;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+			gap: 18px;
+			padding: 0 32px;
+			background: #000;
+			text-align: center;
+			font: 400 13px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif;
+			color: #d4d4d8;
+		}
+		@media (orientation: portrait) and (max-width: 900px) {
+			body:not(.dehub-rotate-dismissed) #dehub-rotate { display: flex; }
+		}
+		#dehub-rotate-icon {
+			width: 40px;
+			height: 62px;
+			border: 2px solid #52525b;
+			border-radius: 7px;
+			animation: dehub-tip 2.4s ease-in-out infinite;
+		}
+		@keyframes dehub-tip {
+			0%, 40%   { transform: rotate(0deg); }
+			60%, 100% { transform: rotate(-90deg); }
+		}
+		@media (prefers-reduced-motion: reduce) {
+			#dehub-rotate-icon { animation: none; transform: rotate(-90deg); }
+		}
+		#dehub-rotate strong {
+			display: block;
+			font-size: 15px;
+			font-weight: 600;
+			color: #fff;
+		}
+		#dehub-rotate button {
+			margin-top: 4px;
+			padding: 7px 16px;
+			border: 0;
+			border-radius: 999px;
+			background: rgba(255, 255, 255, 0.1);
+			box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+			color: #fff;
+			font: 600 11px/1 system-ui, -apple-system, "Segoe UI", sans-serif;
+			letter-spacing: 0.08em;
+			text-transform: uppercase;
+			cursor: pointer;
+			touch-action: manipulation;
+		}
+    </style>
+
+
+</head>
+
+<body>
+	<div id="fb-root"></div>
+
+	<!-- Riftn: boot screen and portrait guard. Both are markup + CSS so they are
+	     up before a single byte of the engine has parsed, which is exactly when
+	     they are needed. See the style block above for why each exists. -->
+	<div id="dehub-boot">
+		<img src="dehub-loader-wordmark.png" alt="Street Slayer" />
+		<div id="dehub-boot-track"><div id="dehub-boot-bar"></div></div>
+	</div>
+
+	<div id="dehub-rotate">
+		<div id="dehub-rotate-icon"></div>
+		<p><strong>Turn your phone sideways</strong>Street Slayer is a landscape game — its controls do not fit a portrait screen.</p>
+		<button type="button" id="dehub-rotate-dismiss">Play anyway</button>
+	</div>
+
+	<script>
+	// Issue a warning if trying to preview an exported project on disk.
+	(function(){
+		// Check for running exported on file protocol
+		if (window.location.protocol.substr(0, 4) === "file")
+		{
+			alert("Exported games won't work until you upload them. (When running on the file:/// protocol, browsers block many features from working for security reasons.)");
+		}
+	})();
+	</script>
+
+	<!-- The canvas must be inside a div called c2canvasdiv -->
+	<div id="c2canvasdiv">
+
+		<!-- The canvas the project will render to.  If you change its ID, don't forget to change the
+		ID the runtime looks for in the jQuery events above (ready() and cr_sizeCanvas()). -->
+		<canvas id="c2canvas" width="854" height="480">
+			<!-- This text is displayed if the visitor's browser does not support HTML5.
+			You can change it, but it is a good idea to link to a description of a browser
+			and provide some links to download some popular HTML5-compatible browsers. -->
+			<h1>Your browser does not appear to support HTML5.  Try upgrading your browser to the latest version.  <a href="http://www.whatbrowser.org">What is a browser?</a>
+			<br/><br/><a href="http://www.microsoft.com/windows/internet-explorer/default.aspx">Microsoft Internet Explorer</a><br/>
+			<a href="http://www.mozilla.com/firefox/">Mozilla Firefox</a><br/>
+			<a href="http://www.google.com/chrome/">Google Chrome</a><br/>
+			<a href="http://www.apple.com/safari/download/">Apple Safari</a></h1>
+		</canvas>
+
+	</div>
+
+	<!-- Pages load faster with scripts at the bottom -->
+
+	<!-- Construct 2 exported games require jQuery. -->
+	<script src="jquery-2.1.1.min.js"></script>
+
+
+
+    <!-- The runtime script.  You can rename it, but don't forget to rename the reference here as well.
+    This file will have been minified and obfuscated if you enabled "Minify script" during export. -->
+	<script src="c2runtime.js"></script>
+
+    <script>
+		// Start the Construct 2 project running on window load.
+		jQuery(document).ready(function ()
+		{
+			// Create new runtime using the c2canvas
+			cr_createRuntime("c2canvas");
+		});
+
+		// Pause and resume on page becoming visible/invisible
+		function onVisibilityChanged() {
+			if (document.hidden || document.mozHidden || document.webkitHidden || document.msHidden)
+				cr_setSuspended(true);
+			else
+				cr_setSuspended(false);
+		};
+
+		document.addEventListener("visibilitychange", onVisibilityChanged, false);
+		document.addEventListener("mozvisibilitychange", onVisibilityChanged, false);
+		document.addEventListener("webkitvisibilitychange", onVisibilityChanged, false);
+		document.addEventListener("msvisibilitychange", onVisibilityChanged, false);
+
+		// Riftn: upstream registers a service worker here for offline play. That
+		// cannot work in this frame and, worse, cannot fail quietly in it: the
+		// sandbox withholds allow-same-origin, so the frame has an opaque origin,
+		// and READING navigator.serviceWorker on an opaque origin THROWS a
+		// SecurityError rather than returning undefined. Upstream's guard is
+		// `if (!navigator.serviceWorker) return;`, which sits outside its own
+		// try/catch, so the throw escapes into the runtime's startup path.
+		//
+		// The runtime calls this by name if it exists (c2runtime.js:4953), so it
+		// stays defined and does nothing. sw.js, offline.js, offlineClient.js and
+		// offline.appcache are not vendored at all — see README.md.
+		window.C2_RegisterSW = function C2_RegisterSW() {};
+    </script>
+
+	<!-- ===================================================================
+	     Riftn: the way out. Not upstream, and it is a PAGE change rather
+	     than a runtime patch, so re-exporting the game does not reproduce it.
+
+	     The arcade player draws no chrome of its own: a game gets the whole
+	     viewport and is expected to offer its own close, which reaches the
+	     host by postMessage (an opaque-origin frame has no other channel).
+	     See src/config/arcade-games.ts `exitSource` and lib/game-exit-request.
+
+	     Why a button and not a key. Every key that reads as "quit" is already
+	     the game's: Esc and P both toggle its pause, R restarts the stage.
+	     Taking one would mean swallowing it before the runtime's own document
+	     listener saw it, which breaks a control the game ships with.
+	     =================================================================== -->
+	<script>
+	// Riftn: drive the boot screen from the runtime's own progress, and retire
+	// it when the runtime says it has finished loading.
+	//
+	// `cr_getC2Runtime` is a global the Construct 2 export already publishes, so
+	// this reads the engine's real state rather than guessing on a timer — but
+	// it IS an engine handle, so src/test/arcade.test.ts asserts it survives a
+	// re-vendor. `loadingprogress` is 0..1; `isloading` flips false when every
+	// texture and sound is in.
+	(function () {
+		var boot = document.getElementById('dehub-boot');
+		var bar = document.getElementById('dehub-boot-bar');
+		// Belt and braces: if the handle ever disappears, the screen must not
+		// sit there forever over a game that is already playable.
+		var giveUpAt = Date.now() + 60000;
+
+		function finish() {
+			boot.classList.add('is-done');
+			window.setTimeout(function () { boot.remove(); }, 400);
+		}
+
+		(function poll() {
+			var rt = (typeof cr_getC2Runtime === 'function') ? cr_getC2Runtime() : null;
+			if (rt) bar.style.width = Math.round((rt.loadingprogress || 0) * 100) + '%';
+			if ((rt && !rt.isloading) || Date.now() > giveUpAt) {
+				bar.style.width = '100%';
+				window.setTimeout(finish, 140);
+				return;
+			}
+			window.setTimeout(poll, 100);
+		}());
+	}());
+
+	// Riftn: let someone who cannot rotate play anyway.
+	(function () {
+		var b = document.getElementById('dehub-rotate-dismiss');
+		b.addEventListener('click', function () {
+			document.body.classList.add('dehub-rotate-dismissed');
+		});
+	}());
+
+	// Riftn: the run bridge. Not upstream, and a PAGE change like the exit chip
+	// below — re-exporting the game does not reproduce it.
+	//
+	// WHAT IT MEASURES, AND WHY NOT THE OBVIOUS THING
+	// -----------------------------------------------
+	// The project looks like it has a progression to rank: a global called
+	// `number_of_complete_stages`. It has not. That variable is COMPARED in six
+	// places and SET in two, both times to zero — nothing anywhere increments
+	// it, so it is always 0 and a leaderboard built on it would never have had
+	// a single row on it. (Established by walking every event in data.js, not
+	// by reading the variable's name.)
+	//
+	// What the runtime does report truthfully is two things:
+	//
+	//   running_layout.scrollX   the camera, across a street of known width
+	//   life_of_p1               starts at 500, subtracted from by every hit,
+	//                            added to by the one life pickup
+	//
+	// So a run is "how far down the street, and how much health was left":
+	// distance as permille of the reachable street, health as the tiebreak
+	// between the players who reach the end.
+	//
+	// Reachable street is the layout width less ONE SCREEN, not the layout
+	// width. Construct clamps the camera half a screen in at each end, so
+	// scrollX travels 427..4173 across a 4600-wide layout, and dividing by 4600
+	// would mean nobody could ever finish.
+	//
+	// The host relays these to the server, which decides what they were worth —
+	// see src/lib/game-run-report.ts and supabase/functions/arcade-score. This
+	// side reports; it does not score, and it is not trusted to.
+	//
+	// `cr_getC2Runtime` is the same engine handle the boot screen above reads,
+	// and src/test/arcade.test.ts asserts it survives a re-vendor.
+	(function () {
+		// Gated on being embedded, exactly like the exit chip: a standalone
+		// deploy has no host to report to.
+		if (window.parent === window)
+			return;
+
+		var SOURCE = "street-slayer";
+		// The one layout that IS the game. Everything else — title, character
+		// select, stage select, game over, credits — is between runs.
+		var PLAY_LAYOUT = "stage";
+		// Permille of the street between reports. Ten or so per run: often
+		// enough that the server watches the run happen, rare enough that a run
+		// is not a stream of requests.
+		var CHECKPOINT = 100;
+		var SAMPLE_MS = 500;
+
+		var running = false;
+		var baseScrollX = 0;
+		var best = 0;      // furthest reached this run, in permille
+		var reported = 0;  // what the last report carried
+		var life = 0;
+
+		function post(type) {
+			window.parent.postMessage({ source: SOURCE, type: type, progress: best, life: life }, "*");
+		}
+
+		function globalVar(rt, name) {
+			var vars = (rt && rt.all_global_vars) || [];
+			for (var i = 0; i < vars.length; i++) {
+				if (vars[i].name === name) return vars[i].data;
+			}
+			return 0;
+		}
+
+		function endRun() {
+			if (!running) return;
+			running = false;
+			post("run-end");
+		}
+
+		// So the exit chip can close the run before it closes the game: a player
+		// who walks out mid-run still gets the distance they earned.
+		window.DEHUB_END_RUN = endRun;
+
+		window.setInterval(function () {
+			var rt = (typeof cr_getC2Runtime === "function") ? cr_getC2Runtime() : null;
+			var layout = rt && rt.running_layout;
+			if (!layout) return;
+
+			if (layout.name !== PLAY_LAYOUT) {
+				endRun();
+				return;
+			}
+
+			if (!running) {
+				running = true;
+				// The camera's position on arrival, not zero: it opens half a
+				// screen in, and every run starts from wherever that is.
+				baseScrollX = layout.scrollX;
+				best = 0;
+				reported = 0;
+				life = globalVar(rt, "life_of_p1");
+				post("run-start");
+			}
+
+			life = globalVar(rt, "life_of_p1");
+
+			var street = Math.max(1, layout.width - rt.original_width);
+			var permille = Math.round(((layout.scrollX - baseScrollX) / street) * 1000);
+			// Restarting the stage with R rewinds the camera behind the start,
+			// which reads as negative here. A run's reach is the furthest it
+			// ever got, so the floor is 0 and `best` only ever climbs.
+			if (permille < 0) permille = 0;
+			if (permille > 1000) permille = 1000;
+			if (permille > best) best = permille;
+
+			if (best - reported >= CHECKPOINT) {
+				reported = best;
+				post("run-progress");
+			}
+		}, SAMPLE_MS);
+
+		// Closing the tab mid-run. Not reliable in every browser, which is why
+		// the server also expires an abandoned run on its own clock — this is
+		// the cheap path, not the guarantee.
+		window.addEventListener("pagehide", endRun);
+	}());
+
+	(function () {
+		// Gated on being embedded, so a standalone deploy — which has nothing
+		// to return to — never grows a button that does nothing.
+		if (window.parent === window)
+			return;
+
+		var chip = document.createElement("button");
+		chip.id = "dehub-exit";
+		chip.type = "button";
+		chip.textContent = "Exit";
+		chip.setAttribute("aria-label", "Leave Street Slayer and return to the arcade");
+
+		chip.addEventListener("click", function () {
+			// Close the run before closing the game, or a player who walks out
+			// at 80% of the street is recorded as never having been there.
+			if (window.DEHUB_END_RUN) window.DEHUB_END_RUN();
+			window.parent.postMessage({ source: "street-slayer", type: "exit" }, "*");
+		});
+
+		document.body.appendChild(chip);
+	}());
+	</script>
+</body>
+</html>

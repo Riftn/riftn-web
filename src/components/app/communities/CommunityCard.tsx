@@ -1,0 +1,102 @@
+import { useTranslation as _useCopy } from 'react-i18next';
+import { Crown, Clock } from "lucide-react";
+import Users from "@/components/ui/cut-icons/communities";
+import Lock from "@/components/ui/cut-icons/privacy";
+import { DescriptionWithLinks } from "./DescriptionWithLinks";
+
+import { useTranslation } from 'react-i18next';
+import type { Community } from '@/hooks/use-communities';
+import { storageImage, deviceWidth } from '@/lib/media-url';
+import { useAppTheme } from '@/contexts/ThemeContext';
+
+import { formatCount } from '@/lib/format-count';
+function formatRelativeTime(dateString: string): string {
+  const date = new Date(dateString);
+  const diffMs = Date.now() - date.getTime();
+  const diffDays = Math.floor(diffMs / 86400000);
+  if (diffDays < 1) return 'today';
+  if (diffDays === 1) return 'yesterday';
+  if (diffDays < 7) return `${diffDays}d`;
+  if (diffDays < 30) return `${Math.floor(diffDays / 7)}w`;
+  if (diffDays < 365) return `${Math.floor(diffDays / 30)}m`;
+  return `${Math.floor(diffDays / 365)}y`;
+}
+
+interface CommunityCardProps {
+  community: Community;
+  isMember: boolean;
+  role?: string;
+  unreadCount?: number;
+  onClick: () => void;
+}
+
+export function CommunityCard({ community, isMember, role, unreadCount, onClick }: CommunityCardProps) {
+  const { t: _copy } = _useCopy();
+  const { t } = useTranslation();
+  const { theme, themeChoice } = useAppTheme();
+  const isLight = theme === 'light' || themeChoice === 'system-light';
+  const isOwner = role === 'owner';
+  const description = community.description || '';
+
+  return (
+    <button
+      onClick={onClick}
+      className="w-full flex items-center gap-3 p-3 pr-16 rounded-xl bg-white/[0.04] border border-white/[0.08] hover:bg-white/[0.08] transition-colors text-left relative overflow-hidden"
+    >
+      {community.banner_url && (
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            backgroundImage: `url(${storageImage(community.banner_url, deviceWidth(360))})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            opacity: 0.42,
+            maskImage: 'linear-gradient(to right, transparent 30%, black 70%)',
+            WebkitMaskImage: 'linear-gradient(to right, transparent 30%, black 70%)',
+          }}
+        />
+      )}
+      <div className="absolute top-2 right-2 flex items-center gap-1 px-2 py-0.5 rounded-md bg-black/50 backdrop-blur-sm border border-white/10 z-10">
+        <Clock className="w-3 h-3 text-zinc-400" />
+        <span className="text-[10px] text-zinc-300 font-medium leading-none">{formatRelativeTime(community.created_at)}</span>
+      </div>
+      <div className="relative w-12 h-12 rounded-xl bg-white/[0.08] flex items-center justify-center flex-shrink-0">
+       <div className="w-full h-full rounded-xl overflow-hidden flex items-center justify-center">
+        {community.avatar_url ? (
+          <img src={storageImage(community.avatar_url, deviceWidth(48))} alt={community.name} className="w-full h-full object-cover rounded-lg" loading="lazy" decoding="async" />
+        ) : (
+          <Users className="w-5 h-5 text-zinc-500" />
+        )}
+       </div>
+        {unreadCount !== undefined && unreadCount > 0 && (
+          <span data-unread-chip className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 flex items-center justify-center bg-red-500 text-white text-[10px] font-bold rounded-full z-10 leading-none">
+            {unreadCount > 99 ? '99+' : unreadCount}
+          </span>
+        )}
+      </div>
+
+      <div className="relative flex-1 min-w-0">
+        <div className="flex items-center gap-1.5">
+          <span className="text-white font-medium text-sm truncate">{community.name}</span>
+          {community.is_private && <Lock className="w-3 h-3 text-zinc-500 flex-shrink-0" />}
+        </div>
+        {description ? (
+          <DescriptionWithLinks text={description} singleLine className="text-xs text-white" />
+        ) : (
+          <p className="text-xs truncate text-white">{t('communities.noDescription')}</p>
+        )}
+        <div className="flex items-center gap-3 mt-0.5">
+          <span className="text-white text-xs">{formatCount(community.member_count)} {t('communities.members')}</span>
+          {isMember && (
+            isOwner ? (
+              <span className={`flex items-center gap-1 text-xs ${isLight ? 'text-amber-800' : 'text-amber-400/80'}`}>
+                <Crown className="w-3 h-3" />{_copy("copy.4b1b8aa3608a", { defaultValue: "Owner" })}</span>
+            ) : (
+              <span className={`text-xs ${isLight ? 'text-emerald-800' : 'text-emerald-500/80'}`}>{t('communities.joined')}</span>
+            )
+          )}
+        </div>
+      </div>
+    </button>
+  );
+}

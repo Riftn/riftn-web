@@ -1,0 +1,410 @@
+import { apiCall, getAuthToken } from './core';
+import { noteSignInWall } from '@/lib/sign-in-wall';
+import { normalizeCategoryList } from '@/lib/category-names';
+import type {
+  DeHubNFT,
+  DeHubUser,
+  DeHubCategory,
+  PaginatedResponse,
+  SearchNFTsParams,
+  UniversalSearchParams,
+  UniversalSearchResponse,
+  SearchAccount,
+  SearchSuggestionsParams,
+  SearchSuggestion,
+  SearchLogParams,
+} from './types';
+
+export async function searchNFTs(params: SearchNFTsParams = {}): Promise<PaginatedResponse<DeHubNFT>> {
+  let sortBy: string | undefined;
+  let sortOrder: string | undefined;
+  switch (params.sortMode) {
+    case 'new':
+      sortBy = 'createdAt';
+      sortOrder = 'desc';
+      break;
+    case 'popular':
+      sortBy = 'likes';
+      sortOrder = 'desc';
+      break;
+    case 'trending':
+      sortBy = 'views';
+      sortOrder = 'desc';
+      break;
+    case 'by-comments':
+      sortBy = 'comments';
+      sortOrder = 'desc';
+      break;
+    case 'by-tips':
+      sortBy = 'tips';
+      sortOrder = 'desc';
+      break;
+  }
+
+  const apiParams: Record<string, string | number | undefined> = {
+    page: params.page !== undefined ? params.page + 1 : 1,
+    limit: params.unit || 20,
+    sortBy,
+    sortOrder,
+    category: params.category,
+    range: params.range,
+    minter: params.creator_id,
+    postType: params.postType,
+    search: params.search,
+    status: params.status || 'all',
+  };
+
+  // requiresAuth when a token exists: it makes apiCall refresh a stale token
+  // before the request — /api/feed answers a dead token with 200-anonymous
+  // (no isLiked/isSaved), not a 401, so there is no retry after the fact.
+  const response = await apiCall<{ result: DeHubNFT[]; pagination?: { page: number; limit: number; totalCount: number; totalPages: number; hasMore: boolean } }>("/api/feed", {
+    params: apiParams,
+    requiresAuth: !!getAuthToken(),
+  });
+  
+  noteSignInWall(response);
+  const items = response.result || [];
+  const pagination = response.pagination;
+  
+  return {
+    data: items,
+    total: pagination?.totalCount ?? items.length,
+    page: params.page || 0,
+    limit: params.unit || 20,
+    has_more: pagination?.hasMore ?? items.length >= (params.unit || 20),
+  };
+}
+
+export async function universalSearch(params: UniversalSearchParams): Promise<UniversalSearchResponse> {
+  const response = await apiCall<any>("/api/search", {
+    requiresAuth: !!getAuthToken(),
+    params: {
+      q: params.q,
+      page: (params.page ?? 0) + 1,
+      // /search's page-size param is `limit` — `unit` was ignored and every
+      // request fell back to the server default of 20.
+      limit: params.unit,
+      type: params.type === 'accounts' ? 'accounts' : params.type ? 'content' : undefined,
+      postType: params.postType,
+      address: params.address,
+    },
+  });
+  
+  const isAccountSearch = params.type === 'accounts';
+  
+  // Handle account search - API returns { accounts: { items: [...], pagination: {...} } }
+  if (isAccountSearch) {
+    let rawAccounts: any[] = [];
+    let pagination: any = {};
+    
+    // Primary format: { accounts: { items: [...], pagination: {...} } }
+    if (response?.accounts?.items) {
+      rawAccounts = response.accounts.items;
+      pagination = response.accounts.pagination || {};
+    }
+    // Fallback: { result: [...] }
+    else if (Array.isArray(response?.result)) {
+      rawAccounts = response.result;
+      pagination = response.pagination || {};
+    }
+    // Fallback: raw array
+    else if (Array.isArray(response)) {
+      rawAccounts = response;
+    }
+    
+    const accounts: SearchAccount[] = rawAccounts
+      .map(item => ({
+        id: item._id || item.id || item.address || '',
+        address: item.address || '',
+        username: item.username || '',
+        displayName: item.displayName,
+        bio: item.aboutMe || item.bio,
+        avatarUrl: item.avatarImageUrl || item.avatarUrl,
+        avatarImageUrl: item.avatarImageUrl,
+        verified: item.isVerified || false,
+        followerCount: typeof item.followers === 'number' ? item.followers : undefined,
+        isFollowing: item.isFollowing,
+        followsYou: item.followsYou,
+        coverImageUrl: item.coverImageUrl ?? null,
+        badgeBalance: item.badgeBalance,
+        badgeLock: item.badgeLock,
+        hideBadgeAndBalance: item.hideBadgeAndBalance,
+      }))
+      .filter(a => a.id && a.address);
+    
+    return {
+      accounts,
+      videos: [],
+      livestreams: [],
+      has_more: pagination.hasMore ?? rawAccounts.length >= (params.unit || 15),
+      total: pagination.totalCount ?? rawAccounts.length,
+    };
+  }
+  
+  // Handle content/video search - API may return { result: [...] } or { content: { items: [...] } }
+  let items: any[] = [];
+  let pagination: any = {};
+  
+  if (response?.content?.items) {
+    items = response.content.items;
+    pagination = response.content.pagination || {};
+  } else if (Array.isArray(response?.result)) {
+    items = response.result;
+    pagination = response.pagination || {};
+  } else if (Array.isArray(response)) {
+    items = response;
+  }
+  
+  // Also extract accounts from "All" search responses
+  let accounts: SearchAccount[] = [];
+  if (!params.type && response?.accounts?.items) {
+    accounts = response.accounts.items
+      .map((item: any) => ({
+        id: item._id || item.id || item.address || '',
+        address: item.address || '',
+        username: item.username || '',
+        displayName: item.displayName,
+        bio: item.aboutMe || item.bio,
+        avatarUrl: item.avatarImageUrl || item.avatarUrl,
+        avatarImageUrl: item.avatarImageUrl,
+        verified: item.isVerified || false,
+        followerCount: typeof item.followers === 'number' ? item.followers : undefined,
+        isFollowing: item.isFollowing,
+        followsYou: item.followsYou,
+        coverImageUrl: item.coverImageUrl ?? null,
+        badgeBalance: item.badgeBalance,
+        badgeLock: item.badgeLock,
+        hideBadgeAndBalance: item.hideBadgeAndBalance,
+      }))
+      .filter((a: SearchAccount) => a.id && a.address);
+  }
+  
+  return {
+    accounts,
+    videos: items as DeHubNFT[],
+    livestreams: [],
+    has_more: pagination.hasMore ?? items.length >= (params.unit || 15),
+    total: pagination.totalCount ?? items.length,
+  };
+}
+
+export async function getSearchSuggestions(params: SearchSuggestionsParams): Promise<SearchSuggestion[]> {
+  const response = await apiCall<{ suggestions: SearchSuggestion[] } | SearchSuggestion[]>("/api/search/suggestions", {
+    params: {
+      q: params.q,
+      limit: params.limit,
+    },
+  });
+  
+  if (response && typeof response === 'object' && 'suggestions' in response) {
+    return response.suggestions;
+  }
+  
+  return response as SearchSuggestion[];
+}
+
+export async function logSearchAnalytics(params: SearchLogParams): Promise<void> {
+  await apiCall<{ status: boolean }>("/api/search/log", {
+    method: "POST",
+    body: {
+      query: params.query,
+      type: params.type === 'accounts' ? 'accounts' : params.type ? 'content' : undefined,
+      resultCount: params.resultCount,
+      clicked: params.clicked,
+      clickedResultId: params.clickedResultId,
+    },
+  });
+}
+
+export async function getNFTInfo(tokenId: string): Promise<DeHubNFT> {
+  const token = getAuthToken();
+  const response = await apiCall<{ result: DeHubNFT } | DeHubNFT>(`/api/nft_info/${tokenId}`, {
+    requiresAuth: !!token,
+  });
+  if (response && typeof response === 'object' && 'result' in response) {
+    return response.result;
+  }
+  return response as DeHubNFT;
+}
+
+export async function recordView(tokenId: string): Promise<void> {
+  return apiCall<void>(`/api/record-view/${tokenId}`, {
+    method: "GET",
+  });
+}
+
+export async function recordListen(tokenId: string): Promise<void> {
+  return apiCall<void>(`/api/record-listen/${tokenId}`, {
+    method: "GET",
+  });
+}
+
+export interface SavePostResponse {
+  status: string;
+  message: string;
+}
+
+export async function toggleSavePost(tokenId: string | number): Promise<SavePostResponse> {
+  return apiCall<SavePostResponse>("/api/savePost", {
+    method: "POST",
+    body: { tokenId: Number(tokenId) },
+    requiresAuth: true,
+  });
+}
+
+export async function getSavedPosts(page: number = 1, limit: number = 20): Promise<{ result: DeHubNFT[]; pagination?: { page: number; limit: number; totalCount: number; totalPages: number; hasMore: boolean } }> {
+  return apiCall<{ result: DeHubNFT[]; pagination?: any }>("/api/savedPosts", {
+    params: { page, limit },
+    requiresAuth: true,
+  });
+}
+
+export async function getLikedPosts(
+  page: number = 1, 
+  limit: number = 20, 
+): Promise<{ result: DeHubNFT[]; pagination?: { page: number; limit: number; totalCount: number; totalPages: number; hasMore: boolean } }> {
+  return apiCall<{ result: DeHubNFT[]; pagination?: any }>("/api/liked_videos", {
+    params: { page, limit },
+    requiresAuth: true,
+  });
+}
+
+/**
+ * Posts an account disliked, newest first (the profile Dislikes tab). The API
+ * answers 403 for someone else's dislikes unless they made them public
+ * (customs.dislikesVisibility = 'public').
+ */
+export async function getDislikedPosts(
+  address: string,
+  page: number = 1,
+  limit: number = 20,
+): Promise<{ result: DeHubNFT[]; pagination?: { page: number; limit: number; totalCount: number; totalPages: number; hasMore: boolean } }> {
+  return apiCall<{ result: DeHubNFT[]; pagination?: any }>("/api/disliked_posts", {
+    params: { address: address.toLowerCase(), page, limit },
+  });
+}
+
+/**
+ * Posts an account liked, newest first (the profile Likes tab). The API answers
+ * 403 for someone else's likes unless they made them public
+ * (customs.likesVisibility = 'public'). Likes are private by default.
+ */
+export async function getProfileLikes(
+  address: string,
+  page: number = 1,
+  limit: number = 20,
+): Promise<{ result: DeHubNFT[]; pagination?: { page: number; limit: number; totalCount: number; totalPages: number; hasMore: boolean } }> {
+  return apiCall<{ result: DeHubNFT[]; pagination?: any }>("/api/liked_posts", {
+    params: { address: address.toLowerCase(), page, limit },
+  });
+}
+
+export async function getWatchHistory(
+  page: number = 0,
+  limit: number = 20,
+  address?: string,
+  postType?: string
+): Promise<{ result: DeHubNFT[] }> {
+  return apiCall<{ result: DeHubNFT[] }>("/api/my_watched_nfts", {
+    // Callers are 0-based; /my_watched_nfts is 1-based, so page 0 and page 1
+    // used to return the same first page.
+    params: { page: page + 1, limit, ...(address && { address }), ...(postType && { postType }) },
+    requiresAuth: true,
+  });
+}
+
+export async function clearWatchHistory(): Promise<{ result: boolean; deleted: number }> {
+  return apiCall<{ result: boolean; deleted: number }>("/api/my_watched_nfts", {
+    method: 'DELETE',
+    requiresAuth: true,
+  });
+}
+
+export async function getPpvSalesCount(tokenId: string | number): Promise<{ result: boolean; tokenId: number; salesCount: number }> {
+  return apiCall<{ result: boolean; tokenId: number; salesCount: number }>("/api/ppv-sales-count", {
+    params: { tokenId: String(tokenId) },
+  });
+}
+
+export async function getCategories(): Promise<DeHubCategory[]> {
+  const response = await apiCall<string[] | DeHubCategory[]>("/api/get_categories");
+  
+  let cats: DeHubCategory[] = [];
+  if (Array.isArray(response) && response.length > 0) {
+    if (typeof response[0] === 'object' && 'name' in response[0]) {
+      cats = (response as DeHubCategory[]).flatMap(c =>
+        normalizeCategoryList([c.name]).map(name => ({ ...c, name: name.toLowerCase() })),
+      );
+    } else {
+      cats = normalizeCategoryList(response as string[]).map((name) => ({
+        id: name.toLowerCase(),
+        name: name.toLowerCase(),
+        slug: name.toLowerCase().replace(/\s+/g, '-'),
+      }));
+    }
+  }
+
+  // Deduplicate by lowercase name
+  const seen = new Set<string>();
+  return cats.filter(c => {
+    const key = c.name.toLowerCase();
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+export async function getServerTime(): Promise<{ time: string }> {
+  const response = await apiCall<any>("/api/getServerTime");
+  // New shape: { status: true, data: <unix_timestamp>, note: "s" }
+  if (response && typeof response === 'object' && 'data' in response && typeof response.data === 'number') {
+    return { time: new Date(response.data * 1000).toISOString() };
+  }
+  // Legacy shape: { time: string }
+  if (response && typeof response === 'object' && 'time' in response) {
+    return response as { time: string };
+  }
+  return { time: new Date().toISOString() };
+}
+
+export async function claimBounty(tokenId: number | string): Promise<{
+  r: string;
+  s: string;
+  v: number;
+  amount: number;
+}> {
+  const response = await apiCall<any>("/api/claim-bounty", {
+    params: { tokenId },
+    requiresAuth: true,
+  });
+  return response?.result || response;
+}
+
+export async function getUnlockedNFTs(
+  userId: string,
+  page: number = 0,
+  limit: number = 20
+): Promise<{ result: DeHubNFT[] }> {
+  return apiCall<{ result: DeHubNFT[] }>(`/api/unlocked_nfts/${userId}`, {
+    params: { page, limit },
+    requiresAuth: true,
+  });
+}
+
+export async function recordBatchViews(tokenIds: number[]): Promise<{ result: boolean }> {
+  return apiCall<{ result: boolean }>("/api/view/batch", {
+    method: "POST",
+    body: { tokenIds },
+    requiresAuth: false,
+  });
+}
+
+export async function getMyPosts(
+  page: number = 1,
+  limit: number = 20,
+): Promise<{ result: DeHubNFT[]; pagination?: { page: number; limit: number; totalCount: number; totalPages: number; hasMore: boolean } }> {
+  return apiCall<{ result: DeHubNFT[]; pagination?: any }>("/api/myPosts", {
+    params: { page, limit },
+    requiresAuth: true,
+  });
+}

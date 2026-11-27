@@ -1,0 +1,259 @@
+import { useBadgeTierLabel } from '@/i18n/badge-tier-label';
+import { useTranslation as _useCopy } from 'react-i18next';
+/**
+ * BadgeIcon — Reusable staking badge image with tooltip. A click opens the
+ * badge showcase, flying the badge out of this spot.
+ */
+import { useEffect, useState, type CSSProperties } from 'react';
+import { useAppTheme } from '@/contexts/ThemeContext';
+import { badgeAnimationStyle } from '@/lib/badge-animation-style';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { useBadgeVisual } from '@/hooks/use-badge-balance';
+import { riftnGoldBadge, type BadgeLock } from '@/lib/staking-badges';
+import { openBadgeShowcase, preloadBadgeShowcase } from '@/lib/badge-showcase';
+import { badgeHoverArt } from '@/lib/badge-hover-art';
+import { useMediaQuery } from '@/hooks/use-media-query';
+import { useInlineBadgeFont } from '@/hooks/use-inline-badge-font';
+import { badgePosterSit, badgeTierScale } from '@/lib/badge-poster-bounds';
+import { badgeSmallSrcSet, warmBadgeStills } from '@/lib/badge-small-art';
+
+function BadgeAnimation({ src, style, onError }: { src: string; style: CSSProperties; onError: () => void }) {
+  const [ready, setReady] = useState(false);
+  return <img src={src} style={{ ...style, opacity: ready ? 1 : 0, zIndex: 1 }}
+    className="peer object-contain" data-ready={ready} data-badge-animation alt="" aria-hidden
+    decoding="async" onError={onError} onLoad={(event) => {
+      const image = event.currentTarget;
+      void image.decode().then(() => setReady(true)).catch(onError);
+    }} />;
+}
+
+interface BadgeIconProps {
+  /** Pass badgeBalance to resolve badge from balance */
+  badgeBalance?: number | string | null;
+  /** Username for override lookup */
+  username?: string | null;
+  /**
+   * Username or wallet address to fetch the balance for, when the surrounding
+   * payload carries no badge data (stage hosts, community owners, advertisers).
+   * Ignored when `badgeBalance` or `src` is supplied.
+   */
+  lookupId?: string | null;
+  /**
+   * The holder's grandfathered tier, when the payload carries one. A provided
+   * `badgeBalance` skips the account lookup, so a feed card has to pass this
+   * for the badge to reflect a tier the live ladder no longer grants.
+   */
+  badgeLock?: BadgeLock | null;
+  /** Or pass a pre-resolved badgeUrl directly */
+  src?: string | null;
+  /** Extra classes (positioning, sizing) */
+  className?: string;
+}
+
+// Visible artwork bounds on the 128px canvas, measured at alpha > 16.
+const BADGE_OPTICS: Record<string, { left: number; top: number; right: number; bottom: number }> = {
+  "Crab": { left: 9, top: 16, right: 120, bottom: 118 },
+  "Ghost Lobster": { left: 16, top: 14, right: 112, bottom: 111 },
+  "Piranha": { left: 7, top: 11, right: 120, bottom: 119 },
+  "Giant Tortoise": { left: 8, top: 16, right: 119, bottom: 114 },
+  "King Cobra": { left: 15, top: 8, right: 111, bottom: 119 },
+  "Octopus": { left: 10, top: 14, right: 118, bottom: 120 },
+  "Crocodile": { left: 8, top: 12, right: 121, bottom: 117 },
+  "Dolphin": { left: 15, top: 12, right: 111, bottom: 120 },
+  "Tiger Shark": { left: 8, top: 15, right: 120, bottom: 120 },
+  "Killer Whale": { left: 19, top: 17, right: 109, bottom: 121 },
+  "Great White Shark": { left: 8, top: 13, right: 121, bottom: 120 },
+  "Blue Whale": { left: 7, top: 13, right: 119, bottom: 121 },
+  "Megalodon": { left: 11, top: 15, right: 117, bottom: 117 },
+};
+
+// Optical resting line of the original stills, measured like badgePosterSit.
+const BADGE_SIT: Record<string, number> = {
+  "Crab": 114, "Ghost Lobster": 108, "Piranha": 112, "Giant Tortoise": 112, "King Cobra": 117, "Octopus": 118,
+  "Crocodile": 115, "Dolphin": 117, "Tiger Shark": 113, "Killer Whale": 118, "Great White Shark": 114,
+  "Blue Whale": 115, "Megalodon": 114,
+};
+
+// The gold seal ends in a thin point, so it rests on the same quarter-width
+// line as the tiers: the lowest row a quarter as wide as the seal.
+const GOLD_SIT = 117;
+
+function badgeNameFromAssetUrl(url: string | null): string | undefined {
+  if (!url) return undefined;
+  let decodedUrl = url;
+  try {
+    decodedUrl = decodeURIComponent(url);
+  } catch {
+    // A malformed external URL can still render; it simply gets neutral optics.
+  }
+  return Object.keys(BADGE_OPTICS).find((tier) => decodedUrl.includes(tier));
+}
+
+export function BadgeIcon({ badgeBalance, username, lookupId, badgeLock, src, className = 'w-[1em] h-[1em]' }: BadgeIconProps) {
+  const { t: _copy } = _useCopy();
+  const tierLabel = useBadgeTierLabel();
+  const badgeRef = useInlineBadgeFont();
+  const { url, name } = useBadgeVisual({ badgeBalance, username, lookupId, badgeLock, src });
+  // Profiles already hold a resolved asset URL. Recover its tier so the same
+  // size and measured artwork inset still apply there as everywhere else.
+  const visualName = name ?? badgeNameFromAssetUrl(url);
+  const displayName = visualName ? tierLabel(visualName) : _copy("copy.002474e36821", { defaultValue: "Badge" });
+  const gold = url === riftnGoldBadge;
+  const art = gold ? undefined : badgeHoverArt(visualName);
+  const originalStill = visualName === 'Killer Whale';
+  const fullStill = originalStill ? url : art?.poster ?? url;
+  const [hovered, setHovered] = useState(false);
+  const [focused, setFocused] = useState(false);
+  const [failedAnimation, setFailedAnimation] = useState<string | null>(null);
+  const reducedMotion = useMediaQuery('(prefers-reduced-motion: reduce)');
+  const active = hovered || focused;
+  const playing = active && !reducedMotion && art && failedAnimation !== art.animation;
+  const { theme } = useAppTheme();
+  const metallic = badgeAnimationStyle(theme) === 'metallic';
+  // A mouse resting on the badge has time to spare, so the metal stage is
+  // prepared under it. A finger does not: building a renderer between touch
+  // and click held the tap's own response back, so touch and focus only make
+  // sure the code is here.
+  const warmShowcase = (stage = false) => {
+    void preloadBadgeShowcase(stage && metallic ? visualName : undefined).catch(() => {});
+    // The showcase opens on the full-size still; the name only drew a small one.
+    if (fullStill && typeof Image !== 'undefined') new Image().src = fullStill;
+  };
+  useEffect(warmBadgeStills, []);
+  const optics = (originalStill ? BADGE_OPTICS['Killer Whale'] : art?.posterBounds) ?? (visualName ? BADGE_OPTICS[visualName] : undefined);
+  const bounds = gold ? { left: 1, top: 1, right: 127, bottom: 123 } : optics ?? { left: 0, top: 0, right: 128, bottom: 128 };
+  const artworkHeight = bounds.bottom - bounds.top;
+  // Each tier's optical resting line (its body, not a dangling claw or tail tip).
+  const sitRow = gold ? GOLD_SIT : !visualName ? bounds.bottom
+    : (originalStill || !art ? BADGE_SIT[visualName] : badgePosterSit[visualName]) ?? bounds.bottom;
+  const sit = Math.min(1, Math.max(0, (sitRow - bounds.top) / artworkHeight));
+  // Full artwork height: 1.27x the adjacent font's cap height (cap height,
+  // +10%, +10% on 2026-11-04, +5% on 2026-11-05). Every tier's measured bounds
+  // scale from this one number. The box ends on the tier's resting line, so
+  // that line sits on the name's baseline and thin tips overshoot just below.
+  const tierScale = badgeTierScale[visualName ?? ''] ?? 1;
+  const cap = typeof CSS !== 'undefined' && typeof CSS.supports === 'function' && CSS.supports('height', '1cap')
+    ? `${1.27 * tierScale}cap` : `${0.93 * tierScale}em`;
+  const opticalStyle: CSSProperties = {
+    width: `calc(${(bounds.right - bounds.left) / artworkHeight} * ${cap})`,
+    height: `calc(${sit} * ${cap})`,
+    position: 'relative',
+    display: 'inline-block',
+    marginInlineStart: 0,
+    overflow: 'visible',
+    verticalAlign: 'baseline',
+    lineHeight: 0,
+  };
+  const imageStyleFor = (imageBounds: typeof bounds): CSSProperties => {
+    const height = imageBounds.bottom - imageBounds.top;
+    const centre = (bounds.right - bounds.left) / artworkHeight / 2;
+    return {
+      position: 'absolute',
+      maxWidth: 'none',
+      width: `calc(${128 / height} * ${cap})`,
+      height: `calc(${128 / height} * ${cap})`,
+      left: `calc(${centre - (imageBounds.left + imageBounds.right) / height / 2} * ${cap})`,
+      top: `calc(${-imageBounds.top / height} * ${cap})`,
+    };
+  };
+  const imageStyle = imageStyleFor(bounds);
+  // The hover animation opens on the hover poster, so the poster's artwork is
+  // what has to fill the still's box. Sizing by the whole motion envelope made
+  // that first frame smaller than the still: the badge shrank, then moved.
+
+  if (!url) return null;
+  const poster = originalStill ? url : art?.poster ?? url;
+  // The name's glyphs and this box's edges both land on whole device pixels.
+  // An overflowing <img> rounds its own edges instead, so its resting line
+  // drifted up to a pixel above or below the name from one row to the next.
+  // The still is painted as the box's background, cut at the resting line, so
+  // that line shares the baseline's pixel row at every size and scroll offset.
+  // A second slice below the box paints the tips that hang under the line.
+  const smallSet = gold ? undefined : badgeSmallSrcSet(visualName);
+  const stillImage = smallSet
+    ? `-webkit-image-set(${smallSet.split(', ').map((entry) => {
+        const [source, density] = entry.split(' ');
+        return `url("${source}") ${density}`;
+      }).join(', ')})`
+    : `url("${poster.replace(/"/g, '%22')}")`;
+  const artworkWidth = bounds.right - bounds.left;
+  const bodyRows = sit * artworkHeight;
+  const tipRows = artworkHeight - bodyRows;
+  const slice = (start: number, rows: number) => (rows >= 128 ? 0 : (start / (128 - rows)) * 100);
+  const stillStyle: CSSProperties | null = bodyRows > 0 ? {
+    position: 'absolute',
+    inset: 0,
+    backgroundImage: stillImage,
+    backgroundRepeat: 'no-repeat',
+    backgroundSize: `${(128 / artworkWidth) * 100}% ${(128 / bodyRows) * 100}%`,
+    backgroundPosition: `${slice(bounds.left, artworkWidth)}% ${slice(bounds.top, bodyRows)}%`,
+  } : null;
+  const tipStyle: CSSProperties | null = stillStyle && tipRows > 0 ? {
+    position: 'absolute',
+    left: 0,
+    top: '100%',
+    width: '100%',
+    height: `${(tipRows / bodyRows) * 100}%`,
+    backgroundImage: stillImage,
+    backgroundRepeat: 'no-repeat',
+    backgroundSize: `${(128 / artworkWidth) * 100}% ${(128 / tipRows) * 100}%`,
+    backgroundPosition: `${slice(bounds.left, artworkWidth)}% ${slice(bounds.top + bodyRows, tipRows)}%`,
+  } : null;
+
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <span
+          ref={badgeRef}
+          style={opticalStyle}
+          className={`shrink-0 self-baseline align-baseline cursor-pointer ${className}`}
+          role="button"
+          tabIndex={0}
+          aria-label={displayName}
+          data-badge-playing={playing ? 'true' : 'false'}
+          onPointerEnter={(e) => {
+            warmShowcase(e.pointerType === 'mouse');
+            if (e.pointerType !== 'touch') setHovered(true);
+          }}
+          onPointerLeave={() => setHovered(false)}
+          onTouchStart={() => warmShowcase()}
+          onFocus={() => { warmShowcase(); setFocused(true); }}
+          onBlur={() => setFocused(false)}
+          onKeyDown={(e) => {
+            if (e.key !== 'Enter' && e.key !== ' ') return;
+            e.stopPropagation();
+            e.preventDefault();
+            openBadgeShowcase(visualName ?? null, e.currentTarget);
+          }}
+          onClick={(e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            openBadgeShowcase(visualName ?? null, e.currentTarget);
+          }}
+        >
+          {playing && <BadgeAnimation key={art.animation} src={art.animation} style={imageStyleFor(art.posterBounds)}
+            onError={() => setFailedAnimation(art.animation)} />}
+          {stillStyle && (
+            <span aria-hidden data-badge-still style={stillStyle} className="pointer-events-none peer-data-[ready=true]:opacity-0">
+              {tipStyle && <span style={tipStyle} />}
+            </span>
+          )}
+          <img
+            style={imageStyle}
+            data-badge-icon
+            src={poster}
+            srcSet={gold ? undefined : badgeSmallSrcSet(visualName)}
+            alt={displayName}
+            width={16}
+            height={16}
+            decoding="sync"
+            className={`relative block w-full h-full rounded-none bg-transparent object-contain ${stillStyle ? 'opacity-0' : 'peer-data-[ready=true]:opacity-0'}`}
+          />
+        </span>
+      </TooltipTrigger>
+      <TooltipContent side="top" className="text-xs capitalize">
+        {displayName}
+      </TooltipContent>
+    </Tooltip>
+  );
+}

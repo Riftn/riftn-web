@@ -1,0 +1,1217 @@
+import { useTranslation as _useCopy } from 'react-i18next';
+import { useSurfaceDraft } from '@/hooks/use-surface-draft';
+/**
+ * Staking Page
+ * ============
+ * Chain-abstracted DHB staking. Auto-detects which chain(s) user has balance on.
+ */
+
+import { useState, useEffect, useRef } from 'react';
+import { DhbCoin } from '@/components/app/DhbAmount';
+import { motion } from 'framer-motion';
+import { formatUnits, parseUnits } from 'ethers';
+import { useQueryClient } from '@tanstack/react-query';
+import { apiCall } from '@/lib/api/dehub/core';
+import { TrendingUp, DollarSign, Activity, ArrowDownToLine, ArrowUpFromLine, Loader2, Clock, AlertTriangle, Percent, Zap, Crown } from "lucide-react";
+import Lock from "@/components/ui/cut-icons/privacy";
+import ExternalLink from "@/components/ui/cut-icons/open-externally";
+import RefreshCw from "@/components/ui/cut-icons/refresh";
+import Gift from "@/components/ui/cut-icons/gifts";
+import Wallet from "@/components/ui/cut-icons/wallet";
+import Copy from "@/components/ui/cut-icons/copy";
+
+import X from "@/components/ui/cut-icons/close";
+import ChevronRight from "@/components/ui/cut-icons/next";
+
+import { ThemedIcon } from '@/components/app/war/WarHudIcon';
+import { IslandAction, PageBody, PageIsland } from '@/components/app/page-kit/PageKit';
+import { Link } from 'react-router-dom';
+import { BadgeProgress } from '@/components/app/BadgeProgress';
+import { useStakingStats, useUnstakeQueue, useStakingTVL, useUserStakingData, useIsStakeRouteActive, getUserDHBBalance, type UnstakeEvent } from '@/hooks/use-staking-data';
+import { cn } from '@/lib/utils';
+import { sendERC20Token } from '@/lib/wallet/send';
+import { supabase } from '@/integrations/supabase/client';
+import { withWalletHeader } from '@/lib/supabase-wallet-client';
+import { STAKING_ADDRESS, claimBNBRewards, unstakeBNB, getForceUnstakeFeeBps, DEFAULT_FORCE_UNSTAKE_FEE_BPS } from '@/lib/contracts/staking';
+import { BASE_CHAIN_ID, BNB_CHAIN_ID, CHAIN_CONFIGS, DHB_TOTAL_SUPPLY, fromWei } from '@/lib/contracts/dhb-token';
+import { getWalletAddress, switchChain, isWalletLockedError } from '@/lib/contracts/aa-utils';
+import { toast } from 'sonner';
+import { LiquidGlassBubble } from '@/components/ui/liquid-glass-bubble';
+import { LiquidGlassBubble2 } from '@/components/ui/liquid-glass-bubble-2';
+import { useTranslation } from 'react-i18next';
+import { SEOHead } from '@/components/SEOHead';
+import { AppState } from '@/components/app/AppState';
+import { useAuth } from '@/contexts/AuthContext';
+import { useAppTokensConfig } from '@/hooks/use-app-tokens';
+import { AppTokenStaking } from '@/components/app/wallet/AppTokenStaking';
+import { Button } from '@/components/ui/button';
+import { confirmStake, recoverStake, readStakeEvidence, refreshConfirmedStake, stakeFromReplacement, type StakeAttempt } from '@/lib/stake-confirmation';
+import { createLogger } from '@/lib/logger';
+import { retiredStakeMessage } from '@/lib/stake-recovery-messages';
+const stakeLog = createLogger('Staking');
+const pendingStakeKey = (wallet: string) => `dehub:pending-stake:${wallet.toLowerCase()}`;
+const recordStakeEvent = (message: string, attempt: StakeAttempt, outcome?: string) => {
+  void supabase.functions.invoke('client-logs', { body: {
+    level: 'info', component: 'Staking', message, user_address: attempt.wallet,
+    metadata: { ...attempt, outcome, client_time: new Date().toISOString() },
+  } }).catch(() => {});
+};
+
+
+const UNSTAKE_COOLDOWN_DAYS = 12;
+const UNSTAKE_COOLDOWN_MS = UNSTAKE_COOLDOWN_DAYS * 24 * 60 * 60 * 1000;
+
+function UnstakeCountdown({ timestamp }: { timestamp: number }) {
+  const { t: _copy } = _useCopy();
+  const [now, setNow] = useState(Date.now());
+  // This page lives in PersistentPageCache — without the route gate every
+  // unstake row would tick a 1s re-render for the whole session while hidden.
+  const isStakeRouteActive = useIsStakeRouteActive();
+
+  useEffect(() => {
+    if (!isStakeRouteActive) return;
+    setNow(Date.now());
+    const interval = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(interval);
+  }, [isStakeRouteActive]);
+
+  const createdAt = timestamp * 1000;
+  const endTime = createdAt + UNSTAKE_COOLDOWN_MS;
+  const remaining = endTime - now;
+
+  if (remaining <= 0) {
+    return (
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-500/20 text-emerald-400">{_copy("copy.5fa7aac5375c", { defaultValue: "Ready" })}</span>
+    );
+  }
+
+  const days = Math.floor(remaining / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((remaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const mins = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+  const secs = Math.floor((remaining % (1000 * 60)) / 1000);
+
+  const progress = 1 - remaining / UNSTAKE_COOLDOWN_MS;
+
+  return (
+    <span className="inline-flex sm:flex-col sm:items-center items-center gap-1.5 sm:gap-0.5 text-[11px] font-mono text-amber-400/80">
+      <Clock className="w-3 h-3 shrink-0 sm:hidden" />
+      <span>{days}d {String(hours).padStart(2, '0')}h {String(mins).padStart(2, '0')}m {String(secs).padStart(2, '0')}s</span>
+      <span role="progressbar" className="w-12 h-1 rounded-full bg-white/10 overflow-hidden">
+        <span data-progress-fill className="block h-full rounded-full bg-amber-400/60 transition-all" style={{ width: `${(progress * 100).toFixed(1)}%` }} />
+      </span>
+    </span>
+  );
+}
+
+function formatNumber(val: string | number, decimals = 0): string {
+  const num = typeof val === 'string' ? parseFloat(val) : val;
+  if (isNaN(num)) return '0';
+  if (num >= 1_000_000_000) return (Math.floor(num / 1_000_000_000 * 100) / 100).toFixed(2) + 'B';
+  if (num >= 1_000_000) return (Math.floor(num / 1_000_000 * 100) / 100).toFixed(2) + 'M';
+  if (num >= 1_000) return (Math.floor(num / 1_000 * 100) / 100).toFixed(2) + 'K';
+  const factor = Math.pow(10, decimals);
+  return (Math.floor(num * factor) / factor).toFixed(decimals);
+}
+
+function formatUSD(val: number): string {
+  if (val >= 1_000_000) return '$' + (val / 1_000_000).toFixed(2) + 'M';
+  if (val >= 1_000) return '$' + (val / 1_000).toFixed(2) + 'K';
+  return '$' + val.toFixed(2);
+}
+
+function truncateAddress(addr: string): string {
+  return addr.slice(0, 6) + '...' + addr.slice(-4);
+}
+
+function getExplorerUrl(txHash: string, chain: 'BNB' | 'Base'): string {
+  const base = chain === 'BNB' ? 'https://bscscan.com' : 'https://basescan.org';
+  return `${base}/tx/${txHash}`;
+}
+
+const ESTIMATED_APY = 0;
+
+function StatCard({ 
+  icon: Icon, label, value, subtitle, accent, delay = 0 
+}: { 
+  icon: any; label: string; value: string; subtitle?: string; accent: string; delay?: number;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay, duration: 0.4 }}
+      className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-xl p-3 sm:p-4 lg:p-3"
+    >
+      <div className="absolute top-0 right-0 w-24 h-24 rounded-full blur-3xl opacity-10 bg-white" />
+      <div className="flex items-start gap-3 lg:gap-0">
+        <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex-shrink-0 flex items-center justify-center bg-white/5 border border-white/10 lg:hidden">
+          <Icon className="w-4 h-4 sm:w-5 sm:h-5 text-white/70" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-[10px] sm:text-xs lg:text-[10px] text-white/50 uppercase tracking-wider mb-1 truncate">{label}</p>
+          <p className="text-lg sm:text-xl lg:text-base font-bold text-white break-all leading-tight">{value}</p>
+          {subtitle && <p className="text-[10px] sm:text-xs lg:text-[10px] text-white/40 mt-0.5 truncate">{subtitle}</p>}
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+export default function StakingPage() {
+  const { t } = useTranslation();
+  const config = useAppTokensConfig();
+  const [showLegacy, setShowLegacy] = useState(false);
+
+  if (config.isPending) return <PageBody><Loader2 className="mx-auto h-5 w-5 animate-spin" /></PageBody>;
+  if (config.isError && !config.data) {
+    return (
+      <PageBody>
+        <p role="alert">{t('staking.configError', 'Could not load staking.')}</p>
+        <Button variant="glass" onClick={() => void config.refetch()}>{t('common.retry', 'Retry')}</Button>
+      </PageBody>
+    );
+  }
+  if (!config.data?.staking) return <LegacyStakingPage withdrawalsOnly={config.data?.enabled === true} />;
+
+  return (
+    <div className="min-h-screen max-w-5xl mx-auto">
+      <SEOHead title="Stake in-app tokens on Riftn" description="Stake and unstake from your Riftn wallet." url="https://riftn.com/stake" image="https://riftn.com/og/stake.jpg" />
+      <PageIsland icon="staking" title={t('staking.title')} />
+      <h1 className="sr-only">{t('staking.title')}</h1>
+      <PageBody>
+        <AppTokenStaking />
+        <Button variant="glass" aria-expanded={showLegacy} onClick={() => setShowLegacy(value => !value)}>
+          {t('staking.legacyDhb', 'Legacy DHB staking')}
+        </Button>
+        {showLegacy && <LegacyStakingPage withdrawalsOnly embedded />}
+      </PageBody>
+    </div>
+  );
+}
+
+function LegacyStakingPage({ withdrawalsOnly = false, embedded = false }: { withdrawalsOnly?: boolean; embedded?: boolean }) {
+  const { t: _copy } = _useCopy();
+  const { t, i18n } = useTranslation();
+  const queryClient = useQueryClient();
+  const isStakeRouteActive = useIsStakeRouteActive();
+  const { data: stats, isLoading: statsLoading, isError: statsError, refetch: refetchStats } = useStakingStats();
+  const { data: unstakeQueue, isLoading: queueLoading, refetch: refetchQueue } = useUnstakeQueue();
+  const { data: userData, refetch: refetchUser } = useUserStakingData();
+  const { tvl, dhbPrice } = useStakingTVL();
+
+  const [pendingStake, setPendingStake] = useState<StakeAttempt | null>(null);
+  const checkingStake = useRef(false);
+  const reconcileTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const receiptDiagnostics = useRef(new Set<string>());
+  const sendingStake = useRef(false);
+  const [stakeAmount, setStakeAmount] = useSurfaceDraft("pages/app/StakingPage.tsx:stakeAmount", '');
+  const [unstakeAmount, setUnstakeAmount] = useSurfaceDraft("pages/app/StakingPage.tsx:unstakeAmount", '');
+  const [isApproving, setIsApproving] = useState(false);
+  const [isStaking, setIsStaking] = useState(false);
+  const [isUnstaking, setIsUnstaking] = useState(false);
+  // The early-withdrawal fee has been quoted for the amount currently in the
+  // box and the user pressed Withdraw again anyway.
+  const [earlyFeeAccepted, setEarlyFeeAccepted] = useState(false);
+  const [isClaiming, setIsClaiming] = useState(false);
+  const [stakingChainLabel, setStakingChainLabel] = useState('');
+  const { walletAddress: sessionWalletAddress } = useAuth();
+  const currentWallet = sessionWalletAddress?.toLowerCase() || '';
+  useEffect(() => () => { clearTimeout(reconcileTimer.current); }, [currentWallet]);
+  const [cancellingTx, setCancellingTx] = useState<string | null>(null);
+  const [showDeposits, setShowDeposits] = useState(false);
+  const [depositRecords, setDepositRecords] = useState<{ amount: number; tx_hash: string; chain: string; created_at: string; source: 'db' | 'chain' }[]>([]);
+  const [depositsLoading, setDepositsLoading] = useState(false);
+  const [syncingDeposits, setSyncingDeposits] = useState(false);
+  const [showWithdrawals, setShowWithdrawals] = useState(false);
+  const [withdrawalRecords, setWithdrawalRecords] = useState<{ amount: number; tx_hash: string; chain: string; created_at: string }[]>([]);
+  const [withdrawalsLoading, setWithdrawalsLoading] = useState(false);
+
+  const fetchDeposits = async () => {
+    if (!currentWallet) return;
+    setDepositsLoading(true);
+    try {
+      // Fetch DB records and BscScan legacy contract deposits in parallel
+      const [dbResult, bscDeposits] = await Promise.all([
+        supabase
+          .from('staking_records')
+          .select('amount, tx_hash, chain, created_at')
+          .eq('wallet_address', currentWallet.toLowerCase())
+          .eq('action', 'stake')
+          .order('created_at', { ascending: false })
+          .limit(50),
+        fetchBscScanDeposits(currentWallet),
+      ]);
+
+      const dbRecords = (dbResult.data ?? []).map(r => ({ ...r, source: 'db' as const }));
+      const dbTxHashes = new Set(dbRecords.map(r => r.tx_hash.toLowerCase()));
+
+      // Merge: BscScan records that aren't already in DB
+      const uniqueBscRecords = bscDeposits.filter(r => !dbTxHashes.has(r.tx_hash.toLowerCase()));
+      const merged = [...dbRecords, ...uniqueBscRecords].sort(
+        (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
+
+      setDepositRecords(merged);
+    } catch { setDepositRecords([]); }
+    setDepositsLoading(false);
+  };
+
+  /** Fetch historical ERC20 transfers TO the legacy BNB staking contract from user */
+  async function fetchBscScanDeposits(wallet: string): Promise<{ amount: number; tx_hash: string; chain: string; created_at: string; source: 'chain' }[]> {
+    const LEGACY_CONTRACT = '0x26d2cd7763106fdce443fadd36163e2ad33a76e6';
+    const DHB_BNB_TOKEN = '0x680d3113caf77b61b510f332d5ef4cf5b41a761d';
+    try {
+      const url = `https://api.bscscan.com/api?module=account&action=tokentx&contractaddress=${DHB_BNB_TOKEN}&address=${wallet}&sort=desc&page=1&offset=100`;
+      const res = await fetch(url);
+      const json = await res.json();
+      if (json.status !== '1' || !Array.isArray(json.result)) return [];
+
+      return json.result
+        .filter((tx: any) => tx.to?.toLowerCase() === LEGACY_CONTRACT.toLowerCase() && tx.from?.toLowerCase() === wallet.toLowerCase())
+        .map((tx: any) => ({
+          amount: parseFloat(tx.value) / 1e18,
+          tx_hash: tx.hash,
+          chain: 'BNB',
+          created_at: new Date(parseInt(tx.timeStamp) * 1000).toISOString(),
+          source: 'chain' as const,
+        }));
+    } catch (err) {
+      console.error('[Staking] BscScan fetch failed:', err);
+      return [];
+    }
+  }
+  const fetchWithdrawals = async () => {
+    if (!currentWallet) return;
+    setWithdrawalsLoading(true);
+    try {
+      const { data } = await supabase
+        .from('staking_records')
+        .select('amount, tx_hash, chain, created_at')
+        .eq('wallet_address', currentWallet.toLowerCase())
+        .eq('action', 'unstake')
+        .order('created_at', { ascending: false })
+        .limit(50);
+      setWithdrawalRecords(data ?? []);
+    } catch { setWithdrawalRecords([]); }
+    setWithdrawalsLoading(false);
+  };
+
+  function timeAgo(timestamp: number): string {
+    if (!timestamp) return '—';
+    const now = Math.floor(Date.now() / 1000);
+    const diff = now - timestamp;
+    if (diff < 60) return t('staking.justNow');
+    if (diff < 3600) return t('staking.minutesAgo', { count: Math.floor(diff / 60) });
+    if (diff < 86400) return t('staking.hoursAgo', { count: Math.floor(diff / 3600) });
+    return t('staking.daysAgo', { count: Math.floor(diff / 86400) });
+  }
+
+  // A fee someone accepted for one amount is not a fee they accepted for
+  // another, so any edit puts the confirmation back.
+  useEffect(() => {
+    setEarlyFeeAccepted(false);
+  }, [unstakeAmount]);
+
+  const handleRefresh = () => {
+    refetchStats();
+    refetchQueue();
+    refetchUser();
+  };
+
+  const handleCancelUnstake = async (txHash: string) => {
+    setCancellingTx(txHash);
+    try {
+      const { error } = await withWalletHeader(
+        supabase
+          .from('staking_records')
+          .delete()
+          .eq('tx_hash', txHash),
+        currentWallet
+      );
+
+      if (error) throw error;
+
+      toast.success(t('toasts.unstake_cancelled'), { description: t('toasts.unstake_request_removed') });
+      refetchQueue();
+      refetchUser();
+      refetchStats();
+    } catch (err: any) {
+      console.error('[Staking] Cancel unstake error:', err);
+      // Locked wallet: the unlock sheet and its toast are already up, and
+      // nothing failed — this would just tell them to stop.
+      if (!isWalletLockedError(err)) {
+        toast.error(t('toasts.failed_to_cancel'), { description: err?.message || _copy("copy.27c2ccd962c2", { defaultValue: "Unknown error" }) });
+      }
+    } finally {
+      setCancellingTx(null);
+    }
+  };
+
+  const refreshStakePosition = (wallet: string) => apiCall(`/api/staking/refresh/${wallet}`, { method: 'POST' });
+
+  const clearPendingStake = (attempt: StakeAttempt) => {
+    try {
+      const saved = JSON.parse(localStorage.getItem(pendingStakeKey(attempt.wallet)) || 'null');
+      if (saved?.hash === attempt.hash) localStorage.removeItem(pendingStakeKey(attempt.wallet));
+    } catch {}
+    setPendingStake(previous => previous?.hash === attempt.hash ? null : previous);
+  };
+
+  const checkPendingStake = async (attempt: StakeAttempt, receipt?: unknown) => {
+    if (checkingStake.current) return;
+    checkingStake.current = true;
+    try {
+      // Recovery needs two RPCs that can answer an unknown historical hash.
+      // The token-read RPC can reject those as archive requests instead of
+      // returning null, which would keep old saved attempts pending forever.
+      const urls = attempt.chainId === 56
+        ? ['https://bsc-dataseed.binance.org', 'https://bsc-rpc.publicnode.com']
+        : ['https://mainnet.base.org', 'https://base.drpc.org'];
+      const onReadError = (error: unknown) => {
+        const diagnostic = `${attempt.hash}:${String(error)}`;
+        if (receiptDiagnostics.current.has(diagnostic)) return;
+        receiptDiagnostics.current.add(diagnostic);
+        void stakeLog.warn('Receipt lookup unavailable', { hash: attempt.hash, chainId: attempt.chainId, error: String(error) });
+      };
+      const recovery = receipt
+        ? { outcome: await confirmStake(attempt, [async () => receipt], onReadError), attempt }
+        : await recoverStake(attempt, urls.map(url => () => readStakeEvidence(url, attempt)), onReadError);
+      const { outcome } = recovery;
+      if (outcome === 'pending' && (recovery.attempt.nonce !== attempt.nonce || recovery.attempt.submittedAt !== attempt.submittedAt)) {
+        try {
+          const saved = JSON.parse(localStorage.getItem(pendingStakeKey(attempt.wallet)) || 'null');
+          if (saved?.hash === attempt.hash) localStorage.setItem(pendingStakeKey(attempt.wallet), JSON.stringify(recovery.attempt));
+        } catch {}
+        setPendingStake(previous => previous?.hash === attempt.hash ? recovery.attempt : previous);
+      }
+      if (outcome === 'pending') return;
+      clearPendingStake(attempt);
+      recordStakeEvent('Stake outcome verified', attempt, outcome);
+      if (outcome === 'confirmed') {
+        if (!attempt.confirmed) {
+          toast.success(t('toasts.staked_successfully'), { description: t('staking.stakeConfirmedOn', { amount: attempt.amount, chain: attempt.chainId === 56 ? 'BNB Chain' : 'Base' }) });
+        }
+        void refreshConfirmedStake(
+          () => refreshStakePosition(attempt.wallet),
+          async () => { await supabase.functions.invoke('sync-staking-deposits', { body: { wallet: attempt.wallet } }); },
+          async () => {
+            await Promise.all([refetchStats(), refetchUser(),
+              queryClient.invalidateQueries({ queryKey: ['dhb-staked', attempt.wallet.toLowerCase()] }),
+              queryClient.invalidateQueries({ queryKey: ['wallet-tokens'] }),
+            ]);
+          },
+        ).catch(error => { void stakeLog.warn('Stake balance refresh unavailable', { hash: attempt.hash, error: String(error) }); });
+        // The shared ledger keeps a 25-block window. Reconcile once beyond it,
+        // without holding up the confirmed transfer or waiting for the scanner.
+        clearTimeout(reconcileTimer.current);
+        reconcileTimer.current = setTimeout(() => {
+          void refreshStakePosition(attempt.wallet).then(() => Promise.all([
+            refetchUser(), refetchStats(),
+            queryClient.invalidateQueries({ queryKey: ['dhb-staked', attempt.wallet.toLowerCase()] }),
+          ])).catch(() => {});
+        }, 60_000);
+      } else if (outcome === 'replaced' || outcome === 'not-found') {
+        toast.info(retiredStakeMessage(i18n.resolvedLanguage || i18n.language));
+        void refreshConfirmedStake(
+          () => refreshStakePosition(attempt.wallet),
+          async () => { await supabase.functions.invoke('sync-staking-deposits', { body: { wallet: attempt.wallet } }); },
+          async () => { await Promise.all([refetchUser(), queryClient.invalidateQueries({ queryKey: ['dhb-staked', attempt.wallet.toLowerCase()] }), queryClient.invalidateQueries({ queryKey: ['wallet-tokens'] })]); },
+        ).catch(() => {});
+      } else {
+        toast.error(t('toasts.transaction_reverted'), { description: _copy("copy.6e39c3cc12e5", { defaultValue: "The blockchain confirmed this transaction reverted." }) });
+      }
+    } finally { checkingStake.current = false; }
+  };
+
+  useEffect(() => {
+    if (!currentWallet) { setPendingStake(null); return; }
+    try {
+      const saved = JSON.parse(localStorage.getItem(pendingStakeKey(currentWallet)) || 'null');
+      setPendingStake(saved?.wallet?.toLowerCase() === currentWallet.toLowerCase() && /^0x[0-9a-f]{64}$/i.test(saved.hash) ? saved : null);
+    } catch { setPendingStake(null); }
+  }, [currentWallet]);
+
+  useEffect(() => {
+    if (!isStakeRouteActive || isStaking || !pendingStake || pendingStake.wallet.toLowerCase() !== currentWallet?.toLowerCase()) return;
+    void checkPendingStake(pendingStake);
+    const timer = setInterval(() => { void checkPendingStake(pendingStake); }, 15_000);
+    return () => clearInterval(timer);
+  }, [pendingStake, currentWallet, isStakeRouteActive, isStaking]);
+
+  const handleStake = async () => {
+    if (sendingStake.current || pendingStake) return;
+    let amountWei: bigint;
+    try { amountWei = parseUnits(stakeAmount.trim(), 18); } catch { amountWei = BigInt(0); }
+    if (amountWei <= BigInt(0)) {
+      toast.error(t('toasts.invalid_amount'), { description: t('toasts.please_enter_valid_amount_stake') });
+      return;
+    }
+
+    sendingStake.current = true;
+    setIsStaking(true);
+    try {
+      const walletAddress = await getWalletAddress();
+      if (!walletAddress) {
+        toast.error(t('toasts.not_connected'), { description: t('toasts.please_connect_wallet_first') });
+        return;
+      }
+
+      // Fresh on-chain balance check (never rely on cached data)
+      const [bnbBalRaw, baseBalRaw] = await Promise.all([
+        getUserDHBBalance(walletAddress, BNB_CHAIN_ID),
+        getUserDHBBalance(walletAddress, BASE_CHAIN_ID),
+      ]);
+
+      if (bnbBalRaw <= BigInt(0) && baseBalRaw <= BigInt(0)) {
+        toast.error(t('toasts.no_dhb_balance'), { description: t('toasts.no_dhb_tokens_either_chain') });
+        return;
+      }
+
+      // Pick chain with sufficient balance. Base leads, matching the order
+      // every other DHB spend uses (src/lib/wallet/pay-chain.ts): it is the
+      // default network, the only chain with a DHB pool to swap into and the
+      // only one the fiat gateway delivers on, so a staker who comes up short
+      // can top up there and finish. Walking BNB first parked deposits on the
+      // chain they cannot refill from.
+      let targetChain: 'BNB' | 'Base';
+
+      if (baseBalRaw >= amountWei) {
+        targetChain = 'Base';
+      } else if (bnbBalRaw >= amountWei) {
+        targetChain = 'BNB';
+      } else {
+        // Neither chain has enough for the full amount
+        const maxBal = Number(formatUnits(baseBalRaw >= bnbBalRaw ? baseBalRaw : bnbBalRaw, 18));
+        const maxChain = baseBalRaw >= bnbBalRaw ? 'Base' : 'BNB Chain';
+        toast.error(t('toasts.insufficient_balance', 'Insufficient balance'), {
+          description: t('toasts.max_available_on_chain', { amount: maxBal.toFixed(2), chain: maxChain }),
+        });
+        return;
+      }
+
+      setStakingChainLabel(targetChain);
+
+      if (targetChain === 'BNB') {
+        await stakeTransferFlow(formatUnits(amountWei, 18), BNB_CHAIN_ID, 'BNB Chain', walletAddress);
+      } else {
+        await stakeTransferFlow(formatUnits(amountWei, 18), BASE_CHAIN_ID, 'Base', walletAddress);
+      }
+    } catch (err: any) {
+      if (err?.message === 'INSUFFICIENT_TOKEN_BALANCE') {
+        toast.dismiss();
+        toast.error(t('toasts.insufficient_balance', 'Insufficient balance'));
+        return;
+      }
+      void stakeLog.error('Stake request unresolved', { error: String(err), wallet: currentWallet }, err);
+      toast.dismiss();
+      // Locked wallet: the unlock sheet and its toast are already up, and
+      // nothing failed — this would just tell them to stop.
+      if (!isWalletLockedError(err)) {
+        toast.info(_copy("copy.258c7d9af228", { defaultValue: "Could not confirm the stake request" }), { description: _copy("copy.f14adc6d4e07", { defaultValue: "Check your wallet activity before trying again. No failed transfer has been confirmed." }) });
+      }
+    } finally {
+      sendingStake.current = false;
+      setIsStaking(false);
+      setIsApproving(false);
+      setStakingChainLabel('');
+    }
+  };
+
+  const stakeTransferFlow = async (
+    amount: string,
+    chainId: typeof BNB_CHAIN_ID | typeof BASE_CHAIN_ID,
+    chainLabel: string,
+    walletAddress: string
+  ) => {
+    await switchChain(chainId);
+    const dhbTokenAddress = CHAIN_CONFIGS[chainId]?.dhbToken;
+    if (!dhbTokenAddress) {
+      toast.error(t('toasts.error'), { description: t('toasts.dhb_token_not_configured', { chain: chainLabel }) });
+      return;
+    }
+
+    const result = await sendERC20Token(dhbTokenAddress, STAKING_ADDRESS, String(amount), 18, chainId as any);
+
+    let attempt: StakeAttempt = {
+      hash: result.hash, wallet: walletAddress, chainId, token: dhbTokenAddress,
+      pool: STAKING_ADDRESS, amount: String(amount), amountHex: `0x${parseUnits(String(amount), 18).toString(16)}`,
+      submittedAt: Date.now(),
+    };
+    setPendingStake(attempt);
+    setStakeAmount.complete(stakeAmount, '');
+    try { localStorage.setItem(pendingStakeKey(walletAddress), JSON.stringify(attempt)); }
+    catch (error) { void stakeLog.warn('Pending stake storage unavailable', { hash: attempt.hash, error: String(error) }); }
+    recordStakeEvent('Stake submitted; awaiting receipt', attempt);
+    try {
+      const mined = await result.wait();
+      if (mined.hash.toLowerCase() !== attempt.hash.toLowerCase()) {
+        const replacement = stakeFromReplacement(mined.receipt, attempt);
+        if (!replacement) {
+          clearPendingStake(attempt);
+          recordStakeEvent('Stake replaced by another wallet transaction', attempt);
+          await refetchUser();
+          return;
+        }
+        attempt = replacement;
+        setPendingStake(attempt);
+        try { localStorage.setItem(pendingStakeKey(walletAddress), JSON.stringify(attempt)); } catch {}
+      }
+      await checkPendingStake(attempt, mined.receipt);
+    } catch (error: any) {
+      if (error?.code === 'TRANSACTION_REPLACED' && error.cancelled) {
+        clearPendingStake(attempt);
+        recordStakeEvent('Stake cancelled in wallet', attempt);
+      }
+      // Keep the saved hash available for read-only recovery after a timeout.
+    }
+  };
+
+  const handleUnstake = async () => {
+    const amount = parseFloat(unstakeAmount);
+    if (!amount || amount <= 0) {
+      toast.error(t('toasts.invalid_amount'), { description: t('toasts.please_enter_valid_amount_unstake') });
+      return;
+    }
+
+    // Only the legacy BNB contract can be withdrawn from. The unified staking
+    // address is a plain wallet: it has no `unstake()`, and the request queue
+    // that used to be written here has never been paid out, so offering it
+    // again would just bank another promise nobody can keep.
+    const withdrawable = userData?.legacyStaked ?? 0;
+    if (amount > withdrawable) {
+      toast.error(t('toasts.insufficient_staked_balance'), {
+        description: withdrawable > 0
+          ? t('toasts.only_have_dhb_withdrawable', { amount: formatNumber(withdrawable, 2) })
+          : t('staking.poolNotWithdrawable', { amount: formatNumber(userData?.totalStaked ?? 0, 2) }),
+      });
+      return;
+    }
+
+    // Withdrawing before the unlock date is allowed and costs a fee — the
+    // contract simply returns less. Blocking it would deny something the
+    // contract supports; letting it through on one click would take the fee
+    // out of someone who never saw it mentioned. So quote it, then allow.
+    const unlockAt = userData?.legacyUnlockAt ?? 0;
+    const isLocked = unlockAt > Date.now() / 1000;
+    if (isLocked && !earlyFeeAccepted) {
+      const feeBps = await getForceUnstakeFeeBps().catch(() => DEFAULT_FORCE_UNSTAKE_FEE_BPS);
+      setEarlyFeeAccepted(true);
+      toast.warning(t('toasts.early_withdrawal_fee'), {
+        description: t('toasts.early_withdrawal_fee_detail', {
+          date: new Date(unlockAt * 1000).toLocaleDateString(),
+          percent: (feeBps / 100).toFixed(feeBps % 100 === 0 ? 0 : 2),
+          amount: formatNumber((amount * feeBps) / 10000, 2),
+        }),
+        duration: 10000,
+      });
+      return;
+    }
+
+    setIsUnstaking(true);
+    try {
+      const walletAddress = await getWalletAddress();
+      if (!walletAddress) {
+        toast.error(t('toasts.not_connected'), { description: t('toasts.please_connect_wallet_first') });
+        return;
+      }
+
+      // Withdrawing the whole position uses the exact wei the contract holds,
+      // so a rounded display value can never leave dust behind or overshoot.
+      // Otherwise parse the typed string to keep its precision, falling back
+      // to the parsed float for input parseUnits rejects (`1e5`, 20 decimals).
+      let amountWei: bigint;
+      if (amount >= withdrawable && userData?.legacyStakedRaw) {
+        amountWei = userData.legacyStakedRaw;
+      } else {
+        try {
+          amountWei = parseUnits(unstakeAmount.trim(), 18);
+        } catch {
+          amountWei = parseUnits(amount.toFixed(18), 18);
+        }
+      }
+
+      toast.loading(t('toasts.confirming_transaction'), { description: t('toasts.please_confirm_transaction') });
+      const result = await unstakeBNB(amountWei);
+
+      toast.loading(t('toasts.transaction_submitted'), { description: t('toasts.waiting_for_confirmation') });
+      const receipt = await result.wait();
+      toast.dismiss();
+
+      if (receipt.status !== 1) {
+        toast.error(t('toasts.unstake_failed'), { description: t('toasts.transaction_reverted') });
+        return;
+      }
+
+      // Recorded for the withdrawal history only. The real hash is what keeps
+      // it out of the pending queue — see isPendingQueueRow in
+      // use-staking-data: the on-chain position has already dropped, so
+      // counting this row again would subtract the same DHB twice.
+      try {
+        await withWalletHeader(
+          supabase.from('staking_records').insert({
+            wallet_address: walletAddress.toLowerCase(),
+            amount,
+            chain: 'BNB',
+            action: 'unstake',
+            tx_hash: receipt.hash,
+          }),
+          walletAddress,
+        );
+      } catch (dbErr) {
+        console.error('[Staking] Failed to record withdrawal in DB:', dbErr);
+      }
+
+      toast.success(t('toasts.unstaked_successfully'), {
+        description: t('toasts.dhb_unstaked_on_chain', { amount: unstakeAmount, chain: 'BNB Chain' }),
+      });
+      setUnstakeAmount.complete(unstakeAmount, '');
+      refetchStats();
+      refetchUser();
+      refetchQueue();
+    } catch (err: any) {
+      console.error('[Staking] Unstake error:', err);
+      toast.dismiss();
+      // Locked wallet: the unlock sheet and its toast are already up, and
+      // nothing failed — this would just tell them to stop.
+      if (isWalletLockedError(err)) return;
+      // Legacy stakers arrive with an external wallet and a position they made
+      // years ago; plenty of them hold no BNB at all now. The sentinel on its
+      // own reads as a bug, so name the token they actually need.
+      if (err?.message === 'INSUFFICIENT_GAS_FUNDS') {
+        toast.error(t('toasts.insufficient_balance'), {
+          description: t('toasts.not_enough_gas_token', { token: 'BNB' }),
+        });
+      } else {
+        toast.error(t('toasts.unstake_failed'), { description: err?.message || _copy("copy.27c2ccd962c2", { defaultValue: "Unknown error" }) });
+      }
+    } finally {
+      setIsUnstaking(false);
+    }
+  };
+
+  const handleClaim = async () => {
+    setIsClaiming(true);
+    try {
+      const walletAddress = await getWalletAddress();
+      if (!walletAddress) {
+        toast.error(t('toasts.not_connected'), { description: t('toasts.please_connect_wallet_first') });
+        return;
+      }
+
+      toast.loading(t('toasts.claiming_rewards'), { description: t('toasts.please_confirm_transaction') });
+      const result = await claimBNBRewards();
+      const receipt = await result.wait();
+
+      if (receipt.status === 1) {
+        toast.dismiss();
+        toast.success(t('toasts.rewards_claimed'), { description: t('toasts.rewards_sent_to_wallet') });
+        refetchUser();
+      } else {
+        toast.dismiss();
+        toast.error(t('toasts.claim_failed'), { description: t('toasts.transaction_reverted') });
+      }
+    } catch (err: any) {
+      console.error('[Staking] Claim error:', err);
+      toast.dismiss();
+      // Locked wallet: the unlock sheet and its toast are already up, and
+      // nothing failed — this would just tell them to stop.
+      if (!isWalletLockedError(err)) {
+        toast.error(t('toasts.claim_failed'), { description: err?.message || _copy("copy.27c2ccd962c2", { defaultValue: "Unknown error" }) });
+      }
+    } finally {
+      setIsClaiming(false);
+    }
+  };
+
+  const userStaked = userData?.totalStaked ?? 0;
+  const userUnstaked = userData?.totalUnstaked ?? 0;
+  const userEarned = userData ? parseFloat(userData.bnbEarned) : 0;
+  // What the user can actually pull out themselves: the legacy BNB contract
+  // position. The rest of `userStaked` is in the transfer pool wallet.
+  const userWithdrawable = userData?.legacyStaked ?? 0;
+  const poolOnlyStake = Math.max(0, userStaked - userWithdrawable);
+  const Body = embedded ? "div" : PageBody;
+
+  return (
+    <div className={embedded ? undefined : "min-h-screen max-w-5xl mx-auto"}>
+      {!embedded && <>
+      <SEOHead title={_copy("copy.5095e609c2ed", { defaultValue: "Stake tokens: Earn Rewards & Unlock Badges" })} description={_copy("copy.6b104af6acd4", { defaultValue: "Stake your Riftn tokens on Riftn to earn staking rewards, unlock staking badges and gain governance voting weight, with rewards funded by platform fees." })} url="https://riftn.com/stake" image="https://riftn.com/og/stake.jpg" jsonLd={{ '@context': 'https://schema.org', '@type': 'WebPage', name: 'Token Staking', url: 'https://riftn.com/stake', description: _copy("copy.b424c707e52c", { defaultValue: "Stake Riftn tokens to earn staking rewards and unlock badges on Riftn." }), isPartOf: { '@type': 'WebSite', name: 'Riftn', url: 'https://riftn.com' } }} />
+      <h1 className="sr-only">{_copy("copy.710c2213de98", { defaultValue: "Riftn Staking — Decentralised Social Media, Censorship Resistant & Freedom of Speech" })}</h1>
+      <PageIsland
+        icon="staking"
+        title={t('staking.title')}
+        subtitle={t('staking.subtitle')}
+        actions={
+          <IslandAction label={t('dex.refresh')} onClick={handleRefresh}>
+            <RefreshCw className="h-[18px] w-[18px]" />
+          </IslandAction>
+        }
+      />
+      </>}
+
+      <Body>
+      {/* Stats error */}
+      {statsError && !stats && (
+        <div className="flex items-center justify-center gap-2 text-xs text-white/50">
+          <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
+          <span>{t('staking.statsLoadFailed', "Couldn't load staking stats")}</span>
+          <button onClick={() => refetchStats()} className="text-white underline hover:text-white/80 transition-colors">
+            {t('common.retry', 'Retry')}
+          </button>
+        </div>
+      )}
+
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <StatCard icon={Lock} label={t('staking.totalStaked')} value={statsLoading || (statsError && !stats) ? '—' : formatNumber(stats?.totalStaked ?? '0')} subtitle={statsLoading || (statsError && !stats) ? '' : `${((Number(stats?.totalStaked ?? 0) / DHB_TOTAL_SUPPLY) * 100).toFixed(2)}% ${t('staking.ofSupply')}`} accent="bg-white/20" delay={0} />
+        <StatCard icon={DollarSign} label={t('staking.totalValueLocked')} value={statsLoading || (statsError && !stats) ? '—' : formatUSD(tvl)} subtitle={t('staking.pricePerToken', { price: dhbPrice.toFixed(6) })} accent="bg-white/20" delay={0.05} />
+        <StatCard icon={TrendingUp} label={t('staking.estApy')} value={`${ESTIMATED_APY}%`} subtitle={t('staking.variableRate')} accent="bg-white/20" delay={0.1} />
+      </div>
+
+      {/* Badge ladder — the reason most people are on this page. Sits above the
+          stake box so the number they are about to type has a target. */}
+      <div data-kit-section>
+        <BadgeProgress />
+      </div>
+
+      {/* Multi-chain notice */}
+      {!withdrawalsOnly && userData?.hasBothChains && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="flex items-start gap-2.5 p-3 rounded-xl border border-white/10 bg-white/5"
+        >
+          <AlertTriangle className="w-4 h-4 text-white/60 flex-shrink-0 mt-0.5" />
+          <p className="text-xs text-white/60">
+            {t('staking.multiChainNotice')}
+          </p>
+        </motion.div>
+      )}
+
+      {/* Stake / Unstake Actions */}
+      <div data-kit-flat-skip className={cn("grid gap-0 sm:gap-4", !withdrawalsOnly && userStaked > 0 ? "grid-cols-1 lg:grid-cols-2" : "grid-cols-1")}>
+        {/* Keep the receipt controls available for deposits started before the switch. */}
+        {(!withdrawalsOnly || (pendingStake && pendingStake.wallet.toLowerCase() === currentWallet)) && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.25 }}
+          data-kit-section
+          className="border border-white/10 bg-white/[0.03] backdrop-blur-xl p-5"
+        >
+          <div className="flex items-center gap-2 mb-4">
+            <ArrowDownToLine className="w-4 h-4 text-white" />
+            <h2 className="text-sm font-semibold text-white/70 uppercase tracking-wider">{t('staking.stakeDhb')}</h2>
+          </div>
+          <p className="text-xs text-white/40 mb-4">
+            {!withdrawalsOnly ? t('staking.stakeDesc') : t('staking.legacyDhb', 'Legacy DHB staking')}
+          </p>
+          {!isStaking && pendingStake && pendingStake.wallet.toLowerCase() === currentWallet?.toLowerCase() && (
+            <div role="status" className="mb-4 rounded-xl border border-white/15 p-3 text-sm text-white/80">
+              <p>{pendingStake.confirmed ? t('staking.pendingConfirmed', { amount: pendingStake.amount }) : t('staking.pendingSubmitted', { amount: pendingStake.amount })}</p>
+              <a className="underline" href={getExplorerUrl(pendingStake.hash, pendingStake.chainId === 56 ? 'BNB' : 'Base')} target="_blank" rel="noopener noreferrer">{_copy("copy.5e377bdb4e78", { defaultValue: "View transaction" })}</a>
+              <button className="ml-4 underline" onClick={() => { void checkPendingStake(pendingStake); }}>{_copy("copy.fb7099ad8e81", { defaultValue: "Check again" })}</button>
+              <button className="ml-4 underline" onClick={() => {
+                recordStakeEvent('Stake tracking dismissed by user', pendingStake);
+                clearPendingStake(pendingStake);
+                void refreshStakePosition(pendingStake.wallet).catch(() => {}).then(() => { void refetchUser(); });
+              }}>{t('common.close')}</button>
+            </div>
+          )}
+          {!withdrawalsOnly && <>
+          <div className="flex gap-2">
+            <LiquidGlassBubble
+              shimmer={false}
+              noBorder
+              className="flex-1 min-w-0 h-[42px] [&>div]:!rounded-xl [&>div]:!h-full [&>div]:before:!rounded-xl [&>div]:after:!rounded-xl"
+            >
+              <div className="relative flex items-center h-full">
+                <input
+                  type="number"
+                  placeholder={userUnstaked > 0 ? formatNumber(userUnstaked) : '0'}
+                  value={stakeAmount}
+                  onChange={(e) => setStakeAmount(e.target.value)}
+                  className="w-full bg-transparent text-white text-sm placeholder:text-white/30 focus:outline-none pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    // A deposit uses one chain. Never sum balances the wallet cannot send together.
+                    const bnbBal = userData?.bnbBalanceRaw ?? BigInt(0);
+                    const baseBal = userData?.baseBalanceRaw ?? BigInt(0);
+                    setStakeAmount(formatUnits(baseBal >= bnbBal ? baseBal : bnbBal, 18));
+                  }}
+                  className="absolute right-0 top-1/2 -translate-y-1/2 px-1 text-white/50 text-[10px] font-bold uppercase hover:text-white transition-colors"
+                >
+                  {t('staking.max')}
+                </button>
+              </div>
+            </LiquidGlassBubble>
+            <LiquidGlassBubble2
+              label={t('staking.stake')}
+              icon={<ArrowDownToLine className="w-[22px] h-[22px]" />}
+              loading={isApproving || isStaking}
+              loadingLabel={isApproving ? t('staking.approving') : t('staking.staking')}
+              disabled={!stakeAmount || !!pendingStake}
+              onClick={handleStake}
+            />
+          </div>
+
+          {/* Alternative manual deposit */}
+          <div className="mt-4 flex items-center justify-center gap-2 text-[11px] text-white/40">
+            <span>{_copy("copy.9901f888b899", { defaultValue: "Alternatively, send your tokens directly to" })}</span>
+            <button
+              type="button"
+              onClick={() => {
+                navigator.clipboard.writeText(STAKING_ADDRESS);
+                toast.success(_copy("copy.ced3de4ff643", { defaultValue: "Deposit address copied!" }));
+              }}
+              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-white/5 border border-white/10 text-white/60 hover:text-white hover:bg-white/10 transition-colors font-mono text-[10px]"
+            >
+              {STAKING_ADDRESS.slice(0, 6)}...{STAKING_ADDRESS.slice(-4)}
+              <Copy className="w-3 h-3" />
+            </button>
+          </div>
+          </>}
+        </motion.div>
+        )}
+
+        {/* Unstake — only visible when user has staked balance */}
+        {userStaked > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            data-kit-section
+            className="border border-white/10 bg-white/[0.03] backdrop-blur-xl p-5"
+          >
+            <div className="flex items-center gap-2 mb-4">
+              <ArrowUpFromLine className="w-4 h-4 text-white" />
+              <h2 className="text-sm font-semibold text-white/70 uppercase tracking-wider">{t('staking.unstakeDhb')}</h2>
+            </div>
+            <p className="text-xs text-white/40 mb-4">
+              {t('staking.unstakeDesc')}
+            </p>
+            <div className="flex gap-2">
+              <LiquidGlassBubble
+                shimmer={false}
+                noBorder
+                className="flex-1 min-w-0 h-[42px] [&>div]:!rounded-xl [&>div]:!h-full [&>div]:before:!rounded-xl [&>div]:after:!rounded-xl"
+              >
+                <div className="relative flex items-center h-full">
+                  <input
+                    type="number"
+                    placeholder={formatNumber(userWithdrawable)}
+                    value={unstakeAmount}
+                    onChange={(e) => setUnstakeAmount(e.target.value)}
+                    className="w-full bg-transparent text-white text-sm placeholder:text-white/30 focus:outline-none pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setUnstakeAmount(String(userWithdrawable))}
+                    className="absolute right-0 top-1/2 -translate-y-1/2 text-white/50 text-[10px] font-bold uppercase hover:text-white transition-colors"
+                  >
+                    {t('staking.max')}
+                  </button>
+                </div>
+              </LiquidGlassBubble>
+              <LiquidGlassBubble2
+                label={t('staking.unstake')}
+                icon={<ArrowUpFromLine className="w-[22px] h-[22px]" />}
+                loading={isUnstaking}
+                disabled={!unstakeAmount || userWithdrawable <= 0}
+                onClick={handleUnstake}
+              />
+            </div>
+
+            {/* Say up front which half of the position this button can move.
+                Everything outside the legacy BNB contract sits in a wallet
+                with no withdrawal function, and the queue that used to stand
+                in for one was never paid. */}
+            <div className="mt-3 space-y-1">
+              <div className="flex items-center justify-between text-[11px]">
+                <span className="text-white/40">{t('staking.withdrawableNow')}</span>
+                <span className="text-white/70 font-medium">
+                  {formatNumber(userWithdrawable, 2)} <DhbCoin /> <span className="text-white/40">{_copy("copy.ad9f9dcc4cd7", { defaultValue: "· BNB" })}</span>
+                </span>
+              </div>
+              {poolOnlyStake > 0 && (
+                <p className="text-[11px] text-white/40 leading-snug">
+                  {t('staking.poolNotWithdrawable', { amount: formatNumber(poolOnlyStake, 2) })}
+                </p>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </div>
+
+      {/* User Balance Row — Staked + Unstaked + Rewards + Claim */}
+      {userData && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="grid grid-cols-2 sm:grid-cols-4 gap-3"
+        >
+          <div
+            className="rounded-xl border border-white/10 bg-white/[0.03] p-3 sm:p-4 cursor-pointer hover:bg-white/[0.06] transition-colors relative"
+            onClick={() => { setShowDeposits(!showDeposits); if (!showDeposits) fetchDeposits(); }}
+          >
+            <p className="text-[10px] text-white/40 uppercase tracking-wider">{_copy("copy.1b34932b1eb9", { defaultValue: "Deposits" })}</p>
+            <p className="text-sm font-bold text-white truncate">{formatNumber(userStaked)}</p>
+            
+          </div>
+          <div
+            className="rounded-xl border border-white/10 bg-white/[0.03] p-3 sm:p-4 cursor-pointer hover:bg-white/[0.06] transition-colors"
+            onClick={() => { setShowWithdrawals(!showWithdrawals); if (!showWithdrawals) fetchWithdrawals(); }}
+          >
+            <p className="text-[10px] text-white/40 uppercase tracking-wider">{_copy("copy.9a88b49480e7", { defaultValue: "Withdrawals" })}</p>
+            <p className="text-sm font-bold text-white truncate">{formatNumber(userData?.totalUnstakeQueued ?? 0)}</p>
+          </div>
+          <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3 sm:p-4">
+            <p className="text-[10px] text-white/40 uppercase tracking-wider">{t('staking.rewards')}</p>
+            <p className="text-sm font-bold text-white truncate">{formatNumber(userEarned, 2)}</p>
+          </div>
+          <LiquidGlassBubble
+            shimmer
+            noBorder
+            onClick={(isClaiming || userEarned <= 0) ? undefined : handleClaim}
+            className={cn(
+              "cursor-pointer [&>div]:!rounded-xl [&>div]:!h-full [&>div]:before:!rounded-xl [&>div]:after:!rounded-xl [&>div]:!flex [&>div]:!items-center [&>div]:!justify-center",
+              (isClaiming || userEarned <= 0) && "opacity-40 cursor-not-allowed"
+            )}
+          >
+            <span className="flex items-center justify-center gap-2 text-white text-sm font-medium">
+              {isClaiming && <Loader2 className="w-4 h-4 animate-spin shrink-0" />}
+              {t('staking.claim')}
+            </span>
+          </LiquidGlassBubble>
+        </motion.div>
+      )}
+
+      {/* Deposit History Panel */}
+      {showDeposits && userData && (
+        <motion.div
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: 'auto' }}
+          exit={{ opacity: 0, height: 0 }}
+          data-kit-section
+          className="border border-white/10 bg-white/[0.03] backdrop-blur-xl overflow-hidden"
+        >
+          <div className="p-4 border-b border-white/5 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div>
+                <h2 className="text-sm font-semibold text-white/70 uppercase tracking-wider">{_copy("copy.a3b7dbe57071", { defaultValue: "Your Deposits" })}</h2>
+                <p className="text-xs text-white/30 mt-0.5">{_copy("copy.701ef1840612", { defaultValue: "All your stake transactions" })}</p>
+              </div>
+              <button
+                onClick={async (e) => {
+                  e.stopPropagation();
+                  if (syncingDeposits || !currentWallet) return;
+                  setSyncingDeposits(true);
+                  try {
+                    const { data, error } = await supabase.functions.invoke('sync-staking-deposits', {
+                      body: { wallet: currentWallet },
+                    });
+                    if (error) throw error;
+                    if (data?.newRecords > 0) {
+                      toast.success(`Found ${data.newRecords} new deposit${data.newRecords > 1 ? 's' : ''} on-chain`);
+                      await fetchDeposits();
+                    } else {
+                      toast.success(_copy("copy.7082f2b3815d", { defaultValue: "Deposits are up to date" }));
+                    }
+                  } catch (err) {
+                    console.error('[Staking] Sync failed:', err);
+                    toast.error(_copy("copy.2d240e231566", { defaultValue: "Failed to sync deposits" }));
+                  }
+                  setSyncingDeposits(false);
+                }}
+                disabled={syncingDeposits}
+                className="p-1.5 rounded-lg text-white/30 hover:text-white/60 hover:bg-white/5 transition-colors disabled:opacity-50"
+                title={_copy("copy.5b5a9671e539", { defaultValue: "Scan on-chain for missing deposits" })}
+              >
+                <RefreshCw className={cn("w-3.5 h-3.5", syncingDeposits && "animate-spin")} />
+              </button>
+            </div>
+            <button onClick={() => setShowDeposits(false)} className="text-white/40 hover:text-white transition-colors">
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+          {depositsLoading ? (
+            <div className="p-8 text-center">
+              <RefreshCw className="w-5 h-5 text-white/30 animate-spin mx-auto mb-2" />
+              <p className="text-xs text-white/30">{_copy("copy.d5f1653b59aa", { defaultValue: "Loading deposits…" })}</p>
+            </div>
+          ) : !depositRecords.length ? (
+            <AppState icon="command" title={_copy("copy.4574472bb474", { defaultValue: "No deposits yet" })} description={_copy("copy.cbfc01a6c13a", { defaultValue: "Completed staking deposits will appear here." })} size="drawer" />
+          ) : (
+            <div className="divide-y divide-white/5">
+              <div className="hidden sm:grid grid-cols-4 gap-2 px-5 py-2 text-xs text-white/30 uppercase tracking-wider">
+                <span>{_copy("copy.49e96d7cdf58", { defaultValue: "Amount" })}</span>
+                <span>{_copy("copy.dae0896cbc2c", { defaultValue: "Chain" })}</span>
+                <span>{_copy("copy.99c40ab40592", { defaultValue: "Date" })}</span>
+                <span className="text-right">{_copy("copy.5b9e8d7c728d", { defaultValue: "Tx" })}</span>
+              </div>
+              {depositRecords.map((rec, idx) => {
+                const explorer = rec.chain === 'BNB'
+                  ? `https://bscscan.com/tx/${rec.tx_hash}`
+                  : `https://basescan.org/tx/${rec.tx_hash}`;
+                return (
+                  <div key={idx} className="grid grid-cols-2 sm:grid-cols-4 gap-2 px-5 py-3 text-xs text-white/70 items-center">
+                    <span className="font-medium">{formatNumber(rec.amount)} <DhbCoin /></span>
+                    <span className="text-white/50">{rec.chain}</span>
+                    <span className="text-white/40 hidden sm:block">{new Date(rec.created_at).toLocaleDateString()}</span>
+                    <a
+                      href={explorer}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-right flex items-center justify-end gap-1 text-white/50 hover:text-white transition-colors"
+                    >
+                      <span className="font-mono truncate max-w-[80px]">{rec.tx_hash.slice(0, 10)}…</span>
+                      <ExternalLink className="w-3 h-3 shrink-0" />
+                    </a>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </motion.div>
+      )}
+
+      {/* Withdrawals History Panel */}
+      {showWithdrawals && userData && (
+        <motion.div
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: 'auto' }}
+          exit={{ opacity: 0, height: 0 }}
+          data-kit-section
+          className="border border-white/10 bg-white/[0.03] backdrop-blur-xl overflow-hidden"
+        >
+          <div className="p-4 border-b border-white/5 flex items-center justify-between">
+            <div>
+              <h2 className="text-sm font-semibold text-white/70 uppercase tracking-wider">{_copy("copy.a7b7e36d6fdf", { defaultValue: "Your Withdrawals" })}</h2>
+              <p className="text-xs text-white/30 mt-0.5">{_copy("copy.31a3711c4ab5", { defaultValue: "All your withdrawal transactions" })}</p>
+            </div>
+            <button onClick={() => setShowWithdrawals(false)} className="text-white/40 hover:text-white transition-colors">
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+          {withdrawalsLoading ? (
+            <div className="p-8 text-center">
+              <RefreshCw className="w-5 h-5 text-white/30 animate-spin mx-auto mb-2" />
+              <p className="text-xs text-white/30">{_copy("copy.45c8ed5e9de7", { defaultValue: "Loading withdrawals…" })}</p>
+            </div>
+          ) : !withdrawalRecords.length ? (
+            <AppState icon="command" title={_copy("copy.1fdecb2c9a54", { defaultValue: "No withdrawals yet" })} description={_copy("copy.50b2bdd7a1e5", { defaultValue: "Completed staking withdrawals will appear here." })} size="drawer" />
+          ) : (
+            <div className="divide-y divide-white/5">
+              <div className="hidden sm:grid grid-cols-4 gap-2 px-5 py-2 text-xs text-white/30 uppercase tracking-wider">
+                <span>{_copy("copy.49e96d7cdf58", { defaultValue: "Amount" })}</span>
+                <span>{_copy("copy.dae0896cbc2c", { defaultValue: "Chain" })}</span>
+                <span>{_copy("copy.99c40ab40592", { defaultValue: "Date" })}</span>
+                <span className="text-right">{_copy("copy.5b9e8d7c728d", { defaultValue: "Tx" })}</span>
+              </div>
+              {withdrawalRecords.map((rec, idx) => {
+                const explorer = rec.chain === 'BNB'
+                  ? `https://bscscan.com/tx/${rec.tx_hash}`
+                  : `https://basescan.org/tx/${rec.tx_hash}`;
+                return (
+                  <div key={idx} className="grid grid-cols-2 sm:grid-cols-4 gap-2 px-5 py-3 text-xs text-white/70 items-center">
+                    <span className="font-medium">{formatNumber(rec.amount)} <DhbCoin /></span>
+                    <span className="text-white/50">{rec.chain}</span>
+                    <span className="text-white/40 hidden sm:block">{new Date(rec.created_at).toLocaleDateString()}</span>
+                    <a
+                      href={explorer}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-right flex items-center justify-end gap-1 text-white/50 hover:text-white transition-colors"
+                    >
+                      <span className="font-mono truncate max-w-[80px]">{rec.tx_hash.slice(0, 10)}…</span>
+                      <ExternalLink className="w-3 h-3 shrink-0" />
+                    </a>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </motion.div>
+      )}
+
+
+
+      {/* Why Stake Section */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.5 }}
+        data-kit-section
+        className="border border-white/10 bg-white/[0.03] backdrop-blur-xl overflow-hidden"
+      >
+        <div className="p-5 border-b border-white/5">
+          <h2 className="text-sm font-semibold text-white/70 uppercase tracking-wider">{t('staking.whyStake')}</h2>
+          <p className="text-xs text-white/30 mt-1">{t('staking.unlockBenefits')}</p>
+        </div>
+
+        <div className="p-5 columns-1 sm:columns-2 gap-4 space-y-4">
+          {/* Profit Share */}
+          <div className="break-inside-avoid rounded-xl border border-white/10 bg-white/[0.04] p-4 space-y-2">
+            <h3 className="text-sm font-semibold text-white">{t('staking.profitShare')}</h3>
+            <p className="text-xs text-white/50 leading-relaxed">
+              {t('staking.profitShareDesc')}
+            </p>
+          </div>
+
+          {/* Super Powers — this card has advertised the feature since it was
+              written and had nowhere to send anybody. It does now. */}
+          <Link
+            to="/app/superpowers"
+            className="block break-inside-avoid rounded-xl border border-white/10 bg-white/[0.04] p-4 space-y-2 hover:border-white/25 transition-colors"
+          >
+            <h3 className="text-sm font-semibold text-white flex items-center gap-1.5">
+              <ThemedIcon icon="superpowers" alt="" className="w-6 h-6 object-contain" />
+              {t('staking.superPowers')}
+              <ChevronRight className="w-3.5 h-3.5 text-white/40" />
+            </h3>
+            <ul className="space-y-1.5 text-xs text-white/50">
+              <li>• {t('staking.trendingBoosts')}</li>
+              <li>• {t('staking.timelineExposure')}</li>
+            </ul>
+          </Link>
+
+          {/* Increased Limits */}
+          <div className="break-inside-avoid rounded-xl border border-white/10 bg-white/[0.04] p-4 space-y-2">
+            <h3 className="text-sm font-semibold text-white">{t('staking.increasedLimits')}</h3>
+            <p className="text-xs text-white/50 leading-relaxed">
+              {t('staking.increasedLimitsDesc')}
+            </p>
+          </div>
+
+          {/* Early Access */}
+          <div className="break-inside-avoid rounded-xl border border-white/10 bg-white/[0.04] p-4 space-y-2">
+            <h3 className="text-sm font-semibold text-white">{t('staking.earlyAccess')}</h3>
+            <p className="text-xs text-white/50 leading-relaxed">
+              {t('staking.earlyAccessDesc')}
+            </p>
+          </div>
+
+          {/* Enhanced Experience */}
+          <div className="break-inside-avoid rounded-xl border border-white/10 bg-white/[0.04] p-4 space-y-2">
+            <h3 className="text-sm font-semibold text-white">{t('staking.enhancedExperience')}</h3>
+            <p className="text-xs text-white/50 leading-relaxed">
+              {t('staking.enhancedExperienceDesc')}
+            </p>
+          </div>
+
+          {/* Airdrops */}
+          <div className="break-inside-avoid rounded-xl border border-white/10 bg-white/[0.04] p-4 space-y-2">
+            <h3 className="text-sm font-semibold text-white">{t('staking.airdrops')}</h3>
+            <p className="text-xs text-white/50 leading-relaxed">
+              {t('staking.airdropsDesc')}
+            </p>
+          </div>
+        </div>
+      </motion.div>
+      </Body>
+    </div>
+  );
+}

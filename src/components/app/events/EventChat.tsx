@@ -1,0 +1,423 @@
+import { outsideImage } from '@/lib/outside-image';
+import { useTranslation as _useCopy } from 'react-i18next';
+import { useDraftState } from '@/hooks/use-draft-state';
+import { useSurfaceDraft } from '@/hooks/use-surface-draft';
+/**
+ * Event Chat
+ * ===========
+ * Live chat for events. Mirrors CommunityChat UI.
+ */
+
+import { useState, useRef, useEffect, useCallback } from 'react';
+import { InlineEmoji } from '@/components/app/emoji/EmojiText';
+import { Loader2, SmilePlus, CornerDownRight, LogIn } from "lucide-react";
+import Reply from "@/components/ui/cut-icons/reply";
+import Pencil from "@/components/ui/cut-icons/edit";
+import Check from "@/components/ui/cut-icons/check";
+
+import Send from "@/components/ui/cut-icons/send";
+import X from "@/components/ui/cut-icons/close";
+import MessageSquare from "@/components/ui/cut-icons/messages";
+
+import { BadgeIcon } from '@/components/app/BadgeIcon';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { EmojiGifPicker } from '../chat/EmojiGifPicker';
+import { VoiceRecorder } from '../chat/VoiceRecorder';
+import { voiceRecordingFile } from '@/lib/voice-recording';
+import { VoiceWaveformPlayer } from '../chat/VoiceWaveformPlayer';
+import { formatTimeAgo } from '@/lib/feed-utils';
+import { useAuth } from '@/contexts/AuthContext';
+import { buildAvatarUrl, buildAvatarCdnFallbackUrl } from '@/lib/media-url';
+import { AppState } from '@/components/app/AppState';
+import { useEventChat, type EventChatMessage } from '@/hooks/use-event-chat';
+import { useNavigate } from 'react-router-dom';
+import { Skeleton } from '@/components/ui/skeleton';
+import { replaceLinksWithEmoji, TranslatableText, SharedTranslationContext } from '../TranslatableText';
+import { useTranslation } from 'react-i18next';
+import { supabase } from '@/integrations/supabase/client';
+import { getAuthToken } from '@/lib/api/dehub';
+import { toast } from 'sonner';
+
+import { QUICK_CHAT_REACTIONS } from '@/components/app/chat/reaction-options';
+import { MoreReactionsButton } from '@/components/app/chat/MoreReactionsButton';
+import { profilePath } from '@/lib/profile-path';
+import { stripBold } from '@/lib/bold-markup';
+
+function ChatAvatar({ src, address, name }: { src?: string | null; address?: string; name: string }) {
+  const [failed, setFailed] = useState(false);
+  const [cdnFailed, setCdnFailed] = useState(false);
+  const cdnUrl = address ? buildAvatarCdnFallbackUrl(address, src ?? undefined) : undefined;
+  const activeSrc = failed ? cdnUrl : (src ?? undefined);
+  return (
+    <Avatar className="w-7 h-7">
+      {activeSrc && !cdnFailed && (
+        <AvatarImage src={activeSrc} onError={() => failed ? setCdnFailed(true) : setFailed(true)} />
+      )}
+      <AvatarFallback className="bg-zinc-700 text-white text-[10px] font-medium">
+        {name.charAt(0).toUpperCase()}
+      </AvatarFallback>
+    </Avatar>
+  );
+}
+
+function ChatReactions({
+  reactions, currentUserAddress, onReact, onRemoveReaction, messageId,
+}: {
+  reactions: Record<string, string[]>;
+  currentUserAddress?: string;
+  onReact: (id: string, emoji: string) => void;
+  onRemoveReaction: (id: string, emoji: string) => void;
+  messageId: string;
+}) {
+  const entries = Object.entries(reactions).filter(([, addrs]) => addrs.length > 0);
+  if (entries.length === 0) return null;
+  return (
+    <div className="flex flex-wrap gap-0.5 mt-0.5">
+      {entries.map(([emoji, addresses]) => {
+        const mine = currentUserAddress ? addresses.some(a => a.toLowerCase() === currentUserAddress.toLowerCase()) : false;
+        return (
+          <button key={emoji} onClick={() => mine ? onRemoveReaction(messageId, emoji) : onReact(messageId, emoji)}
+            className={`group/reaction inline-flex items-center gap-0.5 text-[10px] px-1 py-0.5 rounded-md border transition-colors ${mine ? 'border-white/30 bg-white/10 text-white' : 'border-zinc-700 bg-zinc-800/50 text-zinc-400 hover:border-zinc-600'}`}>
+            <span className="text-xs inline-flex items-center"><InlineEmoji value={emoji} className="h-4 m-0" /></span>
+            {mine ? (
+              <>
+                <span className="group-hover/reaction:hidden">{addresses.length}</span>
+                <X className="w-2.5 h-2.5 hidden group-hover/reaction:block text-white" />
+              </>
+            ) : <span>{addresses.length}</span>}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+interface EventChatProps {
+  restricted?: boolean;
+  eventId: string;
+}
+
+export function EventChat({ eventId, restricted }: EventChatProps) {
+  const { t: _copy } = _useCopy();
+  const [newMessage, setNewMessage] = useSurfaceDraft("components/app/events/EventChat.tsx:newMessage", '', eventId);
+  const [replyTo, setReplyTo] = useDraftState<EventChatMessage | null>(`event:${eventId}:reply`, null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editInitial, setEditInitial] = useState('');
+  const [editText, setEditText] = useDraftState(editingId ? `chat:edit:${editingId}` : null, editInitial);
+  const commitDraftEdit = async (id: string) => {
+    if (!editText.trim()) return;
+    try {
+      const result = await editMessage(id, editText);
+      if (result !== false && setEditText.complete(editText, editText)) setEditingId(current => current === id ? null : current);
+    } catch { /* Keep the edit available for retry. */ }
+  };
+
+  const bottomRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const navigate = useNavigate();
+  const { isAuthenticated, walletAddress, openLoginModal, user } = useAuth();
+  const { t } = useTranslation();
+  const profileData = user ? {
+    handle: user.username,
+    name: user.displayName || user.display_name,
+    avatarUrl: user.avatarImageUrl || user.avatarUrl || user.avatar_url,
+  } : null;
+
+  const { messages, isLoading, sendMessage, editMessage, addReaction, removeReaction } = useEventChat(eventId, restricted);
+
+  useEffect(() => {
+    if (messages.length > 0 && bottomRef.current) {
+      const scrollContainer = bottomRef.current.closest('.overflow-y-auto');
+      if (scrollContainer) {
+        requestAnimationFrame(() => { scrollContainer.scrollTop = scrollContainer.scrollHeight; });
+      }
+    }
+  }, [messages.length]);
+
+  const sendingRef = useRef(false);
+  const handleSend = async () => {
+    if (sendingRef.current) return;
+    if (!isAuthenticated) { openLoginModal(); return; }
+    const trimmed = newMessage.trim();
+    if (!trimmed) return;
+    const replyToId = replyTo?.id;
+    sendingRef.current = true;
+    try {
+      await sendMessage(trimmed, 'text', undefined, replyToId, {
+        username: profileData?.handle || undefined,
+        displayName: profileData?.name || undefined,
+        avatarUrl: profileData?.avatarUrl || undefined,
+        badgeBalance: user?.badgeBalance || undefined,
+      });
+      if (setNewMessage.complete(newMessage, '')) setReplyTo.complete(replyTo, null);
+    } catch { /* handled */ } finally { sendingRef.current = false; }
+  };
+
+  const handleEmojiSelect = (emoji: string) => setNewMessage(prev => (prev + emoji).slice(0, 500));
+
+  const handleGifSelect = async (gifUrl: string) => {
+    if (!isAuthenticated) { openLoginModal(); return; }
+    const replyToId = replyTo?.id;
+    try {
+      await sendMessage(gifUrl, 'gif', gifUrl, replyToId, {
+        username: profileData?.handle || undefined,
+        displayName: profileData?.name || undefined,
+        avatarUrl: profileData?.avatarUrl || undefined,
+        badgeBalance: user?.badgeBalance || undefined,
+      });
+    } catch { /* handled */ }
+  };
+
+  const handleVoiceRecordingComplete = useCallback(async (blob: Blob, _duration: number) => {
+    if (!isAuthenticated) { openLoginModal(); return; }
+    const toastId = 'event-voice-upload';
+    toast.loading(t('events.uploadingVoiceNote'), { id: toastId });
+    try {
+      const token = getAuthToken();
+      const file = voiceRecordingFile(blob);
+      const formData = new FormData();
+      formData.append('file', file, file.name);
+      const { data, error } = await supabase.functions.invoke('dm-upload-media', {
+        body: formData,
+        headers: {
+          'x-wallet-address': walletAddress?.toLowerCase() || '',
+          'x-dehub-token': token || '',
+        },
+      });
+      if (error || !data?.ok || !data?.url) {
+        throw new Error(data?.error || error?.message || _copy("copy.6efc5d27f30b", { defaultValue: "Upload failed" }));
+      }
+      await sendMessage(data.url, 'voice', data.url, replyTo?.id, {
+        username: profileData?.handle || undefined,
+        displayName: profileData?.name || undefined,
+        avatarUrl: profileData?.avatarUrl || undefined,
+        badgeBalance: user?.badgeBalance || undefined,
+      });
+      setReplyTo.complete(replyTo, null);
+      toast.success(t('events.voiceNoteSent'), { id: toastId });
+    } catch (err: any) {
+      console.error('[EventChat] Voice upload failed:', err);
+      toast.error(err?.message || t('events.voiceNoteFailed'), { id: toastId });
+    }
+  }, [isAuthenticated, walletAddress, sendMessage, replyTo, profileData, user, openLoginModal, setReplyTo, _copy]);
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); }
+  };
+
+  const handleReact = useCallback((messageId: string, emoji: string) => {
+    if (!isAuthenticated) { openLoginModal(); return; }
+    const msg = messages.find(m => m.id === messageId);
+    const myReaction = walletAddress && msg?.reactions?.[emoji]?.some(a => a.toLowerCase() === walletAddress.toLowerCase());
+    if (myReaction) removeReaction(messageId, emoji);
+    else addReaction(messageId, emoji);
+  }, [isAuthenticated, walletAddress, messages, addReaction, removeReaction]);
+
+  const translateSignal = 0;
+  const originalSignal = 0;
+
+  return (
+    <div className="flex flex-col" style={{ height: '340px', minHeight: '200px' }}>
+      <SharedTranslationContext.Provider value={{ translateSignal, originalSignal, requestTranslate: () => {}, requestOriginal: () => {} }}>
+        <div className="relative flex-1">
+          <div className="absolute inset-0 chat-text-zone overflow-y-auto py-2 space-y-2">
+            {isLoading ? (
+              <div className="space-y-3 py-2 px-3">
+                {[...Array(3)].map((_, i) => (
+                  <div key={i} className="flex items-start gap-2">
+                    <Skeleton className="w-7 h-7 rounded-full bg-white/[0.06]" />
+                    <div className="space-y-1 flex-1">
+                      <Skeleton className="h-3 w-20 bg-white/[0.06]" />
+                      <Skeleton className="h-3 w-40 bg-white/[0.06]" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : messages.length === 0 ? (
+              <AppState icon="messages" title={_copy("copy.f42e0f66017d", { defaultValue: "No messages yet" })} description={_copy("copy.c26c60eb4a6c", { defaultValue: "Be the first to chat." })} size="section" className="h-full" />
+            ) : (
+              messages.map((msg) => {
+                const avatarUrl = buildAvatarUrl(msg.wallet_address, msg.avatar_url);
+                const name = msg.display_name || msg.username || msg.wallet_address?.slice(0, 8) || _copy("copy.90395d452a30", { defaultValue: "Anon" });
+                const handle = msg.username;
+                const goToProfile = handle ? () => navigate(profilePath(handle)) : undefined;
+
+                return (
+                  <div key={msg.id} className="group relative px-3">
+                    {msg.reply_to && (
+                      <div className="flex items-center gap-1 text-[10px] text-zinc-500 ml-9 mb-0.5">
+                        <CornerDownRight className="w-2.5 h-2.5" />
+                        <span className="font-medium">{msg.reply_to.sender_name}</span>
+                        <span className="truncate max-w-[200px]">{stripBold(msg.reply_to.content)}</span>
+                      </div>
+                    )}
+                    <div className="flex items-start gap-2">
+                      <button onClick={goToProfile} disabled={!handle} className={`flex-shrink-0 ${handle ? 'cursor-pointer' : 'cursor-default'}`}>
+                        <ChatAvatar src={avatarUrl} address={msg.wallet_address} name={name} />
+                      </button>
+                      <div className="min-w-0 flex-1">
+                        <span className="inline-flex items-baseline gap-1.5">
+                          <span className="inline-flex items-baseline gap-1 shrink min-w-0">
+                            <button onClick={goToProfile} disabled={!handle} className={`text-xs font-semibold text-white truncate ${handle ? 'hover:underline cursor-pointer' : 'cursor-default'}`}>
+                              {name}
+                            </button>
+                            <BadgeIcon badgeBalance={(msg as any).badge_balance} username={msg.username} className="w-[1em] h-[1em]" />
+                          </span>
+                          <span className="text-zinc-600 text-[10px]">{formatTimeAgo(msg.created_at)}</span>
+                        </span>
+                        {msg.message_type === 'gif' && msg.image_url ? (
+                          <img src={outsideImage(msg.image_url)} alt="GIF" className="max-w-[280px] max-h-32 rounded mt-0.5" loading="lazy" />
+                        ) : msg.message_type === 'voice' && msg.image_url ? (
+                          <div className="mt-1">
+                            <VoiceWaveformPlayer src={msg.image_url} />
+                          </div>
+                        ) : editingId === msg.id ? (
+                          <div className="flex items-center gap-1 mt-0.5">
+                            <input autoFocus value={editText} onChange={(e) => setEditText(e.target.value)}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') { void commitDraftEdit(msg.id); }
+                                else if (e.key === 'Escape') setEditingId(null);
+                              }}
+                              className="flex-1 text-xs text-white bg-white/5 border border-white/10 rounded px-1.5 py-0.5 outline-none focus:border-white/20" maxLength={500}
+                            />
+                            <button onClick={() => { void commitDraftEdit(msg.id); }} className="p-0.5 text-emerald-400 hover:text-emerald-300"><Check className="w-3.5 h-3.5" /></button>
+                            <button onClick={() => setEditingId(null)} className="p-0.5 text-zinc-500 hover:text-white"><X className="w-3.5 h-3.5" /></button>
+                          </div>
+                        ) : (
+                          <TranslatableText text={msg.content} className="text-xs text-zinc-300 break-words" as="p" />
+                        )}
+                        {msg.reactions && Object.keys(msg.reactions).length > 0 && (
+                          <ChatReactions reactions={msg.reactions} currentUserAddress={walletAddress || undefined} onReact={addReaction} onRemoveReaction={removeReaction} messageId={msg.id} />
+                        )}
+                      </div>
+                      {isAuthenticated && (
+                        <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-0.5 flex-shrink-0 mt-0.5">
+                          {walletAddress && msg.wallet_address.toLowerCase() === walletAddress.toLowerCase() && msg.message_type !== 'gif' && (
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <button onClick={() => { setEditingId(msg.id); setEditInitial(msg.content); }} className="p-0.5 text-zinc-500 hover:text-white transition-colors rounded">
+                                  <Pencil className="w-3.5 h-3.5" />
+                                </button>
+                              </TooltipTrigger>
+                              <TooltipContent side="top">{t('events.edit')}</TooltipContent>
+                            </Tooltip>
+                          )}
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <button onClick={() => setReplyTo(msg)} className="p-0.5 text-zinc-500 hover:text-white transition-colors rounded">
+                                <Reply className="w-3.5 h-3.5" />
+                              </button>
+                            </TooltipTrigger>
+                            <TooltipContent side="top">{t('events.reply')}</TooltipContent>
+                          </Tooltip>
+                          <Popover>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <PopoverTrigger asChild>
+                                  <button className="p-0.5 text-zinc-500 hover:text-white transition-colors rounded">
+                                    <SmilePlus className="w-3.5 h-3.5" />
+                                  </button>
+                                </PopoverTrigger>
+                              </TooltipTrigger>
+                              <TooltipContent side="top">{t('events.react')}</TooltipContent>
+                            </Tooltip>
+                            <PopoverContent side="top" align="end" className="w-auto p-1 bg-zinc-800 border-zinc-700 rounded-xl">
+                              <div className="flex gap-0.5">
+                                {QUICK_CHAT_REACTIONS.map((emoji) => {
+                                  const isActive = walletAddress && msg.reactions?.[emoji]?.some(a => a.toLowerCase() === walletAddress.toLowerCase());
+                                  return (
+                                    <button key={emoji} onClick={() => handleReact(msg.id, emoji)}
+                                      className={`w-8 h-8 flex items-center justify-center text-sm rounded-lg transition-colors ${isActive ? 'bg-white/15 ring-1 ring-white/30' : 'hover:bg-zinc-700'}`}>
+                                      {emoji}
+                                    </button>
+                                  );
+                                })}
+                                <MoreReactionsButton
+                                  onPick={(emoji) => handleReact(msg.id, emoji)}
+                                  reactions={msg.reactions}
+                                  viewerAddress={walletAddress}
+                                />
+                              </div>
+                            </PopoverContent>
+                          </Popover>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })
+            )}
+            <div ref={bottomRef} />
+          </div>
+        </div>
+      </SharedTranslationContext.Provider>
+
+      {/* Reply preview */}
+      {replyTo && (
+        <div className="flex items-center gap-1.5 mx-1 mb-1 px-2 py-1 bg-zinc-800/70 rounded-lg">
+          <Reply className="w-3.5 h-3.5 text-white flex-shrink-0" />
+          <div className="flex-1 min-w-0">
+            <span className="text-[10px] font-medium text-white">{replyTo.display_name || replyTo.username || _copy("copy.b512d97e7cbf", { defaultValue: "User" })}</span>
+            <p className="text-[10px] text-zinc-400 truncate">{replyTo.content || _copy("copy.d357175cfe89", { defaultValue: "Media" })}</p>
+          </div>
+          <button onClick={() => setReplyTo.complete(replyTo, null)} className="flex-shrink-0 p-0.5 text-zinc-500 hover:text-white">
+            <X className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
+
+      {/* Input */}
+      {isAuthenticated ? (
+        <div className="px-2 py-2">
+          <div className="rounded-xl border border-white/[0.08] bg-white/[0.03] px-3 py-2 relative">
+            <span className="absolute top-2 right-3 text-[10px] text-zinc-600">{newMessage.length}/500</span>
+            <Textarea
+              ref={textareaRef}
+              placeholder={t('events.typeMessage')}
+              value={newMessage}
+              onChange={(e) => {
+                const val = e.target.value;
+                if (val.length <= 500) {
+                  setNewMessage(val);
+                }
+                const ta = e.target;
+                requestAnimationFrame(() => {
+                  ta.style.height = 'auto';
+                  ta.style.height = `${Math.min(ta.scrollHeight, 128)}px`;
+                });
+              }}
+              onKeyDown={handleKeyDown}
+              maxLength={500}
+              className="chat-text-input min-h-[36px] max-h-32 resize-none text-sm bg-transparent border-none text-white placeholder:text-zinc-500 p-0 pt-1 pr-12 focus-visible:ring-0 focus-visible:ring-offset-0 leading-[1.35]"
+              rows={1}
+              style={{ fieldSizing: 'content' } as React.CSSProperties}
+            />
+            <div className="flex items-center justify-end pt-1">
+              <div className="flex items-center gap-1">
+                <EmojiGifPicker onEmojiSelect={handleEmojiSelect} onGifSelect={handleGifSelect} />
+                <VoiceRecorder
+                  onRecordingComplete={handleVoiceRecordingComplete}
+                  disabled={!isAuthenticated}
+                />
+                <Button variant="ghost" size="icon" onClick={handleSend} disabled={!newMessage.trim()} className="h-8 w-8 text-zinc-400 hover:text-white hover:bg-zinc-700">
+                  <Send className="w-5 h-5" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="px-1 py-3">
+          <button onClick={() => openLoginModal()} className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-white/[0.08] bg-white/[0.03] text-zinc-500 text-sm hover:text-white transition-colors">
+            <LogIn className="w-4 h-4" />
+            {t('events.logInToChat')}
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}

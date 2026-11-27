@@ -1,0 +1,269 @@
+/**
+ * Post Cache Utilities
+ * ====================
+ * Pre-populates React Query cache for instant post navigation.
+ * 
+ * When clicking a post in the feed, we cache its data before navigation
+ * so the SinglePostPage displays instantly without a loading phase.
+ */
+
+import { QueryClient } from '@tanstack/react-query';
+import type { DeHubNFT } from '@/lib/api/dehub';
+import type { VideoItem, ImagePost, TextPost } from '@/types/feed.types';
+import { getVoteCache } from '@/lib/vote-cache';
+import { parseFormattedCount } from '@/lib/feed-utils';
+import { liveSourceFromHlsUrl } from '@/lib/live-ingest';
+import { warmPostPage } from '@/lib/preload-post-page';
+import { warmPostData } from '@/lib/post-warm';
+import { buildSoundtrackTag } from '@/lib/soundtrack';
+import { translateCopy as _translateCopy } from '@/i18n/copy';
+
+/**
+ * Parse a duration string (e.g., "1:23" or "1:02:34") back to seconds
+ */
+function parseDurationToSeconds(duration: string): number {
+  if (!duration || duration === '0:00') return 0;
+  const parts = duration.split(':').map(Number);
+  if (parts.length === 3) {
+    // HH:MM:SS
+    return parts[0] * 3600 + parts[1] * 60 + parts[2];
+  } else if (parts.length === 2) {
+    // MM:SS
+    return parts[0] * 60 + parts[1];
+  }
+  return 0;
+}
+
+
+/**
+ * Convert VideoItem back to partial DeHubNFT format for caching
+ */
+function videoItemToNFT(video: VideoItem): Partial<DeHubNFT> {
+  const isLivePost = !!video.isLivePost;
+  const description = video.description || video.title;
+  const soundtrack = video.soundtrackUrl && !description.includes('[soundtrack:')
+    ? buildSoundtrackTag({ tokenId: video.soundtrackTokenId || video.id, title: video.soundtrackTitle || _translateCopy('copy.46124e023603', { defaultValue: 'Sound' }), creator: video.soundtrackCreator || '', url: video.soundtrackUrl })
+    : '';
+
+  return {
+    tokenId: parseInt(video.id) || 0,
+    postType: (isLivePost ? 'live' : video.isAudio ? 'feed-audio' : 'video') as any,
+    title: video.title,
+    name: video.title,
+    description: soundtrack ? `${description}\n${soundtrack}` : description,
+    imageUrl: video.thumbnail || undefined,
+    videoUrl: isLivePost ? undefined : video.videoUrl,
+    // Already absolute; toStoryboard passes a full URL straight through.
+    storyboard: video.storyboard,
+    videoInfo: video.storedAspect ? { w: video.storedAspect, h: 1 } : undefined,
+    // Survives the round trip so the post page keeps the feed card's ladder
+    // (buildHlsUrl passes the already-built URL through).
+    hlsUrl: isLivePost ? undefined : video.hlsUrl,
+    audioUrl: video.audioUrl,
+    audioDuration: video.audioDuration,
+    videoDuration: video.durationSeconds || parseDurationToSeconds(video.duration),
+    duration: video.durationSeconds || parseDurationToSeconds(video.duration),
+    minterDisplayName: video.channel,
+    mintername: video.creatorUsername,
+    minterAvatarUrl: video.channelAvatar,
+    minter: video.creatorId,
+    status: video.status || 'minted',
+    // Seeded onto totalViews, the field resolveViewCount prefers, so the shell
+    // renders the same count the card showed rather than falling through to the
+    // signed-in-only `views`.
+    totalViews: parseFormattedCount(video.views),
+    isLiked: video.isLiked,
+    isDisliked: video.isDisliked,
+    totalVotes: {
+      for: video.likeCount || 0,
+      against: video.dislikeCount || 0,
+    },
+    commentCount: video.commentCount || 0,
+    is_ppv: video.isPPV,
+    ppv_price: video.ppvPrice,
+    ppv_currency: video.ppvCurrency,
+    is_w2e: video.isW2E,
+    is_locked: video.isLocked,
+    locked_price: video.lockedPrice,
+    locked_currency: video.lockedCurrency,
+    isOwner: video.isOwner,
+    isUnlocked: video.isUnlocked,
+    totalReposts: video.repostCount || 0,
+    isReposted: video.isReposted ?? false,
+    createdAt: video.createdAt,
+    stream: isLivePost
+      ? {
+          streamId: video.liveStreamId,
+          playbackId: video.livePlaybackId,
+          playbackUrl: video.livePlaybackUrl || video.livePlaybackUrls?.[0],
+          // Without the provider a self-hosted stream is read as Livepeer, and
+          // the post page dials livepeer.studio, fails, and drops to HLS.
+          provider: liveSourceFromHlsUrl(video.livePlaybackUrls?.[0])?.provider,
+          status: video.liveStatus,
+          isActive: video.liveIsActive,
+        }
+      : undefined,
+    streamInfo: !isLivePost && video.isW2E ? {
+      isAddBounty: true,
+      addBountyFirstXViewers: video.bountyViews,
+      addBountyFirstXComments: video.bountyComments,
+      addBountyAmount: video.bountyAmount,
+      addBountyTokenSymbol: video.bountyCurrency || 'DHB',
+    } : undefined,
+  };
+}
+
+/**
+ * Convert ImagePost back to partial DeHubNFT format for caching
+ */
+function imagePostToNFT(post: ImagePost): Partial<DeHubNFT> {
+  const description = post.description || post.caption || '';
+  const soundtrack = post.soundtrackUrl && !description.includes('[soundtrack:')
+    ? buildSoundtrackTag({ tokenId: post.id, title: post.soundtrackTitle || _translateCopy('copy.46124e023603', { defaultValue: 'Sound' }), creator: post.soundtrackCreator || '', url: post.soundtrackUrl })
+    : '';
+  return {
+    tokenId: parseInt(post.id) || 0,
+    postType: 'image',
+    title: post.title,
+    name: post.title,
+    description: soundtrack ? `${description}\n${soundtrack}` : description,
+    imageUrl: post.image,
+    imageUrls: post.imageUrls,
+    // Without these the post page paints a comic as a plain photo until its
+    // own fetch lands, then swaps to the cards.
+    layout: post.layout,
+    mediaCaptions: post.mediaCaptions,
+    mediaDescriptions: post.mediaDescriptions,
+    minterDisplayName: post.username,
+    mintername: post.creatorUsername,
+    minterAvatarUrl: post.avatar,
+    minter: post.creatorId,
+    status: post.status || 'minted',
+    // See videoItemToNFT — the feed carries this already formatted.
+    totalViews: parseFormattedCount(post.views),
+    isLiked: post.isLiked,
+    isDisliked: post.isDisliked,
+    totalVotes: {
+      for: post.likes || 0,
+      against: post.dislikes || 0,
+    },
+    commentCount: post.comments || 0,
+    // Preserve the original timestamp - timeAgo is already formatted, so we need to pass createdAt
+    createdAt: post.createdAt,
+    // Preserve gating fields (PPV/Bounty/Locked)
+    is_ppv: post.isPPV || false,
+    ppv_price: post.ppvPrice,
+    ppv_currency: post.ppvCurrency,
+    is_w2e: post.isW2E || false,
+    is_locked: post.isLocked || false,
+    locked_price: post.lockedPrice,
+    locked_currency: post.lockedCurrency,
+    isOwner: post.isOwner,
+    isUnlocked: post.isUnlocked,
+    totalReposts: post.repostCount || 0,
+    isReposted: post.isReposted ?? false,
+    streamInfo: {
+      ...(post.bountyAmount != null && { addBountyAmount: post.bountyAmount }),
+      ...(post.bountyViews != null && { addBountyFirstXViewers: post.bountyViews }),
+      ...(post.bountyComments != null && { addBountyFirstXComments: post.bountyComments }),
+      ...(post.bountyCurrency && { addBountyTokenSymbol: post.bountyCurrency }),
+    } as any,
+  };
+}
+
+/**
+ * Convert TextPost back to partial DeHubNFT format for caching
+ * Note: postType is set to 'image' as fallback since DeHubNFT doesn't have a 'text' type
+ */
+function textPostToNFT(post: TextPost): Partial<DeHubNFT> {
+  const createdAt = post.createdAt && !/^(just now|\d+[smhdwy]|\d+mo)$/i.test(post.createdAt.trim())
+    ? post.createdAt
+    : '';
+
+  return {
+    tokenId: parseInt(post.id) || 0,
+    // Use undefined to let SinglePostPage detect as text post via absence of media
+    postType: undefined,
+    description: post.content,
+    title: post.content.slice(0, 100),
+    name: post.content.slice(0, 100),
+    minterDisplayName: post.author.name,
+    mintername: post.author.handle,
+    minterAvatarUrl: post.author.avatarSeed,
+    minter: post.author.id,
+    status: post.status || 'minted',
+    // See videoItemToNFT — the feed carries this already formatted.
+    totalViews: parseFormattedCount(post.views),
+    isLiked: post.isLiked,
+    isDisliked: post.isDisliked,
+    totalVotes: {
+      for: post.stats.likes || 0,
+      against: post.stats.dislikes || 0,
+    },
+    commentCount: post.stats.comments || 0,
+    totalReposts: post.stats.reposts || 0,
+    isReposted: post.isReposted ?? false,
+    // Preserve the original timestamp
+    createdAt,
+  };
+}
+
+/**
+ * Merge any recent vote cache entry into NFT data
+ */
+function applyVoteCache(postId: string, nft: Partial<DeHubNFT>): Partial<DeHubNFT> {
+  const cached = getVoteCache(postId);
+  if (!cached) return nft;
+  return {
+    ...nft,
+    isLiked: cached.isLiked,
+    isDisliked: cached.isDisliked,
+    totalVotes: {
+      for: cached.likeCount,
+      against: cached.dislikeCount,
+    },
+  };
+}
+
+/**
+ * Seed the cache then mark it stale (without refetching now), so
+ * SinglePostPage renders the shell instantly but still fetches the full
+ * post in the background — same pattern as profile-cache-seed. Without the
+ * invalidate, the shell counts as fresh for the whole staleTime and fields
+ * the feed doesn't carry (e.g. quotedPost) never arrive.
+ */
+function seedPostCache(queryClient: QueryClient, id: string, nftData: Partial<DeHubNFT>, articleSlug?: string): void {
+  warmPostPage();
+  // The page's own request only leaves after its first render; start it now.
+  warmPostData(id);
+  queryClient.setQueryData(['single-post', id], nftData);
+  queryClient.invalidateQueries({ queryKey: ['single-post', id], exact: true, refetchType: 'none' });
+  // An article opens at its readable address, which the page turns back into
+  // this id with a request before it draws anything. The card already knows
+  // the answer, so the article opens as fast as any other post.
+  const slug = articleSlug?.toLowerCase();
+  if (slug && /^\d+$/.test(id) && queryClient.getQueryData(['article-slug', slug]) === undefined) {
+    queryClient.setQueryData(['article-slug', slug], { tokenId: Number(id), articleSlug: slug });
+  }
+}
+
+/**
+ * Pre-cache video data before navigation
+ */
+export function cacheVideoForNavigation(queryClient: QueryClient, video: VideoItem): void {
+  seedPostCache(queryClient, video.id, applyVoteCache(video.id, videoItemToNFT(video)), video.articleSlug);
+}
+
+/**
+ * Pre-cache image post data before navigation
+ */
+export function cacheImageForNavigation(queryClient: QueryClient, post: ImagePost): void {
+  seedPostCache(queryClient, post.id, applyVoteCache(post.id, imagePostToNFT(post)), post.articleSlug);
+}
+
+/**
+ * Pre-cache text post data before navigation
+ */
+export function cacheTextPostForNavigation(queryClient: QueryClient, post: TextPost): void {
+  seedPostCache(queryClient, post.id, applyVoteCache(post.id, textPostToNFT(post)), post.articleSlug);
+}

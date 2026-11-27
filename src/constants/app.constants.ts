@@ -1,0 +1,319 @@
+import { translateCopy as _translateCopy } from '@/i18n/copy';
+import FileText from "@/components/ui/cut-icons/blog";
+import FileTextIcon from "@/components/ui/cut-icons/blog";
+import Film from "@/components/ui/cut-icons/editor";
+import Wand2 from "@/components/ui/cut-icons/prompt";
+import Zap from "@/components/ui/cut-icons/superpowers";
+import AtSign from "@/components/ui/cut-icons/usernames";
+import Tv from "@/components/ui/cut-icons/live-tv";
+import ArrowDownToLine from "@/components/ui/cut-icons/converter";
+import FolderInput from "@/components/ui/cut-icons/migrate";
+import Scroll from "@/components/ui/cut-icons/glossary";
+import Blog from "@/components/ui/cut-icons/blog";
+import Hammer from "@/components/ui/cut-icons/work";
+import Shorts from "@/components/ui/cut-icons/shorts";
+import Quote from "@/components/ui/cut-icons/quote";
+import Handshake from "@/components/ui/cut-icons/affiliate";
+
+import Blocks from "@/components/ui/cut-icons/apps";
+import Store from "@/components/ui/cut-icons/store";
+import Trophy from "@/components/ui/cut-icons/leaderboard";
+import Image from "@/components/ui/cut-icons/images";
+import Video from "@/components/ui/cut-icons/video";
+import Radio from "@/components/ui/cut-icons/live";
+import Users from "@/components/ui/cut-icons/communities";
+import CalendarDays from "@/components/ui/cut-icons/events";
+import Coins from "@/components/ui/cut-icons/coins";
+import LayoutDashboard from "@/components/ui/cut-icons/command";
+import Sparkles from "@/components/ui/cut-icons/assistant";
+import Wallet from "@/components/ui/cut-icons/wallet";
+import BookOpen from "@/components/ui/cut-icons/docs";
+import Lightbulb from "@/components/ui/cut-icons/feature-requests";
+import Briefcase from "@/components/ui/cut-icons/bounties";
+import Vote from "@/components/ui/cut-icons/governance";
+import Landmark from "@/components/ui/cut-icons/dao";
+import Vault from "@/components/ui/cut-icons/staking";
+import Map from "@/components/ui/cut-icons/guide";
+import BarChart3 from "@/components/ui/cut-icons/stats";
+import Gamepad2 from "@/components/ui/cut-icons/arcade";
+import PieChart from "@/components/ui/cut-icons/fractions";
+import Megaphone from "@/components/ui/cut-icons/advertising";
+
+import Home from "@/components/ui/cut-icons/home";
+import Search from "@/components/ui/cut-icons/search";
+import Bell from "@/components/ui/cut-icons/alerts";
+import MessageSquare from "@/components/ui/cut-icons/messages";
+import MessageEnvelope from "@/components/ui/cut-icons/message-envelope";
+import Bookmark from "@/components/ui/cut-icons/save";
+import Settings from "@/components/ui/cut-icons/settings-cog";
+import Creator from "@/components/ui/cut-icons/creator";
+import Packs from "@/components/ui/cut-icons/packs";
+import User from "@/components/ui/cut-icons/profile";
+import Play from "@/components/ui/cut-icons/play";
+import Mic from "@/components/ui/cut-icons/mic";
+
+import type { NavItem, User as UserType, TrendingTopic, SearchTab } from '@/types/app.types';
+
+// Order here is the order the MOBILE menu renders in, top to bottom. The
+// desktop rail lifts Home out and prepends it itself (DesktopSidebar), which
+// is why Home used to sit last in this list — harmless on desktop, but it put
+// the app's most-used destination at the bottom of a 28-item mobile sheet.
+export const NAV_ITEMS: NavItem[] = [
+  { icon: Home, label: 'Home', path: '/app' },
+  { icon: User, label: 'Profile', path: '/app/profile' },
+  { icon: Search, label: 'Explore', path: '/app/explore' },
+  { icon: Bell, label: 'Notifications', path: '/app/notifications' },
+  { icon: MessageEnvelope, label: 'Messages', path: '/app/messages' },
+  { icon: Gamepad2, label: 'Arcade', path: '/arcade' },
+  { icon: Users, label: 'Communities', path: '/app/communities' },
+  { icon: Sparkles, label: 'Assistant', path: '/app/assistant' },
+  { icon: Settings, label: 'Settings', path: '/app/settings' },
+  { icon: Film, label: 'Editor', path: '/editor' },
+  { icon: Creator, label: 'Creator', path: '/creator' },
+  { icon: Mic, label: 'Stages', path: '/stages' },
+  { icon: Bookmark, label: 'Bookmarks', path: '/app/bookmarks' },
+  { icon: LayoutDashboard, label: 'Command', path: '/app/command-centre' },
+  { icon: Wallet, label: 'Wallet', path: '/app/wallet' },
+  { icon: CalendarDays, label: 'Events', path: '/app/events' },
+  { icon: Trophy, label: 'Leaderboard', path: '/app/leaderboard' },
+  { icon: Lightbulb, label: 'Feature Requests', path: '/build' },
+  { icon: MessageSquare, label: 'Feedback', path: '/feedback' },
+  { icon: Vault, label: 'Staking', path: '/app/stake' },
+  // Directly under Staking, because it is what staking buys. Without an entry
+  // here a holder who has already staked has no route to the page at all.
+  { icon: Zap, label: 'SuperPowers', path: '/app/superpowers' },
+  { icon: Vote, label: 'Governance', path: '/governance' },
+  { icon: Landmark, label: 'DAO', path: '/dao' },
+  { icon: Hammer, label: 'Bounties', path: '/work' },
+  { icon: Handshake, label: 'Affiliate', path: '/affiliate' },
+  { icon: Briefcase, label: 'Careers', path: '/app/jobs' },
+  { icon: Store, label: 'Stores', path: '/app/stores' },
+  { icon: PieChart, label: 'Fractions', path: '/app/fractions' },
+  { icon: AtSign, label: 'Usernames', path: '/usernames' },
+  { icon: Users, label: 'Accounts', path: '/accounts' },
+  { icon: Megaphone, label: 'Advertising', path: '/app/ads' },
+  { icon: Tv, label: 'Live TV', path: '/tv' },
+  { icon: Blocks, label: 'Apps', path: '/apps' },
+  { icon: Wand2, label: 'Prompt', path: '/prompt' },
+  { icon: ArrowDownToLine, label: 'Converter', path: '/converter' },
+  // The converter's batch twin: one link there, a whole channel here.
+  { icon: FolderInput, label: 'Migrate', path: '/migrate-youtube' },
+  { icon: Packs, label: 'Packs', path: '/packs' },
+  { icon: Scroll, label: 'Glossary', path: '/app/glossary' },
+  { icon: BarChart3, label: 'Compare Riftn', path: '/compare' },
+  { icon: Map, label: 'Guide', path: '/guide' },
+  { icon: BarChart3, label: 'Stats', path: '/stats' },
+  { icon: BookOpen, label: 'Docs', path: '/docs' },
+  { icon: Blog, label: 'Blog', path: '/docs/blog' },
+];
+
+/**
+ * The only paths reachable in Kids Mode.
+ *
+ * An allowlist, not a denylist. App.tsx carries more than ninety routes and
+ * grows most weeks; a list of what is forbidden is wrong the day somebody adds
+ * the ninety-first, and wrong in the direction that matters. So this names what
+ * is open and everything else redirects.
+ *
+ * Matching is by prefix, so `/post` covers `/post/123` and `/post/123/info`.
+ * Keep the entries specific enough that a prefix cannot swallow a sibling —
+ * `/app` would match the entire product, which is why Home is `/app` exactly
+ * and every other app route is listed with its own segment.
+ *
+ * What is deliberately absent, and why:
+ *
+ *  - Messages, communities, chat, stages, live — direct contact with adults,
+ *    none of it rated, none of it filterable.
+ *  - Explore, search-by-people, profiles, notifications — doors to everything
+ *    an account ever posted.
+ *  - Wallet, staking, stores, fractions, bounties, DAO, buy — a child does not
+ *    spend the parent's wallet.
+ *  - Arcade — third-party content in an opaque-origin iframe.
+ *  - Upload, creator tools — no posting from a Kids Mode session.
+ *  - The assistant — it answers with text nobody rated.
+ *
+ * Settings stays open because it is the way out; the page hides everything on
+ * it except the PIN pad.
+ */
+export const KIDS_MODE_PATHS: readonly string[] = [
+  '/app', // Home. Exact — see the note above about prefixes.
+  '/app/settings',
+  '/post',
+  '/posts',
+  '/video',
+  '/newpost',
+];
+
+/** Whether a path is reachable in Kids Mode. */
+export function isKidsModePath(pathname: string): boolean {
+  return KIDS_MODE_PATHS.some(allowed => pathname === allowed || pathname.startsWith(`${allowed}/`));
+}
+
+// Match the visible Cut artwork to Shorts without changing the tab layout.
+// Keep these optical scales in sync with mobile's FeedNavBar.
+export const FEED_TAB_ICON_SCALE: Record<string, number> = {
+  home: 1.15,
+  shorts: 1,
+  images: 1.16,
+  videos: 1.08,
+  music: 1.09,
+  live: 1,
+  settings: 1.18,
+};
+
+// Quote marks sit short and wide, so an even scale big enough to reach the
+// row's height would make them the widest glyph. Stretch them taller instead.
+// Keep in sync with mobile's FEED_NAV_ICON_STRETCH.
+const FEED_TAB_ICON_STRETCH: Record<string, readonly [number, number]> = {
+  text: [1.22, 1.49],
+};
+
+/** CSS transform that sizes a home-tab glyph to match its neighbours. */
+export function feedTabIconTransform(tab: string): string {
+  const stretch = FEED_TAB_ICON_STRETCH[tab];
+  return stretch ? `scale(${stretch[0]}, ${stretch[1]})` : `scale(${FEED_TAB_ICON_SCALE[tab] ?? 1})`;
+}
+
+export const FEED_TABS: SearchTab[] = [
+  { icon: Home, get label() { return _translateCopy("copy.3a78695388b3", { defaultValue: "Home" }); }, value: 'home' },
+  { icon: Shorts, get label() { return _translateCopy("copy.3c784a16cf27", { defaultValue: "Shorts" }); }, value: 'shorts' },
+  { icon: Image, get label() { return _translateCopy("copy.be7e2f201293", { defaultValue: "Images" }); }, value: 'images' },
+  { icon: Video, get label() { return _translateCopy("copy.c9a9639463c2", { defaultValue: "Videos" }); }, value: 'videos' },
+  { icon: Mic, get label() { return _translateCopy("copy.6eb00b4b2614", { defaultValue: "Music" }); }, value: 'music' },
+  { icon: Radio, get label() { return _translateCopy("copy.b64ac05f17e6", { defaultValue: "Live" }); }, value: 'live' },
+];
+
+/**
+ * Phones swap the Videos tab for this one: the Shorts tab already holds wide
+ * videos there, so the slot goes to text-only posts.
+ */
+export const TEXT_FEED_TAB: SearchTab = {
+  icon: Quote, get label() { return _translateCopy("textFeed.tab", { defaultValue: "Text" }); }, value: 'text',
+};
+
+/** The home tab row: phones show Text where wider screens show Videos. */
+export function feedTabsFor(isPhone: boolean, shortsEnabled: boolean): SearchTab[] {
+  const tabs = shortsEnabled ? FEED_TABS : FEED_TABS.filter(t => t.value !== 'shorts');
+  return isPhone ? tabs.map(t => (t.value === 'videos' ? TEXT_FEED_TAB : t)) : tabs;
+}
+
+export const EXPLORE_TABS: SearchTab[] = [
+  { icon: Search, get label() { return _translateCopy("copy.a52ace420f21", { defaultValue: "All" }); }, value: 'all' },
+  { icon: Users, get label() { return _translateCopy("copy.7db20897053b", { defaultValue: "People" }); }, value: 'people' },
+  { icon: FileTextIcon, get label() { return _translateCopy("copy.a80811cf6889", { defaultValue: "Posts" }); }, value: 'posts' },
+  { icon: Image, get label() { return _translateCopy("copy.be7e2f201293", { defaultValue: "Images" }); }, value: 'images' },
+  { icon: Video, get label() { return _translateCopy("copy.c9a9639463c2", { defaultValue: "Videos" }); }, value: 'videos' },
+  { icon: Play, get label() { return _translateCopy("copy.6eb00b4b2614", { defaultValue: "Music" }); }, value: 'music' },
+  { icon: Radio, get label() { return _translateCopy("copy.b64ac05f17e6", { defaultValue: "Live" }); }, value: 'live' },
+];
+
+export const SUGGESTED_USERS: UserType[] = [
+  { id: '1', name: 'React Team', handle: '@reactjs', verified: false },
+  { id: '2', name: 'TypeScript', handle: '@typescript', verified: false },
+  { id: '3', name: 'Tailwind CSS', handle: '@tailwindcss', verified: false },
+  { id: '4', name: 'Vite.js', handle: '@vitejs', verified: false },
+  { id: '5', name: 'Web3 Builder', handle: '@web3builder', verified: false },
+];
+
+export const EXTENDED_SUGGESTED_USERS: UserType[] = [
+  { id: '6', name: 'Next.js', handle: '@nextjs', verified: false },
+  { id: '7', name: 'Ethereum', handle: '@ethereum', verified: false },
+  { id: '8', name: 'Solana', handle: '@solana', verified: false },
+  { id: '9', name: 'Figma', handle: '@figma', verified: false },
+  { id: '10', name: 'GitHub', handle: '@github', verified: false },
+  { id: '11', name: 'OpenAI', handle: '@openai', verified: false },
+  { id: '12', name: 'Vercel', handle: '@vercel', verified: false },
+  { id: '13', name: 'Cloudflare', handle: '@cloudflare', verified: false },
+  { id: '14', name: 'Prisma', handle: '@prisma', verified: false },
+  { id: '15', name: 'Supabase', handle: '@supabase', verified: false },
+];
+
+// Generate 100 more suggested users
+export const GENERATED_SUGGESTED_USERS: UserType[] = Array.from({ length: 100 }, (_, i) => {
+  const names = ['Alex', 'Jordan', 'Sam', 'Taylor', 'Morgan', 'Casey', 'Riley', 'Quinn', 'Avery', 'Blake'];
+  const techs = ['Web3', 'DeFi', 'NFT', 'AI', 'ML', 'Rust', 'Go', 'Swift', 'Kotlin', 'Python'];
+  const name = `${names[i % names.length]} ${techs[Math.floor(i / 10) % techs.length]}`;
+  return {
+    id: `${16 + i}`,
+    name,
+    handle: `@${name.toLowerCase().replace(' ', '_')}`,
+    verified: false,
+  };
+});
+
+export const TRENDING_TOPICS: TrendingTopic[] = [
+  { tag: '#WebDevelopment', postCount: '125K posts' },
+  { tag: '#React', postCount: '89K posts' },
+  { tag: '#AI', postCount: '234K posts' },
+  { tag: '#Crypto', postCount: '67K posts' },
+];
+
+export const EXTENDED_TRENDING_TOPICS: TrendingTopic[] = [
+  { tag: '#Gaming', postCount: '312K posts' },
+  { tag: '#NFT', postCount: '156K posts' },
+  { tag: '#DeFi', postCount: '98K posts' },
+  { tag: '#Solana', postCount: '145K posts' },
+  { tag: '#Ethereum', postCount: '278K posts' },
+  { tag: '#Web3', postCount: '189K posts' },
+  { tag: '#Metaverse', postCount: '76K posts' },
+  { tag: '#TypeScript', postCount: '112K posts' },
+  { tag: '#JavaScript', postCount: '203K posts' },
+  { tag: '#Design', postCount: '167K posts' },
+  { tag: '#Startup', postCount: '134K posts' },
+  { tag: '#Tech', postCount: '289K posts' },
+];
+
+// Generate 100 more trending topics
+export const GENERATED_TRENDING_TOPICS: TrendingTopic[] = Array.from({ length: 100 }, (_, i) => {
+  const topics = ['Blockchain', 'Cybersecurity', 'Cloud', 'DevOps', 'Frontend', 'Backend', 'Mobile', 'Data', 'IoT', 'AR'];
+  const subtopics = ['Tips', 'News', 'Trends', 'Updates', 'Guide', 'Tutorial', 'Deep', 'Pro', 'Live', 'Hot'];
+  return {
+    tag: `#${topics[i % topics.length]}${subtopics[Math.floor(i / 10) % subtopics.length]}`,
+    postCount: `${Math.floor(Math.random() * 500) + 10}K posts`,
+  };
+});
+
+export const RECENT_SEARCHES = ['fitness', 'cooking', 'music', 'art'];
+
+export const EXPLORE_TRENDING: Array<{ tag: string; postCount: string }> = [
+  { tag: '#fitness', postCount: '1035 posts' },
+  { tag: '#cooking', postCount: '449 posts' },
+  { tag: '#music', postCount: '745 posts' },
+  { tag: '#art', postCount: '527 posts' },
+];
+
+// ============================================
+// GLASS MORPHISM STYLES - UNIVERSAL RULE
+// ============================================
+// ALL popovers, dropdowns, sheets, drawers, menus, and overlays
+// MUST use these styles for consistency. NO EXCEPTIONS.
+// ============================================
+
+export const GLASS_STYLES = {
+  // For Popovers, Dropdowns, Menus - floating elements
+  popover: "bg-black/40 backdrop-blur-2xl border border-white/10",
+  
+  // For Drawers, Sheets - bottom/side panels
+  drawer: "bg-black/40 backdrop-blur-2xl border-t border-white/10",
+  sheet: "bg-black/40 backdrop-blur-2xl border-l border-white/10",
+  
+  // For Dialogs, Modals - centered overlays  
+  dialog: "bg-black/40 backdrop-blur-2xl border border-white/10",
+  
+  // For Cards with glass effect
+  card: "bg-white/5 backdrop-blur-xl border border-white/10",
+} as const;
+
+// ============================================
+// /work — admin arbiters
+// ============================================
+// Wallet addresses (lowercased) that can resolve disputes via /work/disputes or /app/work/disputes.
+// Must match the `feeRecipient` / `owner` of the deployed DeHubWork contract.
+export const WORK_ADMIN_ARBITERS: string[] = [
+  '0x9324840523a5d17dd12a2f11a9472e5a199c1937',
+];
+
+export function isWorkAdmin(addr?: string | null): boolean {
+  if (!addr) return false;
+  return WORK_ADMIN_ARBITERS.includes(addr.toLowerCase());
+}

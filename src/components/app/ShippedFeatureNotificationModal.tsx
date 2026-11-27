@@ -1,0 +1,145 @@
+import { useTranslation as _useCopy } from 'react-i18next';
+/**
+ * Shipped Feature Notification Modal
+ * ===================================
+ * Thanks a user for their feedback once their feature request or bug
+ * report ships. Shown once per item on their next login — including
+ * items that were already marked shipped before this existed, since
+ * eligibility is DB-tracked ("shipped" + "not yet notified"), not based
+ * on when it shipped.
+ */
+
+import { useEffect, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { CheckCircle2, ArrowUpRight } from "lucide-react";
+import X from "@/components/ui/cut-icons/close";
+
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
+import { useUnnotifiedShippedFeatures, useMarkShippedNotified, CATEGORY_LABELS } from '@/hooks/use-feature-requests';
+import { getShippedFeatureDestination } from '@/lib/feature-shipped-destination';
+import { SHIPPED_POINTS } from '@/lib/top-builders';
+
+import { formatCount } from '@/lib/format-count';
+export function ShippedFeatureNotificationModal() {
+  const { t: _copy } = _useCopy();
+  const { isAuthenticated, walletAddress, requiresUsername } = useAuth();
+  const navigate = useNavigate();
+  const { data: shippedItems } = useUnnotifiedShippedFeatures();
+  const markNotified = useMarkShippedNotified();
+  const [show, setShow] = useState(false);
+
+  const hasItems = !!shippedItems && shippedItems.length > 0;
+
+  useEffect(() => {
+    if (!isAuthenticated || !walletAddress || requiresUsername || !hasItems) {
+      setShow(false);
+      return;
+    }
+    // Small delay so the login flow (and the mandatory username modal, if any) settles first.
+    const timer = setTimeout(() => setShow(true), 2500);
+    return () => clearTimeout(timer);
+  }, [isAuthenticated, walletAddress, requiresUsername, hasItems]);
+
+  if (!show || !shippedItems || shippedItems.length === 0) return null;
+
+  const handleDismiss = () => {
+    setShow(false);
+    markNotified.mutate(shippedItems.map((f) => f.id));
+  };
+
+  const handleViewShipped = (destination: string) => {
+    handleDismiss();
+    navigate(destination);
+  };
+
+  const isPlural = shippedItems.length > 1;
+  const totalPoints = shippedItems.length * SHIPPED_POINTS;
+
+  return (
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+        onClick={handleDismiss}
+      >
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.95, y: 20 }}
+          transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+          className="w-full max-w-md bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden shadow-2xl"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="flex items-start justify-between px-5 pt-5">
+            <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center">
+              <CheckCircle2 className="w-5 h-5 text-white/80" />
+            </div>
+            <button
+              type="button"
+              aria-label={_copy("copy.bdd4f5015e96", { defaultValue: "Close shipped request notification" })}
+              onClick={handleDismiss}
+              className="text-zinc-500 hover:text-white transition-colors p-1"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+
+          <div className="px-5 pt-3 pb-5">
+            <h2 className="text-white font-bold text-lg mb-1.5">{_copy("copy.8f3dc69e83c4", { defaultValue: "Your feedback shipped!" })}</h2>
+            <p className="text-zinc-400 text-sm leading-relaxed mb-4">{isPlural ? _copy("copy.905392fbed15", { defaultValue: "Thanks for helping make Riftn better — {{value1}} things you asked for are now live:", value1: shippedItems.length }) : _copy("copy.2971f9103f78", { defaultValue: "Thanks for helping make Riftn better — something you asked for is now live:" })}</p>
+
+            <div className="mb-4 flex items-center gap-3 rounded-xl border border-white/[0.12] bg-white/[0.06] px-3.5 py-3">
+              <span className="text-2xl font-bold tabular-nums text-white">+{formatCount(totalPoints)}</span>
+              <div className="min-w-0">
+                <p className="text-white text-sm font-semibold leading-tight">{_copy("copy.f0c8bb34335b", { defaultValue: "You earned +{{value1}} points", value1: totalPoints })}</p>
+                <p className="text-zinc-400 text-xs leading-snug mt-0.5">{_copy("copy.0fbe06b679a8", { defaultValue: "{{value1}} points for each shipped request, added to your Top builders score.", value1: SHIPPED_POINTS })}</p>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-2 mb-5 max-h-48 overflow-y-auto">
+              {shippedItems.map((item) => (
+                <button
+                  type="button"
+                  key={item.id}
+                  onClick={() => handleViewShipped(getShippedFeatureDestination(item))}
+                  className="group flex w-full items-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.03] px-3 py-2.5 text-left transition-colors hover:bg-white/[0.07] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
+                >
+                  <span className="text-white text-sm font-medium leading-snug flex-1 min-w-0">{item.title}</span>
+                  <span className="text-[10px] font-medium px-2 py-0.5 rounded-lg whitespace-nowrap shrink-0 bg-white/10 text-white/60">
+                    {CATEGORY_LABELS[item.category]}
+                  </span>
+                  <span className="text-[11px] font-semibold tabular-nums whitespace-nowrap shrink-0 text-white">
+                    {_copy("copy.7f78bdc0762d", { defaultValue: "+{{value1}} pts", value1: SHIPPED_POINTS })}
+                  </span>
+                  <ArrowUpRight className="h-4 w-4 shrink-0 text-zinc-500 transition-colors group-hover:text-white" aria-hidden="true" />
+                </button>
+              ))}
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => handleViewShipped(
+                  isPlural
+                    ? '/build?tab=shipped'
+                    : getShippedFeatureDestination(shippedItems[0])
+                )}
+                className="flex-1 px-4 py-2.5 rounded-xl text-sm font-semibold bg-white text-black hover:bg-zinc-200 transition-all"
+              >
+                {isPlural ? _copy("copy.20d4214b9d4b", { defaultValue: "View shipped requests" }) : _copy("copy.da4c7c208cf4", { defaultValue: "Check it out" })}
+              </button>
+              <button
+                type="button"
+                onClick={handleDismiss}
+                className="px-4 py-2.5 rounded-xl text-sm font-medium text-zinc-400 hover:text-white transition-colors"
+              >{_copy("copy.1aa7b1c1d5fb", { defaultValue: "Thanks!" })}</button>
+            </div>
+          </div>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
+  );
+}

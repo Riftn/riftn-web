@@ -1,0 +1,714 @@
+import { useTranslation as _useCopy } from 'react-i18next';
+/**
+ * Communities Hooks
+ * =================
+ * React Query hooks for community CRUD, membership, and pinned communities.
+ */
+
+import { useEffect } from 'react';
+import { useQuery, useMutation, useQueryClient, type QueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { withWalletHeader } from '@/lib/supabase-wallet-client';
+import { useAuth } from '@/contexts/AuthContext';
+import { adminErrorMessage } from '@/hooks/use-community-admin';
+import { toast } from 'sonner';
+
+export interface Community {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  avatar_url: string | null;
+  banner_url: string | null;
+  creator_wallet_address: string;
+  is_private: boolean;
+  member_count: number;
+  rules: any[];
+  ticker_symbol: string | null;
+  ticker_contract_address: string | null;
+  ticker_chain_id: string | null;
+  ticker_pair_address: string | null;
+  /** 0 = off. Owners and admins are exempt. */
+  slow_mode_seconds: number;
+  /** What a plain member may do; per-admin grants override it. */
+  default_permissions: Record<string, boolean> | null;
+  /** Holder groups: set together, or all null when anyone may join. */
+  holder_gate_chain_id?: number | null;
+  holder_gate_token?: string | null;
+  holder_gate_min?: number | string | null;
+  holder_gate_symbol?: string | null;
+  holder_gate_decimals?: number | null;
+  /** 'group' and 'channel' are started from the + in Messages. */
+  kind?: 'community' | 'group' | 'channel' | null;
+  /** One-off entry price in whole Riftn tokens; null or 0 = free. */
+  entry_price?: number | string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export type CommunityRole = 'owner' | 'admin' | 'member';
+export type CommunityMemberStatus = 'active' | 'pending' | 'banned';
+
+export interface CommunityMember {
+  id: string;
+  community_id: string;
+  wallet_address: string;
+  role: CommunityRole;
+  status: CommunityMemberStatus;
+  joined_at: string;
+  /** Per-admin rights. Empty for owners (who hold everything) and for members. */
+  permissions: Record<string, boolean> | null;
+  custom_title: string | null;
+  muted_until: string | null;
+  ban_reason: string | null;
+  banned_until: string | null;
+  moderated_by: string | null;
+  moderated_at: string | null;
+  promoted_by: string | null;
+}
+
+export interface PinnedCommunity {
+  id: string;
+  wallet_address: string;
+  community_id: string;
+  display_order: number;
+  created_at: string;
+  communities?: Community;
+}
+
+// ─── Fetch all communities (discover) ─────────────────────────────────────────
+
+export function useDiscoverCommunities() {
+  return useQuery({
+    queryKey: ['communities', 'discover'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('communities')
+        .select('*')
+        .order('member_count', { ascending: false })
+        .limit(100);
+      if (error) throw error;
+      return (data ?? []) as Community[];
+    },
+    staleTime: 60_000,
+  });
+}
+
+// ─── Activity scores: recent chat message counts per community ────────────────
+
+export function useCommunityActivityScores() {
+  return useQuery({
+    queryKey: ['communities', 'activity-scores'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('community_chat_messages')
+        .select('community_id')
+        .order('created_at', { ascending: false })
+        .limit(2000);
+      if (error) throw error;
+      const counts: Record<string, number> = {};
+      (data ?? []).forEach((row: any) => {
+        if (row.community_id) counts[row.community_id] = (counts[row.community_id] || 0) + 1;
+      });
+      return counts;
+    },
+    staleTime: 60_000,
+  });
+}
+
+// ─── Fetch user's joined communities ──────────────────────────────────────────
+
+export function useUserCommunities() {
+  const { walletAddress } = useAuth();
+
+  return useQuery({
+    queryKey: ['communities', 'user', walletAddress],
+    queryFn: async () => {
+      if (!walletAddress) return [];
+      const { data, error } = await withWalletHeader(
+        supabase
+          .from('community_members')
+          .select('*, communities(*)')
+          .eq('status', 'active')
+          .eq('wallet_address', walletAddress.toLowerCase()),
+        walletAddress
+      );
+      if (error) throw error;
+      return (data ?? []) as (CommunityMember & { communities: Community })[];
+    },
+    enabled: !!walletAddress,
+    staleTime: 30_000,
+  });
+}
+
+// ─── Fetch single community by slug or notification's stable ID ───────────────
+
+export function useCommunity(slug: string | undefined) {
+  const queryClient = useQueryClient();
+  return useQuery({
+    queryKey: ['communities', 'slug', slug],
+    queryFn: async () => {
+      if (!slug) return null;
+      const { data, error } = await supabase
+        .from('communities')
+        .select('*')
+        .eq(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(slug) ? 'id' : 'slug', slug)
+        // maybeSingle, not single: an unknown slug is a successful null, so
+        // only a failed read reaches the error state and not-found stays
+        // not-found.
+        .maybeSingle();
+      if (error) throw error;
+      return (data as Community | null) ?? null;
+    },
+    enabled: !!slug,
+    // Instant open from any list: discover holds full rows and the user's
+    // joined list embeds them — paint the clicked community immediately
+    // (which also unblocks the id-gated members/membership queries a full
+    // round-trip earlier) while the authoritative fetch runs behind it.
+    placeholderData: () => {
+      if (!slug) return undefined;
+      const discover = queryClient.getQueryData<Community[]>(['communities', 'discover']);
+      const fromDiscover = discover?.find(c => c.slug === slug);
+      if (fromDiscover) return fromDiscover;
+      for (const query of queryClient.getQueryCache().findAll({ queryKey: ['communities', 'user'] })) {
+        const rows = query.state.data as Array<{ communities?: Community }> | undefined;
+        const hit = rows?.find?.(m => m.communities?.slug === slug)?.communities;
+        if (hit) return hit;
+      }
+      return undefined;
+    },
+  });
+}
+
+// ─── Fetch members of a community ────────────────────────────────────────────
+
+// Every read below carries the wallet header. The roster is no longer world
+// readable — a private community's members are visible only to its members, and
+// the pending/banned lists only to moderators — so an unheadered request now
+// comes back empty instead of complete. The wallet is part of the query key for
+// the same reason: one account's RLS-filtered result must not be served to the
+// next.
+export function useCommunityMembers(communityId: string | undefined) {
+  const { walletAddress } = useAuth();
+  return useQuery({
+    queryKey: ['communities', 'members', communityId, walletAddress],
+    queryFn: async () => {
+      if (!communityId) return [];
+      const { data, error } = await withWalletHeader(
+        supabase
+          .from('community_members')
+          .select('*')
+          .eq('community_id', communityId)
+          .eq('status', 'active')
+          .order('joined_at', { ascending: true }),
+        walletAddress
+      );
+      if (error) throw error;
+      return (data ?? []) as CommunityMember[];
+    },
+    enabled: !!communityId,
+  });
+}
+
+// ─── Fetch pending members of a community ────────────────────────────────────
+
+export function usePendingCommunityMembers(communityId: string | undefined) {
+  const { walletAddress } = useAuth();
+  return useQuery({
+    queryKey: ['communities', 'pending-members', communityId, walletAddress],
+    queryFn: async () => {
+      if (!communityId) return [];
+      const { data, error } = await withWalletHeader(
+        supabase
+          .from('community_members')
+          .select('*')
+          .eq('community_id', communityId)
+          .eq('status', 'pending')
+          .order('joined_at', { ascending: true }),
+        walletAddress
+      );
+      if (error) throw error;
+      return (data ?? []) as CommunityMember[];
+    },
+    enabled: !!communityId && !!walletAddress,
+  });
+}
+
+// ─── Fetch banned members ────────────────────────────────────────────────────
+
+export function useBannedCommunityMembers(communityId: string | undefined) {
+  const { walletAddress } = useAuth();
+  return useQuery({
+    queryKey: ['communities', 'banned-members', communityId, walletAddress],
+    queryFn: async () => {
+      if (!communityId) return [];
+      const { data, error } = await withWalletHeader(
+        supabase
+          .from('community_members')
+          .select('*')
+          .eq('community_id', communityId)
+          .eq('status', 'banned')
+          .order('joined_at', { ascending: true }),
+        walletAddress
+      );
+      if (error) throw error;
+      return (data ?? []) as CommunityMember[];
+    },
+    enabled: !!communityId && !!walletAddress,
+  });
+}
+
+
+// ─── Moderation ──────────────────────────────────────────────────────────────
+// Approve, reject, ban, unban, kick, mute and role changes all live in
+// use-community-admin.ts now. They used to be direct table writes here, which
+// RLS silently filtered to zero rows while the mutation still reported success;
+// they go through SECURITY DEFINER RPCs that raise on refusal instead.
+
+// ─── Check if user is member ─────────────────────────────────────────────────
+
+// Last membership row we saw per wallet + community, kept on the device so a
+// chat you are already in opens with its message box, not "Join this
+// community", while the fresh read is still on its way.
+const MEMBERSHIP_STORE = 'riftn.community-membership.v1';
+const MEMBERSHIP_STORE_MAX = 300;
+
+function membershipStoreKey(wallet: string, communityId: string) {
+  return `${wallet.toLowerCase()}:${communityId}`;
+}
+
+function readMembershipStore(): Record<string, CommunityMember> {
+  try {
+    const raw = localStorage.getItem(MEMBERSHIP_STORE);
+    const parsed = raw ? JSON.parse(raw) : null;
+    return parsed && typeof parsed === 'object' ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
+function writeMembership(wallet: string, communityId: string, row: CommunityMember | null) {
+  try {
+    const store = readMembershipStore();
+    const key = membershipStoreKey(wallet, communityId);
+    if (row) store[key] = row;
+    else if (key in store) delete store[key];
+    else return;
+    const keys = Object.keys(store);
+    for (const k of keys.slice(0, Math.max(0, keys.length - MEMBERSHIP_STORE_MAX))) delete store[k];
+    localStorage.setItem(MEMBERSHIP_STORE, JSON.stringify(store));
+  } catch {
+    // Storage full or blocked: the live read still decides.
+  }
+}
+
+/**
+ * A membership we already know without asking: the joined-communities list
+ * (Messages loads it for its rows) or the copy saved on this device. Only a
+ * "you are in" answer is reused; "not a member" always waits for the server,
+ * so a stale copy can never flash the join prompt at someone who joined since.
+ */
+export function knownMembership(qc: QueryClient, communityId: string | undefined, wallet: string | null | undefined): CommunityMember | undefined {
+  if (!communityId || !wallet) return undefined;
+  for (const [, rows] of qc.getQueriesData<(CommunityMember & { communities?: Community })[]>({ queryKey: ['communities', 'user', wallet] })) {
+    const row = rows?.find(r => r.community_id === communityId);
+    if (row) {
+      const { communities: _c, ...member } = row;
+      return member as CommunityMember;
+    }
+  }
+  return readMembershipStore()[membershipStoreKey(wallet, communityId)];
+}
+
+export function useIsCommunityMember(communityId: string | undefined) {
+  const { walletAddress } = useAuth();
+  const qc = useQueryClient();
+  const query = useQuery({
+    queryKey: ['communities', 'membership', communityId, walletAddress],
+    queryFn: async () => {
+      if (!communityId || !walletAddress) return null;
+      const { data, error } = await withWalletHeader(
+        supabase
+          .from('community_members')
+          .select('*')
+          .eq('community_id', communityId)
+          .eq('wallet_address', walletAddress.toLowerCase())
+          .maybeSingle(),
+        walletAddress
+      );
+      if (error) throw error;
+      return data as CommunityMember | null;
+    },
+    enabled: !!communityId && !!walletAddress,
+    placeholderData: () => knownMembership(qc, communityId, walletAddress),
+  });
+  // Keep the device copy in step with every settled answer, including the
+  // optimistic join/leave writes, so the next cold open starts right.
+  const settled = query.isPlaceholderData ? undefined : query.data;
+  useEffect(() => {
+    if (!communityId || !walletAddress || settled === undefined) return;
+    writeMembership(walletAddress, communityId, settled);
+  }, [communityId, walletAddress, settled]);
+  return query;
+}
+
+/**
+ * True while we do not yet know whether the signed-in wallet belongs to the
+ * community. Callers hold back the join prompt (and anything else that only
+ * a non-member sees) until this turns false.
+ */
+export function isMembershipLoading(q: { data: unknown; fetchStatus: string }): boolean {
+  return q.data === undefined && q.fetchStatus !== 'idle';
+}
+
+// ─── Create community ────────────────────────────────────────────────────────
+
+export function useCreateCommunity() {
+  const { t: _copy } = _useCopy();
+  const { walletAddress } = useAuth();
+  const qc = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (input: { name: string; slug: string; description?: string; avatar_url?: string; banner_url?: string; is_private?: boolean; rules?: any[]; kind?: 'community' | 'group' | 'channel'; entry_price?: number | null }) => {
+      if (!walletAddress) throw new Error('Not connected');
+      const { data, error } = await withWalletHeader(
+        supabase
+          .from('communities')
+          .insert({
+            name: input.name,
+            slug: input.slug.toLowerCase().replace(/[^a-z0-9-]/g, '-'),
+            description: input.description || null,
+            avatar_url: input.avatar_url || null,
+            banner_url: input.banner_url || null,
+            creator_wallet_address: walletAddress,
+            is_private: input.is_private || false,
+            rules: input.rules || [],
+            ...(input.kind && input.kind !== 'community' ? { kind: input.kind } : {}),
+            ...(input.entry_price ? { entry_price: input.entry_price } : {}),
+          } as any)
+          .select()
+          .single(),
+        walletAddress
+      );
+      if (error) throw error;
+      return data as Community;
+    },
+    onSuccess: (created) => {
+      qc.invalidateQueries({ queryKey: ['communities', 'discover'] });
+      qc.invalidateQueries({ queryKey: ['communities', 'user'] });
+      toast.success(created?.kind === 'group'
+        ? _copy('communities.newChat.groupCreated', { defaultValue: 'Group created' })
+        : created?.kind === 'channel'
+          ? _copy('communities.newChat.channelCreated', { defaultValue: 'Channel created' })
+          : _copy("copy.62ce8772eeee", { defaultValue: "Community created!" }));
+    },
+    onError: (e: any) => {
+      if (e?.message?.includes('duplicate')) {
+        toast.error(_copy("copy.b9553afecdaa", { defaultValue: "That slug is already taken" }));
+      } else {
+        toast.error(_copy("copy.fc11ae3b7945", { defaultValue: "Failed to create community" }));
+      }
+    },
+  });
+}
+
+// ─── Update community ────────────────────────────────────────────────────────
+
+export function useUpdateCommunity() {
+  const { t: _copy } = _useCopy();
+  const { walletAddress } = useAuth();
+  const qc = useQueryClient();
+
+  return useMutation({
+    // Direct UPDATE on communities is revoked — the RPC is the only writer, so
+    // that member_count and creator_wallet_address are not client-writable and
+    // so admins (not just the founder) can edit the community.
+    mutationFn: async ({ id, ...updates }: Partial<Community> & { id: string }) => {
+      if (!walletAddress) throw new Error('Not connected');
+      const { data, error } = await withWalletHeader(
+        (supabase as any).rpc('community_update_settings', { _community_id: id, _patch: updates }),
+        walletAddress
+      );
+      if (error) throw error;
+      return data as Community;
+    },
+    onSuccess: (data) => {
+      // Patch the detail cache directly with the fresh row, refresh only the discover list
+      qc.setQueryData<Community>(['communities', 'slug', data.slug], data);
+      qc.invalidateQueries({ queryKey: ['communities', 'discover'] });
+      qc.invalidateQueries({ queryKey: ['community'] });
+      toast.success(_copy("copy.b9e94842367e", { defaultValue: "Community updated" }));
+    },
+    onError: (error) => toast.error(adminErrorMessage(error, _copy("copy.1b97419f8a5c", { defaultValue: "Failed to update community" }))),
+  });
+}
+
+// ─── Join community ──────────────────────────────────────────────────────────
+
+export function useJoinCommunity() {
+  const { t: _copy } = _useCopy();
+  const { walletAddress } = useAuth();
+  const qc = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ communityId, isPrivate }: { communityId: string; isPrivate?: boolean }) => {
+      if (!walletAddress) throw new Error('Not connected');
+      const { error } = await withWalletHeader(
+        supabase
+          .from('community_members')
+          .insert({
+            community_id: communityId,
+            wallet_address: walletAddress,
+            role: 'member',
+            status: isPrivate ? 'pending' : 'active',
+          }),
+        walletAddress
+      );
+      if (error) throw error;
+      return { isPrivate };
+    },
+    onMutate: async ({ communityId, isPrivate }) => {
+      if (!walletAddress) return undefined;
+      await qc.cancelQueries({ queryKey: ['communities', 'membership', communityId] });
+
+      const prevMembership = qc.getQueriesData<CommunityMember | null>({ queryKey: ['communities', 'membership', communityId] });
+      const prevDiscover = qc.getQueryData<Community[]>(['communities', 'discover']);
+      const prevSlug = qc.getQueriesData<Community | null>({ queryKey: ['communities', 'slug'] });
+
+      // Flip the membership row that drives the Join/Leave button instantly
+      qc.setQueriesData<CommunityMember | null>({ queryKey: ['communities', 'membership', communityId] }, () => ({
+        id: `optimistic-${communityId}`,
+        community_id: communityId,
+        wallet_address: walletAddress.toLowerCase(),
+        role: 'member',
+        status: isPrivate ? 'pending' : 'active',
+        joined_at: new Date().toISOString(),
+        permissions: null,
+        custom_title: null,
+        muted_until: null,
+        ban_reason: null,
+        banned_until: null,
+        moderated_by: null,
+        moderated_at: null,
+        promoted_by: null,
+      }));
+
+      // Bump member counts in cached community objects (public joins only)
+      if (!isPrivate) {
+        const bump = (c: Community) => c.id === communityId ? { ...c, member_count: c.member_count + 1 } : c;
+        qc.setQueryData<Community[]>(['communities', 'discover'], (old) => old?.map(bump));
+        qc.setQueriesData<Community | null>({ queryKey: ['communities', 'slug'] }, (old) => (old ? bump(old) : old));
+      }
+
+      return { prevMembership, prevDiscover, prevSlug };
+    },
+    onError: (_err, _vars, ctx) => {
+      ctx?.prevMembership?.forEach(([key, data]) => qc.setQueryData(key, data));
+      if (ctx?.prevDiscover) qc.setQueryData(['communities', 'discover'], ctx.prevDiscover);
+      ctx?.prevSlug?.forEach(([key, data]) => qc.setQueryData(key, data));
+      toast.error(_copy("copy.6d163522af89", { defaultValue: "Failed to join" }));
+    },
+    onSuccess: (result, { communityId }) => {
+      // Narrow refetches: real membership row (server id) + small per-community lists
+      qc.invalidateQueries({ queryKey: ['communities', 'membership', communityId] });
+      qc.invalidateQueries({ queryKey: ['communities', 'user'] });
+      qc.invalidateQueries({ queryKey: ['communities', 'members', communityId] });
+      // Counts were patched optimistically — mark stale without refetching
+      qc.invalidateQueries({ queryKey: ['communities', 'discover'], refetchType: 'none' });
+      qc.invalidateQueries({ queryKey: ['communities', 'slug'], refetchType: 'none' });
+      toast.success(result?.isPrivate ? _copy("copy.f5b187df66bf", { defaultValue: "Join request sent!" }) : _copy("copy.bfd0987df65b", { defaultValue: "Joined community!" }));
+    },
+  });
+}
+
+// ─── Leave community ────────────────────────────────────────────────────────
+
+export function useLeaveCommunity() {
+  const { t: _copy } = _useCopy();
+  const { walletAddress } = useAuth();
+  const qc = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (communityId: string) => {
+      if (!walletAddress) throw new Error('Not connected');
+      const { error } = await withWalletHeader(
+        supabase
+          .from('community_members')
+          .delete()
+          .eq('community_id', communityId)
+          .eq('wallet_address', walletAddress.toLowerCase()),
+        walletAddress
+      );
+      if (error) throw error;
+    },
+    onMutate: async (communityId) => {
+      await qc.cancelQueries({ queryKey: ['communities', 'membership', communityId] });
+
+      const prevMembership = qc.getQueriesData<CommunityMember | null>({ queryKey: ['communities', 'membership', communityId] });
+      const prevDiscover = qc.getQueryData<Community[]>(['communities', 'discover']);
+      const prevSlug = qc.getQueriesData<Community | null>({ queryKey: ['communities', 'slug'] });
+      const prevUser = qc.getQueriesData<(CommunityMember & { communities: Community })[]>({ queryKey: ['communities', 'user'] });
+      const prevMembers = qc.getQueryData<CommunityMember[]>(['communities', 'members', communityId]);
+
+      // Only an active member affects visible member counts (pending requests don't)
+      const wasActive = prevMembership.some(([, m]) => m?.status === 'active');
+
+      // Instantly clear the membership row that drives the Join/Leave button
+      qc.setQueriesData<CommunityMember | null>({ queryKey: ['communities', 'membership', communityId] }, () => null);
+      qc.setQueriesData<(CommunityMember & { communities: Community })[]>(
+        { queryKey: ['communities', 'user'] },
+        (old) => old?.filter(m => m.community_id !== communityId),
+      );
+      if (walletAddress) {
+        qc.setQueryData<CommunityMember[]>(['communities', 'members', communityId], (old) =>
+          old?.filter(m => m.wallet_address.toLowerCase() !== walletAddress.toLowerCase()));
+      }
+      if (wasActive) {
+        const drop = (c: Community) => c.id === communityId ? { ...c, member_count: Math.max(0, c.member_count - 1) } : c;
+        qc.setQueryData<Community[]>(['communities', 'discover'], (old) => old?.map(drop));
+        qc.setQueriesData<Community | null>({ queryKey: ['communities', 'slug'] }, (old) => (old ? drop(old) : old));
+      }
+
+      return { prevMembership, prevDiscover, prevSlug, prevUser, prevMembers, communityId };
+    },
+    onError: (_err, communityId, ctx) => {
+      ctx?.prevMembership?.forEach(([key, data]) => qc.setQueryData(key, data));
+      if (ctx?.prevDiscover) qc.setQueryData(['communities', 'discover'], ctx.prevDiscover);
+      ctx?.prevSlug?.forEach(([key, data]) => qc.setQueryData(key, data));
+      ctx?.prevUser?.forEach(([key, data]) => qc.setQueryData(key, data));
+      if (ctx?.prevMembers) qc.setQueryData(['communities', 'members', communityId], ctx.prevMembers);
+      toast.error(_copy("copy.9b71f3f35f22", { defaultValue: "Failed to leave" }));
+    },
+    onSuccess: (_data, communityId) => {
+      // Caches already patched optimistically — mark the narrow keys stale without refetching
+      qc.invalidateQueries({ queryKey: ['communities', 'membership', communityId], refetchType: 'none' });
+      qc.invalidateQueries({ queryKey: ['communities', 'user'], refetchType: 'none' });
+      qc.invalidateQueries({ queryKey: ['communities', 'members', communityId], refetchType: 'none' });
+      qc.invalidateQueries({ queryKey: ['communities', 'discover'], refetchType: 'none' });
+      qc.invalidateQueries({ queryKey: ['communities', 'slug'], refetchType: 'none' });
+    },
+  });
+}
+
+// ─── Pinned communities ─────────────────────────────────────────────────────
+
+export function usePinnedCommunities(walletAddress: string | null | undefined) {
+  return useQuery({
+    queryKey: ['communities', 'pinned', walletAddress],
+    queryFn: async () => {
+      if (!walletAddress) return [];
+      // Pins are public. The profile owner is a filter, not the authenticated viewer.
+      const { data, error } = await supabase
+        .from('pinned_communities')
+        .select('*, communities(*)')
+        .eq('wallet_address', walletAddress.toLowerCase())
+        .order('display_order', { ascending: true });
+      if (error) throw error;
+      return (data ?? []) as PinnedCommunity[];
+    },
+    enabled: !!walletAddress,
+    staleTime: 60_000,
+  });
+}
+
+export function usePinCommunity() {
+  const { t: _copy } = _useCopy();
+  const { walletAddress } = useAuth();
+  const qc = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ communityId, displayOrder }: { communityId: string; displayOrder: number }) => {
+      if (!walletAddress) throw new Error('Not connected');
+      const { error } = await withWalletHeader(
+        supabase
+          .from('pinned_communities')
+          .insert({
+            wallet_address: walletAddress,
+            community_id: communityId,
+            display_order: displayOrder,
+          }),
+        walletAddress
+      );
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['communities', 'pinned'] });
+      toast.success(_copy("copy.0bb94dad879e", { defaultValue: "Community pinned to profile" }));
+    },
+    onError: () => toast.error(_copy("copy.de6f13c6ad9b", { defaultValue: "Failed to pin community" })),
+  });
+}
+
+/** Moves one pin to the top of the owner's list; the rest keep their order. */
+export function useShowPinFirst() {
+  const { t } = _useCopy();
+  const { walletAddress } = useAuth();
+  const qc = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ communityId, orderedIds }: { communityId: string; orderedIds: string[] }) => {
+      if (!walletAddress) throw new Error('Not connected');
+      const order = [communityId, ...orderedIds.filter(id => id !== communityId)];
+      const results = await Promise.all(order.map((id, index) => withWalletHeader(
+        supabase
+          .from('pinned_communities')
+          .update({ display_order: index })
+          .eq('community_id', id)
+          .eq('wallet_address', walletAddress.toLowerCase()),
+        walletAddress
+      )));
+      const failed = results.find(result => result.error);
+      if (failed?.error) throw failed.error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['communities', 'pinned'] }),
+    onError: () => toast.error(t('communities.pinUpdateFailed')),
+  });
+}
+
+export function useUnpinCommunity() {
+  const { t: _copy } = _useCopy();
+  const { walletAddress } = useAuth();
+  const qc = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (communityId: string) => {
+      if (!walletAddress) throw new Error('Not connected');
+      const { error } = await withWalletHeader(
+        supabase
+          .from('pinned_communities')
+          .delete()
+          .eq('community_id', communityId)
+          .eq('wallet_address', walletAddress.toLowerCase()),
+        walletAddress
+      );
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['communities', 'pinned'] });
+      toast.success(_copy("copy.a9f02f461177", { defaultValue: "Community unpinned" }));
+    },
+    onError: () => toast.error(_copy("copy.b8d9e21d2ec0", { defaultValue: "Failed to unpin" })),
+  });
+}
+
+// ─── Upload community media ─────────────────────────────────────────────────
+
+export async function uploadCommunityMedia(file: File, slug: string, type: 'avatar' | 'banner'): Promise<string> {
+  const ext = file.name.split('.').pop() || 'jpg';
+  // Use a unique path each time to bust CDN/browser cache
+  const path = `${slug}/${type}_${Date.now()}.${ext}`;
+  
+  // Not upsert: the path already carries a timestamp so it never collides, and
+  // storage UPDATE is no longer granted to anyone (it was the hole that let any
+  // visitor replace a community's branding).
+  const { error } = await supabase.storage
+    .from('community-media')
+    .upload(path, file, { upsert: false });
+  if (error) throw error;
+
+  const { data } = supabase.storage
+    .from('community-media')
+    .getPublicUrl(path);
+  
+  return data.publicUrl;
+}

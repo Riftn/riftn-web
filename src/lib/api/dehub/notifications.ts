@@ -1,0 +1,396 @@
+import { apiCall } from './core';
+import type { DeHubUser, DeHubNFT } from './types';
+import type { PostReaction } from '@/lib/reactions';
+
+/**
+ * Every type the API can send. This used to list only thirteen of them, so the
+ * rest reached the UI as unhandled strings and every read of them needed an
+ * `as any` — which is how several ended up with no icon and no click target.
+ */
+export type NotificationType =
+  | 'like'
+  | 'comment'
+  | 'comment_reply'
+  /** The post's creator answered your comment; sent instead of `comment_reply`. */
+  | 'creator_comment_reply'
+  | 'comment_like'
+  | 'mention'
+  | 'following'
+  | 'follow_request'
+  | 'follow_request_accepted'
+  | 'repost'
+  | 'quote'
+  | 'tip'
+  | 'subscription'
+  | 'ppv_purchase'
+  | 'bounty_available'
+  | 'bounty_claimed'
+  | 'fraction_offer'
+  | 'fraction_offer_accepted'
+  | 'fraction_offer_rejected'
+  | 'username_offer'
+  | 'username_offer_accepted'
+  | 'username_offer_declined'
+  | 'fraction_purchased'
+  | 'fraction_gift'
+  | 'story_like'
+  | 'story_mention'
+  | 'story_comment'
+  | 'video_milestone'
+  | 'new_message'
+  | 'livestream_start'
+  | 'signal_flare'
+  | 'game_turn'
+  | 'badge_delegated'
+  | 'badge_delegation_ended'
+  | 'badge_delegation_changed'
+  | 'badge_tier_up'
+  | 'badge_tier_down'
+  | 'video_removal'
+  | 'account_warning'
+  | 'system'
+  | 'coauthor_invite'
+  | 'coauthor_accepted';
+
+export type NotificationCategory =
+  | 'engagement'
+  | 'social'
+  | 'monetization'
+  | 'content'
+  | 'messages'
+  | 'system';
+
+export type NotificationPostType = 'video' | 'short' | 'feed-images' | 'feed-simple' | 'feed-audio';
+
+export interface DeHubNotification {
+  _id: string;
+  id: string;
+  address: string;
+  type: NotificationType;
+  category: NotificationCategory;
+  content: string;
+  read: boolean;
+  createdAt: string;
+  updatedAt: string;
+  readAt?: string;
+  actorAddress?: string;
+  actorUsername?: string;
+  actorAvatar?: string;
+  tokenId?: number;
+  tokenTitle?: string;
+  tokenThumbnail?: string;
+  postType?: NotificationPostType;
+  aggregatedCount?: number;
+  latestActorNames?: string[];
+  amount?: number;
+  currency?: string;
+  actor?: DeHubUser;
+  post?: DeHubNFT;
+  /**
+   * The comment this row is about — the new one for `comment`/`comment_reply`,
+   * the liked one for `comment_like`, the one you were named in for `mention`.
+   * Already rode through `normalizeNotification`'s spread; declaring it is what
+   * lets the row link to the comment rather than to the post it is buried in.
+   * On an aggregated row it is whichever comment opened the group.
+   */
+  commentId?: number;
+  /** First 150 characters of that comment. */
+  commentPreview?: string;
+  /** For a reply, the comment it answers. */
+  parentCommentId?: number;
+  /**
+   * Which reaction produced a `like` notification. Absent when the actors in an
+   * aggregated row disagree (render it as a generic "reacted to"), and on rows
+   * written before multi-reaction shipped (render them as a plain like).
+   */
+  reaction?: PostReaction;
+  /**
+   * Free-form bag the server attaches per notification type; it already rode
+   * through `normalizeNotification`'s spread, it was just never declared. The
+   * one key the UI reads is `articleUrl`, which an admin broadcast sets to the
+   * page the announcement is about — see `announcementTarget` in
+   * NotificationsPage.
+   */
+  metadata?: NotificationMetadata;
+  /**
+   * The comment this row is about, whole: rows of the comment, reply, mention
+   * and comment-like types carry it when the comment still stands. The list
+   * shows it in full with Reply / Like / Tip; `commentPreview` is the fallback.
+   */
+  comment?: NotificationComment;
+}
+
+export interface NotificationComment {
+  id: number | string;
+  tokenId?: number;
+  address?: string;
+  parentId?: number | null;
+  content?: string;
+  imageUrl?: string;
+  gifUrl?: string;
+  videoUrl?: string;
+  audioUrl?: string;
+  audioDuration?: number;
+  likeCount?: number;
+  dislikeCount?: number;
+  replyCount?: number;
+  isLiked?: boolean;
+  isDisliked?: boolean;
+  myReaction?: string | null;
+  createdAt?: string;
+}
+
+/** Only the keys the client reads; the server sends more. */
+export interface NotificationMetadata {
+  game?: string;
+  conversationId?: string;
+  deepLink?: string;
+  articleUrl?: string;
+  /** story_like / story_mention: the moment, and its public poster frame when it has one. */
+  storyId?: string;
+  storyPoster?: string;
+  /** Badge lending: the tier that was lent, as it stood on the day. */
+  tier?: string;
+  /** Which end of that loan the reader was on. */
+  role?: 'grantor' | 'grantee';
+  /**
+   * Why a loan ended — 'grantor'/'grantee' for a decision, 'slots'/'unbadged'
+   * for one that lapsed when the grantor's balance fell. The copy differs:
+   * nobody chose a lapse, so nobody should be blamed for it.
+   */
+  reason?: string;
+  /** Where a mention was made: 'post', 'comment', 'live_chat' or 'public_chat'. */
+  mentionContext?: string;
+  /** A chat mention: the room and the line that tagged the reader. */
+  roomId?: string;
+  chatMessageId?: string;
+  [key: string]: unknown;
+}
+
+interface RawNotification {
+  _id: string;
+  address: string;
+  type: NotificationType;
+  category: NotificationCategory;
+  content: string;
+  read: boolean;
+  createdAt: string;
+  updatedAt: string;
+  readAt?: string;
+  actorAddress?: string;
+  actorUsername?: string;
+  actorAvatar?: string;
+  actor?: {
+    address?: string;
+    username?: string;
+    displayName?: string;
+    avatarImageUrl?: string;
+    avatarUrl?: string;
+    followers?: number;
+    followings?: number;
+    uploads?: number;
+    isPrivate?: boolean;
+    isFollowing?: boolean;
+    isFollowRequestPending?: boolean;
+    followsYou?: boolean;
+  };
+  tokenId?: number;
+  tokenTitle?: string;
+  tokenThumbnail?: string;
+  postType?: NotificationPostType;
+  aggregatedCount?: number;
+  latestActorNames?: string[];
+  reaction?: PostReaction;
+  amount?: number;
+  currency?: string;
+  commentId?: number;
+  commentPreview?: string;
+  parentCommentId?: number;
+  metadata?: NotificationMetadata;
+  comment?: NotificationComment;
+}
+
+interface NotificationsApiResponse {
+  result: RawNotification[];
+}
+
+interface UnreadCountApiResponse {
+  total: number;
+  byCategory: UnreadCountByCategory;
+}
+
+/** One entry per NotificationCategory — keep the two in step or indexing by a
+ *  notification's own category stops type-checking. */
+export type UnreadCountByCategory = Record<NotificationCategory, number>;
+
+const EMPTY_UNREAD_BY_CATEGORY: UnreadCountByCategory = {
+  engagement: 0,
+  social: 0,
+  monetization: 0,
+  content: 0,
+  messages: 0,
+  system: 0,
+};
+
+/** Normalize API type strings to our canonical snake_case types */
+function normalizeNotificationType(rawType: string): NotificationType {
+  const typeMap: Record<string, NotificationType> = {
+    'followRequest': 'follow_request',
+    'follow-request': 'follow_request',
+    'follow_request': 'follow_request',
+    'commentReply': 'comment_reply',
+    'comment-reply': 'comment_reply',
+    'commentLike': 'comment_like',
+    'comment-like': 'comment_like',
+    'ppvPurchase': 'ppv_purchase',
+    'ppv-purchase': 'ppv_purchase',
+    'videoMilestone': 'video_milestone',
+    'video-milestone': 'video_milestone',
+    'livestreamStart': 'livestream_start',
+    'signalFlare': 'signal_flare',
+    'signal-flare': 'signal_flare',
+    'livestream-start': 'livestream_start',
+    'videoRemoval': 'video_removal',
+    'video-removal': 'video_removal',
+  };
+  return typeMap[rawType] || rawType as NotificationType;
+}
+
+function normalizeNotification(raw: RawNotification): DeHubNotification {
+  // Resolve avatar: prefer nested actor object (from API), fall back to flat actorAvatar field
+  const actorAvatarPath = raw.actor?.avatarImageUrl || raw.actor?.avatarUrl || raw.actorAvatar;
+  const normalizedType = normalizeNotificationType(raw.type as string);
+  
+  return {
+    ...raw,
+    id: raw._id,
+    type: normalizedType,
+    actorAvatar: actorAvatarPath,
+    actor: raw.actor || raw.actorUsername || raw.actorAddress ? {
+      ...raw.actor,
+      address: raw.actor?.address || raw.actorAddress,
+      username: raw.actor?.username || raw.actorUsername,
+      avatarImageUrl: actorAvatarPath,
+    } : undefined,
+    post: raw.tokenId ? {
+      tokenId: raw.tokenId,
+      name: raw.tokenTitle || '',
+      title: raw.tokenTitle,
+      imageUrl: raw.tokenThumbnail || '',
+      postType: raw.postType === 'video' ? 'video' : 'image',
+      minter: '',
+      createdAt: raw.createdAt,
+    } : undefined,
+  };
+}
+
+export async function getNotifications(
+  page: number = 1,
+  limit: number = 30,
+  category?: NotificationCategory,
+  unreadOnly: boolean = false,
+  types?: string[],
+  /** The notifications the reader's filters held back, instead of the main list. */
+  filtered = false,
+): Promise<{ items: DeHubNotification[]; totalCount: number; hasMore: boolean }> {
+  const params: Record<string, string | number> = {
+    page,
+    limit,
+    unreadOnly: unreadOnly.toString(),
+  };
+
+  if (category) {
+    params.category = category;
+  }
+
+  // Server-side type filter. The API validates the list and ignores names it
+  // does not know, so sending types it has never heard of (the Supabase-backed
+  // ones) degrades to an unfiltered page rather than an empty one.
+  if (types?.length) {
+    params.types = types.join(',');
+  }
+
+  if (filtered) {
+    params.filtered = 'true';
+  }
+
+  const response = await apiCall<NotificationsApiResponse | { result: RawNotification[] } | RawNotification[]>("/api/notification", {
+    params,
+    requiresAuth: true,
+  });
+  
+  if (response && typeof response === 'object' && 'result' in response) {
+    const result = response.result;
+    if (Array.isArray(result)) {
+      console.log('[Notifications] raw types from API:', result.map((n: any) => n?.type));
+      const items = result
+        .filter(item => item && item._id)
+        .map(normalizeNotification);
+      return {
+        items,
+        totalCount: items.length,
+        hasMore: items.length >= limit
+      };
+    }
+  }
+
+  if (Array.isArray(response)) {
+    console.log('[Notifications] raw types from API:', response.map((n: any) => n?.type));
+    const items = response
+      .filter(item => item && item._id)
+      .map(normalizeNotification);
+    return {
+      items,
+      totalCount: items.length,
+      hasMore: items.length >= limit
+    };
+  }
+
+  return { items: [], totalCount: 0, hasMore: false };
+}
+
+export interface UnreadNotificationCount {
+  total: number;
+  byCategory: UnreadCountByCategory;
+}
+
+export async function getUnreadNotificationCount(): Promise<UnreadNotificationCount> {
+  const response = await apiCall<UnreadCountApiResponse>("/api/notification/unread-count", {
+    requiresAuth: true,
+  });
+
+  return {
+    total: response?.total || 0,
+    // Merged rather than substituted: older deployments omit `messages`, and a
+    // missing key would make every read of it undefined instead of zero.
+    byCategory: { ...EMPTY_UNREAD_BY_CATEGORY, ...(response?.byCategory ?? {}) },
+  };
+}
+
+export async function markNotificationAsRead(notificationId: string): Promise<{ message: string }> {
+  return apiCall<{ message: string }>(`/api/notification/${notificationId}`, {
+    method: "PATCH",
+    requiresAuth: true,
+  });
+}
+
+export function clearAllNotifications(wallet: string, through: number): Promise<{ clearedThrough: string }> {
+  return apiCall('/api/notification/clear-all', {
+    method: 'POST',
+    body: { wallet, through },
+    requiresAuth: true,
+  });
+}
+
+export async function markAllNotificationsAsRead(category?: NotificationCategory): Promise<{ message: string; count: number }> {
+  const params: Record<string, string> = {};
+  if (category) {
+    params.category = category;
+  }
+  
+  return apiCall<{ message: string; count: number }>("/api/notification/mark-all-read", {
+    method: "POST",
+    params,
+    requiresAuth: true,
+  });
+}

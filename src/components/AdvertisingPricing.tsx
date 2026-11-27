@@ -1,0 +1,154 @@
+import { useTranslation as _useCopy } from 'react-i18next';
+
+import React from 'react';
+import { useTranslation } from 'react-i18next';
+import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
+import { Badge } from './ui/badge';
+import { DollarSign, TrendingUp } from "lucide-react";
+import Users from "@/components/ui/cut-icons/communities";
+
+import { badgeImage } from '@/lib/staking-badges';
+import { DhbAmount } from '@/components/app/DhbAmount';
+
+const AdvertisingPricing = () => {
+  const { t: _copy } = _useCopy();
+  const { t } = useTranslation();
+  // CPMs mirror the live POVR rates in src/lib/ads/povr.ts — value-scaled to
+  // verified holdings, anchored at Crab $100 and Megalodon $25,000.
+  const pricingTiers = [
+    { threshold: "< 10,000", badge: _copy("copy.6883cefe9094", { defaultValue: "No Badge" }), cpm: "$10", multiplier: "1x", image: null, color: "bg-gray-300" },
+    { threshold: "10,000+", badge: "Crab Badge", cpm: "$100", multiplier: "10x", image: badgeImage('Crab'), color: "bg-orange-500" },
+    { threshold: "25,000+", badge: "Ghost Lobster Badge", cpm: "$180", multiplier: "18x", image: badgeImage('Ghost Lobster'), color: "bg-red-500" },
+    { threshold: "50,000+", badge: "Piranha Badge", cpm: "$285", multiplier: "28x", image: badgeImage('Piranha'), color: "bg-purple-500" },
+    { threshold: "100,000+", badge: "Giant Tortoise Badge", cpm: "$450", multiplier: "45x", image: badgeImage('Giant Tortoise'), color: "bg-green-600" },
+    { threshold: "250,000+", badge: "King Cobra Badge", cpm: "$800", multiplier: "80x", image: badgeImage('King Cobra'), color: "bg-gray-800" },
+    { threshold: "500,000+", badge: "Octopus Badge", cpm: "$1,250", multiplier: "125x", image: badgeImage('Octopus'), color: "bg-blue-600" },
+    { threshold: "1,000,000+", badge: "Crocodile Badge", cpm: "$2,000", multiplier: "200x", image: badgeImage('Crocodile'), color: "bg-green-800" },
+    { threshold: "2,000,000+", badge: "Dolphin Badge", cpm: "$3,000", multiplier: "300x", image: badgeImage('Dolphin'), color: "bg-cyan-500" },
+    { threshold: "3,000,000+", badge: "Tiger Shark Badge", cpm: "$4,000", multiplier: "400x", image: badgeImage('Tiger Shark'), color: "bg-slate-600" },
+    { threshold: "5,000,000+", badge: "Great White Shark Badge", cpm: "$5,500", multiplier: "550x", image: badgeImage('Great White Shark'), color: "bg-gray-900" },
+    { threshold: "10,000,000+", badge: "Killer Whale Badge", cpm: "$8,750", multiplier: "875x", image: badgeImage('Killer Whale'), color: "bg-blue-800" },
+    { threshold: "25,000,000+", badge: "Blue Whale Badge", cpm: "$16,000", multiplier: "1600x", image: badgeImage('Blue Whale'), color: "bg-indigo-700" },
+    { threshold: "50,000,000+", badge: "Megalodon Badge", cpm: "$25,000", multiplier: "2500x", image: badgeImage('Megalodon'), color: "bg-purple-800" }
+  ];
+
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            <DollarSign className="w-5 h-5 text-medium-silver" />
+            <span>{_copy("copy.31ecade69c73", { defaultValue: "POVR Advertising Pricing System" })}</span>
+          </CardTitle>
+          <p className="text-gray-700">
+            {t('ads.povrPricingIntro')}
+          </p>
+        </CardHeader>
+        <CardContent>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>{_copy("copy.9a54d445743a", { defaultValue: "Badge Tier" })}</TableHead>
+                  <TableHead>{_copy("copy.490f4babbf34", { defaultValue: "Holdings Required" })}</TableHead>
+                  <TableHead>{_copy("copy.88510d987879", { defaultValue: "CPM Rate" })}</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {pricingTiers.map((tier, index) => (
+                  <TableRow key={tier.badge} className="hover:bg-muted/50">
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        {tier.image ? (
+                          <img 
+                            src={tier.image} 
+                            alt={tier.badge}
+                            className="w-6 h-6 object-contain"
+                          />
+                        ) : (
+                          <div className="w-6 h-6 rounded-full bg-gray-300"></div>
+                        )}
+                        <span className="font-medium">{tier.badge}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <DhbAmount amount={tier.threshold} className="font-mono text-sm" />
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className="font-mono">
+                        {tier.cpm}
+                      </Badge>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="grid md:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <TrendingUp className="w-5 h-5 text-medium-silver" />
+              <span>{_copy("copy.da00129f86c3", { defaultValue: "Pricing Benefits" })}</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="flex items-start space-x-3">
+              <div className="w-2 h-2 rounded-full bg-medium-silver mt-2"></div>
+              <p className="text-sm text-gray-700">
+                <strong>{_copy("copy.facf83d72c52", { defaultValue: "Value-scaled pricing:" })}</strong>{_copy("copy.c7f13f4e7a7f", { defaultValue: " CPMs grow with verified on-chain holdings — from $100 (Crab) to $25,000 (Megalodon)" })}</p>
+            </div>
+            <div className="flex items-start space-x-3">
+              <div className="w-2 h-2 rounded-full bg-medium-silver mt-2"></div>
+              <p className="text-sm text-gray-700">
+                <strong>{_copy("copy.c3b24b34919b", { defaultValue: "Fair pricing:" })}</strong>{_copy("copy.b5d810a0d270", { defaultValue: " Costs reflect actual audience value and purchasing power" })}</p>
+            </div>
+            <div className="flex items-start space-x-3">
+              <div className="w-2 h-2 rounded-full bg-medium-silver mt-2"></div>
+              <p className="text-sm text-gray-700">
+                <strong>{_copy("copy.a678c0e1debb", { defaultValue: "Fraud protection:" })}</strong>{_copy("copy.6c177a8b8818", { defaultValue: " POVR verification ensures real, valuable audiences" })}</p>
+            </div>
+            <div className="flex items-start space-x-3">
+              <div className="w-2 h-2 rounded-full bg-medium-silver mt-2"></div>
+              <p className="text-sm text-gray-700">
+                <strong>{_copy("copy.16eb7a174c92", { defaultValue: "Scalable targeting:" })}</strong>{_copy("copy.b418975fef86", { defaultValue: " Choose specific tiers or ranges for optimal ROI" })}</p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <Users className="w-5 h-5 text-medium-silver" />
+              <span>{_copy("copy.fef494276d40", { defaultValue: "Package Options" })}</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="p-3 rounded-lg border bg-muted/20">
+              <h4 className="font-semibold text-sm">{_copy("copy.6ad75697d792", { defaultValue: "Multi-Tier Targeting" })}</h4>
+              <p className="text-xs text-muted-foreground">{_copy("copy.1bfeb30ab593", { defaultValue: "Target multiple badge tiers with blended CPM rates" })}</p>
+            </div>
+            <div className="p-3 rounded-lg border bg-muted/20">
+              <h4 className="font-semibold text-sm">{_copy("copy.872432219d89", { defaultValue: "Volume Discounts" })}</h4>
+              <p className="text-xs text-muted-foreground">{_copy("copy.2acba32389a4", { defaultValue: "5-15% discounts for campaigns over $10K spend" })}</p>
+            </div>
+            <div className="p-3 rounded-lg border bg-muted/20">
+              <h4 className="font-semibold text-sm">{_copy("copy.2d051bbe182f", { defaultValue: "Premium Placement" })}</h4>
+              <p className="text-xs text-muted-foreground">{_copy("copy.f244929c34dc", { defaultValue: "Featured positioning with 1.5x CPM premium" })}</p>
+            </div>
+            <div className="p-3 rounded-lg border bg-muted/20">
+              <h4 className="font-semibold text-sm">{_copy("copy.c842101a969b", { defaultValue: "Real-time Bidding" })}</h4>
+              <p className="text-xs text-muted-foreground">{_copy("copy.3df736236c96", { defaultValue: "Dynamic pricing based on competition and demand" })}</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+};
+
+export default AdvertisingPricing;

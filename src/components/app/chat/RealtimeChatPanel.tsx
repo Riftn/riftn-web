@@ -1,0 +1,621 @@
+import { useTranslation as _useCopy } from 'react-i18next';
+import { useDraftState } from '@/hooks/use-draft-state';
+import { dblClickReply } from '@/lib/dblclick-reply';
+/**
+ * RealtimeChatPanel
+ * =================
+ * The message list + composer shared by every Supabase-backed chat surface
+ * (TV channels, Stages). Presentational only: it owns the composer, reply,
+ * edit and scroll state, and takes the messages and the write callbacks from
+ * whichever hook owns the table.
+ *
+ * Lifted out of TVChat verbatim rather than written fresh. The chat tables
+ * (community_chat_messages, event_chat_messages, tv_chat_messages,
+ * stage_chat_messages) deliberately carry the same columns so a message looks
+ * identical wherever it is read, and that promise only holds if one component
+ * draws it.
+ *
+ * @module components/app/chat/RealtimeChatPanel
+ */
+
+import { useState, useRef, useEffect, useCallback, type ReactNode } from 'react';
+import { Loader2, CornerDownRight, LogIn, ArrowDown, type LucideIcon } from "lucide-react";
+import Reply from "@/components/ui/cut-icons/reply";
+import Pencil from "@/components/ui/cut-icons/edit";
+import Check from "@/components/ui/cut-icons/check";
+import Trash2 from "@/components/ui/cut-icons/delete";
+
+import Send from "@/components/ui/cut-icons/send";
+import X from "@/components/ui/cut-icons/close";
+import MessageSquare from "@/components/ui/cut-icons/message-envelope";
+
+import { BadgeIcon } from '@/components/app/BadgeIcon';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { formatTimeAgo } from '@/lib/feed-utils';
+import { useAuth } from '@/contexts/AuthContext';
+import { useDraft } from '@/hooks/use-draft';
+import { buildAvatarUrl, buildAvatarCdnFallbackUrl } from '@/lib/media-url';
+import { useNavigate } from 'react-router-dom';
+import { cn } from '@/lib/utils';
+import { RoomChatText } from './RoomChatText';
+
+import { QUICK_CHAT_REACTIONS } from './reaction-options';
+import { ReactionGlyph, RollingCount, useReactionHost } from './ReactionArrival';
+import { ChatHoldSheet, isTouchHold, type ChatHoldAction } from './ChatHoldSheet';
+import { MessageMenu, type MessageMenuAction } from './MessageMenu';
+import { menuIcons, messageMenuMeta, keepBrowserMenu, MessageMoreButton } from './message-menu-kit';
+import { useHoldMenu } from '@/hooks/use-hold-menu';
+import Copy from '@/components/ui/cut-icons/copy';
+import { toast } from 'sonner';
+import { profilePath } from '@/lib/profile-path';
+import { stripBold } from '@/lib/bold-markup';
+
+/**
+ * One row of any of the chat tables. The columns are the same across all of
+ * them by design — see the migration headers.
+ */
+export interface RealtimeChatMessage {
+  id: string;
+  wallet_address: string;
+  username: string | null;
+  display_name: string | null;
+  avatar_url: string | null;
+  badge_balance: number | null;
+  content: string;
+  message_type: string;
+  image_url: string | null;
+  reply_to_id: string | null;
+  reactions: Record<string, string[]>;
+  created_at: string;
+  reply_to?: {
+    id: string;
+    content: string;
+    sender_name: string;
+  };
+}
+
+/** Who the message is stamped with — read off the signed-in user by the panel. */
+export interface ChatSenderProfile {
+  username?: string;
+  displayName?: string;
+  avatarUrl?: string;
+  badgeBalance?: number;
+}
+
+export interface RealtimeChatPanelProps {
+  messages: RealtimeChatMessage[];
+  isLoading: boolean;
+  onSend: (content: string, replyToId: string | undefined, profile: ChatSenderProfile) => Promise<void>;
+  onEdit: (id: string, content: string) => void | Promise<void | boolean>;
+  onDelete: (id: string) => void;
+  onReact: (id: string, emoji: string) => void;
+  onRemoveReaction: (id: string, emoji: string) => void;
+  /**
+   * Delete rights beyond "it is mine" — the stage host clearing their own
+   * room. Editing stays with the author either way: a host rewriting what
+   * somebody said is a different feature, and not a good one.
+   */
+  canModerate?: boolean;
+  title?: string;
+  subtitle?: string;
+  icon?: LucideIcon;
+  emptyHint?: string;
+  placeholder?: string;
+  signInLabel?: string;
+  /** Height of the scrolling list — the main thing that differs per surface. */
+  listClassName?: string;
+  className?: string;
+  maxLength?: number;
+  /** Rendered in place of the list. Use for "this surface is not available". */
+  error?: string | null;
+  /** Sits under the composer. */
+  footer?: ReactNode;
+  onClick?: (e: React.MouseEvent) => void;
+  /**
+   * Scope this composer's text is saved under, so a half-typed line survives
+   * the drawer closing, the card scrolling out, or a reload. Must be stable for
+   * the life of the room. Omit it and the composer behaves as before.
+   */
+  draftKey?: string | null;
+}
+
+/** Avatar with cascading fallback: primary → CDN → initials */
+function ChatAvatar({ src, address, name }: { src?: string | null; address?: string; name: string }) {
+  const [failed, setFailed] = useState(false);
+  const [cdnFailed, setCdnFailed] = useState(false);
+  const cdnUrl = address ? buildAvatarCdnFallbackUrl(address, src ?? undefined) : undefined;
+  const activeSrc = failed ? cdnUrl : (src ?? undefined);
+  return (
+    <Avatar className="w-7 h-7">
+      {activeSrc && !cdnFailed && (
+        <AvatarImage
+          src={activeSrc}
+          onError={() => failed ? setCdnFailed(true) : setFailed(true)}
+        />
+      )}
+      <AvatarFallback className="bg-zinc-700 text-white text-[10px] font-medium">
+        {name.charAt(0).toUpperCase()}
+      </AvatarFallback>
+    </Avatar>
+  );
+}
+
+function ChatReactions({
+  reactions,
+  currentUserAddress,
+  onReact,
+  onRemoveReaction,
+  messageId,
+}: {
+  reactions: Record<string, string[]>;
+  currentUserAddress?: string;
+  onReact: (id: string, emoji: string) => void;
+  onRemoveReaction: (id: string, emoji: string) => void;
+  messageId: string;
+}) {
+  useReactionHost(messageId);
+  const entries = Object.entries(reactions).filter(([, addrs]) => addrs.length > 0);
+  if (entries.length === 0) return null;
+
+  return (
+    <div className="flex flex-wrap gap-0.5 mt-0.5">
+      {entries.map(([emoji, addresses]) => {
+        const mine = currentUserAddress
+          ? addresses.some((a) => a.toLowerCase() === currentUserAddress.toLowerCase())
+          : false;
+        return (
+          <button
+            key={emoji}
+            data-chat-reaction-chip
+            onClick={() => mine ? onRemoveReaction(messageId, emoji) : onReact(messageId, emoji)}
+            className={`group/reaction inline-flex items-center gap-0.5 text-[10px] px-1 py-0.5 rounded-md border transition-colors ${
+              mine
+                ? 'border-white/30 bg-white/10 text-white'
+                : 'border-zinc-700 bg-zinc-800/50 text-zinc-400 hover:border-zinc-600'
+            }`}
+          >
+            <span className="text-xs inline-flex items-center"><ReactionGlyph messageId={messageId} emoji={emoji} addresses={addresses} me={currentUserAddress} className="h-4 m-0" /></span>
+            {mine ? (
+              <>
+                <RollingCount value={addresses.length} className="group-hover/reaction:hidden" />
+                <X className="w-2.5 h-2.5 hidden group-hover/reaction:block text-white" />
+              </>
+            ) : (
+              <RollingCount value={addresses.length} />
+            )}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+export function RealtimeChatPanel({
+  messages,
+  isLoading,
+  onSend,
+  onEdit,
+  onDelete,
+  onReact,
+  onRemoveReaction,
+  canModerate = false,
+  title: titleProp,
+  subtitle,
+  icon: Icon = MessageSquare,
+  emptyHint: emptyHintProp,
+  placeholder: placeholderProp,
+  signInLabel: signInLabelProp,
+  listClassName = 'h-56',
+  className,
+  maxLength = 500,
+  error = null,
+  footer,
+  onClick,
+  draftKey,
+}: RealtimeChatPanelProps) {
+  const { t: _copy } = _useCopy();
+  const title = titleProp ?? _copy("copy.1c7cc7287ca8", { defaultValue: "Live chat" });
+  const emptyHint = emptyHintProp ?? _copy("copy.815cd42549ac", { defaultValue: "No messages yet — say something." });
+  const placeholder = placeholderProp ?? _copy("copy.8cbff9ea966c", { defaultValue: "Type here..." });
+  const signInLabel = signInLabelProp ?? _copy("copy.048ff525a56b", { defaultValue: "Sign in to chat" });
+  const [newMessage, setNewMessage] = useDraft(draftKey);
+  const [replyTo, setReplyTo] = useDraftState<RealtimeChatMessage | null>(draftKey ? `${draftKey}:reply` : null, null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editInitial, setEditInitial] = useState('');
+  const [editText, setEditText] = useDraftState(editingId ? `chat:edit:${editingId}` : null, editInitial);
+  const commitDraftEdit = async (id: string) => {
+    if (!editText.trim()) return;
+    try {
+      const result = await onEdit(id, editText);
+      if (result !== false && setEditText.complete(editText, editText)) setEditingId(current => current === id ? null : current);
+    } catch { /* Keep the edit available for retry. */ }
+  };
+
+  const [isSending, setIsSending] = useState(false);
+  const [showJumpToLatest, setShowJumpToLatest] = useState(false);
+
+  const bottomRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const navigate = useNavigate();
+  const { user, walletAddress, isAuthenticated, openLoginModal } = useAuth();
+
+  // Track whether the reader is pinned to the bottom; only auto-scroll if so,
+  // otherwise a busy room yanks the view while they are reading back.
+  const atBottomRef = useRef(true);
+  const handleScroll = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const atBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 60;
+    atBottomRef.current = atBottom;
+    setShowJumpToLatest(!atBottom);
+  }, []);
+
+  const scrollToBottom = useCallback(() => {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        // `nearest`, not `end`: this panel is nested inside taller scrollers
+        // (the Stages drawer), and `end` walks up the ancestor chain and drags
+        // the whole room down to reach it.
+        bottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      });
+    });
+  }, []);
+
+  useEffect(() => {
+    if (atBottomRef.current) scrollToBottom();
+  }, [messages.length, scrollToBottom]);
+
+  const handleSend = useCallback(async () => {
+    const text = newMessage.trim();
+    if (!text || isSending) return;
+    if (!isAuthenticated || !walletAddress) {
+      openLoginModal?.();
+      return;
+    }
+    setIsSending(true);
+    try {
+      await onSend(text, replyTo?.id, {
+        username: user?.username || undefined,
+        displayName: user?.displayName || undefined,
+        avatarUrl: user?.avatarImageUrl || undefined,
+        badgeBalance: user?.badgeBalance ?? undefined,
+      });
+      if (setNewMessage.complete(newMessage, '')) setReplyTo.complete(replyTo, null);
+      atBottomRef.current = true;
+      scrollToBottom();
+    } catch {
+      // toast already raised in the hook
+    } finally {
+      setIsSending(false);
+    }
+  }, [newMessage, isSending, isAuthenticated, walletAddress, openLoginModal, onSend, replyTo, user, scrollToBottom, setReplyTo]);
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      void handleSend();
+    }
+  };
+
+  const handleReact = (id: string, emoji: string) => {
+    if (!walletAddress) {
+      openLoginModal?.();
+      return;
+    }
+    const msg = messages.find(m => m.id === id);
+    const mine = msg?.reactions?.[emoji]?.some(a => a.toLowerCase() === walletAddress.toLowerCase());
+    if (mine) onRemoveReaction(id, emoji);
+    else onReact(id, emoji);
+  };
+
+  // Hold a line on a phone for the reaction + action sheet. Desktop gets the
+  // same actions from a right-click or the one "..." on hover.
+  const [held, setHeld] = useState<{ msg: RealtimeChatMessage; el: HTMLElement } | null>(null);
+  // Right-click with a mouse: the same actions, at the pointer.
+  const [menu, setMenu] = useState<{ msg: RealtimeChatMessage; el: HTMLElement; point: { x: number; y: number } } | null>(null);
+  const [menuMounted, setMenuMounted] = useState(false);
+  const hold = useHoldMenu((point, target) => {
+    if (editingId) return false;
+    const el = target.closest<HTMLElement>('[data-rt-msg]');
+    const msg = el ? messages.find((m) => m.id === el.dataset.rtMsg) : undefined;
+    if (!el || !msg) return false;
+    if (isTouchHold()) { setHeld({ msg, el }); return; }
+    if (keepBrowserMenu(target, el)) return false;
+    setMenuMounted(true);
+    setMenu({ msg, el, point });
+  });
+  useEffect(() => {
+    if (!menu) return;
+    menu.el.setAttribute('data-msg-menu-open', '');
+    return () => menu.el.removeAttribute('data-msg-menu-open');
+  }, [menu]);
+  const menuMsg = menu?.msg;
+  const menuMine = !!menuMsg && !!walletAddress && menuMsg.wallet_address.toLowerCase() === walletAddress.toLowerCase();
+  const menuActions: MessageMenuAction[] = [];
+  if (menuMsg) {
+    if (isAuthenticated) menuActions.push({ key: 'reply', icon: menuIcons.reply, label: _copy('copy.c253f451bdd5', { defaultValue: 'Reply' }), onSelect: () => setReplyTo(menuMsg), hint: 'R' });
+    if (menuMine && isAuthenticated) menuActions.push({ key: 'edit', icon: menuIcons.edit, label: _copy('copy.464c4ffd019e', { defaultValue: 'Edit' }), onSelect: () => { setEditingId(menuMsg.id); setEditInitial(menuMsg.content); }, hint: 'E' });
+    if (menuMsg.content?.trim()) menuActions.push({
+      key: 'copy', icon: menuIcons.copy, label: _copy('msgMenu.copyText', { defaultValue: 'Copy Text' }), hint: 'C',
+      onSelect: () => { void navigator.clipboard?.writeText(menuMsg.content).then(() => toast.success(_copy('chatHold.copied', { defaultValue: 'Copied' })), () => undefined); },
+    });
+    if ((menuMine || canModerate) && isAuthenticated) menuActions.push({
+      key: 'delete', divided: true, destructive: true, icon: menuIcons.delete,
+      label: menuMine ? _copy('copy.e2d0a54968ea', { defaultValue: 'Delete' }) : _copy('copy.c3812fc4acb8', { defaultValue: 'Remove' }),
+      onSelect: () => { if (confirm(_copy('copy.8f6e2cda49ca', { defaultValue: 'Delete this message?' }))) onDelete(menuMsg.id); },
+    });
+  }
+  const menuMineReactions = menuMsg && walletAddress
+    ? Object.entries(menuMsg.reactions ?? {})
+        .filter(([, addrs]) => addrs?.some((a) => a.toLowerCase() === walletAddress.toLowerCase()))
+        .map(([emoji]) => emoji)
+    : [];
+  const heldMsg = held?.msg;
+  const heldMine = !!heldMsg && !!walletAddress && heldMsg.wallet_address.toLowerCase() === walletAddress.toLowerCase();
+  const holdActions: ChatHoldAction[] = [];
+  if (heldMsg) {
+    if (isAuthenticated) holdActions.push({ key: 'reply', prime: true, icon: <Reply />, label: _copy('copy.c253f451bdd5', { defaultValue: 'Reply' }), onSelect: () => setReplyTo(heldMsg) });
+    if (heldMsg.content?.trim()) holdActions.push({
+      key: 'copy', icon: <Copy />, label: _copy('chatHold.copy', { defaultValue: 'Copy' }),
+      onSelect: () => { void navigator.clipboard?.writeText(heldMsg.content).then(() => toast.success(_copy('chatHold.copied', { defaultValue: 'Copied' })), () => undefined); },
+    });
+    if (heldMine && isAuthenticated) holdActions.push({ key: 'edit', icon: <Pencil />, label: _copy('copy.464c4ffd019e', { defaultValue: 'Edit' }), onSelect: () => { setEditingId(heldMsg.id); setEditInitial(heldMsg.content); } });
+    if ((heldMine || canModerate) && isAuthenticated) holdActions.push({
+      key: 'delete', destructive: true, icon: <Trash2 />,
+      label: heldMine ? _copy('copy.e2d0a54968ea', { defaultValue: 'Delete' }) : _copy('copy.c3812fc4acb8', { defaultValue: 'Remove' }),
+      onSelect: () => { if (confirm(_copy('copy.8f6e2cda49ca', { defaultValue: 'Delete this message?' }))) onDelete(heldMsg.id); },
+    });
+  }
+  const heldMineReactions = heldMsg && walletAddress
+    ? Object.entries(heldMsg.reactions ?? {})
+        .filter(([, addrs]) => addrs?.some((a) => a.toLowerCase() === walletAddress.toLowerCase()))
+        .map(([emoji]) => emoji)
+    : [];
+
+  return (
+    <div
+      className={cn('rounded-xl border border-white/[0.12] bg-white/[0.03] p-3', className)}
+      onClick={onClick}
+    >
+      <div className="flex items-center gap-1.5 mb-2">
+        <Icon className="w-3.5 h-3.5 text-zinc-400" />
+        <span className="text-xs font-semibold text-white">{title}</span>
+        {subtitle && (
+          <span className="text-[10px] text-zinc-500 truncate">· {subtitle}</span>
+        )}
+      </div>
+
+      <>
+        <div className="relative">
+          <div
+            ref={scrollRef}
+            onScroll={handleScroll}
+            className={cn('chat-text-zone overflow-y-auto space-y-1 scrollbar-hide', listClassName)}
+            {...hold}
+          >
+            {error ? (
+              <div className="h-full flex flex-col items-center justify-center gap-1 text-center px-4">
+                <Icon className="w-5 h-5 text-zinc-700" />
+                <p className="text-[11px] text-zinc-500">{error}</p>
+              </div>
+            ) : isLoading ? (
+              <div className="h-full flex items-center justify-center">
+                <Loader2 className="w-4 h-4 text-zinc-500 animate-spin" />
+              </div>
+            ) : messages.length === 0 ? (
+              <div className="h-full flex flex-col items-center justify-center gap-1 text-center px-4">
+                <Icon className="w-5 h-5 text-zinc-700" />
+                <p className="text-[11px] text-zinc-500">{emptyHint}</p>
+              </div>
+            ) : (
+              messages.map((msg) => {
+                const avatarUrl = buildAvatarUrl(msg.wallet_address, msg.avatar_url);
+                const name = msg.display_name || msg.username || msg.wallet_address?.slice(0, 8) || _copy("copy.90395d452a30", { defaultValue: "Anon" });
+                const handle = msg.username;
+                const goToProfile = handle ? () => navigate(profilePath(handle)) : undefined;
+                const isMine = !!walletAddress && msg.wallet_address.toLowerCase() === walletAddress.toLowerCase();
+
+                return (
+                  <div key={msg.id} className="group relative" data-chat-row data-rt-msg={msg.id} onDoubleClick={(e) => dblClickReply(e, isAuthenticated && (() => setReplyTo(msg)))}>
+                    {msg.reply_to && (
+                      <div className="flex items-center gap-1 text-[10px] text-zinc-500 ml-9 mb-0.5">
+                        <CornerDownRight className="w-2.5 h-2.5" />
+                        <span className="font-medium">{msg.reply_to.sender_name}</span>
+                        <span className="truncate max-w-[200px]">{stripBold(msg.reply_to.content)}</span>
+                      </div>
+                    )}
+                    <div className="flex items-start gap-2">
+                      <button onClick={goToProfile} disabled={!handle} className={`flex-shrink-0 ${handle ? 'cursor-pointer' : 'cursor-default'}`}>
+                        <ChatAvatar src={avatarUrl} address={msg.wallet_address} name={name} />
+                      </button>
+                      <div className="min-w-0 flex-1">
+                        <span className="inline-flex items-baseline gap-1.5">
+                          <span className="relative inline-flex items-baseline gap-1 shrink min-w-0 pr-3">
+                            <button onClick={goToProfile} disabled={!handle} className={`text-xs font-semibold text-white truncate ${handle ? 'hover:underline cursor-pointer' : 'cursor-default'}`}>
+                              {name}
+                            </button>
+                            {/* lookupId is the fallback, and it matters here:
+                                badge_balance is stamped onto the row from the
+                                sender's own session, so a message sent before
+                                their balances resolved stores null — and a
+                                missing balance draws nothing, silently, with
+                                no way to tell it apart from "below the floor".
+                                It is ignored whenever the row did carry a
+                                balance, so this costs a request only for the
+                                messages that would otherwise show no badge at
+                                all. It also keeps an old message's badge
+                                current rather than frozen at send time. */}
+                            <BadgeIcon
+                              badgeBalance={msg.badge_balance}
+                              username={msg.username}
+                              lookupId={msg.username || msg.wallet_address}
+                              className="w-[1em] h-[1em]"
+                            />
+                          </span>
+                          <span className="text-zinc-600 text-[10px]">{formatTimeAgo(msg.created_at)}</span>
+                        </span>
+                        {editingId === msg.id ? (
+                          <div className="flex items-center gap-1 mt-0.5">
+                            <input
+                              autoFocus
+                              value={editText}
+                              onChange={(e) => setEditText(e.target.value)}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                  void commitDraftEdit(msg.id);
+                                } else if (e.key === 'Escape') {
+                                  setEditingId(null);
+                                }
+                              }}
+                              className="flex-1 text-xs text-white bg-white/5 border border-white/10 rounded px-1.5 py-0.5 outline-none focus:border-white/20"
+                              maxLength={maxLength}
+                            />
+                            <button
+                              onClick={() => { void commitDraftEdit(msg.id); }}
+                              className="p-0.5 text-emerald-400 hover:text-emerald-300"
+                            >
+                              <Check className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              onClick={() => setEditingId(null)}
+                              className="p-0.5 text-zinc-500 hover:text-white"
+                            >
+                              <X className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        ) : (
+                          <RoomChatText key={msg.id} text={msg.content} />
+                        )}
+                        <ChatReactions
+                          reactions={msg.reactions ?? {}}
+                          currentUserAddress={walletAddress || undefined}
+                          onReact={onReact}
+                          onRemoveReaction={onRemoveReaction}
+                          messageId={msg.id}
+                        />
+                      </div>
+                      {/* Every action lives in the message menu (right-click, a
+                          hold on a phone, or this "..." for keyboard users). */}
+                      {editingId !== msg.id && (
+                        <MessageMoreButton
+                          className="mt-0.5"
+                          onOpen={(point, button) => {
+                            const el = button.closest<HTMLElement>('[data-rt-msg]');
+                            if (!el) return;
+                            setMenuMounted(true);
+                            setMenu({ msg, el, point });
+                          }}
+                        />
+                      )}
+                    </div>
+                  </div>
+                );
+              })
+            )}
+            <div ref={bottomRef} />
+          </div>
+
+          {showJumpToLatest && (
+            <button
+              onClick={() => { atBottomRef.current = true; scrollToBottom(); }}
+              className="absolute bottom-2 left-1/2 -translate-x-1/2 z-10 flex items-center gap-1 px-3 py-1.5 rounded-full bg-zinc-800 hover:bg-zinc-700 text-white text-xs font-medium shadow-lg border border-white/10 transition-colors"
+            >
+              <ArrowDown className="w-3.5 h-3.5" />{_copy("copy.867524581f01", { defaultValue: "Jump to latest" })}</button>
+          )}
+        </div>
+      </>
+
+      <ChatHoldSheet
+        open={!!held}
+        onOpenChange={(open) => { if (!open) setHeld(null); }}
+        anchor={held?.el ?? null}
+        quickReactions={isAuthenticated ? QUICK_CHAT_REACTIONS.slice(0, 6) : null}
+        mine={heldMineReactions}
+        onReact={(emoji) => { if (heldMsg) handleReact(heldMsg.id, emoji); }}
+        actions={holdActions}
+        reactors={heldMsg?.reactions ? { reactions: heldMsg.reactions } : null}
+      />
+      {menuMounted && (
+        <MessageMenu
+          point={menu?.point ?? null}
+          onClose={() => setMenu(null)}
+          quickReactions={isAuthenticated ? QUICK_CHAT_REACTIONS : null}
+          mine={menuMineReactions}
+          onReact={(emoji) => { if (menuMsg) handleReact(menuMsg.id, emoji); }}
+          actions={menuActions}
+          reactors={menuMsg?.reactions ? { reactions: menuMsg.reactions } : null}
+          meta={menuMsg ? messageMenuMeta(menuMsg.created_at) : null}
+        />
+      )}
+
+      {/* Reply preview */}
+      {replyTo && (
+        <div className="flex items-center gap-1.5 mt-2 px-2 py-1 bg-zinc-800/70 rounded-lg">
+          <Reply className="w-3.5 h-3.5 text-white flex-shrink-0" />
+          <div className="flex-1 min-w-0">
+            <span className="text-[10px] font-medium text-white">
+              {replyTo.display_name || replyTo.username || _copy("copy.b512d97e7cbf", { defaultValue: "User" })}
+            </span>
+            <p className="text-[10px] text-zinc-400 truncate">{replyTo.content || _copy("copy.d357175cfe89", { defaultValue: "Media" })}</p>
+          </div>
+          <button onClick={() => setReplyTo.complete(replyTo, null)} className="flex-shrink-0 p-0.5 text-zinc-500 hover:text-white">
+            <X className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
+
+      {/* Composer */}
+      {isAuthenticated ? (
+        <div className="pt-2">
+          <div className="rounded-xl border border-white/[0.08] bg-white/[0.03] px-3 py-2">
+            <div className="relative">
+              <span className="absolute top-1 right-0 text-[10px] text-zinc-600 z-10">{newMessage.length}/{maxLength}</span>
+              <Textarea
+                ref={textareaRef}
+                placeholder={placeholder}
+                value={newMessage}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (val.length <= maxLength) setNewMessage(val);
+                  const ta = e.target;
+                  requestAnimationFrame(() => {
+                    ta.style.height = 'auto';
+                    ta.style.height = `${Math.min(ta.scrollHeight, 128)}px`;
+                  });
+                }}
+                onKeyDown={handleKeyDown}
+                maxLength={maxLength}
+                className="chat-text-input min-h-[36px] max-h-32 resize-none text-sm bg-transparent border-none text-white placeholder:text-zinc-500 p-0 pt-1 pr-12 focus-visible:ring-0 focus-visible:ring-offset-0 leading-[1.35]"
+                rows={1}
+              />
+            </div>
+            <div className="flex items-center justify-end pt-1">
+              <Button
+                size="icon"
+                onClick={handleSend}
+                disabled={!newMessage.trim() || isSending}
+                className="h-7 w-7 rounded-lg bg-white/10 hover:bg-white/20 border border-white/20 hover:border-white/40 text-white disabled:opacity-40"
+              >
+                {isSending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
+              </Button>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <button
+          onClick={() => openLoginModal?.()}
+          className="mt-2 w-full flex items-center justify-center gap-1.5 rounded-xl border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-xs text-zinc-400 hover:text-white hover:bg-white/[0.06] transition-colors"
+        >
+          <LogIn className="w-3.5 h-3.5" />
+          {signInLabel}
+        </button>
+      )}
+
+      {footer}
+    </div>
+  );
+}

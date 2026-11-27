@@ -1,0 +1,327 @@
+/**
+ * Live stage captions — the wire format and the two viewer preferences.
+ * ====================================================================
+ *
+ * Captions are produced **per speaker, on that speaker's own machine**, and
+ * broadcast as text. The alternative — one client transcribing the room mix —
+ * looks cheaper and does not work here: the host's recording graph only ever
+ * contains the host's microphone and injected clips, guests arrive as separate
+ * Agora tracks that are never mixed in, and host-side echo cancellation
+ * removes what leaks through the speakers. A mix-tap would caption the host
+ * and nobody else.
+ *
+ * Transcribing locally instead buys three things for free: every speaker is
+ * captured, the speaker of each line is known exactly (no diarisation guessing
+ * "Speaker 2"), and the bill scales with people talking rather than people
+ * listening — a stage with five thousand listeners costs the same as one with
+ * five.
+ *
+ * Lines ride a Supabase Realtime **broadcast** channel, the same mechanism
+ * StageReactions uses. Broadcast, not a table: an hour of live captions is
+ * thousands of interim updates that are worthless ten seconds later, and none
+ * of them should touch Postgres. The durable transcript is still the
+ * end-of-stage Scribe pass in `transcribe-stage`, which is more accurate than
+ * anything real-time and stays the record.
+ */
+
+import { useSyncExternalStore } from 'react';
+import i18n from 'i18next';
+
+/**
+ * Secret channel names for rooms that are not public, keyed by room.
+ *
+ * A stage is public, so its captions ride a channel named after it. A call is
+ * not, and a group's id is no secret, so a call's captions ride a channel name
+ * the server hands only to the people on the call (stage-caption-token with
+ * `topicOnly`). Registered before any caption hook is given the room.
+ */
+const privateTopics = new Map<string, string>();
+
+export function setPrivateCaptionTopic(roomKey: string, topic: string) {
+  privateTopics.set(roomKey, topic);
+}
+
+/** One caption channel per stage, separate from reactions so their rates are independent. */
+export function stageCaptionChannel(spaceId: string): string {
+  const secret = privateTopics.get(spaceId);
+  return secret ? `call-captions:${secret}` : `stage-captions:${spaceId}`;
+}
+
+export const CAPTION_EVENT = 'caption';
+
+export interface StageCaptionMessage {
+  /**
+   * Utterance id. Interim updates reuse it and the final reuses it once more,
+   * so a receiver replaces a line in place instead of appending a new one per
+   * word. A fresh id starts a new line.
+   */
+  id: string;
+  /** Lowercased wallet of the speaker — for an AI line, of the speaker who injected it. */
+  wallet: string;
+  /** Display name for the line. */
+  name: string;
+  text: string;
+  /** False while the sentence is still being spoken. */
+  final: boolean;
+  /** 'ai' covers TTS and soundboard clips, whose text we already know without transcribing. */
+  kind: 'speech' | 'ai';
+  /** Wall-clock ms at the sender. Used only for expiry, never for ordering across clients. */
+  at: number;
+}
+
+/** How long a finished line stays on screen. */
+export const CAPTION_FINAL_TTL_MS = 9000;
+/**
+ * How long an unfinished line survives without an update. A speaker who drops
+ * mid-sentence would otherwise leave a fragment pinned to the overlay forever.
+ */
+export const CAPTION_INTERIM_TTL_MS = 5000;
+/** Lines visible at once. Three is about two seconds of reading at conversational pace. */
+export const CAPTION_MAX_LINES = 3;
+
+// ─── Translation ─────────────────────────────────────────────────────────────
+//
+// A finalised line is translated once, server-side, into every language a
+// listener is currently reading, and the result is broadcast back on this same
+// channel. The alternative — each listener translating what it reads — would
+// have cost one call per listener per language per line; twenty-three
+// listeners on ten languages is two hundred and thirty calls for one sentence.
+//
+// Only finals are translated. Interims revise themselves every few hundred
+// milliseconds, so translating them would multiply the bill by an order of
+// magnitude to produce subtitles that rewrite themselves as you read.
+
+export const CAPTION_TRANSLATION_EVENT = 'caption-translation';
+
+export interface StageCaptionTranslation {
+  /** The utterance this belongs to — the same id the source line carried. */
+  id: string;
+  /** Language code → the line in that language. Missing codes fall back to the source. */
+  translations: Record<string, string>;
+}
+
+/**
+ * What the picker offers.
+ *
+ * Deliberately a separate list from StageTranscriptDrawer's: that one carries
+ * an `original` pseudo-entry and drives a cached, whole-transcript job, while
+ * this drives per-line work priced by how many languages are live. The
+ * server holds the same allowlist — a code that is not on both does nothing.
+ */
+export const CAPTION_LANGUAGES: Array<{ code: string; name: string }> = [
+  { code: 'en', name: 'English' },
+  { code: 'es', name: 'Español' },
+  { code: 'fr', name: 'Français' },
+  { code: 'de', name: 'Deutsch' },
+  { code: 'pt', name: 'Português' },
+  { code: 'it', name: 'Italiano' },
+  { code: 'ja', name: '日本語' },
+  { code: 'ko', name: '한국어' },
+  { code: 'zh', name: '中文' },
+  { code: 'ar', name: 'العربية' },
+  { code: 'hi', name: 'हिन्दी' },
+  { code: 'ru', name: 'Русский' },
+  { code: 'tr', name: 'Türkçe' },
+  { code: 'id', name: 'Bahasa Indonesia' },
+];
+
+/** Presence key a listener publishes when it is reading the source language. */
+export const CAPTION_SOURCE_LANGUAGE = 'source';
+
+// ─── Local echo ──────────────────────────────────────────────────────────────
+//
+// A speaker has to see their own subtitles, and the broadcast channel will not
+// reliably give them back: Realtime's `self` option is decided per join, the
+// publisher and the overlay are separate joins on one socket, and whether a
+// message crosses between them is not something worth betting a visible
+// feature on. So a caption is handed to the local overlay directly at the same
+// moment it goes out on the wire. It arrives with no round trip, and if the
+// broadcast does echo back the overlay simply replaces the line by its id.
+
+type LocalCaptionListener = (spaceId: string, message: StageCaptionMessage) => void;
+
+const localCaptionListeners = new Set<LocalCaptionListener>();
+
+export function onLocalCaption(listener: LocalCaptionListener): () => void {
+  localCaptionListeners.add(listener);
+  return () => {
+    localCaptionListeners.delete(listener);
+  };
+}
+
+export function emitLocalCaption(spaceId: string, message: StageCaptionMessage) {
+  localCaptionListeners.forEach((listener) => listener(spaceId, message));
+}
+
+/**
+ * Translations take the same local shortcut as captions do: the client that
+ * asked for them hands them straight to its own overlay, so a speaker reading
+ * along in another language is not waiting on a round trip they started.
+ */
+type LocalTranslationListener = (spaceId: string, payload: StageCaptionTranslation) => void;
+
+const localTranslationListeners = new Set<LocalTranslationListener>();
+
+export function onLocalTranslation(listener: LocalTranslationListener): () => void {
+  localTranslationListeners.add(listener);
+  return () => {
+    localTranslationListeners.delete(listener);
+  };
+}
+
+export function emitLocalTranslation(spaceId: string, payload: StageCaptionTranslation) {
+  localTranslationListeners.forEach((listener) => listener(spaceId, payload));
+}
+
+// ─── Preferences ─────────────────────────────────────────────────────────────
+//
+// Two independent switches, and they are genuinely independent: a listener who
+// hides subtitles should not stop a speaker's microphone being transcribed for
+// everyone else, and a speaker who does not want to be transcribed should still
+// be able to read other people. They live in a module store rather than in
+// StageContext because the publisher runs inside the provider (so captions
+// survive minimising the stage) while the toggle lives in the room UI — two
+// different trees reading one value.
+
+const SHOW_KEY = 'dehub.stage.captions.show';
+const SEND_KEY = 'dehub.stage.captions.send';
+
+function readPref(key: string, fallback: boolean): boolean {
+  if (typeof window === 'undefined') return fallback;
+  try {
+    const raw = window.localStorage.getItem(key);
+    return raw === null ? fallback : raw === '1';
+  } catch {
+    return fallback;
+  }
+}
+
+function writePref(key: string, value: boolean) {
+  try {
+    window.localStorage.setItem(key, value ? '1' : '0');
+  } catch {
+    /* private mode — the session still works, the choice just does not stick */
+  }
+}
+
+let showCaptions = readPref(SHOW_KEY, true);
+/**
+ * Calls keep their own switch, and it starts off: a call is private, and a
+ * person's voice is only transcribed while someone on the call reads it.
+ */
+const CALL_SHOW_KEY = 'dehub.call.captions.show';
+let showCallCaptions = readPref(CALL_SHOW_KEY, false);
+let sendCaptions = readPref(SEND_KEY, true);
+
+const listeners = new Set<() => void>();
+
+function emit() {
+  listeners.forEach((l) => l());
+}
+
+function subscribe(cb: () => void) {
+  listeners.add(cb);
+  return () => {
+    listeners.delete(cb);
+  };
+}
+
+export type CaptionScope = 'stage' | 'call';
+
+export function useShowCaptions(scope: CaptionScope = 'stage'): boolean {
+  return useSyncExternalStore(
+    subscribe,
+    () => (scope === 'call' ? showCallCaptions : showCaptions),
+    () => scope !== 'call',
+  );
+}
+
+export function useSendCaptions(): boolean {
+  return useSyncExternalStore(subscribe, () => sendCaptions, () => true);
+}
+
+export function setShowCaptions(value: boolean, scope: CaptionScope = 'stage') {
+  if (scope === 'call') {
+    if (showCallCaptions === value) return;
+    showCallCaptions = value;
+    writePref(CALL_SHOW_KEY, value);
+    emit();
+    return;
+  }
+  if (showCaptions === value) return;
+  showCaptions = value;
+  writePref(SHOW_KEY, value);
+  emit();
+}
+
+export function setSendCaptions(value: boolean) {
+  if (sendCaptions === value) return;
+  sendCaptions = value;
+  writePref(SEND_KEY, value);
+  emit();
+}
+
+/**
+ * The language this viewer reads captions in, or null for the language being
+ * spoken. Stored per browser, and published over Realtime presence — which is
+ * what decides the set of languages the room actually pays to translate into.
+ */
+const LANG_KEY = 'dehub.stage.captions.lang';
+
+/** Stored when the viewer picks the spoken language on purpose. */
+const SOURCE_PREF = 'source';
+
+const isCaptionLanguage = (code: string | null | undefined): code is string =>
+  !!code && CAPTION_LANGUAGES.some((l) => l.code === code);
+
+/**
+ * Until a viewer picks, captions come in the language Riftn is shown in. They
+ * used to default to the spoken language, so a Turkish listener in an English
+ * room saw English captions and took translation for broken.
+ */
+function uiLanguage(): string | null {
+  const code = (i18n.language || '').split(/[-_]/)[0].toLowerCase();
+  return isCaptionLanguage(code) ? code : null;
+}
+
+function readLangPref(): string | null | undefined {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = window.localStorage.getItem(LANG_KEY);
+    if (raw === SOURCE_PREF) return null;
+    // Guard the stored value against a picker that has since dropped a language.
+    return isCaptionLanguage(raw) ? raw : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+/** The viewer's own pick: a language, null for the spoken one, undefined for none yet. */
+let pickedLanguage = readLangPref();
+let captionLanguage: string | null = pickedLanguage === undefined ? uiLanguage() : pickedLanguage;
+
+// Follows the app's language until the viewer picks one for captions.
+i18n.on?.('languageChanged', () => {
+  if (pickedLanguage !== undefined) return;
+  const next = uiLanguage();
+  if (next === captionLanguage) return;
+  captionLanguage = next;
+  emit();
+});
+
+export function useCaptionLanguage(): string | null {
+  return useSyncExternalStore(subscribe, () => captionLanguage, () => null);
+}
+
+export function setCaptionLanguage(value: string | null) {
+  if (value !== null && !isCaptionLanguage(value)) return;
+  pickedLanguage = value;
+  const changed = captionLanguage !== value;
+  captionLanguage = value;
+  try {
+    window.localStorage.setItem(LANG_KEY, value ?? SOURCE_PREF);
+  } catch {
+    /* private mode — the choice just does not survive the tab */
+  }
+  if (changed) emit();
+}

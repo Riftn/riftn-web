@@ -1,0 +1,93 @@
+import { createHandler, media, queueUrl } from './handler.ts';
+
+const secret = 'internal-test-credential-32-characters';
+const values: Record<string, string> = {INTERNAL_SERVICE_SECRET: secret, FAL_KEY: 'private-fal', REPLICATE_API_KEY: 'private-replicate'};
+const env = (name: string) => values[name];
+const signed = `https://live.dehub.io/maboroshi/media/${'a'.repeat(32)}/seedance-input.mp4?expires=1999999999&signature=${'b'.repeat(64)}`;
+const req = (body: unknown, credential = secret) => new Request('https://example.org', {method: 'POST', headers: {'x-internal-secret': credential}, body: JSON.stringify(body)});
+function assert(value: unknown, message = 'Assertion failed'): asserts value { if (!value) throw new Error(message); }
+// The mock fetch is cast to `typeof fetch`, so its options arrive as a union of
+// RequestInit variants; read the two fields the tests need through one cast.
+const bodyOf = (options: unknown) => String((options as { body?: unknown })?.body);
+const headersOf = (options: unknown) => (options as { headers?: HeadersInit })?.headers;
+
+Deno.test('Kling uses the exact edit endpoint and keeps audio without draft or HD', async () => {
+  const sent: any[] = [];
+  const handler = createHandler(env, (async (url, options) => {
+    assert(String(url) === 'https://queue.fal.run/fal-ai/kling-video/o3/pro/video-to-video/edit');
+    sent.push(JSON.parse(bodyOf(options)));
+    return Response.json({request_id: 'kling-id', status_url: 'https://queue.fal.run/fal-ai/kling-video/requests/kling-id/status', response_url: 'https://queue.fal.run/fal-ai/kling-video/requests/kling-id'});
+  }) as typeof fetch);
+  assert((await handler(req({operation: 'kling', input: {prompt: 'Replace subject', video_url: signed, image_urls: [signed], keep_audio: false}}))).status === 200);
+  assert(sent[0].keep_audio === true && sent[0].draft === undefined);
+  assert((await handler(req({operation: 'kling', input: {prompt: 'Replace subject', video_url: 'https://example.org/private', image_urls: [signed]}}))).status === 502);
+  assert(sent.length === 1);
+});
+
+Deno.test('anonymous and wallet callers cannot access shared credentials or start processing', async () => {
+  let calls = 0;
+  const handler = createHandler(env, (() => { calls++; throw new Error(); }) as typeof fetch);
+  for (const token of ['', 'wallet-token']) assert((await handler(req({operation: 'draft'}, token))).status === 401);
+  const health = await handler(req({operation: 'health'}));
+  assert(await health.text() === '{"ready":true}');
+  assert(calls === 0);
+});
+
+Deno.test('untrusted media and arbitrary queue URLs cannot receive credentials', () => {
+  assert(media(signed) === signed);
+  for (const url of ['http://127.0.0.1/private', signed.replace('live.dehub.io', 'example.org'), signed.replace('/media/', '/setup/')]) {
+    let rejected = false; try { media(url); } catch { rejected = true; } assert(rejected);
+  }
+  for (const url of ['https://example.org/status', 'https://queue.fal.run/other/model/requests/id/status', 'https://queue.fal.run/bytedance/seedance-2.5/requests/wrong/status']) {
+    let rejected = false; try { queueUrl(url, 'id', 'status'); } catch { rejected = true; } assert(rejected);
+  }
+});
+
+Deno.test('draft forces shared-account preview and HD uses returned draft ID', async () => {
+  const sent: Array<{url: string; body: any}> = [];
+  const handler = createHandler(env, (async (url, options) => {
+    assert(new Headers(headersOf(options)).get('Authorization') === 'Key private-fal');
+    sent.push({url: String(url), body: JSON.parse(bodyOf(options))});
+    return Response.json({request_id: 'queue-id', status_url: 'https://queue.fal.run/bytedance/seedance-2.5/requests/queue-id/status', response_url: 'https://queue.fal.run/bytedance/seedance-2.5/requests/queue-id'});
+  }) as typeof fetch);
+  assert((await handler(req({operation: 'draft', input: {prompt: 'Replace subject', task: 'editing', video_urls: [signed], image_urls: [signed], duration: 'auto', draft: false, resolution: '1080p'}}))).status === 200);
+  assert(sent[0].body.draft === true && sent[0].body.resolution === '480p');
+  assert((await handler(req({operation: 'hd', draft_id: 'completed-draft-id'}))).status === 200);
+  assert(sent[1].url.endsWith('/draft/complete'));
+  assert(sent[1].body.draft_id === 'completed-draft-id' && sent[1].body.resolution === '1080p');
+});
+
+Deno.test('provider failure never exposes credentials or payload', async () => {
+  const handler = createHandler(env, (async () => new Response('private-fal private signed URL', {status: 403})) as typeof fetch);
+  const response = await handler(req({operation: 'hd', draft_id: 'id'}));
+  assert(response.status === 502);
+  assert(! (await response.text()).includes('private'));
+});
+
+Deno.test('kie one-pass renders build the fixed 720p task and map task states', async () => {
+  const sent: Array<{url: string; body: any; auth: string | null}> = [];
+  let state = 'generating';
+  const handler = createHandler((name) => ({...values, KIE_API_KEY: 'private-kie'})[name], (async (url, options) => {
+    sent.push({url: String(url), body: options && (options as {body?: string}).body ? JSON.parse(bodyOf(options)) : null, auth: new Headers(headersOf(options)).get('Authorization')});
+    if (String(url).endsWith('/createTask')) return Response.json({code: 200, data: {taskId: 'task_wan_1'}});
+    return Response.json({code: 200, data: {state, resultJson: JSON.stringify({resultUrls: ['https://tempfile.example/result.mp4']})}});
+  }) as typeof fetch);
+  const ok = await handler(req({operation: 'kie', model: 'wan', input: {prompt: 'Replace subject', video_url: signed, image_urls: [signed], duration: 9}}));
+  assert(ok.status === 200 && (await ok.json()).requestId === 'task_wan_1');
+  assert(sent[0].auth === 'Bearer private-kie' && sent[0].body.model === 'wan/3-0-video');
+  assert(sent[0].body.input.resolution === '720P' && sent[0].body.input.reference_video_urls[0] === signed && sent[0].body.input.duration === 9);
+  assert((await handler(req({operation: 'kie', model: 'seedance', input: {prompt: 'Replace subject', video_url: signed, image_urls: [signed], duration: 6}}))).status === 200);
+  assert(sent[1].body.model === 'bytedance/seedance-2-5' && sent[1].body.input.resolution === '720p');
+  for (const bad of [{model: 'veo'}, {model: 'wan', duration: 30}, {model: 'seedance', duration: 3}]) {
+    const response = await handler(req({operation: 'kie', model: bad.model, input: {prompt: 'x', video_url: signed, image_urls: [signed], duration: bad.duration ?? 6}}));
+    assert(response.status === 400);
+  }
+  assert((await handler(req({operation: 'kie', model: 'wan', input: {prompt: 'x', video_url: 'https://example.org/a.mp4', image_urls: [signed], duration: 6}}))).status === 502);
+  assert(sent.length === 2);
+  assert((await (await handler(req({operation: 'kie_status', request_id: 'task_wan_1'}))).json()).status === 'IN_PROGRESS');
+  state = 'success';
+  const done = await (await handler(req({operation: 'kie_status', request_id: 'task_wan_1'}))).json();
+  assert(done.status === 'COMPLETED' && done.result === 'https://tempfile.example/result.mp4');
+  state = 'fail';
+  assert((await (await handler(req({operation: 'kie_status', request_id: 'task_wan_1'}))).json()).status === 'FAILED');
+});

@@ -1,0 +1,165 @@
+name: i18n fan-out
+
+# Fills the locales that are behind en.json and opens one PR with the result.
+#
+# One job per locale, up to two side by side. A locale takes one to four hours
+# (the smaller ones retry most lines singly), so running them one after another
+# inside a single job hit the time limit after two or three locales. Each job
+# only writes its own locale file; a final job gathers them, regenerates the
+# files derived from every locale, and opens the PR.
+#
+# No secret is needed. The function is called with the publishable key the
+# browser bundle already ships.
+
+on:
+  workflow_dispatch:
+    inputs:
+      locales:
+        description: 'Comma-separated locale codes (blank = the furthest behind)'
+        required: false
+        default: ''
+      count:
+        description: 'How many locales to fill when none are named'
+        required: false
+        default: '20'
+      keys:
+        description: 'Max keys per locale in one run (blank = 200)'
+        required: false
+        default: ''
+      only:
+        description: 'Comma-separated keys to fill and nothing else (blank = every missing key)'
+        required: false
+        default: ''
+
+concurrency:
+  group: translation-localization
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      locales: ${{ steps.pick.outputs.locales }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Report the gap before
+        run: node scripts/i18n-fanout.mjs --check | head -30
+      - id: pick
+        run: |
+          if [ -n "${{ inputs.locales }}" ]; then
+            LIST="${{ inputs.locales }}"
+          else
+            LIST=$(node scripts/i18n-fanout.mjs --check | awk 'NF >= 2 && $NF+0 > 0 && $(NF-1) == "missing" {print $1}' | head -${{ inputs.count }} | paste -sd, -)
+          fi
+          echo "locales=$(node -e 'console.log(JSON.stringify(process.argv[1].split(",").map(s=>s.trim()).filter(Boolean)))' "$LIST")" >> "$GITHUB_OUTPUT"
+
+  fill:
+    needs: plan
+    if: needs.plan.outputs.locales != '[]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        locale: ${{ fromJSON(needs.plan.outputs.locales) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # Runs BEFORE the fill, not after. Pruning turns a padded English value
+      # into a missing key, and only the fill that follows can translate it.
+      - name: Drop values that came back as English
+        env:
+          ONLY: ${{ inputs.only }}
+        run: node scripts/i18n-fanout.mjs --prune --locale ${{ matrix.locale }} ${ONLY:+--only "$ONLY"}
+
+      - name: Fill
+        env:
+          ONLY: ${{ inputs.only }}
+        run: |
+          ARGS="--locale ${{ matrix.locale }}"
+          if [ -n "${{ inputs.keys }}" ]; then ARGS="$ARGS --keys ${{ inputs.keys }}"; fi
+          node scripts/i18n-fanout.mjs $ARGS ${ONLY:+--only "$ONLY"}
+
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: locale-${{ matrix.locale }}
+          path: src/i18n/locales/${{ matrix.locale }}.json
+
+  pr:
+    needs: fill
+    # always(): a locale that timed out loses only itself, not the others.
+    if: always() && needs.fill.result != 'skipped'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: locale-*
+          merge-multiple: true
+          path: src/i18n/locales
+
+      # A locale drops off the widget fallback list the moment its file is
+      # genuinely translated, so this has to run after the fill.
+      - name: Refresh the widget fallback list
+        run: node scripts/i18n-fanout.mjs --emit-fallback-list
+
+      # build-seo-i18n.mjs reaches scripts/build-public-locales.mjs, which
+      # parses TypeScript with the `typescript` package. Nothing else in this
+      # job needs node_modules, so only that one package is installed — at the
+      # version package.json pins — rather than the whole tree.
+      - name: Install the TypeScript parser
+        run: npm install --no-save --no-package-lock --ignore-scripts "typescript@$(node -p "require('./package.json').devDependencies.typescript || require('./package.json').dependencies.typescript")"
+
+      # seo-i18n.json is built from the locale files and a test fails when it
+      # lags them, so every fill that touches a page's seoTitle/seoDescription
+      # has to ship the regenerated file with it. The same script rewrites the
+      # sitemap alternates and the content-addressed crawler pages, which a new
+      # sitemap row or a crawler-copy edit changes, so those ship too.
+      - name: Regenerate SEO translations
+        run: node scripts/build-seo-i18n.mjs
+
+      - name: Report the gap after
+        run: |
+          node scripts/i18n-fanout.mjs --check | head -30
+          node scripts/i18n-coverage.mjs --floor || true
+
+      - name: Open a pull request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          branch: i18n-fanout-${{ github.run_number }}
+          commit-message: 'Translate the outstanding keys into more locales'
+          title: 'Translate the outstanding keys into more locales'
+          body: |
+            Filled by `scripts/i18n-fanout.mjs`, one job per locale.
+
+            **Intent** — close the gap between what is translatable and what is
+            translated. Until a locale carries a key it renders English.
+
+            **Constraints** — an existing translation is never overwritten, and a
+            string whose placeholders do not survive the round trip is dropped
+            rather than written, so a bad translation falls back to English
+            instead of shipping literal `{{count}}` to a user.
+
+            **Result** — see the before/after coverage in the run log.
+          add-paths: |
+            src/i18n/locales/*.json
+            src/i18n/widget-fallback-locales.ts
+            public/seo-i18n.json
+            public/sitemap-static.xml
+            src/i18n/public-locales.json
+            public/locale-pages

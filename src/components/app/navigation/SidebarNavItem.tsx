@@ -1,0 +1,345 @@
+import { useTranslation as _useCopy } from 'react-i18next';
+import { openNotificationsDrawer } from '../NotificationsDrawer';
+import { memo, useRef, useLayoutEffect } from 'react';
+import { StableLink } from './StableLink';
+import { useStableNavigate } from '@/hooks/use-stable-navigate';
+import { useTranslation } from 'react-i18next';
+import { motion } from 'framer-motion';
+import { useAppTheme } from '@/contexts/ThemeContext';
+import { cn } from '@/lib/utils';
+import { preloadRoute } from '@/lib/route-preload';
+import { isHomePath } from '@/lib/home-path';
+import { resolveHomeNavIntent } from '@/lib/home-nav-intent';
+import { scrollDocumentToSmooth } from '@/lib/document-scroll';
+import type { NavItem } from '@/types/app.types';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { ThemedIcon } from '@/components/app/war/WarHudIcon';
+import AssistantNavIcon from '@/components/ui/AssistantNavIcon';
+import { NotificationBell } from './NotificationBell';
+import { MessagesNavGlyph } from './MessagesNavGlyph';
+
+import { formatCount } from '@/lib/format-count';
+// Map nav item labels to i18n keys. Exported because the menu-search filter
+// (nav-search.ts) has to match on the same translated label a row renders.
+//
+// A label with no entry here falls through to `t(label)`, which misses and is
+// humanised back to the label itself by parseMissingKeyHandler — so an
+// unmapped row still reads correctly in English, it just cannot be translated.
+// That is deliberate for the Arcade games in nav-search's search-only list:
+// their titles are owned by config/arcade-games.ts and are not translated
+// anywhere else in the app either.
+export const NAV_LABEL_KEYS: Record<string, string> = {
+  Home: 'nav.home', Explore: 'nav.explore', Prompt: 'nav.prompt', Notifications: 'nav.notifications',
+  Messages: 'settings.chat', Assistant: 'nav.assistant', Leaderboard: 'nav.leaderboard',
+  Editor: 'creator.editor', Creator: 'commandCentre.creator',
+  Bookmarks: 'nav.bookmarks', Settings: 'nav.settings', Profile: 'nav.profile', Blog: 'nav.blog',
+  Feedback: 'stats.feedback.title', 'Command': 'nav.command', 'Command Centre': 'nav.commandCentre', Wallet: 'nav.wallet', Docs: 'nav.docs', 'Feature Requests': 'nav.featureRequests', Staking: 'nav.staking', SuperPowers: 'superpowers.title', Governance: 'nav.governance', DAO: 'nav.dao', Communities: 'nav.communities', Events: 'nav.events', Careers: 'nav.careers', Converter: 'nav.converter', Migrate: 'migrate.title', Fractions: 'fractions.title', Glossary: 'nav.glossary', Guide: 'nav.guide', Stats: 'nav.stats', Arcade: 'nav.arcade', Apps: 'miniApps.store.title',
+  // Search-only destinations (nav-search.ts). The three feed surfaces reuse the
+  // keys the feed tabs already ship, so they arrive translated for free.
+  Videos: 'feed.videos', Shorts: 'feed.shorts', Music: 'feed.music',
+  'Live TV': 'nav.liveTv', 'Buy Tokens': 'nav.buyDhb', Bridge: 'nav.bridge', 'Top 100': 'nav.top100',
+  'AI Agents': 'nav.agents', Advertising: 'nav.advertising', Premium: 'nav.premium',
+  Pricing: 'nav.pricing', Creators: 'nav.creators', 'Get the App': 'nav.getTheApp',
+  'Connect AI': 'nav.connectAi', 'Compare Riftn': 'nav.compareRiftn',
+  Packs: 'creatorPacks.title', 'Public Chat': 'publicChat.title', Planned: 'planned.title',
+  'Live Studio': 'liveStudio.title', Launchpad: 'nav.launchpad',
+  // The bounty history page's own title key.
+  'My Bounties': 'work.myBounties',
+  // Same key the bottom nav uses for this destination.
+  Stages: 'stages.title',
+  // Page titles where the page has one, so the menu row reads the same as the
+  // heading it opens.
+  Bounties: 'work.title', Affiliate: 'nav.affiliate', Stores: 'stores.title',
+  Usernames: 'usernames.title', 'NFT Market': 'nftMarket.title', Accounts: 'accounts.title',
+  // Borrows the drawer's key rather than minting a `nav.` twin: `sidebar.logOut`
+  // is already translated in all 110 locales, and the two controls should not be
+  // able to drift into saying different things.
+  'Log out': 'sidebar.logOut',
+};
+
+interface SidebarNavItemProps {
+  item: NavItem;
+  isActive: boolean;
+  isHome: boolean;
+  /** Unused for rendering; kept so callers need no change. */
+  currentPath?: string;
+  onNavigate?: () => void;
+  onClick?: (e: React.MouseEvent) => void;
+  variant?: 'mobile' | 'desktop';
+  collapsed?: boolean;
+  /** When true, labels are always hidden (overrides xl: breakpoint show) */
+  forceCollapsed?: boolean;
+  avatarUrl?: string | null;
+  avatarFallback?: string;
+  notificationCount?: number;
+  /** Layout group for smooth sliding indicator */
+  layoutId?: string;
+  /** Optional callback to register the active desktop nav item DOM node for an overlay indicator */
+  registerActiveRef?: (el: HTMLElement | null) => void;
+}
+
+function getDesktopTextColor(theme?: string) {
+  // Light theme uses black text on light surfaces; minimal/dark/system use white.
+  if (theme === 'light' || theme === 'system-light') return 'text-black';
+  return 'text-white';
+}
+
+function SidebarNavItemInner({ 
+  item, 
+  isActive, 
+  isHome, 
+  onNavigate: onNavigateProp,
+  onClick: onClickProp,
+  variant = 'desktop',
+  collapsed = false,
+  forceCollapsed = false,
+  avatarUrl,
+  avatarFallback,
+  notificationCount,
+  layoutId = 'sidebar-nav',
+  registerActiveRef: registerActiveRefProp,
+}: SidebarNavItemProps) {
+  const { t: _copy } = _useCopy();
+  const navigate = useStableNavigate();
+  // The parent hands new callbacks every render; the memo below ignores their
+  // identity, so read the latest ones through a ref instead of a stale closure.
+  const latest = useRef({ onClick: onClickProp, onNavigate: onNavigateProp, registerActiveRef: registerActiveRefProp });
+  latest.current = { onClick: onClickProp, onNavigate: onNavigateProp, registerActiveRef: registerActiveRefProp };
+  const onClick = (e: React.MouseEvent) => latest.current.onClick?.(e);
+  const onNavigate = () => latest.current.onNavigate?.();
+  const hasRegister = !!registerActiveRefProp;
+  const { t } = useTranslation();
+  const { theme, themeChoice } = useAppTheme();
+  const translatedLabel = t(NAV_LABEL_KEYS[item.label] || item.label, item.label);
+  const itemRef = useRef<HTMLAnchorElement | HTMLButtonElement | null>(null);
+  const isDesktop = variant === 'desktop';
+  const desktopTextColor = getDesktopTextColor(themeChoice === 'system-light' ? themeChoice : theme);
+  const isLightTheme = (theme === 'light' || themeChoice === 'system-light');
+  const desktopHoverClass = isLightTheme ? 'hover:font-semibold' : 'hover:bg-zinc-800/50';
+
+  // Layout effect so the sidebar learns about the new active row before the
+  // browser paints it (see the indicator in DesktopSidebar).
+  useLayoutEffect(() => {
+    const register = latest.current.registerActiveRef;
+    if (isDesktop && isActive && hasRegister && register) {
+      register(itemRef.current);
+      return () => register(null);
+    }
+  }, [isDesktop, isActive, hasRegister]);
+  
+  const handleClick = (e: React.MouseEvent) => {
+    onClick?.(e);
+    if (e.defaultPrevented) return;
+    // Desktop keeps its original Notifications route; only phones use the sheet.
+    if (!isDesktop && (item.path === '/app/notifications' || item.path === '/notifications')) {
+      e.preventDefault();
+      openNotificationsDrawer();
+      onNavigate?.();
+      return;
+    }
+    
+    if (isHome) {
+      e.preventDefault();
+      // Coming from another page, Home is a plain move — it lands on a fresh
+      // render already. On Home the first click only returns to the top; a
+      // second click refreshes. See lib/home-nav-intent.
+      const intent = resolveHomeNavIntent(isHomePath(window.location.pathname));
+      if (intent === 'refresh') {
+        window.dispatchEvent(new CustomEvent('home-refresh'));
+      } else if (intent === 'scrollToTop') {
+        scrollDocumentToSmooth();
+      }
+      navigate('/app');
+    }
+    onNavigate?.();
+  };
+
+  const showAvatar = avatarUrl !== undefined;
+  const isNotifications = item.path === '/app/notifications' || item.path === '/notifications';
+  // Desktop Messages rings the envelope like the bell instead of showing a count chip.
+  const isDesktopMessages = isDesktop && item.path === '/app/messages';
+  const navIcon = (className: string) => isNotifications ? (
+    <NotificationBell unread={notificationCount} size={isDesktop ? 20 : 22} />
+  ) : isDesktopMessages ? (
+    <MessagesNavGlyph unread={notificationCount ?? 0} className={className} />
+  ) : isDesktop && item.path === '/app/assistant' ? (
+    <AssistantNavIcon className={className} />
+  ) : !isDesktop && item.path !== '/app/messages' && item.themedIcon ? (
+    <ThemedIcon icon={item.themedIcon} alt="" className={cn(className, 'object-contain')} />
+  ) : (
+    <item.icon className={className} />
+  );
+  
+  const isForceCollapsed = forceCollapsed;
+  const collapsedItemClass = collapsed
+    ? isForceCollapsed
+      ? 'w-9 h-9 justify-center px-0'
+      : 'w-9 h-9 lg:w-full lg:h-auto justify-center lg:justify-start px-0 lg:px-2.5 lg:py-2.5 lg:gap-3'
+    : 'gap-3 px-2.5 py-2.5';
+  const labelClass = isForceCollapsed ? "hidden" : collapsed ? "hidden lg:inline" : "";
+
+  // Shared glass indicator element — key forces full remount on collapse toggle
+  // Use smaller radius in collapsed mode so 36×36 icons don't look circular
+  const indicatorRadius = (collapsed && !isForceCollapsed) ? 'rounded-2xl lg:rounded-2xl' : isForceCollapsed ? 'rounded-xl' : 'rounded-2xl';
+  const isCollapsedSquare = isDesktop && (isForceCollapsed || (collapsed));
+  const glassIndicator = isActive && !isDesktop && (
+    <motion.div
+      key={layoutId}
+      layoutId={layoutId}
+      className={cn(
+        "absolute inset-0 bg-gradient-to-br from-white/20 via-white/10 to-white/5 backdrop-blur-xl border border-white/30",
+        isLightTheme
+          ? "shadow-[0_2px_8px_rgba(0,0,0,0.1),inset_0_1px_0_rgba(255,255,255,0.2),inset_0_-1px_0_rgba(255,255,255,0.05)]"
+          : "shadow-[0_4px_16px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.4),inset_0_-1px_0_rgba(255,255,255,0.1)]",
+        isCollapsedSquare ? 'rounded-xl' : 'rounded-2xl'
+      )}
+      transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+    />
+  );
+
+  if (item.external) {
+    return (
+      <a
+        ref={itemRef as React.Ref<HTMLAnchorElement>}
+        href={item.path}
+        target="_blank"
+        rel="noopener noreferrer"
+        onClick={onNavigate}
+        className={cn(
+          'relative flex items-center rounded-2xl text-[15px]',
+          isLightTheme ? 'transition-[font-weight]' : 'transition-colors',
+          isDesktop ? desktopTextColor : 'text-white',
+          isDesktop ? collapsedItemClass : 'gap-3.5 px-3 py-3',
+          !isActive && isDesktop && desktopHoverClass
+        )}
+      >
+        {glassIndicator}
+        <div className={cn(
+          theme === 'glass' && "!bg-transparent",
+          "relative z-10 rounded-xl flex items-center justify-center flex-shrink-0",
+          isDesktop ? "w-9 h-9" : "w-10 h-10",
+          isDesktop
+            ? isActive ? "bg-transparent" : (collapsed && !isForceCollapsed) ? "bg-transparent lg:bg-zinc-800" : isForceCollapsed ? "bg-transparent" : "bg-zinc-800"
+            : isActive
+              ? "bg-white/[0.10] backdrop-blur-sm border border-white/[0.12]"
+              : "bg-white/[0.06] backdrop-blur-sm border border-white/[0.08]"
+        )}>
+          {navIcon(cn(isDesktop ? "w-5 h-5" : "w-[22px] h-[22px]"))}
+        </div>
+        <span className={cn("relative z-10 truncate", labelClass)}>{translatedLabel}</span>
+      </a>
+    );
+  }
+
+  // Action items (like Stages) render as buttons, not links
+  if (item.action) {
+    return (
+      <button
+        ref={itemRef as React.Ref<HTMLButtonElement>}
+        onClick={(e) => {
+          onClick?.(e);
+          onNavigate?.();
+        }}
+        className={cn(
+          'relative flex items-center rounded-2xl text-[15px] w-full text-left',
+          isLightTheme ? 'transition-[font-weight]' : 'transition-colors',
+          isDesktop ? desktopTextColor : 'text-white',
+          isDesktop ? collapsedItemClass : 'gap-3.5 px-3 py-3',
+          !isActive && isDesktop && desktopHoverClass
+        )}
+      >
+        {glassIndicator}
+        <div className={cn(
+          theme === 'glass' && "!bg-transparent",
+          // Light: the dark tile behind each icon read as a grey plate.
+          isLightTheme && isDesktop && "!bg-transparent",
+          "relative z-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors",
+          isDesktop ? "w-9 h-9" : "w-10 h-10",
+          isDesktop
+            ? isActive ? "bg-transparent" : (collapsed && !isForceCollapsed) ? "bg-transparent lg:bg-zinc-800" : isForceCollapsed ? "bg-transparent" : "bg-zinc-800"
+            : isActive
+              ? "bg-white/[0.10] backdrop-blur-sm border border-white/[0.12]"
+              : "bg-white/[0.06] backdrop-blur-sm border border-white/[0.08]"
+        )}>
+          {navIcon(cn(isDesktop ? "w-5 h-5" : "w-[22px] h-[22px]"))}
+        </div>
+        <span className={cn("relative z-10 truncate", labelClass)}>{translatedLabel}</span>
+      </button>
+    );
+  }
+
+  return (
+    <StableLink
+      ref={itemRef as React.Ref<HTMLAnchorElement>}
+      to={item.path}
+      aria-current={isActive ? 'page' : undefined}
+      aria-label={isNotifications ? `${translatedLabel}${notificationCount ? ` (${formatCount(notificationCount)})` : ''}` : undefined}
+      onClick={handleClick}
+      onPointerEnter={() => preloadRoute(item.path)}
+      onTouchStart={() => preloadRoute(item.path)}
+      onFocus={() => preloadRoute(item.path)}
+      className={cn(
+        'relative flex items-center rounded-2xl text-[15px]',
+        isLightTheme ? 'transition-[font-weight]' : 'transition-colors',
+        isDesktop ? desktopTextColor : 'text-white',
+        isDesktop ? collapsedItemClass : 'gap-3.5 px-3 py-3',
+        isActive ? 'font-semibold active' : '',
+        !isActive && isDesktop && desktopHoverClass
+      )}
+    >
+      {glassIndicator}
+      {showAvatar ? (
+        <Avatar data-own-avatar className={cn(
+          "relative z-10 flex-shrink-0 rounded-xl",
+          isDesktop ? "w-9 h-9" : "w-10 h-10"
+        )}>
+          {avatarUrl && (
+            <AvatarImage src={avatarUrl} alt={_copy("copy.d696a35bdd18", { defaultValue: "Profile" })} className="object-cover rounded-xl" />
+          )}
+          <AvatarFallback className="bg-zinc-700 text-white font-medium text-sm rounded-xl">
+            {avatarFallback || 'U'}
+          </AvatarFallback>
+        </Avatar>
+      ) : (
+        <div className={cn(
+          theme === 'glass' && "!bg-transparent",
+          // Light: the dark tile behind each icon read as a grey plate.
+          isLightTheme && isDesktop && "!bg-transparent",
+          "relative z-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors",
+          isDesktop ? "w-9 h-9" : "w-10 h-10",
+          isDesktop
+             ? isActive 
+              ? "bg-transparent" 
+              : (collapsed && !isForceCollapsed) ? "bg-transparent lg:bg-zinc-800" : isForceCollapsed ? "bg-transparent" : "bg-zinc-800"
+            : isActive
+              ? "bg-white/[0.10] backdrop-blur-sm border border-white/[0.12]"
+              : "bg-white/[0.06] backdrop-blur-sm border border-white/[0.08]"
+        )}>
+          {navIcon(cn(isDesktop ? "w-5 h-5" : "w-[22px] h-[22px]"))}
+          {!isNotifications && !isDesktopMessages && notificationCount !== undefined && notificationCount > 0 && (
+            <span data-unread-chip className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 flex items-center justify-center bg-red-500 text-white text-[10px] font-bold rounded-full z-20 leading-none">
+              {notificationCount > 99 ? '99+' : notificationCount}
+            </span>
+          )}
+        </div>
+      )}
+      <span className={cn("relative z-10 truncate", labelClass)}>{translatedLabel}</span>
+    </StableLink>
+  );
+}
+
+/**
+ * Memoised so a route change re-renders only the items whose active state or
+ * badge changed, not the whole list. `currentPath` and the callbacks change
+ * identity on every parent render, so they are left out of the comparison
+ * (the item reads the path at click time and the callbacks through a ref).
+ */
+export const SidebarNavItem = memo(SidebarNavItemInner, (prev, next) => {
+  for (const key of Object.keys({ ...prev, ...next }) as (keyof SidebarNavItemProps)[]) {
+    if (key === 'currentPath') continue;
+    const a = prev[key], b = next[key];
+    if (typeof a === 'function' && typeof b === 'function') continue;
+    if (a !== b) return false;
+  }
+  return true;
+});

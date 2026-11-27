@@ -1,0 +1,502 @@
+/*
+ * The call stage: one full-screen surface for ringing, connecting, in-call and
+ * ended. It is mounted beside the app shell, outside #app-root, so it cannot
+ * lean on the shell's colour tokens; every colour here comes from the --cs-*
+ * set below, which each theme overrides on <html data-theme>.
+ *
+ * No green accept and no red hang-up: the one strong control is the solid
+ * --cs-fg fill. Round buttons are the in-call exception to the rounded-square
+ * recipe. Avatars stay rounded squares.
+ */
+.call-stage {
+  --cs-bg: #050506;
+  --cs-fg: #ffffff;
+  --cs-on-fg: #0a0a0c;
+  --cs-mu: rgb(255 255 255 / 0.6);
+  --cs-glass: rgb(255 255 255 / 0.09);
+  --cs-glass-2: rgb(255 255 255 / 0.16);
+  --cs-line: rgb(255 255 255 / 0.13);
+  --cs-dock: rgb(22 22 26 / 0.72);
+  --cs-tint-top: rgb(0 0 0 / 0.55);
+  --cs-ring: #ffffff;
+  --cs-ring-2: #ffffff;
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--cs-fg);
+}
+.call-stage *, .call-mini *, .call-card * { box-sizing: border-box; }
+
+.call-stage__scrim { position: absolute; inset: 0; background: rgb(0 0 0 / 0.55); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+.call-stage__win {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--cs-bg);
+  isolation: isolate;
+}
+/* Desktop: a call window over the dimmed app, not a phone screen stretched across the monitor. */
+@media (min-width: 768px) {
+  .call-stage__win { width: min(440px, 92vw); height: min(700px, 90vh); border-radius: 28px; border: 1px solid var(--cs-line); box-shadow: 0 30px 80px rgb(0 0 0 / 0.55); }
+  .call-stage[data-video="true"] .call-stage__win { width: min(1040px, 92vw); height: min(680px, 88vh); }
+}
+.call-stage__backdrop { position: absolute; inset: -60px; z-index: -2; background-position: center; background-size: cover; filter: blur(46px) saturate(1.35); opacity: 0.8; transform: translateZ(0); }
+.call-stage__tint { position: absolute; inset: 0; z-index: -1; background: linear-gradient(180deg, var(--cs-tint-top) 0%, var(--cs-bg) 92%); }
+.call-stage__remote { position: absolute; inset: 0; z-index: -1; background: #000; }
+.call-stage__remote > div { width: 100%; height: 100%; }
+.call-stage__remote video { object-fit: cover; }
+
+.call-stage__min {
+  position: absolute; left: 16px; top: max(16px, env(safe-area-inset-top)); z-index: 3;
+  display: grid; place-items: center; width: 40px; height: 40px; border-radius: 999px;
+  border: 1px solid var(--cs-line); background: var(--cs-glass); color: var(--cs-fg);
+  backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+}
+.call-stage__min:hover { background: var(--cs-glass-2); }
+.call-stage__message { left: auto; right: 16px; }
+.call-stage[data-direct="true"] .call-stage__min {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+}
+.call-stage[data-direct="true"] .call-stage__min svg { width: 20px; height: 20px; }
+.call-stage[data-direct="true"][data-live="true"] .call-stage__min {
+  border-color: rgb(255 255 255 / 0.25);
+  background: rgb(18 18 22 / 0.78);
+  color: #fff;
+}
+.call-stage[data-direct="true"][data-live="true"] .call-stage__min:hover { background: rgb(42 42 48 / 0.9); }
+.call-stage[data-direct="true"][data-live="true"] .call-stage__min:focus-visible { outline-color: #fff; }
+.call-stage[data-direct="true"][data-live="true"] .call-stage__top {
+  padding-top: calc(max(16px, env(safe-area-inset-top)) + 52px);
+  padding-inline: 16px;
+}
+.call-stage[data-direct="true"][data-live="true"] .call-stage__self {
+  bottom: calc(100% + 8px);
+  height: clamp(64px, 22dvh, 148px);
+}
+.call-stage[data-direct="true"][data-live="true"] .call-stage__foot {
+  --cs-fg: #fff;
+  --cs-on-fg: #0a0a0c;
+}
+.call-stage[data-direct="true"][data-live="true"] .call-stage__foot::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(transparent, rgb(0 0 0 / 0.9));
+}
+.call-stage[data-message="true"] .call-stage__fx {
+  right: 68px;
+}
+.call-stage[data-direct="true"] .call-stage__win { overflow-y: auto; }
+.call-stage[data-direct="true"] .call-stage__avatar {
+  margin-top: 24px;
+  width: clamp(108px, 23dvh, 180px);
+  height: auto;
+  aspect-ratio: 1;
+}
+.call-stage[data-direct="true"] .call-stage__portrait {
+  border: 1px solid color-mix(in srgb, var(--cs-fg) 36%, transparent);
+}
+.call-stage[data-direct="true"] .call-stage__kind,
+.call-stage[data-direct="true"] .call-stage__status,
+.call-stage[data-direct="true"] .call-ctl { color: var(--cs-fg); }
+.call-stage[data-direct="true"] .call-ctl {
+  min-width: 60px;
+  max-width: 92px;
+  text-align: center;
+  font-size: 13px;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+.call-stage[data-direct="true"] .call-dock { max-width: 100%; }
+.call-stage[data-direct="true"] .call-dock > .call-ctl { min-width: 0; }
+.call-stage[data-direct="true"] .call-btn:not([data-solid="true"]) { border: 1px solid var(--cs-line); }
+.call-stage[data-direct="true"] .call-stage__foot > .call-ctl { margin-top: 2px; }
+.call-row.call-row--ringing { gap: clamp(40px, 15vw, 96px); }
+.call-row--ringing .call-btn { width: 68px; height: 68px; }
+.call-stage[data-direct="true"] .call-stage__foot > .call-ctl > .call-btn {
+  width: 66px;
+  height: 66px;
+}
+@media (max-width: 767px) and (min-height: 680px) {
+  .call-stage[data-direct="true"] .call-stage__id {
+    padding-top: calc(max(16px, env(safe-area-inset-top)) + 12dvh);
+  }
+  .call-stage[data-direct="true"] .call-stage__foot:has(.call-row--ringing) {
+    padding-bottom: max(8dvh, env(safe-area-inset-bottom));
+  }
+}
+@media (max-height: 620px) {
+  .call-stage[data-direct="true"] .call-stage__id { padding-top: calc(max(12px, env(safe-area-inset-top)) + 48px); }
+  .call-stage[data-direct="true"] .call-stage__avatar { margin-top: 12px; }
+  .call-stage[data-direct="true"] .call-wave { margin-top: 8px; }
+}
+
+.call-stage__id { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: calc(max(16px, env(safe-area-inset-top)) + 56px) 24px 0; text-align: center; }
+.call-stage__kind { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: var(--cs-mu); }
+.call-stage__name { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 32px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.15; color: var(--cs-fg); }
+.call-stage__status { font-size: 15px; font-variant-numeric: tabular-nums; color: var(--cs-mu); }
+.call-stage__avatar { position: relative; isolation: isolate; margin-top: 44px; width: 148px; height: 148px; }
+.call-stage__avatar > .call-stage__portrait { position: relative; z-index: 1; display: grid; place-items: center; width: 100%; height: 100%; border-radius: 26%; object-fit: cover; background: var(--cs-glass-2); color: var(--cs-fg); font-size: 48px; font-weight: 800; box-shadow: 0 18px 50px rgb(0 0 0 / 0.35); }
+.call-stage__portrait > img { border-radius: inherit; object-fit: cover; }
+.call-stage__portrait > [data-avatar-fallback] { border-radius: inherit; background: transparent; }
+@media (max-height: 640px) { .call-stage__avatar { margin-top: 24px; width: 108px; height: 108px; } }
+
+.call-stage__top { position: absolute; inset: 0 0 auto; z-index: 2; display: flex; justify-content: center; padding: max(18px, env(safe-area-inset-top)) 70px 0; pointer-events: none; }
+.call-stage__chip { display: inline-flex; align-items: center; gap: 8px; max-width: 100%; padding: 8px 14px; border-radius: 999px; border: 1px solid rgb(255 255 255 / 0.2); background: rgb(18 18 22 / 0.5); color: #fff; font-size: 14px; font-weight: 700; backdrop-filter: blur(18px) saturate(1.4); -webkit-backdrop-filter: blur(18px) saturate(1.4); }
+.call-stage__chip span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.call-stage__chip span:last-child { font-weight: 500; font-variant-numeric: tabular-nums; opacity: 0.8; }
+.call-stage__self { position: absolute; right: 16px; bottom: 148px; z-index: 2; width: 104px; height: 148px; overflow: hidden; border-radius: 18px; border: 1.5px solid rgb(255 255 255 / 0.7); background: #17171b; box-shadow: 0 10px 30px rgb(0 0 0 / 0.45); }
+.call-stage[data-live="false"] .call-stage__self { top: calc(max(16px, env(safe-area-inset-top)) + 56px); bottom: auto; width: 84px; height: 120px; }
+.call-stage__self > div { width: 100%; height: 100%; }
+.call-stage__self-off { position: absolute; inset: 0; display: grid; place-items: center; color: rgb(255 255 255 / 0.6); }
+@media (min-width: 768px) { .call-stage__self { width: 168px; height: 112px; bottom: 124px; } }
+
+.call-stage__foot { margin-top: auto; display: flex; flex-direction: column; align-items: center; gap: 14px; padding: 16px 16px max(22px, env(safe-area-inset-bottom)); position: relative; z-index: 2; }
+.call-stage__note { font-size: 12px; color: var(--cs-mu); }
+.call-stage__hint { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 12px; border: 1px solid var(--cs-line); background: var(--cs-glass); color: var(--cs-mu); font-size: 12px; }
+.call-dock { display: flex; align-items: flex-start; justify-content: center; gap: 14px; padding: 14px 18px; border-radius: 36px; border: 1px solid var(--cs-line); background: var(--cs-dock); backdrop-filter: blur(22px) saturate(1.5); -webkit-backdrop-filter: blur(22px) saturate(1.5); }
+.call-stage[data-live="true"][data-video="true"] .call-dock { --cs-fg: #fff; --cs-on-fg: #0a0a0c; --cs-mu: rgb(255 255 255 / 0.8); --cs-glass-2: rgb(255 255 255 / 0.22); border-color: rgb(255 255 255 / 0.2); background: rgb(18 18 22 / 0.5); }
+.call-ctl { display: flex; flex-direction: column; align-items: center; gap: 7px; min-width: 60px; font-size: 12px; font-weight: 600; color: var(--cs-mu); }
+.call-btn { display: grid; place-items: center; width: 60px; height: 60px; border-radius: 999px; border: 0; background: var(--cs-glass-2); color: var(--cs-fg); transition: transform 0.12s ease, background-color 0.15s ease; }
+.call-btn:hover { background: color-mix(in srgb, var(--cs-fg) 24%, transparent); }
+.call-btn:not(:disabled):active { transform: scale(0.94); }
+.call-btn:disabled { opacity: 0.38; }
+.call-btn[data-solid="true"] { background: var(--cs-fg); color: var(--cs-on-fg); }
+.call-btn[data-dimmed="true"] { color: color-mix(in srgb, var(--cs-fg) 55%, transparent); }
+.call-ctl[data-dimmed="true"] > span { opacity: 0.7; }
+.call-btn:focus-visible, .call-pill:focus-visible, .call-stage__min:focus-visible { outline: 2px solid var(--cs-fg); outline-offset: 3px; }
+.call-row { display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; max-width: 380px; }
+.call-pill { display: inline-flex; flex: 1 1 0; align-items: center; justify-content: center; gap: 8px; height: 56px; padding: 0 20px; border-radius: 999px; border: 0; background: var(--cs-glass-2); color: var(--cs-fg); font-size: 16px; font-weight: 700; white-space: nowrap; transition: transform 0.12s ease; }
+.call-pill:active { transform: scale(0.97); }
+.call-pill[data-solid="true"] { flex-grow: 1.35; height: 62px; background: var(--cs-fg); color: var(--cs-on-fg); }
+.call-pill[data-quiet="true"] { flex: 0 0 auto; height: 38px; padding: 0 14px; border: 1px solid var(--cs-line); background: var(--cs-glass); font-size: 13px; font-weight: 600; }
+
+.call-wave { display: flex; align-items: center; gap: 3px; height: 22px; margin-top: 22px; color: var(--cs-fg); }
+.call-wave i { width: 3px; border-radius: 2px; background: currentColor; transform-origin: center; animation: call-wave 1.1s ease-in-out infinite alternate; }
+.call-wave[data-paused="true"] i { animation-play-state: paused; opacity: 0.35; }
+@keyframes call-wave { from { transform: scaleY(0.3); } to { transform: scaleY(1); } }
+
+/* ---------- The ringing effect, drawn by the theme ---------- */
+.call-rings::before, .call-rings::after { content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+@keyframes call-ring { from { transform: scale(1); opacity: 0.55; } to { transform: scale(1.75); opacity: 0; } }
+@keyframes call-haze { from { transform: scale(0.78) rotate(0deg); opacity: 0.5; } to { transform: scale(1.22) rotate(28deg); opacity: 1; } }
+@keyframes call-spin { to { transform: rotate(360deg); } }
+@keyframes call-blink { 50% { opacity: 0.25; } }
+@keyframes call-breathe { from { transform: scale(1.06); opacity: 0.35; } to { transform: scale(1.14); opacity: 0.9; } }
+@keyframes call-beat { 0%, 100% { transform: scale(1); opacity: 0.45; } 12% { transform: scale(1.3); opacity: 0.95; } 24% { transform: scale(1.08); opacity: 0.6; } 36% { transform: scale(1.24); opacity: 0.85; } 60% { transform: scale(1); opacity: 0.45; } }
+@keyframes call-blob { 0% { border-radius: 42% 58% 55% 45% / 48% 42% 58% 52%; transform: rotate(0deg) scale(1.2); } 50% { border-radius: 58% 42% 40% 60% / 55% 60% 40% 45%; transform: rotate(180deg) scale(1.34); } 100% { border-radius: 42% 58% 55% 45% / 48% 42% 58% 52%; transform: rotate(360deg) scale(1.2); } }
+@keyframes call-sweep { to { transform: rotate(360deg); } }
+
+/* System (default) and any theme without its own: squared outline pulse. */
+.call-rings::before, .call-rings::after { border-radius: 26%; border: 1.5px solid var(--cs-ring); animation: call-ring 1.9s ease-out infinite; }
+.call-rings::after { animation-delay: 0.95s; }
+
+/* Light themes: soft filled ripples. */
+html[data-theme="light"] .call-rings::before, html[data-theme="light"] .call-rings::after,
+html[data-theme="system"][data-system-tone="light"] .call-rings::before, html[data-theme="system"][data-system-tone="light"] .call-rings::after { border: 0; background: rgb(20 20 26 / 0.1); }
+
+/* Minimal: one hairline that breathes. */
+html[data-theme="minimal"] .call-rings::before { border-width: 1px; animation: call-breathe 1.8s ease-in-out infinite alternate; }
+html[data-theme="minimal"] .call-rings::after { display: none; }
+
+/* Glass: a thick frosted rim with a moving highlight. */
+html[data-theme="glass"] .call-rings::before { inset: -14px; border: 0; border-radius: 30%; background: conic-gradient(from 0deg, rgb(255 255 255 / 0.05), rgb(255 255 255 / 0.7), rgb(255 255 255 / 0.05) 35%, var(--cs-ring) 60%, rgb(255 255 255 / 0.05)); filter: blur(2px); animation: call-spin 4s linear infinite; }
+html[data-theme="glass"] .call-rings::after { inset: -14px; border: 1px solid rgb(255 255 255 / 0.4); border-radius: 30%; background: rgb(255 255 255 / 0.08); animation: call-breathe 2.2s ease-in-out infinite alternate; }
+
+/* Cosmic: an orbit and stars. */
+html[data-theme="cosmic"] .call-rings::before { inset: -26%; border: 1px dashed rgb(255 255 255 / 0.55); border-radius: 50%; animation: call-spin 9s linear infinite; }
+html[data-theme="cosmic"] .call-rings::after { inset: -52%; border: 0; border-radius: 50%; background: radial-gradient(circle at 18% 30%, #fff 0 2px, transparent 3px), radial-gradient(circle at 84% 62%, #fff 0 1.5px, transparent 2.5px), radial-gradient(circle at 60% 6%, #9cd3ff 0 2.2px, transparent 3.2px), radial-gradient(circle at 30% 92%, #d9b8ff 0 1.8px, transparent 2.8px); animation: call-spin 14s linear infinite reverse; }
+
+/* Hazy: haze drifting off the avatar, in the picked theme colour. */
+html[data-theme="hazy"] .call-rings::before { inset: -38%; border: 0; border-radius: 50%; background: radial-gradient(closest-side, color-mix(in srgb, var(--cs-ring) 85%, transparent), color-mix(in srgb, var(--cs-ring) 38%, transparent) 55%, transparent); filter: blur(14px); animation: call-haze 2.6s ease-in-out infinite alternate; }
+html[data-theme="hazy"] .call-rings::after { inset: -72%; border: 0; border-radius: 50%; background: radial-gradient(closest-side, color-mix(in srgb, var(--cs-ring-2) 45%, transparent), color-mix(in srgb, var(--cs-ring) 20%, transparent) 60%, transparent); filter: blur(24px); animation: call-haze 3.6s ease-in-out infinite alternate-reverse; }
+
+/* Swarms: two rings of specks circling at different speeds. */
+html[data-theme="swarms"] .call-rings::before, html[data-theme="swarms"] .call-rings::after { border: 0; border-radius: 50%; }
+html[data-theme="swarms"] .call-rings::before { inset: -24%; background: radial-gradient(circle at 50% 2%, var(--cs-ring) 0 3px, transparent 4px), radial-gradient(circle at 96% 60%, var(--cs-ring) 0 2.4px, transparent 3.4px), radial-gradient(circle at 12% 78%, var(--cs-ring) 0 2.8px, transparent 3.8px), radial-gradient(circle at 78% 10%, var(--cs-ring-2) 0 2px, transparent 3px); animation: call-spin 3.4s linear infinite; }
+html[data-theme="swarms"] .call-rings::after { inset: -44%; background: radial-gradient(circle at 8% 40%, var(--cs-ring-2) 0 2.4px, transparent 3.4px), radial-gradient(circle at 60% 98%, var(--cs-ring) 0 2px, transparent 3px), radial-gradient(circle at 92% 28%, var(--cs-ring) 0 2.6px, transparent 3.6px), radial-gradient(circle at 34% 4%, var(--cs-ring-2) 0 1.8px, transparent 2.8px), radial-gradient(circle at 70% 70%, var(--cs-ring) 0 1.6px, transparent 2.6px); animation: call-spin 6s linear infinite reverse; }
+
+/* Lava lamp: slow molten blobs. */
+html[data-theme="lavalamp"] .call-rings::before, html[data-theme="lavalamp"] .call-rings::after { border: 0; filter: blur(8px); }
+html[data-theme="lavalamp"] .call-rings::before { background: linear-gradient(140deg, var(--cs-ring), var(--cs-ring-2)); opacity: 0.85; animation: call-blob 7s ease-in-out infinite; }
+html[data-theme="lavalamp"] .call-rings::after { inset: -10%; background: linear-gradient(320deg, var(--cs-ring-2), var(--cs-ring)); opacity: 0.5; animation: call-blob 11s ease-in-out infinite reverse; }
+
+/* Winter: frost glow and drifting snow. */
+html[data-theme="winter"] .call-rings::before { inset: -9px; border: 1.5px solid rgb(205 236 255 / 0.9); border-radius: 30%; box-shadow: 0 0 26px rgb(160 215 255 / 0.85), inset 0 0 14px rgb(255 255 255 / 0.5); animation: call-haze 2.4s ease-in-out infinite alternate; }
+html[data-theme="winter"] .call-rings::after { inset: -48%; border: 0; border-radius: 50%; background: radial-gradient(circle at 20% 20%, #fff 0 2px, transparent 3px), radial-gradient(circle at 78% 34%, #fff 0 1.6px, transparent 2.6px), radial-gradient(circle at 40% 88%, #fff 0 2.2px, transparent 3.2px), radial-gradient(circle at 90% 80%, #fff 0 1.4px, transparent 2.4px), radial-gradient(circle at 8% 62%, #fff 0 1.6px, transparent 2.6px); animation: call-haze 4s ease-in-out infinite alternate; }
+
+/* War: a radar sweep inside range rings. */
+html[data-theme="war"] .call-rings::before { inset: -34%; border: 1px solid color-mix(in srgb, var(--cs-ring) 55%, transparent); border-radius: 50% !important; background: conic-gradient(from 0deg, color-mix(in srgb, var(--cs-ring) 55%, transparent), transparent 28%, transparent); animation: call-sweep 2.4s linear infinite; }
+html[data-theme="war"] .call-rings::after { inset: -16%; border: 1px dashed color-mix(in srgb, var(--cs-ring) 60%, transparent); border-radius: 50% !important; animation: call-blink 1.2s steps(2) infinite; }
+
+/* Osaka: neon sign glow. */
+html[data-theme="osaka"] .call-rings::before, html[data-theme="osaka"] .call-rings::after { border: 0; border-radius: 30%; background: conic-gradient(#ff3d81, #ffb300, #00e5ff, #7c4dff, #ff3d81); animation: call-spin 3.2s linear infinite; }
+html[data-theme="osaka"] .call-rings::before { inset: -8px; filter: blur(12px); }
+html[data-theme="osaka"] .call-rings::after { inset: -4px; }
+
+/* Jungle: fireflies in a green glow. */
+html[data-theme="jungle"] .call-rings::before { inset: -30%; border: 0; border-radius: 50%; background: radial-gradient(closest-side, rgb(90 220 120 / 0.55), transparent); filter: blur(16px); animation: call-haze 3s ease-in-out infinite alternate; }
+html[data-theme="jungle"] .call-rings::after { inset: -48%; border: 0; border-radius: 50%; background: radial-gradient(circle at 14% 40%, #eaff7a 0 3px, transparent 5px), radial-gradient(circle at 86% 26%, #eaff7a 0 2.4px, transparent 4.4px), radial-gradient(circle at 66% 92%, #c6ff5e 0 3px, transparent 5px), radial-gradient(circle at 30% 8%, #eaff7a 0 2px, transparent 4px); animation: call-spin 11s linear infinite; }
+
+/* Island: round water ripples. */
+html[data-theme="island"] .call-rings::before, html[data-theme="island"] .call-rings::after { inset: -6%; border: 2px solid var(--cs-ring); border-radius: 50%; animation: call-ring 2.6s ease-out infinite; }
+html[data-theme="island"] .call-rings::after { animation-delay: 1.3s; border-color: var(--cs-ring-2); }
+
+/* Hacker: a blinking terminal frame. */
+html[data-theme="hacker"] .call-rings::before { inset: -9px; border: 1.5px solid var(--cs-ring); border-radius: 2px; animation: call-blink 1s steps(2) infinite; }
+html[data-theme="hacker"] .call-rings::after { inset: -9px; border: 1px dashed color-mix(in srgb, var(--cs-ring) 60%, transparent); border-radius: 2px; animation: call-ring 1.6s steps(6) infinite; }
+html[data-theme="hacker"] .call-stage__avatar > .call-stage__portrait { border-radius: 4px; }
+
+/* Horror: a heartbeat in the dark. */
+html[data-theme="horror"] .call-rings::before { inset: -18%; border: 0; border-radius: 50%; background: radial-gradient(closest-side, color-mix(in srgb, var(--cs-ring) 75%, transparent), transparent); filter: blur(12px); animation: call-beat 1.5s ease-in-out infinite; }
+html[data-theme="horror"] .call-rings::after { border-color: color-mix(in srgb, var(--cs-ring) 70%, transparent); animation: call-beat 1.5s ease-in-out infinite; }
+
+/* ---------- Theme palettes ---------- */
+html[data-theme="light"] .call-stage, html[data-theme="system"][data-system-tone="light"] .call-stage,
+html[data-theme="light"] .call-mini, html[data-theme="system"][data-system-tone="light"] .call-mini {
+  --cs-bg: #f6f5f1; --cs-fg: #14141a; --cs-on-fg: #ffffff; --cs-mu: rgb(20 20 26 / 0.6);
+  --cs-glass: rgb(20 20 26 / 0.05); --cs-glass-2: rgb(20 20 26 / 0.1); --cs-line: rgb(20 20 26 / 0.12);
+  --cs-dock: rgb(255 255 255 / 0.74); --cs-tint-top: rgb(246 245 241 / 0.6); --cs-ring: #14141a; --cs-ring-2: #14141a;
+}
+html[data-theme="system"][data-system-tone="light"] .call-stage, html[data-theme="system"][data-system-tone="light"] .call-mini { --cs-bg: #ffffff; --cs-tint-top: rgb(255 255 255 / 0.62); }
+html[data-theme="glass"] .call-stage { --cs-bg: #06141a; --cs-tint-top: rgb(4 30 38 / 0.5); --cs-dock: rgb(10 34 42 / 0.6); --cs-ring: var(--tint-accent, #00d5e6); }
+html[data-theme="cosmic"] .call-stage { --cs-bg: #03030a; --cs-tint-top: rgb(20 14 48 / 0.55); --cs-dock: rgb(14 12 30 / 0.66); }
+html[data-theme="hazy"] .call-stage { --cs-bg: #0a0514; --cs-tint-top: rgb(46 18 86 / 0.52); --cs-dock: rgb(40 20 70 / 0.6); --cs-ring: var(--tint-accent, #b877ff); --cs-ring-2: #ff96dc; }
+html[data-theme="swarms"] .call-stage { --cs-bg: #040a12; --cs-tint-top: rgb(8 30 52 / 0.55); --cs-dock: rgb(10 24 40 / 0.66); --cs-ring: var(--tint-accent, #3fb6ff); --cs-ring-2: #ffffff; }
+html[data-theme="lavalamp"] .call-stage { --cs-bg: #120604; --cs-tint-top: rgb(70 22 8 / 0.5); --cs-dock: rgb(44 16 10 / 0.64); --cs-ring: var(--tint-accent, #ff6a2b); --cs-ring-2: #ff3d9a; }
+html[data-theme="winter"] .call-stage { --cs-bg: #07121d; --cs-tint-top: rgb(22 50 76 / 0.55); --cs-dock: rgb(14 32 50 / 0.64); --cs-ring: #cdecff; }
+html[data-theme="war"] .call-stage { --cs-bg: #0a0c07; --cs-tint-top: rgb(36 42 22 / 0.6); --cs-dock: rgb(24 28 16 / 0.7); --cs-ring: #c9d46a; }
+html[data-theme="osaka"] .call-stage { --cs-bg: #0c0618; --cs-tint-top: rgb(60 14 70 / 0.5); --cs-dock: rgb(22 10 44 / 0.62); }
+html[data-theme="jungle"] .call-stage { --cs-bg: #041008; --cs-tint-top: rgb(12 52 26 / 0.55); --cs-dock: rgb(8 30 16 / 0.66); }
+html[data-theme="island"] .call-stage { --cs-bg: #03121a; --cs-tint-top: rgb(6 66 84 / 0.5); --cs-dock: rgb(6 36 46 / 0.64); --cs-ring: #5fe3e0; --cs-ring-2: #ffe7b0; }
+html[data-theme="hacker"] .call-stage { --cs-bg: #000000; --cs-fg: #39ff88; --cs-on-fg: #001a0a; --cs-mu: rgb(57 255 136 / 0.62); --cs-glass: rgb(57 255 136 / 0.07); --cs-glass-2: rgb(57 255 136 / 0.14); --cs-line: rgb(57 255 136 / 0.28); --cs-dock: rgb(0 14 6 / 0.8); --cs-tint-top: rgb(0 0 0 / 0.78); --cs-ring: #39ff88; }
+html[data-theme="horror"] .call-stage { --cs-bg: #070203; --cs-tint-top: rgb(46 4 8 / 0.6); --cs-dock: rgb(26 6 8 / 0.7); --cs-ring: #b3121f; }
+
+/* ---------- Minimised pill ---------- */
+.call-mini {
+  --cs-fg: #ffffff; --cs-on-fg: #0a0a0c; --cs-mu: rgb(255 255 255 / 0.62); --cs-glass-2: rgb(255 255 255 / 0.16); --cs-line: rgb(255 255 255 / 0.14); --cs-dock: rgb(22 22 26 / 0.72);
+  position: fixed; right: 16px; bottom: calc(84px + env(safe-area-inset-bottom)); z-index: 60;
+  width: min(320px, calc(100vw - 32px)); color: var(--cs-fg); touch-action: none; user-select: none;
+}
+/* Keep minimized calls above the full-screen chat and below dialogs. */
+body[data-fullscreen-chat-up] .call-mini { z-index: 80; }
+@media (max-width: 767px) { .call-mini { left: 16px; right: 16px; width: auto; } }
+.call-mini__body { overflow: hidden; border-radius: 24px; border: 1px solid var(--cs-line); background: var(--cs-dock); box-shadow: 0 16px 40px rgb(0 0 0 / 0.4); backdrop-filter: blur(24px) saturate(1.5); -webkit-backdrop-filter: blur(24px) saturate(1.5); }
+.call-mini__video { position: relative; width: 100%; aspect-ratio: 16 / 9; background: #0c0c0f; cursor: grab; }
+.call-mini__video > div { width: 100%; height: 100%; }
+.call-mini__row { display: flex; align-items: center; gap: 10px; padding: 8px; }
+.call-mini__who { display: flex; flex: 1 1 0; min-width: 0; align-items: center; gap: 10px; border: 0; background: none; color: inherit; text-align: left; cursor: pointer; }
+.call-mini__who img, .call-mini__who > span:first-child { display: grid; place-items: center; flex: 0 0 auto; width: 36px; height: 36px; border-radius: 26%; object-fit: cover; background: var(--cs-glass-2); font-weight: 800; }
+.call-mini__name { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; font-weight: 700; line-height: 1.2; }
+.call-mini__time { display: block; font-size: 12px; font-variant-numeric: tabular-nums; color: var(--cs-mu); }
+.call-mini .call-wave { margin: 0 2px 0 0; height: 16px; }
+.call-mini .call-btn { width: 38px; height: 38px; flex: 0 0 auto; }
+html[data-theme="hacker"] .call-mini { --cs-fg: #39ff88; --cs-on-fg: #001a0a; --cs-mu: rgb(57 255 136 / 0.62); --cs-glass-2: rgb(57 255 136 / 0.14); --cs-line: rgb(57 255 136 / 0.28); --cs-dock: rgb(0 14 6 / 0.82); }
+
+/* ---------- Call cards in a chat ---------- */
+.call-card { display: flex; align-items: center; gap: 10px; width: min(300px, 100%); padding: 9px 9px 9px 11px; border-radius: 18px; border: 1px solid rgb(255 255 255 / 0.12); background: rgb(255 255 255 / 0.06); color: #f4f4f5; }
+.call-card__icon { display: grid; place-items: center; flex: 0 0 auto; width: 36px; height: 36px; border-radius: 12px; background: rgb(255 255 255 / 0.1); }
+.call-card__text { flex: 1 1 0; min-width: 0; }
+.call-card__title { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; font-weight: 700; line-height: 1.25; }
+.call-card__sub { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; color: rgb(244 244 245 / 0.6); font-variant-numeric: tabular-nums; }
+.call-card__go { flex: 0 0 auto; height: 32px; padding: 0 12px; border-radius: 11px; border: 0; background: #f4f4f5; color: #0a0a0c; font-size: 12.5px; font-weight: 700; white-space: nowrap; }
+.call-card__go:disabled { opacity: 0.45; }
+.call-card[data-quiet="true"] .call-card__go { background: rgb(255 255 255 / 0.12); color: #f4f4f5; }
+html[data-theme="light"] .call-card, html[data-theme="system"][data-system-tone="light"] .call-card { border-color: rgb(20 20 26 / 0.12); background: rgb(20 20 26 / 0.04); color: #14141a; }
+html[data-theme="light"] .call-card__icon, html[data-theme="system"][data-system-tone="light"] .call-card__icon { background: rgb(20 20 26 / 0.08); }
+html[data-theme="light"] .call-card__sub, html[data-theme="system"][data-system-tone="light"] .call-card__sub { color: rgb(20 20 26 / 0.6); }
+html[data-theme="light"] .call-card__go, html[data-theme="system"][data-system-tone="light"] .call-card__go { background: #14141a; color: #ffffff; }
+html[data-theme="light"] .call-card[data-quiet="true"] .call-card__go, html[data-theme="system"][data-system-tone="light"] .call-card[data-quiet="true"] .call-card__go { background: rgb(20 20 26 / 0.1); color: #14141a; }
+html[data-theme="hacker"] .call-card { border-color: rgb(57 255 136 / 0.3); background: rgb(57 255 136 / 0.06); color: #39ff88; border-radius: 4px; }
+html[data-theme="hacker"] .call-card__go { background: #39ff88; color: #001a0a; border-radius: 3px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .call-rings::before, .call-rings::after, .call-wave i { animation: none !important; }
+}
+
+/* Group calls: one tile per person between the name chip and the dock. */
+/* The screen splits as people join, up to four: one fills it, two take a
+   half each, three are a wide tile over two, four are quarters. A fifth
+   person and on keep quarter tiles and the grid scrolls for the rest. */
+.group-call-grid {
+  flex: 1 1 auto; min-height: 0; display: grid; gap: 8px;
+  grid-template-columns: repeat(var(--gc-cols, 1), minmax(0, 1fr)); grid-auto-rows: minmax(0, 1fr);
+  padding: calc(max(18px, env(safe-area-inset-top)) + 54px) 12px 0;
+}
+.group-call-grid[data-count="3"], .group-call-grid[data-count="4"], .group-call-grid[data-count="5"] { --gc-cols: 2; }
+.group-call-grid[data-count="3"] > .group-call-tile:first-child { grid-column: 1 / -1; }
+.group-call-grid[data-count="5"] { overflow-y: auto; overscroll-behavior: contain; grid-auto-rows: calc((100% - 8px) / 2); scrollbar-width: none; }
+.group-call-grid[data-count="5"]::-webkit-scrollbar { display: none; }
+@media (min-width: 768px) {
+  .group-call-grid[data-video="true"][data-count="2"] { --gc-cols: 2; }
+}
+.group-call-tile {
+  position: relative; min-height: 0; overflow: hidden; border-radius: 20px;
+  border: 1px solid var(--cs-line); background: var(--cs-glass);
+  transition: box-shadow 0.18s ease, border-color 0.18s ease;
+}
+.group-call-tile[data-speaking="true"] { border-color: var(--cs-ring); box-shadow: inset 0 0 0 2px var(--cs-ring), 0 0 24px color-mix(in srgb, var(--cs-ring) 35%, transparent); }
+.group-call-tile__video { position: absolute; inset: 0; background: #000; }
+.group-call-tile__video video { object-fit: cover; }
+.group-call-tile__video--self video { transform: scaleX(-1); }
+.group-call-tile__face { position: absolute; inset: 0; display: grid; place-items: center; }
+.group-call-tile__face > img, .group-call-tile__face > span {
+  display: grid; place-items: center; width: clamp(56px, 38%, 112px); aspect-ratio: 1; border-radius: 26%;
+  object-fit: cover; background: var(--cs-glass-2); color: var(--cs-fg); font-size: 28px; font-weight: 800;
+}
+.group-call-tile__name {
+  position: absolute; left: 8px; bottom: 8px; max-width: calc(100% - 16px); display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 10px; border-radius: 999px; background: rgb(18 18 22 / 0.55); color: #fff; font-size: 12px; font-weight: 600;
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+}
+.group-call-tile__name > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+@media (prefers-reduced-motion: reduce) { .group-call-tile { transition: none; } }
+
+/* ── Live subtitles in calls ─────────────────────────────────────────────── */
+.call-captions { width: 100%; margin-bottom: 4px; }
+.call-btn--captions { position: relative; }
+.call-btn__badge { position: absolute; bottom: 7px; left: 0; right: 0; font-size: 9px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; line-height: 1; opacity: 0.8; }
+.call-btn--captions[data-coded="true"] svg { transform: translateY(-4px); }
+/* Five controls (video calls with subtitles) fit a phone without scrolling. */
+@media (max-width: 440px) {
+  .call-dock[data-crowded="true"] { gap: 8px; padding: 12px 12px; }
+  .call-dock[data-crowded="true"] .call-ctl { min-width: 52px; font-size: 11px; }
+  .call-dock[data-crowded="true"] .call-btn { width: 52px; height: 52px; }
+  .call-stage[data-direct="true"] .call-dock[data-crowded="true"] .call-ctl { min-width: 52px; font-size: 13px; }
+}
+
+/* Background effects on a video call: the corner button and the row of choices above the controls. */
+.call-stage__fx {
+  position: absolute; right: 16px; top: max(16px, env(safe-area-inset-top)); z-index: 3;
+  display: grid; place-items: center; width: 40px; height: 40px; border-radius: 999px;
+  border: 1px solid var(--cs-line); background: var(--cs-glass); color: var(--cs-fg);
+  backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+}
+.call-stage__fx:hover { background: var(--cs-glass-2); }
+.call-stage__fx[data-active="true"] { background: var(--cs-fg); color: var(--cs-on-fg); border-color: transparent; }
+.call-stage__fx:focus-visible { outline: 2px solid var(--cs-fg); outline-offset: 3px; }
+.call-stage[data-live="true"][data-video="true"] .call-stage__fx:not([data-active="true"]) { border-color: rgb(255 255 255 / 0.2); background: rgb(18 18 22 / 0.5); color: #fff; }
+.call-fx {
+  width: min(100%, 480px); padding: 12px 12px 10px; border-radius: 22px;
+  border: 1px solid var(--cs-line); background: var(--cs-dock); color: var(--cs-fg);
+  backdrop-filter: blur(22px) saturate(1.5); -webkit-backdrop-filter: blur(22px) saturate(1.5);
+}
+.call-stage[data-live="true"][data-video="true"] .call-fx { --cs-fg: #fff; --cs-on-fg: #0a0a0c; --cs-mu: rgb(255 255 255 / 0.8); --cs-glass-2: rgb(255 255 255 / 0.22); border-color: rgb(255 255 255 / 0.2); background: rgb(18 18 22 / 0.55); }
+.call-fx__head { display: flex; align-items: center; gap: 8px; padding: 0 4px 10px; font-size: 13px; font-weight: 700; }
+.call-fx__close { margin-left: auto; display: grid; place-items: center; width: 28px; height: 28px; border-radius: 999px; border: 0; background: var(--cs-glass-2); color: var(--cs-fg); }
+.call-fx__row { display: flex; gap: 10px; overflow-x: auto; scrollbar-width: none; padding: 2px 2px 4px; }
+.call-fx__row::-webkit-scrollbar { display: none; }
+.call-fx__opt { flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; gap: 6px; width: 54px; border: 0; background: none; color: var(--cs-mu); font-size: 11px; font-weight: 600; }
+.call-fx__opt:disabled { opacity: 0.6; }
+.call-fx__swatch { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 999px; background: var(--cs-glass-2) center / cover no-repeat; color: var(--cs-fg); box-shadow: inset 0 0 0 1px var(--cs-line); }
+.call-fx__swatch[data-kind="blur"] { background-image: radial-gradient(circle at 35% 35%, rgb(255 255 255 / 0.5), rgb(255 255 255 / 0.08) 70%); }
+.call-fx__opt[data-selected="true"] { color: var(--cs-fg); }
+.call-fx__opt[data-selected="true"] .call-fx__swatch { box-shadow: 0 0 0 2px var(--cs-fg), inset 0 0 0 1px var(--cs-line); }
+.call-fx__label { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.call-fx__head--sub { padding-top: 10px; font-size: 12px; color: var(--cs-mu); }
+.call-fx__emoji { font-size: 24px; line-height: 1; }
+
+/* ── Town hall: the talker on the big stage, everyone else in a strip ────── */
+.call-stage__layout {
+  position: absolute; right: 16px; top: max(16px, env(safe-area-inset-top)); z-index: 3;
+  display: grid; place-items: center; width: 40px; height: 40px; border-radius: 999px;
+  border: 1px solid var(--cs-line); background: var(--cs-glass); color: var(--cs-fg);
+  backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+}
+.call-stage__layout[data-beside-fx="true"] { right: 64px; }
+.call-stage__layout:hover { background: var(--cs-glass-2); }
+.call-stage__layout:focus-visible { outline: 2px solid var(--cs-fg); outline-offset: 3px; }
+.call-stage:has(.call-stage__layout[data-beside-fx="true"]) .call-stage__top { padding-left: 116px; padding-right: 116px; }
+
+.th {
+  flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; gap: 8px;
+  padding: calc(max(18px, env(safe-area-inset-top)) + 54px) 12px 0;
+}
+.th-stage {
+  --th-level: 0;
+  position: relative; flex: 1 1 auto; min-height: 0; overflow: hidden; border-radius: 24px;
+  border: 1px solid var(--cs-line); background: var(--cs-glass); isolation: isolate;
+  transition: box-shadow 0.12s linear, border-color 0.18s ease;
+}
+.th-stage[data-talking="true"] {
+  border-color: var(--cs-ring);
+  box-shadow: inset 0 0 0 calc(1.5px + var(--th-level) * 1.5px) var(--cs-ring), 0 0 calc(16px + var(--th-level) * 34px) color-mix(in srgb, var(--cs-ring) 38%, transparent);
+}
+.th-shot { position: absolute; inset: 0; z-index: 0; }
+.th-shot__video { position: absolute; inset: 0; background: #000; }
+.th-shot__video video, .th-tile__video video { object-fit: cover; }
+.th-shot__video[data-mirrored="true"] video, .th-tile__video[data-mirrored="true"] video { transform: scaleX(-1); }
+.th-shot__wash { position: absolute; inset: -12%; background: center / cover no-repeat; filter: blur(42px) saturate(1.4); opacity: 0.5; transform: scale(1.1); }
+.th-shot__face { position: absolute; inset: 0; display: grid; place-items: center; }
+.th-shot__face > img, .th-shot__face > span {
+  display: grid; place-items: center; width: clamp(96px, 34%, 208px); aspect-ratio: 1; border-radius: 26%;
+  object-fit: cover; background: var(--cs-glass-2); color: var(--cs-fg); font-size: 44px; font-weight: 800;
+  transform: scale(calc(1 + var(--th-level) * 0.07)); transition: transform 0.09s linear;
+  box-shadow: 0 0 0 calc(var(--th-level) * 10px) color-mix(in srgb, var(--cs-ring) 22%, transparent);
+}
+
+.th-name {
+  position: absolute; left: 12px; bottom: 12px; z-index: 2; max-width: calc(100% - 24px); display: inline-flex; align-items: center; gap: 8px;
+  padding: 7px 14px 7px 12px; border-radius: 999px; background: rgb(18 18 22 / 0.55); color: #fff; font-size: 15px; font-weight: 700;
+  backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+}
+.th-name > span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.th-meter { display: inline-flex; align-items: center; gap: 2px; height: 14px; }
+.th-meter i { width: 3px; height: 100%; border-radius: 2px; background: currentColor; transform: scaleY(0.3); transform-origin: center; transition: transform 0.2s ease; }
+.th-meter[data-on="true"] i { animation: th-meter 0.7s ease-in-out infinite alternate; }
+.th-meter[data-on="true"] i:nth-child(2) { animation-delay: -0.25s; }
+.th-meter[data-on="true"] i:nth-child(3) { animation-delay: -0.5s; }
+@keyframes th-meter { from { transform: scaleY(0.3); } to { transform: scaleY(1); } }
+.th-pin {
+  position: absolute; top: 12px; z-index: 2; display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 12px;
+  border-radius: 999px; border: 0; background: rgb(18 18 22 / 0.55); color: #fff; font-size: 12.5px; font-weight: 700;
+  backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+}
+.th-pin { left: 12px; cursor: pointer; }
+/* Moderators: mute or remove whoever is on stage. */
+.th-mod, .group-call-tile__mod {
+  position: absolute; top: 12px; right: 12px; z-index: 3; display: grid; place-items: center; width: 32px; height: 32px; padding: 0;
+  border-radius: 999px; border: 0; background: rgb(18 18 22 / 0.55); color: #fff; cursor: pointer;
+  backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+}
+.group-call-tile__mod { top: 8px; right: 8px; width: 28px; height: 28px; }
+.th-mod:focus-visible, .group-call-tile__mod:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+
+.th-strip { flex: 0 0 auto; display: flex; gap: 8px; overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: none; padding: 2px 0; }
+.th-strip::-webkit-scrollbar { display: none; }
+.th-tile:first-child { margin-left: auto; }
+.th-tile:last-child { margin-right: auto; }
+.th-tile {
+  position: relative; flex: 0 0 auto; width: 76px; height: 96px; padding: 0; overflow: hidden; border-radius: 16px;
+  border: 1px solid var(--cs-line); background: var(--cs-glass); color: var(--cs-fg); cursor: pointer;
+  transition: box-shadow 0.18s ease, border-color 0.18s ease, opacity 0.25s ease, transform 0.12s ease;
+}
+.th-tile:active { transform: scale(0.96); }
+.th-tile:focus-visible { outline: 2px solid var(--cs-fg); outline-offset: 2px; }
+.th-tile[data-talking="true"] { border-color: var(--cs-ring); box-shadow: inset 0 0 0 1.5px var(--cs-ring), 0 0 14px color-mix(in srgb, var(--cs-ring) 35%, transparent); }
+.th-tile[data-on-stage="true"] { opacity: 0.5; }
+.th-tile[data-pinned="true"] { opacity: 1; border-color: var(--cs-fg); box-shadow: inset 0 0 0 2px var(--cs-fg); }
+.th-tile__video { position: absolute; inset: 0; background: #000; }
+.th-tile__face { position: absolute; inset: 0 0 18px; display: grid; place-items: center; }
+.th-tile__face > img, .th-tile__face > span { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 26%; object-fit: cover; background: var(--cs-glass-2); font-size: 17px; font-weight: 800; }
+.th-tile__name {
+  position: absolute; left: 4px; right: 4px; bottom: 4px; display: flex; align-items: center; justify-content: center; gap: 3px;
+  padding: 2px 6px; border-radius: 999px; background: rgb(18 18 22 / 0.55); color: #fff; font-size: 10.5px; font-weight: 600;
+}
+.th-tile__name > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* A new speaker fades in over the last one. */
+.th-shot { animation: th-fade 0.24s ease-out both; }
+@keyframes th-fade { from { opacity: 0; } to { opacity: 1; } }
+
+@media (prefers-reduced-motion: reduce) { .th .th-shot { animation: none; } }

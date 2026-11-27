@@ -1,0 +1,960 @@
+import { translateCopy as _translateCopy } from '@/i18n/copy';
+import { duplicateDesignPageSelection } from "@/lib/editor/designClone";
+import { reportDesignClipboard } from "@/lib/editor/designClipboard";
+import { projectEditGate, type ProjectEditLease } from "@/lib/editor/projectEditGate";
+/**
+ * Editor state: media library, multi-track timeline, playback, project settings,
+ * selection, and undo/redo history.
+ * Architecture inspired by OpenCut (MIT) — see LICENSE-OpenCut.
+ */
+import { rebaseProjectHistory } from "@/lib/editor/projectHistory";
+import { projectReviewSnapshotKey } from "@/lib/editor/cloudProjectReview";
+import { removeFilmProjectMedia } from '@/lib/editor/filmProject';
+import { create } from "zustand";
+import { nanoid } from "nanoid";
+import type { MediaMeta, StoredMedia } from "@/lib/editor/mediaStore";
+import { appendPage, getPages, pageAt, removePage, reorderPage, setPageDuration, timelineDuration } from "@/lib/editor/pages";
+import { applyTimelineOp, sliceTimelineClip } from "@/lib/editor/timelineAgent";
+import { fitCaptionTrack } from "@/lib/editor/textFit";
+import { groupedSelection, groupDesignLayers, ungroupDesignLayers, remapDesignGroups } from "@/lib/editor/designGroups";
+import {
+  DEFAULT_SETTINGS,
+  type Clip,
+  type ClipKind,
+  type MediaClip,
+  type ProjectSettings,
+  type ProjectSnapshot,
+  type ShapeClip,
+  type ShapeKindAll,
+  type TextClip,
+  type Track,
+  type TrackKind,
+} from "@/lib/editor/types";
+import { EditorError } from "@/lib/editor/editorError";
+import { editorErrorText } from "@/lib/editor/editorErrorText";
+
+/** A partial update to any kind of clip. */
+export type ClipPatch = Partial<MediaClip> | Partial<TextClip> | Partial<ShapeClip>;
+
+export interface MediaItem extends MediaMeta {
+  url: string;
+  thumbnailUrl?: string;
+}
+
+/** State that is part of the undo/redo snapshot. */
+interface EditableState {
+  tracks: Track[];
+  clips: Clip[];
+  settings: ProjectSettings;
+}
+
+interface EditorState extends EditableState {
+  /** Project identity. */
+  projectId: string;
+  projectTitle: string;
+
+  /** Media library (live object URLs). */
+  media: MediaItem[];
+
+  /** Selection + playback. */
+  selectedClipIds: string[];
+  currentTime: number;
+  isPlaying: boolean;
+  isLooping: boolean;
+  zoom: number; // pixels per second on the timeline
+
+  /** History stacks (capped). */
+  past: EditableState[];
+  future: EditableState[];
+
+  // --- meta actions ---
+  setProjectTitle: (t: string) => void;
+  loadSnapshot: (snap: ProjectSnapshot) => void;
+  applySharedSnapshot: (snap: ProjectSnapshot, expectedKey: string) => number;
+  newProject: () => void;
+  toSnapshot: () => ProjectSnapshot;
+  applyDesignEdit: (expected: ProjectSnapshot, next: ProjectSnapshot) => boolean;
+
+  // --- media library ---
+  setMedia: (items: MediaItem[]) => void;
+  addMedia: (item: MediaItem) => void;
+  removeMedia: (id: string) => void;
+
+  // --- playback ---
+  setCurrentTime: (t: number) => void;
+  setIsPlaying: (p: boolean) => void;
+  toggleLoop: () => void;
+  setZoom: (z: number) => void;
+
+  // --- selection ---
+  selectClip: (id: string | null, additive?: boolean) => void;
+  selectMany: (ids: string[]) => void;
+  selectGroupMember: (id: string) => void;
+  groupSelected: () => void;
+  ungroupSelected: () => void;
+
+  // --- history ---
+  undo: () => void;
+  redo: () => void;
+
+  // --- timeline edits (all go through history) ---
+  addTrack: (kind: TrackKind) => string;
+  removeTrack: (id: string) => void;
+  moveTrack: (id: string, direction: "front" | "back" | "forward" | "backward") => void;
+  reorderTrack: (id: string, toIndex: number) => void;
+
+  /**
+   * `layer: true` stacks the clip over whatever is at the playhead (a new
+   * layer on the page) instead of appending it on the first video track.
+   */
+  addClipFromMedia: (mediaId: string, trackId?: string, start?: number, opts?: { layer?: boolean }) => string | null;
+  /** Canva-style duplicate: same moment in time, one layer up, nudged on the canvas. */
+  duplicateOnCanvas: () => void;
+  /**
+   * `layer: true` puts the text on a new track on top of the stack at exactly
+   * `start`, instead of queueing it after whatever is on the text track.
+   * The agent and templates use it, so text lands where it was asked to be
+   * and above any shape added before it.
+   */
+  addTextClip: (trackId?: string, start?: number, opts?: { layer?: boolean }) => string;
+  /** Add a vector shape as a new layer on top, at the playhead. */
+  addShapeClip: (shape: ShapeKindAll, patch?: Partial<ShapeClip>) => string;
+  moveClip: (id: string, patch: { start?: number; trackId?: string }) => void;
+  trimClip: (id: string, edge: "in" | "out", deltaSeconds: number) => void;
+  setClipSpeed: (id: string, speed: number) => void;
+  splitAtPlayhead: () => void;
+  rippleDelete: (ids?: string[]) => void;
+  duplicateSelected: () => void;
+  copySelectedToClipboard: () => void;
+  pasteFromClipboard: (opts?: { time?: number; trackId?: string }) => void;
+
+  updateTextClip: (id: string, patch: Partial<TextClip>) => void;
+  fitCaptionTrack: (trackId: string) => void;
+  updateMediaClip: (id: string, patch: Partial<MediaClip>) => void;
+  setClipTransition: (id: string, transition: Clip["transitionOut"] | null) => void;
+  updateSettings: (patch: Partial<ProjectSettings>) => void;
+
+  /**
+   * Canvas gestures (drag, resize, rotate) fire dozens of updates a second.
+   * `beginGesture` records one undo step up front, and `patchClipLive` applies
+   * the in-between states without touching history, so one drag is one undo.
+   */
+  /**
+   * Append a page after the last one and move the playhead to it. With
+   * `duplicate`, copy the layers of the current page onto it.
+   */
+  addPage: (opts?: { duplicate?: boolean }) => void;
+  /** Delete a page and its layers; later pages move up to close the gap. */
+  deletePage: (index: number) => void;
+  movePage: (from: number, to: number) => void;
+  resizePage: (index: number, duration: number) => void;
+
+  editing: boolean;
+  scopeVersion: number;
+  isHistorySettled: () => boolean;
+  holdEdits: () => ProjectEditLease;
+  cancelPendingEdits: () => void;
+  beginGesture: () => ProjectEditLease;
+  /**
+   * Run several store edits as one undo step. Used by the AI agent, whose one
+   * request can touch a dozen layers; undo should take the whole request back.
+   */
+  runAsOneStep: (fn: () => void | Promise<void>) => Promise<void>;
+  patchClipLive: (id: string, patch: ClipPatch) => void;
+  /** Patch any clip through history, whatever its kind. */
+  patchClip: (id: string, patch: ClipPatch) => void;
+}
+
+const MAX_HISTORY = 50;
+let batchedEdits = 0;
+let batchEpoch = 0;
+const liveGestures = new Set<symbol>();
+const MIN_CLIP = 0.05; // minimum clip duration (s)
+
+function snapshotEditable(s: EditorState): EditableState {
+  return {
+    tracks: s.tracks.map((t) => ({ ...t })),
+    clips: s.clips.map((c) => ({ ...c })),
+    settings: { ...s.settings },
+  };
+}
+
+function defaultTracks(): Track[] {
+  // Order matters: later entries render on top of earlier ones.
+  // Text sits at the end so overlays land above video by default.
+  return [
+    { id: nanoid(8), kind: "video", name: "Video 1", muted: false, hidden: false },
+    { id: nanoid(8), kind: "audio", name: "Audio 1", muted: false, hidden: false },
+    { id: nanoid(8), kind: "text", name: "Text", muted: false, hidden: false },
+  ];
+}
+
+function findFreeStart(clips: Clip[], trackId: string, desired: number, duration: number): number {
+  // Push to the right until there is no overlap on this track.
+  let start = Math.max(0, desired);
+  const onTrack = clips.filter((c) => c.trackId === trackId).sort((a, b) => a.start - b.start);
+  for (const c of onTrack) {
+    if (start + duration <= c.start) break;
+    if (start < c.start + c.duration) start = c.start + c.duration;
+  }
+  return start;
+}
+
+export const useEditorStore = create<EditorState>((set, get) => {
+  const editGate: ReturnType<typeof projectEditGate> = projectEditGate(() => set({ editing: editGate.isEditing() }));
+  return ({
+  editing: false,
+  scopeVersion: 0,
+  isHistorySettled: () => !batchedEdits && !liveGestures.size,
+  holdEdits: () => editGate.hold(),
+  cancelPendingEdits: () => { batchEpoch++; batchedEdits = 0; liveGestures.clear(); editGate.reset(); },
+  projectId: nanoid(10),
+  projectTitle: "Untitled project",
+  tracks: defaultTracks(),
+  clips: [],
+  settings: { ...DEFAULT_SETTINGS },
+
+  media: [],
+  selectedClipIds: [],
+  currentTime: 0,
+  isPlaying: false,
+  isLooping: false,
+  zoom: 80,
+
+  past: [],
+  future: [],
+
+  // ── meta ──
+  setProjectTitle: (t) => set({ projectTitle: t }),
+  loadSnapshot: (snap) => {
+    batchEpoch++; batchedEdits = 0; liveGestures.clear(); editGate.reset(false);
+    set({
+      editing: false,
+      scopeVersion: get().scopeVersion+1,
+      projectId: snap.id,
+      projectTitle: snap.title,
+      tracks: snap.tracks,
+      clips: snap.clips,
+      settings: snap.settings,
+      selectedClipIds: [],
+      currentTime: 0,
+      isPlaying: false,
+      past: [],
+      future: [],
+    });
+  },
+  applySharedSnapshot: (snap, expectedKey) => {
+    const s = get(), current = s.toSnapshot();
+    if (s.editing || batchedEdits || current.id !== snap.id || projectReviewSnapshotKey(current) !== expectedKey) throw new EditorError("copy.91e28d9a7136", "The current project changed during transfer");
+    const full = (editable: EditableState): ProjectSnapshot => ({ ...current, ...editable });
+    const next = rebaseProjectHistory({ current, past: s.past.map(full), future: s.future.map(full) }, snap);
+    const editable = (value: ProjectSnapshot): EditableState => ({ tracks: value.tracks, clips: value.clips, settings: value.settings });
+    const ids = new Set(snap.clips.map(clip => clip.id));
+    set({ ...editable(next.current), projectTitle: snap.title, past: next.past.map(editable), future: next.future.map(editable),
+      selectedClipIds: s.selectedClipIds.filter(id => ids.has(id)), currentTime: Math.min(s.currentTime,timelineDuration(snap.settings,snap.clips)), isPlaying: false });
+    return next.protectedPaths.length;
+  },
+  newProject: () => {
+    batchEpoch++; batchedEdits = 0; liveGestures.clear(); editGate.reset(false);
+    set({
+      editing: false,
+      scopeVersion: get().scopeVersion+1,
+      projectId: nanoid(10),
+      projectTitle: _translateCopy("copy.1b5a65c3cdba", { defaultValue: "Untitled project" }),
+      tracks: defaultTracks(),
+      clips: [],
+      settings: { ...DEFAULT_SETTINGS },
+      selectedClipIds: [],
+      currentTime: 0,
+      isPlaying: false,
+      past: [],
+      future: [],
+    });
+  },
+  toSnapshot: (): ProjectSnapshot => {
+    const s = get();
+    return {
+      id: s.projectId,
+      title: s.projectTitle,
+      tracks: s.tracks,
+      clips: s.clips,
+      settings: s.settings,
+      updatedAt: Date.now(),
+    };
+  },
+
+  // ── media ──
+  setMedia: (items) => set({ media: items }),
+  addMedia: (item) =>
+    set((s) => ({ media: [item, ...s.media.filter((m) => m.id !== item.id)] })),
+  removeMedia: (id) => {
+    const target = get().media.find((m) => m.id === id);
+    if (target) {
+      try { URL.revokeObjectURL(target.url); } catch { /* noop */ }
+      if (target.thumbnailUrl) try { URL.revokeObjectURL(target.thumbnailUrl); } catch { /* noop */ }
+    }
+    set((s) => {
+      const removed = new Set([id]);
+      const clean = (settings: ProjectSettings): ProjectSettings => {
+        const filmProject = removeFilmProjectMedia(settings.filmProject, removed);
+        return filmProject === settings.filmProject ? settings : { ...settings, filmProject };
+      };
+      return { media: s.media.filter((m) => m.id !== id), settings: clean(s.settings),
+        past: s.past.map(value => ({ ...value, settings: clean(value.settings) })), future: s.future.map(value => ({ ...value, settings: clean(value.settings) })) };
+    });
+    // Also remove dependent clips through history.
+    const orphans = get().clips.filter((c) => "mediaId" in c && c.mediaId === id).map((c) => c.id);
+    if (orphans.length) get().rippleDelete(orphans);
+  },
+
+  // ── playback ──
+  setCurrentTime: (t) => set({ currentTime: Math.max(0, t) }),
+  setIsPlaying: (p) => set({ isPlaying: p }),
+  toggleLoop: () => set((s) => ({ isLooping: !s.isLooping })),
+  setZoom: (z) => set({ zoom: Math.max(2, Math.min(400, z)) }),
+
+  // ── selection ──
+  selectClip: (id, additive) =>
+    set((s) => {
+      if (id === null) return { selectedClipIds: [] };
+      const group = groupedSelection(s.clips, [id], s.currentTime);
+      if (additive) {
+        const exists = s.selectedClipIds.includes(id);
+        return {
+          selectedClipIds: exists
+            ? s.selectedClipIds.filter((x) => !group.includes(x))
+            : [...new Set([...s.selectedClipIds, ...group])],
+        };
+      }
+      return { selectedClipIds: group };
+    }),
+  selectMany: (ids) => set(s => ({ selectedClipIds: groupedSelection(s.clips, ids, s.currentTime) })),
+  selectGroupMember: (id) => set(s => ({ selectedClipIds: s.clips.some(c => c.id === id) ? [id] : [] })),
+  groupSelected: () => {
+    const s = get(), before = s.toSnapshot(), next = groupDesignLayers(before, s.selectedClipIds, () => nanoid(10));
+    if (next !== before) s.applyDesignEdit(before, next);
+  },
+  ungroupSelected: () => {
+    const s = get(), before = s.toSnapshot(), next = ungroupDesignLayers(before, s.selectedClipIds);
+    if (next !== before) s.applyDesignEdit(before, next);
+  },
+
+  // ── history ──
+  undo: () =>
+    set((s) => {
+      if (!s.past.length) return s;
+      const previous = s.past[s.past.length - 1];
+      const newPast = s.past.slice(0, -1);
+      const current = snapshotEditable(s);
+      return {
+        ...previous,
+        past: newPast,
+        future: [current, ...s.future].slice(0, MAX_HISTORY),
+      } as Partial<EditorState> as EditorState;
+    }),
+  redo: () =>
+    set((s) => {
+      if (!s.future.length) return s;
+      const next = s.future[0];
+      const newFuture = s.future.slice(1);
+      const current = snapshotEditable(s);
+      return {
+        ...next,
+        past: [...s.past, current].slice(-MAX_HISTORY),
+        future: newFuture,
+      } as Partial<EditorState> as EditorState;
+    }),
+
+  // ── timeline edits ──
+  addTrack: (kind) => {
+    const id = nanoid(8);
+    const s = get();
+    const past = [...s.past, snapshotEditable(s)].slice(-MAX_HISTORY);
+    const count = s.tracks.filter((t) => t.kind === kind).length + 1;
+    const name = kind === "text" ? `Text ${count}` : kind === "audio" ? `Audio ${count}` : `Video ${count}`;
+    set({
+      past,
+      future: [],
+      tracks: [...s.tracks, { id, kind, name, muted: false, hidden: false }],
+    });
+    return id;
+  },
+  removeTrack: (id) => {
+    const s = get();
+    const past = [...s.past, snapshotEditable(s)].slice(-MAX_HISTORY);
+    set({
+      past,
+      future: [],
+      tracks: s.tracks.filter((t) => t.id !== id),
+      clips: s.clips.filter((c) => c.trackId !== id),
+      selectedClipIds: s.selectedClipIds.filter(
+        (cid) => !s.clips.some((c) => c.id === cid && c.trackId === id),
+      ),
+    });
+  },
+
+  moveTrack: (id, direction) => {
+    const s = get();
+    const idx = s.tracks.findIndex((t) => t.id === id);
+    if (idx < 0) return;
+    const arr = s.tracks.slice();
+    const [item] = arr.splice(idx, 1);
+    let newIdx = idx;
+    if (direction === "front") newIdx = arr.length;
+    else if (direction === "back") newIdx = 0;
+    else if (direction === "forward") newIdx = Math.min(arr.length, idx + 1);
+    else if (direction === "backward") newIdx = Math.max(0, idx - 1);
+    if (newIdx === idx) return;
+    arr.splice(newIdx, 0, item);
+    const past = [...s.past, snapshotEditable(s)].slice(-MAX_HISTORY);
+    set({ past, future: [], tracks: arr });
+  },
+
+  reorderTrack: (id, toIndex) => {
+    const s = get();
+    const idx = s.tracks.findIndex((t) => t.id === id);
+    if (idx < 0) return;
+    const arr = s.tracks.slice();
+    const [item] = arr.splice(idx, 1);
+    const clamped = Math.max(0, Math.min(arr.length, toIndex));
+    if (clamped === idx) return;
+    arr.splice(clamped, 0, item);
+    const past = [...s.past, snapshotEditable(s)].slice(-MAX_HISTORY);
+    set({ past, future: [], tracks: arr });
+  },
+
+  addClipFromMedia: (mediaId, trackId, start, opts) => {
+
+    const s = get();
+    const media = s.media.find((m) => m.id === mediaId);
+    if (!media) return null;
+
+    const wantKind: TrackKind = media.kind === "audio" ? "audio" : "video";
+    const clipLength =
+      media.kind === "image"
+        ? 5
+        : Number.isFinite(media.duration) && (media.duration ?? 0) > 0
+        ? (media.duration as number)
+        : 5;
+    const at = start !== undefined ? start : s.currentTime;
+    // In a still design (no video or audio yet) a new picture is another layer
+    // on the same page, like a graphics editor, not the next shot in a
+    // sequence. Pick a video track that is free at the playhead, or open one.
+    const isStillDesign = !s.clips.some((c) => c.kind === "video" || c.kind === "audio");
+    const layer = (opts?.layer ?? (media.kind === "image" && isStillDesign)) && !trackId;
+    const freeTrack = layer
+      ? s.tracks.find((t) => t.kind === "video" && !s.clips.some(
+          (c) => c.trackId === t.id && c.start < at + clipLength && c.start + c.duration > at,
+        ))
+      : undefined;
+    let targetTrack =
+      (trackId && s.tracks.find((t) => t.id === trackId && t.kind === wantKind)) ||
+      freeTrack ||
+      (layer ? undefined : s.tracks.find((t) => t.kind === wantKind));
+
+    let tracks = s.tracks;
+    if (!targetTrack) {
+      const count = s.tracks.filter((t) => t.kind === wantKind).length + 1;
+      targetTrack = {
+        id: nanoid(8),
+        kind: wantKind,
+        name: wantKind === "audio" ? `Audio ${count}` : `Video ${count}`,
+        muted: false,
+        hidden: false,
+      };
+      tracks = [...s.tracks, targetTrack];
+    }
+
+    const duration = clipLength;
+    const placedStart = findFreeStart(s.clips, targetTrack.id, at, duration);
+
+    const clip: MediaClip = {
+      id: nanoid(10),
+      trackId: targetTrack.id,
+      kind: media.kind as ClipKind as MediaClip["kind"],
+      start: placedStart,
+      duration,
+      trimIn: 0,
+      mediaId,
+      sourceDuration: media.duration,
+    };
+
+    const past = [...s.past, snapshotEditable(s)].slice(-MAX_HISTORY);
+    set({ past, future: [], tracks, clips: [...s.clips, clip], selectedClipIds: [clip.id] });
+    return clip.id;
+
+
+  },
+
+  addTextClip: (trackId, start, opts) => {
+    const s = get();
+    const targetTrack = opts?.layer
+      ? null
+      : (trackId && s.tracks.find((t) => t.id === trackId && t.kind === "text")) ||
+        s.tracks.find((t) => t.kind === "text") ||
+        // create one if absent
+        null;
+    let textTrackId = targetTrack?.id;
+    if (!textTrackId) {
+      textTrackId = nanoid(8);
+    }
+    const duration = 4;
+    const desired = start !== undefined ? start : s.currentTime;
+    const placedStart = findFreeStart(s.clips, textTrackId, desired, duration);
+
+    const clip: TextClip = {
+      id: nanoid(10),
+      trackId: textTrackId,
+      kind: "text",
+      start: placedStart,
+      duration,
+      trimIn: 0,
+      text: _translateCopy("copy.85c4a159c7b0", { defaultValue: "New text" }),
+      fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif",
+      fontSize: 72,
+      fontWeight: 700,
+      color: "#ffffff",
+      align: "centre",
+      x: 0.5,
+      y: 0.5,
+    };
+
+    const past = [...s.past, snapshotEditable(s)].slice(-MAX_HISTORY);
+    const tracks = targetTrack
+      ? s.tracks
+      : [...s.tracks, { id: textTrackId, kind: "text" as const, name: `Text ${s.tracks.filter((t) => t.kind === "text").length + 1}`, muted: false, hidden: false }];
+    set({ past, future: [], tracks, clips: [...s.clips, clip], selectedClipIds: [clip.id] });
+    return clip.id;
+  },
+
+  addShapeClip: (shape, patch) => {
+    const s = get();
+    const count = s.tracks.filter((t) => t.kind === "video").length + 1;
+    const track: Track = { id: nanoid(8), kind: "video", name: `Video ${count}`, muted: false, hidden: false };
+    // A shape is decoration: keep it on screen for the rest of the timeline,
+    // or 5s on an empty one.
+    const end = s.clips.reduce((m, c) => Math.max(m, c.start + c.duration), 0);
+    const start = s.currentTime;
+    const line = shape === "line" || shape === "arrow";
+    const aspect = s.settings.width / s.settings.height;
+    const size = 0.3;
+    const clip: ShapeClip = {
+      id: nanoid(10),
+      trackId: track.id,
+      kind: "shape",
+      shape,
+      start,
+      duration: Math.max(5, end - start),
+      trimIn: 0,
+      w: size,
+      h: line ? 0.02 : size * aspect,
+      fill: line ? "#ffffff" : "#7c5cff",
+      stroke: line ? { color: "#ffffff", width: 8 } : null,
+      ...patch,
+    };
+    const past = [...s.past, snapshotEditable(s)].slice(-MAX_HISTORY);
+    set({ past, future: [], tracks: [...s.tracks, track], clips: [...s.clips, clip], selectedClipIds: [clip.id] });
+    return clip.id;
+  },
+
+  moveClip: (id, patch) => {
+    const s = get();
+    const clip = s.clips.find((c) => c.id === id);
+    if (!clip) return;
+    const newTrackId = patch.trackId ?? clip.trackId;
+    const newTrack = s.tracks.find((t) => t.id === newTrackId);
+    if (!newTrack) return;
+    // Enforce track kind compatibility.
+    const clipKind = clip.kind;
+    const ok =
+      (newTrack.kind === "video" && (clipKind === "video" || clipKind === "image" || clipKind === "shape")) ||
+      (newTrack.kind === "audio" && clipKind === "audio") ||
+      (newTrack.kind === "text" && clipKind === "text");
+    if (!ok) return;
+
+    const desired = Math.max(0, patch.start ?? clip.start);
+    // Avoid overlap with other clips on the target track.
+    const others = s.clips.filter((c) => c.id !== id && c.trackId === newTrackId).sort((a, b) => a.start - b.start);
+    let start = desired;
+    for (const o of others) {
+      const overlap = start < o.start + o.duration && start + clip.duration > o.start;
+      if (overlap) {
+        // Snap to nearest free side.
+        const leftEdge = o.start - clip.duration;
+        const rightEdge = o.start + o.duration;
+        start = Math.abs(desired - leftEdge) < Math.abs(desired - rightEdge) && leftEdge >= 0 ? leftEdge : rightEdge;
+      }
+    }
+    start = Math.max(0, start);
+
+    const past = [...s.past, snapshotEditable(s)].slice(-MAX_HISTORY);
+    set({
+      past,
+      future: [],
+      clips: s.clips.map((c) => (c.id === id ? { ...c, trackId: newTrackId, start } as Clip : c)),
+    });
+  },
+
+  trimClip: (id, edge, deltaSeconds) => {
+    const s = get();
+    const clip = s.clips.find((c) => c.id === id);
+    if (!clip) return;
+    let { start, duration, trimIn } = clip;
+    const source = clip.kind === "video" || clip.kind === "audio";
+    const speed = source ? clip.speed ?? 1 : 1;
+    if (edge === "in") {
+      const newStart = Math.max(0, start + deltaSeconds, source ? start - trimIn / speed : 0);
+      const newDuration = duration - (newStart - start);
+      if (newDuration < MIN_CLIP) return;
+      // For media clips, also move trimIn so the source moves with the trim.
+      if (source) {
+        trimIn = Math.max(0, trimIn + (newStart - start) * speed);
+      }
+      start = newStart;
+      duration = newDuration;
+    } else {
+      const newDuration = duration + deltaSeconds;
+      if (newDuration < MIN_CLIP) return;
+      if (clip.kind === "video" || clip.kind === "audio") {
+        const src = clip.sourceDuration ?? Infinity;
+        if (trimIn + newDuration * speed > src) duration = Math.max(MIN_CLIP, (src - trimIn) / speed);
+        else duration = newDuration;
+      } else {
+        duration = newDuration;
+      }
+    }
+    const past = [...s.past, snapshotEditable(s)].slice(-MAX_HISTORY);
+    set({
+      past,
+      future: [],
+      // Keys are clip-relative; trimming the head must not slide the motion along.
+      clips: s.clips.map((c) => (c.id === id
+        ? sliceTimelineClip(c, start - c.start, duration, c.id, start)
+        : c)),
+    });
+  },
+
+  setClipSpeed: (id, speed) => {
+    const s = get();
+    const next = applyTimelineOp(s, { op: "speed", id, speed }, () => nanoid(10));
+    if (!next) return;
+    set({ past: [...s.past, snapshotEditable(s)].slice(-MAX_HISTORY), future: [], clips: next.clips, tracks: next.tracks });
+  },
+
+  splitAtPlayhead: () => {
+    const s = get();
+    const t = s.currentTime;
+    const toSplit = s.clips.filter((c) => t > c.start + 0.01 && t < c.start + c.duration - 0.01);
+    if (!toSplit.length) return;
+    const past = [...s.past, snapshotEditable(s)].slice(-MAX_HISTORY);
+    const newClips: Clip[] = [];
+    for (const c of s.clips) {
+      const split = toSplit.find((x) => x.id === c.id);
+      if (!split) { newClips.push(c); continue; }
+      const localOffset = t - c.start;
+      const left = sliceTimelineClip(c, 0, localOffset, c.id);
+      const right = sliceTimelineClip(c, localOffset, c.duration - localOffset, nanoid(10), t);
+      newClips.push(left, right);
+    }
+    set({ past, future: [], clips: newClips });
+  },
+
+  rippleDelete: (ids) => {
+    const s = get();
+    const target = groupedSelection(s.clips, ids ?? s.selectedClipIds, s.currentTime);
+    if (!target.length) return;
+    if (s.clips.some(c => target.includes(c.id) && c.groupId && c.locked)) return;
+    const past = [...s.past, snapshotEditable(s)].slice(-MAX_HISTORY);
+    set({
+      past,
+      future: [],
+      clips: s.clips.filter((c) => !target.includes(c.id)),
+      selectedClipIds: [],
+    });
+  },
+
+  duplicateSelected: () => {
+    const s = get();
+    if (!s.selectedClipIds.length) return;
+    const past = [...s.past, snapshotEditable(s)].slice(-MAX_HISTORY);
+    const newIds: string[] = [];
+    const additions: Clip[] = [];
+    let workingClips = s.clips.slice();
+    for (const id of s.selectedClipIds) {
+      const orig = workingClips.find((c) => c.id === id);
+      if (!orig) continue;
+      const desired = orig.start + orig.duration;
+      const placedStart = findFreeStart(workingClips, orig.trackId, desired, orig.duration);
+      const copy = { ...orig, id: nanoid(10), start: placedStart } as Clip;
+      additions.push(copy);
+      workingClips = [...workingClips, copy];
+      newIds.push(copy.id);
+    }
+    if (!additions.length) return;
+    set({ past, future: [], clips: [...s.clips, ...remapDesignGroups(additions, () => nanoid(10))], selectedClipIds: newIds });
+  },
+
+  duplicateOnCanvas: () => {
+    const store = get(), before = store.toSnapshot();
+    try {
+      const result = duplicateDesignPageSelection(before, store.selectedClipIds, store.currentTime, () => nanoid(10));
+      if (result && store.applyDesignEdit(before, result.project)) { get().setIsPlaying(false); get().selectMany(result.ids); }
+    } catch (error) { reportDesignClipboard({ kind: "error", message: editorErrorText(error, _translateCopy("copy.4a52cdd6ac72", { defaultValue: "Could not duplicate these layers" })) }); }
+  },
+
+  copySelectedToClipboard: () => {
+    const s = get();
+    if (!s.selectedClipIds.length) return;
+    const picked = s.clips.filter((c) => s.selectedClipIds.includes(c.id));
+    if (!picked.length) return;
+    const minStart = Math.min(...picked.map((c) => c.start));
+    const maxEnd = Math.max(...picked.map((c) => c.start + c.duration));
+    const payload = {
+      kind: "dehub-editor-clips" as const,
+      version: 2,
+      sourceEnd: maxEnd,
+      relative: picked.map((c) => ({ ...c, start: c.start - minStart })),
+    };
+    try {
+      const json = JSON.stringify(payload);
+      if (typeof navigator !== "undefined" && navigator.clipboard?.writeText) {
+        void navigator.clipboard.writeText(json);
+      }
+      (globalThis as unknown as { __dehubClipboard?: string }).__dehubClipboard = json;
+    } catch { /* noop */ }
+  },
+
+  pasteFromClipboard: (opts) => {
+    const readSync = (): string | null =>
+      (globalThis as unknown as { __dehubClipboard?: string }).__dehubClipboard ?? null;
+    const raw = readSync();
+    if (!raw) return;
+    let parsed: { kind?: string; relative?: Clip[]; sourceEnd?: number } | null = null;
+    try { parsed = JSON.parse(raw); } catch { return; }
+    if (!parsed || parsed.kind !== "dehub-editor-clips" || !Array.isArray(parsed.relative)) return;
+    const s = get();
+    const past = [...s.past, snapshotEditable(s)].slice(-MAX_HISTORY);
+    let workingClips = s.clips.slice();
+    const newIds: string[] = [];
+    // Default: paste immediately after the copied clips' end. Fallback to playhead.
+    const baseTime = opts?.time ?? parsed.sourceEnd ?? s.currentTime;
+    const overrideTrackId = opts?.trackId;
+    for (const c of remapDesignGroups(parsed.relative, () => nanoid(10))) {
+      let track =
+        (overrideTrackId ? s.tracks.find((t) => t.id === overrideTrackId) : null) ??
+        s.tracks.find((t) => t.id === c.trackId) ??
+        s.tracks.find((t) =>
+          (t.kind === "video" && (c.kind === "video" || c.kind === "image" || c.kind === "shape")) ||
+          (t.kind === "audio" && c.kind === "audio") ||
+          (t.kind === "text" && c.kind === "text"),
+        );
+      // If override track kind is incompatible, fall back to compatible track.
+      if (track && overrideTrackId && track.id === overrideTrackId) {
+        const compatible =
+          (track.kind === "video" && (c.kind === "video" || c.kind === "image" || c.kind === "shape")) ||
+          (track.kind === "audio" && c.kind === "audio") ||
+          (track.kind === "text" && c.kind === "text");
+        if (!compatible) {
+          track = s.tracks.find((t) => t.id === c.trackId) ??
+            s.tracks.find((t) =>
+              (t.kind === "video" && (c.kind === "video" || c.kind === "image" || c.kind === "shape")) ||
+              (t.kind === "audio" && c.kind === "audio") ||
+              (t.kind === "text" && c.kind === "text"),
+            );
+        }
+      }
+      if (!track) continue;
+      const desired = baseTime + c.start;
+      const placed = findFreeStart(workingClips, track.id, desired, c.duration);
+      const copy = { ...c, id: nanoid(10), trackId: track.id, start: placed, isPageBackground: undefined } as Clip;
+      workingClips = [...workingClips, copy];
+      newIds.push(copy.id);
+    }
+    if (!newIds.length) return;
+    set({ past, future: [], clips: workingClips, selectedClipIds: newIds });
+  },
+
+
+  updateTextClip: (id, patch) => {
+    const s = get();
+    const past = [...s.past, snapshotEditable(s)].slice(-MAX_HISTORY);
+    set({
+      past,
+      future: [],
+      clips: s.clips.map((c) =>
+        c.id === id && c.kind === "text" ? ({ ...c, ...(patch.text !== undefined && patch.text !== c.text ? { pageNumber: undefined } : {}), ...patch } as TextClip) : c,
+      ),
+    });
+  },
+
+  fitCaptionTrack: (trackId) => {
+    const s = get(), next = fitCaptionTrack(s, trackId);
+    if (next === s) return;
+    set({ past: [...s.past, snapshotEditable(s)].slice(-MAX_HISTORY), future: [], clips: next.clips });
+  },
+
+  updateMediaClip: (id, patch) => {
+    const s = get();
+    const past = [...s.past, snapshotEditable(s)].slice(-MAX_HISTORY);
+    set({
+      past,
+      future: [],
+      clips: s.clips.map((c) =>
+        c.id === id && c.kind !== "text" ? patchedClip(c, patch) : c,
+      ),
+    });
+  },
+
+  setClipTransition: (id, transition) => {
+    const s = get();
+    const past = [...s.past, snapshotEditable(s)].slice(-MAX_HISTORY);
+    set({
+      past,
+      future: [],
+      clips: s.clips.map((c) => {
+        if (c.id !== id) return c;
+        const { transitionOut: _omit, ...rest } = c;
+        return (transition ? { ...rest, transitionOut: transition } : rest) as Clip;
+      }),
+    });
+  },
+
+  applyDesignEdit: (expected, next) => {
+    const s = get();
+    if (expected.id !== s.projectId || next.id !== s.projectId ||
+      projectReviewSnapshotKey(s.toSnapshot()) !== projectReviewSnapshotKey(expected)) return false;
+    const existing = new Set(next.clips.map(c => c.id));
+    set({ past: [...s.past, snapshotEditable(s)].slice(-MAX_HISTORY), future: [], tracks: next.tracks,
+      clips: next.clips, settings: next.settings, selectedClipIds: s.selectedClipIds.filter(id => existing.has(id)),
+      currentTime: Math.min(s.currentTime, timelineDuration(next.settings, next.clips)), isPlaying: false });
+    return true;
+  },
+
+  updateSettings: (patch) => {
+    const s = get();
+    const past = [...s.past, snapshotEditable(s)].slice(-MAX_HISTORY);
+    set({ past, future: [], settings: { ...s.settings, ...patch } });
+  },
+
+  addPage: (opts) => {
+    const s = get();
+    const page = appendPage(s.settings, s.clips, s.currentTime, !!opts?.duplicate, () => nanoid(10));
+    const past = [...s.past, snapshotEditable(s)].slice(-MAX_HISTORY);
+    set({
+      past,
+      future: [],
+      clips: page.clips,
+      settings: page.settings,
+      currentTime: page.start,
+      selectedClipIds: [],
+      isPlaying: false,
+    });
+  },
+
+  deletePage: (index) => {
+    const s = get();
+    const page = removePage(s.settings, s.clips, index, () => nanoid(10));
+    if (!page) return;
+    const past = [...s.past, snapshotEditable(s)].slice(-MAX_HISTORY);
+    set({
+      past,
+      future: [],
+      clips: page.clips,
+      settings: page.settings,
+      currentTime: page.start,
+      selectedClipIds: [],
+    });
+  },
+
+  movePage: (from, to) => {
+    const s = get();
+    const page = reorderPage(s.settings, s.clips, from, to, () => nanoid(10));
+    if (!page) return;
+    set({ past: [...s.past, snapshotEditable(s)].slice(-MAX_HISTORY), future: [],
+      clips: page.clips, settings: page.settings, currentTime: page.start, selectedClipIds: [], isPlaying: false });
+  },
+
+  resizePage: (index, duration) => {
+    const s = get();
+    const page = setPageDuration(s.settings, s.clips, index, duration, () => nanoid(10));
+    if (!page) return;
+    set({ past: [...s.past, snapshotEditable(s)].slice(-MAX_HISTORY), future: [], clips: page.clips,
+      settings: page.settings, currentTime: page.start, selectedClipIds: [], isPlaying: false });
+  },
+
+  beginGesture: () => {
+    const gesture = Symbol(); liveGestures.add(gesture);
+    const lease = editGate.hold();
+    const s = get(), before = snapshotEditable(s);
+    set({ past: [...s.past, before].slice(-MAX_HISTORY), future: [] });
+    return {
+      isCurrent: lease.isCurrent,
+      release: () => {
+        liveGestures.delete(gesture);
+        if (!lease.isCurrent()) return;
+        try {
+          const after = get(), current = after.toSnapshot();
+          if (after.past.at(-1) === before && projectReviewSnapshotKey(current) === projectReviewSnapshotKey({ ...current, ...before })) {
+            set({ past: s.past, future: s.future });
+          }
+        } finally { lease.release(); }
+      },
+    };
+  },
+
+  runAsOneStep: (fn) => {
+    const epoch = batchEpoch, lease = editGate.hold();
+    batchedEdits++;
+    const before = get();
+    const snapshot = snapshotEditable(before);
+    const finish = () => {
+      if (epoch === batchEpoch) {
+        batchedEdits--;
+        const after = get();
+        const current = after.toSnapshot();
+        if (projectReviewSnapshotKey(current) !== projectReviewSnapshotKey({ ...current, ...snapshot })) {
+          set({ past: [...before.past, snapshot].slice(-MAX_HISTORY), future: [] });
+        } else {
+          set({ past: before.past, future: before.future });
+        }
+      }
+      lease.release();
+    };
+    try {
+      const result = fn();
+      if (result) return Promise.resolve(result).finally(finish);
+      finish(); return Promise.resolve();
+    } catch (error) { finish(); return Promise.reject(error); }
+  },
+
+  patchClipLive: (id, patch) =>
+    set((s) => ({ clips: s.clips.map((c) => (c.id === id ? patchedClip(c, patch) : c)) })),
+
+  patchClip: (id, patch) => {
+    const s = get();
+    const past = [...s.past, snapshotEditable(s)].slice(-MAX_HISTORY);
+    set({ past, future: [], clips: s.clips.map((c) => (c.id === id ? patchedClip(c, patch) : c)) });
+  },
+});
+});
+
+/** Replacing footage restores its background; masks belong to the old source. */
+function patchedClip(c: Clip, patch: ClipPatch): Clip {
+  return { ...c, ...(c.kind === "video" && "mediaId" in patch && patch.mediaId !== undefined && patch.mediaId !== c.mediaId ? { videoMatte: null } : {}), ...patch } as Clip;
+}
+
+/** Build a MediaItem (with object URLs) from a StoredMedia row. */
+export function toMediaItem(row: StoredMedia): MediaItem {
+  const { blob, thumbnail, ...meta } = row;
+  return {
+    ...meta,
+    thumbnail,
+    url: URL.createObjectURL(blob),
+    thumbnailUrl: thumbnail ? URL.createObjectURL(thumbnail) : undefined,
+  };
+}
+
+/** Total timeline duration = max(clip end). */
+export function selectTimelineDuration(state: EditorState): number {
+  return timelineDuration(state.settings, state.clips);
+}

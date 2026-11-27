@@ -1,0 +1,208 @@
+import { useTranslation as _useCopy } from 'react-i18next';
+/**
+ * AdsOverviewTab
+ * ==============
+ * Portal landing view: live balance, cross-campaign KPIs (spend, impressions,
+ * clicks, CTR, eCPM) from ad_daily_stats rollups, a 14-day performance chart,
+ * and quick campaign access. All real data — nothing simulated.
+ */
+
+import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
+import { MousePointerClick, DollarSign, Rocket, TrendingUp } from "lucide-react";
+import Wallet from "@/components/ui/cut-icons/wallet";
+import Eye from "@/components/ui/cut-icons/visibility";
+
+import Plus from "@/components/ui/cut-icons/add";
+
+import { Button } from '@/components/ui/button';
+import { AdTopUpModal } from '@/components/app/ads/AdTopUpModal';
+import { useAdAccount, useAdCampaigns, useAllCampaignStats } from '@/hooks/use-ads';
+import { CAMPAIGN_STATUS_LABELS, formatCompact, formatUsd, type AdCampaign } from '@/lib/ads/povr';
+import { cn } from '@/lib/utils';
+
+const STATUS_STYLES: Record<string, string> = {
+  active: 'bg-emerald-500/15 text-emerald-500',
+  pending_review: 'bg-yellow-500/15 text-yellow-500',
+  paused: 'bg-zinc-500/15 text-muted-foreground',
+  draft: 'bg-foreground/10 text-muted-foreground',
+  rejected: 'bg-red-500/15 text-red-500',
+  completed: 'bg-blue-500/15 text-blue-400',
+  archived: 'bg-foreground/5 text-muted-foreground',
+};
+
+export function StatusPill({ status }: { status: AdCampaign['status'] }) {
+  return (
+    <span className={cn('px-2 py-0.5 rounded-full text-[11px] font-medium', STATUS_STYLES[status] || STATUS_STYLES.draft)}>
+      {CAMPAIGN_STATUS_LABELS[status] ?? status}
+    </span>
+  );
+}
+
+interface AdsOverviewTabProps {
+  onOpenCampaign: (id: string) => void;
+  onNewCampaign: () => void;
+  onGoBilling: () => void;
+}
+
+export function AdsOverviewTab({ onOpenCampaign, onNewCampaign, onGoBilling }: AdsOverviewTabProps) {
+  const { t: _copy } = _useCopy();
+  const { t } = useTranslation();
+  const { data: account, isLoading: loadingAccount } = useAdAccount();
+  const { data: campaigns = [], isLoading } = useAdCampaigns();
+  const { data: stats = [] } = useAllCampaignStats(campaigns.map((c) => c.id));
+  const [topUpOpen, setTopUpOpen] = useState(false);
+
+  // An unfunded account is not an error anywhere — ads-serve just skips its
+  // campaigns — so the portal has to be the thing that says it out loud.
+  const waitingOnMoney = campaigns.filter((c) => c.status === 'active' || c.status === 'pending_review');
+  const unfunded = !loadingAccount && Number(account?.balance_usd ?? 0) <= 0 && waitingOnMoney.length > 0;
+  const suggestedUsd = waitingOnMoney.length
+    ? Math.max(25, Math.ceil(Math.min(...waitingOnMoney.map((c) => Number(c.daily_budget_usd) || 25))))
+    : 25;
+
+  const kpis = useMemo(() => {
+    let impressions = 0, clicks = 0, spend = 0;
+    for (const s of stats) {
+      impressions += s.impressions;
+      clicks += s.clicks;
+      spend += Number(s.spend_usd);
+    }
+    return {
+      impressions,
+      clicks,
+      spend,
+      ctr: impressions > 0 ? (clicks / impressions) * 100 : 0,
+      ecpm: impressions > 0 ? (spend / impressions) * 1000 : 0,
+    };
+  }, [stats]);
+
+  const chartData = useMemo(() => {
+    const byDay = new Map<string, { day: string; impressions: number; clicks: number; spend: number }>();
+    const days: string[] = [];
+    for (let i = 13; i >= 0; i--) {
+      const d = new Date(Date.now() - i * 86_400_000).toISOString().slice(0, 10);
+      days.push(d);
+      byDay.set(d, { day: d.slice(5), impressions: 0, clicks: 0, spend: 0 });
+    }
+    for (const s of stats) {
+      const row = byDay.get(s.day);
+      if (row) {
+        row.impressions += s.impressions;
+        row.clicks += s.clicks;
+        row.spend += Number(s.spend_usd);
+      }
+    }
+    return days.map((d) => byDay.get(d)!);
+  }, [stats]);
+
+  const recent = campaigns.slice(0, 5);
+
+  return (
+    <div className="space-y-4">
+      {unfunded && (
+        <div className="rounded-2xl border border-yellow-500/30 bg-yellow-500/10 p-4 flex flex-col items-stretch gap-3">
+          <div className="flex items-center gap-2.5">
+            <Wallet className="w-4 h-4 text-yellow-500 shrink-0" />
+            <div>
+              <p className="text-sm font-medium text-yellow-500">
+                {t('ads.notServingCount', { count: waitingOnMoney.length })}
+              </p>
+              <p className="text-xs text-muted-foreground">{_copy("copy.1f74d6b9d9eb", { defaultValue: "Ads only serve while the balance is above $0. Top up and delivery starts on the next request." })}</p>
+            </div>
+          </div>
+          <Button variant="glass" size="sm" className="w-full" onClick={() => setTopUpOpen(true)}>
+            <Plus className="w-4 h-4 mr-1.5" />{_copy("copy.dacfd4686c02", { defaultValue: " Top up" })}</Button>
+        </div>
+      )}
+
+      {/* Balance + KPI tiles */}
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
+        <button
+          type="button"
+          onClick={onGoBilling}
+          className="rounded-2xl border border-foreground/10 bg-foreground/[0.03] p-4 text-left hover:bg-foreground/[0.06] transition-colors"
+        >
+          <div className="flex items-center gap-2 text-muted-foreground text-xs mb-1"><Wallet className="w-3.5 h-3.5" /> {t('ads.balance')}</div>
+          <p className="text-xl font-bold text-foreground">{formatUsd(account?.balance_usd)}</p>
+          <p className="text-[11px] text-muted-foreground mt-0.5">{t('ads.topUp')}</p>
+        </button>
+        <div className="rounded-2xl border border-foreground/10 bg-foreground/[0.03] p-4">
+          <div className="flex items-center gap-2 text-muted-foreground text-xs mb-1"><DollarSign className="w-3.5 h-3.5" /> {t('ads.spend')}</div>
+          <p className="text-xl font-bold text-foreground">{formatUsd(kpis.spend)}</p>
+        </div>
+        <div className="rounded-2xl border border-foreground/10 bg-foreground/[0.03] p-4">
+          <div className="flex items-center gap-2 text-muted-foreground text-xs mb-1"><Eye className="w-3.5 h-3.5" /> {t('ads.impressions')}</div>
+          <p className="text-xl font-bold text-foreground">{formatCompact(kpis.impressions)}</p>
+        </div>
+        <div className="rounded-2xl border border-foreground/10 bg-foreground/[0.03] p-4">
+          <div className="flex items-center gap-2 text-muted-foreground text-xs mb-1"><MousePointerClick className="w-3.5 h-3.5" /> {t('ads.clicks')}</div>
+          <p className="text-xl font-bold text-foreground">{formatCompact(kpis.clicks)}</p>
+          <p className="text-[11px] text-muted-foreground mt-0.5">{kpis.ctr.toFixed(2)}{_copy("copy.9651c19f5990", { defaultValue: "% CTR" })}</p>
+        </div>
+        <div className="rounded-2xl border border-foreground/10 bg-foreground/[0.03] p-4">
+          <div className="flex items-center gap-2 text-muted-foreground text-xs mb-1"><TrendingUp className="w-3.5 h-3.5" />{_copy("copy.e6eadfd6d1d8", { defaultValue: " eCPM" })}</div>
+          <p className="text-xl font-bold text-foreground">{formatUsd(kpis.ecpm)}</p>
+        </div>
+      </div>
+
+      {/* 14-day chart */}
+      <div className="rounded-2xl border border-foreground/10 bg-foreground/[0.03] p-4">
+        <p className="text-sm font-semibold text-foreground mb-3">{t('ads.last14Days')}</p>
+        <ResponsiveContainer width="100%" height={220}>
+          <LineChart data={chartData} margin={{ top: 4, right: 8, bottom: 0, left: -18 }}>
+            <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.15} />
+            <XAxis dataKey="day" tick={{ fontSize: 11 }} stroke="currentColor" strokeOpacity={0.35} />
+            <YAxis tick={{ fontSize: 11 }} stroke="currentColor" strokeOpacity={0.35} allowDecimals={false} />
+            <Tooltip
+              contentStyle={{ background: 'rgba(24,24,27,0.95)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12, fontSize: 12 }}
+              labelStyle={{ color: '#a1a1aa' }}
+            />
+            <Line type="monotone" dataKey="impressions" stroke="#3b82f6" strokeWidth={2} dot={false} name={_copy("copy.c6310e909e40", { defaultValue: "Impressions" })} />
+            <Line type="monotone" dataKey="clicks" stroke="#22c55e" strokeWidth={2} dot={false} name={_copy("copy.921fc9804ed3", { defaultValue: "Clicks" })} />
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
+
+      {/* Recent campaigns */}
+      <div className="rounded-2xl border border-foreground/10 bg-foreground/[0.03] p-4">
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-sm font-semibold text-foreground">{t('ads.campaigns')}</p>
+          <Button size="sm" variant="ghost" className="text-muted-foreground hover:text-foreground" onClick={onNewCampaign}>
+            <Plus className="w-4 h-4 mr-1" />{_copy("copy.c80638f5f901", { defaultValue: " New" })}</Button>
+        </div>
+        {isLoading ? (
+          <p className="text-sm text-muted-foreground py-4 text-center">{t('ads.loading')}</p>
+        ) : recent.length === 0 ? (
+          <div className="text-center py-8 space-y-3">
+            <Rocket className="w-7 h-7 text-muted-foreground mx-auto" />
+            <p className="text-sm text-muted-foreground">{t('ads.noCampaignsYet')}</p>
+            <Button variant="glass" size="sm" onClick={onNewCampaign}>
+              <Plus className="w-4 h-4 mr-1" />{_copy("copy.4b0bd5e5b077", { defaultValue: " Create campaign" })}</Button>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {recent.map((c) => (
+              <button
+                key={c.id}
+                type="button"
+                onClick={() => onOpenCampaign(c.id)}
+                className="w-full flex items-center justify-between gap-3 rounded-xl border border-foreground/10 px-3.5 py-3 hover:bg-foreground/5 transition-colors text-left"
+              >
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-foreground truncate">{c.name}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {formatUsd(c.spent_usd)} / {formatUsd(c.total_budget_usd)}{_copy("copy.c76418035cab", { defaultValue: " spent" })}</p>
+                </div>
+                <StatusPill status={c.status} />
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <AdTopUpModal open={topUpOpen} onOpenChange={setTopUpOpen} suggestedUsd={suggestedUsd} />
+    </div>
+  );
+}

@@ -1,0 +1,905 @@
+import { useTranslation as _useCopy } from 'react-i18next';
+import { useSurfaceDraft } from '@/hooks/use-surface-draft';
+/**
+ * Governance Page
+ * ===============
+ * Token-holder governance board with weighted voting based on badge tier.
+ * Mirrors the Feature Requests UI pattern but without categories.
+ */
+
+import { BrandIcon } from '@/components/app/war/WarHudIcon';
+import governanceShieldIcon from '@/assets/governance-shield.png';
+
+import { useState, useMemo, useCallback, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { useTranslation } from 'react-i18next';
+import { motion, AnimatePresence } from 'framer-motion';
+import { IslandAction, KitButton, PageBody, PageEmpty, PageIsland, PageTabs } from '@/components/app/page-kit/PageKit';
+import { Loader2, CheckCircle2, RotateCcw } from "lucide-react";
+import Sparkles from "@/components/ui/cut-icons/assistant";
+import ShieldCheck from "@/components/ui/cut-icons/security";
+import Info from "@/components/ui/cut-icons/information";
+import Languages from "@/components/ui/cut-icons/language";
+
+import Search from "@/components/ui/cut-icons/search";
+import Plus from "@/components/ui/cut-icons/add";
+import X from "@/components/ui/cut-icons/close";
+import MessageCircle from "@/components/ui/cut-icons/messages";
+
+import { toast } from 'sonner';
+import { TranslatableText, SharedTranslationProvider, useSharedTranslationControl } from '@/components/app/TranslatableText';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
+import { CardHeader } from '@/components/app/cards/CardHeader';
+import { ActionBar } from '@/components/app/cards/ActionBar';
+import { useAuth } from '@/contexts/AuthContext';
+import { buildAvatarUrl } from '@/lib/media-url';
+import { proposalPath } from '@/lib/dehub-links';
+import { useProfileAvatar } from '@/hooks/use-profile-avatar-cache';
+import { useDebouncedValue } from '@/hooks/use-debounced-value';
+import { SEOHead } from '@/components/SEOHead';
+import { getBadgeName, getBadgeUrl } from '@/lib/staking-badges';
+import { BadgeIcon } from '@/components/app/BadgeIcon';
+import { ProposalVerdictLabel, verdictOf, votingTimeLeft, isVotingClosed, type ProposalVerdict } from '@/components/app/governance/ProposalVerdict';
+import {
+  useGovernanceProposals,
+  useCompletedProposals,
+  useGovernanceUserVotes,
+  useTotalGovernanceCount,
+  useSubmitGovernanceProposal,
+  useVoteGovernanceProposal,
+  useSelfVoteWeight,
+  useExplainCannotVote,
+  uploadProposalMedia,
+  BADGE_VOTE_WEIGHT,
+  type GovernanceSort,
+  type GovernanceProposal,
+  type ProposalMedia as ProposalMediaValue,
+} from '@/hooks/use-governance';
+import { ProposalDiscussion } from '@/components/app/governance/ProposalDiscussion';
+import { useProposalShare } from '@/components/app/governance/useProposalShare';
+import { ProposalMedia } from '@/components/app/governance/ProposalMedia';
+import { ProposalOptions, isMultipleChoice } from '@/components/app/governance/ProposalOptions';
+import { ProposalAnswersEditor } from '@/components/app/governance/ProposalAnswersEditor';
+import { z } from 'zod';
+
+type PageTab = 'proposals' | 'passed' | 'rejected';
+
+function formatTimeAgo(dateStr: string, t: (key: string, opts?: any) => string): string {
+  const seconds = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
+  if (seconds < 60) return t('governance.justNow');
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return t('governance.minutesAgo', { count: minutes });
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return t('governance.hoursAgo', { count: hours });
+  const days = Math.floor(hours / 24);
+  if (days < 30) return t('governance.daysAgo', { count: days });
+  const months = Math.floor(days / 30);
+  return t('governance.monthsAgo', { count: months });
+}
+
+// ──────────────────────────────────────────────────
+// Governance Card
+// ──────────────────────────────────────────────────
+function GovernanceCard({
+  proposal,
+  currentVote,
+  currentOption,
+  onVote,
+  onVoteOption,
+  voteDisabled,
+  userBadgeBalance,
+  username,
+  verdict,
+}: {
+  proposal: GovernanceProposal;
+  currentVote: number | undefined;
+  /** The viewer's answer on a multiple choice proposal. */
+  currentOption?: number | null;
+  onVote: (proposalId: string, voteType: 1 | -1, currentVote: number | undefined) => void;
+  onVoteOption?: (proposalId: string, optionIndex: number) => void;
+  voteDisabled: boolean;
+  userBadgeBalance: number | undefined;
+  username: string | null | undefined;
+  /** Set on a decided proposal: shows the verdict pill and locks voting. */
+  verdict?: ProposalVerdict;
+}) {
+  const { t } = useTranslation();
+  const [showComments, setShowComments] = useState(false);
+  const commentSectionRef = useRef<HTMLDivElement>(null);
+  const isMobile = useIsMobile();
+  const navigate = useNavigate();
+
+  const share = useProposalShare(proposal);
+  const cachedAvatar = useProfileAvatar(proposal.author_wallet_address);
+  const avatarUrl = proposal.author_avatar
+    ? buildAvatarUrl(proposal.author_wallet_address, proposal.author_avatar)
+    : cachedAvatar || null;
+
+  const username_raw = proposal.author_username || '';
+  const displayName = username_raw || proposal.author_wallet_address.slice(0, 6);
+  const handle = username_raw ? `@${username_raw}` : `${proposal.author_wallet_address.slice(0, 6)}...${proposal.author_wallet_address.slice(-4)}`;
+
+  const isLiked = currentVote === 1;
+  const isDisliked = currentVote === -1;
+
+  const handleLike = useCallback(() => {
+    onVote(proposal.id, 1, currentVote);
+  }, [proposal.id, currentVote, onVote]);
+
+  const handleDislike = useCallback(() => {
+    onVote(proposal.id, -1, currentVote);
+  }, [proposal.id, currentVote, onVote]);
+
+  // Show user's vote weight — resolved the way the server will resolve it,
+  // lock and ladder scale included, so the number on the button is the number
+  // that gets recorded.
+  const { weight: userWeight, badgeName: userBadge } = useSelfVoteWeight();
+  const badgeImageUrl = getBadgeUrl(userBadgeBalance, username);
+  const timeLeft = votingTimeLeft(proposal, t);
+  // The window can run out before the cron pass flips the row, so the buttons
+  // read the clock rather than only the status.
+  const votingClosed = isVotingClosed(proposal);
+  const multiple = isMultipleChoice(proposal);
+
+  return (
+    <div
+      data-feed-item
+      className="overflow-visible relative rounded-xl border border-white/[0.12] bg-white/[0.03] backdrop-blur-[24px] p-3 cursor-pointer hover:bg-white/[0.05] transition-colors"
+      onClick={() => navigate(proposalPath(proposal))}
+    >
+      <div className="flex items-start justify-between">
+        <CardHeader
+          username={displayName}
+          handle={handle}
+          avatarSeed={avatarUrl || proposal.author_wallet_address}
+          verified={false}
+          contentType="post"
+          creatorId={proposal.author_wallet_address}
+          creatorUsername={proposal.author_username || undefined}
+          badgeLookupId={proposal.author_username || proposal.author_wallet_address}
+        />
+        <div className="flex items-center gap-1.5 shrink-0 pt-1">
+          {verdict && (
+            <>
+              <ProposalVerdictLabel verdict={verdict} />
+              <span className="text-zinc-500 text-[10px]">·</span>
+            </>
+          )}
+          {timeLeft && (
+            <>
+              <span className="text-white text-[10px] font-semibold">{timeLeft}</span>
+              <span className="text-zinc-500 text-[10px]">·</span>
+            </>
+          )}
+          <span className="text-zinc-500 text-[10px]">{formatTimeAgo(proposal.created_at, t)}</span>
+        </div>
+      </div>
+
+      <SharedTranslationProvider>
+        <div className="pt-1 space-y-2">
+          <TranslatableText publicContent text={proposal.title} className="text-white font-semibold text-sm leading-tight" as="h3" hideControls />
+          <TranslatableText publicContent text={proposal.description} className="text-zinc-400 text-sm leading-relaxed" as="p" hideControls />
+          <ProposalMedia url={proposal.media_url} type={proposal.media_type} alt={proposal.title} />
+
+        {/* Answers on a multiple choice proposal, the for/against bar otherwise */}
+        {multiple ? (
+          <ProposalOptions
+            proposal={proposal}
+            myOption={currentOption}
+            onVote={onVoteOption ? (i) => onVoteOption(proposal.id, i) : undefined}
+            disabled={voteDisabled || votingClosed}
+          />
+        ) : (() => {
+          const total = (proposal.like_count ?? 0) + (proposal.dislike_count ?? 0);
+          const forPct = total > 0 ? Math.round(((proposal.like_count ?? 0) / total) * 100) : 50;
+          const againstPct = 100 - forPct;
+          return (
+            <div className="space-y-1">
+              <div className="flex justify-between text-[10px]">
+                <span className="text-emerald-400 font-medium">{forPct}% {t('governance.forLabel')}</span>
+                <span className="text-red-400 font-medium">{againstPct}% {t('governance.againstLabel')}</span>
+              </div>
+              <div className="h-1.5 rounded-full bg-white/5 overflow-hidden flex">
+                {total > 0 ? (
+                  <>
+                    <div data-keep-dark className="bg-emerald-500 rounded-l-full transition-all duration-300" style={{ width: `${forPct}%` }} />
+                    <div data-keep-dark className="bg-red-500 rounded-r-full transition-all duration-300" style={{ width: `${againstPct}%` }} />
+                  </>
+                ) : (
+                  <div className="bg-white/10 w-full rounded-full" />
+                )}
+              </div>
+            </div>
+          );
+        })()}
+
+        <div onClick={(e) => e.stopPropagation()}>
+          <ProposalTranslateButton />
+        </div>
+
+        <div className="pt-1" onClick={(e) => e.stopPropagation()}>
+          <ActionBar
+            postId={proposal.id}
+            className="p-0"
+            onComment={() => setShowComments(prev => !prev)}
+            onLike={handleLike}
+            onDislike={handleDislike}
+            isLiked={isLiked}
+            isDisliked={isDisliked}
+            likeCount={proposal.like_count ?? 0}
+            dislikeCount={proposal.dislike_count ?? 0}
+            commentCount={proposal.comment_count}
+            voteWeight={userWeight}
+            disabled={voteDisabled || votingClosed}
+            hideVotes={multiple}
+            {...share.actionBarProps}
+          />
+          {share.quoteComposer}
+        </div>
+
+        {/* Comments Section */}
+        {(() => {
+          const commentsContent = (
+            <div className="border-t border-white/5 pt-1 mt-1" onClick={(e) => e.stopPropagation()}>
+              <ProposalDiscussion
+                proposalId={proposal.id}
+                proposalAuthorAddress={proposal.author_wallet_address}
+                compact
+              />
+              <button
+                type="button"
+                onClick={() => navigate(proposalPath(proposal))}
+                className="mt-2 flex items-center gap-1.5 text-xs text-zinc-400 hover:text-white transition-colors"
+              >
+                <MessageCircle className="w-3.5 h-3.5" />
+                {t('governance.discussion.joinOnProposal')}
+              </button>
+            </div>
+          );
+
+          if (isMobile) {
+            return (
+              <Drawer open={showComments} onOpenChange={setShowComments}>
+                <DrawerContent className="bg-black/60 backdrop-blur-[24px] border-white/10 px-4 pb-6 max-h-[70dvh]">
+                  <DrawerHeader className="px-0 pt-2 pb-0">
+                    <DrawerTitle className="text-white text-sm">{t('governance.discussion.title')}</DrawerTitle>
+                  </DrawerHeader>
+                  {commentsContent}
+                </DrawerContent>
+              </Drawer>
+            );
+          }
+
+          return (
+            <AnimatePresence>
+              {showComments && (
+                <motion.div
+                  ref={commentSectionRef}
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="overflow-hidden"
+                  onAnimationComplete={() => {
+                    commentSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                  }}
+                >
+                  {commentsContent}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          );
+        })()}
+        </div>
+      </SharedTranslationProvider>
+    </div>
+  );
+}
+
+// ──────────────────────────────────────────────────
+// Submit Proposal Drawer
+// ──────────────────────────────────────────────────
+function SubmitProposalDrawer({
+  open,
+  onOpenChange,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
+  const { t } = useTranslation();
+  const [title, setTitle] = useSurfaceDraft("pages/app/GovernancePage.tsx:title", '');
+  const [description, setDescription] = useSurfaceDraft("pages/app/GovernancePage.tsx:description", '');
+  // Uploaded on pick and kept as a draft, so a failed submit keeps it too.
+  const [media, setMedia] = useSurfaceDraft<ProposalMediaValue | null>("pages/app/GovernancePage.tsx:media", null);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  // Yes/no stays the default; multiple choice lists two to six answers.
+  const [answerType, setAnswerType] = useSurfaceDraft<'yesno' | 'multiple'>("pages/app/GovernancePage.tsx:answerType", 'yesno');
+  const [options, setOptions] = useSurfaceDraft<string[]>("pages/app/GovernancePage.tsx:options", ['', '']);
+  const { walletAddress } = useAuth();
+  const { weight: selfWeight } = useSelfVoteWeight();
+
+  const submitMutation = useSubmitGovernanceProposal();
+
+  const handlePickMedia = async (file: File | undefined) => {
+    if (!file || !walletAddress) return;
+    setUploading(true);
+    try {
+      setMedia(await uploadProposalMedia(file, walletAddress));
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : t('governance.uploadFailed'));
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  const proposalSchema = useMemo(() => z.object({
+    title: z.string().trim().min(1, t('governance.titleRequired')).max(100, t('governance.titleMaxLength')),
+    description: z.string().trim().min(1, t('governance.descriptionRequired')).max(1000, t('governance.descriptionMaxLength')),
+  }), [t]);
+
+  const handleSubmit = () => {
+    const result = proposalSchema.safeParse({ title, description });
+    const fieldErrors: Record<string, string> = {};
+    if (!result.success) {
+      for (const issue of result.error.issues) {
+        fieldErrors[issue.path[0] as string] = issue.message;
+      }
+    }
+    const answers = answerType === 'multiple' ? options.map((o) => o.trim().replace(/\s+/g, ' ')) : null;
+    if (answers) {
+      if (answers.some((o) => !o)) {
+        fieldErrors.options = t('governance.optionsEmpty', 'Fill in every answer, or remove the empty one.');
+      } else if (new Set(answers.map((o) => o.toLowerCase())).size !== answers.length) {
+        fieldErrors.options = t('governance.optionsDuplicate', 'Two answers are the same. Make each one different.');
+      }
+    }
+    if (!result.success || Object.keys(fieldErrors).length > 0) {
+      setErrors(fieldErrors);
+      return;
+    }
+    setErrors({});
+    submitMutation.mutate(
+      { title: result.data.title, description: result.data.description, media, options: answers },
+      {
+        onSuccess: () => {
+          setTitle.complete(title, '');
+          setDescription.complete(description, '');
+          setMedia.complete(media, null);
+          setAnswerType.complete(answerType, 'yesno');
+          setOptions.complete(options, ['', '']);
+          onOpenChange(false);
+        },
+      }
+    );
+  };
+
+  return (
+    <Drawer open={open} onOpenChange={onOpenChange}>
+      {/* scrollable: with an attachment the form outgrows the sheet, and the
+          submit button sat below the fold with no way to reach it. */}
+      <DrawerContent column scrollable className="bg-black/60 backdrop-blur-[24px] border-white/10 max-h-[85dvh]">
+        <DrawerHeader className="relative">
+          <DrawerTitle className="text-white text-lg font-bold">{t('governance.submitProposal')}</DrawerTitle>
+          <button
+            type="button"
+            onClick={() => onOpenChange(false)}
+            className="absolute right-4 top-4 w-8 h-8 flex items-center justify-center rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-white transition-colors"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </DrawerHeader>
+
+        <div className="px-4 pb-6 space-y-4">
+          <div>
+            <label className="text-zinc-400 text-xs font-medium mb-1 block">{t('governance.titleLabel')}</label>
+            <Input
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder={t('governance.titlePlaceholder')}
+              maxLength={100}
+              className="bg-zinc-900 border-zinc-800 text-white placeholder:text-zinc-600 rounded-xl"
+            />
+            <div className="flex justify-between mt-1">
+              {errors.title && <span className="text-red-400 text-[11px]">{errors.title}</span>}
+              <span className="text-zinc-500 text-[11px] ml-auto">{title.length}/100</span>
+            </div>
+          </div>
+
+          <div>
+            <label className="text-zinc-400 text-xs font-medium mb-1 block">{t('governance.descriptionLabel')}</label>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder={t('governance.descriptionPlaceholder')}
+              maxLength={1000}
+              rows={4}
+              className="w-full bg-zinc-900 border border-zinc-800 text-white placeholder:text-zinc-600 rounded-xl px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-white/20 focus:border-transparent"
+            />
+            <div className="flex justify-between mt-1">
+              {errors.description && <span className="text-red-400 text-[11px]">{errors.description}</span>}
+              <span className="text-zinc-500 text-[11px] ml-auto">{description.length}/1000</span>
+            </div>
+          </div>
+
+          <ProposalAnswersEditor
+            answerType={answerType}
+            onAnswerTypeChange={setAnswerType}
+            options={options}
+            onOptionsChange={setOptions}
+            error={errors.options}
+          />
+
+          <div>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*,video/*"
+              className="hidden"
+              onChange={(e) => handlePickMedia(e.target.files?.[0])}
+            />
+            {media ? (
+              <div className="relative">
+                <ProposalMedia url={media.url} type={media.type} alt={title || t('governance.proposalAttachment')} />
+                <button
+                  type="button"
+                  onClick={() => setMedia(null)}
+                  className="absolute right-2 top-2 w-7 h-7 flex items-center justify-center rounded-lg bg-black/70 text-zinc-300 hover:text-white"
+                  aria-label={t('governance.removeMedia', 'Remove attachment')}
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploading}
+                className="w-full flex items-center justify-center gap-2 rounded-xl border border-dashed border-zinc-700 py-3 text-xs text-zinc-400 hover:text-white hover:border-zinc-500 transition-colors"
+              >
+                {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
+                {t('governance.addMedia', 'Add image or video')}
+              </button>
+            )}
+          </div>
+
+          <p className="text-zinc-500 text-[11px] text-center">
+            {selfWeight > 0
+              ? t('governance.freeForBadgeHolders', 'Free for badge holders. Your draft saves as you type.')
+              : t('governance.proposalFeeNote', 'Proposals cost 10,000 tokens without a staking badge. Your draft saves as you type.')}
+          </p>
+
+          <Button
+            onClick={handleSubmit}
+            disabled={submitMutation.isPending || uploading}
+            variant="glass"
+            className="w-full rounded-xl font-semibold"
+          >
+            {submitMutation.isPending ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <>
+                <ShieldCheck className="w-4 h-4" />
+                {t('governance.submitProposalBtn')}
+              </>
+            )}
+          </Button>
+        </div>
+      </DrawerContent>
+    </Drawer>
+  );
+}
+
+// ──────────────────────────────────────────────────
+// Inline translate button for proposal cards
+// ──────────────────────────────────────────────────
+function ProposalTranslateButton() {
+  const { t: _copy } = _useCopy();
+  const { isTranslated, handleTranslate, handleShowOriginal } = useSharedTranslationControl();
+
+  return (
+    <button
+      onClick={(e) => { e.stopPropagation(); isTranslated ? handleShowOriginal() : handleTranslate(); }}
+      className="flex items-center gap-1 text-zinc-500 hover:text-white transition-colors text-[11px]"
+    >
+      {isTranslated ? <RotateCcw className="w-3 h-3" /> : <Languages className="w-3.5 h-3.5" />}
+      <span>{isTranslated ? _copy("copy.88d759ea02ce", { defaultValue: "Original" }) : _copy("copy.8fe147696fbf", { defaultValue: "Translate" })}</span>
+    </button>
+  );
+}
+
+// ──────────────────────────────────────────────────
+function GovernanceSkeletons() {
+  return (
+    <div className="space-y-3">
+      {Array.from({ length: 5 }).map((_, i) => (
+        <div data-skeleton-group key={i} className="bg-zinc-900 rounded-2xl p-4 flex gap-3 animate-pulse">
+          <div className="flex flex-col items-center gap-1 min-w-[40px]">
+            <div className="w-8 h-8 rounded-lg bg-zinc-800" />
+            <div className="w-5 h-4 rounded bg-zinc-800" />
+            <div className="w-8 h-8 rounded-lg bg-zinc-800" />
+          </div>
+          <div className="flex-1 space-y-2">
+            <div className="h-4 w-3/4 rounded bg-zinc-800" />
+            <div className="h-3 w-full rounded bg-zinc-800" />
+            <div className="h-3 w-1/2 rounded bg-zinc-800" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ──────────────────────────────────────────────────
+// Infinite Scroll Sentinel
+// ──────────────────────────────────────────────────
+function InfiniteScrollSentinel({ onIntersect, isFetching }: { onIntersect: () => void; isFetching: boolean }) {
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting && !isFetching) onIntersect(); },
+      { rootMargin: '200px' }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [onIntersect, isFetching]);
+
+  return (
+    <div ref={ref} className="flex justify-center py-4">
+      {isFetching && <Loader2 className="w-5 h-5 animate-spin text-zinc-500" />}
+    </div>
+  );
+}
+
+// ──────────────────────────────────────────────────
+// Vote Weight Info Panel
+// ──────────────────────────────────────────────────
+/**
+ * Vote weight, as a chip that sits on the tab row so the island stays slim.
+ * The tier table opens under that row from the info button.
+ */
+function VoteWeightChip({
+  badgeBalance,
+  username,
+  showTiers,
+  onToggleTiers,
+}: {
+  badgeBalance: number | undefined;
+  username: string | null | undefined;
+  showTiers: boolean;
+  onToggleTiers: () => void;
+}) {
+  const { t } = useTranslation();
+  const { weight, badgeName, lent } = useSelfVoteWeight();
+  const navigate = useNavigate();
+  const badgeImageUrl = getBadgeUrl(badgeBalance, username);
+
+  return (
+    <div
+      // On phones the info icon is hidden, so the chip itself opens the tiers.
+      onClick={(event) => { if (!(event.target as HTMLElement).closest('button')) onToggleTiers(); }}
+      className="flex min-w-0 max-w-full cursor-pointer items-center gap-1.5 rounded-full bg-zinc-800/50 px-2 py-1 sm:pl-2.5 sm:pr-1.5"
+    >
+      {weight > 0 && badgeImageUrl && <BadgeIcon badgeBalance={badgeBalance} username={username} className="h-4 w-4 shrink-0" />}
+      <span className="min-w-0 truncate text-xs font-medium text-zinc-300">
+        {weight > 0 ? (
+          // Phones keep just the multiplier so the chip fits beside the tabs.
+          <><span className="hidden sm:inline">{t('governance.yourVoteWeight')} </span><span className="font-bold text-white">{weight}×</span><span className="hidden sm:inline"> ({badgeName})</span></>
+        ) : (
+          <span className="text-zinc-500">
+            {lent ? t('governance.lentBadgeCantVote') : t('governance.holdTokensToVote')}
+          </span>
+        )}
+      </span>
+      {weight === 0 && (
+        <button
+          type="button"
+          onClick={() => navigate('/app/buy')}
+          className="shrink-0 text-xs font-semibold text-white underline underline-offset-2"
+        >
+          {t('governance.buyDhb', { defaultValue: 'Buy tokens' })}
+        </button>
+      )}
+      <button
+        type="button"
+        onClick={onToggleTiers}
+        aria-expanded={showTiers}
+        aria-label={t('governance.yourVoteWeight')}
+        className={`shrink-0 p-0.5 text-zinc-500 transition-colors hover:text-zinc-300 ${weight > 0 ? 'hidden sm:block' : ''}`}
+      >
+        <Info className="h-3.5 w-3.5" />
+      </button>
+    </div>
+  );
+}
+
+function VoteWeightTiers({ open }: { open: boolean }) {
+  const { badgeName } = useSelfVoteWeight();
+  return (
+    <AnimatePresence>
+      {open && (
+        <motion.div
+          initial={{ height: 0, opacity: 0 }}
+          animate={{ height: 'auto', opacity: 1 }}
+          exit={{ height: 0, opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          className="overflow-hidden"
+        >
+          <div className="grid grid-cols-2 gap-1 rounded-xl bg-zinc-800/50 p-2">
+            {Object.entries(BADGE_VOTE_WEIGHT).map(([name, w]) => (
+              <div key={name} className={`flex items-center justify-between px-2 py-1 rounded-lg text-[10px] ${
+                name === badgeName ? 'bg-white/10 text-white' : 'text-zinc-500'
+              }`}>
+                <span>{name}</span>
+                <span className="font-bold">{w}×</span>
+              </div>
+            ))}
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
+// ──────────────────────────────────────────────────
+// Main Page
+// ──────────────────────────────────────────────────
+export default function GovernancePage() {
+  const { t: _copy } = _useCopy();
+  const { t } = useTranslation();
+  const { isAuthenticated, openLoginModal, user } = useAuth();
+  const [activeTab, setActiveTab] = useState<PageTab>('proposals');
+  const [sort, setSort] = useState<GovernanceSort>('most_voted');
+  const [showTiers, setShowTiers] = useState(false);
+  const [searchInput, setSearchInput] = useSurfaceDraft("pages/app/GovernancePage.tsx:searchInput", '');
+  const search = useDebouncedValue(searchInput, 300);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
+  const SORTS: { id: GovernanceSort; label: string }[] = useMemo(() => [
+    { id: 'most_voted', label: t('governance.mostVoted') },
+    { id: 'newest', label: t('governance.newest') },
+  ], [t]);
+
+  const { data: proposalsData, isLoading, isError, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } = useGovernanceProposals(sort, search);
+  const proposals = useMemo(() => proposalsData?.pages.flat() ?? [], [proposalsData]);
+  const { data: completedProposals, isLoading: isLoadingCompleted } = useCompletedProposals();
+  const { data: userVotes } = useGovernanceUserVotes();
+  const voteMutation = useVoteGovernanceProposal();
+
+  // Get user's badge balance for vote weight calculation
+  const userBadgeBalance = user?.badgeBalance as number | undefined;
+  const username = user?.username;
+
+  const { weight: selfWeight, badgeName: selfBadge, lent: selfLent } = useSelfVoteWeight();
+  const explainCannotVote = useExplainCannotVote();
+
+  const handleVote = useCallback(
+    (proposalId: string, voteType: 1 | -1, currentVote: number | undefined) => {
+      if (!isAuthenticated) {
+        openLoginModal();
+        return;
+      }
+      if (selfWeight === 0) {
+        explainCannotVote(selfLent);
+        return;
+      }
+      voteMutation.mutate({ proposalId, voteType, currentVote, voteWeight: selfWeight, badgeName: selfBadge });
+    },
+    [isAuthenticated, openLoginModal, voteMutation, selfWeight, selfBadge, selfLent, explainCannotVote]
+  );
+
+  const handleVoteOption = useCallback(
+    (proposalId: string, optionIndex: number) => {
+      if (!isAuthenticated) {
+        openLoginModal();
+        return;
+      }
+      if (selfWeight === 0) {
+        explainCannotVote(selfLent);
+        return;
+      }
+      voteMutation.mutate({
+        proposalId,
+        voteType: 1,
+        currentVote: userVotes?.[proposalId]?.type,
+        voteWeight: selfWeight,
+        badgeName: selfBadge,
+        optionIndex,
+      });
+    },
+    [isAuthenticated, openLoginModal, voteMutation, selfWeight, selfBadge, selfLent, explainCannotVote, userVotes]
+  );
+
+  const handleSubmitClick = () => {
+    if (!isAuthenticated) {
+      openLoginModal();
+      return;
+    }
+    setDrawerOpen(true);
+  };
+
+  const { data: totalCount } = useTotalGovernanceCount();
+  const passedProposals = useMemo(() => (completedProposals ?? []).filter(p => verdictOf(p) === 'passed'), [completedProposals]);
+  const rejectedProposals = useMemo(() => (completedProposals ?? []).filter(p => verdictOf(p) === 'rejected'), [completedProposals]);
+  const passedCount = passedProposals.length;
+  const rejectedCount = rejectedProposals.length;
+
+  return (
+    <div className="min-h-screen">
+      <SEOHead title={_copy("copy.d337c11fa526", { defaultValue: "Governance: Vote on Community Proposals" })} description={_copy("copy.16f2ec30029c", { defaultValue: "Participate in decentralized governance on Riftn. Submit proposals, vote with your staking badge weight, and shape the platform's future." })} url="https://riftn.com/app/governance" jsonLd={{ '@context': 'https://schema.org', '@type': 'WebPage', name: 'Riftn Governance', url: 'https://riftn.com/app/governance', description: _copy("copy.af3d83f09598", { defaultValue: "Decentralized governance, submit and vote on proposals to shape Riftn." }), isPartOf: { '@type': 'WebSite', name: 'Riftn', url: 'https://riftn.com' } }} />
+      <h1 className="sr-only">{_copy("copy.e31ead08f6e6", { defaultValue: "Riftn Governance — Decentralised Social Media, Censorship Resistant & Freedom of Speech" })}</h1>
+      <PageIsland
+        icon={<BrandIcon src={governanceShieldIcon} alt={_copy("copy.86f8a694159b", { defaultValue: "Governance" })} className="h-8 w-8 object-contain brightness-75" />}
+        title={t('governance.title')}
+        subtitle={totalCount === undefined ? t('common.loading', { defaultValue: 'Loading...' }) : t('governance.proposalCount', { count: totalCount })}
+        actions={
+          <IslandAction label={t('governance.propose')} onClick={handleSubmitClick}>
+            <Plus className="h-[18px] w-[18px]" />
+          </IslandAction>
+        }
+        tabs={
+          // Vote weight shares the tab row; when the row is too narrow it
+          // wraps under the tabs rather than squeezing them.
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-2">
+            <PageTabs
+              className="min-w-0"
+              value={activeTab}
+              onChange={setActiveTab}
+              tabs={[
+                { id: 'proposals', label: t('governance.proposals') },
+                { id: 'passed', label: t('governance.passed'), icon: <CheckCircle2 className="h-3.5 w-3.5" />, count: passedCount > 0 ? passedCount : undefined },
+                { id: 'rejected', label: t('governance.rejected'), icon: <X className="h-3.5 w-3.5" />, count: rejectedCount > 0 ? rejectedCount : undefined },
+              ]}
+            />
+            {isAuthenticated && (
+              <div className="ml-auto min-w-0 max-w-full">
+                <VoteWeightChip
+                  badgeBalance={userBadgeBalance}
+                  username={username}
+                  showTiers={showTiers}
+                  onToggleTiers={() => setShowTiers((open) => !open)}
+                />
+              </div>
+            )}
+          </div>
+        }
+      >
+        {isAuthenticated && <VoteWeightTiers open={showTiers} />}
+
+        {/* Search, with the sort on its right */}
+        <div className="flex items-center gap-2">
+          <div className="relative min-w-0 flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+            <Input
+              type="search"
+              placeholder={t('governance.searchProposals')}
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              className="pl-10 bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500 rounded-xl"
+            />
+          </div>
+          <PageTabs size="sm" className="shrink-0" value={sort} onChange={setSort} tabs={SORTS} />
+        </div>
+      </PageIsland>
+
+      {/* Content */}
+      <PageBody>
+      {/* Proposals Tab */}
+      {activeTab === 'proposals' && (
+        <>
+          {isLoading ? (
+            <GovernanceSkeletons />
+          ) : isError ? (
+            <PageEmpty
+              icon="governance"
+              title={t('governance.loadFailed', "Couldn't load proposals")}
+              action={<KitButton onClick={() => refetch()}>{t('common.retry', 'Retry')}</KitButton>}
+            />
+          ) : proposals.length > 0 ? (
+            <div className="space-y-3">
+              {proposals.map((proposal) => (
+                <GovernanceCard
+                  key={proposal.id}
+                  proposal={proposal}
+                  currentVote={userVotes?.[proposal.id]?.type}
+                  currentOption={userVotes?.[proposal.id]?.option}
+                  onVote={handleVote}
+                  onVoteOption={handleVoteOption}
+                  voteDisabled={voteMutation.isPending}
+                  userBadgeBalance={userBadgeBalance}
+                  username={username}
+                />
+              ))}
+              {hasNextPage && (
+                <InfiniteScrollSentinel
+                  onIntersect={fetchNextPage}
+                  isFetching={isFetchingNextPage}
+                />
+              )}
+            </div>
+          ) : (
+            <PageEmpty
+              icon="governance"
+              title={passedCount + rejectedCount > 0 ? t('governance.noOpenProposals', 'No open proposals right now') : t('governance.noProposalsYet')}
+              body={passedCount + rejectedCount > 0 ? t('governance.decidedInTabs', 'Decided proposals are in the Passed and Rejected tabs.') : t('governance.beFirstToSubmit')}
+              action={
+                <KitButton onClick={handleSubmitClick}>
+                  <Plus className="w-4 h-4" />
+                  {t('governance.submitProposalBtn')}
+                </KitButton>
+              }
+            />
+          )}
+        </>
+      )}
+
+      {/* Passed Tab */}
+      {activeTab === 'passed' && (
+        <>
+          {isLoadingCompleted ? (
+            <GovernanceSkeletons />
+          ) : passedProposals.length > 0 ? (
+            <div className="space-y-3">
+              {passedProposals.map((proposal) => (
+                <GovernanceCard
+                  key={proposal.id}
+                  proposal={proposal}
+                  currentVote={userVotes?.[proposal.id]?.type}
+                  currentOption={userVotes?.[proposal.id]?.option}
+                  onVote={handleVote}
+                  onVoteOption={handleVoteOption}
+                  voteDisabled
+                  userBadgeBalance={userBadgeBalance}
+                  username={username}
+                  verdict="passed"
+                />
+              ))}
+            </div>
+          ) : (
+            <PageEmpty icon="governance" title={t('governance.noPassedYet')} body={t('governance.passedAppearHere')} />
+          )}
+        </>
+      )}
+
+      {/* Rejected Tab */}
+      {activeTab === 'rejected' && (
+        <>
+          {isLoadingCompleted ? (
+            <GovernanceSkeletons />
+          ) : rejectedProposals.length > 0 ? (
+            <div className="space-y-3">
+              {rejectedProposals.map((proposal) => (
+                <GovernanceCard
+                  key={proposal.id}
+                  proposal={proposal}
+                  currentVote={userVotes?.[proposal.id]?.type}
+                  currentOption={userVotes?.[proposal.id]?.option}
+                  onVote={handleVote}
+                  onVoteOption={handleVoteOption}
+                  voteDisabled
+                  userBadgeBalance={userBadgeBalance}
+                  username={username}
+                  verdict="rejected"
+                />
+              ))}
+            </div>
+          ) : (
+            <PageEmpty icon="governance" title={t('governance.noRejectedYet')} body={t('governance.rejectedAppearHere')} />
+          )}
+        </>
+      )}
+      </PageBody>
+
+      {/* Submit Drawer */}
+      <SubmitProposalDrawer open={drawerOpen} onOpenChange={setDrawerOpen} />
+    </div>
+  );
+}

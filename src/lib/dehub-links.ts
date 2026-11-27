@@ -1,0 +1,583 @@
+/**
+ * Riftn Entity Links
+ * ==================
+ * One parser for every in-app URL that deserves to render as a card instead of
+ * as a link: posts, profiles, communities, community invites, stores, store
+ * listings, events and bounties.
+ *
+ * Before this module the same job was done by three separate pairs of
+ * `hasXLink`/`extractX` helpers living next to their own embed components, each
+ * with its own regex. They disagreed, and every surface picked a different
+ * subset of them — which is why a store link carded up in the feed but arrived
+ * as a bare URL in a DM, and why an event link never carded anywhere except the
+ * composer. Detection now happens once, here, and the surfaces only choose
+ * where to put the result.
+ *
+ * Two rules this module exists to enforce:
+ *
+ * 1. **Host is checked.** The old helpers matched a path substring anywhere in
+ *    the text, so `evil.example/app/post/1` rendered as one of our post cards.
+ *    A card is a statement that the content is ours; only our own hosts (and
+ *    host-less paths, which can only be ours) get one.
+ *
+ * 2. **The link is kept.** `path` is the URL as written, not one rebuilt from
+ *    the parsed ids, so a link carrying `?comment=` or pointing at `/info`
+ *    still lands where it pointed even though the card is chosen by `kind`.
+ */
+
+import i18n from 'i18next';
+import { RESERVED_LINK_SEGMENTS } from '@/lib/reserved-usernames';
+import { cutFromText } from '@/lib/cut-from-text';
+import { appPageFor } from '@/lib/app-page-paths';
+
+export type DehubLinkKind =
+  | 'post'
+  | 'profile'
+  | 'community'
+  | 'communityInvite'
+  | 'store'
+  | 'listing'
+  | 'event'
+  | 'stage'
+  | 'film'
+  | 'bounty'
+  | 'app'
+  | 'proposal'
+  | 'skill'
+  | 'featureRequest'
+  | 'page';
+
+export interface DehubLinkMatch {
+  kind: DehubLinkKind;
+  /** The exact substring matched in the source text — strip by this, not by a rebuilt URL. */
+  raw: string;
+  /** In-app path (pathname + search) to navigate to, exactly as the link pointed. */
+  path: string;
+  tokenId?: string;
+  /** Comment id when the link is a thread entry (/posts/1/b/55). */
+  commentId?: string;
+  /** Set when a post link used the off-chain slug (/newpost/3) instead of a tokenId. */
+  newPostId?: string;
+  /** Set when a post link used an article's readable slug (/app/post/<title-slug>). */
+  articleSlug?: string;
+  username?: string;
+  slug?: string;
+  code?: string;
+  storeId?: string;
+  listingId?: string;
+  eventNumber?: string;
+  stageId?: string;
+  /** Set when the link used the short form (/stages/7) instead of the uuid. */
+  stageShortId?: string;
+  /** JustWatch id of a /cinema title. */
+  filmId?: string;
+  /** Which catalogue the id belongs to — the offers endpoint needs both. */
+  filmObjectType?: 'movie' | 'show';
+  /**
+   * `/bounty/<job_number>` or the legacy `/work/<uuid>` — `useWorkJob` resolves
+   * either shape, so the raw key is carried through rather than split into two
+   * fields.
+   */
+  bountyJobKey?: string;
+  /** `/apps/<slug>` — a mini app in the store. */
+  appSlug?: string;
+  /** `/app/governance/<n>` or the legacy `/app/governance/<uuid>` — a governance proposal. */
+  proposalId?: string;
+  skillSlug?: string;
+  /** `/build?feature=<uuid>` — one card on the Build board. */
+  featureRequestId?: string;
+  /**
+   * Any other page of ours (Leaderboard, Shorts, an arcade game...). The card
+   * looks the page up in the menu by this pathname.
+   */
+  pagePath?: string;
+}
+
+// ── Hosts ───────────────────────────────────────────────────────────────────
+
+/**
+ * Hosts whose links are ours. `*.dehub.io` covers the legacy host and the
+ * per-username profile subdomains; the preview hosts are here because a link
+ * copied out of a Cloudflare preview build is still a Riftn link, and silently
+ * refusing to card it during testing reads as the feature being broken.
+ */
+/**
+ * The in-site path of any link to our own site, card or not, so a chat can
+ * open it in place instead of in a new tab. Null for other sites.
+ */
+export function ownSitePath(url: string): string | null {
+  try {
+    const parsed = new URL(/^https?:\/\//i.test(url) ? url : `https://${url}`);
+    if (!isDehubHost(parsed.host)) return null;
+    // Other subdomains (docs, staging, builder apps) are separate sites.
+    const h = parsed.hostname.toLowerCase();
+    const sameSite = h === 'riftn.com' || h === 'www.riftn.com' || h === 'dehub.io' || h === 'www.dehub.io'
+      || (typeof window !== 'undefined' && h === window.location.hostname.toLowerCase());
+    return sameSite ? `${parsed.pathname}${parsed.search}${parsed.hash}` : null;
+  } catch {
+    return null;
+  }
+}
+
+function isDehubHost(host: string): boolean {
+  const h = host.toLowerCase().replace(/:\d+$/, '');
+  if (h === 'localhost' || h === '127.0.0.1') return true;
+  if (h === 'dehub.io' || h.endsWith('.dehub.io')) return true;
+  if (h === 'riftn.com' || h.endsWith('.riftn.com')) return true;
+  // dehub.app: the APK download page. Builder apps live on dhb.gg, never trusted.
+  if (h === 'dehub.app' || h === 'www.dehub.app') return true;
+  if (h === 'dehub.net' || h.endsWith('.dehub.net')) return true;
+  if (h.endsWith('.pages.dev') || h.endsWith('.workers.dev')) return true;
+  if (typeof window !== 'undefined' && h === window.location.hostname.toLowerCase()) return true;
+  return false;
+}
+
+/**
+ * Single-segment paths that belong to a route, not to a person.
+ *
+ * `/:username` is the last route in the table, so every one of these would
+ * otherwise parse as a profile — and a profile card that resolves to nothing is
+ * worse than the link it replaced.
+ *
+ * This used to be a hand-typed list "kept in sync with App.tsx", which is the
+ * same promise the worker's SYSTEM_ROUTES made before PR #224 folded it into
+ * one file, and it drifted the same way: it was missing about forty of the
+ * routes that actually exist, so `dehub.io/settings`, `/wallet`, `/fractions`,
+ * `/superpowers` and the rest all carded as profiles of nobody. It reads the
+ * shared list now.
+ */
+const RESERVED_ROOT_SEGMENTS = RESERVED_LINK_SEGMENTS;
+
+// ── Tokenising ──────────────────────────────────────────────────────────────
+
+// Host-qualified URLs, with or without a scheme: dehub.io/app/post/1
+const ABSOLUTE_URL_RE = /(?:https?:\/\/)?(?:[a-z0-9-]+\.)+[a-z]{2,}(?::\d+)?\/[^\s<>"'`]*/gi;
+// Bare in-app paths, which can only be ours: /app/post/1
+// `stage` sits alongside the /app prefix rather than under it because the
+// invite route is top-level — App.tsx routes /stage/:id, not /app/stage/:id.
+// The optional `s` also admits the short share form, /stages/7. `posts` is the
+// short post/thread form for the same reason (/posts/1, /posts/1/b/9). `bounty`
+// and `work` are the same story again for bounty detail pages — /bounty/7 is
+// canonical, /work/<uuid> is the pre-numbering form still out in the wild.
+// `apps` is the mini app store, /apps/<slug>.
+const BARE_PATH_RE = /\/(?:app|apps|communities|posts|stages?|bounty|work|governance)\/[^\s<>"'`]*/gi;
+
+// A URL at the end of a sentence carries the punctuation with it.
+const TRAILING_PUNCTUATION_RE = /[.,;:!?)\]}>"']+$/;
+
+function trimTrailingPunctuation(token: string): string {
+  // A closing paren that has a matching opener inside the URL belongs to it.
+  let out = token;
+  for (;;) {
+    const trimmed = out.replace(TRAILING_PUNCTUATION_RE, '');
+    if (trimmed === out) return out;
+    if (
+      trimmed.length < out.length &&
+      out.endsWith(')') &&
+      (out.match(/\(/g)?.length ?? 0) > (out.match(/\)/g)?.length ?? 0) - 1 &&
+      out.includes('(')
+    ) {
+      return out;
+    }
+    out = trimmed;
+  }
+}
+
+// ── Parsing ─────────────────────────────────────────────────────────────────
+
+/**
+ * Parse a single URL (or bare path) into the entity it points at.
+ * Returns null for anything that is not a Riftn entity link.
+ */
+export function parseDehubLink(input: string): DehubLinkMatch | null {
+  if (!input) return null;
+  const raw = trimTrailingPunctuation(input.trim());
+  if (!raw) return null;
+
+  let pathname: string;
+  let search: string;
+
+  if (raw.startsWith('/')) {
+    const [p, q = ''] = raw.split('?');
+    pathname = p;
+    search = q ? `?${q}` : '';
+  } else {
+    let parsed: URL;
+    try {
+      parsed = new URL(raw.match(/^https?:\/\//i) ? raw : `https://${raw}`);
+    } catch {
+      return null;
+    }
+    if (!isDehubHost(parsed.host)) return null;
+    pathname = parsed.pathname;
+    search = parsed.search;
+  }
+
+  const segments = pathname.split('/').filter(Boolean);
+  if (segments.length === 0) return null;
+
+  const path = `${pathname}${search}`;
+  const base = { raw, path } as const;
+
+  // Both /app/communities/... and /communities/... are live routes; the second
+  // is what the marketing side of the site links to, and it used to card up
+  // nowhere because every regex hard-coded the /app prefix.
+  const scoped = segments[0] === 'app' ? segments.slice(1) : segments;
+  const isAppScoped = segments[0] === 'app';
+
+  if (isAppScoped && scoped.length === 1 && scoped[0] === 'assistant') {
+    const skillSlug = new URLSearchParams(search).get('skill');
+    // A skill link cards as the skill; the bare page falls through and
+    // cards as the Assistant page below.
+    if (skillSlug && /^[a-z0-9-]{1,80}$/.test(skillSlug)) return { ...base, kind: 'skill', skillSlug };
+    if (skillSlug) return null;
+  }
+
+  // ── /app/post/:tokenId, /app/video/:tokenId ──
+  if (isAppScoped && (scoped[0] === 'post' || scoped[0] === 'video') && scoped[1]) {
+    if (/^\d+$/.test(scoped[1])) return { ...base, kind: 'post', tokenId: scoped[1] };
+    // An article's readable address: letters, digits and dashes, with a letter.
+    if (scoped[0] === 'post' && /^[a-z0-9][a-z0-9-]*$/i.test(scoped[1]) && /[a-z]/i.test(scoped[1]) && !/^[a-f\d]{24}$/i.test(scoped[1])) {
+      return { ...base, kind: 'post', articleSlug: scoped[1].toLowerCase() };
+    }
+    return null;
+  }
+
+  // ── /newpost/:n — an off-chain post's own slug ──
+  //
+  // Accepted with or without the /app prefix, like /stage: the canonical
+  // share form is top-level. Cards as a post; the embed resolves the slug to
+  // its tokenId first, since everything downstream keys on that.
+  if (scoped[0] === 'newpost' && scoped[1]) {
+    if (!/^\d+$/.test(scoped[1])) return null;
+    return { ...base, kind: 'post', newPostId: scoped[1] };
+  }
+
+  // ── /posts/:n — the short post form, with the optional thread tail ──
+  //
+  // /posts/1 opens the post; /posts/1/b is the author's self-reply thread;
+  // /posts/1/b/<commentId> anchors one thread entry. Deliberately not
+  // app-scoped, like /stage and /newpost. Anything after /b that isn't a
+  // numeric comment id is not ours.
+  if (scoped[0] === 'posts' && scoped[1]) {
+    if (!/^\d+$/.test(scoped[1])) return null;
+    if (scoped[2] !== undefined && scoped[2] !== 'b') return null;
+    const commentId = scoped[3];
+    if (commentId !== undefined && !/^\d+$/.test(commentId)) return null;
+    return { ...base, kind: 'post', tokenId: scoped[1], ...(commentId ? { commentId } : {}) };
+  }
+
+  // ── communities/join/:code (invite) — must precede the slug form ──
+  if (scoped[0] === 'communities' && scoped[1] === 'join' && scoped[2]) {
+    return { ...base, kind: 'communityInvite', code: scoped[2] };
+  }
+
+  // ── communities/:slug ──
+  if (scoped[0] === 'communities' && scoped[1]) {
+    if (!/^[a-zA-Z0-9_-]+$/.test(scoped[1])) return null;
+    return { ...base, kind: 'community', slug: scoped[1] };
+  }
+
+  // ── /app/stores/:storeId  (+ ?listing=<id>) ──
+  if (scoped[0] === 'stores' && scoped.length === 2) {
+    const storeId = scoped[1];
+    if (!/^[a-fA-F0-9-]{8,}$/.test(storeId)) return null;
+    const listingId = new URLSearchParams(search).get('listing');
+    if (listingId && /^[a-fA-F0-9-]{8,}$/.test(listingId)) {
+      return { ...base, kind: 'listing', storeId, listingId };
+    }
+    return { ...base, kind: 'store', storeId };
+  }
+
+  // ── /app/events/:eventNumber ──
+  if (isAppScoped && scoped[0] === 'events' && scoped[1]) {
+    if (!/^\d+$/.test(scoped[1])) return null;
+    return { ...base, kind: 'event', eventNumber: scoped[1] };
+  }
+
+  // ── /app/governance/:n — one governance proposal ──
+  //
+  // Both /app/governance/... and the top-level /governance/... are routed.
+  // Bare /governance is the board and stays a plain link. The short number is
+  // the share form; the uuid is the legacy one and still resolves.
+  if (scoped[0] === 'governance' && scoped[1] && !scoped[2]) {
+    if (/^\d{1,9}$/.test(scoped[1])) return { ...base, kind: 'proposal', proposalId: scoped[1] };
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(scoped[1])) return null;
+    return { ...base, kind: 'proposal', proposalId: scoped[1].toLowerCase() };
+  }
+
+  // ── /stage/:id — the invite / announcement link ──
+  //
+  // Deliberately not app-scoped: the route is top-level. Accepted either way
+  // so a hand-typed /app/stage/... still cards up rather than falling through
+  // to the profile branch.
+  if (scoped[0] === 'stage' && scoped[1]) {
+    if (!/^[a-fA-F0-9-]{8,}$/.test(scoped[1])) return null;
+    return { ...base, kind: 'stage', stageId: scoped[1] };
+  }
+
+  // ── /stages/:n — the short share form of the same link ──
+  //
+  // Only the numeric shape: bare /stages is the hub page, and anything else
+  // under it has no route.
+  if (scoped[0] === 'stages' && scoped[1]) {
+    if (!/^\d+$/.test(scoped[1])) return null;
+    return { ...base, kind: 'stage', stageShortId: scoped[1] };
+  }
+
+  // ── /cinema/:type/:id — one film or series ──
+  //
+  // Top-level, like /stage. The type segment is part of the URL rather than a
+  // lookup because the offers endpoint is keyed by object_type as well as id:
+  // without it the card cannot fetch what it is pointing at. Bare /cinema is
+  // the search page and carries nothing to card, so it stays a plain link.
+  if (scoped[0] === 'cinema' && scoped[1] && scoped[2]) {
+    if (scoped[1] !== 'film' && scoped[1] !== 'series') return null;
+    if (!/^\d+$/.test(scoped[2])) return null;
+    return {
+      ...base,
+      kind: 'film',
+      filmObjectType: scoped[1] === 'series' ? 'show' : 'movie',
+      filmId: scoped[2],
+    };
+  }
+
+  // ── /bounty/:jobNumber — the canonical bounty detail link ──
+  //
+  // Top-level, like /stage. Only the numeric shape: bare /bounty has no route
+  // of its own (a bounty is always addressed by number).
+  if (scoped[0] === 'bounty' && scoped[1]) {
+    if (!/^\d+$/.test(scoped[1])) return null;
+    return { ...base, kind: 'bounty', bountyJobKey: scoped[1] };
+  }
+
+  // ── /apps/:slug — one mini app ──
+  //
+  // Top-level. `dev` is the developer page, not an app, so it stays a plain
+  // link; a query string (a deep link into the app) rides along in `path`.
+  if (segments[0] === 'apps' && segments[1] && segments[1] !== 'dev' && !segments[2]) {
+    if (!/^[a-z0-9][a-z0-9-]{1,39}$/.test(segments[1])) return null;
+    return { ...base, kind: 'app', appSlug: segments[1] };
+  }
+
+  // ── /work/:uuid — the legacy bounty detail link, from before job numbers ──
+  //
+  // Bare /work (the board), /work/post and /work/history are app pages, not
+  // entities — like bare /stages, they stay plain links. Only the uuid detail
+  // shape cards, `/edit` tail and all, so the card still opens wherever the
+  // link pointed.
+  if (scoped[0] === 'work' && scoped[1] && scoped[1] !== 'post' && scoped[1] !== 'history') {
+    if (!/^[a-fA-F0-9-]{8,}$/.test(scoped[1])) return null;
+    return { ...base, kind: 'bounty', bountyJobKey: scoped[1] };
+  }
+
+  // ── /build?feature=<uuid> — one request on the Build board ──
+  //
+  // `?request=` is the older name for the same thing and still routes, and so
+  // do the board's older addresses, /features and /requests.
+  if ((scoped[0] === 'build' || scoped[0] === 'features' || scoped[0] === 'requests') && !scoped[1]) {
+    const params = new URLSearchParams(search);
+    const id = params.get('feature') || params.get('request');
+    if (id && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
+      return { ...base, kind: 'featureRequest', featureRequestId: id.toLowerCase() };
+    }
+  }
+
+  // ── Any other page of ours ──
+  //
+  // Host-qualified links only, like profiles below: a riftn.com link is a
+  // statement that it is one of our pages, a bare "/app/x" in a sentence is
+  // not. Only real pages (the menu's own list) card; anything else stays a
+  // link, so a typo never becomes a card that opens a 404.
+  if (!raw.startsWith('/')) {
+    const page = appPageFor(pathname);
+    if (page) return { ...base, kind: 'page', pagePath: page };
+  }
+
+  // ── /:username ──
+  //
+  // Host-qualified links only. A bare "/foo" in a sentence is far more likely
+  // to be a path fragment somebody typed than a profile link, and guessing
+  // wrong there costs a card on every stray slash in the feed.
+  if (!raw.startsWith('/') && segments.length === 1) {
+    const username = decodeURIComponent(segments[0]).replace(/^@/, '');
+    if (!username || RESERVED_ROOT_SEGMENTS.has(username.toLowerCase())) return null;
+    if (!/^[a-zA-Z0-9_.-]{2,40}$/.test(username)) return null;
+    return { ...base, kind: 'profile', username };
+  }
+
+  return null;
+}
+
+// ── Scanning free text ──────────────────────────────────────────────────────
+
+/** Every Riftn entity link in a block of text, in the order they appear. */
+/**
+ * How many links in one block of text get carded. The rest stay as text —
+ * see `useDehubLinks`.
+ */
+export const MAX_EMBEDS_PER_MESSAGE = 2;
+
+export function findDehubLinks(text?: string | null): DehubLinkMatch[] {
+  if (!text) return [];
+
+  const matches: DehubLinkMatch[] = [];
+  const claimed: Array<[number, number]> = [];
+  const isClaimed = (start: number) => claimed.some(([s, e]) => start >= s && start < e);
+
+  // Pass 1 — whole URLs. The span is claimed whether or not it parsed, which is
+  // the point: a URL on somebody else's host has already been judged, and the
+  // host check only holds if the bare-path pass cannot then match the
+  // `/app/post/1` sitting inside `https://example.com/app/post/1` and card it
+  // as ours. Claiming only successes let exactly that through.
+  ABSOLUTE_URL_RE.lastIndex = 0;
+  let m: RegExpExecArray | null;
+  while ((m = ABSOLUTE_URL_RE.exec(text)) !== null) {
+    if (isClaimed(m.index)) continue;
+    const parsed = parseDehubLink(m[0]);
+    if (parsed) matches.push(parsed);
+    claimed.push([m.index, m.index + m[0].length]);
+  }
+
+  // Pass 2 — bare in-app paths, which can only be ours. Anything inside a URL
+  // pass 1 already saw is skipped.
+  BARE_PATH_RE.lastIndex = 0;
+  while ((m = BARE_PATH_RE.exec(text)) !== null) {
+    if (isClaimed(m.index)) continue;
+    const parsed = parseDehubLink(m[0]);
+    if (parsed) {
+      matches.push(parsed);
+      claimed.push([m.index, m.index + parsed.raw.length]);
+    }
+  }
+
+  // Restore source order — the two passes run separately.
+  return matches.sort((a, b) => text.indexOf(a.raw) - text.indexOf(b.raw));
+}
+
+/** The first Riftn entity link in a block of text, if any. */
+export function findDehubLink(text?: string | null): DehubLinkMatch | null {
+  return findDehubLinks(text)[0] ?? null;
+}
+
+export function hasDehubLink(text?: string | null): boolean {
+  return findDehubLinks(text).length > 0;
+}
+
+/**
+ * Remove specific matched URLs from text for display, because a card replaced
+ * them. Display only — never send the result back to an API, or editing a post
+ * would silently drop the link out of the stored body.
+ *
+ * Takes the matches rather than re-scanning, so a surface that caps how many
+ * cards it renders strips exactly the links it carded and leaves the rest as
+ * readable text.
+ */
+export function stripDehubLinkMatches(text: string | null | undefined, matches: DehubLinkMatch[]): string {
+  if (!text) return text ?? '';
+  return cutFromText(text, matches.map(match => match.raw));
+}
+
+/** Remove every Riftn entity URL from text for display. */
+export function stripDehubLinks(text?: string | null): string {
+  if (!text) return text ?? '';
+  return stripDehubLinkMatches(text, findDehubLinks(text));
+}
+
+// ── Building ────────────────────────────────────────────────────────────────
+
+/**
+ * Absolute origin for a shared link. Uses the current origin so a link copied
+ * on a preview build stays on that build, and falls back to production when
+ * there is no window (SSR, tests).
+ */
+export function shareOrigin(): string {
+  return typeof window !== 'undefined' ? window.location.origin : 'https://riftn.com';
+}
+
+export const dehubLinkFor = {
+  skill: (slug: string) => `${shareOrigin()}/app/assistant?skill=${encodeURIComponent(slug)}`,
+  /** One card on the Requests board. Requests are not posts: never /app/post/<id>. */
+  featureRequest: (id: string) => `${shareOrigin()}/build?feature=${encodeURIComponent(id)}`,
+  post: (tokenId: string | number) => `${shareOrigin()}/app/post/${tokenId}`,
+  /** An article's readable URL — /app/post/<first-ten-words-of-the-title>. */
+  article: (slug: string) => `${shareOrigin()}/app/post/${slug}`,
+  /** An off-chain post's own slug — use for posts at status 'signed' with a newPostId. */
+  newPost: (n: string | number) => `${shareOrigin()}/newpost/${n}`,
+  comment: (tokenId: string | number, commentId: string | number) =>
+    `${shareOrigin()}/app/post/${tokenId}?comment=${encodeURIComponent(String(commentId))}`,
+  /** Short post form — /posts/1. */
+  postShort: (tokenId: string | number) => `${shareOrigin()}/posts/${tokenId}`,
+  /** The author thread hanging off a post — /posts/1/b. */
+  thread: (tokenId: string | number) => `${shareOrigin()}/posts/${tokenId}/b`,
+  /**
+   * One entry in the author thread — /posts/1/b/55. Used for the share link of
+   * a straight comment the post author left on their own post.
+   */
+  threadEntry: (tokenId: string | number, commentId: string | number) =>
+    `${shareOrigin()}/posts/${tokenId}/b/${encodeURIComponent(String(commentId))}`,
+  profile: (username: string) => `${shareOrigin()}/${encodeURIComponent(username)}`,
+  community: (slug: string) => `${shareOrigin()}/app/communities/${encodeURIComponent(slug)}`,
+  communityInvite: (code: string) => `${shareOrigin()}/app/communities/join/${encodeURIComponent(code)}`,
+  store: (storeId: string) => `${shareOrigin()}/app/stores/${storeId}`,
+  listing: (storeId: string, listingId: string) =>
+    `${shareOrigin()}/app/stores/${storeId}?listing=${listingId}`,
+  event: (eventNumber: string | number) => `${shareOrigin()}/app/events/${eventNumber}`,
+  /**
+   * Prefers the short numeric form when the row carries one; the uuid form
+   * stays valid for links already in the wild.
+   */
+  stage: (stage: string | { id: string; short_id?: number | null }) => {
+    if (typeof stage === 'string') return `${shareOrigin()}/stage/${encodeURIComponent(stage)}`;
+    return stage.short_id != null
+      ? `${shareOrigin()}/stages/${stage.short_id}`
+      : `${shareOrigin()}/stage/${encodeURIComponent(stage.id)}`;
+  },
+  /**
+   * One title on /cinema. `film`/`series` rather than the API's
+   * `movie`/`show` because this ends up in a URL people read.
+   */
+  film: (objectType: 'movie' | 'show', id: string | number) =>
+    `${shareOrigin()}/cinema/${objectType === 'show' ? 'series' : 'film'}/${encodeURIComponent(String(id))}`,
+  bounty: (jobNumber: string | number) => `${shareOrigin()}/bounty/${jobNumber}`,
+  proposal: (proposal: string | { id: string; proposal_number?: number | null }) =>
+    `${shareOrigin()}${proposalPath(proposal)}`,
+};
+
+/**
+ * Links typed into a message by the @ list. Always the live site, never the
+ * build the sender happens to be on, because the person reading it may be on
+ * the phone app, where only riftn.com links open in-app.
+ */
+export const LIVE_ORIGIN = 'https://riftn.com';
+export const mentionLinkFor = {
+  community: (slug: string) => `${LIVE_ORIGIN}/app/communities/${encodeURIComponent(slug)}`,
+  page: (path: string) => `${LIVE_ORIGIN}${path.startsWith('/') ? path : `/${path}`}`,
+};
+
+/**
+ * In-app path for a proposal: the short number when the row has one, the uuid
+ * otherwise (or when only an id string is to hand).
+ */
+export function proposalPath(proposal: string | { id: string; proposal_number?: number | null }): string {
+  if (typeof proposal === 'string') return `/app/governance/${proposal}`;
+  return `/app/governance/${proposal.proposal_number ?? proposal.id}`;
+}
+
+/** Human label for a link kind — used by share sheets and fallback chips. */
+export function dehubLinkLabel(kind: DehubLinkKind | 'link'): string {
+  if (kind === 'skill') return i18n.t('skills.skills');
+  return i18n.t(`dehubLinks.kind.${kind}`);
+}
+
+// An old dehub.io address (bare or www, with or without https://). Subdomains
+// such as staging.dehub.io and emails at dehub.io are left alone.
+const OLD_HOST_RE = /(^|[^\w.@/-]|https?:\/\/)(?:www\.)?dehub\.io(?![\w-]|\.\w)/gi;
+
+/**
+ * One-line previews (the chat list) show old dehub.io links as riftn.com,
+ * where they now open. Display only: the message itself is not changed.
+ */
+export function previewLinks(text: string): string {
+  return text.replace(OLD_HOST_RE, (_m, before: string) => `${before}riftn.com`);
+}

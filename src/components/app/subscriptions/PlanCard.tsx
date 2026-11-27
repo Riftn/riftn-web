@@ -1,0 +1,345 @@
+import { translateCopy as _translateCopy } from '@/i18n/copy';
+import { tokenLabel } from '@/lib/token-label';
+import { lazy, Suspense, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Clock, Loader2, Star, Pin } from "lucide-react";
+import Check from "@/components/ui/cut-icons/check";
+import Users from "@/components/ui/cut-icons/communities";
+import Upload from "@/components/ui/cut-icons/upload";
+import Info from "@/components/ui/cut-icons/information";
+
+import { Button } from '@/components/ui/button';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import { type SubscriptionPlan, planPrice, primaryPlanChain, isPlanPublished } from '@/lib/api/dehub';
+import { useBuyPlan, usePublishPlan, useUpdatePlan } from '@/hooks/use-subscriptions';
+import { formatDuration, normaliseDuration } from '@/lib/contracts/subscription-plan';
+import { BASE_CHAIN_ID } from '@/lib/contracts/dhb-token';
+import type { ChainId } from '@/components/app/ChainSelector';
+import { DHB_PRELISTING_USD, dhbForUsd, formatDhbPayment } from '@/lib/subscription-pricing';
+import dehubCoin from '@/assets/dehub-coin.png';
+import { useAuth } from '@/contexts/AuthContext';
+import type { TipFundingSource } from '@/lib/tip-funding';
+
+// Reads wallet balances (wallet stack), so it loads with the open dialog.
+const TipPayWith = lazy(() => import('@/components/app/tips/TipPayWith'));
+
+/**
+ * One subscription plan, wherever plans are shown — the profile's Subs tab and
+ * the sheet a subscriber-gated post opens.
+ *
+ * Monochrome on purpose. This card used to carry a yellow-to-orange gradient
+ * Subscribe button, a yellow star, a green "Subscribed" pill and amber and red
+ * notices: four accent hues on a surface the rest of the app renders in black,
+ * white and zinc (the design system block at the top of index.css). Every state
+ * below is told apart by its copy and its icon instead.
+ */
+
+interface PlanCardProps {
+  plan: SubscriptionPlan;
+  isOwner?: boolean;
+  isSubscribed?: boolean;
+  onEdit?: () => void;
+  /** Told when the confirm dialog opens or closes, so a sheet holding this card can step aside. */
+  onConfirmOpenChange?: (open: boolean) => void;
+}
+
+function formatAmount(value: number | undefined, maximumFractionDigits = 4): string {
+  if (value === undefined || value === null || Number.isNaN(value)) return _translateCopy("copy.ca1844969742", { defaultValue: "Unavailable" });
+  return value.toLocaleString(undefined, { maximumFractionDigits });
+}
+
+/** Shared shape for the two "you cannot buy this" notices. */
+function PlanNotice({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="flex items-start gap-2 mb-4 rounded-xl bg-white/[0.06] border border-white/10 p-3">
+      <Info className="w-4 h-4 text-white/50 shrink-0 mt-0.5" />
+      <p className="text-xs text-white/70">{children}</p>
+    </div>
+  );
+}
+
+export function PlanCard({ plan, isOwner, isSubscribed, onEdit, onConfirmOpenChange }: PlanCardProps) {
+  const { t } = useTranslation();
+  const buyPlanMutation = useBuyPlan();
+  const { walletAddress } = useAuth();
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [payWith, setPayWith] = useState<TipFundingSource | null>(null);
+  const publishMutation = usePublishPlan();
+  const pinMutation = useUpdatePlan();
+
+  const price = planPrice(plan);
+  const chainEntry = primaryPlanChain(plan);
+  const chainId = (chainEntry?.chainId || BASE_CHAIN_ID) as ChainId;
+  const currency = (chainEntry?.currency || plan.currency || 'DHB').toUpperCase();
+  const isUsdPriced = currency === 'USDT' || currency === 'USDC' || currency === 'USD';
+  const numericPrice = Number(price || 0);
+  const dhbUsd = DHB_PRELISTING_USD;
+  const dhbEstimate = isUsdPriced ? dhbForUsd(numericPrice, dhbUsd) : numericPrice;
+  const formattedPrice = isUsdPriced
+    ? `${formatAmount(price, 2)} USD`
+    : t('subscriptions.tokenAmount', { amount: formatAmount(price) });
+  const published = isPlanPublished(plan);
+  // 999 is what lifetime plans were stored as before the contract's 0–12 range
+  // was respected. Buying one reverts, so it is surfaced rather than hidden.
+  const isBuyable = normaliseDuration(plan.duration) !== null;
+
+  const total = isUsdPriced ? numericPrice : numericPrice * DHB_PRELISTING_USD;
+  const totalDhbEstimate = dhbEstimate;
+
+  const handleSubscribe = async () => {
+    await buyPlanMutation.mutateAsync({
+      plan,
+      chainId,
+      fundFrom: payWith && walletAddress && chainId === BASE_CHAIN_ID ? { source: payWith, walletAddress, t } : null,
+    });
+  };
+
+  const busy = buyPlanMutation.isPending;
+  const subscriberCount = plan.subscriberCount;
+
+  return (
+    <div className="relative rounded-2xl bg-white/5 backdrop-blur-md border border-white/10 p-5 hover:border-white/20 transition-all">
+      {/* Plan header */}
+      <div className="flex items-start justify-between mb-4">
+        <div>
+          <h3 className="text-lg font-bold text-white flex items-center gap-2">
+            <Star className="w-4 h-4 text-white" />
+            {plan.name}
+          </h3>
+          {plan.description && (
+            <p className="text-sm text-zinc-400 mt-1">{plan.description}</p>
+          )}
+        </div>
+        <div className="flex items-center gap-1.5 shrink-0">
+          {/* A creator's own drafts read as unfinished at a glance, so scanning
+              the tab shows which plans still need a step to become real. */}
+          {isOwner && !published && (
+            <span className="px-2 py-1 rounded-lg bg-white/10 border border-white/15 text-white/60 text-xs font-medium">
+              {t('subscriptions.draft')}
+            </span>
+          )}
+          {isSubscribed && (
+            <span className="px-2 py-1 rounded-lg bg-white/10 border border-white/15 text-white text-xs font-medium">
+              {t('subscriptions.subscribed')}
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* Price & Duration */}
+      <div className="mb-4">
+        <div className="flex items-baseline gap-2">
+          <div className="flex items-center gap-1.5">
+            <img src={dehubCoin} alt={tokenLabel()} className="w-5 h-5" />
+            <span className="text-2xl font-bold text-white">{formatDhbPayment(dhbEstimate)}</span>
+          </div>
+          <span className="text-zinc-500">/</span>
+          <div className="flex items-center gap-1 text-zinc-400">
+            <Clock className="w-3.5 h-3.5" />
+            <span className="text-sm">{formatDuration(plan.duration, t)}</span>
+          </div>
+        </div>
+        <p className="mt-1 text-xs text-zinc-400">≈ {total.toLocaleString(undefined, { style: 'currency', currency: 'USD' })} USD</p>
+      </div>
+
+      {/* Benefits */}
+      {plan.benefits && plan.benefits.length > 0 && (
+        <ul className="space-y-2 mb-4">
+          {plan.benefits.map((benefit, idx) => (
+            <li key={idx} className="flex items-start gap-2 text-sm text-zinc-300">
+              <Check className="w-4 h-4 text-white/40 shrink-0 mt-0.5" />
+              <span>{benefit}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {/* Subscriber count */}
+      {typeof subscriberCount === 'number' && (
+        <div className="flex items-center gap-1.5 text-xs text-zinc-500 mb-4">
+          <Users className="w-3.5 h-3.5" />
+          <span>
+            {t('subscriptions.subscriberCount', { count: subscriberCount })}
+          </span>
+        </div>
+      )}
+
+      {/* Not yet on chain — nobody can buy this, so say so rather than showing
+          a Subscribe button that reverts in the buyer's wallet. */}
+      {!published && isBuyable && (
+        <PlanNotice>
+          {isOwner
+            ? t('subscriptions.draftNoticeOwner')
+            : t('subscriptions.draftNoticeViewer')}
+        </PlanNotice>
+      )}
+
+      {!isBuyable && (
+        <PlanNotice>
+          {isOwner
+            ? t('subscriptions.unbuyableNoticeOwner')
+            : t('subscriptions.unbuyableNoticeViewer')}
+        </PlanNotice>
+      )}
+
+      {/* Actions */}
+      {isOwner && (
+        <Button
+          variant="outline"
+          className="w-full mb-2 rounded-xl border-white/20 text-white hover:bg-white/10 gap-2"
+          disabled={pinMutation.isPending || (!plan.isPinned && (!published || !isBuyable))}
+          onClick={() => pinMutation.mutate({ planId: String(plan.id || plan._id), data: { isPinned: !plan.isPinned } })}
+        >
+          {pinMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Pin className="w-4 h-4" />}
+          {plan.isPinned ? t('postOptions.unpinPost') : t('postOptions.pinPost')}
+        </Button>
+      )}
+      {isOwner ? (
+        <div className="flex gap-2">
+          {/* A plan the chain will never accept has one useful action, and it is
+              not "Edit" — the duration is the thing that has to change, so the
+              button says what the creator actually has to do. */}
+          <Button
+            onClick={onEdit}
+            variant={isBuyable ? 'outline' : 'default'}
+            className={
+              isBuyable
+                ? 'flex-1 rounded-xl border-white/20 text-white hover:bg-white/10'
+                : 'flex-1 rounded-xl bg-white/10 border border-white/20 hover:bg-white/20 text-white font-semibold'
+            }
+          >
+            {t(isBuyable ? 'subscriptions.editPlan' : 'subscriptions.startAgain')}
+          </Button>
+          {!published && isBuyable && (
+            <Button
+              onClick={() => publishMutation.mutate({ plan, chainId })}
+              disabled={publishMutation.isPending}
+              className="flex-1 rounded-xl bg-white/10 border border-white/20 hover:bg-white/20 text-white gap-1.5"
+            >
+              {publishMutation.isPending ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  {publishMutation.stageLabel}
+                </>
+              ) : (
+                <>
+                  <Upload className="w-4 h-4" />
+                  {t('subscriptions.publish')}
+                </>
+              )}
+            </Button>
+          )}
+        </div>
+      ) : isSubscribed ? (
+        <Button
+          disabled
+          className="w-full rounded-xl bg-white/10 text-zinc-400 cursor-not-allowed"
+        >
+          <Check className="w-4 h-4 mr-2" />
+          {t('subscriptions.subscribed')}
+        </Button>
+      ) : (
+        <AlertDialog
+          open={confirmOpen}
+          onOpenChange={(open) => {
+            setConfirmOpen(open);
+            onConfirmOpenChange?.(open);
+          }}
+        >
+          <AlertDialogTrigger asChild>
+            <Button
+              disabled={busy || !published || !isBuyable}
+              className="w-full rounded-xl bg-white/10 border border-white/20 hover:bg-white/20 text-white font-semibold disabled:opacity-40"
+            >
+              {busy ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  {buyPlanMutation.stageLabel || t('subscriptions.subscribing')}
+                </>
+              ) : (
+                <>
+                  <Star className="w-4 h-4 mr-2" />
+                  {t('subscriptions.subscribe')}
+                </>
+              )}
+            </Button>
+          </AlertDialogTrigger>
+          {/* z-[110]: the gate sheet that holds this card sits at z-[100], and the
+              dialog has to land in front of it, not behind. */}
+          <AlertDialogContent className="z-[110] bg-black/60 backdrop-blur-[24px] border border-white/10 shadow-2xl">
+            <AlertDialogHeader>
+              <AlertDialogTitle className="text-white">{t('subscriptions.confirmSubscription')}</AlertDialogTitle>
+              <AlertDialogDescription className="text-zinc-400">
+                {t('subscriptions.confirmSubscribeTo', {
+                  plan: plan.name,
+                  price: isUsdPriced ? `${formattedPrice} (${formatDhbPayment(dhbEstimate)})` : formattedPrice,
+                  duration: formatDuration(plan.duration, t),
+                })}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <div className="rounded-xl bg-white/5 border border-white/10 p-3 text-sm">
+              <div className="flex justify-between text-zinc-400">
+                <span>{t('subscriptions.planPrice')}</span>
+                <span className="text-white">{formattedPrice}</span>
+              </div>
+              {isUsdPriced && (
+                <div className="flex justify-between gap-4 text-zinc-400 mt-1.5">
+                  <span>{t('subscriptions.preListingTokenAmount')}</span>
+                  <span className="text-white text-right">{formatDhbPayment(dhbEstimate)}</span>
+                </div>
+              )}
+              <div className="flex justify-between text-zinc-400 mt-1.5 pt-1.5 border-t border-white/10">
+                <span>{t('subscriptions.youPayNow')}</span>
+                <span className="text-white font-medium text-right">
+                  {total ? formatDhbPayment(totalDhbEstimate) : t('subscriptions.calculating')}
+                  {totalDhbEstimate !== null && (
+                    <span className="block text-xs font-normal text-zinc-400">
+                      {t('subscriptions.paidToCreatorWallet')}
+                    </span>
+                  )}
+                </span>
+              </div>
+              {isUsdPriced && (
+                <p className="mt-2 pt-2 border-t border-white/10 text-[11px] leading-relaxed text-zinc-500">
+                  {t('subscriptions.creatorPaidDirectNote')}
+                </p>
+              )}
+            </div>
+            {confirmOpen && walletAddress && chainId === BASE_CHAIN_ID && totalDhbEstimate ? (
+              <Suspense fallback={null}>
+                <TipPayWith amountDhb={totalDhbEstimate} value={payWith} onChange={setPayWith} />
+              </Suspense>
+            ) : null}
+            <AlertDialogFooter>
+              <AlertDialogCancel className="bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700">
+                {t('subscriptions.cancel')}
+              </AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleSubscribe}
+                disabled={busy}
+                className="bg-white/10 border border-white/20 hover:bg-white/20 text-white font-semibold"
+              >
+                {busy ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <Star className="w-4 h-4 mr-2" />
+                )}
+                {t('subscriptions.confirm')}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
+    </div>
+  );
+}

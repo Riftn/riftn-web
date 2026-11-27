@@ -1,0 +1,335 @@
+import { useTranslation as _useCopy } from 'react-i18next';
+import { useEffect, useRef, useCallback, useMemo, useState } from 'react';
+import { useCmcTop100, type CmcCoin } from '@/hooks/use-cmc-top-100';
+import { useTopAssets, type TopAsset } from '@/hooks/use-top-assets';
+import { useNavigate } from 'react-router-dom';
+import { TrendingUp, TrendingDown, Loader2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { SEOHead } from '@/components/SEOHead';
+import { TickerLogo } from '@/components/app/TickerLogo';
+import { AppState } from '@/components/app/AppState';
+import { PageBody, PageIsland } from '@/components/app/page-kit/PageKit';
+import { useCleanPhone } from '@/components/app/clean/CleanKit';
+import appleLogoImg from '@/assets/logo-apple.png';
+import googleLogoImg from '@/assets/logo-google.png';
+import microsoftLogoImg from '@/assets/logo-microsoft.png';
+import berkshireLogoImg from '@/assets/logo-berkshire.png';
+import tsmcLogoImg from '@/assets/logo-tsmc.png';
+import broadcomLogoImg from '@/assets/logo-broadcom.png';
+import jpmcLogoImg from '@/assets/logo-jpmc.png';
+
+const PAGE_SIZE = 100;
+
+interface UnifiedAsset {
+  id: string;
+  name: string;
+  symbol: string;
+  price: number;
+  change1h: number | null;
+  change24h: number;
+  change7d: number | null;
+  marketCap: number;
+  volume24h: number;
+  logoElement: React.ReactNode;
+  navQuery: string;
+}
+
+function formatPrice(price: number): string {
+  if (price >= 1) return `$${price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  if (price >= 0.01) return `$${price.toFixed(4)}`;
+  return `$${price.toPrecision(4)}`;
+}
+
+function formatLargeNumber(n: number): string {
+  if (n >= 1e12) return `$${(n / 1e12).toFixed(2)}T`;
+  if (n >= 1e9) return `$${(n / 1e9).toFixed(2)}B`;
+  if (n >= 1e6) return `$${(n / 1e6).toFixed(2)}M`;
+  return `$${n.toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
+}
+
+function PercentBadge({ value }: { value: number }) {
+  const isPositive = value >= 0;
+  return (
+    <span className={cn(
+      'inline-flex items-center gap-0.5 text-xs font-medium px-1.5 py-0.5 rounded',
+      isPositive ? 'text-emerald-400 bg-emerald-400/10' : 'text-red-400 bg-red-400/10'
+    )}>
+      {isPositive ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+      {Math.abs(value).toFixed(2)}%
+    </span>
+  );
+}
+
+function GoldIcon() {
+  const { t: _copy } = _useCopy();
+  return (
+    <div className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold bg-gradient-to-br from-[#FFD700] to-[#B8860B] text-black">{_copy("copy.3325c2b56f2b", { defaultValue: "Au" })}</div>
+  );
+}
+
+function SilverIcon() {
+  const { t: _copy } = _useCopy();
+  return (
+    <div className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold bg-gradient-to-br from-[#E0E0E0] to-[#A0A0A0] text-black">{_copy("copy.468415f0e112", { defaultValue: "Ag" })}</div>
+  );
+}
+
+function CopperIcon() {
+  const { t: _copy } = _useCopy();
+  return (
+    <div className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold bg-gradient-to-br from-[#E8A065] to-[#B87333] text-black">{_copy("copy.b62c681738d1", { defaultValue: "Cu" })}</div>
+  );
+}
+
+function PlatinumIcon() {
+  const { t: _copy } = _useCopy();
+  return (
+    <div className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold bg-gradient-to-br from-[#E5E4E2] to-[#8E8D8A] text-white drop-shadow-sm" style={{ textShadow: '0 1px 2px rgba(0,0,0,0.3)' }}>{_copy("copy.b602b7029be6", { defaultValue: "Pt" })}</div>
+  );
+}
+
+function NaturalGasIcon() {
+  const { t: _copy } = _useCopy();
+  return (
+    <div className="w-6 h-6 rounded-full flex items-center justify-center relative overflow-hidden bg-gradient-to-br from-[#4FC3F7] to-[#0288D1]">
+      <div className="absolute inset-0 flex flex-wrap justify-center items-center gap-[2px] opacity-40">
+        {[...Array(6)].map((_, i) => (
+          <div key={i} className="w-[5px] h-[5px] rounded-full bg-white/70" />
+        ))}
+      </div>
+      <span className="text-[8px] font-bold text-white relative z-10" style={{ textShadow: '0 1px 2px rgba(0,0,0,0.3)' }}>{_copy("copy.d8d91b2e06df", { defaultValue: "NG" })}</span>
+    </div>
+  );
+}
+
+function AssetLogoElement({ asset }: { asset: TopAsset }) {
+  const { t: _copy } = _useCopy();
+  if (asset.symbol === 'GOLD') return <GoldIcon />;
+  if (asset.symbol === 'SILVER') return <SilverIcon />;
+  if (asset.symbol === 'COPPER') return <CopperIcon />;
+  if (asset.symbol === 'PLATINUM') return <PlatinumIcon />;
+  if (asset.symbol === 'NATGAS') return <NaturalGasIcon />;
+  if (asset.symbol === 'AAPL') return <img src={appleLogoImg} alt={_copy("copy.f223faa96f22", { defaultValue: "Apple" })} className="w-6 h-6 rounded-full bg-white p-0.5 object-contain" />;
+  if (asset.symbol === 'GOOGL') return <img src={googleLogoImg} alt="Google" className="w-6 h-6 rounded-full bg-white p-0.5 object-contain" />;
+  if (asset.symbol === 'MSFT') return <img src={microsoftLogoImg} alt={_copy("copy.c7bac46904be", { defaultValue: "Microsoft" })} className="w-6 h-6 rounded-full bg-white p-0.5 object-contain" />;
+  if (asset.symbol === 'BRK-B' || asset.symbol === 'BRK.B' || asset.symbol === 'BRK-A') return <img src={berkshireLogoImg} alt={_copy("copy.6850f76b953d", { defaultValue: "Berkshire Hathaway" })} className="w-6 h-6 rounded-full bg-white p-0.5 object-contain" />;
+  if (asset.symbol === 'TSM') return <img src={tsmcLogoImg} alt={_copy("copy.00fb5022b75a", { defaultValue: "TSMC" })} className="w-6 h-6 rounded-full bg-white p-0.5 object-contain" />;
+  if (asset.symbol === 'AVGO') return <img src={broadcomLogoImg} alt={_copy("copy.caf79e01972c", { defaultValue: "Broadcom" })} className="w-6 h-6 rounded-full object-cover" />;
+  if (asset.symbol === 'JPM') return <img src={jpmcLogoImg} alt={_copy("copy.94a05775d9f1", { defaultValue: "JPMorgan" })} className="w-6 h-6 rounded-full object-cover" />;
+  return <TickerLogo symbol={asset.symbol} size={24} />;
+}
+
+function CoinLogo({ coin }: { coin: CmcCoin }) {
+  return (
+    <img
+      src={`https://s2.coinmarketcap.com/static/img/coins/64x64/${coin.id}.png`}
+      alt={coin.symbol}
+      className="w-6 h-6 rounded-full"
+      loading="lazy"
+    />
+  );
+}
+
+function UnifiedRow({ asset, rank, onClick }: { asset: UnifiedAsset; rank: number; onClick: () => void }) {
+  return (
+    <tr onClick={onClick} className="border-b border-white/5 hover:bg-white/5 cursor-pointer transition-colors">
+      <td className="py-3 px-3 text-zinc-400 text-sm font-medium">{rank}</td>
+      <td className="py-3 px-3">
+        <div className="flex items-center gap-2 min-w-0">
+          {asset.logoElement}
+          <span className="text-white font-medium text-sm truncate">{asset.name}</span>
+          <span className="text-zinc-500 text-xs">{asset.symbol}</span>
+        </div>
+      </td>
+      <td className="py-3 px-3 text-right text-zinc-300 text-sm font-mono">{formatLargeNumber(asset.marketCap)}</td>
+      <td className="py-3 px-3 text-white text-sm text-right font-mono whitespace-nowrap">{formatPrice(asset.price)}</td>
+      <td className="py-3 px-3 text-right hidden lg:table-cell">
+        {asset.change1h != null ? <PercentBadge value={asset.change1h} /> : '—'}
+      </td>
+      <td className="py-3 px-3 text-right whitespace-nowrap"><PercentBadge value={asset.change24h} /></td>
+      <td className="py-3 px-3 text-right hidden xl:table-cell">
+        {asset.change7d != null ? <PercentBadge value={asset.change7d} /> : '—'}
+      </td>
+      <td className="py-3 px-3 text-right text-zinc-400 text-sm font-mono hidden 2xl:table-cell">{formatLargeNumber(asset.volume24h)}</td>
+    </tr>
+  );
+}
+
+export default function Top100CryptosPage() {
+  const { t: _copy } = _useCopy();
+  const { data: coins, isLoading: cryptoLoading, error: cryptoError, refetch: refetchCrypto } = useCmcTop100();
+  const { data: assets, isLoading: assetsLoading, error: assetsError, refetch: refetchAssets } = useTopAssets();
+  const navigate = useNavigate();
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const sentinelRef = useRef<HTMLDivElement>(null);
+
+  const allAssets = useMemo(() => {
+    const unified: UnifiedAsset[] = [];
+
+    if (assets) {
+      for (const a of assets) {
+        if (a.price == null && a.marketCap == null) continue;
+        unified.push({
+          id: `asset-${a.symbol}`,
+          name: a.name,
+          symbol: a.symbol,
+          price: a.price ?? 0,
+          change1h: null,
+          change24h: a.change24h ?? 0,
+          change7d: null,
+          marketCap: a.marketCap ?? 0,
+          volume24h: a.volume24h ?? 0,
+          logoElement: <AssetLogoElement asset={a} />,
+          navQuery: `$${a.symbol}`,
+        });
+      }
+    }
+
+    if (coins) {
+      for (const c of coins) {
+        unified.push({
+          id: `coin-${c.id}`,
+          name: c.name,
+          symbol: c.symbol,
+          price: c.price,
+          change1h: c.percent_change_1h,
+          change24h: c.percent_change_24h,
+          change7d: c.percent_change_7d,
+          marketCap: c.market_cap,
+          volume24h: c.volume_24h,
+          logoElement: <CoinLogo coin={c} />,
+          navQuery: `$${c.symbol}`,
+        });
+      }
+    }
+
+    unified.sort((a, b) => b.marketCap - a.marketCap);
+    return unified;
+  }, [assets, coins]);
+
+  const clean = useCleanPhone();
+  const hasMore = allAssets.length > visibleCount;
+  const visibleAssets = allAssets.slice(0, visibleCount);
+
+  const loadMore = useCallback(() => {
+    if (hasMore) {
+      setVisibleCount(prev => Math.min(prev + PAGE_SIZE, allAssets.length));
+    }
+  }, [hasMore, allAssets.length]);
+
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      (entries) => { if (entries[0].isIntersecting) loadMore(); },
+      { rootMargin: '400px' }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [loadMore]);
+
+  const isLoading = cryptoLoading || assetsLoading;
+
+  return (
+    <div className="min-h-screen">
+      <SEOHead title={_copy("copy.dcd9f0047f78", { defaultValue: "Top Assets: Live Prices for Stocks, Commodities & Crypto" })} description={_copy("copy.d5e22f862878", { defaultValue: "Track live prices for gold, silver, oil, Tesla, Apple, Bitcoin, stocks, commodities and thousands of crypto assets on Riftn." })} url="https://riftn.com/app/top-100" jsonLd={{ '@context': 'https://schema.org', '@type': 'Table', name: 'Top Assets', url: 'https://riftn.com/app/top-100', description: _copy("copy.7038f259078d", { defaultValue: "Live prices and market data for top stocks, commodities and cryptocurrencies." }) }} />
+      <h1 className="sr-only">{_copy("copy.0ea0134b0336", { defaultValue: "Riftn Top Assets — Live Prices for Stocks, Commodities & Crypto" })}</h1>
+
+      <div className="max-w-5xl mx-auto">
+      <PageIsland
+        back
+        onBack={() => navigate(-1)}
+        icon="stats"
+        title={_copy("copy.c603180499e7", { defaultValue: "Top Assets" })}
+        subtitle={!clean && !isLoading && allAssets.length > 0
+          ? _copy("copy.ccf0988984a3", { defaultValue: "Showing {{value1}} of {{value2}}", value1: visibleAssets.length.toLocaleString(), value2: allAssets.length.toLocaleString() })
+          : undefined}
+      />
+
+      {/* Content */}
+      <PageBody>
+      {isLoading && (
+        <div className="space-y-3">
+          {Array.from({ length: 20 }).map((_, i) => (
+            <div key={i} className="h-12 theme-skeleton rounded animate-pulse" />
+          ))}
+        </div>
+      )}
+
+      {!isLoading && (cryptoError || assetsError || allAssets.length === 0) && (
+        <AppState
+          icon={cryptoError || assetsError ? 'notifications' : 'stats'}
+          title={cryptoError || assetsError ? _copy("copy.706b4d2da0bf", { defaultValue: "Couldn't load market data" }) : _copy("copy.12c2486eb469", { defaultValue: "No market data available" })}
+          description={cryptoError || assetsError ? _copy("copy.481859b689b0", { defaultValue: "Check your connection and try again." }) : _copy("copy.b98cb2290638", { defaultValue: "Market data will appear here when available." })}
+          kind={cryptoError || assetsError ? 'error' : 'empty'}
+          size="page"
+          primaryAction={{ label: _copy("copy.942087cc2d41", { defaultValue: "Retry" }), onClick: () => { refetchCrypto(); refetchAssets(); } }}
+        />
+      )}
+
+      {clean && !isLoading && visibleAssets.length > 0 && (
+        <div data-clean-assets className="px-1 pt-1">
+          {visibleAssets.map((asset, i) => {
+            const up = asset.change24h >= 0;
+            return (
+              <button
+                key={asset.id}
+                type="button"
+                onClick={() => navigate(`/app/explore?q=${asset.navQuery}`)}
+                className="flex w-full min-w-0 items-center gap-3 py-2.5 text-left"
+              >
+                <span className="w-6 shrink-0 text-center text-[13px] font-semibold tabular-nums text-zinc-500">{i + 1}</span>
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center [&>*]:!h-9 [&>*]:!w-9">{asset.logoElement}</span>
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-[15px] font-semibold leading-tight text-white">{asset.name}</span>
+                  <span className="mt-0.5 block truncate text-[12.5px] text-zinc-500">{asset.symbol} · {formatLargeNumber(asset.marketCap)}</span>
+                </span>
+                <span className="shrink-0 text-right">
+                  <span className="block text-[14px] font-semibold tabular-nums text-white">{formatPrice(asset.price)}</span>
+                  <span className={cn('block text-[12.5px] font-semibold tabular-nums', up ? 'text-emerald-400' : 'text-red-400')}>
+                    {up ? '+' : ''}{asset.change24h.toFixed(2)}%
+                  </span>
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {!clean && !isLoading && visibleAssets.length > 0 && (
+        <div data-page-bento data-kit-section className="border border-white/10 overflow-x-auto">
+          <table className="w-full min-w-[540px]">
+            <thead>
+              <tr className="border-b border-white/10 text-zinc-500 text-xs uppercase">
+                <th className="py-3 px-3 text-left">#</th>
+                <th className="py-3 px-3 text-left">{_copy("copy.dcd1d5223f73", { defaultValue: "Name" })}</th>
+                <th className="py-3 px-3 text-right whitespace-nowrap">{_copy("copy.fb25999766b1", { defaultValue: "Market Cap" })}</th>
+                <th className="py-3 px-3 text-right whitespace-nowrap">{_copy("copy.93c91c851e7a", { defaultValue: "Price" })}</th>
+                <th className="py-3 px-3 text-right hidden lg:table-cell">1h</th>
+                <th className="py-3 px-3 text-right whitespace-nowrap">24h</th>
+                <th className="py-3 px-3 text-right hidden xl:table-cell">7d</th>
+                <th className="py-3 px-3 text-right hidden 2xl:table-cell">{_copy("copy.03fba4e9f0e2", { defaultValue: "Volume (24h)" })}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {visibleAssets.map((asset, i) => (
+                <UnifiedRow
+                  key={asset.id}
+                  asset={asset}
+                  rank={i + 1}
+                  onClick={() => navigate(`/app/explore?q=${asset.navQuery}`)}
+                />
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      <div ref={sentinelRef} className="py-4 flex justify-center">
+        {hasMore && <Loader2 className="w-5 h-5 text-zinc-500 animate-spin" />}
+      </div>
+      </PageBody>
+      </div>
+    </div>
+  );
+}

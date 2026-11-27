@@ -1,0 +1,664 @@
+import { useTranslation as _useCopy } from 'react-i18next';
+/**
+ * Governance Hook
+ * ===============
+ * Data fetching and mutations for the governance proposal board. Reads come
+ * straight from Supabase; writes do not.
+ *
+ * Votes and proposals used to be written directly to PostgREST, with the
+ * vote's badge weight computed here and sent up as a number. The table's RLS
+ * authenticated those writes against the caller's own `x-wallet-address`
+ * header, so both the voter and the weight were whatever the request said they
+ * were. Both now go through edge functions that resolve the wallet from a
+ * verified Riftn token and derive the weight server-side from the badge
+ * balance the API holds. What `getVoteWeight` returns here is a preview of
+ * that answer, for the panel that tells someone what their vote is worth.
+ */
+
+import { useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useQuery, useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import i18n from 'i18next';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
+import { getBadgeName, BADGE_LEVELS, type BadgeContext } from '@/lib/staking-badges';
+import { useSelfBadge, preferLiveBalance } from '@/hooks/use-self-badge-balance';
+import { useBadgeScale } from '@/hooks/use-badge-scale';
+import { dehubAuthHeaders } from '@/lib/ai-invoke';
+import { escapeFilterValue } from '@/lib/postgrest-filter';
+import { Interface } from 'ethers';
+import {
+  writeContractAA,
+  getWalletAddress,
+  getERC20Balance,
+  switchChain,
+} from '@/lib/contracts/aa-utils';
+import { toastTxError } from '@/lib/tx-error-toast';
+import { DHB_TOKEN, toWei, getChainConfig, BASE_CHAIN_ID } from '@/lib/contracts/dhb-token';
+
+const GOVERNANCE_TREASURY = '0xbf3039b0bb672b268e8384e30d81b1e6a8a43b2c';
+
+const erc20TransferInterface = new Interface([
+  'function transfer(address to, uint256 amount) returns (bool)',
+]);
+
+export type GovernanceSort = 'most_voted' | 'newest';
+export type GovernanceStatus = 'open' | 'completed' | 'passed' | 'rejected';
+
+export interface GovernanceProposal {
+  id: string;
+  title: string;
+  description: string;
+  status: GovernanceStatus;
+  author_wallet_address: string;
+  author_username: string | null;
+  author_avatar: string | null;
+  vote_count: number;
+  like_count: number;
+  dislike_count: number;
+  comment_count: number;
+  created_at: string;
+  updated_at: string;
+  /** When voting closes. Null on the rows that predate the seven-day window. */
+  voting_ends_at: string | null;
+  /** Optional attachment, stored in the public feature-media bucket. */
+  media_url?: string | null;
+  media_type?: 'image' | 'video' | null;
+  /** Public short number, /app/governance/<n>. Absent until the migration lands. */
+  proposal_number?: number | null;
+  /**
+   * The answers of a multiple choice proposal (2 to 6). Null or absent on a
+   * yes/no proposal, which is every proposal made before multiple choice.
+   */
+  options?: string[] | null;
+  /** Weighted result per answer, same order as `options`. Kept by a trigger. */
+  option_tallies?: { weight: number; voters: number }[] | null;
+}
+
+/** The viewer's vote on one proposal: the side, and on multiple choice the answer. */
+export interface GovernanceUserVote {
+  type: number;
+  weight: number;
+  /** The answer index on a multiple choice proposal. */
+  option?: number | null;
+}
+
+/** A proposal attachment, uploaded as soon as it is picked so a draft keeps it. */
+export interface ProposalMedia {
+  url: string;
+  type: 'image' | 'video';
+}
+
+export const MAX_PROPOSAL_MEDIA_BYTES = 50 * 1024 * 1024;
+
+/**
+ * Upload a proposal attachment to the author's own folder in `feature-media`.
+ * The edge function only accepts URLs inside that folder.
+ */
+export async function uploadProposalMedia(file: File, walletAddress: string): Promise<ProposalMedia> {
+  const type: ProposalMedia['type'] | null = file.type.startsWith('image/')
+    ? 'image'
+    : file.type.startsWith('video/')
+      ? 'video'
+      : null;
+  if (!type) throw new Error(i18n.t('governance.mediaTypeInvalid'));
+  if (file.size > MAX_PROPOSAL_MEDIA_BYTES) throw new Error(i18n.t('governance.mediaTooLarge'));
+  const ext = file.name.split('.').pop()?.toLowerCase().replace(/[^a-z0-9]/g, '') || (type === 'image' ? 'jpg' : 'mp4');
+  const path = `${walletAddress.toLowerCase()}/governance-${Date.now()}.${ext}`;
+  const { error } = await supabase.storage
+    .from('feature-media')
+    .upload(path, file, { contentType: file.type, upsert: false, cacheControl: '31536000' });
+  if (error) throw new Error(i18n.t('governance.uploadFailedDetail', { message: error.message }));
+  const { data } = supabase.storage.from('feature-media').getPublicUrl(path);
+  return { url: data.publicUrl, type };
+}
+
+/**
+ * Badge tier → vote weight mapping.
+ * Crab (10k) = 1, up to Megalodon (50M) = 13.
+ */
+const BADGE_VOTE_WEIGHT: Record<string, number> = {
+  "Crab": 1,
+  "Ghost Lobster": 2,
+  "Piranha": 3,
+  "Giant Tortoise": 4,
+  "King Cobra": 5,
+  "Octopus": 6,
+  "Crocodile": 7,
+  "Dolphin": 8,
+  "Tiger Shark": 9,
+  "Great White Shark": 10,
+  "Killer Whale": 11,
+  "Blue Whale": 12,
+  "Megalodon": 13,
+};
+
+/**
+ * The weight a badge balance votes with.
+ *
+ * `context` carries the ladder scale and the holder's grandfathered tier, and
+ * both matter here: without the lock this returns the tier the live ladder
+ * gives them, which can be lower than the badge they are shown everywhere else
+ * on the site. The server resolves the same three inputs, so passing them
+ * keeps the number on screen equal to the number that gets recorded.
+ */
+export function getVoteWeight(
+  badgeBalance: number | undefined | null,
+  username?: string | null,
+  context?: BadgeContext,
+): { weight: number; badgeName: string | null } {
+  const badgeName = getBadgeName(badgeBalance, username, context);
+  if (!badgeName) return { weight: 0, badgeName: null };
+  return { weight: BADGE_VOTE_WEIGHT[badgeName] || 1, badgeName };
+}
+
+/**
+ * The signed-in user's own vote weight, resolved the way the server will.
+ *
+ * The account row's `badgeBalance` lags the chain, so a fresh buyer would be
+ * told they cannot vote while the badge next to their name says otherwise;
+ * `preferLiveBalance` promotes them the moment the tokens land, and the lock
+ * and scale come from the same place every other badge on the page reads.
+ */
+export function useSelfVoteWeight(): { weight: number; badgeName: string | null; lent: boolean } {
+  const { user } = useAuth();
+  const self = useSelfBadge();
+  const scale = useBadgeScale();
+  const context = { scale, lock: self.lock };
+  // Only DHB the voter holds counts. `badgeBalance` includes a badge lent to
+  // them, which is shown everywhere but does not vote; `lent` says that is
+  // why someone wearing a badge gets weight 0.
+  const own = user?.ownBadgeBalance;
+  const balance = preferLiveBalance((own ?? user?.badgeBalance) as number | undefined, self.balance);
+  const result = getVoteWeight(balance, user?.username, context);
+  const lent = result.weight === 0
+    && own !== undefined
+    && getVoteWeight(user?.badgeBalance as number | undefined, user?.username, context).weight > 0;
+  return { ...result, lent };
+}
+
+/**
+ * Tell someone why they cannot vote, with a way to fix it. A lent badge is
+ * named as the reason, since it looks the same as an earned one.
+ */
+export function useExplainCannotVote(): (lent: boolean) => void {
+  const navigate = useNavigate();
+  return useCallback((lent: boolean) => {
+    toast.error(
+      lent
+        ? i18n.t('governance.lentBadgeCantVote', {
+          defaultValue: "Your badge is lent to you, and lent badges can't vote. Buy tokens to earn your own badge.",
+        })
+        : i18n.t('governance.mustHoldTokens'),
+      {
+        id: 'governance-cannot-vote',
+        action: { label: i18n.t('governance.buyDhb', { defaultValue: 'Buy tokens' }), onClick: () => navigate('/app/buy') },
+      },
+    );
+  }, [navigate]);
+}
+
+export { BADGE_VOTE_WEIGHT };
+
+const PAGE_SIZE = 15;
+
+/**
+ * Call a governance edge function and surface the reason it refused.
+ *
+ * On a non-2xx, supabase-js nulls `data` and throws a FunctionsHttpError whose
+ * message is the literal "Edge Function returned a non-2xx status code" — the
+ * server's message is on `error.context`, an unread Response. Every refusal
+ * here is one a voter needs to read ("voting has closed", "you need a badge"),
+ * so it is worth unwrapping rather than showing that string.
+ */
+async function callGovernance<T>(name: string, body: Record<string, unknown>): Promise<T> {
+  const { data, error } = await supabase.functions.invoke(name, {
+    body,
+    headers: dehubAuthHeaders(),
+  });
+  if (error) {
+    const context = (error as { context?: Response }).context;
+    let detail: string | undefined;
+    let code: string | undefined;
+    if (context) {
+      try {
+        const payload = await context.json();
+        detail = payload?.error;
+        code = typeof payload?.code === 'string' ? payload.code : undefined;
+      } catch {
+        // Body was not JSON — fall through to the generic message.
+      }
+    }
+    throw Object.assign(new Error(detail || error.message || 'Request failed'), code ? { code } : {});
+  }
+  if ((data as { error?: string })?.error) throw new Error((data as { error: string }).error);
+  return data as T;
+}
+
+export function useGovernanceProposals(sort: GovernanceSort, search: string) {
+  return useInfiniteQuery({
+    queryKey: ['governance-proposals', sort, search],
+    queryFn: async ({ pageParam = 0 }) => {
+      // Only proposals still open to a vote. `neq('completed')` used to leave
+      // passed/rejected ones here too, so a decided proposal showed in both
+      // this tab and its verdict tab.
+      let query = supabase
+        .from('governance_proposals')
+        .select('*')
+        .eq('status', 'open');
+
+      if (search.trim()) {
+        const pattern = escapeFilterValue(`%${search.trim()}%`);
+        query = query.or(`title.ilike.${pattern},description.ilike.${pattern}`);
+      }
+
+      switch (sort) {
+        case 'most_voted':
+          query = query.order('vote_count', { ascending: false }).order('created_at', { ascending: false });
+          break;
+        case 'newest':
+          query = query.order('created_at', { ascending: false });
+          break;
+      }
+
+      query = query.range(pageParam, pageParam + PAGE_SIZE - 1);
+      const { data, error } = await query;
+      if (error) throw error;
+      return (data || []) as GovernanceProposal[];
+    },
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) => {
+      if (lastPage.length < PAGE_SIZE) return undefined;
+      return allPages.length * PAGE_SIZE;
+    },
+    staleTime: 60_000,
+    gcTime: 5 * 60_000,
+  });
+}
+
+export function useCompletedProposals() {
+  return useQuery({
+    queryKey: ['governance-proposals-completed'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('governance_proposals')
+        .select('*')
+        .in('status', ['completed', 'passed', 'rejected'])
+        .order('updated_at', { ascending: false });
+      if (error) throw error;
+      return (data || []) as GovernanceProposal[];
+    },
+    staleTime: 60_000,
+  });
+}
+
+export function useTotalGovernanceCount() {
+  return useQuery({
+    queryKey: ['governance-proposals-total-count'],
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from('governance_proposals')
+        .select('*', { count: 'exact', head: true });
+      if (error) throw error;
+      return count ?? 0;
+    },
+    staleTime: 60_000,
+  });
+}
+
+export function useGovernanceUserVotes() {
+  const { walletAddress } = useAuth();
+  return useQuery({
+    queryKey: ['governance-votes', walletAddress],
+    queryFn: async () => {
+      if (!walletAddress) return {};
+      const { data, error } = await supabase
+        .from('governance_votes')
+        .select('*')
+        .eq('wallet_address', walletAddress.toLowerCase());
+      if (error) throw error;
+      const voteMap: Record<string, GovernanceUserVote> = {};
+      for (const vote of (data || []) as { proposal_id: string; vote_type: number; vote_weight: number; option_index?: number | null }[]) {
+        voteMap[vote.proposal_id] = { type: vote.vote_type, weight: vote.vote_weight, option: vote.option_index ?? null };
+      }
+      return voteMap;
+    },
+    enabled: !!walletAddress,
+    staleTime: 60_000,
+  });
+}
+
+const GOVERNANCE_PROPOSAL_FEE = 10000; // DHB per proposal
+
+/**
+ * A proposal fee that is on chain but whose proposal has not been recorded yet.
+ *
+ * The 10,000 DHB leaves the wallet before the edge function is told about it,
+ * and that function verifies through an indexer which can lag a transfer by a
+ * few seconds — so its own answer is "not on chain yet, wait a moment and
+ * retry". The mutation threw on that, and pressing Submit again sent a second
+ * 10,000 DHB while the first sat unclaimed with a one-hour window to be used
+ * in and no way for the user to reach it.
+ *
+ * Keyed on the proposal's own text, because there is no id until the row
+ * exists. Cleared the moment the proposal is recorded.
+ */
+const PENDING_FEE_KEY = 'dehub.governance.pendingFee';
+
+/** JSON rather than a joined string, so no title and body can collide. */
+function proposalKey(title: string, description: string): string {
+  return JSON.stringify([title.trim(), description.trim()]);
+}
+
+function rememberProposalFee(title: string, description: string, txHash: string): void {
+  try {
+    localStorage.setItem(PENDING_FEE_KEY, JSON.stringify({ key: proposalKey(title, description), txHash }));
+  } catch { /* private mode — the in-flight retries below still reuse it */ }
+}
+
+function readProposalFee(title: string, description: string): string | null {
+  try {
+    const raw = JSON.parse(localStorage.getItem(PENDING_FEE_KEY) || 'null');
+    if (raw?.key !== proposalKey(title, description)) return null;
+    return typeof raw.txHash === 'string' ? raw.txHash : null;
+  } catch {
+    return null;
+  }
+}
+
+function forgetProposalFee(): void {
+  try {
+    localStorage.removeItem(PENDING_FEE_KEY);
+  } catch { /* nothing to clean up */ }
+}
+
+/** The indexer lag the server tells us to wait out. */
+const FEE_RETRY_DELAYS_MS = [2000, 4000, 8000];
+
+/**
+ * Record the proposal against a fee already paid, waiting out indexer lag.
+ *
+ * The server distinguishes "not indexed yet" from a real refusal, and only the
+ * first is worth retrying — a wrong amount or a spent hash will not become
+ * right by asking again.
+ */
+async function submitWithPaidFee(
+  title: string,
+  description: string,
+  txHash: string | null,
+  media: ProposalMedia | null,
+  options: string[] | null,
+): Promise<{ proposal: GovernanceProposal }> {
+  let lastError: unknown;
+  for (let attempt = 0; attempt <= FEE_RETRY_DELAYS_MS.length; attempt++) {
+    try {
+      return await callGovernance<{ proposal: GovernanceProposal }>('governance-proposal', {
+        title: title.trim(),
+        description: description.trim(),
+        ...(txHash ? { txHash } : {}),
+        ...(media ? { mediaUrl: media.url, mediaType: media.type } : {}),
+        ...(options && options.length > 0 ? { options } : {}),
+      });
+    } catch (err) {
+      lastError = err;
+      const message = err instanceof Error ? err.message : String(err);
+      if (!/not on chain yet|wait a moment/i.test(message)) throw err;
+      const wait = FEE_RETRY_DELAYS_MS[attempt];
+      if (wait === undefined) break;
+      toast.loading('Confirming your fee on chain…', { id: 'governance-proposal-fee' });
+      await new Promise((resolve) => setTimeout(resolve, wait));
+    }
+  }
+  throw lastError;
+}
+
+export function useSubmitGovernanceProposal() {
+  const { t: _copy } = _useCopy();
+  const queryClient = useQueryClient();
+  const { walletAddress } = useAuth();
+  const { weight: selfWeight } = useSelfVoteWeight();
+
+  return useMutation({
+    mutationFn: async ({ title, description, media = null, options = null }: {
+      title: string;
+      description: string;
+      media?: ProposalMedia | null;
+      /** Two to six answers for a multiple choice proposal; null for yes/no. */
+      options?: string[] | null;
+    }) => {
+      if (!walletAddress) throw new Error('Not authenticated');
+
+      // A fee already paid for this exact proposal is reused rather than paid
+      // again. Reached when the first attempt's fee landed but recording the
+      // proposal did not — the retry below is the same call, not a new charge.
+      const alreadyPaid = readProposalFee(title, description);
+      if (alreadyPaid) {
+        const retried = await submitWithPaidFee(title, description, alreadyPaid, media, options);
+        forgetProposalFee();
+        return retried.proposal;
+      }
+
+      // Badge holders post free. The server decides; if it disagrees (badge
+      // lookup lagging), it answers with feeRequired and we fall through to
+      // the paid path below.
+      if (selfWeight > 0) {
+        try {
+          const free = await submitWithPaidFee(title, description, null, media, options);
+          return free.proposal;
+        } catch (err) {
+          const message = err instanceof Error ? err.message : String(err);
+          if (!/without a staking badge/i.test(message)) throw err;
+        }
+      }
+
+      // ── Charge 10,000 DHB proposal fee ─────────────────────
+      const chainConfig = getChainConfig(BASE_CHAIN_ID);
+      await switchChain(BASE_CHAIN_ID);
+      const signerAddress = await getWalletAddress();
+      const amountWei = toWei(GOVERNANCE_PROPOSAL_FEE, DHB_TOKEN.decimals);
+      const balance = await getERC20Balance(chainConfig.dhbToken, signerAddress, BASE_CHAIN_ID);
+
+      if (balance < amountWei) {
+        const balanceHuman = Number(balance) / 1e18;
+        throw new Error(
+          i18n.t('governance.notEnoughUnstakedTokens', {
+            needed: GOVERNANCE_PROPOSAL_FEE.toLocaleString(),
+            held: balanceHuman.toFixed(2),
+          })
+        );
+      }
+
+      toast.loading('Processing proposal fee...', { id: 'governance-proposal-fee' });
+
+      const txResult = await writeContractAA(
+        chainConfig.dhbToken,
+        erc20TransferInterface,
+        'transfer',
+        [GOVERNANCE_TREASURY, amountWei],
+        { context: 'Governance proposal fee', chainId: BASE_CHAIN_ID }
+      );
+
+      const receipt = await txResult.wait(1);
+      toast.dismiss('governance-proposal-fee');
+      const feeTxHash = receipt?.hash || txResult.hash;
+      rememberProposalFee(title, description, feeTxHash);
+
+      // ── Record proposal, once the chain agrees the fee was paid ──
+      // The row is written by the edge function, not from here: the insert
+      // this replaced had no idea a fee existed, so posting straight to
+      // PostgREST created a free proposal.
+      const result = await submitWithPaidFee(title, description, feeTxHash, media, options);
+      forgetProposalFee();
+      return result.proposal;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['governance-proposals'] });
+      queryClient.invalidateQueries({ queryKey: ['governance-proposals-total-count'] });
+      toast.success(_copy("copy.d866de7ac5f2", { defaultValue: "Governance proposal submitted!" }));
+    },
+    onError: (err: any) => {
+      toast.dismiss('governance-proposal-fee');
+      // The drawer's fields are drafts persisted per account, so nothing typed
+      // is lost — say so, otherwise a failure reads as "my proposal vanished".
+      toastTxError(err, err?.message || i18n.t('governance.submitFailed'), {
+        description: i18n.t('governance.draftSavedRetry'),
+      });
+    },
+  });
+}
+
+export function useVoteGovernanceProposal() {
+  const queryClient = useQueryClient();
+  const { walletAddress } = useAuth();
+  const explainCannotVote = useExplainCannotVote();
+
+  return useMutation({
+    mutationFn: async ({ proposalId, voteType, voteWeight, optionIndex }: {
+      proposalId: string;
+      voteType: 1 | -1;
+      currentVote: number | undefined;
+      voteWeight: number;
+      badgeName: string | null;
+      /** The answer picked on a multiple choice proposal (voteType is then 1). */
+      optionIndex?: number;
+    }) => {
+      if (!walletAddress) throw new Error('Not authenticated');
+      if (voteWeight === 0) throw new Error('You must hold tokens to vote');
+
+      // Three things are deliberately not sent: the weight, the badge name and
+      // whether this click is a withdrawal. The function reads the badge
+      // balance for the wallet its token belongs to and decides the first two;
+      // it compares against the stored vote to decide the third. Deciding the
+      // toggle here meant reading `currentVote`, which is a render old — the
+      // old code read it from the props in the mutation and from the cache in
+      // the optimistic update, so the two could disagree and a withdrawal
+      // would land as a re-vote. `voteWeight` stays in the arguments only
+      // because the optimistic update needs a number to move the bar by.
+      return callGovernance<{ action: 'voted' | 'removed'; weight: number; badgeName: string | null }>(
+        'governance-vote',
+        optionIndex === undefined ? { proposalId, voteType } : { proposalId, voteType: 1, optionIndex },
+      );
+    },
+    onMutate: async ({ proposalId, voteType, voteWeight, optionIndex }) => {
+      await queryClient.cancelQueries({ queryKey: ['governance-proposals'] });
+      await queryClient.cancelQueries({ queryKey: ['governance-votes'] });
+      await queryClient.cancelQueries({ queryKey: ['governance-proposal'] });
+
+      const previousRequests = queryClient.getQueriesData({ queryKey: ['governance-proposals'] });
+      const previousVotes = queryClient.getQueryData(['governance-votes', walletAddress]);
+      const previousDetail = queryClient.getQueryData(['governance-proposal', proposalId]);
+
+      // Read ACTUAL current vote from cache (not the stale prop)
+      const cachedVotes = previousVotes as Record<string, GovernanceUserVote> | undefined;
+      const cached = cachedVotes?.[proposalId];
+      const actualCurrentVote = cached?.type;
+      const oldWeight = cached?.weight ?? voteWeight;
+      const multiple = optionIndex !== undefined;
+      // On multiple choice the same answer again is the withdrawal; on yes/no
+      // it is the same side again.
+      const removing = multiple ? cached?.option === optionIndex : actualCurrentVote === voteType;
+
+      // Optimistic vote map update
+      queryClient.setQueryData(['governance-votes', walletAddress], (old: Record<string, GovernanceUserVote> | undefined) => {
+        const newVotes = { ...(old || {}) };
+        if (removing) {
+          delete newVotes[proposalId];
+        } else {
+          newVotes[proposalId] = { type: multiple ? 1 : voteType, weight: voteWeight, option: multiple ? optionIndex : null };
+        }
+        return newVotes;
+      });
+
+      // Compute deltas once
+      let likeDelta = 0;
+      let dislikeDelta = 0;
+      if (multiple) {
+        // Every multiple choice vote is a vote_type 1 row: the total moves
+        // only when a vote is cast or taken back, not when it changes answer.
+        if (removing) likeDelta = -oldWeight;
+        else if (cached) likeDelta = voteWeight - oldWeight;
+        else likeDelta = voteWeight;
+      } else if (actualCurrentVote === voteType) {
+        // Removing vote — use old weight
+        if (voteType === 1) likeDelta = -oldWeight;
+        else dislikeDelta = -oldWeight;
+      } else if (actualCurrentVote) {
+        // Changing vote — remove old weight, add new weight
+        if (actualCurrentVote === 1) { likeDelta = -oldWeight; dislikeDelta = voteWeight; }
+        else { dislikeDelta = -oldWeight; likeDelta = voteWeight; }
+      } else {
+        // New vote
+        if (voteType === 1) likeDelta = voteWeight;
+        else dislikeDelta = voteWeight;
+      }
+
+      const patch = (p: GovernanceProposal): GovernanceProposal => {
+        const next: GovernanceProposal = {
+          ...p,
+          vote_count: p.vote_count + likeDelta - dislikeDelta,
+          like_count: (p.like_count ?? 0) + likeDelta,
+          dislike_count: (p.dislike_count ?? 0) + dislikeDelta,
+        };
+        if (multiple && Array.isArray(p.options)) {
+          const tallies = p.options.map((_, i) => ({
+            weight: Number(p.option_tallies?.[i]?.weight) || 0,
+            voters: Number(p.option_tallies?.[i]?.voters) || 0,
+          }));
+          const from = cached?.option;
+          if (typeof from === 'number' && tallies[from]) {
+            tallies[from] = { weight: Math.max(0, tallies[from].weight - oldWeight), voters: Math.max(0, tallies[from].voters - 1) };
+          }
+          if (!removing && tallies[optionIndex]) {
+            tallies[optionIndex] = { weight: tallies[optionIndex].weight + voteWeight, voters: tallies[optionIndex].voters + 1 };
+          }
+          next.option_tallies = tallies;
+        }
+        return next;
+      };
+
+      // Optimistic vote count update on list pages (weighted)
+      queryClient.setQueriesData({ queryKey: ['governance-proposals'] }, (old: any) => {
+        if (!old?.pages) return old;
+        return {
+          ...old,
+          pages: old.pages.map((page: GovernanceProposal[]) =>
+            page.map((p) => (p.id === proposalId ? patch(p) : p))
+          ),
+        };
+      });
+
+      // Optimistic update on detail page query
+      queryClient.setQueryData(['governance-proposal', proposalId], (old: GovernanceProposal | undefined) => {
+        if (!old) return old;
+        return patch(old);
+      });
+
+      return { previousRequests, previousVotes, previousDetail, proposalId };
+    },
+    onError: (err: any, _vars, context) => {
+      toast.dismiss('governance-vote-fee');
+      if (context?.previousRequests) {
+        for (const [key, data] of context.previousRequests) {
+          queryClient.setQueryData(key, data);
+        }
+      }
+      if (context?.previousVotes) {
+        queryClient.setQueryData(['governance-votes', walletAddress], context.previousVotes);
+      }
+      if (context?.previousDetail && context?.proposalId) {
+        queryClient.setQueryData(['governance-proposal', context.proposalId], context.previousDetail);
+      }
+      if (err?.code === 'LENT_BADGE' || err?.code === 'NO_BADGE') {
+        explainCannotVote(err.code === 'LENT_BADGE');
+        return;
+      }
+      toastTxError(err, err?.message || i18n.t('governance.voteFailedHoldTokens'));
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['governance-proposals'] });
+      queryClient.invalidateQueries({ queryKey: ['governance-proposal'] });
+      queryClient.invalidateQueries({ queryKey: ['governance-votes'] });
+    },
+  });
+}

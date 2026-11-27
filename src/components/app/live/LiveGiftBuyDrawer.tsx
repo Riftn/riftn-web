@@ -1,0 +1,168 @@
+import { useTranslation as _useCopy } from 'react-i18next';
+import { useSurfaceDraft } from '@/hooks/use-surface-draft';
+import { useCallback, useEffect, useState } from 'react';
+import { EmbeddedCheckout, EmbeddedCheckoutProvider } from '@stripe/react-stripe-js';
+import { CreditCard, Loader2 } from "lucide-react";
+import Wallet from "@/components/ui/cut-icons/wallet";
+
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { NearIntentBuy } from '@/components/app/NearIntentBuy';
+import { DHB_SALES_PAUSED } from '@/lib/dhb-sales';
+import { TokenLaunchNotify } from '@/components/app/token-launch/TokenLaunchNotify';
+import { createCheckoutSession, getDPayPrice, getDPaySessionStatus } from '@/lib/api/dpay';
+import { getStripe, isPaymentsConfigured } from '@/lib/stripe';
+import { useAuth } from '@/contexts/AuthContext';
+import { useQueryClient } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
+
+type Props = {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  neededDhb: number;
+  onFunded: () => void;
+  returnTo?: string;
+};
+
+export function LiveGiftBuyDrawer({ open, onOpenChange, neededDhb, onFunded, returnTo = 'gift' }: Props) {
+  const { t: _copy } = _useCopy();
+  const { walletAddress } = useAuth();
+  const queryClient = useQueryClient();
+  const { t } = useTranslation();
+  // Callers name where the buyer goes back to; the known places are worded here.
+  const returnLabel = returnTo === 'gift'
+    ? _copy("copy.a1954b15a745", { defaultValue: "gift" })
+    : returnTo === 'post'
+      ? _copy("copy.72231043bc18", { defaultValue: "post" })
+      : returnTo;
+  const [method, setMethod] = useState<'card' | 'crypto'>('card');
+  const [amountUsd, setAmountUsd] = useSurfaceDraft("components/app/live/LiveGiftBuyDrawer.tsx:amountUsd", '10');
+  const [tokenPrice, setTokenPrice] = useState(0);
+  const [cryptoAmount, setCryptoAmount] = useSurfaceDraft("src/components/app/live/LiveGiftBuyDrawer.tsx:cryptoAmount", () => String(Math.max(1, Math.ceil(neededDhb))));
+  const [clientSecret, setClientSecret] = useState('');
+  const [sessionId, setSessionId] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+  const [paymentComplete, setPaymentComplete] = useState(false);
+  const estimatedDhb = tokenPrice > 0 ? (Number(amountUsd) / tokenPrice) * 0.9 : 0;
+
+  useEffect(() => {
+    if (!open) return;
+    let cancelled = false;
+    getDPayPrice().then(({ price }) => {
+      if (!cancelled) setTokenPrice(price);
+    }).catch(() => {
+      if (!cancelled) setError(t('liveGift.buy.priceFailed'));
+    });
+    return () => { cancelled = true; };
+  }, [open, t]);
+
+  const delivered = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: ['wallet-tokens'] });
+    setClientSecret('');
+    setSessionId('');
+    onFunded();
+  }, [onFunded, queryClient]);
+
+  useEffect(() => {
+    if (!open || !sessionId) return;
+    let cancelled = false;
+    const check = async () => {
+      try {
+        const status = await getDPaySessionStatus(sessionId);
+        if (cancelled) return;
+        if (['sent', 'completed', 'success'].includes((status.tokenSendStatus || '').toLowerCase())) {
+          delivered();
+        } else if (['failed', 'cancelled', 'canceled', 'expired'].includes((status.status_stripe || '').toLowerCase())) {
+          setError(_copy("copy.022b10cbda10", { defaultValue: "Payment did not complete. Try again." }));
+          setClientSecret('');
+          setSessionId('');
+        }
+      } catch { /* A delayed status response does not mean payment failed. */ }
+    };
+    void check();
+    const timer = setInterval(check, 2500);
+    return () => { cancelled = true; clearInterval(timer); };
+  }, [open, sessionId, delivered, _copy]);
+
+  const buyWithCard = async () => {
+    if (DHB_SALES_PAUSED) return;
+    if (!isPaymentsConfigured()) {
+      setError(_copy("copy.78cd2746bd20", { defaultValue: "Card payments are temporarily unavailable. Please try again later." }));
+      return;
+    }
+    if (!walletAddress || !Number.isFinite(Number(amountUsd)) || Number(amountUsd) < 0.5 || !Number.isFinite(estimatedDhb) || estimatedDhb <= 0) return;
+    setBusy(true);
+    setError('');
+    try {
+      const result = await createCheckoutSession({
+        amount: Number(amountUsd),
+        tokenSymbol: 'DHB',
+        walletAddress,
+        chainId: 8453,
+        tokensToReceive: estimatedDhb,
+        embedded: true,
+        redirect: `${window.location.origin}${window.location.pathname}?gift_payment=return&session_id={CHECKOUT_SESSION_ID}`,
+      });
+      if (!result.clientSecret || !result.sessionId) throw new Error(_copy("copy.a703a8e28fed", { defaultValue: "Card checkout is unavailable." }));
+      setSessionId(result.sessionId);
+      setClientSecret(result.clientSecret);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : _copy("copy.827beb6ec9dc", { defaultValue: "Could not start checkout." }));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <Drawer open={open} onOpenChange={onOpenChange}>
+      <DrawerContent column glass className="px-4 pb-8 max-h-[90dvh]">
+        <DrawerHeader className="border-b border-white/10 mb-4">
+          <DrawerTitle className="text-white">{_copy("copy.1dffe3aad33c", { defaultValue: "Buy tokens" })}</DrawerTitle>
+        </DrawerHeader>
+        {/* While sales are closed the drawer offers the launch list instead. */}
+        {DHB_SALES_PAUSED ? (
+          <div className="overflow-y-auto pb-3"><TokenLaunchNotify compact /></div>
+        ) : (
+        <div className="overflow-y-auto space-y-4 pb-3">
+          <p className="text-sm text-zinc-400">{t('liveGift.buy.intro', { returnTo: returnLabel })}</p>
+          {!clientSecret && (
+            <div className="grid grid-cols-2 gap-2">
+              <Button variant="glass" className="w-full" onClick={() => setMethod('card')} aria-pressed={method === 'card'}><CreditCard className="w-4 h-4 mr-2" />{_copy("copy.be3702e3f1af", { defaultValue: "Card" })}</Button>
+              <Button variant="glass" className="w-full" onClick={() => setMethod('crypto')} aria-pressed={method === 'crypto'}><Wallet className="w-4 h-4 mr-2" />{_copy("copy.df12b8f89b61", { defaultValue: "Crypto" })}</Button>
+            </div>
+          )}
+          {method === 'crypto' && !clientSecret ? (
+            <div className="space-y-3">
+              <label className="text-sm text-zinc-400 block">{t('liveGift.buy.amountToBuy')}</label>
+              <Input type="number" min="1" step="1" value={cryptoAmount} onChange={(e) => setCryptoAmount(e.target.value)} className="bg-zinc-800 border-zinc-700 text-white" />
+              <NearIntentBuy tokensToReceive={Math.max(1, Math.floor(Number(cryptoAmount) || 0))} active onDelivered={delivered} />
+            </div>
+          ) : clientSecret ? (
+            <div className="space-y-3">
+              <div className="bg-white rounded-xl overflow-hidden min-h-[400px]">
+                <EmbeddedCheckoutProvider stripe={getStripe()} options={{ clientSecret, onComplete: () => setPaymentComplete(true) }}>
+                  <EmbeddedCheckout />
+                </EmbeddedCheckoutProvider>
+              </div>
+              <p className="text-xs text-zinc-400 text-center">{paymentComplete ? t('liveGift.buy.waitingDelivery') : _copy("copy.de7a520d250e", { defaultValue: "Complete payment here. Your {{value1}} stays open behind this drawer.", value1: returnLabel })}</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <label className="text-sm text-zinc-400 block">{_copy("copy.24f52bfeb8a8", { defaultValue: "Amount (USD)" })}</label>
+              <Input type="number" min="0.5" step="0.01" value={amountUsd} onChange={(e) => setAmountUsd(e.target.value)} className="bg-zinc-800 border-zinc-700 text-white" />
+              {tokenPrice > 0 && <p className="text-xs text-zinc-400">{t('liveGift.buy.estimate', { amount: estimatedDhb.toLocaleString(undefined, { maximumFractionDigits: 2 }) })}</p>}
+              <Button className="w-full" onClick={buyWithCard} disabled={DHB_SALES_PAUSED || busy || Number(amountUsd) < 0.5 || tokenPrice <= 0}>
+                {busy && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}{DHB_SALES_PAUSED ? t('stores.soldOutButton') : t('ppvTopUp.buyCard')}
+              </Button>
+            </div>
+          )}
+          {error && <p role="alert" className="text-sm text-red-300">{error}</p>}
+          <Button variant="glass" className="w-full" onClick={() => onOpenChange(false)}>{_copy("copy.7ff60540f666", { defaultValue: "Back to {{value1}}", value1: returnLabel })}</Button>
+        </div>
+        )}
+      </DrawerContent>
+    </Drawer>
+  );
+}

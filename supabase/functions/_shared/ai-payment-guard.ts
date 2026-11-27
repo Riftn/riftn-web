@@ -1,0 +1,350 @@
+import { hydrateGenerationResult } from './generation-result.ts';
+/**
+ * Charge a wallet before running a generation.
+ * ============================================
+ * Wraps the three things every paid generation endpoint has to do: prove who
+ * is calling, price the job here rather than trusting the caller, and confirm
+ * the money actually moved before spending a provider credit.
+ *
+ * There is no balance any more. A job is paid for by a DHB transfer to the
+ * treasury, and the caller proves it with a hash that this verifies against
+ * the chain. The first job on a hash records the receipt; later jobs draw
+ * from what is left of it, which is how voice bills per exchange without
+ * asking for a signature between every sentence.
+ *
+ * `guardPaidEndpoint` — auth plus a per-wallet limit — still comes first: a
+ * paid endpoint that skipped it would be the open door the whole module
+ * exists to close.
+ */
+
+import { guardPaidEndpoint, jsonResponse, rateLimitByIp, serviceClient, type RateLimit } from './auth.ts';
+import { claimFree, freeEligible, releaseFree } from './ai-free.ts';
+import { quotePriceDhb, type JobKind, type QuoteOptions } from './ai-pricing.ts';
+import { claimDhbPayment } from './dhb-transfer.ts';
+import { debitCredits, refundCredits } from './credits.ts';
+import { userProviderKey } from './byok.ts';
+import { refundJournalledGeneration, transitionGeneration } from './generation-terminal.ts';
+
+export interface ChargeRequest extends QuoteOptions {
+  /** Server-fetched provider quote. Never populated from a client price field. */
+  providerPriceDhb?: number;
+  kind: JobKind;
+  modelId: string;
+  /** Rate-limit bucket name, e.g. 'generate-image'. */
+  actionType: string;
+  rateLimit: RateLimit;
+  /**
+   * Waive the charge for this job — it runs on our own code rather than a
+   * metered provider, so there is nothing to bill for.
+   *
+   * Auth and the rate limit still apply. The caller owns the promise that a
+   * waived job cannot reach a paid provider once it is past this point.
+   */
+  free?: boolean;
+  /**
+   * The already-parsed request body, when the caller has one.
+   *
+   * Required wherever the handler has read the body before charging —
+   * generate-video, generate-3d and fal-ai-tools all validate first — because
+   * `req.clone()` throws once the body is consumed. generate-image charges
+   * before parsing and can leave this out.
+   */
+  body?: Record<string, unknown>;
+  /**
+   * The provider this job runs on. When the creator saved a working key for it
+   * in Settings, the job runs on their account and nothing is charged; the
+   * result carries `ownKey` so the caller uses it instead of Riftn's.
+   */
+  ownKeyProvider?: string;
+}
+
+export type ChargeResult =
+  | {
+      ok: true;
+      wallet: string;
+      priceDhb: number;
+      jobId: string;
+      /** The creator's own provider key for this job, when they saved one. */
+      ownKey?: string | null;
+      /**
+       * Put the price back on the receipt. Call this when the provider fails
+       * after the draw, so the same transfer pays for the retry instead of
+       * the user paying twice for one result. Idempotent on jobId.
+       *
+       * Resolves true when the price is back with the payer (or nothing was
+       * taken), false when the release failed and the job is left
+       * `refund_pending` for someone to settle by hand. The caller tells the
+       * user which, so a failed start never reads as money gone.
+       */
+      refund: () => Promise<boolean>;
+    }
+  | { ok: false; response: Response };
+
+export async function chargeForJob(req: Request, opts: ChargeRequest): Promise<ChargeResult> {
+  const guard = await guardPaidEndpoint(req, opts.actionType, opts.rateLimit);
+  if (!guard.ok) return guard;
+
+  const ownKey = opts.ownKeyProvider ? await userProviderKey(guard.wallet, opts.ownKeyProvider) : null;
+  if (opts.free || ownKey) {
+    console.log('[ai-payment] free job, no charge', { kind: opts.kind, modelId: opts.modelId, wallet: guard.wallet, ownKey: !!ownKey });
+    return {
+      ok: true,
+      wallet: guard.wallet,
+      priceDhb: 0,
+      jobId: crypto.randomUUID(),
+      ownKey,
+      // Nothing was taken, so there is nothing to give back. Kept as a no-op so
+      // callers can refund unconditionally on failure without checking price.
+      refund: async () => true,
+    };
+  }
+
+  const priceDhb = opts.providerPriceDhb ?? quotePriceDhb(opts.kind, opts.modelId, {
+    durationSeconds: opts.durationSeconds,
+    quality: opts.quality,
+    quantity: opts.quantity,
+  });
+
+  if (priceDhb === null || !Number.isFinite(priceDhb) || priceDhb <= 0) {
+    return {
+      ok: false,
+      response: jsonResponse({ error: `Unknown model: ${opts.kind}/${opts.modelId}` }, 400),
+    };
+  }
+
+  // The hash rides on the same body the handler reads. A caller that has
+  // already parsed it hands it over; otherwise cloning leaves the original
+  // readable, so nothing downstream had to learn about payment.
+  const body = (opts.body
+    ?? await req.clone().json().catch(() => ({}))) as { txHash?: unknown; purpose?: unknown; clientJobId?: unknown; prompt?: unknown; aspectRatio?: unknown; useFree?: unknown; paySource?: unknown };
+  const txHash = typeof body.txHash === 'string' ? body.txHash.toLowerCase() : '';
+
+  // `txHash: "credits"` is a sentinel the web client sends through the existing field.
+  if (body.paySource === 'credits' || txHash === 'credits') return chargeCredits(guard.wallet, priceDhb, opts, body);
+
+  // A free starter image: no transfer, one row in ai_free_generations. The
+  // per-IP cap keeps a farm of fresh wallets from draining it.
+  if (!txHash && body.useFree === true && freeEligible(opts.kind, opts.modelId, opts.quantity)) {
+    const ipLimited = await rateLimitByIp(req, 'ai-free', { limit: 15, windowMs: 24 * 60 * 60 * 1000 });
+    if (ipLimited) return { ok: false, response: ipLimited };
+    const freeJobId = crypto.randomUUID();
+    let claimed = false;
+    try {
+      claimed = await claimFree(guard.wallet, freeJobId, opts.modelId);
+    } catch (error) {
+      console.error('[ai-payment] free claim failed:', error);
+      return { ok: false, response: jsonResponse({ error: 'Could not start a free generation. Please retry.' }, 503) };
+    }
+    if (!claimed) {
+      return {
+        ok: false,
+        response: jsonResponse({ error: 'Your free images are used up. Pay for this one to run it.', code: 'FREE_EXHAUSTED', priceDhb }, 402),
+      };
+    }
+    return { ok: true, wallet: guard.wallet, priceDhb: 0, jobId: freeJobId, refund: async () => { await releaseFree(freeJobId); return true; } };
+  }
+
+  if (!/^0x[a-f0-9]{64}$/.test(txHash)) {
+    return {
+      ok: false,
+      response: jsonResponse(
+        { error: 'This generation costs DHB. Pay for it and pass the transfer hash.', code: 'PAYMENT_REQUIRED', priceDhb },
+        402,
+      ),
+    };
+  }
+
+  const supabase = serviceClient();
+  const jobId = typeof body.clientJobId === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(body.clientJobId) ? body.clientJobId : crypto.randomUUID();
+  if (body.clientJobId) {
+    const previous = await supabase.from('ai_generation_jobs').select('*').eq('id', jobId).maybeSingle();
+    if (previous.error) return { ok: false, response: jsonResponse({ error: 'Could not check the previous generation. Please retry.' }, 503) };
+    if (previous.data) {
+      const job = previous.data;
+      if (job.wallet_address !== guard.wallet || job.tx_hash !== txHash || job.model !== opts.modelId || job.endpoint !== opts.actionType) return { ok: false, response: jsonResponse({ error: 'Generation id is already in use.' }, 409) };
+      return { ok: false, response: jsonResponse(await hydrateGenerationResult(job, supabase) || { error: 'This generation is already being submitted. Check your library before retrying.' }, job.result ? 200 : 409) };
+    }
+  }
+
+  const { data: existing } = await supabase
+    .from('ai_payments')
+    .select('id, wallet_address')
+    .eq('tx_hash', txHash)
+    .maybeSingle();
+
+  if (existing) {
+    // A receipt belongs to the wallet that sent the transfer. Someone else's
+    // hash is not a payment, it is a theft attempt.
+    if (String(existing.wallet_address).toLowerCase() !== guard.wallet) {
+      return { ok: false, response: jsonResponse({ error: 'That payment belongs to another wallet.' }, 403) };
+    }
+  } else {
+    // First job on this hash. The chain is the authority — a caller claiming
+    // to have paid proves it, and everything unconfirmable is refused.
+    const payment = await claimDhbPayment(txHash, guard.wallet, priceDhb, 'ai', supabase);
+    if (!payment.ok) {
+      return {
+        ok: false,
+        response: jsonResponse({ error: payment.reason, code: 'PAYMENT_UNVERIFIED', priceDhb }, 402),
+      };
+    }
+
+    const { error: insertError } = await supabase.from('ai_payments').insert({
+      wallet_address: guard.wallet,
+      tx_hash: payment.hash.toLowerCase(),
+      chain: payment.chain,
+      // The whole transfer, not just this job's price: an overpayment stays
+      // the payer's to spend on the next job rather than being kept.
+      paid_dhb: payment.dhb,
+      remaining_dhb: payment.dhb,
+      purpose: body.purpose === 'voice' ? 'voice' : 'job',
+    });
+
+    // A unique violation here means the same hash arrived twice at once. The
+    // draw below is the arbiter either way, so fall through to it rather than
+    // refusing a payment that is on chain and unspent.
+    if (insertError && !String(insertError.message || '').includes('duplicate')) {
+      console.error('[ai-payment] could not record receipt:', insertError);
+      return { ok: false, response: jsonResponse({ error: 'That payment could not be recorded. Nothing has been charged.' }, 500) };
+    }
+  }
+
+  const journalled = ['generate-image', 'generate-video', 'generate-3d', 'fal-ai-tools'].includes(opts.actionType);
+  const { error } = await supabase.rpc(journalled ? 'ai_job_spend' : 'ai_payment_spend', {
+    p_tx_hash: txHash,
+    p_wallet: guard.wallet,
+    p_dhb: priceDhb,
+    ...(journalled ? { p_job_id: jobId, p_kind: opts.kind, p_model: opts.modelId, p_endpoint: opts.actionType, p_metadata: { prompt: typeof body.prompt === 'string' ? body.prompt.slice(0, 20000) : '', aspectRatio: typeof body.aspectRatio === 'string' ? body.aspectRatio : '' } } : {}),
+  });
+
+  if (error) {
+    const message = String(error.message || '');
+    if (message.includes('PAYMENT_EXHAUSTED')) {
+      return {
+        ok: false,
+        response: jsonResponse(
+          { error: 'That payment has already been used up. Pay for this generation to run it.', code: 'PAYMENT_EXHAUSTED', priceDhb },
+          402,
+        ),
+      };
+    }
+    if (message.includes('PAYMENT_NOT_FOUND')) {
+      return {
+        ok: false,
+        response: jsonResponse({ error: 'That payment could not be found.', code: 'PAYMENT_REQUIRED', priceDhb }, 402),
+      };
+    }
+    console.error('[ai-payment] draw failed:', error);
+    return { ok: false, response: jsonResponse({ error: 'Could not take payment.' }, 500) };
+  }
+
+  return {
+    ok: true,
+    wallet: guard.wallet,
+    priceDhb,
+    jobId,
+    refund: async () => {
+      if (journalled) {
+        try { return await refundJournalledGeneration(jobId, supabase); }
+        catch (error) { console.error('[ai-payment] payment recovery pending', jobId, String(error)); return false; }
+      }
+      const { error: refundError } = await supabase.rpc('ai_payment_release', {
+        p_tx_hash: txHash,
+        p_wallet: guard.wallet,
+        p_dhb: priceDhb,
+        p_job_id: jobId,
+      });
+      const restored = !refundError || String(refundError.message || '').includes('REFUND_ALREADY_APPLIED');
+      // A failed release must not mask the provider error that triggered it.
+      if (!restored) {
+        console.error(`[ai-payment] release failed for job ${jobId}:`, refundError);
+      }
+      return restored;
+    },
+  };
+}
+
+const JOURNALLED = ['generate-image', 'generate-video', 'generate-3d', 'fal-ai-tools'];
+const UUID_V4 = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+/** Pay from the backend credit balance instead of a DHB transfer. */
+export async function chargeCredits(
+  wallet: string,
+  priceDhb: number,
+  opts: ChargeRequest,
+  body: { clientJobId?: unknown; prompt?: unknown; aspectRatio?: unknown },
+  dependencies: { db?: ReturnType<typeof serviceClient>; debit?: typeof debitCredits } = {},
+): Promise<ChargeResult> {
+  const supabase = dependencies.db || serviceClient();
+  const jobId = typeof body.clientJobId === 'string' && UUID_V4.test(body.clientJobId) ? body.clientJobId : crypto.randomUUID();
+  const key = `ai:${jobId}`;
+  // $0.001 per DHB: 1 DHB = 1000 micro-dollars.
+  const usdMicros = Math.round(priceDhb * 1000);
+
+  if (body.clientJobId) {
+    const previous = await supabase.from('ai_generation_jobs').select('*').eq('id', jobId).maybeSingle();
+    if (previous.error) return { ok: false, response: jsonResponse({ error: 'Could not check the previous generation. Please retry.' }, 503) };
+    if (previous.data) {
+      const job = previous.data;
+      if (job.wallet_address !== wallet || job.payment_source !== 'credits' || job.model !== opts.modelId || job.endpoint !== opts.actionType) return { ok: false, response: jsonResponse({ error: 'Generation id is already in use.' }, 409) };
+      return { ok: false, response: jsonResponse(await hydrateGenerationResult(job, supabase) || { error: 'This generation is already being submitted. Check your library before retrying.' }, job.result ? 200 : 409) };
+    }
+  }
+
+  const journalled = JOURNALLED.includes(opts.actionType);
+  if (journalled) {
+    const { error } = await supabase.rpc('ai_job_record_credits', {
+      p_job_id: jobId,
+      p_wallet: wallet,
+      p_dhb: priceDhb,
+      p_kind: opts.kind,
+      p_model: opts.modelId,
+      p_endpoint: opts.actionType,
+      p_metadata: { prompt: typeof body.prompt === 'string' ? body.prompt.slice(0, 20000) : '', aspectRatio: typeof body.aspectRatio === 'string' ? body.aspectRatio : '' },
+      p_debit_key: key,
+    });
+    if (error) {
+      console.error('[ai-payment] credits job record failed:', error);
+      // Only the unique reservation winner may debit this key. A competing
+      // request must not refund the winner or submit a second provider job.
+      const previous = await supabase.from('ai_generation_jobs').select('*').eq('id', jobId).maybeSingle();
+      if (!previous.error && previous.data?.wallet_address === wallet && previous.data?.credit_debit_key === key
+        && previous.data.model === opts.modelId && previous.data.endpoint === opts.actionType) {
+        return { ok: false, response: jsonResponse(await hydrateGenerationResult(previous.data, supabase) || { error: 'This generation is already being submitted. Check your library before retrying.' }, previous.data.result ? 200 : 409) };
+      }
+      return { ok: false, response: jsonResponse({ error: 'Could not reserve this generation. Check your library before retrying.' }, 503) };
+    }
+  }
+
+  const outcome = await (dependencies.debit || debitCredits)(wallet, usdMicros, key);
+  if (outcome !== 'debited') {
+    if (journalled) {
+      try {
+        if (outcome === 'short') {
+          const declined = await supabase.rpc('ai_generation_debit_declined', { p_job_id: jobId });
+          if (declined.error) throw declined.error;
+        } else {
+          await transitionGeneration(jobId, 'failed', { status: 'failed', error: 'Payment confirmation was interrupted. Recovery is pending.', debitUnconfirmed: true }, { expectedStatuses: ['submitting'] }, supabase);
+        }
+      } catch (error) { console.error('[ai-payment] credit confirmation recovery pending', jobId, String(error)); }
+    }
+    if (outcome === 'short') return { ok: false, response: jsonResponse({ error: 'Not enough credits for this generation.', code: 'CREDITS_SHORT', priceDhb, priceUsd: priceDhb / 1000 }, 402) };
+    return { ok: false, response: jsonResponse({ error: 'Payment confirmation was interrupted. Check recovery before paying again.' }, 503) };
+  }
+
+  return {
+    ok: true,
+    wallet,
+    priceDhb,
+    jobId,
+    refund: async () => {
+      if (journalled) {
+        try { return await refundJournalledGeneration(jobId, supabase); }
+        catch (error) { console.error('[ai-payment] credits recovery pending', jobId, String(error)); return false; }
+      }
+      const restored = await refundCredits(key);
+      if (!restored) console.error(`[ai-payment] credits refund failed for job ${jobId}`);
+      return restored;
+    },
+  };
+}

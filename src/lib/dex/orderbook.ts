@@ -1,0 +1,172 @@
+export interface BookPosition {
+  minPrice: number; maxPrice: number; marketPrice: number; amountDhb: number; amountUsdc: number;
+}
+export interface BookLevel { price: number; dhb: number; usdc: number; cumulativeDhb: number }
+/** Grouping steps offered by the order book, finest first. */
+export const BOOK_INCREMENTS = [0.00000001, 0.0000001, 0.000001, 0.00001] as const;
+export const DEFAULT_INCREMENT = 0.000001;
+/** Depth is only meaningful near the pool price. A full-range position spans dozens of orders
+ *  of magnitude, and sampling all of it invents book levels a thousand times off the market. */
+export const BOOK_BAND = 2;
+
+/** Indicative AMM depth from actual reserves. An in-range LP contributes to both sides.
+ * Sample log-price intervals using concentrated-liquidity reserve math, not the indexed deposit amount.
+ */
+export function aggregateBook(positions: BookPosition[], increment = 0.00000001,
+                              externalAsks: { price: number; dhb: number }[] = []) {
+  const bids = new Map<number, BookLevel>(), asks = new Map<number, BookLevel>();
+  const step = Number.isFinite(increment) && increment > 0 ? increment : 0.00000001;
+  const add = (book: Map<number, BookLevel>, price: number, dhb: number, usdc: number, bid: boolean) => {
+    const bucket = (bid ? Math.floor(price / step + 1e-8) : Math.ceil(price / step - 1e-8)) * step;
+    const key = Number(bucket.toPrecision(12));
+    if (key <= 0 || !Number.isFinite(dhb) || dhb <= 1e-9) return;
+    const level = book.get(key) || { price: key, dhb: 0, usdc: 0, cumulativeDhb: 0 };
+    level.dhb += dhb; level.usdc += usdc; book.set(key, level);
+  };
+  for (const p of positions) {
+    if (![p.minPrice, p.maxPrice, p.marketPrice, p.amountDhb, p.amountUsdc].every(Number.isFinite) ||
+        p.minPrice <= 0 || p.maxPrice <= p.minPrice || p.marketPrice <= 0) continue;
+    const mid = Math.min(p.maxPrice, Math.max(p.minPrice, p.marketPrice));
+    for (const bid of [true, false]) {
+      const lo = bid ? p.minPrice : mid, hi = bid ? mid : p.maxPrice;
+      const reserve = bid ? p.amountUsdc : p.amountDhb;
+      if (reserve <= 0 || hi <= lo) continue;
+      const rootLo = Math.sqrt(lo), rootHi = Math.sqrt(hi);
+      // Sample only the part of the range near the pool price, but keep the reserve share
+      // normalised over the whole range, so what is shown is the depth that band really holds.
+      const bandLo = Math.max(lo, p.marketPrice / BOOK_BAND), bandHi = Math.min(hi, p.marketPrice * BOOK_BAND);
+      if (!(bandHi > bandLo)) continue;
+      for (let i = 0; i < 24; i++) {
+        const a = bandLo * Math.pow(bandHi / bandLo, i / 24), b = bandLo * Math.pow(bandHi / bandLo, (i + 1) / 24);
+        const fraction = bid ? (Math.sqrt(b) - Math.sqrt(a)) / (rootHi - rootLo)
+          : (1 / Math.sqrt(a) - 1 / Math.sqrt(b)) / (1 / rootLo - 1 / rootHi);
+        const average = Math.sqrt(a * b);
+        const dhb = bid ? reserve * fraction / average : reserve * fraction;
+        add(bid ? bids : asks, bid ? b : a, dhb, bid ? reserve * fraction : dhb * average, bid);
+      }
+    }
+  }
+  // Pools outside this book still sell DHB, and a book that hides them tells a trader the
+  // market is thinner than it is. They arrive already priced in dollars and pre-levelled.
+  for (const level of externalAsks) {
+    if (!Number.isFinite(level?.price) || !Number.isFinite(level?.dhb) || level.price <= 0) continue;
+    add(asks, level.price, level.dhb, level.dhb * level.price, false);
+  }
+  const finish = (book: Map<number, BookLevel>, bid: boolean) => {
+    let total = 0;
+    return [...book.values()].sort((a, b) => bid ? b.price - a.price : a.price - b.price)
+      .map((level) => ({ ...level, cumulativeDhb: (total += level.dhb) }));
+  };
+  return { bids: finish(bids, true), asks: finish(asks, false) };
+}
+/** Keep the best price beside the spread: asks descend toward it, bids already descend from it. */
+export function displayBookLevels(levels: BookLevel[], bid: boolean) {
+  return bid ? levels : [...levels].reverse();
+}
+/** The `count` levels closest to the spread, in display order, for surfaces without their own scroll box. */
+export function nearestBookLevels(levels: BookLevel[], bid: boolean, count: number) {
+  const displayed = displayBookLevels(levels, bid);
+  return bid ? displayed.slice(0, count) : displayed.slice(Math.max(0, displayed.length - count));
+}
+/** Decimal places a grouping step needs so neighbouring grouped rows never print as the same price. */
+export function incrementDecimals(increment: number) {
+  if (!Number.isFinite(increment) || increment <= 0) return 8;
+  return Math.min(12, Math.max(0, Math.ceil(-Math.log10(increment) - 1e-9)));
+}
+/** Fixed decimals that follow the grouping step, so rows align and each level stays distinct. */
+export function formatBookPrice(value: number | null | undefined, increment: number) {
+  return value != null && Number.isFinite(value) ? value.toFixed(incrementDecimals(increment)) : '—';
+}
+export function formatIncrement(increment: number) {
+  return increment.toFixed(incrementDecimals(increment));
+}
+/** Five significant digits below 1 keep sub-cent prices apart; whole-number prices keep 2–5 decimals. */
+export function formatPrice(value: number | null | undefined) {
+  if (value == null || !Number.isFinite(value)) return '—';
+  const magnitude = Math.abs(value);
+  const digits = magnitude > 0 && magnitude < 1 ? Math.min(12, Math.max(2, 4 - Math.floor(Math.log10(magnitude)))) : 5;
+  return value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: digits });
+}
+export function formatSize(value: number) {
+  return value.toLocaleString('en-US', { maximumFractionDigits: value < 1 ? 6 : 2 });
+}
+/** Spread as a share of the mid price, in percent. */
+export function spreadPercent(bid: number, ask: number) {
+  const mid = (bid + ask) / 2;
+  return mid > 0 && Number.isFinite(mid) ? Math.abs(ask - bid) / mid * 100 : null;
+}
+/** Seed the ticket one grouping step clear of the pool price, so the default range is single-sided. */
+export function defaultOrderPrice(side: 'buy' | 'sell', marketPrice: number | null | undefined, increment = DEFAULT_INCREMENT) {
+  const step = Number.isFinite(increment) && increment > 0 ? increment : DEFAULT_INCREMENT;
+  if (marketPrice == null || !Number.isFinite(marketPrice) || marketPrice <= 0) return '0.00100000';
+  const price = side === 'sell' ? Math.ceil(marketPrice * 1.0005 / step) * step : Math.floor(marketPrice * 0.9995 / step) * step;
+  return (price > 0 ? price : step).toFixed(8);
+}
+/** Share of a deposit already converted, from where the pool price sits inside the range (sqrt-price liquidity math). */
+export function fillFraction(p: { minPrice: number; maxPrice: number; marketPrice: number; side: 'buy' | 'sell' }) {
+  if (![p.minPrice, p.maxPrice, p.marketPrice].every(Number.isFinite) || p.minPrice <= 0 || p.maxPrice <= p.minPrice) return 0;
+  const rootLo = Math.sqrt(p.minPrice), rootHi = Math.sqrt(p.maxPrice);
+  const root = Math.sqrt(Math.min(p.maxPrice, Math.max(p.minPrice, p.marketPrice)));
+  const fraction = p.side === 'sell' ? (root - rootLo) / (rootHi - rootLo) : (1 / root - 1 / rootHi) / (1 / rootLo - 1 / rootHi);
+  return Math.min(1, Math.max(0, fraction));
+}
+/** Integer arithmetic keeps MAX and percentage buttons within the token balance. */
+export function balanceFraction(balance: string, percent: number, decimals: number): string {
+  if (!/^\d+(\.\d+)?$/.test(balance) || !Number.isInteger(percent) || percent < 0 || percent > 100) return '0';
+  const [whole, fraction = ''] = balance.split('.');
+  const scale = 10n ** BigInt(decimals);
+  const units = BigInt(whole) * scale + BigInt(fraction.padEnd(decimals, '0').slice(0, decimals) || '0');
+  const value = units * BigInt(percent) / 100n;
+  const tail = (value % scale).toString().padStart(decimals, '0').replace(/0+$/, '');
+  return `${value / scale}${tail ? `.${tail}` : ''}`;
+}
+/** Largest deviation from the aggregate market a ticket accepts silently, as a fraction. */
+export const PRICE_WARNING_FRACTION = 0.03;
+/**
+ * The price a fresh ticket should anchor on. The order book's own pool can sit far from
+ * where DHB actually trades elsewhere (the 0% pool once printed $0.0010 while every AMM said
+ * $0.0025), so a seller anchored on the pool alone gives the gap away. Sells anchor on the
+ * higher of the two, buys on the lower: never below fair value for a sell, never above it
+ * for a buy. With only one of the two known, that one is used.
+ */
+export function seedReference(side: 'buy' | 'sell', poolPrice: number | null | undefined, marketPrice: number | null | undefined): number | null {
+  const values = [poolPrice, marketPrice].filter((v): v is number => v != null && Number.isFinite(v) && v > 0);
+  if (!values.length) return null;
+  return side === 'sell' ? Math.max(...values) : Math.min(...values);
+}
+/**
+ * How far a chosen price sits from the aggregate market, signed as a fraction of the market.
+ * Positive is above the market. Null when either side is unusable, so nothing is warned about
+ * before a market price exists.
+ */
+export function priceDeviation(price: number | null | undefined, marketPrice: number | null | undefined): number | null {
+  if (price == null || marketPrice == null || !Number.isFinite(price) || !Number.isFinite(marketPrice) || price <= 0 || marketPrice <= 0) return null;
+  return price / marketPrice - 1;
+}
+/** True when the ticket price is far enough from the aggregate market that the trader should be told. */
+export function priceNeedsWarning(side: 'buy' | 'sell', price: number | null | undefined, marketPrice: number | null | undefined, fraction = PRICE_WARNING_FRACTION) {
+  const deviation = priceDeviation(price, marketPrice);
+  if (deviation == null) return false;
+  // A sell below the market and a buy above it are the costly directions; the other way
+  // is merely patient, and patience is what a limit order is for.
+  return side === 'sell' ? deviation < -fraction : deviation > fraction;
+}
+
+/** A book from plain limit orders (Solana trigger orders): each rests at one price. */
+export function levelBook(orders: { side: 'buy' | 'sell'; price: number; size: number }[], increment: number) {
+  const step = Number.isFinite(increment) && increment > 0 ? increment : 0.00000001;
+  const bids = new Map<number, BookLevel>(), asks = new Map<number, BookLevel>();
+  for (const o of orders) {
+    if (!(o.price > 0) || !(o.size > 0)) continue;
+    const bid = o.side === 'buy';
+    const key = Number(((bid ? Math.floor(o.price / step + 1e-8) : Math.ceil(o.price / step - 1e-8)) * step).toPrecision(12));
+    const book = bid ? bids : asks;
+    const level = book.get(key) || { price: key, dhb: 0, usdc: 0, cumulativeDhb: 0 };
+    level.dhb += o.size; level.usdc += o.size * o.price; book.set(key, level);
+  }
+  const finish = (book: Map<number, BookLevel>, bid: boolean) => {
+    let total = 0;
+    return [...book.values()].sort((a, b) => bid ? b.price - a.price : a.price - b.price).map((level) => ({ ...level, cumulativeDhb: (total += level.dhb) }));
+  };
+  return { bids: finish(bids, true), asks: finish(asks, false) };
+}

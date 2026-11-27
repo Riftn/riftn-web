@@ -1,0 +1,703 @@
+import { ProfileFollowButton } from './ProfileFollowButton';
+import { useTranslation as _useCopy } from 'react-i18next';
+import { Star, EllipsisVertical, Loader2, Mail } from "lucide-react";
+import { readAccountCategory, readContactEmail } from "@/lib/account-type";
+import Pencil from "@/components/ui/cut-icons/edit";
+import Copy from "@/components/ui/cut-icons/copy";
+import Wallet from "@/components/ui/cut-icons/wallet";
+import Ban from "@/components/ui/cut-icons/blocked";
+
+import MessageSquare from "@/components/ui/cut-icons/message-envelope";
+
+import { Skeleton } from '@/components/ui/skeleton';
+import { lazy, Suspense, useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import { AuthContext } from '@/contexts/AuthContext';
+import { saveOwnProfileImage, type ProfileImageKind } from '@/lib/profile-image-edit';
+import { useProfileImageMenu } from './useProfileImageMenu';
+import { useTranslation } from 'react-i18next';
+import { useBadgeCeremony } from '@/hooks/use-badge-ceremony';
+import { openBadgePromotion } from '@/lib/badge-showcase';
+import { Button } from '@/components/ui/button';
+import { UserAvatar } from '@/components/app/UserAvatar';
+import { VerifiedBadge } from '@/components/app/VerifiedBadge';
+import { TranslatableText, hasTranslatableText } from '@/components/app/TranslatableText';
+import { BioTranslateButton } from '@/components/app/profile/BioTranslateButton';
+import { ProfileLinksPill } from '@/components/app/profile/ProfileSocialLinks';
+import { ProfileFieldsList } from '@/components/app/profile/ProfileFieldsList';
+import { ProfileSong } from './ProfileSong';
+import { MomentArchive } from './MomentArchive';
+import { TotalReachPill } from '@/components/app/profile/TotalReachPill';
+import { localTimeLine, useProfileLocalTime } from '@/hooks/use-profile-local-time';
+import { MutualFollowers } from '@/components/app/profile/MutualFollowers';
+import { useMutualFollowers } from '@/hooks/use-mutual-followers';
+import { StreamerLevelCard } from '@/components/app/live/StreamerLevelCard';
+import { StreamerBadge } from '@/components/app/live/StreamerBadge';
+import { PinnedCommunities } from '@/components/app/communities/PinnedCommunities';
+import { PinnedCommunityStrip, PinnedCommunityWash, featuredPinnedCommunity } from './PinnedCommunityStage';
+import { usePinnedCommunities } from '@/hooks/use-communities';
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from '@/components/ui/drawer';
+import { cn } from '@/lib/utils';
+import { isBigBadgeUrl } from '@/lib/staking-badges';
+import { buildAvatarCdnFallbackUrl, cdnImageSrcSet } from '@/lib/media-url';
+import { BadgeIcon } from '@/components/app/BadgeIcon';
+import { NewMemberChip } from '@/components/app/NewMemberChip';
+import { OnboardingCompleteChip } from '@/components/app/OnboardingCompleteChip';
+import { EarlySupporterChip } from '@/components/app/EarlySupporterChip';
+import { BadgeMuseumPanel } from '@/components/app/profile/BadgeMuseum';
+import { useMilestones } from '@/hooks/use-milestones';
+import { BadgePatronChip } from '@/components/app/BadgePatronChip';
+import { toast } from 'sonner';
+import { DISPLAY_WALLET_OVERRIDES, getDefaultBanner, type TabValue } from './ProfileConstants';
+import type { ProfileData } from '@/hooks/use-dehub-profile';
+import { useNavigate } from 'react-router-dom';
+import { openDmDock } from '@/hooks/use-dm-dock';
+import { LiveRipple } from '@/components/app/LiveRipple';
+import { MomentFace, useFaceMoment } from '@/components/app/stories/MomentFace';
+import { viewerShareUrl } from '@/lib/share-url';
+import { trackShare } from '@/lib/analytics';
+
+import { formatCount } from '@/lib/format-count';
+const ProfilePetCard = lazy(() => import('@/components/app/pet/ProfilePetCard'));
+export interface ProfileHeaderProps {
+  profile: ProfileData;
+  apiProfile: ProfileData | undefined;
+  isViewingOwnProfile: boolean | undefined;
+  isAuthenticated: boolean;
+  badgeUrl: string | null;
+  /** Tier by name, for the promotion ceremony. */
+  badgeTier?: string | null;
+  // Follow state
+  isFollowing: boolean;
+  isPending: boolean;
+  isTargetPrivate: boolean;
+  isFollowLoading: boolean;
+  handleFollow: () => void;
+  handleUnfollow: () => void;
+  // Subscriptions
+  isSubscribed: boolean;
+  hasPlans: boolean;
+  // Actions
+  setFullscreenImage: (url: string | null) => void;
+  setActiveTab: (tab: TabValue) => void;
+  // Share sheet
+  shareSheetOpen: boolean;
+  setShareSheetOpen: (open: boolean) => void;
+  setLoginModalOpen: (open: boolean) => void;
+  // Options drawer content
+  ShareOptions: React.ComponentType;
+  // Privacy
+  showFollowersFollowing: boolean;
+  /** Per-list visibility; fall back to showFollowersFollowing when not given. */
+  showFollowersList?: boolean;
+  showFollowingList?: boolean;
+  hideFollowerCounts: boolean;
+  // Followers list
+  setFollowListType: (type: 'followers' | 'following') => void;
+  setFollowListDrawerOpen: (open: boolean) => void;
+  // Bio translation
+  translatedBio: string | null;
+  setTranslatedBio: (bio: string | null) => void;
+  // Block state
+  isBlocked?: boolean;
+  isFetchingProfile?: boolean;
+}
+
+export function ProfileHeader({
+  profile,
+  apiProfile,
+  isViewingOwnProfile,
+  isAuthenticated,
+  badgeUrl,
+  badgeTier,
+  isFollowing,
+  isPending,
+  isTargetPrivate,
+  isFollowLoading,
+  handleFollow,
+  handleUnfollow,
+  isSubscribed,
+  hasPlans,
+  setFullscreenImage,
+  setActiveTab,
+  shareSheetOpen,
+  setShareSheetOpen,
+  setLoginModalOpen,
+  ShareOptions,
+  showFollowersFollowing,
+  showFollowersList = showFollowersFollowing,
+  showFollowingList = showFollowersFollowing,
+  hideFollowerCounts,
+  setFollowListType,
+  setFollowListDrawerOpen,
+  translatedBio,
+  setTranslatedBio,
+  isBlocked = false,
+  isFetchingProfile = false,
+}: ProfileHeaderProps) {
+  const { t: _copy } = _useCopy();
+  const navigate = useNavigate();
+
+  const { t } = useTranslation();
+  // The links pill sits in the card's bottom corner: on the mutuals row when
+  // one shows, otherwise at the end of the Following/Followers line.
+  const mutualFollowers = useMutualFollowers({ profileAddress: apiProfile?.walletAddress, enabled: !isViewingOwnProfile });
+  const localTime = useProfileLocalTime(profile.customs?.publicTimeZone);
+  const hasMutualsRow = !isViewingOwnProfile && !mutualFollowers.isLoading && mutualFollowers.mutuals.length > 0;
+  const linksOnCountsRow = !hasMutualsRow && (!hideFollowerCounts || isViewingOwnProfile);
+  const messageSettings = (apiProfile as (ProfileData & {
+    dmSettings?: { disables?: string[] } | Array<{ disables?: string[] }>;
+    dmSetting?: { disables?: string[] } | Array<{ disables?: string[] }>;
+  }) | undefined)?.dmSettings ?? (apiProfile as (ProfileData & {
+    dmSetting?: { disables?: string[] } | Array<{ disables?: string[] }>;
+  }) | undefined)?.dmSetting;
+  const dmDisables = Array.isArray(messageSettings)
+    ? messageSettings[0]?.disables
+    : messageSettings?.disables;
+  // NEW_DM closes new conversations as well as ALL. Existing threads remain
+  // available in Messages, but this profile control always starts a new one.
+  const canStartDirectMessage = !dmDisables?.some((value) => {
+    const status = value.toUpperCase();
+    return status === 'ALL' || status === 'NEW_DM';
+  });
+  const openDirectMessage = () => {
+    if (!isAuthenticated) {
+      setLoginModalOpen(true);
+      return;
+    }
+    const address = apiProfile?.walletAddress ?? profile.walletAddress;
+    if (!address) return;
+    openDmDock({
+      address,
+      username: profile.handle?.replace('@', ''),
+      displayName: profile.name,
+      avatarUrl: profile.avatarUrl,
+    });
+  };
+  // Badge promotion — own profile only, and only ever on the way up. It opens
+  // the badge showcase with the ceremony as its opening, flying out of the
+  // badge beside the name exactly as a click on it would.
+  const badgeSlotRef = useRef<HTMLSpanElement>(null);
+  const { ceremony, dismiss } = useBadgeCeremony({
+    enabled: !!isViewingOwnProfile,
+    address: apiProfile?.walletAddress ?? profile.walletAddress,
+    tier: badgeTier,
+  });
+  useEffect(() => {
+    if (!ceremony) return;
+    const slot = badgeSlotRef.current;
+    openBadgePromotion(ceremony.from, ceremony.to, (slot?.firstElementChild as HTMLElement | null) ?? slot);
+    // Marked seen as it starts: the showcase owns it from here.
+    dismiss();
+  }, [ceremony, dismiss]);
+
+  // The chips by the name (new member, onboarding, early supporter and the
+  // milestone badges) follow the owner's Badge Museum switch: off means none.
+  const { data: museum } = useMilestones(profile.walletAddress);
+  const showBadgeChips = !!museum && !museum.hidden;
+  const [avatarFailed, setAvatarFailed] = useState(false);
+  const [avatarCdnFailed, setAvatarCdnFailed] = useState(false);
+  // The badge rides on the last word so a wrapping name never leaves it
+  // alone on a line of its own.
+  const nameSplit = (profile.name ?? '').lastIndexOf(' ');
+  const nameHead = nameSplit > 0 ? profile.name.slice(0, nameSplit + 1) : '';
+  const nameTail = nameSplit > 0 ? profile.name.slice(nameSplit + 1) : profile.name;
+  const cdnFallbackUrl = buildAvatarCdnFallbackUrl(profile.walletAddress || '', profile.avatarUrl);
+  // On desktop the first pinned community with art dresses the header
+  // instead of sitting in it as a card.
+  const { data: pinnedCommunities = [] } = usePinnedCommunities(profile.walletAddress);
+  const featuredCommunity = featuredPinnedCommunity(pinnedCommunities);
+  const [pinPickerOpen, setPinPickerOpen] = useState(false);
+  const [pinMoreOpen, setPinMoreOpen] = useState(false);
+  const hasMorePins = pinnedCommunities.filter(pin => pin.communities).length > 1;
+
+  const coverSrc = profile.coverUrl || getDefaultBanner(profile.walletAddress);
+
+  // Right-click / hold menu and paste on the picture and banner. The owner
+  // saves straight from here; everyone else can only copy.
+  const queryClient = useQueryClient();
+  // Read softly: the state gallery draws this header with no auth provider.
+  const auth = useContext(AuthContext);
+  const refreshUser = auth?.refreshUser;
+  const patchUser = auth?.patchUser;
+  const [savingImage, setSavingImage] = useState<ProfileImageKind | null>(null);
+  const saveImage = useCallback(async (kind: ProfileImageKind, file: File | null) => {
+    const address = profile.walletAddress;
+    if (!address || !refreshUser || !patchUser) return;
+    setSavingImage(kind);
+    try {
+      await saveOwnProfileImage(kind, file, { address, queryClient, refreshUser, patchUser: patchUser as (p: Record<string, unknown>) => void });
+      toast.success(
+        kind === 'avatar'
+          ? (file ? t('profileImage.avatarSaved', 'Profile picture updated') : t('profileImage.avatarRemoved', 'Profile picture removed'))
+          : (file ? t('profileImage.coverSaved', 'Banner updated') : t('profileImage.coverRemoved', 'Banner removed')),
+      );
+    } catch (err) {
+      toast.error((err as Error)?.message || t('settings.failedUpdateProfile'));
+    } finally {
+      setSavingImage(null);
+    }
+  }, [profile.walletAddress, queryClient, refreshUser, patchUser, t]);
+  const ownsImages = !!isViewingOwnProfile && !!profile.walletAddress;
+  const coverMenu = useProfileImageMenu({
+    kind: 'cover',
+    canEdit: ownsImages,
+    imageUrl: coverSrc,
+    hasImage: !!profile.coverUrl,
+    onFile: (file) => saveImage('cover', file),
+    onRemove: () => saveImage('cover', null),
+  });
+  // With a Moment up, a tap on the picture plays it; the full-size photo moves to the hold menu.
+  const avatarMoment = useFaceMoment(apiProfile?.walletAddress ?? profile.walletAddress);
+  const avatarMenu = useProfileImageMenu({
+    kind: 'avatar',
+    canEdit: ownsImages,
+    imageUrl: profile.avatarUrl,
+    hasImage: !!profile.avatarUrl,
+    onView: avatarMoment && profile.avatarUrl ? () => setFullscreenImage(profile.avatarUrl!) : undefined,
+    onFile: (file) => saveImage('avatar', file),
+    onRemove: () => saveImage('avatar', null),
+  });
+  const savingSpinner = (
+    <span className="absolute inset-0 z-[1] grid place-items-center bg-black/35" aria-hidden>
+      <Loader2 className="h-6 w-6 animate-spin text-white" />
+    </span>
+  );
+
+  return (
+    <div data-profile-header data-profile-art={featuredCommunity ? true : undefined} data-keep-dark={featuredCommunity ? true : undefined} className="rounded-xl border border-white/[0.12] bg-white/[0.03] backdrop-blur-[24px] overflow-hidden relative">
+      {/* Cover Photo */}
+      {isFetchingProfile && !profile.coverUrl ? (
+        <Skeleton data-profile-cover className="aspect-[3/1] w-full bg-white/[0.06] rounded-none" />
+      ) : (
+        <button 
+          data-profile-cover data-pull-through className="relative block aspect-[3/1] bg-zinc-800 w-full cursor-pointer"
+          onClick={() => setFullscreenImage(profile.coverUrl || getDefaultBanner(profile.walletAddress))}
+          {...coverMenu.targetProps}
+        >
+          {/* The cover is the profile's LCP element. It was always fetched at
+              1500 px wide; a phone renders it at ~375 CSS px. */}
+          <img
+            src={coverSrc}
+            srcSet={cdnImageSrcSet(profile.coverUrl, [480, 736, 1100, 1500])}
+            sizes="(min-width: 1024px) 700px, 100vw"
+            alt={_copy("copy.fa8d84566676", { defaultValue: "Cover" })}
+            className="w-full h-full object-cover"
+            fetchPriority="high"
+          />
+          {/* Phone pull-to-refresh: the photo itself stretches up into the gap
+              and two blur panes deepen toward the top (profile-pull.css). */}
+          <span data-profile-cover-blur="soft" aria-hidden style={{ backgroundImage: `url("${coverSrc}")` }} />
+          <span data-profile-cover-blur="deep" aria-hidden style={{ backgroundImage: `url("${coverSrc}")` }} />
+          {savingImage === 'cover' && savingSpinner}
+        </button>
+      )}
+      {coverMenu.menu}
+      {avatarMenu.menu}
+      
+      {/* Profile Content */}
+      <div className="relative isolate flow-root px-4 sm:px-6 pb-4">
+        {featuredCommunity && <PinnedCommunityWash community={featuredCommunity} />}
+        {/* Avatar */}
+        <div className="relative -mt-12 sm:-mt-14 mb-1.5 flex items-end justify-between">
+          <div className="relative [--profile-avatar-size:6rem] sm:[--profile-avatar-size:7rem] [--profile-avatar-radius:calc(var(--profile-avatar-size)/3)]" data-profile-avatar>
+              <svg data-profile-pull-ring aria-hidden viewBox="0 0 100 100" preserveAspectRatio="none">
+                <rect x="2" y="2" width="96" height="96" rx="33.3333%" pathLength="100" />
+              </svg>
+              <MomentFace address={apiProfile?.walletAddress ?? profile.walletAddress} name={profile.name} className="rounded-[var(--profile-avatar-radius)]">
+                <LiveRipple ids={[apiProfile?.walletAddress ?? profile.walletAddress, profile.handle]} size="lg" orbit className="rounded-[var(--profile-avatar-radius)]">
+                <button 
+                  data-keep-dark
+                  data-pull-through
+                  data-own-avatar={isViewingOwnProfile ? '' : undefined}
+                  className="relative size-[var(--profile-avatar-size)] rounded-[var(--profile-avatar-radius)] bg-[linear-gradient(to_bottom,#18181b_50%,transparent_50%)] p-0.5 cursor-pointer disabled:cursor-default"
+                  onClick={() => profile.avatarUrl && setFullscreenImage(profile.avatarUrl)}
+                  // Kept clickable for the owner with no picture yet, so the
+                  // right-click / hold menu (Change, Paste) still reaches it.
+                  disabled={!profile.avatarUrl && !ownsImages && !avatarMoment}
+                  {...avatarMenu.targetProps}
+                >
+                  {profile.avatarUrl && !avatarCdnFailed ? (
+                    <img
+                      src={avatarFailed ? cdnFallbackUrl : profile.avatarUrl}
+                      alt={profile.name}
+                      className="block w-full h-full rounded-[calc(var(--profile-avatar-radius)-2px)] object-cover"
+                      onError={() => avatarFailed ? setAvatarCdnFailed(true) : setAvatarFailed(true)}
+                    />
+                  ) : (
+                    <UserAvatar
+                      name={profile.name}
+                      handle={profile.handle}
+                      size="lg"
+                      className="w-full h-full rounded-[calc(var(--profile-avatar-radius)-2px)]"
+                    />
+                  )}
+                  {savingImage === 'avatar' && <span className="contents [&>span]:rounded-[calc(var(--profile-avatar-radius)-2px)]">{savingSpinner}</span>}
+                </button>
+                </LiveRipple>
+              </MomentFace>
+          </div>
+          <div data-profile-actions className="-mr-1 sm:-mr-3 mt-[60px] sm:mt-[68px] self-start flex items-center gap-2">
+              {isViewingOwnProfile ? (
+                <Button
+                  variant="glass"
+                  size="sm"
+                  className="rounded-xl gap-2"
+                  onClick={() => navigate('/app/settings')}
+                >
+                  <Pencil className="w-4 h-4" />{_copy("copy.fec2ac0f4cf1", { defaultValue: "Edit Profile" })}</Button>
+              ) : isBlocked ? (
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  className="rounded-xl border-red-500/50 text-red-400 gap-2 cursor-default"
+                  disabled
+                >
+                  <Ban className="w-4 h-4" />{_copy("copy.18f2a0947f9d", { defaultValue: "Blocked" })}</Button>
+              ) : isFetchingProfile && profile.isFollowing == null && profile.isPending == null ? (
+                <Skeleton className="h-9 w-24 rounded-xl bg-white/10" />
+              ) : (
+                <>
+                    <ProfileFollowButton profile={profile} apiProfile={apiProfile} isViewingOwnProfile={isViewingOwnProfile} isBlocked={isBlocked} isFetchingProfile={isFetchingProfile} isFollowing={isFollowing} isPending={isPending} isTargetPrivate={isTargetPrivate} isFollowLoading={isFollowLoading} handleFollow={handleFollow} handleUnfollow={handleUnfollow} />
+                    {/* Followers can subscribe to the creator's pinned plans. */}
+                  {isFollowing && !isSubscribed && hasPlans && (
+                    <Button
+                      size="sm"
+                      className="rounded-xl bg-white/10 backdrop-blur-xl border border-white/20 hover:bg-white/20 hover:border-white/40 text-white gap-2"
+                      onClick={() => {
+                        setActiveTab('subscribers');
+                        requestAnimationFrame(() => {
+                          document
+                            .querySelector('[data-feed-nav-outer]')
+                            ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        });
+                      }}
+                    >
+                      <Star className="w-4 h-4" />{_copy("copy.0cc60490a82f", { defaultValue: "Subscribe Now" })}</Button>
+                  )}
+                  {isSubscribed && (
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      className="rounded-xl border-green-500/50 text-green-400 gap-2 cursor-default"
+                      disabled
+                    >
+                      <Star className="w-4 h-4" />{_copy("copy.25c4797cdc7f", { defaultValue: "Subscribed" })}</Button>
+                  )}
+                </>
+              )}
+              {!isViewingOwnProfile && !isBlocked && canStartDirectMessage && (
+                <Button
+                  variant="glass"
+                  size="icon"
+                  className="rounded-xl h-9 w-9"
+                  onClick={openDirectMessage}
+                  aria-label={t('messages.message', 'Message')}
+                >
+                  <MessageSquare className="w-4 h-4" />
+                </Button>
+              )}
+              {!isViewingOwnProfile && readContactEmail(profile.customs as Record<string, unknown> | undefined) && (
+                <Button
+                  asChild
+                  variant="glass"
+                  size="icon"
+                  className="rounded-xl h-9 w-9"
+                >
+                  <a
+                    href={`mailto:${readContactEmail(profile.customs as Record<string, unknown> | undefined)}`}
+                    aria-label={t('accountType.contact', 'Contact')}
+                    title={t('accountType.contact', 'Contact')}
+                  >
+                    <Mail className="w-4 h-4" />
+                  </a>
+                </Button>
+              )}
+              <Drawer open={shareSheetOpen} onOpenChange={(open) => {
+                if (!isAuthenticated && open) {
+                  setLoginModalOpen(true);
+                  return;
+                }
+                setShareSheetOpen(open);
+              }}>
+                <DrawerTrigger asChild>
+                  <Button 
+                    variant="glass" 
+                    size="icon" 
+                    className="rounded-xl h-9 w-9"
+                    aria-label={t('profile.options')}
+                    title={t('profile.options')}
+                    data-profile-options
+                  >
+                    <EllipsisVertical className="w-4 h-4" />
+                  </Button>
+                </DrawerTrigger>
+                <DrawerContent column glass hideHandle={false} className="px-4 pt-1 pb-8">
+                  <DrawerHeader className="sr-only">
+                    <DrawerTitle>{t('profile.options')}</DrawerTitle>
+                  </DrawerHeader>
+                  <ShareOptions />
+                </DrawerContent>
+              </Drawer>
+            </div>
+        </div>
+
+        {/* Profile Info */}
+        <div>
+          <div className="flex flex-col">
+            {/* The name owns the full width and may take two lines. Social
+                links used to share this row, so a long name was cut or
+                crushed beside them; they now sit as small icons at the
+                bottom of the header. The badge stays glued to the last word. */}
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1">
+              <span className="group min-w-0 inline-flex items-baseline gap-1">
+                <h2 data-profile-identity className="text-2xl font-bold leading-8 text-white break-words line-clamp-2 [text-wrap:balance]">
+                  {nameHead}
+                  <span className="whitespace-nowrap">
+                    {nameTail}
+                    {/* The ceremony flies the badge out of this slot and back
+                        into it, so it needs an element to measure. */}
+                    <span data-inline-name-badges className="inline-flex items-end align-baseline">
+                      <span ref={badgeSlotRef} className="inline-flex ml-1">
+                        <BadgeIcon src={badgeUrl} className="w-[1em] h-[1em]" />
+                      </span>
+                      <StreamerBadge address={profile.walletAddress} canSelect={!!isViewingOwnProfile} className="ml-1 !self-end" />
+                    </span>
+                  </span>
+                </h2>
+                {/* A lent badge draws like any other badge everywhere else
+                    on the site. Hovering the name it sits on is the one
+                    place that says whose badge it is. */}
+                <BadgePatronChip lookupId={profile.walletAddress} />
+              </span>
+              {showBadgeChips && (
+                <>
+                  {/* Temporary — gone NEW_MEMBER_WINDOW_DAYS after signup, and
+                      immediately if they switch it off in Settings › Privacy. */}
+                  <NewMemberChip address={profile.walletAddress} />
+                  {/* Your own profile only, and only once the walkthrough is
+                      finished — it is derived from your progress row, not from
+                      anything stored on the profile. */}
+                  <OnboardingCompleteChip address={profile.walletAddress} />
+                  {/* One of their requests on the Requests board shipped. */}
+                  <EarlySupporterChip address={profile.walletAddress} username={profile.handle} />
+                </>
+              )}
+            </div>
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+              <button
+                onClick={() => {
+                  const username = profile.handle.replace('@', '');
+                  navigator.clipboard.writeText(viewerShareUrl(`https://riftn.com/${username}`));
+                  trackShare('copy_link', { kind: 'profile' });
+                  toast.success(_copy("copy.04a12cab619d", { defaultValue: "Profile URL copied to clipboard" }));
+                }}
+                className="min-w-0 max-w-full truncate text-zinc-500 text-lg hover:text-zinc-300 transition-colors"
+              >
+                {profile.handle}
+              </button>
+              {profile.verified && <VerifiedBadge className="w-5 h-5" />}
+              {profile.ensName && (
+                /* Beside the handle, never instead of it: the username is what
+                   this account is called, while the .eth name is a claim on
+                   something that can be sold or left to expire. Copying gives
+                   the .eth URL because that is the one worth showing off. */
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(viewerShareUrl(`https://riftn.com/${profile.ensName}`));
+                    trackShare('copy_link', { kind: 'profile' });
+                    toast.success(_copy("copy.0877581001b8", { defaultValue: "ENS profile URL copied to clipboard" }));
+                  }}
+                  title={_copy("copy.9f8fb573515e", { defaultValue: "Verified ENS name: riftn.com/{{value1}}", value1: profile.ensName })}
+                  className="rounded-md bg-zinc-800/60 px-2 py-0.5 text-xs text-zinc-300 transition-colors hover:bg-zinc-700/50 hover:text-white"
+                >
+                  {profile.ensName}
+                </button>
+              )}
+              {!isViewingOwnProfile && apiProfile?.followsYou && (
+                <span className="text-xs px-2 py-0.5 rounded-md bg-zinc-800/60 text-zinc-400">{_copy("copy.3457098e7042", { defaultValue: "Follows you" })}</span>
+              )}
+            </div>
+          </div>
+          
+          {isViewingOwnProfile && profile.walletAddress && (() => {
+            const displayAddr = DISPLAY_WALLET_OVERRIDES[profile.walletAddress!.toLowerCase()] || profile.walletAddress!;
+            return (
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(profile.walletAddress!);
+                  toast.success(_copy("copy.b00057d60b08", { defaultValue: "Address copied to clipboard" }));
+                }}
+                className="flex items-center gap-1.5 mt-1 text-zinc-500 text-sm hover:text-zinc-300 transition-colors group"
+              >
+                <Wallet className="w-3.5 h-3.5" />
+                <span className="font-mono">
+                  {displayAddr.slice(0, 6)}...{displayAddr.slice(-4)}
+                </span>
+                <Copy className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+              </button>
+            );
+          })()}
+          
+          {/* Creator or Business category, Instagram style: a quiet line above the bio. */}
+          {(() => {
+            const category = readAccountCategory(profile.customs as Record<string, unknown> | undefined);
+            return category ? (
+              <p data-account-category className="mt-2 text-sm text-zinc-400">{t(`accountType.cat.${category}`)}</p>
+            ) : null;
+          })()}
+          {profile.bio && (
+            <TranslatableText publicContent text={translatedBio || profile.bio} className="mt-3 text-white/90 text-base leading-6 block" as="p" />
+          )}
+          {/* The song under the bio: tap to play; may start by itself for visitors. */}
+          <ProfileSong customs={profile.customs as Record<string, unknown> | undefined} isOwn={!!isViewingOwnProfile} profileKey={profile.walletAddress} />
+
+          <ProfileFieldsList fields={profile.profileFields} />
+          {localTime && (
+            <p className="mt-1 text-sm text-zinc-400" title={String(profile.customs?.publicTimeZone)}>
+              {localTimeLine(t as never, localTime, profile.customs?.publicTimeZone)}
+            </p>
+          )}
+
+          {/* Pinned Communities */}
+          {profile.walletAddress && (
+            <PinnedCommunities
+              walletAddress={profile.walletAddress}
+              isOwnProfile={!!isViewingOwnProfile}
+            featuredId={featuredCommunity?.id}
+              pickerOpen={pinPickerOpen}
+              onPickerOpenChange={setPinPickerOpen}
+              moreOpen={pinMoreOpen}
+              onMoreOpenChange={setPinMoreOpen}
+            />
+          )}
+          
+          <div className="flex items-center gap-2 mt-3 text-zinc-500 text-sm">
+            <span>{t('profile.joined')} {profile.joinedDate}</span>
+            {hasTranslatableText(profile.bio) && !isViewingOwnProfile && (
+              <BioTranslateButton
+                bio={profile.bio}
+                isTranslated={!!translatedBio}
+                onTranslated={(t) => setTranslatedBio(t)}
+                onShowOriginal={() => setTranslatedBio(null)}
+              />
+            )}
+          </div>
+          
+
+          {/* Followers/Following */}
+          {(!hideFollowerCounts || isViewingOwnProfile) ? (
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mt-3">
+              {(showFollowingList || isViewingOwnProfile) ? (
+                <button 
+                  onClick={() => {
+                    setFollowListType('following');
+                    setFollowListDrawerOpen(true);
+                  }}
+                  className="hover:underline"
+                >
+                  {profile.following != null ? (
+                    <><span className="font-bold text-white">{formatCount(profile.following)}</span><span className="text-zinc-500 ml-1">{t('profile.following')}</span></>
+                  ) : (
+                    <Skeleton className="h-4 w-16 rounded bg-white/10" />
+                  )}
+                </button>
+              ) : (
+                <div className="flex items-center">
+                  {profile.following != null ? (
+                    <><span className="font-bold text-white">{formatCount(profile.following)}</span><span className="text-zinc-500 ml-1">{t('profile.following')}</span></>
+                  ) : (
+                    <Skeleton className="h-4 w-16 rounded bg-white/10" />
+                  )}
+                </div>
+              )}
+              {(showFollowersList || isViewingOwnProfile) ? (
+                <button 
+                  onClick={() => {
+                    setFollowListType('followers');
+                    setFollowListDrawerOpen(true);
+                  }}
+                  className="hover:underline"
+                >
+                  {profile.followers != null ? (
+                    <><span className="font-bold text-white">{formatCount(profile.followers)}</span><span className="text-zinc-500 ml-1">{t('profile.followers')}</span></>
+                  ) : (
+                    <Skeleton className="h-4 w-16 rounded bg-white/10" />
+                  )}
+                </button>
+              ) : (
+                <div className="flex items-center">
+                  {profile.followers != null ? (
+                    <><span className="font-bold text-white">{formatCount(profile.followers)}</span><span className="text-zinc-500 ml-1">{t('profile.followers')}</span></>
+                  ) : (
+                    <Skeleton className="h-4 w-16 rounded bg-white/10" />
+                  )}
+                </div>
+              )}
+              {/* Riftn followers plus the counts of the creator's linked
+                  socials (verified, else entered in the app). Absent until
+                  one carries a count. */}
+              <TotalReachPill wallet={apiProfile?.walletAddress ?? profile.walletAddress} followers={profile.followers} customs={profile.customs} />
+              {/* The links ride at the end of the counts line and
+                  only wrap below when the line is genuinely full. */}
+              {linksOnCountsRow && (
+                <ProfileLinksPill customs={profile.customs} githubLogin={profile.githubLogin} fields={profile.profileFields} className="ml-auto shrink-0" />
+              )}
+            </div>
+          ) : null}
+
+          {/* The bottom row: mutual followers on the left, the creator's
+              social icons tucked into the right-hand corner. The icons
+              take this row whenever mutuals show, or the counts line is hidden. Each side
+              carries its own top margin, so an empty row takes no space. */}
+          <div className="flex items-center gap-3">
+            <div className="min-w-0 flex-1">
+              {!isViewingOwnProfile && (
+                <MutualFollowers profileAddress={apiProfile?.walletAddress} />
+              )}
+            </div>
+            {!linksOnCountsRow && (
+              <ProfileLinksPill customs={profile.customs} githubLogin={profile.githubLogin} fields={profile.profileFields} className="shrink-0 mt-2" />
+            )}
+          </div>
+
+          {/* Badge Museum: the rarest earned medals under the counts, only
+              when the owner has switched it on in Settings (off by default). */}
+          {profile.walletAddress && <BadgeMuseumPanel address={profile.walletAddress} />}
+
+          {isViewingOwnProfile && profile.walletAddress && <MomentArchive key={profile.walletAddress} profileAddress={profile.walletAddress} />}
+
+          {/* The streamer ladder. Renders nothing for a profile that has
+              never ended a stream, so a non-streamer's page is unchanged. */}
+          {isViewingOwnProfile && (
+            <StreamerLevelCard address={profile.walletAddress} className="mt-4" />
+          )}
+
+          {/* The creator's stream pet. Nothing for someone without one. */}
+          {profile.walletAddress && (
+            <Suspense fallback={null}>
+              <ProfilePetCard address={profile.walletAddress} own={!!isViewingOwnProfile} className="mt-4" />
+            </Suspense>
+          )}
+        </div>
+      </div>
+
+      {featuredCommunity && (
+        <PinnedCommunityStrip
+          community={featuredCommunity}
+          onOpen={() => navigate(`/app/communities/${featuredCommunity.slug}`)}
+          onManagePins={isViewingOwnProfile ? () => setPinPickerOpen(true) : undefined}
+          onMore={hasMorePins ? () => setPinMoreOpen(true) : undefined}
+        />
+      )}
+
+
+    </div>
+  );
+}

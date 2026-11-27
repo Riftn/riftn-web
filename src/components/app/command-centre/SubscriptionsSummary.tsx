@@ -1,0 +1,94 @@
+import { useTranslation as _useCopy } from 'react-i18next';
+import { TrendingUp, Loader2, Star } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { Button } from '@/components/ui/button';
+import { useAuth } from '@/contexts/AuthContext';
+import { useMySubscriptions, useCreatorPlans } from '@/hooks/use-subscriptions';
+import { isLiveSubscription, monthlySpend } from '@/lib/api/dehub';
+import { cn } from '@/lib/utils';
+import { useTokenPrices } from '@/hooks/use-token-prices';
+
+const cardClass = "rounded-2xl p-5 max-h-[420px] overflow-y-auto bg-zinc-900 border border-zinc-800";
+const statBoxClass = "rounded-xl bg-zinc-800/50 p-3";
+
+export function SubscriptionsSummary() {
+  const { t: _copy } = _useCopy();
+  const { isAuthenticated, walletAddress } = useAuth();
+  const { t } = useTranslation();
+  const { subscriptions, isLoading: subsLoading } = useMySubscriptions();
+  const { plans, isLoading: plansLoading } = useCreatorPlans(walletAddress || undefined);
+  const { data: tokenPrices = {} } = useTokenPrices();
+
+  const isLoading = subsLoading || plansLoading;
+
+  const activeSubscriptions = subscriptions.filter(isLiveSubscription);
+  const totalMonthlySpend = monthlySpend(activeSubscriptions, Number(tokenPrices.DHB));
+
+  if (!isAuthenticated) {
+    return (
+      <div data-page-bento className={cn(cardClass, "flex items-center justify-center h-64")}>
+        <p className="text-zinc-500 text-sm">{t('commandCentre.signInSubscriptions')}</p>
+      </div>
+    );
+  }
+
+  return (
+    <div data-page-bento className={cardClass}>
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-white font-semibold">{t('commandCentre.subscriptionsSummary')}</h3>
+        <Button variant="glass" size="sm" className="text-xs h-8 rounded-xl">
+          {t('commandCentre.viewDetails')}
+        </Button>
+      </div>
+
+      {isLoading ? (
+        <div className="flex items-center justify-center py-8">
+          <Loader2 className="w-5 h-5 animate-spin text-zinc-400" />
+        </div>
+      ) : (
+        <>
+          {/* Stats Grid */}
+          <div className="grid grid-cols-3 gap-2 mb-4">
+            <div data-page-bento className={statBoxClass}>
+              <span className="text-zinc-500 text-xs">{t('commandCentre.active')}</span>
+              <p className="text-white text-xl font-bold">{activeSubscriptions.length}</p>
+            </div>
+            <div data-page-bento className={statBoxClass}>
+              <span className="text-zinc-500 text-xs">{t('commandCentre.total')}</span>
+              <p className="text-white text-xl font-bold">{subscriptions.length}</p>
+            </div>
+            <div data-page-bento className={statBoxClass}>
+              <span className="text-zinc-500 text-xs">{_copy("copy.dfe8b2f0de26", { defaultValue: "Plans" })}</span>
+              <p className="text-white text-xl font-bold">{plans.length}</p>
+            </div>
+          </div>
+
+          {/* Monthly Spend */}
+          <div data-page-bento className={cn(statBoxClass, "p-4")}>
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-zinc-400 text-sm">{t('commandCentre.estMonthlySpend')}</span>
+              {activeSubscriptions.length > 0 && (
+                <span className="bg-emerald-500/20 text-emerald-400 text-xs px-2 py-0.5 rounded-lg flex items-center gap-1">
+                  <TrendingUp className="w-3 h-3" />
+                  {activeSubscriptions.length}{_copy("copy.2a222bd79b1a", { defaultValue: " active" })}</span>
+              )}
+            </div>
+            <div className="flex items-baseline gap-2">
+              <span className="text-2xl font-bold text-white">
+                {totalMonthlySpend.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+              </span>
+              <span className="text-zinc-500 text-sm">USD</span>
+            </div>
+          </div>
+
+          {activeSubscriptions.length === 0 && subscriptions.length === 0 && (
+            <div className="flex flex-col items-center justify-center py-4 mt-2">
+              <Star className="w-8 h-8 text-zinc-600 mb-2" />
+              <p className="text-zinc-500 text-sm">{t('commandCentre.noSubscriptionsYet')}</p>
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+}

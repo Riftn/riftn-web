@@ -1,0 +1,284 @@
+/* Portals live outside #app-root. Pair their neutral surfaces and ink here
+   rather than relying on dark-theme utility colours or a parent page. */
+html:is([data-theme='light'], [data-system-tone='light']):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_)
+  :is([role='dialog'], [role='alertdialog'], [role='menu'], [role='listbox'], [data-glass-tooltip], [data-sonner-toast]):not([data-keep-dark]):not([data-keep-dark] *) {
+  color: #242428 !important;
+}
+
+html:is([data-theme='light'], [data-system-tone='light']):not(#_):not(#_):not(#_)
+  :is([role='dialog'], [role='alertdialog'], [role='menu'], [role='listbox'], [data-glass-tooltip], [data-sonner-toast])
+  :is(.text-white, [class~='!text-white'], [class*='text-white/'], .text-zinc-50, .text-zinc-100, .text-zinc-200, .text-zinc-300, .text-zinc-400, .text-zinc-500, .text-muted-foreground):not(:where([data-keep-dark], [data-keep-dark] *, [data-on-media], [data-on-media] *, [data-media-full] *, [data-primary-cta], [data-primary-cta] *, [data-contrast-solid], [data-contrast-solid] *, [data-button-variant='destructive'], [data-button-variant='destructive'] *)) {
+  color: #3f3f46 !important;
+}
+
+/* Recessed neutral controls keep ink labels, including a busy label nested
+   (only a resting bg token counts: hover:bg-white/10 on a menu row used to
+   match the substring and paint every row grey at rest)
+   in the wallet unlock button. Coloured and explicit dark keys keep theirs. */
+html:is([data-theme='light'], [data-system-tone='light']):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_)
+  :is([role='dialog'], [role='alertdialog'], [role='menu'], [data-sonner-toast])
+  :is(button, a[role='button']):is([class^='bg-white/'], [class*=' bg-white/'], [class^='bg-zinc-'], [class*=' bg-zinc-'], [data-button]):not([data-primary-cta]):not([data-contrast-solid]):not([data-keep-dark]):not([data-keep-dark] *):not([data-on-media] *) {
+  color: #242428 !important;
+  background: #eeeef1 !important;
+}
+/* The light "selected chip" rule (theme-controls.css) whitens the icons of a
+   bg-white + dark-label key, but the pale fill above wins its background, so
+   keys like the composer's Post button showed a white icon on white. */
+html:is([data-theme='light'], [data-system-tone='light']):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_)
+  :is([role='dialog'], [role='alertdialog'], [role='menu'], [data-sonner-toast])
+  :is(button, a[role='button']).bg-white:is(.text-black, .text-zinc-900, .text-zinc-950):is([class^='bg-white/'], [class*=' bg-white/'], [class^='bg-zinc-'], [class*=' bg-zinc-'], [data-button]):not([data-primary-cta]):not([data-contrast-solid]):not([data-keep-dark]):not([data-keep-dark] *):not([data-on-media] *)
+  :is([class*='text-black'], [class*='text-zinc-'], .text-white, svg) {
+  color: #0b0b0d !important;
+}
+
+html:is([data-theme='light'], [data-system-tone='light']):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_)
+  :is([data-login-modal] button.bg-white, [data-contrast-solid], [data-sonner-toast] [data-description] :is(button, a):first-child) {
+  background: #111114 !important;
+  color: #fff !important;
+}
+html:is([data-theme='light'], [data-system-tone='light']):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_)
+  :is([data-login-modal] button.bg-white, [data-contrast-solid], [data-sonner-toast] [data-description] :is(button, a):first-child) :is(span, svg) {
+  color: #fff !important;
+}
+
+html:is([data-theme='light'], [data-system-tone='light']):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_)
+  [data-sidebar-chat-actions] {
+  background: #fbfbfc !important;
+  color: #3f3f46 !important;
+}
+html:is([data-theme='light'], [data-system-tone='light']):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_)
+  :is([data-sidebar-chat-actions] :is(button, svg), [data-sidebar-chat-composer] :is(button, svg)) {
+  color: #3f3f46 !important;
+}
+html:is([data-theme='light'], [data-system-tone='light']):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_)
+  [data-sidebar-chat-actions] button:hover {
+  background: #e4e4e7 !important;
+  color: #18181b !important;
+}
+
+/* Minimal Light bottom bar: it is not in the liquid-glass theme list, so it
+   sat at 5% black with no blur and its ink icons vanished over dark artwork
+   (Stages covers, Arcade keys). Same pale frost as System Light. */
+html[data-theme='light']:not(#_):not(#_):not(#_) [data-bottom-nav] > nav {
+  background: rgba(249, 248, 244, 0.86) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(1.4) !important;
+  backdrop-filter: blur(20px) saturate(1.4) !important;
+  border-color: rgba(11, 11, 13, 0.08) !important;
+  /* Cast upward: a drop shadow under the bar is cut off by the screen edge on iPhones. */
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 -1px 2px rgba(11, 11, 13, 0.04), 0 -6px 16px -6px rgba(11, 11, 13, 0.10), 0 -14px 32px -14px rgba(11, 11, 13, 0.14) !important;
+}
+
+/* Bright 500/600 text was written for black; on paper it reads at 2-3:1.
+   Icons keep their colour (stars, dots); words take the deep shade. */
+html:is([data-theme='light'], [data-system-tone='light']) body :is(.text-yellow-500, .text-amber-500, .text-amber-600):not(svg):not(:where([data-keep-dark] *, [data-on-media], [data-on-media] *, [data-media-full] *, [data-media-scrim] *)):not(#_):not(#_) { color: #92400e !important; }
+html:is([data-theme='light'], [data-system-tone='light']) body :is(.text-green-500, .text-emerald-500, .text-green-600):not(svg):not(:where([data-keep-dark] *, [data-on-media], [data-on-media] *, [data-media-full] *, [data-media-scrim] *)):not(#_):not(#_) { color: #047857 !important; }
+html:is([data-theme='light'], [data-system-tone='light']) body .text-sky-500:not(svg):not(:where([data-keep-dark] *, [data-on-media], [data-on-media] *, [data-media-full] *, [data-media-scrim] *)):not(#_):not(#_) { color: #0369a1 !important; }
+
+/* Small black chips over pictures (Fractions "1000 / 1000") keep white type. */
+html:is([data-theme='light'], [data-system-tone='light']):not(#_):not(#_):not(#_):not(#_):not(#_) [data-on-media][class*='bg-black/'] { color: #fff !important; background-color: rgba(0, 0, 0, 0.7) !important; }
+
+/* Unselected glass chips are dimmed to 60% (Fractions sort, Store
+   categories). Fine on black, grey-on-grey on paper: lift them. */
+html:is([data-theme='light'], [data-system-tone='light']) :is(.opacity-60, .opacity-50):has(> [data-theme-control-surface]):not(#_):not(#_) { opacity: 1 !important; }
+
+/* Placeholders: the dark theme's white/30 hints turned near-white on paper. */
+html:is([data-theme='light'], [data-system-tone='light']):not(#_):not(#_):not(#_) :is(input, textarea):not(:where([data-keep-dark] *, [data-on-media] *, [data-media-full] *))::placeholder {
+  color: rgba(11, 11, 13, 0.62) !important;
+  opacity: 1 !important;
+}
+
+/* Muted zinc-500 copy (right rail counts, list numbers) sat at 3:1. */
+html:is([data-theme='light'], [data-system-tone='light']) body .text-zinc-500:not(:where(.docs-root *, [data-keep-dark], [data-keep-dark] *, [data-on-media], [data-on-media] *, [data-media-full] *, [data-media-scrim] *)):not(#_):not(#_) {
+  color: var(--ink-muted, #444) !important;
+}
+
+/* Back button over a profile cover: white on paper when there is no cover.
+   A small dark chip reads on both. */
+html:is([data-theme='light'], [data-system-tone='light']):not(#_):not(#_):not(#_):not(#_) [data-swipe-back][data-on-media] {
+  background: rgba(0, 0, 0, 0.5) !important;
+  color: #fff !important;
+}
+html:is([data-theme='light'], [data-system-tone='light']):not(#_):not(#_):not(#_):not(#_) [data-swipe-back][data-on-media]:not([data-theme-button]) {
+  border-radius: 10px !important;
+}
+html:is([data-theme='light'], [data-system-tone='light']):not(#_):not(#_):not(#_):not(#_) [data-swipe-back][data-on-media] svg { color: #fff !important; }
+html[data-theme='system'][data-system-tone='light']:not(#_):not(#_):not(#_):not(#_) [data-profile-photo-dialog] [data-swipe-back][data-on-media] {
+  border-radius: 12px !important;
+}
+
+/* System Light feed filters drawer: the pale glass let the dark video tiles
+   under it smear behind the labels. Near-solid paper keeps the frost. */
+html[data-theme='system'][data-system-tone='light']:not(#_):not(#_):not(#_):not(#_) [data-feed-island-surface] {
+  background: rgba(255, 255, 255, 0.95) !important;
+}
+
+/* Profile tab counts (14, 10, 6) under the tab icons. */
+html:is([data-theme='light'], [data-system-tone='light']):not(#_):not(#_):not(#_):not(#_) [data-feed-tab-btn] > span.text-\[10px\] {
+  color: var(--ink-muted, #444) !important;
+}
+
+/* The destructive key is pale red glass with a near-white label, drawn for
+   dark pages. On a light page the label takes a deep red so it reads. */
+html:is([data-theme='light'], [data-system-tone='light']):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_)
+  [data-button-variant='destructive']:not([data-on-media]):not([data-on-media] *):not([data-keep-dark]):not([data-keep-dark] *),
+html:is([data-theme='light'], [data-system-tone='light']):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_)
+  [data-button-variant='destructive']:not([data-on-media]):not([data-on-media] *):not([data-keep-dark]):not([data-keep-dark] *) :is(span, svg) {
+  color: #b91c1c !important;
+}
+
+/* System Light: menu rows that only light up on focus (`focus:bg-white/10`)
+   were caught by the repaint of every `bg-white/` class, so every row sat
+   grey and the list read as one block. Rows stay clear; only the hovered or
+   keyboard-focused row greys, with a little air between rows. */
+html[data-theme='system'][data-system-tone='light']:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_)
+  [role='menu'] [role='menuitem'][class*='focus:bg-white/'] {
+  border-radius: 10px;
+}
+html[data-theme='system'][data-system-tone='light']:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_)
+  [role='menu'] [role='menuitem'][class*='focus:bg-white/'] + [role='menuitem'] {
+  margin-top: 2px;
+}
+html[data-theme='system'][data-system-tone='light']:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_)
+  [role='menu'] [role='menuitem'][class*='focus:bg-white/']:not([data-highlighted]) {
+  background-color: transparent !important;
+}
+html[data-theme='system'][data-system-tone='light']:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_)
+  [role='menu'] [role='menuitem'][class*='focus:bg-white/'][data-highlighted] {
+  background-color: #f0f1f3 !important;
+}
+
+/* System Light flattens feed rows edge to edge. The profile's list view shows
+   posts as separate cards, so there they keep their rounded corners. */
+html[data-system-tone='light']:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-profile-list-view] [data-feed-item] {
+  border-radius: 0.75rem !important;
+}
+
+/* Icons that stayed white (or page-coloured) inside a button the light pass
+   had already turned pale: they take the button's own ink. Their paths too:
+   the dark-chip rule in index.css (button[class*="bg-black/"] *) reached past
+   the svg and drew outline buttons' icons white on white. Same for a label
+   wrapped in its own span. */
+html:is([data-theme='light'], [data-system-tone='light']):not(#_):not(#_):not(#_)
+  [data-theme-button]:is([data-button-variant='default'], [data-button-variant='glass'], [data-button-variant='secondary'], [data-button-variant='outline']):not([data-keep-dark]):not([data-keep-white]):not([data-on-media]):not([data-on-media] *) > svg:not([class*='text-']),
+html:is([data-theme='light'], [data-system-tone='light']):not(#_):not(#_):not(#_)
+  [data-theme-button]:is([data-button-variant='default'], [data-button-variant='glass'], [data-button-variant='secondary'], [data-button-variant='outline']):not([data-keep-dark]):not([data-keep-white]):not([data-on-media]):not([data-on-media] *) > svg:not([class*='text-']) *,
+html:is([data-theme='light'], [data-system-tone='light']):not(#_):not(#_):not(#_)
+  [data-theme-button]:is([data-button-variant='default'], [data-button-variant='glass'], [data-button-variant='secondary'], [data-button-variant='outline']):not([data-keep-dark]):not([data-keep-white]):not([data-on-media]):not([data-on-media] *) > span:not([class*='text-']) {
+  color: inherit !important;
+}
+html:is([data-theme='light'], [data-system-tone='light']):not(#_):not(#_):not(#_) [data-theme-control-label] svg.text-background {
+  color: #0b0b0d !important;
+}
+/* Docs and Support tiles: the brand gradient is dark grey on light, so its icon is white. */
+html:is([data-theme='light'], [data-system-tone='light']):not(#_):not(#_):not(#_)
+  .docs-root [class*='bg-gradient-to-']:is([class*='from-royal-blue'], [class*='from-sky-blue'], [class*='from-middle-blue']) > svg {
+  color: #fff !important;
+}
+
+/* Minimal Light: standalone pages (premium, creator flow, admin manual) paint
+   their own near-black shell with fixed hex classes. Their text was already
+   turned to ink, so the page read as dark on black. Same paper as the rest
+   (System Light does this in system-light.css). */
+html[data-theme='light'] #root:not(#_):not(#_):not(#_) :is([class*='bg-[#090a0b]'], [class*='bg-[#08080b]'], [class*='bg-[#111214]'], [class*='bg-[#0a0a0a]'], [class*='bg-[#0a0a0b]']):not([data-media-full]):not([data-media-full] *):not([data-keep-dark]):not([data-keep-dark] *) {
+  background-color: var(--paper) !important;
+  color: var(--ink) !important;
+}
+
+/* Minimal Light: /creator kept its near-black page while half of its text had
+   already been turned to ink (dark grey on black), and the hero title stayed
+   white on a pale picture. One paper page with ink text, as on System Light. */
+html[data-theme='light']:not(#_):not(#_) [data-creator-page] {
+  background-color: var(--paper) !important;
+}
+html[data-theme='light']:not(#_):not(#_) [data-creator-page] .text-white:not([data-keep-dark]):not([data-keep-dark] *):not([data-on-media]):not([data-on-media] *):not([data-media-full] *) {
+  color: var(--ink) !important;
+}
+
+/* Minimal Light, Pricing: the plan cards are washed pale there, so their
+   "included" lines (white/75) and the white logo had nothing to sit on. */
+html[data-theme='light']:not(#_):not(#_):not(#_) [data-pricing-page] [class*='text-white/']:not([data-keep-dark]):not([data-keep-dark] *) {
+  color: var(--ink-muted, #444) !important;
+}
+
+/* The flat white Riftn wordmark on the standalone pages (pricing, DePIN, prize
+   draws, stream, app): those pages turn to paper on light, so the mark is ink. */
+html:is([data-theme='light'], [data-system-tone='light']) [data-glass-page] img[src*='riftn-wordmark-flat-white']:not([data-keep-dark]):not([data-keep-dark] *) {
+  filter: invert(1);
+}
+
+/* Star field and its dark floor wash (install page, 404): drawn for a black
+   room, on paper they are a grey smudge behind ink text. */
+html:is([data-theme='light'], [data-system-tone='light']) [data-dark-backdrop] {
+  visibility: hidden;
+}
+/* Minimal Light: the white-glass buttons on those pages keep an edge. */
+html[data-theme='light']:not(#_):not(#_) [data-glass-page] :is(button, a)[class*='bg-white/10']:not([data-keep-dark]):not([data-keep-dark] *) {
+  background-color: rgb(17 17 20 / 0.05) !important;
+  border-color: rgb(17 17 20 / 0.18) !important;
+}
+
+/* Minimal Light, phone top bar: the white Riftn mark sat on paper. Its paper
+   rule keyed on the old alt text and stopped matching when the alt changed. */
+html[data-theme='light'] :is([data-mobile-header], [data-island-logo]) img[src*='dehub-logo-compact'] {
+  filter: invert(1) hue-rotate(180deg) brightness(0.9);
+}
+
+/* Pricing billing switch: the picked chip's glass lift is drawn for a black
+   page; on light it is a heavy grey smear under the chip. */
+html:is([data-theme='light'], [data-system-tone='light']) [data-pricing-page] button.text-black[style*='box-shadow'] {
+  box-shadow: 0 0 0 1px rgb(17 17 20 / 0.12), 0 2px 8px rgb(17 17 20 / 0.1) !important;
+}
+
+/* Settings > profile picture: the camera chip sits on the photo, so it stays a
+   dark chip with a white camera whatever the photo or theme. */
+html:is([data-theme='light'], [data-system-tone='light']):not(#_):not(#_):not(#_):not(#_) [data-setting-anchor='profile-picture'] button[data-on-media] {
+  background-color: rgb(24 24 27 / 0.82) !important;
+  border-color: rgb(255 255 255 / 0.2) !important;
+}
+
+/* Glass rails Follow (WideVideoRails). It is pinned dark for the canvas
+   themes, which Minimal Light turned into a grey slab with a pale label and
+   System Light into white on white. Light themes get the house light primary:
+   solid ink with a white label, and Following as a flat ink wash. */
+html:is([data-theme='light'], [data-system-tone='light']):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-rail-follow='follow'] {
+  background: #111114 !important;
+  border-color: #111114 !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+  filter: none !important;
+}
+html:is([data-theme='light'], [data-system-tone='light']):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-rail-follow='following'] {
+  background: rgb(11 11 13 / 0.05) !important;
+  border-color: rgb(11 11 13 / 0.14) !important;
+  color: #0b0b0d !important;
+  box-shadow: none !important;
+}
+@media (hover: hover) {
+  html:is([data-theme='light'], [data-system-tone='light']):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-rail-follow='follow']:hover { background: #2a2a2e !important; border-color: #2a2a2e !important; }
+  html:is([data-theme='light'], [data-system-tone='light']):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-rail-follow='following']:hover { background: rgb(11 11 13 / 0.09) !important; }
+}
+
+/* The typing line follows the words. Edit boxes for comments, replies and
+   chat lines ask for a white caret, written for the dark themes; on a light
+   page that line vanished while the text itself turned ink. Here the caret
+   takes the text colour instead, so it shows wherever the words show, ink on
+   paper and still white on a photo or a live video. */
+html:is([data-theme='light'], [data-system-tone='light']):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_)
+  :is(.caret-white, [style*='caret-color: white'], [style*='caret-color: #fff'], [style*='caret-color: rgb(255, 255, 255)']) {
+  caret-color: currentColor !important;
+}
+
+/* Editing your own comment turns its words into the field. The field keeps
+   the dark themes' plain look (data-keep-dark stops Jungle and Osaka boxing
+   it), which on Minimal Light also meant white words on paper. It reads in
+   the same ink as the comment did before the tap. */
+html[data-theme='light']:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_)
+  [data-inplace-edit]:not(:where([data-keep-dark] *, [data-on-media] *, [data-media-full] *)) {
+  color: #2e2e2e !important;
+}
+
+/* Sticky picker labels need an opaque light surface so scrolling emoji stay clear underneath. */
+html:is([data-theme='light'], [data-system-tone='light'])
+  [data-emoji-section-heading]:not(:where([data-keep-dark], [data-keep-dark] *)) {
+  background-color: var(--sl-card, #f4f4f6) !important;
+}

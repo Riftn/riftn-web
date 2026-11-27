@@ -1,0 +1,116 @@
+import { useTranslation as _useCopy } from 'react-i18next';
+/**
+ * Mute Author Hook
+ * ================
+ * Muting hides an account's posts from your own feeds and nothing else. It is
+ * one-way and private: your posts still reach them, DMs are untouched, and they
+ * are never told. `use-block-author` is the loud counterpart — it severs the
+ * relationship in both directions and shows on their profile.
+ *
+ * Until this hook existed, the only control on offer was the block API wearing
+ * the word "mute", which is why the ⋯ menu could offer just one of the two.
+ *
+ * @module hooks/use-mute-author
+ */
+import { useCallback, useState } from 'react';
+import { useQueryClient, type InfiniteData } from '@tanstack/react-query';
+import { toast } from 'sonner';
+import type { MutedUser } from '@/lib/api/dehub/mutes';
+import { lowerAddress, pruneUnifiedPages, pruneNftPages } from '@/lib/feed-prune';
+
+export function useMuteAuthor() {
+  const { t: _copy } = _useCopy();
+  const queryClient = useQueryClient();
+  const [isMuting, setIsMuting] = useState(false);
+
+  const muteAuthor = useCallback(
+    async (address?: string | null, displayName?: string, onChange?: () => void) => {
+      const target = lowerAddress(address);
+      if (!target || isMuting) return;
+      setIsMuting(true);
+      try {
+        // Loaded on demand. Every feed card mounts this hook, so a static
+        // import would put the mute API in the entry bundle for every session
+        // to serve a request that only happens behind two taps on the ⋯ menu.
+        // The type import above is erased and costs nothing.
+        const { muteUser } = await import('@/lib/api/dehub/mutes');
+        await muteUser(target);
+
+        // Optimistic entry so anything keyed on ['mute-list'] sees the address
+        // immediately; the invalidate below resyncs with server truth. Kept
+        // separate from ['block-list'] — sharing one would make unmuting look
+        // like unblocking and leak muted accounts into the block list.
+        queryClient.setQueryData<MutedUser[]>(['mute-list'], (old) => {
+          const list = old ?? [];
+          if (list.some((user) => lowerAddress(user.address) === target)) return list;
+          return [
+            ...list,
+            { muteId: `pending-${target}`, address: target, mutedAt: new Date().toISOString() },
+          ];
+        });
+
+        // Prune in place so the muted post vanishes where it sits.
+        for (const query of queryClient.getQueryCache().findAll({ queryKey: ['unified-feed'] })) {
+          queryClient.setQueryData(query.queryKey, (old: InfiniteData<{ items?: { minter?: string }[] }> | undefined) =>
+            pruneUnifiedPages(old, target));
+        }
+        for (const query of queryClient.getQueryCache().findAll({ queryKey: ['dehub-feed'] })) {
+          queryClient.setQueryData(query.queryKey, (old: InfiniteData<{ data?: { minter?: string; creator?: { id?: string } }[] }> | undefined) =>
+            pruneNftPages(old, target));
+        }
+
+        queryClient.invalidateQueries({ queryKey: ['mute-list'] });
+        queryClient.invalidateQueries({ queryKey: ['story-shelf'] });
+        // Says what a mute does and does not do — the point of it being its own
+        // control rather than a softer word for Block.
+        //
+        // Undo lives here because there is nowhere else. Once muted, the
+        // author's posts are gone from every feed, so the ⋯ menu that muted
+        // them cannot be reached again — and there is no muted-accounts screen
+        // in Settings to go to. Without this the action is one-way, which is
+        // not what a mute should be. unmuteUser has existed and been reachable
+        // from nothing since it was written.
+        toast.success(displayName
+          ? _copy("copy.6c0c22a155f4", { defaultValue: "Muted {{value1}} — they won't know", value1: displayName })
+          : _copy("copy.1585e999670b", { defaultValue: "Muted account — they won't know" }), {
+          action: {
+            label: _copy("copy.a8283ade3185", { defaultValue: "Undo" }),
+            onClick: () => {
+              void (async () => {
+                try {
+                  const { unmuteUser } = await import('@/lib/api/dehub/mutes');
+                  await unmuteUser(target);
+                  queryClient.setQueryData<MutedUser[]>(['mute-list'], (old) =>
+                    (old ?? []).filter((user) => lowerAddress(user.address) !== target));
+                  queryClient.invalidateQueries({ queryKey: ['mute-list'] });
+                  queryClient.invalidateQueries({ queryKey: ['story-shelf'] });
+                  onChange?.();
+                  // The pruned pages are gone from the cache, so refetch to
+                  // bring the author's posts back rather than leaving a mute
+                  // that reads as undone and still looks applied.
+                  queryClient.invalidateQueries({ queryKey: ['unified-feed'] });
+                  queryClient.invalidateQueries({ queryKey: ['dehub-feed'] });
+                  toast.success(displayName
+                    ? _copy("copy.1e771eecf49a", { defaultValue: "Unmuted {{value1}}", value1: displayName })
+                    : _copy("copy.73b1ced97680", { defaultValue: "Unmuted account" }));
+                } catch (error) {
+                  console.error('[unmuteAuthor]', error);
+                  toast.error(_copy("copy.6487e666c44d", { defaultValue: "Failed to unmute account" }));
+                }
+              })();
+            },
+          },
+        });
+        onChange?.();
+      } catch (error) {
+        console.error('[muteAuthor]', error);
+        toast.error(_copy("copy.a82fcbd4b343", { defaultValue: "Failed to mute account" }));
+      } finally {
+        setIsMuting(false);
+      }
+    },
+    [queryClient, isMuting, _copy],
+  );
+
+  return { muteAuthor, isMuting };
+}

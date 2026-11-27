@@ -1,0 +1,777 @@
+/**
+ * Riftn Feed Hook
+ * ================
+ * Fetches content from the Riftn API and maps it to local feed types.
+ * Provides loading states, pagination, and error handling.
+ * 
+ * @module hooks/use-dehub-feed
+ */
+
+import { useMemo } from 'react';
+import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
+import { mergeLiveCounts } from '@/lib/live-counts';
+import { displayPostTitle } from '@/lib/post-caption';
+import {
+  searchNFTs,
+  getMediaUrl,
+  DEHUB_CDN_BASE,
+  getLiveStreams,
+  getBlockList,
+  type DeHubNFT,
+  type SearchNFTsParams,
+  type LiveStream as ApiLiveStream,
+} from '@/lib/api/dehub';
+import { resolveDislikeCount, resolveLikeCount, resolveMyReaction, resolveReactionCounts, resolveViewCount } from '@/lib/engagement';
+import { buildAvatarUrl, buildFeedImageUrls, buildHlsUrl } from '@/lib/media-url';
+import { parseSoundtrackTag, getFeedViewer } from '@/hooks/use-unified-feed';
+import { formatDuration, formatViews, formatTimeAgo } from '@/lib/feed-utils';
+import type { VideoItem, ImagePost, LiveStream } from '@/types/feed.types';
+import { extractReplayUrl, isReplayTruncated } from '@/lib/live-replay';
+import { isStreamLive } from '@/lib/live-status';
+import { BLOCKED_POST_IDS } from '@/constants/post.constants';
+import { useAuth } from '@/contexts/AuthContext';
+import { hlsUrlFor, liveProviderOf, liveThumbnailFor, noteLatencyMode } from '@/lib/live-ingest';
+import { toStoryboard } from '@/lib/storyboard';
+import { storedVideoAspect, storedVideoSizeShown } from '@/lib/video-aspect';
+import { translateCopy as _translateCopy } from '@/i18n/copy';
+
+// Fallback thumbnails for when API doesn't return one
+const FALLBACK_THUMBNAILS = [
+  'https://images.unsplash.com/photo-1611162616475-46b635cb6868?w=480&h=270&fit=crop',
+  'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=480&h=270&fit=crop',
+  'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=480&h=270&fit=crop',
+  'https://images.unsplash.com/photo-1504639725590-34d0984388bd?w=480&h=270&fit=crop',
+];
+
+/** Hardcoded fallback usernames/display names to filter out from feeds */
+const BLOCKED_CREATORS_FALLBACK = [
+  'monkey d luffy',
+  'monkey d. luffy',
+  'monkeydluffy',
+  'monkey_d_luffy',
+];
+
+function isBlockedCreator(nft: DeHubNFT, dynamicBlockedAddresses?: Set<string>): boolean {
+  // Check dynamic block list (addresses) first
+  if (dynamicBlockedAddresses) {
+    const minter = (nft.minter || '').toLowerCase();
+    if (minter && dynamicBlockedAddresses.has(minter)) return true;
+  }
+  const displayName = (nft.minterDisplayName || nft.mintername || '').toLowerCase();
+  const username = (nft.creator?.username || '').toLowerCase();
+  return BLOCKED_CREATORS_FALLBACK.some(blocked =>
+    displayName.includes(blocked) || username.includes(blocked)
+  );
+}
+
+function isBlockedPost(nft: DeHubNFT): boolean {
+  const tokenId = nft.tokenId || nft.id || nft.token_id;
+  const numericId = typeof tokenId === 'string' ? parseInt(tokenId, 10) : tokenId;
+  return BLOCKED_POST_IDS.includes(numericId);
+}
+
+// Helper functions (formatDuration, formatViews, formatTimeAgo) are now imported from @/lib/feed-utils
+
+/**
+ * Helper function to detect content type from API response
+ */
+export function getContentType(nft: DeHubNFT): 'video' | 'image' | 'audio' {
+  // Check postType first (primary field from API)
+  const pt = nft.postType as string;
+  if (pt === 'image' || pt === 'video') return pt;
+  if (pt === 'audio' || pt === 'feed-audio') return 'audio';
+  // Fallback to media_type if present
+  if (nft.media_type === 'image' || nft.media_type === 'video' || nft.media_type === 'audio') {
+    return nft.media_type;
+  }
+  // Detect by URL patterns - if has video URL, it's video
+  if (nft.videoUrl && nft.videoUrl.length > 0) return 'video';
+  if (nft.imageUrl && !nft.videoUrl) return 'image';
+  // Search API postType values that are not videos
+  if (pt === 'feed-simple' || pt === 'feed-all' || pt === 'text') return 'image';
+  if (pt === 'feed-images') return 'image';
+  if (pt === 'feed-video') return 'video';
+  return 'image'; // Default to image instead of video to avoid broken players
+}
+
+/**
+ * Map Riftn NFT to VideoItem type
+ * Handles both old and new API response field names
+ */
+export function mapNFTToVideoItem(nft: DeHubNFT, index: number): VideoItem {
+  // Get ID from various possible fields
+  const tokenId = nft.tokenId || nft.id || nft.token_id;
+  const id = String(tokenId);
+
+  // Get thumbnail with CDN URL.
+  //
+  // A live post keeps its poster on the nested stream, not on the token —
+  // /api/feed answers live items with no imageUrl at all — so reading only the
+  // token fields dropped every live cover on the floor and handed the card a
+  // random stock photo instead. The stream's own thumbnail comes first for
+  // live posts because the broadcaster refreshes it while the stream runs,
+  // making it the newer of the two.
+  const streamThumbnail = (nft as any).stream?.thumbnail as string | undefined;
+  const thumbnail =
+    ((nft.postType as string) === 'live' ? getMediaUrl(streamThumbnail) : '') ||
+    getMediaUrl(nft.imageUrl) ||
+    getMediaUrl(nft.thumbnail_url) ||
+    getMediaUrl(nft.media_url) ||
+    FALLBACK_THUMBNAILS[index % FALLBACK_THUMBNAILS.length];
+
+  // Live posts can't be played natively — skip videoUrl so VideoCard shows thumbnail
+  // and the user clicks through to single post page (which uses HLS via LiveStreamCard).
+  // Audio posts use the audio CDN URL. Regular videos use video CDN URL.
+  const isLivePost = (nft.postType as string) === 'live';
+  const isAudioPost = (nft.postType as string) === 'audio' || (nft.postType as string) === 'feed-audio';
+  const videoUrl = isLivePost
+    ? undefined
+    : isAudioPost
+      ? undefined
+      : (tokenId
+          ? `https://dehubcdn.ams3.cdn.digitaloceanspaces.com/videos/${tokenId}.mp4`
+          : getMediaUrl(nft.videoUrl) || undefined);
+
+  // Build audio URL from API audioUrl field, fallback to videoUrl/media_url for audio posts
+  const rawAudioSource = (nft as any).audioUrl || (isAudioPost ? (nft.videoUrl || nft.media_url) : undefined);
+  const audioUrl = isAudioPost && rawAudioSource
+    ? (rawAudioSource.startsWith('http') ? rawAudioSource : `https://dehubcdn.ams3.cdn.digitaloceanspaces.com/${rawAudioSource.replace(/^\/+/, '')}`)
+    : undefined;
+
+  // Get duration from various fields
+  const duration = isAudioPost ? ((nft as any).audioDuration || nft.videoDuration || nft.duration) : (nft.videoDuration || nft.duration);
+
+  // Get creator info from various possible fields
+  const channel = nft.minterDisplayName ||
+    nft.minterUsername ||
+    nft.mintername ||
+    nft.creator?.display_name ||
+    nft.creator?.username ||
+    _translateCopy("copy.056823642989", { defaultValue: "Unknown Creator" });
+
+  // Build canonical avatar URL using minter address
+  const minterAddress = nft.minter || nft.creator?.id || '';
+  const channelAvatar = buildAvatarUrl(minterAddress, nft.minterAvatarUrl) ||
+    buildAvatarUrl(minterAddress, nft.creator?.avatar_url) ||
+    'user';
+
+  const verified = nft.creator?.is_verified || false;
+
+  // Get view count from various fields
+  const viewCount = resolveViewCount(nft);
+
+  // Get created date from various fields
+  const createdAt = nft.createdAt || nft.created_at;
+
+  // Get creator ID and username for profile navigation
+  const creatorId = nft.minter || nft.creator?.id;
+  const creatorUsername = nft.minterUsername || nft.mintername || nft.creator?.username;
+
+  // Get stats
+  const likeCount = resolveLikeCount(nft);
+  const dislikeCount = resolveDislikeCount(nft);
+  const commentCount = nft.commentCount || nft.comment_count || 0;
+
+  // Map content access fields from API
+  const isPPV = nft.is_ppv ?? false;
+  const ppvPrice = nft.ppv_price;
+  const ppvCurrency = nft.ppv_currency || nft.streamInfo?.payPerViewTokenSymbol || 'DHB';
+  const isW2E = nft.is_w2e || nft.streamInfo?.isAddBounty || false;
+  const isLocked = nft.is_locked ?? false;
+  const lockedPrice = nft.locked_price;
+  const lockedCurrency = nft.locked_currency || 'DHB';
+  const lockedTokenAddress = nft.streamInfo?.lockContentContractAddress;
+  const lockedChainId = nft.streamInfo?.lockContentChainIds?.[0];
+
+  // Extract soundtrack metadata from description
+  const descText = nft.description || '';
+  const { soundtrackUrl, soundtrackTitle, soundtrackCreator } = parseSoundtrackTag(descText);
+  const soundtrackTokenId = soundtrackUrl ? descText.match(/\[soundtrack:(\d+)/)?.[1] : undefined;
+
+  // Clean soundtrack tag from description for display
+  const cleanDescription = descText.replace(/\[soundtrack:[^\]]*\]/, '').trim();
+  const videoTitle = nft.name || nft.title;
+
+  return {
+    id,
+    type: 'video',
+    shopLinks: (nft as any).shopLinks,
+    shopListingCount: (nft as any).shopListingCount,
+    thumbnail,
+    videoUrl,
+    hlsUrl: isLivePost ? undefined : buildHlsUrl(nft.hlsUrl),
+    transcodingStatus: nft.transcodingStatus,
+    storyboard: toStoryboard(nft.storyboard),
+    storedAspect: storedVideoAspect(nft.videoInfo),
+    storedAspectShown: storedVideoSizeShown(nft.videoInfo),
+    audioUrl,
+    audioDuration: isAudioPost ? (typeof duration === 'number' ? duration : 0) : undefined,
+    isAudio: isAudioPost,
+    duration: formatDuration(duration),
+    durationSeconds: typeof duration === 'number' ? duration : 0,
+    title: displayPostTitle(videoTitle, cleanDescription),
+    description: cleanDescription || undefined,
+    channel,
+    channelAvatar,
+    verified,
+    views: formatViews(viewCount),
+    createdAt,
+    uploadedAgo: formatTimeAgo(createdAt),
+    creatorId,
+    creatorUsername,
+    creatorBadgeBalance: nft.minterUser?.hideBadgeAndBalance ? 0 : nft.minterUser?.badgeBalance,
+    creatorPaymentsDisabled: nft.minterUser?.hideBadgeAndBalance === true,
+    isLiked: nft.isLiked ?? false,
+    isDisliked: nft.isDisliked ?? false,
+    myReaction: resolveMyReaction(nft),
+    reactionCounts: resolveReactionCounts(nft),
+    likeCount,
+    dislikeCount,
+    commentCount,
+    isPPV,
+    ppvPrice,
+    ppvPreviewReady: nft.ppvPreview?.ready === true,
+    ppvCurrency,
+    isW2E,
+    bountyViews: nft.streamInfo?.addBountyFirstXViewers != null ? Number(nft.streamInfo.addBountyFirstXViewers) : undefined,
+    bountyComments: nft.streamInfo?.addBountyFirstXComments != null ? Number(nft.streamInfo.addBountyFirstXComments) : undefined,
+    bountyAmount: nft.streamInfo?.addBountyAmount,
+    bountyCurrency: nft.streamInfo?.addBountyTokenSymbol || 'DHB',
+    isLocked,
+    lockedPrice,
+    lockedCurrency,
+    lockedTokenAddress,
+    lockedChainId,
+    subscriberPlans: (nft as any).plansDetails,
+    isOwner: nft.isOwner ?? false,
+    isUnlocked: nft.isUnlocked ?? false,
+    chainId: nft.chainId,
+    // Live posts: the card plays the HLS ladder inline rather than sitting on
+    // a poster until somebody clicks through.
+    isLivePost,
+    liveStatus: (nft as any).stream?.status,
+    liveIsActive: (nft as any).stream?.isActive,
+    livePlaybackId: (nft as any).stream?.playbackId,
+    livePlaybackUrl: (nft as any).stream?.playbackUrl,
+    livePlaybackUrls: (() => {
+      noteLatencyMode((nft as any).stream);
+      const hls = hlsUrlFor((nft as any).stream);
+      if (!hls) return (nft as any).stream?.playbackUrl ? [(nft as any).stream.playbackUrl] : undefined;
+      return liveProviderOf((nft as any).stream) === 'mediamtx'
+        ? [hls]
+        : [hls, `https://livepeercdn.com/hls/${(nft as any).stream?.playbackId}/index.m3u8`];
+    })(),
+    isLiveNow: isLivePost
+      && (nft as any).stream?.isActive !== false
+      && ['live', 'active'].includes(String((nft as any).stream?.status || '').toLowerCase()),
+    liveStreamId: (nft as any).stream?._id || (nft as any).stream?.streamId,
+    soundtrackUrl,
+    soundtrackTitle,
+    soundtrackCreator,
+    soundtrackTokenId,
+    totalTips: nft.totalTips ?? 0,
+  };
+}
+
+/**
+ * Map Riftn NFT to ImagePost type
+ * Handles both old and new API response field names
+ * Supports multi-image posts (1-4 images)
+ */
+export function mapNFTToImagePost(nft: DeHubNFT, index: number): ImagePost {
+  // Get ID from various possible fields
+  const tokenId = nft.tokenId || nft.id || nft.token_id;
+  const id = String(tokenId);
+
+  // Build image URLs array from imageUrls field using shared utility
+  const imageUrls = buildFeedImageUrls(nft.imageUrls, undefined, (nft as { imageSizes?: unknown }).imageSizes) || [];
+
+  // Get primary image URL (first from array or fallback to single image)
+  const primaryImage = imageUrls[0] ||
+    getMediaUrl(nft.imageUrl) ||
+    getMediaUrl(nft.media_url) ||
+    getMediaUrl(nft.thumbnail_url) ||
+    FALLBACK_THUMBNAILS[index % FALLBACK_THUMBNAILS.length];
+
+  // Get creator info
+  const username = nft.minterDisplayName || nft.minterUsername || nft.mintername || nft.creator?.display_name || nft.creator?.username || 'unknown';
+  // Build canonical avatar URL using minter address
+  const minterAddress = nft.minter || nft.creator?.id || '';
+  const avatar = buildAvatarUrl(minterAddress, nft.minterAvatarUrl) ||
+    buildAvatarUrl(minterAddress, nft.creator?.avatar_url) ||
+    'user';
+  const verified = nft.creator?.is_verified || false;
+
+  // Get stats
+  const likes = resolveLikeCount(nft);
+  const comments = nft.commentCount || nft.comment_count || 0;
+  const viewCount = resolveViewCount(nft);
+
+  // Get created date
+  const createdAt = nft.createdAt || nft.created_at;
+
+  // Get creator ID and username for profile navigation
+  const creatorId = nft.minter || nft.creator?.id;
+  const creatorUsername = nft.minterUsername || nft.mintername || nft.creator?.username;
+
+  // Get title and description
+  const rawTitle = nft.name || nft.title;
+  const rawDescription = nft.description || '';
+  const soundtrack = parseSoundtrackTag(rawDescription);
+  const description = rawDescription.replace(/\[soundtrack:[^\]]*\]/, '').trim();
+  const title = displayPostTitle(rawTitle, description);
+
+  return {
+    id,
+    type: 'image',
+    shopLinks: (nft as any).shopLinks,
+    shopListingCount: (nft as any).shopListingCount,
+    username,
+    verified,
+    avatar,
+    image: primaryImage,
+    imageUrls: imageUrls.length > 0 ? imageUrls : undefined,
+    title,
+    description,
+    likes,
+    caption: rawDescription || title,
+    ...soundtrack,
+    comments,
+    views: formatViews(viewCount).replace(' views', ''),
+    createdAt,
+    timeAgo: formatTimeAgo(createdAt),
+    creatorId,
+    creatorUsername,
+    creatorBadgeBalance: nft.minterUser?.hideBadgeAndBalance ? 0 : nft.minterUser?.badgeBalance,
+    creatorPaymentsDisabled: nft.minterUser?.hideBadgeAndBalance === true,
+    isLiked: nft.isLiked ?? false,
+    isDisliked: nft.isDisliked ?? false,
+    myReaction: resolveMyReaction(nft),
+    reactionCounts: resolveReactionCounts(nft),
+    // PPV/Bounty/Locked fields
+    isPPV: nft.is_ppv || nft.streamInfo?.isPayPerView || false,
+    ppvPrice: nft.ppv_price || nft.streamInfo?.payPerViewAmount,
+    ppvCurrency: nft.ppv_currency || nft.streamInfo?.payPerViewTokenSymbol || 'DHB',
+    isW2E: nft.is_w2e || nft.streamInfo?.isAddBounty || false,
+    isLocked: nft.is_locked || nft.streamInfo?.isLockContent || false,
+    lockedPrice: nft.locked_price || nft.streamInfo?.lockContentAmount,
+    lockedCurrency: nft.locked_currency || nft.streamInfo?.lockContentTokenSymbol || 'DHB',
+    lockedTokenAddress: nft.streamInfo?.lockContentContractAddress,
+    lockedChainId: nft.streamInfo?.lockContentChainIds?.[0],
+    subscriberPlans: (nft as any).plansDetails,
+    bountyViews: nft.streamInfo?.addBountyFirstXViewers != null ? Number(nft.streamInfo.addBountyFirstXViewers) : undefined,
+    bountyComments: nft.streamInfo?.addBountyFirstXComments != null ? Number(nft.streamInfo.addBountyFirstXComments) : undefined,
+    bountyAmount: nft.streamInfo?.addBountyAmount,
+    bountyCurrency: nft.streamInfo?.addBountyTokenSymbol || 'DHB',
+    isOwner: nft.isOwner ?? false,
+    isUnlocked: nft.isUnlocked ?? false,
+    chainId: nft.chainId,
+    totalTips: nft.totalTips ?? 0,
+  };
+}
+
+/**
+ * Map Riftn NFT to LiveStream type
+ * Handles live content from the API
+ */
+export function mapNFTToLiveStream(nft: DeHubNFT, index: number): LiveStream {
+  const id = String(nft.tokenId || nft.id || nft.token_id);
+
+  // The stream's own thumbnail first, and it has to be read at all: a live
+  // post keeps its cover on the nested stream, never on the token, so reading
+  // only the token fields dropped every real cover and fell through to a stock
+  // photo. mapNftToVideo already reads it this way; this path did not.
+  const thumbnail = getMediaUrl((nft as any).stream?.thumbnail) ||
+    getMediaUrl(nft.imageUrl) ||
+    getMediaUrl(nft.thumbnail_url) ||
+    getMediaUrl(nft.media_url) ||
+    '';
+
+  const streamer = nft.minterDisplayName ||
+    nft.mintername ||
+    nft.creator?.display_name ||
+    nft.creator?.username ||
+    _translateCopy("copy.dc03dee626ea", { defaultValue: "Unknown Streamer" });
+
+  // Build canonical avatar URL using minter address
+  const minterAddress = nft.minter || nft.creator?.id || '';
+  const avatar = buildAvatarUrl(minterAddress, nft.minterAvatarUrl) ||
+    buildAvatarUrl(minterAddress, nft.creator?.avatar_url) ||
+    'user';
+
+  const viewCount = resolveViewCount(nft);
+  const category = Array.isArray(nft.category) ? nft.category[0] : nft.category;
+
+  // Get creator ID and username for profile navigation
+  const creatorId = nft.minter || nft.creator?.id;
+  const creatorUsername = nft.mintername || nft.creator?.username;
+
+  // MongoDB ObjectId needed for /api/live/{id}/settings endpoint
+  const streamId = (nft.stream as any)?._id || nft.stream?.streamId;
+
+  return {
+    id,
+    type: 'live',
+    streamer,
+    avatar,
+    title: nft.name || nft.title || _translateCopy("copy.7975f2a611d0", { defaultValue: "Live Stream" }),
+    game: category || 'Just Chatting',
+    viewers: formatViews(viewCount).replace(' views', ''),
+    thumbnail,
+    tags: nft.tags || [],
+    isLive: isStreamLive(nft.stream, nft.is_live ?? false),
+    creatorId,
+    creatorUsername,
+    creatorBadgeBalance: nft.minterUser?.hideBadgeAndBalance ? 0 : nft.minterUser?.badgeBalance,
+    creatorPaymentsDisabled: nft.minterUser?.hideBadgeAndBalance === true,
+    replayUrl: extractReplayUrl(nft.stream),
+    replayTruncated: isReplayTruncated(nft.stream),
+    // Access, read from the same streamInfo a video post carries. Go Live
+    // writes it through the same composer switches, so a stream can be sold or
+    // gated like any other post.
+    isPPV: nft.is_ppv || nft.streamInfo?.isPayPerView || false,
+    ppvPrice: nft.ppv_price || nft.streamInfo?.payPerViewAmount,
+    ppvCurrency: nft.ppv_currency || nft.streamInfo?.payPerViewTokenSymbol || 'DHB',
+    ppvChainId: nft.streamInfo?.payPerViewChainIds?.[0] ?? nft.chainId,
+    isLocked: nft.is_locked || nft.streamInfo?.isLockContent || false,
+    lockedPrice: nft.locked_price || nft.streamInfo?.lockContentAmount,
+    lockedCurrency: nft.locked_currency || nft.streamInfo?.lockContentTokenSymbol || 'DHB',
+    lockedTokenAddress: nft.streamInfo?.lockContentContractAddress,
+    lockedChainId: nft.streamInfo?.lockContentChainIds?.[0],
+    subscriberPlans: (nft as any).plansDetails,
+    contentRating: nft.contentRating,
+    mediaDescriptions: nft.mediaDescriptions,
+    layout: nft.layout,
+    mediaCaptions: nft.mediaCaptions,
+    comicBorder: nft.comicBorder,
+    hideAssetCards: nft.hideAssetCards,
+    hiddenLinkPreviews: nft.hiddenLinkPreviews,
+    imageTags: nft.imageTags,
+    hasQuiz: nft.hasQuiz,
+    spoilerText: nft.spoilerText,
+    quotePolicy: nft.quotePolicy,
+    visibility: nft.visibility,
+    quoteRevoked: nft.quoteRevoked,
+    replyPolicy: nft.replyPolicy,
+    shopLinks: nft.shopLinks,
+    shopListingCount: nft.shopListingCount,
+    isOwner: nft.isOwner ?? false,
+    isUnlocked: nft.isUnlocked ?? false,
+    // Reactions read exactly as on a video post: the live card renders the
+    // same ActionBar, and without these it showed a thumb that never filled.
+    likeCount: resolveLikeCount(nft),
+    dislikeCount: resolveDislikeCount(nft),
+    commentCount: Math.max(nft.commentCount ?? (nft as any).comment_count ?? 0, (nft as any).liveChatCount ?? 0),
+    isLiked: nft.isLiked ?? false,
+    isDisliked: nft.isDisliked ?? false,
+    myReaction: resolveMyReaction(nft),
+    reactionCounts: resolveReactionCounts(nft),
+    ...(streamId ? { streamId } : {}),
+  };
+}
+
+/**
+ * Map Riftn NFT creator to story user format
+ */
+export function mapNFTToStoryUser(nft: DeHubNFT): { name: string; avatar: string } {
+  const name = nft.minterDisplayName ||
+    nft.mintername ||
+    nft.creator?.display_name ||
+    nft.creator?.username ||
+    _translateCopy("copy.b512d97e7cbf", { defaultValue: "User" });
+
+  // Build canonical avatar URL using minter address
+  const minterAddress = nft.minter || nft.creator?.id || '';
+  const avatar = buildAvatarUrl(minterAddress, nft.minterAvatarUrl) ||
+    buildAvatarUrl(minterAddress, nft.creator?.avatar_url) ||
+    '';
+
+  return { name, avatar };
+}
+
+interface UseDeHubFeedOptions extends SearchNFTsParams {
+  enabled?: boolean;
+}
+
+/**
+ * Hook to fetch paginated Riftn feed content
+ * By default shows all published content — minted and off-chain ('signed') alike.
+ */
+export function useDeHubFeed(options: UseDeHubFeedOptions = {}) {
+  const queryClient = useQueryClient();
+  const { enabled = true, status = 'all', ...searchParams } = options;
+  const { isAuthenticated } = useAuth();
+
+  // Fetch dynamic block list for authenticated users
+  const { data: blockList } = useQuery({
+    queryKey: ['block-list'],
+    queryFn: getBlockList,
+    enabled: isAuthenticated,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+  });
+
+  const blockedAddresses = useMemo(() => {
+    if (!blockList?.length) return undefined;
+    return new Set(blockList.map(u => u.address.toLowerCase()));
+  }, [blockList]);
+
+  return useInfiniteQuery({
+    // Viewer in the key: without it, a page fetched anonymously (or by the
+    // previous account) is served to the next signer-in for up to gcTime.
+    queryKey: ['dehub-feed', { ...searchParams, status }, getFeedViewer()],
+    queryFn: async ({ pageParam = 0 }) => {
+      const response = await searchNFTs({
+        ...searchParams,
+        status,
+        page: pageParam,
+        unit: searchParams.unit || 15,
+      });
+
+      // Handle both response formats: { result: [...] } or { data: [...] }
+      const rawData = (response as any).result || response.data || [];
+      mergeLiveCounts(queryClient, rawData);
+
+      // Filter out blocked creators and blocked posts
+      const data = rawData.filter((nft: DeHubNFT) => !isBlockedCreator(nft, blockedAddresses) && !isBlockedPost(nft));
+
+      const unit = searchParams.unit || 15;
+
+      return {
+        data,
+        page: pageParam,
+        has_more: rawData.length >= unit, // Use raw length to determine pagination
+        total: response.total || data.length,
+        unit,
+      };
+    },
+    getNextPageParam: (lastPage) => {
+      if (lastPage.has_more) {
+        return lastPage.page + 1;
+      }
+      return undefined;
+    },
+    initialPageParam: 0,
+    enabled,
+    staleTime: 1000 * 60 * 10, // 10 minutes - keep data fresh longer
+    gcTime: 1000 * 60 * 30, // Keep in cache for 30 minutes
+    refetchOnWindowFocus: false, // Don't refetch on tab focus
+    refetchOnMount: false, // Don't refetch when component remounts
+    retry: 2,
+  });
+}
+
+/**
+ * Hook to fetch video content specifically
+ * Note: postType is undefined for videos (same as home feed)
+ */
+export function useDeHubVideos(options: Omit<UseDeHubFeedOptions, 'postType'> = {}) {
+  return useDeHubFeed(options);
+}
+
+/**
+ * Hook to fetch image content specifically
+ * Uses postType: "feed-images" to filter for images
+ * Now accepts sortMode for API-level sorting
+ */
+export function useDeHubImages(options: Omit<UseDeHubFeedOptions, 'postType'> = {}) {
+  return useDeHubFeed({
+    ...options,
+    postType: 'feed-images',
+  });
+}
+
+/** Default params — Home, Live tab, and prefetch must match so React Query dedupes to one cache entry. */
+/**
+ * On air first (newest start first), then replays (newest end first). The
+ * list also carries recent recordings, so sorting on start time alone put a
+ * replay that started an hour ago above a stream that has been live for two.
+ */
+export function sortLiveThenReplays<T extends { status?: string; startedAt?: string; endedAt?: string; createdAt?: string }>(rows: T[]): T[] {
+  const onAir = (row: T) => (isStreamLive(row) ? 0 : 1);
+  const at = (row: T) => Date.parse((onAir(row) === 0 ? row.startedAt : row.endedAt || row.startedAt) || row.createdAt || '') || 0;
+  return [...rows].sort((a, b) => onAir(a) - onAir(b) || at(b) - at(a));
+}
+
+export const DEFAULT_DEHUB_LIVE_QUERY_OPTIONS = {
+  unit: 200,
+  sortMode: 'recent' as const,
+};
+
+/**
+ * Hook to fetch live content specifically
+ * Uses /api/live endpoint
+ */
+export function useDeHubLive(options: { unit?: number; sortMode?: 'viewers' | 'recent' | 'popular'; category?: string; enabled?: boolean } = {}) {
+  // `enabled` is destructured OUT before merging so the queryKey stays identical
+  // across callers (HomeFeed carousel, Live tab, prefetch) and the cache is shared.
+  const { enabled = true, ...rest } = options;
+  const merged = { ...DEFAULT_DEHUB_LIVE_QUERY_OPTIONS, ...rest };
+  return useInfiniteQuery({
+    enabled,
+    queryKey: ['dehub-live', merged],
+    queryFn: async ({ pageParam = 1 }) => {
+      try {
+        const response = await getLiveStreams({
+          page: pageParam,
+          unit: merged.unit,
+          sortMode: merged.sortMode,
+          category: merged.category,
+        });
+
+        // API returns a plain array, not { result: [...] }
+        const streams = Array.isArray(response) ? response : (response.result || []);
+
+        return {
+          data: merged.sortMode === 'recent' ? sortLiveThenReplays(streams) : streams,
+          page: pageParam,
+          has_more: streams.length >= merged.unit,
+          total: streams.length,
+          limit: merged.unit,
+        };
+      } catch (error) {
+        console.warn('[Live] Failed to fetch live streams:', error);
+        // Return empty result on error
+        return {
+          data: [],
+          page: pageParam,
+          has_more: false,
+          total: 0,
+          limit: merged.unit,
+        };
+      }
+    },
+    getNextPageParam: (lastPage) => {
+      if (lastPage.has_more) {
+        return lastPage.page + 1;
+      }
+      return undefined;
+    },
+    initialPageParam: 1,
+    /** Avoid hammering /api/live; list is still refreshed on pull-to-refresh and after stale window. */
+    staleTime: 60 * 1000,
+    gcTime: 1000 * 60 * 10,
+    refetchOnWindowFocus: true,
+    refetchInterval: enabled ? 60_000 : false,
+    // Re-entering the tab refreshes stale results; staleTime alone does not fetch.
+    refetchOnMount: true,
+    retry: 1,
+  });
+}
+
+/**
+ * How many are watching a live right now, from a /live list row, or null when
+ * the row does not say. Never `totalViews` (every join) or `peakViewers`
+ * (only ever climbs).
+ */
+export function watchingNowOf(row: { viewerCount?: unknown } | null | undefined): number | null {
+  const raw = row?.viewerCount;
+  if (raw == null || raw === '') return null;
+  const n = Number(raw);
+  return Number.isFinite(n) && n >= 0 ? Math.floor(n) : null;
+}
+
+/**
+ * Map API LiveStream to local LiveStream format
+ */
+export function mapApiLiveStreamToLocal(stream: ApiLiveStream, index: number): LiveStream {
+  // API returns 'account' not 'streamer', and 'thumbnail' as relative path
+  const rawAccount = (stream as any).account || stream.streamer;
+  const rawThumbnail = (stream as any).thumbnail || stream.thumbnailUrl;
+  const playbackId = (stream as any).playbackId;
+  const livepeerThumb = liveThumbnailFor(stream as any) ?? null;
+  // The Live tab and live rows read big-event mode from here too, so a big
+  // event's viewers get the shared HLS feed instead of a WebRTC session each.
+  noteLatencyMode(stream as any);
+  const hlsUrl = hlsUrlFor(stream as any);
+  // Empty, not a stock photo, when a stream has no cover of its own. That is
+  // the common case — the self-hosted ingest renders no thumbnail — and a
+  // random Unsplash desk shot is a worse answer than none: the card claims to
+  // show a frame of a broadcast it has never seen. Every consumer already
+  // branches on a falsy thumbnail and draws LiveEndedMedia's static screen
+  // with the stream's own label, which the stock URL was quietly preventing.
+  const thumbnail = rawThumbnail
+    ? (rawThumbnail.startsWith('http') ? rawThumbnail : `${DEHUB_CDN_BASE}${rawThumbnail.replace(/^\//, '')}`)
+    : livepeerThumb ?? '';
+
+  const streamerName = rawAccount?.displayName ||
+    rawAccount?.username ||
+    _translateCopy("copy.dc03dee626ea", { defaultValue: "Unknown Streamer" });
+
+  const avatar = rawAccount
+    ? buildAvatarUrl(rawAccount.address, rawAccount.avatarImageUrl || rawAccount.avatarUrl)
+    : '';
+
+  // API uses _id not streamId, categories[] not category, totalViews not viewerCount
+  const id = (stream as any)._id || stream.streamId || String(index);
+  const category = Array.isArray((stream as any).categories) ? (stream as any).categories[0] : stream.category;
+  const viewerCount = (stream as any).totalViews ?? (stream as any).peakViewers ?? stream.viewerCount ?? 0;
+  const watchingNow = watchingNowOf(stream);
+  const likeCount = (stream as any).likes ?? stream.likeCount ?? 0;
+  const liveStreamInfo = (stream as any).streamInfo as
+    | import('@/lib/api/dehub').StreamInfo
+    | undefined;
+
+  return {
+    id,
+    type: 'live',
+    streamer: streamerName,
+    avatar,
+    title: stream.title,
+    game: category || 'Just Chatting',
+    viewers: formatViews(viewerCount).replace(' views', ''),
+    watching: watchingNow == null ? '' : formatViews(watchingNow).replace(' views', ''),
+    thumbnail,
+    tags: [],
+    isLive: isStreamLive(stream),
+    liveStatus: stream.status,
+    streamId: id,
+    playbackUrl: stream.playbackUrl || hlsUrl,
+    // The .com host is Livepeer's deprecated CDN, kept as a second chance for
+    // that provider only; a self-hosted stream is served from one host and a
+    // fabricated alternate would just 404 twice.
+    playbackUrls: !hlsUrl
+      ? undefined
+      : liveProviderOf(stream as any) === 'mediamtx'
+        ? [hlsUrl]
+        : [hlsUrl, `https://livepeercdn.com/hls/${playbackId}/index.m3u8`],
+    creatorId: stream.address || rawAccount?.address,
+    creatorUsername: rawAccount?.username,
+    creatorBadgeBalance: rawAccount?.hideBadgeAndBalance ? 0 : rawAccount?.badgeBalance,
+    creatorPaymentsDisabled: rawAccount?.hideBadgeAndBalance === true,
+    likeCount,
+    replayUrl: extractReplayUrl(stream),
+    replayTruncated: isReplayTruncated(stream),
+    // `id` above is the stream's ObjectId, which every /api/live route wants.
+    // A PPV payment is recorded against the POST, so the tokenId is carried
+    // separately rather than conflated with it.
+    tokenId: (stream as any).tokenId != null ? String((stream as any).tokenId) : undefined,
+    /*
+     * Access, from the token behind the stream.
+     *
+     * `/api/live` used to project the stream's own `streamInfo` and nothing
+     * else, so two of the four gates were invisible here: `plans` and
+     * `contentRating` live on the TOKEN. The Live tab therefore drew
+     * subscriber-only streams as open and mature thumbnails unblurred, and only
+     * the post page ever resolved them. The backend now serves both, along with
+     * `plansDetails` and the viewer's own `isUnlocked`.
+     */
+    contentRating: (stream as any).contentRating,
+    subscriberPlans: (stream as any).plansDetails,
+    // Flattened onto the row by applyLiveAccess, like contentRating — the
+    // board lives on the token, and /api/live only serves the stream.
+    shopLinks: (stream as any).shopLinks,
+    shopListingCount: (stream as any).shopListingCount,
+    isUnlocked: (stream as any).isUnlocked ?? false,
+    isPPV: liveStreamInfo?.isPayPerView || false,
+    ppvPrice: liveStreamInfo?.payPerViewAmount,
+    ppvCurrency: liveStreamInfo?.payPerViewTokenSymbol || 'DHB',
+    ppvChainId: liveStreamInfo?.payPerViewChainIds?.[0],
+    isLocked: liveStreamInfo?.isLockContent || false,
+    lockedPrice: liveStreamInfo?.lockContentAmount,
+    lockedCurrency: liveStreamInfo?.lockContentTokenSymbol || 'DHB',
+    lockedTokenAddress: liveStreamInfo?.lockContentContractAddress,
+    lockedChainId: liveStreamInfo?.lockContentChainIds?.[0],
+    isOwner: (stream as any).isOwner ?? false,
+  };
+}

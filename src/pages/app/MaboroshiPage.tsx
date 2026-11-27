@@ -1,0 +1,155 @@
+import { tokenLabel } from '@/lib/token-label';
+import { useTranslation as _useCopy } from 'react-i18next';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import RefreshCw from "@/components/ui/cut-icons/refresh";
+
+import ArrowLeft from "@/components/ui/cut-icons/back";
+
+import { useAuth } from '@/contexts/AuthContext';
+import { SEOHead } from '@/components/SEOHead';
+import { getAuthToken } from '@/lib/api/dehub/core';
+import { payForJob, forgetPayment } from '@/lib/ai-payment';
+import { getWalletAddress } from '@/lib/contracts/aa-utils';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { completeMaboroshiPayment, getMaboroshiQuote, isMaboroshiPaymentRequest, maboroshiStageLabel, type MaboroshiQuote } from '@/lib/maboroshi-payment';
+import { MotionLibraryShowcase } from '@/components/app/creator/MotionLibraryShowcase';
+import { findMotionClip, type MotionClip } from '@/lib/creator/motionLibrary';
+import { maboroshiStudioUrl } from '@/lib/maboroshi-studio';
+import { isMaboroshiDelivery, maboroshiAssetId, maboroshiAspect } from '@/lib/maboroshi-delivery';
+import { saveCloudGeneration } from '@/lib/creator/cloudLibrary';
+
+const ORIGIN = 'https://live.dehub.io';
+
+export default function MaboroshiPage({ remake = false }: { remake?: boolean }) {
+  const [searchParams] = useSearchParams();
+  const preset = searchParams.get('preset') || '';
+  const studioUrl = maboroshiStudioUrl(preset, remake);
+  const { t: _copy } = _useCopy();
+  const { t } = useTranslation();
+  const studioName = t(remake ? 'creator.toolRemake' : 'creator.toolMaboroshi');
+  const { isAuthenticated, walletAddress, openLoginModal } = useAuth();
+  const frame = useRef<HTMLIFrameElement>(null);
+  const [connected, setConnected] = useState(false);
+  const [selectedClip, setSelectedClip] = useState<MotionClip | null>(null);
+  const selectedClipRef = useRef(selectedClip); selectedClipRef.current = selectedClip;
+  const [attempt, setAttempt] = useState(0);
+  const [quote, setQuote] = useState<MaboroshiQuote | null>(null);
+  const [paying, setPaying] = useState(false);
+  const pending = useRef<string | null>(null);
+  const paymentInFlight = useRef(false);
+  const deliveryInFlight = useRef(false);
+  const [deliveryStatus, setDeliveryStatus] = useState('');
+  const [savedAsset, setSavedAsset] = useState<{ id: string; wallet: string } | null>(null);
+  const activeWallet = useRef('');
+  activeWallet.current = isAuthenticated ? (walletAddress || '').toLowerCase() : '';
+  const reply = useCallback((requestId: string, error?: string, cancelled = false) => {
+    frame.current?.contentWindow?.postMessage({ type: 'maboroshi:payment-result', requestId, error, cancelled }, ORIGIN);
+  }, []);
+  const session = useCallback(() => {
+    frame.current?.contentWindow?.postMessage({ type: 'maboroshi:session',
+      token: isAuthenticated ? getAuthToken() || '' : '', wallet: walletAddress || '',
+      paymentBridge: 1, libraryBridge: 1, allowPayments: true,
+    }, ORIGIN);
+  }, [isAuthenticated, walletAddress]);
+
+  useEffect(() => {
+    const receive = (event: MessageEvent) => {
+      if (event.origin !== ORIGIN || event.source !== frame.current?.contentWindow) return;
+      if (isMaboroshiDelivery(event.data)) {
+        const input = event.data;
+        if (deliveryInFlight.current || !activeWallet.current || input.wallet !== activeWallet.current) return;
+        deliveryInFlight.current = true;
+        setDeliveryStatus(t('common.saving', 'Saving…'));
+        void (async () => {
+          const id = await maboroshiAssetId(input);
+          if (activeWallet.current !== input.wallet) return;
+          await saveCloudGeneration(input.wallet, { id, kind: 'video', prompt: 'Remake video', resolvedPrompt: '',
+            model: 'remake', modelName: 'Remake', aspect: maboroshiAspect(input), status: 'done', stage: '',
+            url: input.url, createdAt: input.createdAt });
+          if (activeWallet.current !== input.wallet) return;
+          setDeliveryStatus(t('copy.922cb35a34dc', 'Saved to your account'));
+          setSavedAsset({ id, wallet: input.wallet });
+          frame.current?.contentWindow?.postMessage({ type: 'maboroshi:save-result', requestId: input.requestId }, ORIGIN);
+        })().catch(() => {
+          if (activeWallet.current !== input.wallet) return;
+          setDeliveryStatus(t('copy.472d4637d255', 'Cloud save pending. Retry saving'));
+          frame.current?.contentWindow?.postMessage({ type: 'maboroshi:save-result', requestId: input.requestId, error: 'Could not save. Your project is retained; try again.' }, ORIGIN);
+        }).finally(() => { deliveryInFlight.current = false; });
+        return;
+      }
+      if (event.data?.type === 'maboroshi:ready') {
+        setConnected(true); session();
+        if (selectedClipRef.current) frame.current?.contentWindow?.postMessage({ type: 'maboroshi:clip', clip: selectedClipRef.current }, ORIGIN);
+        return;
+      }
+      if (!isMaboroshiPaymentRequest(event.data) || pending.current) return;
+      const input = event.data;
+      pending.current = input.requestId;
+      void getMaboroshiQuote(input, getAuthToken() || '', activeWallet.current).then(value => {
+        if (activeWallet.current !== value.wallet) throw new Error('The signed-in account changed.');
+        setQuote(value);
+      }).catch(error => { reply(input.requestId, error.message); if (pending.current === input.requestId) pending.current = null; });
+    };
+    window.addEventListener('message', receive);
+    return () => window.removeEventListener('message', receive);
+  }, [session, reply, t]);
+  useEffect(() => { session(); }, [session]);
+  useEffect(() => {
+    const clipId = searchParams.get('clip');
+    if (!clipId || !/^[a-f0-9]{20}$/.test(clipId)) return;
+    let cancelled = false;
+    void findMotionClip(clipId).then(clip => { if (!cancelled && clip) setSelectedClip(clip); }).catch(() => {});
+    return () => { cancelled = true; };
+  }, [searchParams]);
+  useEffect(() => {
+    if (connected && selectedClip) frame.current?.contentWindow?.postMessage({ type: 'maboroshi:clip', clip: selectedClip }, ORIGIN);
+  }, [connected, selectedClip, isAuthenticated, walletAddress]);
+  useEffect(() => { setQuote(null); pending.current = null; }, [walletAddress]);
+  useEffect(() => { setDeliveryStatus(''); setSavedAsset(null); }, [walletAddress]);
+  const confirm = async () => {
+    if (!quote || paymentInFlight.current) return;
+    paymentInFlight.current = true;
+    setPaying(true);
+    try {
+      await completeMaboroshiPayment(quote, getAuthToken() || '', () => activeWallet.current, async amount => {
+        if ((await getWalletAddress()).toLowerCase() !== quote.wallet) throw new Error('Connect the wallet that owns this project.');
+        return payForJob(amount);
+      }, forgetPayment);
+      reply(quote.requestId);
+    } catch (error) { reply(quote.requestId, error instanceof Error ? error.message : 'Payment could not be confirmed.'); }
+    finally { if (pending.current === quote.requestId) pending.current = null; paymentInFlight.current = false; setQuote(null); setPaying(false); }
+  };
+
+  return (
+    <main data-glass-page className="relative z-[1] flex min-h-[100dvh] flex-col bg-[#090a0b] text-white">
+      <SEOHead title={remake ? `${studioName} | Riftn Creator` : _copy("copy.ce42a8ab1ca9", { defaultValue: "Maboroshi | Riftn Creator" })} description={t('creator.toolMaboroshiDesc')} url={`https://riftn.com/creator/${remake ? 'remake' : 'maboroshi'}`} />
+      <header className="flex min-h-16 flex-wrap items-center justify-between gap-3 border-b border-white/10 px-4 py-3">
+        <Link to="/creator" className="inline-flex min-h-11 items-center gap-2 text-sm font-medium"><ArrowLeft className="h-4 w-4" />{t('creator.srHeading')}</Link>
+        <div className="flex items-center gap-3">
+          <button type="button" disabled={!!quote || paying} onClick={() => { setConnected(false); setAttempt(value => value + 1); }} aria-label={t('common.refresh', 'Refresh')} className="flex h-11 w-11 items-center justify-center rounded-lg hover:bg-white/10"><RefreshCw className="h-4 w-4" /></button>
+          {!isAuthenticated && <button type="button" onClick={() => openLoginModal()} className="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-black">{t('creator.login', 'Login')}</button>}
+        </div>
+      </header>
+      <MotionLibraryShowcase onPick={clip => { setSelectedClip(clip); frame.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }} />
+      {deliveryStatus && <p role="status" className="px-4 py-3 text-sm">{deliveryStatus} <Link to="/creator" className="underline">{t('creator.referenceLibrary')}</Link>{savedAsset && <> · <Link to="/editor" state={{ remakeAssetId: savedAsset.id, wallet: savedAsset.wallet }} className="underline">{t('creator.editInTimeline')}</Link></>}</p>}
+      {!connected && <p role="status" className="px-4 py-3 text-sm text-white/60">{t('common.loading', 'Loading…')}{_copy("copy.8f3a26244094", { defaultValue: " Maboroshi" })}</p>}
+      <iframe key={`${walletAddress || 'guest'}:${attempt}:${remake}`} ref={frame} src={studioUrl} title={studioName}
+        className="w-full flex-1 border-0" style={{ minHeight: 'calc(100dvh - 65px)' }}
+        allow="fullscreen" sandbox="allow-scripts allow-same-origin allow-forms allow-downloads" referrerPolicy="no-referrer" />
+      <Dialog open={!!quote} onOpenChange={open => {
+        if (!open && quote && !paying) { reply(quote.requestId, 'Payment cancelled.', true); pending.current = null; setQuote(null); }
+      }}>
+        <DialogContent onInteractOutside={event => { if (paying) event.preventDefault(); }}>
+          <DialogHeader><DialogTitle>{studioName}</DialogTitle>
+            <DialogDescription>{quote && maboroshiStageLabel(quote.stage, quote.renderer)} · {quote && (quote.price_micros / 1000).toLocaleString()} {tokenLabel()} · {quote && new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD' }).format(quote.price_micros / 1e6)}</DialogDescription>
+          </DialogHeader>
+          <Button disabled={paying} onClick={() => void confirm()}>{paying ? t('common.loading', 'Loading…') : t('common.confirm', 'Confirm')}</Button>
+          <Button variant="outline" disabled={paying} onClick={() => { if (quote) reply(quote.requestId, 'Payment cancelled.', true); pending.current = null; setQuote(null); }}>{t('common.cancel')}</Button>
+        </DialogContent>
+      </Dialog>
+    </main>
+  );
+}

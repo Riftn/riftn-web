@@ -1,0 +1,4215 @@
+import { ppvTokenLabel } from '@/lib/token-label';
+import { canShareToMoment, getStreamMomentTokenId } from '@/lib/moment-share';
+import Minimize from "@/components/ui/cut-icons/exit-fullscreen";
+import FastForward from "@/components/ui/cut-icons/fast-forward";
+import Rewind from "@/components/ui/cut-icons/rewind";
+import PictureInPicture2 from "@/components/ui/cut-icons/picture-in-picture";
+import { useTranslation as _useCopy } from 'react-i18next';
+import { useVideoDownload } from "@/hooks/use-video-download";
+import { cdnImageSrcSet } from '@/lib/media-url';
+import { applyVideoVolume } from '@/lib/dub-volume';
+import { VideoVolumeControl } from '@/components/app/video/VideoVolumeControl';
+import { MediaControlIcon } from '@/components/app/video/MediaControlIcon';
+import { useFeedPlaybackAllowed, visualActivity } from '@/lib/visual-activity';
+import { isVideoOutsideFeed } from '@/lib/video-background-playback';
+import { isVideoInPictureInPicture } from '@/lib/picture-in-picture';
+/**
+ * Video Card Component
+ * ====================
+ * Displays video content with thumbnail, duration, and universal styling.
+ * 
+ * @example
+ * ```tsx
+ * <VideoCard video={videoData} />
+ * ```
+ */
+
+import { audioStudioPlaceholderHeight } from '@/components/app/audio/audio-studio-shape';
+import { useState, useRef, useCallback, useMemo, memo, useEffect, useId, lazy, Suspense, useContext, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
+import { CachedPageActiveContext } from '@/contexts/CachedPageActiveContext';
+const BountyClaimActions = lazy(() => import('./BountyClaimActions'));
+import { DhbAmount } from '@/components/app/DhbAmount';
+import { cn } from '@/lib/utils';
+import { useAutoOpenComments } from '@/hooks/use-auto-open-comments';
+import { usePostMenuContext } from '@/lib/post-menu';
+import { useNavigate } from 'react-router-dom';
+import { useHandoffVideo } from '@/hooks/use-handoff-video';
+import { useVideoCardOpen } from '@/hooks/use-video-card-open';
+import { handoffVideoHolder } from '@/lib/video-handoff';
+import { useBootSettled, useFirstInteraction } from '@/hooks/use-boot-settled';
+import { useVideoFullscreen } from '@/hooks/use-video-fullscreen';
+import { isBrainrotSwipe, isTouchPrimary, openBrainrotFeed } from '@/lib/brainrot-feed';
+import { useShortsEnabled } from '@/contexts/ShortsEnabledContext';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { videoItemToShort } from '@/lib/short-video';
+import { useTapGestures } from '@/hooks/use-tap-gestures';
+import { useVideoScrubZone } from '@/hooks/use-video-scrub-zone';
+import { StoryboardPreview } from '@/components/app/video/StoryboardPreview';
+import { TapReactionBurst } from '@/components/app/cards/TapReactionBurst';
+import { useIsWatchedVideo } from '@/hooks/use-watched-videos';
+import { useVideoProcessingStatus } from '@/hooks/use-video-processing-status';
+import { useSkipSegments } from '@/lib/skip-segments';
+import { useVideoSegments, segmentAt } from '@/hooks/use-video-segments';
+import { SEGMENT_LABELS } from '@/lib/api/video-segments';
+// Lazy: a drawer opened from a menu has no business in the bytes parsed
+// before first paint. Prefetched when the options drawer opens, so the chunk
+// is warm by the time it is asked for and the sheet still slides up.
+const SegmentMarkerDrawer = lazy(() =>
+  import('./SegmentMarkerDrawer').then(m => ({ default: m.SegmentMarkerDrawer })),
+);
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { useQueryClient } from '@tanstack/react-query';
+import MoreVertical from '@/components/ui/cut-icons/morevertical';
+import { ListPlus, Clock, Zap, Ticket, Star, Code } from "lucide-react";
+import { copyPostEmbedCode } from '@/lib/post-embed-code';
+import { soundFromPost } from '@/lib/soundtrack';
+import { useOptionalGlobalDropZone } from '@/hooks/use-global-drop-zone';
+import { AltTextBadge } from './AltTextBadge';
+import Eye from "@/components/ui/cut-icons/visibility";
+import Flag from "@/components/ui/cut-icons/report";
+import Ban from "@/components/ui/cut-icons/blocked";
+import Volume2 from "@/components/ui/cut-icons/volume";
+import VolumeX from "@/components/ui/cut-icons/mute";
+import Maximize from "@/components/ui/cut-icons/fullscreen";
+import Lock from "@/components/ui/cut-icons/privacy";
+import Gift from "@/components/ui/cut-icons/gifts";
+import Link2 from "@/components/ui/cut-icons/link";
+import Trash2 from "@/components/ui/cut-icons/delete";
+import Music from "@/components/ui/cut-icons/music";
+import Pencil from "@/components/ui/cut-icons/edit";
+
+import ArrowLeft from "@/components/ui/cut-icons/back";
+import Download from "@/components/ui/cut-icons/download";
+import { CastMenuItem } from './CastMenuItem';
+import Play from "@/components/ui/cut-icons/play";
+import Pause from "@/components/ui/cut-icons/pause";
+import MessageCircle from "@/components/ui/cut-icons/messages";
+import MessageSquare from "@/components/ui/cut-icons/messages";
+import Gem from "@/components/ui/cut-icons/diamond";
+import Repeat from "@/components/ui/cut-icons/repost";
+import X from "@/components/ui/cut-icons/close";
+
+import { ThemedIcon } from '@/components/app/war/WarHudIcon';
+import { useFeedSuperpowers } from '@/contexts/FeedSuperpowersContext';
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
+import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
+import dehubCoin from '@/assets/dehub-coin.png';
+import ppvTicketIcon from '@/assets/ppv-ticket-icon.png';
+
+import { motion, AnimatePresence } from 'framer-motion';
+import { CardHeader } from './CardHeader';
+import { PostHeaderBoostButton, PostHeaderOptionsButton } from './PostHeaderOptionsButton';
+import { useBoostedPost } from './boosted-post';
+import { MatureContentGate, useMatureGate } from './MatureContentGate';
+import { ContentWarningGate, useContentWarning } from './ContentWarningGate';
+import { BadgedName } from '@/components/app/BadgedName';
+import { ActionBar } from './ActionBar';
+import { useLiveReaction } from '@/hooks/use-live-reaction';
+import { ShopBoardLazy } from '../live/ShopBoardLazy';
+import { PollCard } from './PollCard';
+import { LazyQuizCard } from '@/components/app/quiz/LazyQuizCard';
+import { PostMetadata } from './PostMetadata';
+import { PPVDrawerContent } from './LazyPPVDrawerContent';
+import { LiquidGlassBubble } from '@/components/ui/liquid-glass-bubble';
+import { VerifyUnlockButton } from './VerifyUnlockButton';
+import { TranslatableText, SharedTranslationProvider, useTranslation, splitTranslatedTitleAndBody } from '../TranslatableText';
+import { DehubLinkEmbeds, useDehubLinks } from '@/components/app/cards/DehubLinkEmbedsLazy';
+import { FeedCaptionExpander, squeezeBlankLines } from './FeedCaptionExpander';
+import { FeedLinkPreviews } from '@/components/app/cards/FeedLinkPreviews';
+import { AssetRefCards, useAssetRefsInText } from '@/components/app/cards/AssetRefCards';
+import { useTranslation as useI18n } from 'react-i18next';
+const TranscodeRetry = lazy(() => import('./TranscodeRetry').then(m => ({ default: m.TranscodeRetry })));
+// Only a creator's own unfinished upload shows it: kept off the first-paint path.
+const TranscodingBadge = lazy(() => import('@/components/app/video/TranscodingBadge').then(m => ({ default: m.TranscodingBadge })));
+import { PostAIChatLazy } from './PostAIChatLazy';
+import { ReportModal } from '../modals/ReportModal';
+import { DeletePostModal } from '../modals/DeletePostModal';
+// Lazy, mounted on demand: both modals were statically imported by every feed
+// card, which put ~700 KB of source (the edit drawer's shop sheet, the boost
+// flow's payment code) in the entry chunk for every visitor. Same shape as
+// PostCard's BoostModal.
+const EditPostModal = lazy(() =>
+  import('../modals/EditPostModal').then((m) => ({ default: m.EditPostModal }))
+);
+const LivePostChat = lazy(() =>
+  import('./LivePostChat').then((m) => ({ default: m.LivePostChat }))
+);
+const BoostModal = lazy(() =>
+  import('../modals/BoostModal').then((m) => ({ default: m.BoostModal }))
+);
+import { applyOptimisticEdit } from '@/lib/optimistic-edit';
+import { QuotePostModalLazy } from '../modals/QuotePostModalLazy';
+import { TipModalLazy as TipModal } from '../modals/TipModalLazy';
+import { CommentsWrapper } from './CommentsWrapper';
+import { LiveEndedMedia } from './LiveEndedMedia';
+import { LiveAudienceProfileContext, usePreviewAudienceProfile } from '../live/live-audience-profile';
+// Lazy: only a live post ever renders it, and a static import would put the
+// preview (and its HLS glue) in the boot path for every card.
+const LiveFeedPreview = lazy(() => import('./LiveFeedPreview').then(m => ({ default: m.LiveFeedPreview })));
+import { useVideoViewTracking } from '@/hooks/use-view-tracking';
+import { usePostTipCount } from '@/hooks/use-post-tip-count';
+import { videoPlaybackManager } from '@/lib/video-playback-manager';
+import { getVideoPreferences, openedVideoMuted, useMediaVolume, getPlaybackRateFor, setPlaybackRate as vpSetPlaybackRate, setIsLooping as vpSetIsLooping, setVolume as vpSetVolume, PLAYBACK_RATES } from '@/lib/video-preferences';
+import { useAuth } from '@/contexts/AuthContext';
+import { usePostLinkCopyCount, useTrackPostLinkCopy } from '@/hooks/use-link-copy-count';
+import { useAutoplay } from '@/contexts/AutoplayContext';
+import { useAutoplayPausePrompt } from '@/hooks/use-autoplay-pause-prompt';
+import { useConnectionQuality } from '@/hooks/use-connection-quality';
+/** Lazy: nine canvas painters and a decoder, ~50 KB, for a minority post type
+ *  — none of it belongs in the bytes parsed before first paint. */
+const AudioVisualizer = lazy(() =>
+  import('../audio/ProtectedAudioVisualizer').then((m) => ({ default: m.ProtectedAudioVisualizer }))
+);
+import { cacheVideoForNavigation } from '@/lib/post-cache';
+import { warmPostPage } from '@/lib/preload-post-page';
+import { repostPost } from '@/lib/api/dehub';
+import { useSyncedAudio } from '@/hooks/use-synced-audio';
+import { handoffAudioFor } from '@/lib/audio-handoff';
+import { isHoldGated, isSubscriberGated, cheapestSubscriberQuote } from '@/lib/content-gate';
+import { SubscribeFromPrice } from './SubscribeFromPrice';
+import { isVideoAccessExpiring, useResumeAcrossRefresh, useVideoAccess, videoNeedsAccess } from '@/lib/api/dehub/video-access';
+
+/** Lazy: PlanCard reaches the subscription contracts, and this card boots. */
+const SubscriberGateDrawer = lazy(() =>
+  import('./SubscriberGateDrawer').then((m) => ({ default: m.SubscriberGateDrawer }))
+);
+import { isTokenUnlocked, markTokenUnlocked } from '@/lib/unlocked-tokens-store';
+import { PostUtilityMenuItems } from './PostUtilityMenuItems';
+import { RemixMenuItems } from './LazyRemixMenuItems';
+import { DuetCredit } from './DuetCredit';
+import { ReactionOfChip, ReactionsLink } from '../remix/LazyReactionChips';
+import { StitchAttribution } from './StitchAttribution';
+import { useBlockAuthor } from '@/hooks/use-block-author';
+import { useMuteAuthor } from '@/hooks/use-mute-author';
+import { useBlankPoster, BLANK_PROBE_WIDTH } from '@/hooks/use-blank-poster';
+import { useMediaAspect, getMeasuredMediaAspect, rememberVideoAspect, DEFAULT_ASPECT, THIN_MIN_RATIO } from '@/hooks/use-media-aspect';
+import { useFeedFrameAspect } from '@/hooks/use-feed-frame-aspect';
+import { FEED_VIDEO_MIN_ASPECT, useFeedVideoShape } from '@/lib/feed-video-shape';
+import { useWideVideoMode, WIDE_RAILS_MAX_ASPECT } from '@/lib/wide-video-mode';
+import { useIsDesktopViewport } from '@/hooks/use-is-desktop';
+import { WideAmbientFill } from '@/components/app/video/WideAmbientFill';
+import { WideVideoPanel } from '@/components/app/video/WideVideoRails';
+import { useResolvedThumbnail } from '@/lib/thumbnail-fallback';
+import { GatePreview } from './GatePreview';
+import { PpvFreePreview } from './PpvFreePreview';
+import { deviceWidth, isMdUp } from '@/lib/media-url';
+import {
+  claimMediaSession,
+  releaseMediaSession,
+  setMediaSessionPlaying,
+  setMediaSessionPosition,
+} from '@/lib/media-session';
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  wasDrawerJustDismissed,
+} from '@/components/ui/drawer';
+import type { VideoItem } from '@/types/feed.types';
+// The CC button and caption renderer, with the transcript, translation and
+// dubbing code behind it. Nothing in it is needed to paint the card, so it
+// arrives just after rather than riding the entry chunk.
+const VideoSubtitleOverlay = lazy(() =>
+  import('@/components/app/video/VideoSubtitleOverlay').then((m) => ({ default: m.VideoSubtitleOverlay })),
+);
+const DubVolumeControl = lazy(() =>
+  import('@/components/app/video/DubVolumeControl').then((m) => ({ default: m.DubVolumeControl })),
+);
+// Only shown inside the options sheet; not worth a place on the boot path.
+const DubMenuItem = lazy(() =>
+  import('@/components/app/video/DubMenuItem').then((m) => ({ default: m.DubMenuItem })),
+);
+import { VideoGlitchLoader } from '@/components/app/video/VideoGlitchLoaderLazy';
+import { cancelVideoPlayback, requestVideoPlayback } from '@/lib/video-start';
+import { isLadderPlayback, setVideoSource, syncVideoLoad, videoSourceOf } from '@/lib/hls-vod';
+import { usePlaybackRecovery } from '@/hooks/use-playback-recovery';
+import { usePostStage } from '@/components/app/post-stage/post-stage-context';
+import { StageCreatorRow } from '@/components/app/post-stage/StageCreatorRow';
+import { viewerLiveShareUrl, viewerShareUrl } from '@/lib/share-url';
+import { KeywordFilterGate } from './KeywordFilterGate';
+import { useTabletPortraitFeed } from '@/hooks/use-tablet-portrait-feed';
+import { tabletPortraitTitleSize } from '@/lib/tablet-portrait-feed';
+import { noteProfileFeedOpen, useProfileFeedContext } from '@/lib/profile-feed-origin';
+import { useInMasonryColumn } from '@/components/app/feeds/masonry-context';
+import { profilePath } from '@/lib/profile-path';
+
+/**
+ * How far a touch may travel and still count as a tap on the player. Matches the
+ * threshold the card's gating overlays already use.
+ */
+const TAP_SLOP_PX = 10;
+
+/**
+ * Tallest the media may get in the feed, in px. A portrait clip stops growing
+ * here and narrows its own width instead — the same 600px cap and left-hugging
+ * behaviour ImageCard gives a portrait photo, so a vertical video takes one
+ * screen rather than three.
+ */
+const MAX_MEDIA_HEIGHT = 600;
+
+/**
+ * Tallest the media may get on the post page. The clip is the page there, so
+ * it grows to most of the screen instead of stopping at the feed's 600px. On
+ * phones it may also grow as tall as a full-width 9:16 clip, so a vertical
+ * video spans the screen edge to edge (index.css, --post-media-max-h).
+ */
+const IMMERSIVE_MAX_MEDIA_HEIGHT = 'var(--post-media-max-h, 80dvh)';
+/** Phone feed preview cap: a bit taller than X's long-form videos (~46%). */
+const FEED_PREVIEW_MAX_HEIGHT = '55svh';
+/** Desktop/tablet feed frame cap: the clip hugs its shape up to 75% of the screen. */
+const DESKTOP_FEED_MAX_HEIGHT = '75svh';
+
+/**
+ * How long the player's controls stay up after the interaction that revealed
+ * them — a hover, a pointer move, or (in the feed) a click or tap on the media.
+ * Any further interaction re-arms the window rather than shortening it.
+ */
+const CONTROLS_HIDE_MS = 2000;
+
+/** A tap that landed on a real control, which owns it rather than the player. */
+/**
+ * Whether the viewer can actually see `el`: not hidden by CSS or a skipped
+ * content-visibility subtree. IntersectionObserver ignores all of that, so a
+ * clip on a hidden page or panel counted as "on screen" and could autoplay.
+ */
+function isRendered(el: HTMLElement | null): boolean {
+  if (!el || !el.isConnected) return false;
+  const check = (el as HTMLElement & { checkVisibility?: (o?: object) => boolean }).checkVisibility;
+  return check ? check.call(el, { visibilityProperty: true, opacityProperty: true, contentVisibilityAuto: true }) : true;
+}
+
+/**
+ * Whether a clip is the thing on screen rather than one peeking in at an edge:
+ * nearly all of it in view, or (for one taller than the window) filling most
+ * of the window. Only such a clip may make sound by itself — a video sitting
+ * half below the fold under the first post must not be what you hear on load.
+ */
+function isProminent(el: HTMLElement | null): boolean {
+  if (!el || !isRendered(el)) return false;
+  const r = el.getBoundingClientRect();
+  if (r.height <= 0) return false;
+  const shown = Math.max(0, Math.min(r.bottom, window.innerHeight) - Math.max(r.top, 0));
+  return shown / r.height >= 0.9 || shown >= window.innerHeight * 0.6;
+}
+
+/** Whether any of `slot` is inside the viewport. */
+function slotOnScreen(slot: HTMLElement | null): boolean {
+  if (!slot || !slot.isConnected) return false;
+  const r = slot.getBoundingClientRect();
+  return r.width > 0 && r.height > 0 && r.bottom > 0 && r.right > 0 && r.top < window.innerHeight && r.left < window.innerWidth;
+}
+
+function isControlTarget(target: EventTarget | null) {
+  return !!(target as HTMLElement | null)?.closest?.(
+    'button, a, input, textarea, [role="button"], [data-video-controls]',
+  );
+}
+
+// Use lg breakpoint (1024px) to determine if we show drawer vs inline
+function useIsTabletOrMobile() {
+  const [isTabletOrMobile, setIsTabletOrMobile] = useState(false);
+  
+  useEffect(() => {
+    const mql = window.matchMedia('(max-width: 1023px)');
+    const onChange = () => setIsTabletOrMobile(mql.matches);
+    mql.addEventListener('change', onChange);
+    setIsTabletOrMobile(mql.matches);
+    return () => mql.removeEventListener('change', onChange);
+  }, []);
+  
+  return isTabletOrMobile;
+}
+
+/**
+ * Mobile creator info component - shows avatar, display name, handle, and action buttons
+ * Includes drawers for PPV, Bounty, and Locked badges
+ */
+interface MobileCreatorInfoProps {
+  channel?: string;
+  channelAvatar?: string;
+  creatorUsername?: string;
+  creatorId?: string;
+  badgeBalance?: number;
+  tokenId?: string;
+  verified?: boolean;
+  onBoostClick?: () => void;
+  onMenuClick?: () => void;
+  isPPV?: boolean;
+  ppvPrice?: number | string;
+  ppvCurrency?: string;
+  isW2E?: boolean;
+  bountyAmount?: number;
+  bountyCurrency?: string;
+  bountyViews?: number;
+  bountyComments?: number;
+  isLocked?: boolean;
+  lockedPrice?: number;
+  lockedCurrency?: string;
+  lockedTokenAddress?: string;
+  lockedChainId?: number;
+  chainId?: number;
+  onUnlocked?: () => void;
+  /**
+   * Phone post page: the Stage creator row (followers + Follow). The menu is
+   * in the post panel, so it is not drawn here.
+   */
+  stage?: boolean;
+}
+
+function MobileCreatorInfo({
+  channel,
+  channelAvatar,
+  creatorUsername,
+  creatorId,
+  badgeBalance,
+  tokenId,
+  verified = false,
+  onBoostClick,
+  onMenuClick,
+  isPPV,
+  ppvPrice,
+  ppvCurrency,
+  isW2E,
+  bountyAmount,
+  bountyCurrency,
+  bountyViews,
+  bountyComments,
+  isLocked,
+  lockedPrice,
+  lockedCurrency,
+  lockedTokenAddress,
+  lockedChainId,
+  chainId,
+  onUnlocked,
+  stage = false,
+}: MobileCreatorInfoProps) {
+  const { t: _copy } = _useCopy();
+  const navigate = useNavigate();
+  const { t } = useI18n();
+  const [showBountyDrawer, setShowBountyDrawer] = useState(false);
+  const [showPPVDrawer, setShowPPVDrawer] = useState(false);
+  const [showLockedDrawer, setShowLockedDrawer] = useState(false);
+  const [avatarError, setAvatarError] = useState(false);
+
+  // Format numbers with abbreviations (1K, 1M, etc.) - matches thumbnail format
+  const formatCompact = (num: number | null | undefined): string => {
+    const n = Number(num);
+    if (!Number.isFinite(n) || n <= 0) return '0';
+    if (n >= 1000000) return `${Math.floor(n / 1000000)}M`;
+    if (n >= 1000) return `${Math.floor(n / 1000)}K`;
+    return String(Math.floor(n));
+  };
+
+  // Calculate total bounty pool
+  const totalBountyPool = bountyAmount && (bountyViews || bountyComments)
+    ? bountyAmount * ((bountyViews || 0) + (bountyComments || 0))
+    : 0;
+
+  const handleProfileClick = () => {
+    if (creatorUsername) {
+      const cleanUsername = creatorUsername.replace('@', '');
+      navigate(profilePath(cleanUsername));
+    } else if (creatorId) {
+      navigate(`/app/profile?id=${creatorId}`);
+    }
+  };
+
+  const isClickable = !!(creatorId || creatorUsername);
+  const hasBadges = isPPV || isW2E || isLocked;
+
+  if (!channel) return null;
+
+  const stageBadge = 'flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-[10px]';
+
+  return (
+    <>
+      {stage ? (
+        <div className="mb-3">
+          <StageCreatorRow
+            tokenId={tokenId}
+            name={channel}
+            avatar={channelAvatar}
+            handle={creatorUsername}
+            creatorId={creatorId}
+            badgeBalance={badgeBalance}
+            verified={verified}
+            trailing={hasBadges ? (
+              <>
+                {isPPV && ppvPrice && (
+                  <button type="button" data-stage-chip className={stageBadge} aria-label={t('drawers.ppvTitle', 'Pay per view')} onClick={(e) => { e.stopPropagation(); setShowPPVDrawer(true); }}>
+                    <Ticket className="h-4 w-4" />
+                  </button>
+                )}
+                {isW2E && (
+                  <button type="button" data-stage-chip className={stageBadge} aria-label={t('drawers.bountyTitle')} onClick={(e) => { e.stopPropagation(); setShowBountyDrawer(true); }}>
+                    <Gift className="h-4 w-4" />
+                  </button>
+                )}
+                {isLocked && (
+                  <button type="button" data-stage-chip className={stageBadge} aria-label={t('drawers.gatedTitle')} onClick={(e) => { e.stopPropagation(); setShowLockedDrawer(true); }}>
+                    <Lock className="h-4 w-4" />
+                  </button>
+                )}
+              </>
+            ) : null}
+          />
+        </div>
+      ) : (
+      <div className="flex items-center justify-between mb-3">
+        <button
+          onClick={handleProfileClick}
+          disabled={!isClickable}
+          className={`flex items-center gap-2 ${isClickable ? 'cursor-pointer hover:opacity-80 transition-opacity' : 'cursor-default'}`}
+        >
+          {channelAvatar && channelAvatar.startsWith('http') && !avatarError ? (
+            <img 
+              src={channelAvatar} 
+              alt={channel}
+              className="w-9 h-9 rounded-md object-cover shrink-0"
+              onError={() => setAvatarError(true)}
+            />
+          ) : (
+            <div className="w-9 h-9 rounded-md bg-zinc-700 flex items-center justify-center shrink-0 text-white text-sm font-semibold">
+              {(channel || '?').charAt(0).toUpperCase()}
+            </div>
+          )}
+          <div className="flex flex-col items-start min-w-0">
+            <div className="flex items-center gap-1.5">
+              <BadgedName
+                badgeBalance={badgeBalance}
+                username={creatorUsername || channel}
+                className="font-semibold text-white text-sm leading-tight"
+              >
+                {channel}
+              </BadgedName>
+              {verified && (
+                <svg className="w-3.5 h-3.5 text-white shrink-0 self-end" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                </svg>
+              )}
+            </div>
+            {creatorUsername && (
+              <span className="text-zinc-400 text-xs truncate">@{creatorUsername.replace('@', '')}</span>
+            )}
+          </div>
+        </button>
+        
+        {/* Action buttons and badges */}
+        <div className="flex items-center gap-0.5">
+          {/* Content Type Badges - PPV/Bounty/Locked */}
+          {hasBadges && (
+            <div className="flex items-center gap-1">
+              {/* PPV Badge - icon only on mobile */}
+              {isPPV && ppvPrice && (
+                <button 
+                  className="flex items-center justify-center bg-black/40 backdrop-blur-[24px] backdrop-saturate-[180%] w-7 h-7 rounded-lg border border-white/10 hover:bg-black/60 transition-colors"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowPPVDrawer(true);
+                  }}
+                >
+                  <Ticket className="w-4 h-4 text-white" />
+                </button>
+              )}
+              
+              {/* Bounty Badge - keep text for bounty */}
+              {isW2E && (
+                <button 
+                  className="flex items-center gap-1 bg-black/40 backdrop-blur-[24px] backdrop-saturate-[180%] px-2 py-1 rounded-lg border border-white/10 hover:bg-black/60 transition-colors"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowBountyDrawer(true);
+                  }}
+                >
+                  <Gift className="w-3 h-3 text-white" />
+                  <span className="text-white text-xs font-medium">
+                    {bountyAmount && bountyAmount > 0 
+                      ? <DhbAmount amount={formatCompact(bountyAmount)} currency={bountyCurrency} />
+                      : _copy("copy.0abbc4ecb2b0", { defaultValue: "Bounty" })}
+                  </span>
+                </button>
+              )}
+              
+              {/* Locked Badge - icon only on mobile */}
+              {isLocked && (
+                <button 
+                  className="flex items-center justify-center bg-black/40 backdrop-blur-[24px] backdrop-saturate-[180%] w-7 h-7 rounded-lg border border-white/10 hover:bg-black/60 transition-colors"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowLockedDrawer(true);
+                  }}
+                >
+                  <Lock className="w-4 h-4 text-white" />
+                </button>
+              )}
+            </div>
+          )}
+          
+          <div className="flex items-start gap-0.5">
+            {onBoostClick && (
+              <button
+                onClick={onBoostClick}
+                className="mr-[0.8px] w-8 h-[37.5px] flex items-start justify-center pt-[6.25px] text-zinc-400 hover:text-white transition-colors"
+                aria-label={t('postOptions.boostPost')}
+              >
+                <Zap className="w-[23.5px] h-[23.5px]" />
+              </button>
+            )}
+            {onMenuClick && <PostHeaderOptionsButton
+              iconSize={23.5}
+              corner={false}
+              onClick={onMenuClick}
+              style={{ marginTop: -4 }}
+            />}
+          </div>
+        </div>
+      </div>
+      )}
+
+      {/* Bounty Drawer */}
+      <Drawer open={showBountyDrawer} onOpenChange={setShowBountyDrawer}>
+        <DrawerContent scrollable glass className="px-4 pb-6">
+          <DrawerHeader className="pb-3 relative">
+              <DrawerTitle className="text-white text-lg flex items-center gap-2">
+                <Gift className="w-5 h-5 text-white" />
+                {t('drawers.bountyTitle')}
+              </DrawerTitle>
+              <button onClick={() => setShowBountyDrawer(false)} className="absolute top-3 right-0 p-1.5 rounded-lg bg-white/[0.06] hover:bg-white/[0.12] transition-colors">
+                <X className="w-4 h-4 text-zinc-400" />
+              </button>
+            </DrawerHeader>
+            <div className="flex flex-col gap-4">
+              <div className="space-y-3">
+              {bountyViews && bountyViews > 0 && (
+                  <div className="flex items-center gap-3 px-4 py-3 bg-white/5 rounded-xl border border-white/10">
+                    <div className="w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center">
+                      <Eye className="w-4 h-4 text-white" />
+                    </div>
+                    <div>
+                      <p className="text-white text-sm font-medium">{t('drawers.firstViews', { count: bountyViews })}</p>
+                      <p className="text-zinc-400 text-xs">{t('drawers.rewardedWatching')}</p>
+                    </div>
+                  </div>
+                )}
+                {bountyComments && bountyComments > 0 && (
+                  <div className="flex items-center gap-3 px-4 py-3 bg-white/5 rounded-xl border border-white/10">
+                    <div className="w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center">
+                      <MessageCircle className="w-4 h-4 text-white" />
+                    </div>
+                    <div>
+                      <p className="text-white text-sm font-medium">{t('drawers.firstComments', { count: bountyComments })}</p>
+                      <p className="text-zinc-400 text-xs">{t('drawers.rewardedEngaging')}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+              
+              {bountyAmount && bountyAmount > 0 && (
+                <div className="flex items-center justify-between px-4 py-4 bg-white/5 rounded-xl border border-white/10">
+                  <span className="text-white text-sm">{t('drawers.rewardPerUser')}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-white text-lg font-bold"><DhbAmount amount={formatCompact(bountyAmount)} currency={bountyCurrency} /></span>
+                  </div>
+                </div>
+              )}
+              
+              {totalBountyPool > 0 && (
+                <div className="flex items-center justify-between px-4 py-3 bg-white/5 rounded-xl border border-white/10">
+                  <span className="text-white text-sm">{t('drawers.totalBountyPool')}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-white text-sm font-medium"><DhbAmount amount={formatCompact(totalBountyPool)} currency={bountyCurrency} /></span>
+                  </div>
+                </div>
+              )}
+              
+              <Suspense fallback={null}>
+                <BountyClaimActions tokenId={tokenId || ''} open={showBountyDrawer} />
+              </Suspense>
+              <p className="text-center text-white/60 text-sm">
+                {t('drawers.bountyDescription')}
+              </p>
+            </div>
+          </DrawerContent>
+        </Drawer>
+
+      {/* PPV Drawer */}
+      <Drawer open={showPPVDrawer} onOpenChange={setShowPPVDrawer}>
+        <PPVDrawerContent open={showPPVDrawer}
+          tokenId={tokenId || ''}
+          price={Number(ppvPrice)}
+          currency={ppvCurrency || 'DHB'}
+          creatorAddress={creatorId}
+          chainId={chainId}
+          onClose={() => setShowPPVDrawer(false)}
+          onUnlocked={onUnlocked}
+          formatCompact={formatCompact}
+        />
+      </Drawer>
+
+      {/* Gated Content Drawer */}
+      <Drawer open={showLockedDrawer} onOpenChange={setShowLockedDrawer}>
+        <DrawerContent scrollable glass className="px-4 pb-6">
+          <DrawerHeader className="pb-3 relative">
+              <DrawerTitle className="text-white text-lg flex items-center gap-2">
+                <Lock className="w-5 h-5 text-white" />
+                {t('drawers.gatedTitle')}
+              </DrawerTitle>
+              <button onClick={() => setShowLockedDrawer(false)} className="absolute top-3 right-0 p-1.5 rounded-lg bg-white/[0.06] hover:bg-white/[0.12] transition-colors">
+                <X className="w-4 h-4 text-zinc-400" />
+              </button>
+            </DrawerHeader>
+            <div className="flex flex-col gap-4">
+              {lockedPrice && lockedPrice > 0 && (
+                <div className="flex items-center justify-between px-4 py-4 bg-white/5 rounded-xl border border-white/10">
+                  <span className="text-white text-sm">{t('drawers.mustHoldToView')}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-white text-lg font-bold"><DhbAmount amount={formatCompact(lockedPrice)} currency={lockedCurrency} /></span>
+                  </div>
+                </div>
+              )}
+              <p className="text-center text-white/60 text-sm">
+                {t('drawers.gatedDescription')}
+              </p>
+              {lockedPrice && lockedPrice > 0 && (
+                <VerifyUnlockButton
+                  requiredAmount={lockedPrice}
+                  currency={lockedCurrency || 'DHB'}
+                  tokenAddress={lockedTokenAddress}
+                  chainId={lockedChainId}
+                  onUnlocked={() => { setShowLockedDrawer(false); onUnlocked?.(); }}
+                />
+              )}
+            </div>
+          </DrawerContent>
+        </Drawer>
+    </>
+  );
+}
+
+/**
+ * Expandable description component for immersive video view
+ * Shows 4 lines with "see more" button, expands to full text on click
+ */
+interface ExpandableDescriptionProps {
+  description: string;
+  isImmersive: boolean;
+  /** Lines shown before "more" (immersive only). The phone post page uses fewer. */
+  clampLines?: 2 | 3 | 4;
+  /** The poster closed the market card for this post. */
+  hideAssetCards?: boolean;
+  /** Links whose preview card the poster closed. */
+  hiddenLinkPreviews?: string[];
+}
+
+const CLAMP_CLASS = { 2: 'line-clamp-2', 3: 'line-clamp-3', 4: 'line-clamp-4' } as const;
+
+function ExpandableDescription({ description: rawDescription, isImmersive, clampLines = 4, hideAssetCards, hiddenLinkPreviews }: ExpandableDescriptionProps) {
+  const { t: _copy } = _useCopy();
+  // Unify \r\n → \n only. Blank lines and spacing stay exactly as typed.
+  const normalized = rawDescription.replace(/\r\n/g, '\n').trim();
+  // Riftn links render as cards below, so the URLs come out of the copy
+  // (display-only — never sent back to the API).
+  const { links: dehubLinks, displayText: linkFreeDescription } = useDehubLinks(normalized);
+  const { refs: assetRefs, displayText: description } = useAssetRefsInText(linkFreeDescription, undefined, hideAssetCards);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [needsExpansion, setNeedsExpansion] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Check overflow via ResizeObserver to avoid forced reflow from direct scrollHeight reads
+  useEffect(() => {
+    if (!isImmersive || !containerRef.current) return;
+    const el = containerRef.current;
+    const ro = new ResizeObserver(() => {
+      setNeedsExpansion(el.scrollHeight > el.clientHeight);
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [isImmersive, description]);
+
+  // auto={false} throughout: VideoCard translates title+description itself and
+  // passes the result in. Left on, each of these re-translated text that had
+  // already been translated — three requests per video instead of one.
+  // Feed: three lines, then "Show more" opens a capped scroll box. Post pages
+  // (clampLines < 4) keep their short inline "more".
+  if (clampLines === 4) {
+    return (
+      <div className="mb-2">
+        {description ? (
+          <FeedCaptionExpander
+            textKey={description}
+            preview={<TranslatableText publicContent text={squeezeBlankLines(description)} className="text-zinc-400 text-[14px]" as="p" auto={false} />}
+          >
+            <TranslatableText publicContent text={description} className="text-zinc-400 text-[14px]" as="p" auto={false} />
+          </FeedCaptionExpander>
+        ) : null}
+        <DehubLinkEmbeds links={dehubLinks} />
+        <FeedLinkPreviews text={normalized} hidden={hiddenLinkPreviews} />
+        <AssetRefCards refs={assetRefs} />
+      </div>
+    );
+  }
+  if (!isImmersive) {
+    // Non-immersive: simple 1-line truncation
+    return (
+      <>
+        {description ? (
+          <TranslatableText publicContent
+            text={description}
+            className="text-zinc-400 text-[14px] mb-2 line-clamp-1"
+            as="p"
+            auto={false}
+          />
+        ) : null}
+        <DehubLinkEmbeds links={dehubLinks} />
+        <FeedLinkPreviews text={normalized} hidden={hiddenLinkPreviews} />
+        <AssetRefCards refs={assetRefs} />
+      </>
+    );
+  }
+
+  return (
+    <div className="mb-2">
+      <div
+        ref={containerRef}
+        className={isExpanded ? '' : CLAMP_CLASS[clampLines]}
+      >
+        {description ? (
+          <TranslatableText publicContent
+            text={description}
+            className="text-zinc-400 text-[14px]"
+            as="p"
+            auto={false}
+          />
+        ) : null}
+      </div>
+      <DehubLinkEmbeds links={dehubLinks} />
+      <FeedLinkPreviews text={normalized} hidden={hiddenLinkPreviews} />
+      <AssetRefCards refs={assetRefs} />
+      {needsExpansion && !isExpanded && (
+        <button
+          onClick={() => setIsExpanded(true)}
+          data-stage-more={clampLines < 4 || undefined}
+          className={clampLines < 4 ? 'mt-0.5 text-sm font-bold' : 'text-zinc-300 text-sm font-medium mt-1 hover:text-white transition-colors'}
+        >
+          {clampLines < 4 ? _copy("copy.187897ce0afc", { defaultValue: "more" }) : _copy("copy.bab37d624729", { defaultValue: "See more" })}
+        </button>
+      )}
+      {isExpanded && (
+        <button
+          onClick={() => setIsExpanded(false)}
+          className="text-zinc-300 text-sm font-medium mt-1 hover:text-white transition-colors"
+        >{_copy("copy.94ea9b1d33a0", { defaultValue: "Show less" })}</button>
+      )}
+    </div>
+  );
+}
+
+interface VideoCardProps {
+  video: VideoItem;
+  /** Dedicated post: navigation stays on the player and utilities below it. */
+  postPage?: boolean;
+  onBack?: () => void;
+  /** Dedicated pages own one shared comments window below the post card. */
+  onOpenComments?: (tab?: 'replies' | 'quotes' | 'reposts' | 'search') => void;
+  /** When true, renders full-width without rounded corners or header for immersive view */
+  isImmersive?: boolean;
+  /** When true, disables intersection-based autoplay (video only plays on explicit click) */
+  disableAutoplay?: boolean;
+  /** When true, hides the action bar (votes, comments, tips etc.) — useful for carousel thumbnails */
+  hideActions?: boolean;
+  /** First few feed items — skip lazy loading so LCP thumbnail loads immediately */
+  aboveFold?: boolean;
+  /** On Home, keep nearby cards on posters until the visitor uses the feed. */
+  deferMediaOnBoot?: boolean;
+  /** Square and wide landing videos keep their identity above the player. */
+  firstFeedPost?: boolean;
+}
+
+/** Seconds from a `?t=` link, or null when there is none worth seeking to. */
+function readStartAt(): number | null {
+  if (typeof window === 'undefined') return null;
+  const at = Number(new URLSearchParams(window.location.search).get('t'));
+  return Number.isFinite(at) && at > 0 ? at : null;
+}
+
+/**
+ * Desktop only: the row the player sits in, holding the wide-screen panel when
+ * they are on and `display: contents` otherwise. Phones get no wrapper at all,
+ * since their theme rules select the frame as a direct child of the card.
+ */
+function WideRailsRow({ enabled, rails, panel, children }: { enabled: boolean; rails: boolean; panel: ReactNode; children: ReactNode }) {
+  if (!enabled) return <>{children}</>;
+  return (
+    <div data-wide-rails-row={rails || undefined} className={rails ? 'flex items-stretch gap-3' : 'contents'}>
+      {/* The caption panel reads first on the left; the picture sits on the right. */}
+      {rails && panel}
+      {children}
+    </div>
+  );
+}
+
+const VideoCardBody = memo(function VideoCard({ video, postPage = false, onBack, isImmersive = false, disableAutoplay = false, hideActions = false, aboveFold = false, deferMediaOnBoot = false, firstFeedPost = false, onOpenComments }: VideoCardProps) {
+  const { previewHandoff, openAudienceProfile } = usePreviewAudienceProfile(
+    video.id, video.title, video.creatorUsername ? `@${video.creatorUsername}` : video.channel, video.channelAvatar,
+  );
+  const { t: _copy } = _useCopy();
+  const playbackAllowed = useFeedPlaybackAllowed();
+  const playbackAllowedRef = useRef(playbackAllowed);
+  playbackAllowedRef.current = playbackAllowed;
+  const instanceId = useId();
+  const { t } = useI18n();
+  const [showAIChat, setShowAIChat] = useState(false);
+  const [showComments, setShowComments] = useState(false);
+  const [commentsInitialTab, setCommentsInitialTab] = useState<'replies' | 'quotes' | 'reposts' | 'search' | undefined>(undefined);
+  useAutoOpenComments(setShowComments, video.id);
+  const [showBountyDrawer, setShowBountyDrawer] = useState(false);
+  const [showPPVDrawer, setShowPPVDrawer] = useState(false);
+  const [showLockedDrawer, setShowLockedDrawer] = useState(false);
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editModalMounted, setEditModalMounted] = useState(false);
+  useEffect(() => {
+    if (showEditModal) setEditModalMounted(true);
+  }, [showEditModal]);
+  const [showBoostModal, setShowBoostModal] = useState(false);
+
+  const [showOptionsDrawer, setShowOptionsDrawer] = useState(false);
+  // Two flags, not one: mounting a vaul Root that is already open renders it
+  // at its final position with no transition, so the drawer mounts closed and
+  // opens on the next frame.
+  const [segmentDrawerMounted, setSegmentDrawerMounted] = useState(false);
+  const [showSegmentDrawer, setShowSegmentDrawer] = useState(false);
+  const [showTipModal, setShowTipModal] = useState(false);
+  const [showQuoteModal, setShowQuoteModal] = useState(false);
+  const { data: tipCount = 0 } = usePostTipCount(video.id, video.totalTips);
+  // In this account's watch history — one shared query behind every card.
+  const isWatchedVideo = useIsWatchedVideo(video.id);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const isPlayingRef = useRef(false);
+  // Tracks the latest IntersectionObserver visibility so an async play() that
+  // resolves after the card has scrolled away can bail instead of playing off-screen.
+  const isIntersectingRef = useRef(false);
+  // Takes the shared <video> back from another card showing this same post.
+  // Filled in once useHandoffVideo has run, further down.
+  const takeVideoRef = useRef<() => HTMLVideoElement | null>(() => null);
+  // A card on a cached page that is not the one showing never autoplays.
+  const surfaceActive = useContext(CachedPageActiveContext);
+  const surfaceActiveRef = useRef(surfaceActive);
+  surfaceActiveRef.current = surfaceActive;
+  // Playing without sound only because it was not the clip on screen when it
+  // autoplayed — it gets the sound once it is, unless the viewer muted it.
+  const autoMutedRef = useRef(false);
+  const isTabletOrMobile = useIsTabletOrMobile();
+  const navigate = useNavigate();
+  const boosted = useBoostedPost();
+  const queryClient = useQueryClient();
+  const profileFeed = useProfileFeedContext();
+  const { walletAddress, openLoginModal } = useAuth();
+  const dropZone = useOptionalGlobalDropZone();
+  const { selfReaction, sendLiveReaction } = useLiveReaction(video.liveStreamId, !!video.isLivePost && !!video.isLiveNow);
+  // Deep Current is the one power spent on somebody ELSE's post, so it is
+  // the one row that belongs in this half of the menu. `status.powers` is
+  // the authority for whether this account has it — the badge the client
+  // draws from a live wallet read deliberately over-reports.
+  const superpowerStatus = useFeedSuperpowers();
+  const canGiftBoost = !!superpowerStatus?.powers.some(
+    p => p.key === 'deep_current' && p.unlocked && p.available,
+  );
+  // The options menu offers the same copy as the share sheet, so it counts the
+  // same. Shares one react-query key with the ActionBar below, so no extra
+  // request — and the bump lands on the card's own share counter.
+  const { data: linkCopyCount = 0 } = usePostLinkCopyCount(video.id);
+  const trackLinkCopy = useTrackPostLinkCopy();
+  const { autoplayEnabled, autoplayMuted } = useAutoplay();
+  const { recordPause, cancelPause } = useAutoplayPausePrompt(video.id);
+  const autoStartedRef = useRef(false);
+  // Slow-network / Data-Saver mode: suppress autoplay and video preloading so a
+  // metered connection isn't spent fetching 50MB clips the user hasn't asked for.
+  const { liteMode } = useConnectionQuality();
+  const isOwnPost = !!video.isOwner || !!(
+    walletAddress && video.creatorId?.toLowerCase() === walletAddress.toLowerCase()
+  );
+  const { blockAuthor } = useBlockAuthor();
+  const { muteAuthor } = useMuteAuthor();
+  const handleBlockCreator = useCallback(() => {
+    if (!walletAddress) { openLoginModal(); return; }
+    if (!video.creatorId) return;
+    setShowOptionsDrawer(false);
+    blockAuthor(video.creatorId, video.channel || undefined);
+  }, [walletAddress, openLoginModal, video.creatorId, video.channel, blockAuthor]);
+  const handleMuteCreator = useCallback(() => {
+    if (!walletAddress) { openLoginModal(); return; }
+    if (!video.creatorId) return;
+    setShowOptionsDrawer(false);
+    muteAuthor(video.creatorId, video.channel || undefined);
+  }, [walletAddress, openLoginModal, video.creatorId, video.channel, muteAuthor]);
+  const videoTokenId = parseInt(video.id, 10) || undefined;
+  const [isMuted, setIsMuted] = useState(() => video.isAudio ? false : videoPlaybackManager.globalMuted);
+  const [showControls, setShowControls] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [hasError, setHasError] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [videoShape, setVideoShape] = useState<{ id: string; ratio: number } | null>(null);
+  const intrinsicAspect = videoShape?.id === video.id ? videoShape.ratio : null;
+  const setIntrinsicAspect = useCallback((ratio: number) => {
+    rememberVideoAspect(video.id, ratio);
+    setVideoShape({ id: video.id, ratio });
+  }, [video.id]);
+  const volume = useMediaVolume();
+  /**
+   * The control row mounts the subtitle button through this node, so it shares
+   * the row's mount instead of fading in on a timer of its own.
+   */
+  const [ccSlot, setCcSlot] = useState<HTMLDivElement | null>(null);
+  /** The subtitle language menu holds the controls up while it is open. */
+  const [subsMenuOpen, setSubsMenuOpen] = useState(false);
+  // The phone post page ("Stage"). Null in every feed.
+  const stage = usePostStage();
+  const registerOptions = stage?.registerOptions;
+  const openPostOptions = useCallback(() => {
+    if (!walletAddress) { openLoginModal(); return; }
+    setShowOptionsDrawer(true);
+  }, [walletAddress, openLoginModal]);
+  useEffect(() => {
+    if (!registerOptions) return;
+    registerOptions(openPostOptions);
+    return () => registerOptions(null);
+  }, [registerOptions, openPostOptions]);
+  // Video posts use the same bare glyph controls at every viewport size,
+  // mute in the top corner, and playback actions beside fullscreen on the
+  // bottom row with play and remaining time.
+  const bareControls = !video.isAudio && !(video.isLivePost && video.isLiveNow) && !!video.videoUrl;
+  const [dubAvailable, setDubAvailable] = useState(false);
+  // The speaker's slider (see VideoVolumeControl): hover on desktop, press
+  // and hold on a phone. Open counts as activity so the controls stay up.
+  const [volumeOpen, setVolumeOpen] = useState(false);
+  const [seekIndicator, setSeekIndicator] = useState<'left' | 'right' | null>(null);
+  const [showPlayIndicator, setShowPlayIndicator] = useState<'play' | 'pause' | null>(null);
+  // This creator's own rate if they have one, otherwise the global default.
+  const [playbackRate, setPlaybackRate] = useState(() => getPlaybackRateFor(video.creatorId));
+  const [isLooping, setIsLooping] = useState(() => getVideoPreferences().isLooping);
+  const [isFocused, setIsFocused] = useState(false);
+  // Written by useHandoffVideo, which owns the element rather than React — the
+  // feed card and the post page share one <video> so opening a post doesn't
+  // restart the clip (lib/video-handoff).
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  // Desktop post page: the page draws the creator row above this card, so
+  // boost + options go in that row (via a portal) instead of under the caption.
+  const [postHeadSlot, setPostHeadSlot] = useState<HTMLElement | null>(null);
+  useEffect(() => {
+    if (!postPage) return;
+    const find = () => (containerRef.current?.closest('[data-feed-item]') ?? document).querySelector<HTMLElement>('[data-post-head-actions]');
+    setPostHeadSlot(find());
+    const raf = requestAnimationFrame(() => setPostHeadSlot(find()));
+    return () => cancelAnimationFrame(raf);
+  }, [postPage]);
+  const transcodingStatus = useVideoProcessingStatus(video.id, video.transcodingStatus, surfaceActive && playbackAllowed, containerRef);
+  const controlsTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const scrubbingRef = useRef(false);
+  /** Mirrors scrubbingRef for render: the storyboard tile shows while it is true. */
+  const [scrubbing, setScrubbing] = useState(false);
+  /** Where a mouse rests over the timeline, 0-1: the scene there shows above it, as while dragging. */
+  const [hoverFraction, setHoverFraction] = useState<number | null>(null);
+  const isHoveringRef = useRef(false);
+  
+  // View tracking - fires view after watching threshold
+  const { onTimeUpdate: trackView } = useVideoViewTracking(video.id);
+
+  // Shorts thumbnails may live at shorts/{id}.jpg instead of the mapped
+  // images/{id}.jpg (folder moved mid-history; the API path lies both ways) —
+  // resolve to whichever actually exists so the poster isn't a 403 black box.
+  // Feed media is the full column width: ~334 CSS px on a phone, ~680 on a
+  // desktop viewport. A 3x phone genuinely does need ~1080 here; a 1x desktop
+  // and a 2x phone do not, and were getting it anyway.
+  const thumbnail = useResolvedThumbnail(video.thumbnail, deviceWidth(isMdUp() ? 680 : 360));
+
+  // Some video thumbnails are auto-captured from a black opening frame, so the
+  // poster is a valid-but-blank black JPEG that renders as an empty black box
+  // (worst on the immersive post page, where the video often isn't autoplaying).
+  // Detect that and swap the flat poster for a neutral play-cover.
+  //
+  // Deliberately a DIFFERENT, tiny variant rather than the poster above. The
+  // check decodes onto a 32x18 canvas, so it needs no more than that — and it
+  // requests with crossOrigin="anonymous", which the browser caches separately
+  // from the poster's no-CORS request. Sharing the poster URL therefore meant
+  // downloading the full poster a second time (29 KB) purely to sample it.
+  const posterProbe = useResolvedThumbnail(
+    !video.isAudio && video.videoUrl ? video.thumbnail : undefined,
+    BLANK_PROBE_WIDTH,
+  );
+  const posterBlank = useBlankPoster(posterProbe);
+
+  // Synced audio overlay — plays a soundtrack over the video
+  const { hasSoundtrack } = useSyncedAudio({
+    mediaKey: video.id,
+    soundtrackUrl: video.soundtrackUrl,
+    isPlaying,
+    isMuted,
+    volume,
+    videoRef: videoRef as React.RefObject<HTMLVideoElement>,
+  });
+
+  // Translation hook for video text content.
+  //
+  // Only the text that actually gets rendered — a description that merely
+  // repeats the title is not shown, and sending it anyway meant paying to
+  // translate the title twice and then splitting the answer back into a
+  // duplicated heading.
+  const ownDescription = video.description && video.description !== video.title ? video.description : undefined;
+  const videoText = [video.title, ownDescription].filter(Boolean).join('\n\n');
+  const {
+    isTranslated: isVideoTranslated,
+    translatedText: videoTranslatedText,
+    isLoading: isTranslateLoading,
+    error: translateError,
+    handleTranslate: handleVideoTranslate,
+    handleShowOriginal: handleVideoShowOriginal,
+    sourceLang: videoSourceLang,
+    isTooShort: nothingToTranslate,
+  } = useTranslation(videoText, true, containerRef, true);
+  // Glass rails show the caption in the panel beside the video, so they need
+  // the same translated title and description as the caption under the card.
+  const [railTitle, railDescription] = useMemo(
+    () => (isVideoTranslated && videoTranslatedText
+      ? splitTranslatedTitleAndBody(videoTranslatedText, video.title, ownDescription)
+      : [video.title, ownDescription]),
+    [isVideoTranslated, videoTranslatedText, video.title, ownDescription],
+  );
+  const videoTranslateControl = nothingToTranslate ? undefined : {
+    isTranslated: isVideoTranslated,
+    isLoading: isTranslateLoading,
+    error: translateError,
+    onTranslate: handleVideoTranslate,
+    onShowOriginal: handleVideoShowOriginal,
+    sourceLang: videoSourceLang,
+  };
+
+  // Repost handler
+  const handleRepost = useCallback(async () => {
+    if (!walletAddress) { openLoginModal(); return; }
+    const numericId = parseInt(video.id, 10);
+    if (isNaN(numericId)) return;
+    try {
+      await repostPost(numericId);
+      // Mark caches stale WITHOUT refetching now — refetching the unified feed
+      // tears down the infinite-scroll list and snaps the user back to the top.
+      queryClient.invalidateQueries({ queryKey: ['unified-feed'], refetchType: 'none' });
+      queryClient.invalidateQueries({ queryKey: ['user-reposts'], refetchType: 'none' });
+    } catch (err) {
+      toast.error(_copy("copy.7527dc6722fc", { defaultValue: "Failed to repost" }));
+      throw err; // let ActionBar roll back its optimistic repost state
+    }
+  }, [video.id, walletAddress, openLoginModal, queryClient, _copy]);
+
+  const handleQuote = useCallback(() => {
+    if (!walletAddress) { openLoginModal(); return; }
+    setShowQuoteModal(true);
+  }, [walletAddress, openLoginModal]);
+
+
+  const videoAsNFT = {
+    tokenId: parseInt(video.id, 10) || 0,
+    name: video.title || '',
+    description: video.description || '',
+    imageUrl: thumbnail || '',
+    videoUrl: video.videoUrl || '',
+    postType: (video.isAudio ? 'feed-audio' : 'video') as any,
+    minter: video.creatorId || '',
+    minterUsername: video.creatorUsername || '',
+    minterDisplayName: video.channel,
+    minterAvatarUrl: video.channelAvatar,
+    createdAt: video.createdAt || '',
+  };
+
+  // Pause callback for the playback manager
+  const pauseVideo = useCallback(() => {
+    if (isVideoInPictureInPicture(videoRef.current) && !visualActivity.isCallBusy()) return;
+    cancelVideoPlayback(videoRef.current);
+    videoRef.current?.pause();
+    isPlayingRef.current = false;
+    setIsPlaying(false);
+  }, []);
+
+  // Keep refs in sync for autoplay-related values
+  const autoplayEnabledRef = useRef(autoplayEnabled);
+  autoplayEnabledRef.current = autoplayEnabled;
+  useEffect(() => {
+    if (autoplayEnabled || !autoStartedRef.current) return;
+    pauseVideo();
+    videoPlaybackManager.stop(instanceId);
+  }, [autoplayEnabled, pauseVideo, instanceId]);
+  const autoplayMutedRef = useRef(autoplayMuted);
+  // The post page and the immersive player are videos the viewer opened.
+  const openedRef = useRef(postPage || isImmersive);
+  openedRef.current = postPage || isImmersive;
+  // Phone feed preview (set further down): autoplay there is always silent.
+  const feedPreviewRef = useRef(false);
+  autoplayMutedRef.current = autoplayMuted;
+  const liteModeRef = useRef(liteMode);
+  liteModeRef.current = liteMode;
+
+  // Video load gate: only videos at/near the viewport are allowed to pull bytes.
+  // Off-screen cards render preload="none" (poster only) so the initial feed
+  // doesn't fire a metadata range-request at every one of the ~50MB clips down
+  // the list. Two-way with hysteresis: warm within 800px, and released again
+  // only once the card drifts beyond ~2500px — the gap avoids preload thrash
+  // on scroll-back while stopping a long session from accumulating hundreds of
+  // media elements holding decoded buffers (the long-scroll tab-kill on 4GB
+  // phones). aboveFold (LCP) videos never release — but they do not warm until
+  // the page has loaded and idled once AND the visitor has scrolled or tapped:
+  // a Lighthouse run of the signed-out home on 2026-09-02 showed the two
+  // above-fold clips (14.7 MB + 12.3 MB) downloading in full during the load
+  // window, ahead of the hero the LCP is measured on — and waiting for load
+  // alone did not help, because a playing muted clip streams its whole file
+  // regardless of preload. The poster is a separate eager <img>, so nothing the
+  // visitor sees waits on this; the first scroll is what starts the clip.
+  const [nearViewport, setNearViewport] = useState(aboveFold || isImmersive);
+  const bootSettled = useBootSettled();
+  const interacted = useFirstInteraction();
+  const bootReady = bootSettled && interacted;
+  const homeMediaReady = !deferMediaOnBoot || bootReady;
+  const livePreviewPoster = video.isLivePost && video.isLiveNow && (thumbnail
+    ? <img src={thumbnail} alt="" aria-hidden="true" decoding="async" className="absolute inset-0 w-full h-full object-cover" loading={aboveFold ? 'eager' : 'lazy'} fetchPriority={aboveFold ? 'high' : 'auto'} />
+    : <div className="absolute inset-0 bg-black" />);
+  useEffect(() => {
+    if (aboveFold) return;
+    const el = containerRef.current;
+    if (!el) return;
+    const enterObs = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) setNearViewport(true);
+      },
+      { rootMargin: '800px 0px' },
+    );
+    const exitObs = new IntersectionObserver(
+      ([entry]) => {
+        // Never unload mid-playback (the visibility observer pauses at
+        // viewport exit anyway, so this only guards races).
+        if (!entry.isIntersecting && !isPlayingRef.current && !isVideoOutsideFeed(videoRef.current)) setNearViewport(false);
+      },
+      { rootMargin: '2500px 0px' },
+    );
+    enterObs.observe(el);
+    exitObs.observe(el);
+    return () => {
+      enterObs.disconnect();
+      exitObs.disconnect();
+    };
+  }, [aboveFold]);
+
+  // Releasing the src attribute alone doesn't free the decoder/buffer — an
+  // explicit load() after React removes it does.
+  const mediaAttached = aboveFold ? bootReady : nearViewport && homeMediaReady;
+  useEffect(() => {
+    if (mediaAttached) return;
+    const vid = videoRef.current;
+    if (vid && !videoSourceOf(vid)) {
+      try { vid.load(); } catch { /* noop */ }
+    }
+  }, [mediaAttached]);
+
+  // In Lite mode nothing preloads (tap-to-play still forces a load via play()).
+  // Never `auto`: with a muted autoplay clip Chrome reads that as "fetch the
+  // whole file", and play() streams whatever it needs regardless — metadata is
+  // enough to start on the first frame and costs one small range request.
+  const videoPreload: 'none' | 'metadata' | 'auto' = liteMode
+    ? 'none'
+    : mediaAttached
+      ? 'metadata'
+      : 'none';
+  const hasErrorRef = useRef(hasError);
+  hasErrorRef.current = hasError;
+  // Transcode still running or dead — videoUrl is the optimistic CDN guess
+  // written at upload time, and the file doesn't exist yet (or ever) until
+  // this clears. Autoplay/tap-to-play must not attempt it.
+  const isVideoNotReady = transcodingStatus === 'pending' || transcodingStatus === 'on' || transcodingStatus === 'failed';
+
+  // Show controls briefly after any user interaction, then auto-hide
+    const showControlsBriefly = useCallback(() => {
+      setShowControls(true);
+      if (controlsTimerRef.current) clearTimeout(controlsTimerRef.current);
+      if (scrubbingRef.current) return;
+      controlsTimerRef.current = setTimeout(() => {
+        setShowControls(false);
+      }, CONTROLS_HIDE_MS);
+    }, []);
+
+  useEffect(() => {
+    if (isPlaying && !video.isAudio) showControlsBriefly();
+  }, [isPlaying, video.isAudio, showControlsBriefly]);
+
+  // Cleanup controls timer on unmount
+  useEffect(() => {
+    return () => {
+      if (controlsTimerRef.current) clearTimeout(controlsTimerRef.current);
+    };
+  }, []);
+
+  const [locallyUnlocked, setLocallyUnlocked] = useState(false);
+  const [locallySubscribed, setLocallySubscribed] = useState(false);
+  const [showSubDrawer, setShowSubDrawer] = useState(false);
+  const storedUnlocked = isTokenUnlocked(video.id);
+  const canBypassGating = !!(isOwnPost || video.isOwner || video.isUnlocked || locallyUnlocked || storedUnlocked);
+  const isPPVLocked = !!video.isPPV && !canBypassGating;
+  const isBountyLocked = false; // W2E content is free to watch; bounty rewards first X viewers/commenters
+  const isHoldingsLocked = isHoldGated(video.isLocked, video.lockedPrice) && !canBypassGating;
+  // A separate gate: subscribe to this creator, rather than own a token.
+  const isSubGated = isSubscriberGated(video.subscriberPlans, !!isOwnPost || !!video.isOwner || locallySubscribed);
+  // Cheapest plan a reader can actually buy. The price lives on the plan's
+  // chain entry, not on `plan.price` — that field does not exist on this
+  // payload, and reading it gave NaN, which formatCompact renders as "0".
+  const cheapestQuote = cheapestSubscriberQuote(video.subscriberPlans);
+  const isComboLocked = isPPVLocked && isHoldingsLocked;
+  // Independent of the monetisation gates above: a post can be both mature and
+  // pay-per-view, and the creator's own post is warned about too — the warning
+  // is for whoever is looking at the screen.
+  const matureGate = useMatureGate(video.contentRating);
+  const contentWarning = useContentWarning(video.spoilerText);
+  // Folded into isContentGated so the warning gets the behaviour a locked post
+  // already has: no autoplay, no controls, no poster fallback painted over it.
+  const isContentGated = isPPVLocked || isBountyLocked || isHoldingsLocked || isSubGated || matureGate.isGated || contentWarning.hidden;
+  // A gated post's file is private: once the viewer is through the gate it
+  // plays from a signed URL the API hands out. An open post whose file fails
+  // is asked about once too, in case its gate was just removed and the file is
+  // not public again yet.
+  const requiresVideoAccess = !video.isAudio && !!video.videoUrl && !(video.isLivePost && video.isLiveNow) && videoNeedsAccess(video);
+  const [accessFallback, setAccessFallback] = useState(false);
+  const videoAccess = useVideoAccess(video.id, (requiresVideoAccess && !isContentGated) || accessFallback, walletAddress);
+  const playableVideoUrl = requiresVideoAccess || accessFallback
+    ? videoAccess.data?.url ?? (requiresVideoAccess ? undefined : video.videoUrl)
+    : video.videoUrl;
+  const accessFailed = requiresVideoAccess && !isContentGated && videoAccess.isError;
+  // An open post's HLS ladder. A gated one plays its signed file and never has
+  // one: a playlist would hand out every rendition by public URL.
+  const ladderUrl = requiresVideoAccess || accessFallback ? undefined : video.hlsUrl;
+  // Feed cards are small and there are many of them, so their ladder starts on
+  // the lowest rung and climbs; the post page starts where the connection
+  // allows. Without a ladder the file plays as before.
+  const ladderStartsLow = !postPage && !isImmersive;
+  /** Imperative attach for paths that can beat the render that sets src. */
+  const attachPostMedia = (vid: HTMLVideoElement) => {
+    if (!videoSourceOf(vid) && playableVideoUrl) {
+      setVideoSource(vid, { src: playableVideoUrl, hls: ladderUrl, startLow: ladderStartsLow, aspect: video.storedAspect });
+    }
+  };
+  const downloadVideo = useVideoDownload();
+  const handleDownloadVideo = useCallback(async () => {
+    if (isContentGated || !video.videoUrl) return;
+    setShowOptionsDrawer(false);
+    if (!video.isAudio) {
+      if (!playableVideoUrl) return;
+      videoRef.current?.pause();
+      await downloadVideo({ url: playableVideoUrl, title: video.title || String(video.id), username: video.creatorUsername });
+      return;
+    }
+    try {
+      const response = await fetch(video.videoUrl);
+      if (!response.ok) throw new Error("Audio download failed");
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url; a.download = (video.title || String(video.id)) + (blob.type.includes("mpeg") ? ".mp3" : blob.type.includes("wav") ? ".wav" : blob.type.includes("ogg") ? ".ogg" : ".m4a"); a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 30000);
+    } catch { toast.error(t("editor.export.failed")); }
+  }, [isContentGated, video.videoUrl, playableVideoUrl, video.isAudio, video.title, video.id, video.creatorUsername, downloadVideo, t]);
+
+
+
+  // The corner player took an audio post's track, or gave it back with this
+  // play state. While it holds the track this card is not the player: it drops
+  // its own play state, and with it its media session claim, so the two never
+  // fight over the OS controls.
+  const handleAudioPopOutChange = useCallback((poppedOut: boolean, playing: boolean) => {
+    const next = poppedOut ? false : playing;
+    isPlayingRef.current = next;
+    setIsPlaying(next);
+  }, []);
+
+  // This card has taken the shared audio player over (lib/audio-handoff) and
+  // is reporting what it walked into: a post opened from the feed lands on a
+  // track already running, and a feed returned to after a pause on the post
+  // page must not still show a pause button.
+  const handleAudioPlaybackAdopted = useCallback((playing: boolean) => {
+    isPlayingRef.current = playing;
+    setIsPlaying(playing);
+  }, []);
+
+  const handlePlayClick = useCallback(() => {
+    if (!playbackAllowedRef.current || !visualActivity.isFeedPlaybackAllowed()) return;
+    // Audio posts use AudioVisualizer which handles its own playback
+    if (video.isAudio) {
+      if (isContentGated) return;
+      setIsMuted(getVideoPreferences().mediaMuted === true);
+      const willPlay = !isPlayingRef.current;
+      setIsPlaying(willPlay);
+      isPlayingRef.current = willPlay;
+      setShowPlayIndicator(willPlay ? 'play' : 'pause');
+      setTimeout(() => setShowPlayIndicator(null), 500);
+      // Record listen on first play
+      if (willPlay) {
+        import('@/lib/api/dehub/feed').then(m => m.recordListen(video.id)).catch(() => {});
+      }
+      return;
+    }
+    
+    if (requiresVideoAccess && !playableVideoUrl && !isContentGated) {
+      void videoAccess.refetch({ cancelRefetch: false });
+      return;
+    }
+    if (!playableVideoUrl || isContentGated || isVideoNotReady) return;
+
+    if (isPlaying) {
+      if (autoStartedRef.current && !isImmersive) recordPause();
+      if (videoRef.current) videoRef.current.dataset.userPaused = 'true';
+      cancelVideoPlayback(videoRef.current);
+      videoRef.current?.pause();
+      isPlayingRef.current = false;
+      setIsPlaying(false);
+      setShowPlayIndicator('pause');
+      setTimeout(() => setShowPlayIndicator(null), 500);
+      videoPlaybackManager.stop(instanceId);
+      showControlsBriefly();
+    } else {
+      cancelPause();
+      autoStartedRef.current = false;
+      // A tap means this card: take the element back if another copy of
+      // the post is holding it.
+      if (!videoRef.current) takeVideoRef.current();
+      // Claim audio ownership for this video (user-initiated play)
+      if (videoRef.current) delete videoRef.current.dataset.userPaused;
+      videoPlaybackManager.claimAudio(instanceId);
+      const shouldMute = openedVideoMuted();
+      setIsMuted(shouldMute);
+      if (videoRef.current) {
+        videoRef.current.muted = shouldMute;
+      }
+      
+      // Notify manager
+      videoPlaybackManager.play(instanceId);
+      setIsLoading(true);
+      // Attach src imperatively if the media-release gate detached it and the
+      // re-render hasn't landed yet (tap can beat the render).
+      const vidEl = videoRef.current;
+      if (vidEl) attachPostMedia(vidEl);
+      setHasError(false);
+      if (!vidEl) { setIsLoading(false); return; }
+      requestVideoPlayback(vidEl).then(() => {
+        if (videoRef.current !== vidEl || vidEl.dataset.userPaused === 'true' ||
+          ((!playbackAllowedRef.current || !visualActivity.isFeedPlaybackAllowed()) && !isVideoInPictureInPicture(vidEl))) {
+          if (videoRef.current === vidEl) { vidEl.pause(); setIsLoading(false); }
+          return;
+        }
+        // Recovery can accept work before the browser starts the video.
+        if (vidEl.paused) return;
+        isPlayingRef.current = true;
+        setIsPlaying(true);
+        if (vidEl.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) setIsLoading(false);
+        setShowPlayIndicator('play');
+        setTimeout(() => setShowPlayIndicator(null), 500);
+        showControlsBriefly();
+      }).catch((error) => {
+        if (videoRef.current !== vidEl) return;
+        setIsLoading(false);
+        if (error?.name !== 'AbortError') setHasError(true);
+        videoPlaybackManager.stop(instanceId);
+      });
+    }
+  }, [isPlaying, playableVideoUrl, requiresVideoAccess, videoAccess.refetch, video.isAudio, video.id, instanceId, showControlsBriefly, isContentGated, isVideoNotReady, isImmersive, recordPause, cancelPause]);
+
+  const toggleMute = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    const newMuted = !isMuted;
+    setIsMuted(newMuted);
+    videoPlaybackManager.globalMuted = newMuted;
+    if (!newMuted) {
+      // User unmuted — claim audio ownership so other videos get muted
+      videoPlaybackManager.claimAudio(instanceId);
+    }
+    if (videoRef.current) {
+      videoRef.current.muted = newMuted;
+    }
+  }, [isMuted, instanceId]);
+
+  // Shared with the shorts viewer — see hooks/use-video-fullscreen for the iOS
+  // and WebView fallbacks, which fail silently rather than throwing.
+  // On touch screens the page's own fullscreen, not the system player, so a
+  // swipe up inside it can open the shorts feed (see handleTouchEnd). Anyone
+  // who switched Shorts off keeps the system player and never gets the feed.
+  const { shortsEnabled } = useShortsEnabled();
+  const swipeToShorts = shortsEnabled && isTouchPrimary();
+  const { isFullscreen, toggleFullscreen } = useVideoFullscreen(videoRef, containerRef, {
+    escapeAncestors: true,
+    preferContainer: swipeToShorts,
+  });
+
+  // Going fullscreen opens the video: a clip the feed muted gets its sound,
+  // unless the viewer muted it themselves.
+  useEffect(() => {
+    const vid = videoRef.current;
+    if (!isFullscreen || !vid || !vid.muted || openedVideoMuted() || video.isAudio) return;
+    vid.muted = false;
+    setIsMuted(false);
+    videoPlaybackManager.claimAudio(instanceId);
+  }, [isFullscreen, instanceId, video.isAudio]);
+
+  // Fullscreen on a phone is one swipe from the shorts feed: warm it up now so
+  // that swipe lands on a playing clip rather than a spinner.
+  useEffect(() => {
+    if (!isFullscreen || !swipeToShorts) return;
+    import('@/components/app/BrainrotFeedHost')
+      .then(m => m.prefetchBrainrotFeed(queryClient))
+      .catch(() => {});
+  }, [isFullscreen, swipeToShorts, queryClient]);
+
+  // Phone feeds show the clip as it is: muted autoplay (or a still frame with
+  // autoplay off), an unmute button in the corner and nothing else, no play
+  // or pause. A tap anywhere else opens it in the shorts viewer (the post
+  // page with Shorts off), where the full controls are. Desktop keeps normal
+  // in-feed playback with hover controls, and its posts open the post page.
+  const isPhone = useIsMobile();
+  const feedShortsTarget = isPhone && shortsEnabled && !postPage && !isImmersive && !isFullscreen && !hideActions
+    && !video.isAudio && !video.isAd && !(video.isLivePost && video.isLiveNow) && !!video.videoUrl
+    && !isContentGated && !isVideoNotReady;
+  const feedPreview = isPhone && !postPage && !isImmersive && !isFullscreen && !hideActions
+    && !video.isAudio && !video.isAd && !(video.isLivePost && video.isLiveNow) && !!video.videoUrl
+    && !isContentGated && !isVideoNotReady;
+  feedPreviewRef.current = feedPreview;
+  // An on-air post gets the same phone preview: it hugs the stream, plays
+  // muted with only unmute in the corner, and a tap opens the live page.
+  const liveFeedPreview = isPhone && !isImmersive && !isFullscreen && !hideActions
+    && !!video.isLivePost && !!video.isLiveNow && !isContentGated;
+  const phoneFeedFrame = (isPhone && shortsEnabled && feedPreview) || liveFeedPreview;
+  const [liveSoundOn, setLiveSoundOn] = useState(false);
+  useEffect(() => {
+    if (!feedShortsTarget || !bootSettled || !interacted || !nearViewport || liteMode) return;
+    // Warm the viewer code while its preview is visible, once the visitor has
+    // touched the page: the viewer is ~70 code files, and a visit that never
+    // scrolls or taps should not download them. Queries still start on
+    // touch-down so scrolling through cards does not fetch five feeds.
+    import('@/components/app/BrainrotFeedHost').catch(() => {});
+  }, [feedShortsTarget, bootSettled, interacted, nearViewport, liteMode]);
+
+  /** Swiped up out of fullscreen: stop here and carry on in the shorts feed. */
+  const swipeIntoShorts = useCallback(() => {
+    pauseVideo();
+    videoPlaybackManager.stop(instanceId);
+    toggleFullscreen();
+    openBrainrotFeed(video.id);
+  }, [pauseVideo, instanceId, toggleFullscreen, video.id]);
+
+  /** Any feed surface opens this clip first, using the same live player. */
+  const openPreviewInShorts = useCallback(() => {
+    pauseVideo();
+    videoPlaybackManager.stop(instanceId);
+    noteProfileFeedOpen(profileFeed, video.id);
+    openBrainrotFeed(video.id, videoItemToShort(video));
+  }, [pauseVideo, instanceId, video, profileFeed]);
+
+  // The space the player took inline, held open while it is full screen so
+  // the page under it keeps its height and comes back to the same spot.
+  const [inlineBox, setInlineBox] = useState<{ width: number; height: number } | null>(null);
+  const switchFullscreen = useCallback(() => {
+    const frame = containerRef.current;
+    if (frame && !isFullscreen) {
+      const box = frame.getBoundingClientRect();
+      setInlineBox({ width: box.width, height: box.height });
+    }
+    toggleFullscreen();
+    // Focus leaves the Full screen button for the player itself: Space then
+    // plays and pauses instead of pressing the button again, which threw the
+    // viewer straight back out of full screen.
+    if (!isPhone) frame?.focus({ preventScroll: true });
+  }, [isFullscreen, isPhone, toggleFullscreen]);
+  const handleFullscreen = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    switchFullscreen();
+  }, [switchFullscreen]);
+
+  const handlePictureInPicture = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!document.pictureInPictureEnabled) return;
+    if (document.pictureInPictureElement) {
+      document.exitPictureInPicture().catch(() => {});
+    } else if (videoRef.current) {
+      videoRef.current.requestPictureInPicture().catch(() => {
+        toast.error(_copy("copy.8e2efd43f448", { defaultValue: "Picture-in-picture not supported in this browser" }));
+      });
+    }
+  }, [_copy]);
+
+  /**
+   * Per-video volume. Dragging off zero also unmutes and claims audio, or the
+   * slider moves and nothing is heard. Dragging to zero mutes, so the icon and
+   * the slider never disagree.
+   */
+  const setVolumeTo = useCallback((next: number) => {
+    const newVolume = Math.max(0, Math.min(1, next));
+    vpSetVolume(newVolume);
+    if (videoRef.current) applyVideoVolume(videoRef.current, newVolume);
+    const shouldMute = newVolume === 0;
+    if (shouldMute !== isMuted) {
+      setIsMuted(shouldMute);
+      videoPlaybackManager.globalMuted = shouldMute;
+      if (videoRef.current) videoRef.current.muted = shouldMute;
+      if (!shouldMute) videoPlaybackManager.claimAudio(instanceId);
+    }
+  }, [isMuted, instanceId]);
+
+  const adjustVolume = useCallback((delta: number) => {
+    setVolumeTo(volume + delta);
+  }, [volume, setVolumeTo]);
+
+  /** A tap on the speaker. A level dragged down to nothing comes back up, or unmuting would stay silent. */
+  const handleSpeakerClick = useCallback((event: React.MouseEvent) => {
+    if (volume === 0) { event.stopPropagation(); setVolumeTo(0.8); }
+    else toggleMute(event);
+  }, [volume, setVolumeTo, toggleMute]);
+
+  // A menu or slider open over the player counts as activity: the row must not
+  // vanish out from under the thing the pointer is already inside.
+  // Desktop/tablet feeds: the frame hugs the clip (no black side panels) and
+  // the transport bar only shows on hover or while paused, over the picture.
+  const desktopFeedHug = !isPhone && !isImmersive && !isFullscreen && !video.isAudio;
+  // Full screen on a desktop is the same player: the picture takes the whole
+  // screen and the transport sits over it, fading out with the pointer while
+  // it plays. A black strip under the picture cut 47px off every video.
+  // Touch screens keep the strip: their full screen has its own gestures.
+  const overlayControls = desktopFeedHug || (!isPhone && !isTouchPrimary() && isFullscreen && !video.isAudio);
+  const splitControls = bareControls && !isContentGated && !feedPreview && !overlayControls;
+  // Desktop feeds keep mute/unmute in the bottom row beside play time, CC and
+  // speed instead of alone in the top corner. Phones never reach this: their
+  // feed previews keep the corner mute.
+  const volumeInRow = splitControls || (bareControls && !isContentGated && overlayControls);
+  const showCenterPlay = !feedPreview && !splitControls && !isLoading && !!video.videoUrl && !video.isAudio && !isVideoNotReady && !(video.isLivePost && video.isLiveNow);
+  const controlsVisible = splitControls || !isPlaying || showControls || subsMenuOpen || volumeOpen;
+  useEffect(() => {
+    if (controlsVisible && videoRef.current) setCurrentTime(videoRef.current.currentTime);
+  }, [controlsVisible]);
+
+  // Revealing the controls has to be able to fill in the timeline. A card that
+  // never autoplayed - every video on a profile, and anything in Lite mode -
+  // has preload="none" and therefore duration 0, which used to hide the
+  // scrubber and both timestamps outright: the feed had a seek bar and the
+  // profile had none. Asking for the media as soon as the controls come up
+  // costs one small range request and only for the card being looked at.
+  // Paused controls are visible on Home's initial render. Wait for the same
+  // interaction gate as autoplay before requesting timeline metadata there.
+  useEffect(() => {
+    if (!homeMediaReady || !controlsVisible || (!nearViewport && !showControls) || duration > 0 || video.isAudio || !playableVideoUrl) return;
+    setNearViewport(true);
+    const vid = videoRef.current;
+    if (!vid) return;
+    attachPostMedia(vid);
+    if (vid.preload === 'none') vid.preload = 'metadata';
+    if (isLadderPlayback(vid)) {
+      // hls.js loads its first segment itself; load() would detach it.
+      syncVideoLoad(vid);
+    } else if (vid.readyState === 0) {
+      try { vid.load(); } catch { /* noop */ }
+    }
+  }, [homeMediaReady, controlsVisible, nearViewport, showControls, duration, video.isAudio, playableVideoUrl]);
+
+  // The saved volume only ever reached the element through an explicit
+  // adjustment, so a viewer who had turned a video down got full volume back on
+  // the next one. Apply it whenever this card owns the shared <video>.
+  useEffect(() => {
+    if (videoRef.current) applyVideoVolume(videoRef.current, volume);
+  }, [volume, isPlaying, mediaAttached]);
+
+  const seekBy = useCallback((seconds: number) => {
+    if (videoRef.current) {
+      videoRef.current.currentTime = Math.max(0, Math.min(videoRef.current.currentTime + seconds, videoRef.current.duration || 0));
+      setSeekIndicator(seconds > 0 ? 'right' : 'left');
+      setTimeout(() => setSeekIndicator(null), 500);
+    }
+  }, []);
+
+  /**
+   * Hold the OS media session while this card is actually audible.
+   *
+   * The `!isMuted` half is the important one. A feed autoplays videos muted,
+   * so claiming on `isPlaying` alone would mean every card scrolled past
+   * silently seizes the lock screen — and pressing pause on your headphones
+   * would stop a muted thumbnail somewhere on screen instead of the radio
+   * station you are listening to. Only a video with sound gets to own it.
+   */
+  useEffect(() => {
+    if (!isPlaying || isMuted) {
+      releaseMediaSession(instanceId);
+      return;
+    }
+
+    claimMediaSession(
+      instanceId,
+      {
+        title: video.title || _copy("copy.75a86ca428cf", { defaultValue: "Riftn video" }),
+        artist: video.channel || 'Riftn',
+        album: video.isAudio ? _copy("copy.a2caa0dc28fb", { defaultValue: "Riftn • Audio" }) : _copy("copy.4671ecba9812", { defaultValue: "Riftn • Video" }),
+        artwork: (video.isAudio ? video.channelAvatar : thumbnail) || null,
+      },
+      {
+        // handlePlayClick toggles, which is exactly what both actions want.
+        play: handlePlayClick,
+        pause: handlePlayClick,
+        seekbackward: (offset) => seekBy(-offset),
+        seekforward: (offset) => seekBy(offset),
+        seekto: (time) => {
+          if (videoRef.current) videoRef.current.currentTime = time;
+        },
+      },
+    );
+    setMediaSessionPlaying(instanceId, true);
+  }, [isPlaying, isMuted, instanceId, video.title, video.channel, video.channelAvatar, video.isAudio, thumbnail, handlePlayClick, seekBy, _copy]);
+
+  // A card unmounting mid-play — scrolled out of the virtualised feed, or the
+  // route changed — must not leave the OS holding a dead session.
+  useEffect(() => () => releaseMediaSession(instanceId), [instanceId]);
+
+  const handleVideoEnded = useCallback(() => {
+    // Ads always loop — never stop
+    if ((video.isAd || isLooping) && videoRef.current) {
+      videoRef.current.currentTime = 0;
+      requestVideoPlayback(videoRef.current).catch(() => {});
+      return;
+    }
+    isPlayingRef.current = false;
+    setIsPlaying(false);
+    videoPlaybackManager.stop(instanceId);
+  }, [instanceId, isLooping, video.isAd]);
+
+
+  const cyclePlaybackRate = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    const currentIdx = PLAYBACK_RATES.indexOf(getPlaybackRateFor(video.creatorId) as any);
+    const nextRate = PLAYBACK_RATES[(currentIdx + 1) % PLAYBACK_RATES.length];
+    if (videoRef.current) videoRef.current.playbackRate = nextRate;
+    setPlaybackRate(nextRate);
+    // Pins the rate to this creator as well as moving the global default, so
+    // the next video of theirs starts here without freezing everyone else.
+    vpSetPlaybackRate(nextRate, video.creatorId);
+  }, [video.creatorId]);
+
+  const toggleLoop = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    const nextLoop = !(videoRef.current?.loop ?? isLooping);
+    if (videoRef.current) videoRef.current.loop = nextLoop;
+    setIsLooping(nextLoop);
+    vpSetIsLooping(nextLoop);
+    showControlsBriefly();
+  }, [isLooping, showControlsBriefly]);
+
+  // Listen for preference changes from other players. Resolved per creator,
+  // not read straight off the event: a rate someone set on another channel
+  // must not overwrite the rate pinned to this one.
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const prefs = (e as CustomEvent).detail;
+      const rate = getPlaybackRateFor(video.creatorId);
+      setPlaybackRate(rate);
+      setIsLooping(prefs.isLooping);
+      if (videoRef.current) videoRef.current.playbackRate = rate;
+    };
+    window.addEventListener('video-prefs-changed', handler);
+    return () => window.removeEventListener('video-prefs-changed', handler);
+  }, [video.creatorId]);
+
+  const handleVideoError = useCallback(() => {
+    // The recovery controller owns terminal errors and the retry budget.
+  }, [video.videoUrl]);
+
+  // ── Sponsor / intro skipping ──────────────────────────────────────────────
+  // Only fetched when the viewer has skipping on: otherwise this would be a
+  // request per video card in a feed, for a feature most readers leave off.
+  const skipSegmentsOn = useSkipSegments();
+  const { segments: skipSegments } = useVideoSegments(video.id, skipSegmentsOn && mediaAttached);
+  // Segments already jumped in this session, so undoing a skip does not put
+  // the viewer straight back into the same jump on the next timeupdate.
+  const skippedRef = useRef<Set<string>>(new Set());
+
+  // Open on the frame after the mount, so the sheet slides up rather than
+  // appearing. Closing leaves it mounted — a second open should animate too.
+  useEffect(() => {
+    if (!segmentDrawerMounted) return;
+    const frame = requestAnimationFrame(() => setShowSegmentDrawer(true));
+    return () => cancelAnimationFrame(frame);
+  }, [segmentDrawerMounted]);
+
+  // Warm the chunk while the options drawer is up, so the tap that opens the
+  // sheet is not also the tap that downloads it.
+  useEffect(() => {
+    if (showOptionsDrawer) void import('./SegmentMarkerDrawer');
+  }, [showOptionsDrawer]);
+
+  const maybeSkipSegment = useCallback((currentTime: number) => {
+    if (!skipSegmentsOn || !skipSegments.length || !videoRef.current) return;
+    const segment = segmentAt(skipSegments, currentTime);
+    if (!segment || skippedRef.current.has(segment.id)) return;
+
+    skippedRef.current.add(segment.id);
+    const resumeAt = currentTime;
+    videoRef.current.currentTime = segment.end_seconds;
+
+    toast(_copy("copy.1a6575c0a40f", { defaultValue: "{{value1}} skipped", value1: SEGMENT_LABELS[segment.category] }), {
+      action: {
+        label: _copy("copy.a8283ade3185", { defaultValue: "Undo" }),
+        onClick: () => {
+          if (videoRef.current) videoRef.current.currentTime = resumeAt;
+        },
+      },
+      duration: 4000,
+    });
+  }, [skipSegmentsOn, skipSegments, _copy]);
+
+  const handleTimeUpdate = useCallback(() => {
+    if (videoRef.current) {
+      const ct = videoRef.current.currentTime;
+      const dur = videoRef.current.duration;
+      if (controlsVisible && !scrubbingRef.current) setCurrentTime(ct);
+
+      // Track video view progress (fires view when threshold met)
+      if (dur > 0) {
+        trackView(ct, dur, videoRef.current.loop);
+      }
+
+      // Crowdsourced sponsor reads and intros, if the viewer asked for them to
+      // be skipped. Guarded on isPlaying: a seek while paused would otherwise
+      // teleport the scrubber out from under the thumb.
+      maybeSkipSegment(ct);
+
+      // Drives the OS progress bar. A no-op unless this card currently owns
+      // the media session, and it drops non-finite durations rather than
+      // throwing — a live HLS source reports Infinity here.
+      setMediaSessionPosition(instanceId, ct, dur, videoRef.current.playbackRate);
+    }
+  }, [trackView, instanceId, maybeSkipSegment, controlsVisible]);
+
+  const handleLoadedMetadata = useCallback(() => {
+    if (videoRef.current) {
+      setDuration(videoRef.current.duration);
+      // The clip's own shape, once known — trusted over the poster probe.
+      const { videoWidth: w, videoHeight: h } = videoRef.current;
+      if (w && h) setIntrinsicAspect(w / h);
+    }
+  }, [setIntrinsicAspect]);
+
+  /**
+   * Real shape of the media, so a portrait clip shows portrait instead of being
+   * cropped into a 16:9 slot. Falls back to the poster's ratio until the element
+   * reports its own, and to 16:9 until either is measured. Audio posts keep the
+   * fixed frame: their "poster" is square cover art, not a video frame.
+   * On the post page a clip thinner than 9:16 keeps its real shape too, so it
+   * fills the height instead of being cropped into a 9:16 box.
+   */
+  const measuredAspect = useMediaAspect(
+    video.isAudio ? null : thumbnail,
+    intrinsicAspect,
+    isImmersive ? THIN_MIN_RATIO : undefined,
+    video.id,
+    video.storedAspect,
+    video.storedAspectShown,
+  );
+  const resolvedVideoAspect = intrinsicAspect ?? (video.storedAspectShown ? video.storedAspect : null) ?? getMeasuredMediaAspect(thumbnail) ?? video.storedAspect ?? null;
+  const mediaAspect = useFeedFrameAspect(`video:${video.id}`, video.isAudio ? DEFAULT_ASPECT : measuredAspect, containerRef, !isImmersive && !isFullscreen,
+    !video.isAudio && resolvedVideoAspect != null ? measuredAspect : undefined);
+  const headerAboveMedia = firstFeedPost && !video.isAudio && !video.isLivePost && mediaAspect >= 1;
+  const cropFeedVideo = !isImmersive && !isFullscreen && !video.isAudio;
+  // Settings > Video size in your feed: a tall clip letterboxes inside a
+  // square or 16:9 frame instead of filling the screen. Feed frame only.
+  const feedVideoShape = useFeedVideoShape();
+  const feedFrameAspect = Math.max(mediaAspect, FEED_VIDEO_MIN_ASPECT[feedVideoShape]);
+
+  // Long form media on wide screens (Settings > Appearance > Media). Desktop
+  // only: the feed card and the post page player. Ambient runs the frame full
+  // width with the blurred picture beside it; rails hug the picture between
+  // two glass pills, and only where there is room beside it.
+  const isDesktopViewport = useIsDesktopViewport();
+  const wideVideoMode = useWideVideoMode();
+  const inMasonryColumn = useInMasonryColumn();
+  const wideViewport = isDesktopViewport && !isPhone && !inMasonryColumn;
+  // Worked out as if the player were inline, so going full screen does not
+  // change which layout the card is in underneath.
+  const wideSlot = wideViewport && !video.isAudio && !stage && !hideActions
+    && !(video.isLivePost && video.isLiveNow) && ((!isPhone && !isImmersive) || (isImmersive && !showComments));
+  const wideEligible = wideSlot && !isFullscreen;
+  const wideAmbient = wideEligible && wideVideoMode === 'ambient';
+  // The row and its panel stay mounted while the player is full screen: the
+  // panel keeps a half-written comment and the page keeps its height, so
+  // leaving full screen lands on the same spot instead of a rebuilt card.
+  const wideRailsRow = wideSlot && wideVideoMode === 'rails' && mediaAspect < WIDE_RAILS_MAX_ASPECT;
+  const wideRails = wideRailsRow && !isFullscreen;
+  const wideCentered = wideAmbient || wideRails;
+  const wideMaxHeight = desktopFeedHug ? DESKTOP_FEED_MAX_HEIGHT : IMMERSIVE_MAX_MEDIA_HEIGHT;
+
+  // Desktop only: a custom cover whose shape is not the clip's (a wide still on
+  // a tall clip). Read off the poster as it loads, so nothing extra is fetched.
+  const [posterShape, setPosterShape] = useState<{ url: string; ratio: number } | null>(null);
+  const notePosterShape = useCallback((event: React.SyntheticEvent<HTMLImageElement>) => {
+    const { naturalWidth: w, naturalHeight: h } = event.currentTarget;
+    if (w && h && thumbnail) setPosterShape((previous) => (previous?.url === thumbnail ? previous : { url: thumbnail, ratio: w / h }));
+  }, [thumbnail]);
+  // Only where the frame is exactly the clip's shape (Glass rails), so the
+  // filled cover never shows around the playing picture.
+  const posterOffShape = wideRails && resolvedVideoAspect != null && Math.abs(resolvedVideoAspect / mediaAspect - 1) < 0.02
+    && posterShape?.url === thumbnail && Math.abs(posterShape.ratio / mediaAspect - 1) > 0.08;
+
+  // Before the handoff assigns `src`, so a refreshed signature resumes in place.
+  useResumeAcrossRefresh(videoRef, mediaAttached && !isVideoNotReady ? playableVideoUrl : undefined);
+
+  // Claims the shared <video> for this post into the slot rendered below, and
+  // keeps this card's props on it while this card is the one showing it.
+  const { attachSlot: attachVideoSlot, isActive: ownsVideoElement, takeOver: takeVideoElement } = useHandoffVideo({
+    videoRef,
+    handoffKey: video.id,
+    watchTokenId: video.isAd ? undefined : video.id,
+    src: mediaAttached && !isVideoNotReady ? playableVideoUrl : undefined,
+    hlsSrc: ladderUrl,
+    startLow: ladderStartsLow,
+    aspect: video.storedAspect,
+    // A cover of another shape stays off the element, which would letterbox
+    // it: the picture behind the slot shows it filling the frame instead.
+    poster: posterOffShape ? undefined : thumbnail || undefined,
+    muted: isMuted,
+    loop: !!(video.isAd || isLooping),
+    preload: videoPreload,
+    // Phones crop tall footage to fill the column; desktop shows the whole
+    // picture on the left (a short stays a short, not a stretched wide crop).
+    className: `dehub-inline-video w-full h-full ${isFullscreen ? 'object-contain' : isPhone ? 'object-cover' : wideCentered ? 'object-contain' : 'object-contain object-left'}`,
+    onEnded: handleVideoEnded,
+    onError: handleVideoError,
+    onTimeUpdate: handleTimeUpdate,
+    onLoadedMetadata: handleLoadedMetadata,
+    onAdopt: (el) => {
+      if (!videoSourceOf(el)) return;
+      setNearViewport(true);
+      isPlayingRef.current = !el.paused;
+      setIsPlaying(!el.paused);
+      const handedMuted = video.soundtrackUrl ? handoffAudioFor(`synced:${video.id}:${video.soundtrackUrl}`)?.muted ?? el.muted : el.muted;
+      // Opened from a feed that played it silently: the sound comes on here,
+      // unless the viewer muted it themselves.
+      if (openedRef.current && handedMuted && !openedVideoMuted() && !video.soundtrackUrl) {
+        el.muted = false;
+        setIsMuted(false);
+        if (!el.paused) videoPlaybackManager.claimAudio(instanceId);
+      } else {
+        setIsMuted(handedMuted);
+      }
+      setPlaybackRate(el.playbackRate);
+      setIsLooping(el.loop);
+      setCurrentTime(el.currentTime);
+      if (Number.isFinite(el.duration) && el.duration > 0) setDuration(el.duration);
+      if (el.videoWidth && el.videoHeight) setIntrinsicAspect(el.videoWidth / el.videoHeight);
+      setIsLoading(el.readyState < 2 && !el.paused);
+    },
+    onPlaybackChange: (playing) => {
+      isPlayingRef.current = playing;
+      setIsPlaying(playing);
+    },
+  });
+
+  // Handing the element to the post page has to hand the audio over with it.
+  // The playback manager tracks audio ownership per card instance, so the feed
+  // card stays the owner until it says otherwise — and the post page, arriving
+  // second, would be told to play muted while the card behind it held the sound.
+  useEffect(() => {
+    if (!ownsVideoElement) videoPlaybackManager.stop(instanceId);
+  }, [ownsVideoElement, instanceId]);
+
+  // A chapter or timestamp link (/app/post/123?t=95) opens the post at that
+  // moment. Read once: scrubbing afterwards must not snap back to it.
+  const startAtRef = useRef<number | null>(postPage ? readStartAt() : null);
+  useEffect(() => {
+    const el = videoRef.current;
+    if (!ownsVideoElement || !el || startAtRef.current == null) return;
+    const seek = () => {
+      const at = startAtRef.current;
+      if (at == null) return;
+      startAtRef.current = null;
+      el.currentTime = Number.isFinite(el.duration) && el.duration > 0 ? Math.min(at, el.duration) : at;
+      setCurrentTime(el.currentTime);
+    };
+    if (el.readyState >= HTMLMediaElement.HAVE_METADATA) { seek(); return; }
+    el.addEventListener('loadedmetadata', seek, { once: true });
+    return () => el.removeEventListener('loadedmetadata', seek);
+  }, [ownsVideoElement, playableVideoUrl]);
+
+  takeVideoRef.current = takeVideoElement;
+  const playbackPhase = usePlaybackRecovery(videoRef, playableVideoUrl, ownsVideoElement, {
+    component: 'VideoCard', postId: video.id,
+    muteForAutoplay: () => {
+      if (!autoStartedRef.current) return false;
+      setIsMuted(true);
+      return true;
+    },
+    allowed: () => !!videoRef.current && videoRef.current.dataset.userPaused !== 'true' &&
+      !visualActivity.isCallBusy() && ((playbackAllowedRef.current && surfaceActiveRef.current &&
+        // A manual click can land before the observer reports the new position.
+        (isVideoOutsideFeed(videoRef.current) || (autoStartedRef.current
+          ? isIntersectingRef.current
+          : slotOnScreen(containerRef.current))) && isRendered(containerRef.current)) || isVideoInPictureInPicture(videoRef.current)),
+  });
+  useEffect(() => {
+    setHasError(playbackPhase === 'failed');
+    // A buffer stall mid-play ('waiting') holds the last frame, as any player
+    // does. Swapping the poster loader over a frame that is already showing
+    // made playing clips flash to their thumbnail while the feed scrolled.
+    const hasFrame = (videoRef.current?.readyState ?? 0) >= HTMLMediaElement.HAVE_CURRENT_DATA;
+    setIsLoading(playbackPhase === 'retrying' || (playbackPhase === 'loading' && !hasFrame));
+    if (playbackPhase === 'failed' || playbackPhase === 'blocked') {
+      isPlayingRef.current = false;
+      setIsPlaying(false);
+      videoPlaybackManager.stop(instanceId);
+    }
+  }, [playbackPhase, instanceId]);
+
+  // Register with playback manager and setup IntersectionObserver (stable — no isPlaying dep)
+  useEffect(() => {
+    if (!playbackAllowed) pauseVideo();
+    videoPlaybackManager.register(instanceId, pauseVideo, (muted: boolean) => {
+      // Callback for manager to force mute/unmute this video
+      if (videoRef.current) videoRef.current.muted = muted;
+      if (!muted) autoMutedRef.current = false;
+      setIsMuted(muted);
+    }, () => isProminent(containerRef.current), () => videoRef.current);
+
+    // Auto-pause when scrolled out of view + auto-play when scrolled into view (if enabled)
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          isIntersectingRef.current = entry.isIntersecting;
+          if (isVideoInPictureInPicture(videoRef.current) && !visualActivity.isCallBusy()) return;
+          if (!playbackAllowedRef.current || !visualActivity.isFeedPlaybackAllowed()) { pauseVideo(); return; }
+          // Backgrounding is not a scroll-away; PiP owns its own visible surface.
+          if (isVideoOutsideFeed(videoRef.current)) return;
+          if (!entry.isIntersecting && isPlayingRef.current) {
+            pauseVideo();
+            videoPlaybackManager.stop(instanceId);
+          } else if (entry.isIntersecting && homeMediaReady && surfaceActiveRef.current && isRendered(containerRef.current) && autoplayEnabledRef.current && !liteModeRef.current && !disableAutoplay && !isPlayingRef.current && videoRef.current?.dataset.userPaused !== 'true' && !video.isPPV && !isContentGated && !video.isAudio && playableVideoUrl && !hasErrorRef.current && !isVideoNotReady) {
+            let vid = videoRef.current;
+            // Another copy of this post holds the element. Take it back unless
+            // that copy is on screen — the post page open over the feed.
+            if (!vid && !slotOnScreen(handoffVideoHolder(video.id))) vid = takeVideoRef.current();
+            if (vid) {
+              // Fast fling race: the media-attach state may not have
+              // re-rendered yet — attach the src imperatively before play()
+              // (React reconciles to the same value on the next render).
+              attachPostMedia(vid);
+              // Only the clip that is actually on screen may take the sound;
+              // one peeking in at the bottom of the window plays silently.
+              const prominent = isProminent(containerRef.current);
+              const ownsAudio = prominent ? videoPlaybackManager.play(instanceId) : videoPlaybackManager.playMuted(instanceId);
+              // "Start autoplay muted" beats an earlier unmute: scrolling
+              // onto a clip must never be what makes sound.
+              // An opened post is not scrolled onto: it has sound unless the
+              // viewer muted a video themselves.
+              // A post link opened straight from outside has had no tap yet,
+              // and the browser would refuse to start it with sound at all.
+              const shouldMute = openedRef.current
+                ? openedVideoMuted() || !ownsAudio || navigator.userActivation?.hasBeenActive === false
+                : feedPreviewRef.current || autoplayMutedRef.current || videoPlaybackManager.globalMuted || !ownsAudio;
+              autoMutedRef.current = shouldMute && !prominent && !autoplayMutedRef.current && !videoPlaybackManager.globalMuted;
+              vid.muted = shouldMute;
+              setIsMuted(shouldMute);
+              // A clip that already has a frame (scrolled back to, or adopted) starts
+              // on that frame; covering it with the poster loader for the length
+              // of play() is the flash seen while scrolling.
+              setIsLoading(vid.readyState < HTMLMediaElement.HAVE_CURRENT_DATA);
+              autoStartedRef.current = true;
+              requestVideoPlayback(vid).catch((error) => {
+                // Landed on a post link with no tap yet: the browser refuses
+                // sound, so start it silent rather than not at all.
+                if (error?.name !== 'NotAllowedError' || vid.muted) throw error;
+                vid.muted = true;
+                setIsMuted(true);
+                return vid.play();
+              }).then(() => {
+                // Scroll-away race: if the card left the viewport while play() was
+                // pending, the pause branch above was skipped (isPlayingRef was
+                // still false), so bail here to avoid playing/holding audio off-screen.
+                if ((!autoplayEnabledRef.current && autoStartedRef.current) || vid.dataset.userPaused === 'true' || ((!playbackAllowedRef.current || !visualActivity.isFeedPlaybackAllowed()) && !isVideoInPictureInPicture(vid)) || (!isIntersectingRef.current && !isVideoOutsideFeed(vid))) {
+                  vid.pause();
+                  videoPlaybackManager.stop(instanceId);
+                  setIsLoading(false);
+                  return;
+                }
+                if (vid.paused) return;
+                isPlayingRef.current = true;
+                setIsPlaying(true);
+                if (vid.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) setIsLoading(false);
+              }).catch(() => {
+                setIsLoading(false);
+              });
+            }
+          }
+        });
+      },
+      { threshold: 0.5 }
+    );
+
+    // Hard stop once no pixel of the card is left on screen, whatever this
+    // card's own state says. The pause above trusts isPlayingRef, and the
+    // element can be playing without it: handed over from another card, or
+    // resumed by the page cache. A playing clip nobody can see is the
+    // "old video's audio keeps going" bug.
+    const offscreenObserver = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) return;
+        const vid = videoRef.current;
+        if (vid && isVideoOutsideFeed(vid)) return;
+        if (vid && !vid.paused) {
+          pauseVideo();
+          videoPlaybackManager.stop(instanceId);
+        }
+      },
+      { threshold: 0 }
+    );
+
+    // A clip that autoplayed silently because it was only peeking in takes
+    // the sound once it is scrolled fully into view, if nothing else has it.
+    const prominenceObserver = new IntersectionObserver(
+      () => {
+        const vid = videoRef.current;
+        if (!autoMutedRef.current || !vid || vid.paused || !isProminent(containerRef.current)) return;
+        if (autoplayMutedRef.current || videoPlaybackManager.globalMuted) return;
+        if (!videoPlaybackManager.takeFreeAudio(instanceId)) return;
+        autoMutedRef.current = false;
+        vid.muted = false;
+        setIsMuted(false);
+      },
+      { threshold: [0.6, 0.9, 1] }
+    );
+
+    if (containerRef.current) {
+      observer.observe(containerRef.current);
+      offscreenObserver.observe(containerRef.current);
+      prominenceObserver.observe(containerRef.current);
+    }
+
+    return () => {
+      videoPlaybackManager.unregister(instanceId);
+      observer.disconnect();
+      offscreenObserver.disconnect();
+      prominenceObserver.disconnect();
+    };
+  }, [instanceId, pauseVideo, video.isPPV, isContentGated, playableVideoUrl, ladderUrl, ladderStartsLow, video.isAudio, isVideoNotReady, playbackAllowed, disableAutoplay, surfaceActive, autoplayEnabled, liteMode, homeMediaReady]);
+
+  // A signed URL that lapsed mid-session fails like a broken file: fetch a
+  // fresh one and pick up where it stopped. An open post that fails gets one
+  // access check.
+  const refetchVideoAccess = videoAccess.refetch;
+  useEffect(() => {
+    if (playbackPhase !== 'failed') return;
+    if (videoAccess.data?.private) {
+      if (isVideoAccessExpiring(videoAccess.data)) void refetchVideoAccess();
+    } else if (!requiresVideoAccess && !video.isAudio && walletAddress) {
+      setAccessFallback(true);
+    }
+  }, [playbackPhase, videoAccess.data, refetchVideoAccess, requiresVideoAccess, video.isAudio, walletAddress]);
+  useEffect(() => {
+    if (accessFailed) setHasError(true);
+  }, [accessFailed]);
+
+  // Play state follows the element itself while this card holds it, and is
+  // off while it doesn't. The element changes hands and gets paused or resumed
+  // from outside this card (the page cache, another card taking it), and a
+  // stale "playing" here is what kept the scroll-away pause from firing.
+  useEffect(() => {
+    if (video.isAudio) return;
+    const el = ownsVideoElement ? videoRef.current : null;
+    const sync = () => {
+      const playing = !!el && !el.paused;
+      if (isPlayingRef.current === playing) return;
+      isPlayingRef.current = playing;
+      setIsPlaying(playing);
+    };
+    sync();
+    if (!el) return;
+    el.addEventListener('play', sync);
+    el.addEventListener('pause', sync);
+    return () => {
+      el.removeEventListener('play', sync);
+      el.removeEventListener('pause', sync);
+    };
+  }, [ownsVideoElement, video.isAudio]);
+
+
+  // The <video> element is shared between cards, so it arrives carrying
+  // whatever rate the last card left on it. Re-stamp this card's rate on every
+  // claim, or a channel pinned to 2× would keep playing the next one at 2×.
+  // The default rate too, since the Shorts viewer sets it and a new source
+  // falls back to it.
+  useEffect(() => {
+    if (!ownsVideoElement || !videoRef.current) return;
+    videoRef.current.defaultPlaybackRate = playbackRate;
+    videoRef.current.playbackRate = playbackRate;
+  }, [ownsVideoElement, playbackRate]);
+
+  const hiddenScrubStart = useRef<{ x: number; y: number } | null>(null);
+
+  const handleSeek = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    if (hiddenScrubStart.current) return;
+    const time = parseFloat(e.target.value);
+    if (videoRef.current) {
+      videoRef.current.currentTime = time;
+      setCurrentTime(time);
+    }
+  }, []);
+
+  const finishScrubbing = useCallback(() => {
+    scrubbingRef.current = false;
+    setScrubbing(false);
+    hiddenScrubStart.current = null;
+    if (controlsTimerRef.current) clearTimeout(controlsTimerRef.current);
+    controlsTimerRef.current = setTimeout(() => setShowControls(false), CONTROLS_HIDE_MS);
+  }, []);
+
+  const scrubEventRef = useRef<HTMLDivElement>(null);
+  const tabletPortrait = useTabletPortraitFeed(scrubEventRef,
+    isTabletOrMobile && mediaAspect < 1 && !isImmersive && !postPage && !stage && !hideActions
+    && !isFullscreen && !video.isAudio && !video.isAd && !video.isLivePost && !!video.videoUrl
+    && !isContentGated && !matureGate.isGated && !contentWarning.hidden);
+  const scrubZone = useVideoScrubZone({
+    mediaRef: containerRef,
+    eventRef: scrubEventRef,
+    enabled: bareControls && !isContentGated && duration > 0 && Number.isFinite(duration),
+    duration,
+    onStart: () => {
+      scrubbingRef.current = true;
+      setScrubbing(true);
+      setShowControls(true);
+      if (controlsTimerRef.current) clearTimeout(controlsTimerRef.current);
+    },
+    onPreview: setCurrentTime,
+    onCommit: time => {
+      if (videoRef.current) videoRef.current.currentTime = time;
+      setCurrentTime(time);
+    },
+    onFinish: finishScrubbing,
+    onCancel: () => setCurrentTime(videoRef.current?.currentTime ?? 0),
+  });
+
+  const openDedicatedPost = useCallback(() => {
+    if (window.matchMedia('(max-width: 639px)').matches) {
+      // A warned video opens its warning here, in the feed. The next tap then
+      // plays it in the Shorts viewer like any other clip, instead of leaving
+      // for the post page and asking again there.
+      if (contentWarning.hidden && shortsEnabled && !postPage) {
+        contentWarning.reveal();
+        return;
+      }
+      // Landscape footage keeps the post page, with the player at the top.
+      // Tall footage plays in the Shorts viewer, in place.
+      if (mediaAspect <= 1 && !isPPVLocked) {
+        navigate(`/app?short=${encodeURIComponent(video.id)}`);
+        return;
+      }
+      // Locked pay-per-view asks to unlock first. Once it is unlocked the next
+      // tap plays it in the Shorts viewer.
+      if (isPPVLocked) {
+        setShowPPVDrawer(true);
+        return;
+      }
+    }
+    cacheVideoForNavigation(queryClient, video);
+    noteProfileFeedOpen(profileFeed, video.id);
+    navigate(`/app/post/${video.articleSlug || video.id}`, { state: { fromFeed: true } });
+  }, [navigate, queryClient, video, mediaAspect, isPPVLocked, profileFeed, contentWarning.hidden, contentWarning.reveal, shortsEnabled, postPage]);
+  const openPost = useVideoCardOpen({
+    mediaRef: containerRef,
+    shorts: feedShortsTarget,
+    blocked: showBountyDrawer || showPPVDrawer || showLockedDrawer,
+    wasDismissed: wasDrawerJustDismissed,
+    openShorts: openPreviewInShorts,
+    openPost: openDedicatedPost,
+  });
+
+  /**
+   * Anywhere on the video, two taps Like and three taps Love. In the phone
+   * feed one tap opens the viewer, a moment later so a second tap can still
+   * turn it into a like. Inside the player one tap drives playback; that is
+   * reversible, so it happens immediately and is put back on tap two rather
+   * than making every play/pause wait for the gesture window. Fullscreen and
+   * seeking stay on their visible controls.
+   */
+  const tapGestures = useTapGestures({
+    postId: video.id,
+    reactionArea: 'surface',
+    // A gated card (PPV, holdings/subscriber lock, mature warning) draws no
+    // burst — TapReactionBurst lives inside the isContentGated block further
+    // down — so a cast there would react, invisibly, to a post you cannot
+    // see. On gated media the tap belongs to the unlock overlay. ImageCard
+    // already behaves this way: its gate branch replaces the carousel that
+    // carries the gesture, so this only brings video into line.
+    disabled: hideActions || !!video.isAudio || isContentGated || liveFeedPreview,
+    onSingleTap: feedPreview ? openPost : isImmersive ? () => {
+      showControlsBriefly();
+      handlePlayClick();
+    } : undefined,
+    onUndoSingleTap: isImmersive ? handlePlayClick : undefined,
+  });
+
+  const captionRef = useRef<HTMLDivElement>(null);
+  // Gated, warned and live posts keep the card's own destination, which owns
+  // their unlock and reveal steps.
+  const openCaptionPost = () => {
+    if (isPPVLocked || contentWarning.hidden || liveFeedPreview || video.isAudio) { openPost(); return; }
+    if (showBountyDrawer || showPPVDrawer || showLockedDrawer || wasDrawerJustDismissed()) return;
+    cacheVideoForNavigation(queryClient, video);
+    noteProfileFeedOpen(profileFeed, video.id);
+    navigate(`/app/post/${video.articleSlug || video.id}`, { state: { fromFeed: true } });
+  };
+
+  // A tap on the text opens the post page; links and "See more" keep
+  // their own actions.
+  const captionTapGestures = useTapGestures({
+    singleTapOnly: !isImmersive,
+    postId: video.id,
+    reactionArea: 'center',
+    disabled: hideActions || isContentGated,
+    enableLongPress: false,
+    onSingleTap: (event) => {
+      if (isImmersive) return;
+      if ((event.target as HTMLElement | null)?.closest?.('button, a, input, textarea, [role="button"]')) return;
+      const selection = window.getSelection();
+      if (selection && selection.toString().length > 0) return;
+      // A cut-off caption opens the rest of its text first; the next tap
+      // opens the post page. Only the picture goes straight to the player.
+      const more = captionRef.current?.querySelector<HTMLButtonElement>('[data-caption-more]');
+      if (more) { more.click(); return; }
+      openCaptionPost();
+    },
+  });
+
+  // Playback and reactions run from pointer events above. The compatibility
+  // click only keeps the visible controls awake; it must never toggle twice.
+  const handleVideoAreaClick = useCallback(() => {
+    if (feedPreview) return; // Pointer release owns viewer navigation.
+    if (liveFeedPreview) {
+      openPost();
+      return;
+    }
+    if (!isImmersive) {
+      showControlsBriefly();
+      handlePlayClick();
+      return;
+    }
+    showControlsBriefly();
+  }, [isImmersive, showControlsBriefly, handlePlayClick, feedPreview, liveFeedPreview, openPost]);
+
+  // Both the click and the touch handler are bound unconditionally on the player.
+  // `isTouchDevice` is a width check, not a capability one, so gating the click on
+  // it left a mouse in a narrow window with no handler at all — the player was
+  // completely inert there. handleTouchEnd preventDefaults on every path it acts
+  // on, so a touch never also arrives as a synthesized click.
+
+  /** Where a touch on the player started, to tell a tap from a scroll fling. */
+  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    touchStartRef.current = touch ? { x: touch.clientX, y: touch.clientY } : null;
+    // A tap here opens the shorts viewer: start loading it on the way down.
+    if (feedPreviewRef.current) {
+      import('@/components/app/BrainrotFeedHost')
+        .then(m => m.prefetchBrainrotFeed(queryClient))
+        .catch(() => {});
+    }
+      // A touch is not a hover. Tapping a control can synthesize mouseenter
+      // without a matching mouseleave on a phone, so do not let that stale
+      // hover state make later mousemove events keep the controls visible.
+    isHoveringRef.current = false;
+  }, [queryClient]);
+
+  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+    const touch = e.changedTouches[0];
+    // A flick that scrolled the feed past this card is not a tap on it. Without
+    // this the touchend that ends a scroll landed as a tap and toggled playback.
+    const start = touchStartRef.current;
+    touchStartRef.current = null;
+    // Fullscreen is its own screen, so "scrolling down" there means the next
+    // video — the same gesture as every short-video app.
+    if (start && isFullscreen && swipeToShorts && !isControlTarget(e.target)
+      && isBrainrotSwipe(start, { x: touch.clientX, y: touch.clientY })) {
+      e.preventDefault();
+      swipeIntoShorts();
+      return;
+    }
+    if (start && Math.hypot(touch.clientX - start.x, touch.clientY - start.y) > TAP_SLOP_PX) {
+      e.preventDefault(); // no compatibility click either
+      return;
+    }
+
+    if (isControlTarget(e.target)) {
+      // The control owns the tap — no preventDefault, or the synthesized click
+      // that actually activates the button never arrives. Re-arm the hide timer
+      // though: using a control counts as activity, so the panel shouldn't
+      // vanish 2s after the tap that opened it while a finger is still on it.
+      showControlsBriefly();
+      return;
+    }
+
+    if (feedPreview) {
+      // Pointer release opens the viewer without a multi-tap delay.
+      e.preventDefault();
+      return;
+    }
+
+    if (liveFeedPreview) {
+      e.preventDefault();
+      openPost();
+      return;
+    }
+
+    if (!isImmersive) {
+      e.preventDefault();
+      showControlsBriefly();
+      handlePlayClick();
+      return;
+    }
+
+    // Pointer events own the one/two/three-tap ladder. Suppress the browser's
+    // compatibility click so touch cannot run a second playback action.
+    e.preventDefault();
+    showControlsBriefly();
+  }, [isImmersive, showControlsBriefly, handlePlayClick, isFullscreen, swipeToShorts, swipeIntoShorts, feedPreview, liveFeedPreview, openPost]);
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  // Format numbers with abbreviations (1K, 1M, etc.) - no decimals
+  const formatCompact = (num: number | null | undefined): string => {
+    const n = Number(num);
+    if (!Number.isFinite(n) || n <= 0) return '0';
+    if (n >= 1000000) return `${Math.floor(n / 1000000)}M`;
+    if (n >= 1000) return `${Math.floor(n / 1000)}K`;
+    return String(Math.floor(n));
+  };
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    // A feed preview has no transport: its only control is mute.
+    // Full screen is the whole screen, so its keys work wherever focus sits.
+    if ((!isFocused && !isFullscreen) || feedPreview) return;
+    // Inline and paused, only Space (resume) and F answer: the arrows go back
+    // to scrolling the page.
+    const transportKeys = isPlaying || isFullscreen;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      const target = e.target as HTMLElement | null;
+      const tag = target?.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || target?.isContentEditable) return;
+      // A focused button or slider keeps its own keys.
+      const onControl = !!target?.closest?.('button, a, [role="button"], [role="slider"], [role="menu"], [role="dialog"]');
+      if (onControl && (e.key === ' ' || e.key.startsWith('Arrow'))) return;
+      if (!transportKeys && e.key !== ' ' && e.key !== 'k' && e.key !== 'f') return;
+      // A key in full screen brings the transport up for a moment, as a pointer move does.
+      if (isFullscreen && [' ', 'k', 'm', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) showControlsBriefly();
+      switch (e.key) {
+        case ' ':
+        case 'k':
+          e.preventDefault();
+          handlePlayClick();
+          break;
+        case 'f':
+          if (isPhone || video.isAudio) return;
+          e.preventDefault();
+          switchFullscreen();
+          break;
+        case 'ArrowLeft':
+          e.preventDefault();
+          seekBy(-5);
+          break;
+        case 'ArrowRight':
+          e.preventDefault();
+          seekBy(5);
+          break;
+        case 'ArrowUp':
+          e.preventDefault();
+          adjustVolume(0.1);
+          break;
+        case 'ArrowDown':
+          e.preventDefault();
+          adjustVolume(-0.1);
+          break;
+        case 'm':
+          e.preventDefault();
+          setIsMuted(prev => {
+            const newMuted = !prev;
+            videoPlaybackManager.globalMuted = newMuted;
+            if (!newMuted) videoPlaybackManager.claimAudio(instanceId);
+            if (videoRef.current) videoRef.current.muted = newMuted;
+            return newMuted;
+          });
+          break;
+        case 'p':
+          e.preventDefault();
+          if (document.pictureInPictureEnabled && videoRef.current) {
+            if (document.pictureInPictureElement) {
+              document.exitPictureInPicture().catch(() => {});
+            } else {
+              videoRef.current.requestPictureInPicture().catch(() => {});
+            }
+          }
+          break;
+      }
+    };
+    
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isFocused, isFullscreen, isPlaying, feedPreview, isPhone, video.isAudio, handlePlayClick, switchFullscreen, showControlsBriefly, seekBy, adjustVolume]);
+  // Navigate to single post page when clicking non-interactive areas (header only)
+  // Pre-cache video data for instant display on the single post page
+  const handleCardClick = useCallback((e: React.MouseEvent) => {
+    const target = e.target as HTMLElement;
+    const isInteractive = target.closest('button, a, input, textarea, [role="button"], [data-no-navigate]');
+    if (isInteractive) return;
+    // Allow text selection without navigating
+    const selection = window.getSelection();
+    if (selection && selection.toString().length > 0) return;
+    // openPost carries the rest of the guards (an open drawer, or one just
+    // dismissed by a scrim tap whose ghost click would otherwise open the post).
+    openPost();
+  }, [openPost]);
+  
+  // One radius token rather than two competing utilities: fullscreen must stay
+  // square, and a `lg:` override would outrank the fullscreen `rounded-none` at
+  // desktop widths. Immersive media runs edge-to-edge on mobile, but on desktop
+  // it sits inset inside the post shell's rounded-2xl bento, where a square
+  // frame is the only hard rectangle in the column — ImageCard, which fills the
+  // same slot for image posts, has always rounded there.
+  const mediaRadius = isFullscreen
+    ? 'rounded-none'
+    : stage
+      ? 'rounded-2xl'
+      : isImmersive ? 'rounded-none lg:rounded-2xl'
+      : 'rounded-2xl';
+
+  // The immersive wrapper used to ship `bg-black lg:bg-transparent`. Every
+  // theme's untagged-slab net matches `[class*='bg-black']` and is scoped under
+  // #app-root, so it carries an id and outranked the `lg:` override at every
+  // width: the wrapper painted a slab across the video and the title block that
+  // then stopped dead, leaving a seam partway down the page — theme material on
+  // Osaka and Jungle, flat black over the canvas on Cosmic, Hazy and War. It has
+  // no surface of its own to draw. Behind it [data-post-page] is already black
+  // on the opaque themes, paper on light and transparent on every canvas theme,
+  // and the desktop branch has the post shell. Carrying no colour class is what
+  // keeps it unreachable by those nets, permanently — do not give it one again.
+  // Same fix, same reason, as [data-post-overlay-backdrop] in index.css.
+  // Right-click anywhere on the card: every action for the post at the pointer.
+  const onPostContextMenu = usePostMenuContext(() => ({
+    id: video.id,
+    newPostId: video.status === 'signed' ? video.newPostId ?? null : null,
+    articleSlug: video.articleSlug,
+    authorId: video.creatorId,
+    authorName: video.channel,
+    authorHandle: video.creatorUsername,
+    text: [video.title, video.description].filter(Boolean).join('\n\n'),
+    title: video.title ?? video.description ?? '',
+    isOwn: isOwnPost,
+    visibility: video.visibility,
+    quotePolicy: video.quotePolicy,
+    myReaction: video.myReaction,
+    isReposted: video.isReposted,
+    noTip: !!video.creatorPaymentsDisabled,
+    videoUrl: requiresVideoAccess || video.isAudio || video.isLivePost ? null : video.videoUrl,
+    actions: {
+      comments: () => {
+        if (onOpenComments) { onOpenComments(); return; }
+        setCommentsInitialTab(undefined);
+        setShowComments(true);
+      },
+      askAI: () => { if (!walletAddress) { openLoginModal(); return; } setShowAIChat(true); },
+      seeEngagements: () => {
+        if (onOpenComments) { onOpenComments('reposts'); return; }
+        setCommentsInitialTab('reposts');
+        setShowComments(true);
+      },
+      quote: handleQuote,
+      tip: () => setShowTipModal(true),
+      report: () => setShowReportModal(true),
+      boost: () => setShowBoostModal(true),
+      edit: isOwnPost ? () => setShowEditModal(true) : undefined,
+      delete: isOwnPost ? () => setShowDeleteModal(true) : undefined,
+    },
+  }));
+
+  return (
+    <div
+      ref={scrubEventRef}
+      data-video-card
+      data-stats-token={video.isAd ? undefined : video.id}
+      onContextMenu={video.isAd ? undefined : onPostContextMenu}
+      data-video-header-above={headerAboveMedia ? '' : undefined}
+      onClick={isImmersive || stage ? undefined : handleCardClick}
+      className={isImmersive || stage
+        ? "overflow-hidden isolate"
+        : "overflow-visible cursor-pointer isolate"
+      }
+      {...scrubZone}
+      onPointerDownCapture={event => {
+        scrubZone.onPointerDownCapture?.(event);
+        if (!event.isPropagationStopped() && !isImmersive && !stage && !isControlTarget(event.target)) {
+          if (feedShortsTarget) import('@/components/app/BrainrotFeedHost').catch(() => {});
+          else warmPostPage();
+        }
+      }}
+      data-tablet-portrait={tabletPortrait || undefined}
+      style={tabletPortrait ? { ['--tablet-video-width' as string]: `min(44%, calc(65svh * ${mediaAspect.toFixed(4)}))` } : undefined}
+    >
+      {/* Header with AI and menu buttons - hidden in immersive mode and carousel (hideActions) mode */}
+      {!isImmersive && !hideActions && !stage && (
+        <div data-card-head={headerAboveMedia ? 'plain' : ''} className="flex items-start justify-between">
+          <CardHeader
+            postPage={postPage}
+            tokenId={videoTokenId}
+            username={video.channel}
+            visibility={video.visibility}
+            handle={video.creatorUsername}
+            avatarSeed={video.channelAvatar}
+            verified={video.verified}
+            contentType="video"
+            creatorId={video.creatorId}
+            creatorUsername={video.creatorUsername}
+            badgeBalance={video.creatorBadgeBalance}
+          />
+          {!postPage && <div className="flex items-center gap-1">
+            {(isOwnPost || boosted) && (
+              <PostHeaderBoostButton
+                rowGap={4}
+                lit={boosted}
+                onClick={() => (isOwnPost ? setShowBoostModal(true) : navigate('/app/superpowers'))}
+                aria-label={isOwnPost ? t('postOptions.boostPost') : _copy("copy.c1f1c8819e33", { defaultValue: "Boosted" })}
+              />
+            )}
+            {/* Plain button, not DrawerTrigger — see PostCard: a trigger pins
+                vaul's Root (and its window scroll listener) into every card.
+                The sheet itself is mounted once at the card root and shared
+                with the carousel and immersive openers further down; a second
+                <Drawer> here bound to the same state opened a duplicate. */}
+            <PostHeaderOptionsButton onClick={() => { if (!walletAddress) { openLoginModal(); return; } setShowOptionsDrawer(true); }} data-head-options />
+          </div>}
+        </div>
+      )}
+
+      {postPage && postHeadSlot && !hideActions && createPortal(
+          <div className="flex items-center gap-1">
+            {(isOwnPost || boosted) && (
+              <PostHeaderBoostButton
+                rowGap={4}
+                lit={boosted}
+                onClick={() => (isOwnPost ? setShowBoostModal(true) : navigate('/app/superpowers'))}
+                aria-label={isOwnPost ? t('postOptions.boostPost') : _copy("copy.c1f1c8819e33", { defaultValue: "Boosted" })}
+              />
+            )}
+            <PostHeaderOptionsButton onClick={() => { if (!walletAddress) { openLoginModal(); return; } setShowOptionsDrawer(true); }} data-head-options />
+          </div>,
+          postHeadSlot,
+        )}
+
+        {/* Video Player / Thumbnail. On desktop it sits in a row that holds the
+            wide-screen rails when they are on (display: contents otherwise, so
+            nothing else sees the wrapper). Phones never get the wrapper: their
+            theme rules select the frame as a direct child of the card. */}
+      <WideRailsRow
+        enabled={wideViewport}
+        rails={wideRailsRow}
+        panel={(
+          <WideVideoPanel
+            video={video}
+            walletAddress={walletAddress}
+            onLogin={openLoginModal}
+            isOwnPost={isOwnPost}
+            hideCaption={contentWarning.hidden}
+            title={railTitle}
+            body={railDescription ? (
+              <ExpandableDescription
+                description={railDescription}
+                isImmersive={false}
+                clampLines={4}
+                hideAssetCards={video.hideAssetCards}
+                hiddenLinkPreviews={video.hiddenLinkPreviews}
+              />
+            ) : null}
+            translate={videoTranslateControl}
+            onOpenComments={() => {
+              if (onOpenComments) { onOpenComments(); return; }
+              setCommentsInitialTab(undefined);
+              setShowComments(true);
+            }}
+          />
+        )}
+      >
+      <div 
+        ref={containerRef}
+        data-wide-rails-frame={wideRails || undefined}
+        tabIndex={0}
+        data-feed-preview={(phoneFeedFrame && !tabletPortrait) || undefined}
+        data-media-frame-key={!isImmersive && !isFullscreen ? `video:${video.id}` : undefined}
+        data-media-frame-measured={resolvedVideoAspect == null ? undefined : measuredAspect}
+        data-audio-frame={video.isAudio || undefined}
+        data-video-pointer-hidden={(isFullscreen && overlayControls && !controlsVisible) || undefined}
+        data-no-navigate
+        data-feed-video-frame={cropFeedVideo || undefined}
+        data-video-split-controls={splitControls || undefined}
+        data-video-fullscreen={isFullscreen || undefined}
+        data-media-full
+        className={`bg-black cursor-pointer group/thumb outline-none focus:outline-none focus-visible:outline-none overflow-hidden ${mediaRadius} ${isFullscreen ? 'fixed inset-0 z-[9999] w-screen h-[100dvh] flex items-center justify-center' : `relative ${isImmersive ? 'mx-auto' : ''} ${isImmersive && showComments ? 'aspect-[2/1]' : ''}`}`}
+        /* Inline footage fills the width and crops within its height budget.
+           The transport stays below it; fullscreen retains the full picture. */
+        style={{ ...(
+          isFullscreen || (isImmersive && showComments)
+            ? undefined
+            : wideRails
+              ? {
+                  // Hugs the picture beside the one info panel, which keeps at
+                  // least 260px (plus the 12px gap).
+                  // The control strip under the picture takes 47px of the height.
+                  aspectRatio: mediaAspect,
+                  width: `min(calc((${wideMaxHeight}${splitControls ? ' - 47px' : ''}) * ${mediaAspect.toFixed(4)}), calc(100% - 272px))`,
+                  maxHeight: splitControls ? `calc(${wideMaxHeight} - 47px)` : wideMaxHeight,
+                  flex: 'none',
+                }
+            : wideAmbient && desktopFeedHug
+              ? {
+                  // Full column width; the picture sits in the middle with the
+                  // ambient fill beside it.
+                  aspectRatio: feedFrameAspect,
+                  width: '100%',
+                  maxHeight: DESKTOP_FEED_MAX_HEIGHT,
+                }
+            : isImmersive
+              ? {
+                  aspectRatio: mediaAspect,
+                  width: '100%',
+                  maxHeight: splitControls
+                    ? `calc(${isPhone ? FEED_PREVIEW_MAX_HEIGHT : IMMERSIVE_MAX_MEDIA_HEIGHT} - 47px)`
+                    : isPhone ? FEED_PREVIEW_MAX_HEIGHT : IMMERSIVE_MAX_MEDIA_HEIGHT,
+                }
+              : phoneFeedFrame
+                ? {
+                    // Tall previews crop vertically instead of narrowing the frame.
+                    aspectRatio: mediaAspect,
+                    width: '100%',
+                    maxHeight: FEED_PREVIEW_MAX_HEIGHT,
+                    marginLeft: 0,
+                    marginRight: 'auto',
+                  }
+              : desktopFeedHug
+                ? {
+                    // The frame hugs the clip, up to 75% of the screen tall,
+                    // left aligned, so a short keeps its upright shape.
+                    aspectRatio: feedFrameAspect,
+                    width: `min(100%, calc(${DESKTOP_FEED_MAX_HEIGHT} * ${feedFrameAspect.toFixed(4)}))`,
+                    maxHeight: DESKTOP_FEED_MAX_HEIGHT,
+                    marginLeft: 0,
+                    marginRight: 'auto',
+                  }
+              : cropFeedVideo
+                ? {
+                    aspectRatio: feedFrameAspect,
+                    width: '100%',
+                    maxHeight: splitControls ? 'calc(75svh - 47px)' : '75svh',
+                  }
+                : {
+                  aspectRatio: mediaAspect,
+                  width: `min(100%, ${Math.round(MAX_MEDIA_HEIGHT * mediaAspect)}px)`,
+                  // Backstop for the minimal theme, which forces media to full
+                  // bleed with !important width: the box letterboxes there rather
+                  // than growing past a screen.
+                  maxHeight: splitControls ? MAX_MEDIA_HEIGHT - 47 : MAX_MEDIA_HEIGHT,
+                }
+        ), ...(splitControls ? { paddingBottom: 47, boxSizing: 'content-box' as const, ...(isFullscreen ? { height: 'calc(100dvh - 47px)' } : {}) } : {}) }}
+        onClick={video.isAudio ? undefined : handleVideoAreaClick}
+        onTouchStart={video.isAudio ? undefined : handleTouchStart}
+        onTouchEnd={video.isAudio ? undefined : handleTouchEnd}
+        {...tapGestures}
+        onMouseEnter={() => {
+          isHoveringRef.current = true;
+          setShowControls(true);
+          if (controlsTimerRef.current) clearTimeout(controlsTimerRef.current);
+          controlsTimerRef.current = setTimeout(() => setShowControls(false), CONTROLS_HIDE_MS);
+        }}
+        onMouseMove={() => {
+          // Full screen opened from the keyboard never saw the pointer come in.
+          if (!isHoveringRef.current) {
+            if (!isFullscreen) return;
+            isHoveringRef.current = true;
+          }
+          setShowControls(true);
+          if (controlsTimerRef.current) clearTimeout(controlsTimerRef.current);
+          controlsTimerRef.current = setTimeout(() => setShowControls(false), CONTROLS_HIDE_MS);
+        }}
+        onMouseLeave={() => {
+          isHoveringRef.current = false;
+          if (controlsTimerRef.current) clearTimeout(controlsTimerRef.current);
+          setShowControls(false);
+          if (!dubAvailable) setVolumeOpen(false);
+        }}
+        onFocus={() => setIsFocused(true)}
+        onBlur={() => setIsFocused(false)}
+      >
+        <div data-video-picture className={splitControls ? "absolute inset-x-0 top-0 bottom-[47px]" : "contents"}>
+        {wideAmbient && <WideAmbientFill videoRef={videoRef} thumbnail={thumbnail || undefined} live={ownsVideoElement} />}
+        {/* Mature warning sits outermost: revealing it falls through to
+            whatever gate the post actually has, rather than replacing it. */}
+        {contentWarning.hidden ? (
+          <ContentWarningGate
+            text={contentWarning.text}
+            preview={thumbnail}
+            onReveal={contentWarning.reveal}
+            className="w-full h-full rounded-lg [&>img]:h-full [&>img]:max-h-none"
+          />
+        ) : matureGate.isGated ? (
+          <MatureContentGate
+            preview={thumbnail}
+            onReveal={matureGate.reveal}
+            className="w-full h-full rounded-lg [&>img]:h-full [&>img]:max-h-none"
+          />
+        ) : /* Combo PPV + Holdings Locked */ isComboLocked ? (
+          <>
+            <GatePreview src={thumbnail} className="w-full h-full object-cover rounded-lg" />
+            <div 
+              data-gate-overlay
+              data-keep-dark
+                className="absolute inset-0 flex flex-col items-center justify-center bg-black/30 cursor-pointer"
+              onClick={(e) => { e.stopPropagation(); setShowPPVDrawer(true); }}
+              onTouchStart={(e) => { (e.currentTarget as any)._touchStart = { x: e.touches[0].clientX, y: e.touches[0].clientY }; }}
+              onTouchEnd={(e) => {
+                const start = (e.currentTarget as any)._touchStart;
+                (e.currentTarget as any)._touchStart = null;
+                if (!start) return;
+                const touch = e.changedTouches[0];
+                if (!touch) return;
+                // Only consume taps; swipes must reach the feed's tab navigation.
+                if (Math.abs(touch.clientX - start.x) < 10 && Math.abs(touch.clientY - start.y) < 10) { e.stopPropagation(); e.preventDefault(); setShowPPVDrawer(true); }
+              }}
+            >
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-14 h-14 rounded-2xl bg-black/40 backdrop-blur-[24px] backdrop-saturate-[180%] flex items-center justify-center border border-white/10">
+                  <Ticket className="h-6 w-6 text-white" />
+                </div>
+                <div className="w-14 h-14 rounded-2xl bg-black/40 backdrop-blur-[24px] backdrop-saturate-[180%] flex items-center justify-center border border-white/10">
+                  <Lock className="h-6 w-6 text-white" />
+                </div>
+              </div>
+              <p className="text-white font-semibold text-sm mb-1">
+                {t('drawers.unlockFor')} <DhbAmount amount={formatCompact(Number(video.ppvPrice))} currency={video.ppvCurrency} />
+              </p>
+              <p className="text-white/70 text-xs">{_copy("copy.5ec168a82232", { defaultValue: "Must be holding " })}<DhbAmount amount={formatCompact(Number(video.lockedPrice))} currency={video.lockedCurrency} />
+              </p>
+            </div>
+          </>
+        ) : isPPVLocked ? (
+          <>
+            <GatePreview src={thumbnail} className="w-full h-full object-cover" />
+            <div 
+              data-gate-overlay
+              data-keep-dark
+                className="absolute inset-0 flex flex-col items-center justify-center bg-black/30 cursor-pointer"
+              onClick={(e) => { e.stopPropagation(); setShowPPVDrawer(true); }}
+              onTouchStart={(e) => { (e.currentTarget as any)._touchStart = { x: e.touches[0].clientX, y: e.touches[0].clientY }; }}
+              onTouchEnd={(e) => {
+                const start = (e.currentTarget as any)._touchStart;
+                (e.currentTarget as any)._touchStart = null;
+                if (!start) return;
+                const touch = e.changedTouches[0];
+                if (!touch) return;
+                // Only consume taps; swipes must reach the feed's tab navigation.
+                if (Math.abs(touch.clientX - start.x) < 10 && Math.abs(touch.clientY - start.y) < 10) { e.stopPropagation(); e.preventDefault(); setShowPPVDrawer(true); }
+              }}
+            >
+              <div data-keep-dark className="w-16 h-16 rounded-2xl bg-black/40 backdrop-blur-[24px] backdrop-saturate-[180%] flex items-center justify-center border border-white/10 mb-3">
+                <Ticket className="h-7 w-7 text-white" />
+              </div>
+              <p className="text-white font-semibold text-sm mb-1">{t('drawers.ppvTitle')}</p>
+              <p className="text-white/70 text-xs">
+                {t('drawers.unlockFor')} {formatCompact(Number(video.ppvPrice))} {ppvTokenLabel(video.ppvCurrency || 'DHB')}
+              </p>
+              
+            </div>
+            {video.ppvPreviewReady && videoTokenId && !isSubGated && !video.isW2E && (
+              <PpvFreePreview key={video.id} tokenId={video.id} />
+            )}
+          </>
+        ) : isSubGated ? (
+          <>
+            {/* Subscriber gate — subscribe to this creator. Not the holdings
+                gate below, which anyone can satisfy by buying tokens. */}
+            <GatePreview src={thumbnail} className="w-full h-full object-cover" />
+            <div
+              data-gate-overlay
+              data-keep-dark
+                className="absolute inset-0 flex flex-col items-center justify-center bg-black/30 cursor-pointer"
+              onClick={(e) => { e.stopPropagation(); setShowSubDrawer(true); }}
+              onTouchStart={(e) => { (e.currentTarget as any)._touchStart = { x: e.touches[0].clientX, y: e.touches[0].clientY }; }}
+              onTouchEnd={(e) => {
+                const start = (e.currentTarget as any)._touchStart;
+                (e.currentTarget as any)._touchStart = null;
+                if (!start) return;
+                const touch = e.changedTouches[0];
+                if (!touch) return;
+                // Only consume taps; swipes must reach the feed's tab navigation.
+                if (Math.abs(touch.clientX - start.x) < 10 && Math.abs(touch.clientY - start.y) < 10) { e.stopPropagation(); e.preventDefault(); setShowSubDrawer(true); }
+              }}
+            >
+              <div data-keep-dark className="w-16 h-16 rounded-2xl bg-black/40 backdrop-blur-[24px] backdrop-saturate-[180%] flex items-center justify-center border border-white/10 mb-3">
+                <Star className="h-7 w-7 text-white" />
+              </div>
+              <p className="text-white font-semibold text-sm mb-1">{_copy("copy.109ddfc1cc4a", { defaultValue: "Subscribers only" })}</p>
+              <p className="text-white/70 text-xs">
+                {cheapestQuote ? (
+                  <SubscribeFromPrice quote={cheapestQuote} />
+                ) : (
+                  _copy("copy.855f365abafc", { defaultValue: "Subscribe to {{value1}}", value1: video.channel })
+                )}
+              </p>
+            </div>
+          </>
+        ) : isHoldingsLocked ? (
+          <>
+            <GatePreview src={thumbnail} className="w-full h-full object-cover" />
+            <div
+              data-gate-overlay
+              data-keep-dark
+                className="absolute inset-0 flex flex-col items-center justify-center bg-black/30 cursor-pointer"
+              onClick={(e) => { e.stopPropagation(); setShowLockedDrawer(true); }}
+              onTouchStart={(e) => { (e.currentTarget as any)._touchStart = { x: e.touches[0].clientX, y: e.touches[0].clientY }; }}
+              onTouchEnd={(e) => {
+                const start = (e.currentTarget as any)._touchStart;
+                (e.currentTarget as any)._touchStart = null;
+                if (!start) return;
+                const touch = e.changedTouches[0];
+                if (!touch) return;
+                // Only consume taps; swipes must reach the feed's tab navigation.
+                if (Math.abs(touch.clientX - start.x) < 10 && Math.abs(touch.clientY - start.y) < 10) { e.stopPropagation(); e.preventDefault(); setShowLockedDrawer(true); }
+              }}
+            >
+              <div data-keep-dark className="w-16 h-16 rounded-2xl bg-black/40 backdrop-blur-[24px] backdrop-saturate-[180%] flex items-center justify-center border border-white/10 mb-3">
+                <Lock className="h-7 w-7 text-white" />
+              </div>
+              <p className="text-white font-semibold text-sm mb-1">{_copy("copy.490f4babbf34", { defaultValue: "Holdings Required" })}</p>
+              <p className="text-white/70 text-xs">{_copy("copy.5ec168a82232", { defaultValue: "Must be holding " })}<DhbAmount amount={formatCompact(Number(video.lockedPrice))} currency={video.lockedCurrency} />
+              </p>
+            </div>
+          </>
+        ) : isBountyLocked ? (
+          <>
+            <GatePreview src={thumbnail} className="w-full h-full object-cover" />
+            <div 
+              data-gate-overlay
+              data-keep-dark
+                className="absolute inset-0 flex flex-col items-center justify-center bg-black/30 cursor-pointer"
+              onClick={(e) => { e.stopPropagation(); setShowBountyDrawer(true); }}
+              onTouchStart={(e) => { (e.currentTarget as any)._touchStart = { x: e.touches[0].clientX, y: e.touches[0].clientY }; }}
+              onTouchEnd={(e) => {
+                const start = (e.currentTarget as any)._touchStart;
+                (e.currentTarget as any)._touchStart = null;
+                if (!start) return;
+                const touch = e.changedTouches[0];
+                if (!touch) return;
+                // Only consume taps; swipes must reach the feed's tab navigation.
+                if (Math.abs(touch.clientX - start.x) < 10 && Math.abs(touch.clientY - start.y) < 10) { e.stopPropagation(); e.preventDefault(); setShowBountyDrawer(true); }
+              }}
+            >
+              <div data-keep-dark className="w-16 h-16 rounded-2xl bg-black/40 backdrop-blur-[24px] backdrop-saturate-[180%] flex items-center justify-center border border-white/10 mb-3">
+                <Gift className="h-7 w-7 text-white" />
+              </div>
+              <p className="text-white font-semibold text-sm mb-1">{t('drawers.bountyTitle')}</p>
+              <p className="text-white/70 text-xs">
+                {video.bountyAmount && video.bountyAmount > 0 
+                  ? <DhbAmount amount={formatCompact(video.bountyAmount)} currency={video.bountyCurrency} />
+                  : t('drawers.bountyDescription')}
+              </p>
+            </div>
+          </>
+        ) : (
+          <>
+            {video.isAudio && video.audioUrl ? (
+              /* Audio post: liquid glass container with static waveform backdrop */
+              <div data-audio-backdrop className="relative w-full h-full bg-black/60 backdrop-blur-[24px] border border-white/10 overflow-hidden">
+                {/* Live AudioVisualizer */}
+                <div className="absolute inset-0">
+                  <Suspense fallback={<AudioStudioPlaceholder />}>
+                    <AudioVisualizer
+                      tokenId={video.id}
+                      viewerKey={walletAddress}
+                      requiresAccess={!!video.isPPV || isHoldGated(video.isLocked, video.lockedPrice) || !!video.subscriberPlans?.length || (!!video.visibility && video.visibility !== 'public')}
+                      audioUrl={video.audioUrl}
+                      artworkUrl={thumbnail || undefined}
+                      isPlaying={isPlaying}
+                      onPlayPause={handlePlayClick}
+                      className="w-full h-full"
+                      showStylePicker={true}
+                      muted={isMuted}
+                      onMuteChange={setIsMuted}
+                      seed={video.id}
+                      decodeEnabled={nearViewport}
+                      waveformOnPlay={!postPage}
+                      durationHint={video.audioDuration || video.durationSeconds || 0}
+                      /* The card's own fullscreen, so the element that goes to
+                         the top layer is the media container — the one holding
+                         the visualizer AND its controls. `videoRef` is null on
+                         an audio post, so the hook takes the container path
+                         rather than iOS's system player. */
+                      onFullscreen={handleFullscreen}
+                      isFullscreen={isFullscreen}
+                      popoutTrack={{
+                        tokenId: video.id,
+                        audioUrl: video.audioUrl,
+                        title: video.title || '',
+                        artist: video.channel || '',
+                        artworkUrl: thumbnail || video.channelAvatar || null,
+                      }}
+                      onPopOutChange={handleAudioPopOutChange}
+                      /* The feed card and the post page's card share one
+                         player for this post, so opening it does not restart
+                         the track — see lib/audio-handoff. */
+                      handoffKey={video.id}
+                      onPlaybackAdopted={handleAudioPlaybackAdopted}
+                    />
+                  </Suspense>
+                </div>
+              </div>
+            ) : transcodingStatus === 'failed' ? (
+              /* Transcode job failed server-side — videoUrl was written
+                 optimistically at upload time and the file was never actually
+                 produced, so a player here would just 404 forever. */
+              <div className="absolute inset-0 overflow-hidden bg-black">
+                {thumbnail && (
+                  <img src={thumbnail} srcSet={cdnImageSrcSet(thumbnail, [320, 480, 640, 960, 1280])} sizes="(min-width: 1024px) 600px, 100vw" decoding="async" alt="" className="w-full h-full object-cover opacity-50" loading={aboveFold ? 'eager' : 'lazy'} />
+                )}
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/40">
+                  <Suspense fallback={<span className="text-white/80 text-xs">{t('videoPlayer.processingFailed')}</span>}>
+                    <TranscodeRetry tokenId={video.id} isOwner={isOwnPost} />
+                  </Suspense>
+                </div>
+              </div>
+            ) : (transcodingStatus === 'pending' || transcodingStatus === 'on') ? (
+              /* Still transcoding — same optimistic videoUrl, but recoverable
+                 once the job finishes, unlike the 'failed' branch above. */
+              <div data-keep-dark className="absolute inset-0 overflow-hidden bg-black">
+                {thumbnail && (
+                  <img src={thumbnail} srcSet={cdnImageSrcSet(thumbnail, [320, 480, 640, 960, 1280])} sizes="(min-width: 1024px) 600px, 100vw" decoding="async" alt="" className="w-full h-full object-cover opacity-50" loading={aboveFold ? 'eager' : 'lazy'} />
+                )}
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/40">
+                  <Suspense fallback={<span className="text-white/80 text-xs">{t('videoPlayer.transcoding')}</span>}>
+                    <TranscodingBadge tokenId={video.id} isOwner={isOwnPost} />
+                  </Suspense>
+                </div>
+              </div>
+            ) : video.videoUrl && !(video.isLivePost && video.isLiveNow) ? (
+              /* The <video> is not rendered here — useHandoffVideo puts the
+                 pooled element inside this slot, so it can move to the post page
+                 without being torn down and recreated. The poster sits behind it
+                 rather than on it: while the post page holds the element, this
+                 card's slot is empty, and an empty black box would show through
+                 the post layer on the canvas themes. */
+              <>
+                {thumbnail && (
+                  <img
+                    src={thumbnail} srcSet={cdnImageSrcSet(thumbnail, [320, 480, 640, 960, 1280])} sizes="(min-width: 1024px) 600px, 100vw" decoding="async"
+                    alt=""
+                    aria-hidden="true"
+                    onLoad={notePosterShape}
+                    // Full screen shows the clip alone once this card holds the
+                    // player: a cover of another shape used to spill out behind
+                    // a tall clip, filling the screen on both sides of it. A cover that is not the clip's shape
+                    // fills the inline frame instead of sitting in it with bars.
+                    className={`absolute inset-0 w-full h-full ${isFullscreen ? (ownsVideoElement ? 'object-contain opacity-0' : 'object-contain') : isPhone || posterOffShape ? 'object-cover' : wideCentered ? 'object-contain' : 'object-contain object-left'}`}
+                    loading={aboveFold ? 'eager' : 'lazy'}
+                    fetchPriority={aboveFold ? 'high' : 'auto'}
+                  />
+                )}
+                <div
+                  ref={attachVideoSlot}
+                  aria-hidden={!mediaAttached || undefined}
+                  className={cn("absolute inset-0 w-full h-full", hasError && "invisible")}
+                />
+                <AltTextBadge text={video.mediaDescriptions?.[0]} className="absolute left-2 top-2" />
+              </>
+            ) : video.isLivePost && video.isLiveNow ? (
+              /* On air: play the stream right here. The feed used to show only
+                 a poster for a live post, so a stream that was actually running
+                 read as a dead card until you opened it. */
+              /* The preview is its own chunk, so the fallback shows the cover:
+                 when a live post tops the feed this cover is the phone LCP,
+                 and a black box here held it back until the chunk loaded. */
+              !homeMediaReady ? livePreviewPoster : <Suspense fallback={livePreviewPoster}>
+                <LiveFeedPreview
+                  eager={aboveFold}
+                  streamId={video.liveStreamId}
+                  streamStatus={video.liveStatus}
+                  creatorId={video.creatorId}
+                  isOwner={video.isOwner}
+                  selfReaction={selfReaction}
+                  urls={video.livePlaybackUrls || [video.livePlaybackUrl]}
+                  thumbnail={thumbnail}
+                  fallbackLabel={t('feed.live')}
+                  muted={liveFeedPreview ? !liveSoundOn : isMuted}
+                  controlsVisible={liveFeedPreview ? false : controlsVisible}
+                  onToggleMute={toggleMute}
+                  audienceHandoff={previewHandoff}
+                />
+              </Suspense>
+            ) : (
+              /* No playable URL — a past live (or url-less video). Show the
+                 cover image if there is one, otherwise a staticy TV screen.
+                 Never an empty black box. */
+              <LiveEndedMedia
+                thumbnail={thumbnail}
+                label={video.isLivePost ? _copy("copy.b8b7b20faac9", { defaultValue: "Live ended" }) : _copy("copy.ca1844969742", { defaultValue: "Unavailable" })}
+              />
+            )}
+           </>
+        )}
+
+        {/* Blank/black poster fallback — a neutral play-cover so a video whose
+            thumbnail is a flat black frame never reads as an empty black box.
+            Sits above the video but below the controls (z-10); pointer-events
+            stay off so the container's click/tap still triggers play. Hidden
+            once the clip is playing or actively loading. */}
+        {posterBlank && video.videoUrl && !isContentGated && !isPlaying && !isLoading && (
+          <div
+            className="absolute inset-0 z-[5] flex items-center justify-center bg-gradient-to-b from-zinc-800 to-black pointer-events-none"
+            aria-hidden="true"
+          >
+            {/* The centre control already draws a play glyph; a second one
+                here stacked two triangles on top of each other. */}
+            {!showCenterPlay && (
+              <div data-keep-dark className="w-16 h-16 rounded-2xl bg-black/40 backdrop-blur-[24px] backdrop-saturate-[180%] border border-white/10 flex items-center justify-center">
+                <Play className="w-7 h-7 text-white fill-current ml-1" />
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* The post's song. Tapping it starts a new post with the same song. */}
+        {hasSoundtrack && video.soundtrackTitle && video.soundtrackUrl && (
+          <button
+            type="button"
+            data-no-navigate
+            data-keep-dark
+            onClick={(event) => {
+              event.stopPropagation();
+              if (!walletAddress) { openLoginModal(); return; }
+              dropZone?.openPostModalWithSound(soundFromPost(video.soundtrackUrl!, video.soundtrackTitle!, video.soundtrackCreator));
+            }}
+            aria-label={`${_copy("copy.0418db35eb35", { defaultValue: "Use this sound" })}: ${video.soundtrackTitle}`}
+            className="absolute bottom-2 left-2 z-10 flex items-center gap-1.5 bg-black/40 backdrop-blur-[16px] px-2 py-1 rounded-lg border border-white/10 max-w-[60%] text-left transition-colors hover:bg-black/55 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+          >
+            <Music className="w-3 h-3 text-white flex-shrink-0" />
+            <span className="text-white text-[10px] truncate">
+              {video.soundtrackTitle}{video.soundtrackCreator ? ` — ${video.soundtrackCreator}` : ''}
+            </span>
+          </button>
+        )}
+        
+        {onBack && !stage && !video.isAudio && !isFullscreen && (controlsVisible || isContentGated) && (
+          <button
+            type="button"
+            data-video-controls
+            data-video-back
+            data-video-bare
+            aria-label={t('common.goBack')}
+            className="absolute left-2 top-1.5 z-20 h-8 w-8 text-white flex items-center justify-center"
+            onClick={(event) => { event.stopPropagation(); onBack(); }}
+            data-swipe-back
+          >
+            <MediaControlIcon icon={ArrowLeft} />
+          </button>
+        )}
+
+        {video.isW2E && !stage && (
+          <button
+            type="button"
+            aria-label={t('drawers.bountyTitle')}
+            className={cn("absolute left-2 z-10 flex items-center gap-1 bg-black/40 backdrop-blur-[24px] backdrop-saturate-[180%] px-2 py-1 rounded-lg border border-white/10 hover:bg-black/60 transition-colors", onBack ? "top-11" : "top-2")}
+            onClick={(e) => { e.stopPropagation(); setShowBountyDrawer(true); }}
+          >
+            <Gift className="w-3 h-3 text-white" />
+            <span className="text-white text-xs font-medium">
+              {video.bountyAmount && video.bountyAmount > 0
+                ? <DhbAmount amount={formatCompact(video.bountyAmount)} currency={video.bountyCurrency} />
+                : t('drawers.bountyTitle')}
+            </span>
+          </button>
+        )}
+
+        {/* Top-left lock badge removed — centered Holdings Required overlay covers this */}
+
+        {/* Captions belong to the opened player; feed previews show mute only. */}
+        {!feedPreview && !isContentGated && video.videoUrl && (
+          <Suspense fallback={null}>
+            <VideoSubtitleOverlay
+              tokenId={video.id}
+              videoRef={videoRef}
+              buttonPortalTarget={ccSlot}
+              buttonClassName={ccSlot ? undefined : 'absolute top-2 right-2 z-20'}
+              buttonVisible={controlsVisible}
+              plainButton={splitControls}
+              onMenuOpenChange={setSubsMenuOpen}
+              onDubAvailableChange={setDubAvailable}
+            />
+          </Suspense>
+        )}
+        
+        
+        {/* Video overlays - hidden when PPV locked */}
+        {!isContentGated && <>
+        {/* First-frame glitch loader */}
+        {isLoading && (
+          <VideoGlitchLoader poster={thumbnail} />
+        )}
+        
+        {showCenterPlay && (
+          <button
+            data-video-controls data-video-bare data-video-center
+            data-controls-hidden={isPlaying && !controlsVisible ? 'true' : undefined}
+            aria-label={hasError ? t('common.retry') : isPlaying ? _copy("copy.858e4ba7a29f", { defaultValue: "Pause" }) : _copy("copy.436e61016e26", { defaultValue: "Play" })}
+            onPointerDown={(event) => event.stopPropagation()}
+            onPointerUp={(event) => event.stopPropagation()}
+            onTouchStart={(event) => event.stopPropagation()}
+            onTouchEnd={(event) => event.stopPropagation()}
+            onClick={(event) => { event.stopPropagation(); showControlsBriefly(); handlePlayClick(); }}
+            className="absolute left-1/2 top-1/2 z-20 flex h-14 w-14 -translate-x-1/2 -translate-y-1/2 items-center justify-center bg-transparent text-white"
+          >
+            {hasError ? <span className="rounded-full bg-black/70 px-4 py-2 text-sm">{t('common.retry')}</span> : <MediaControlIcon icon={isPlaying ? Pause : Play} size={32} plain />}
+          </button>
+        )}
+
+        {/* Draws the 👍 / ❤️ for the tap ladder above. Inert and self-contained;
+            it listens for this post's own events rather than taking state. */}
+        {!hideActions && !video.isAudio && (
+          <TapReactionBurst postId={video.id} />
+        )}
+
+        {/* Top-aligned video controls (volume, PiP & fullscreen) - liquid glass.
+            Never for audio posts: speed, loop, PiP and fullscreen have nothing
+            to act on there, and the row appeared on hover over a visualizer
+            that already carries its own transport. */}
+
+        </>}
+        </div>
+
+        {!isContentGated && <>
+        {feedPreview && (
+          <VideoVolumeControl
+            layout="below"
+            volume={volume} muted={isMuted || volume === 0}
+            onToggleMute={handleSpeakerClick} onVolume={setVolumeTo}
+            open={volumeOpen} onOpenChange={setVolumeOpen}
+            label={isMuted ? _copy("copy.ce4ee4efc5e3", { defaultValue: "Unmute" }) : _copy("copy.8dd6857baf02", { defaultValue: "Mute" })}
+            sliderLabel={t('videoPlayer.volume')}
+            wrapperData={{ 'data-video-controls': true, 'data-preview-mute': true }}
+            className="absolute right-1.5 top-1.5 z-20"
+            buttonData={{ 'data-video-bare': true }}
+            buttonClassName="flex h-9 w-9 items-center justify-center text-white"
+          >
+            <MediaControlIcon icon={isMuted || volume === 0 ? VolumeX : Volume2} plain />
+          </VideoVolumeControl>
+        )}
+        {liveFeedPreview && (
+          <button
+            type="button"
+            data-video-controls data-video-bare data-preview-mute
+            aria-label={liveSoundOn ? _copy("copy.8dd6857baf02", { defaultValue: "Mute" }) : _copy("copy.ce4ee4efc5e3", { defaultValue: "Unmute" })}
+            onPointerDown={(event) => event.stopPropagation()}
+            onPointerUp={(event) => event.stopPropagation()}
+            onTouchStart={(event) => event.stopPropagation()}
+            onTouchEnd={(event) => event.stopPropagation()}
+            onClick={(event) => { event.stopPropagation(); setLiveSoundOn(on => !on); }}
+            className="absolute right-1.5 top-1.5 z-20 flex h-9 w-9 items-center justify-center text-white"
+          >
+            <MediaControlIcon icon={liveSoundOn ? Volume2 : VolumeX} plain />
+          </button>
+        )}
+        {!feedPreview && !volumeInRow && controlsVisible && !video.isAudio && !(video.isLivePost && video.isLiveNow) && (
+          <div data-video-controls data-video-topbar="bare" className={cn("absolute right-2 top-1.5 flex items-center z-10", bareControls ? "gap-1" : "gap-2")}>
+            {/* Hovering the speaker drops a slider for this video alone —
+                turning a loud clip down should not mean reaching for the system
+                mixer. The wrapper keeps the pointer inside while the cursor
+                travels from the button to the slider. */}
+            {dubAvailable ? (
+              <Suspense fallback={<span className="h-8 w-8" />}>
+              <DubVolumeControl open={volumeOpen} onOpenChange={setVolumeOpen} muted={isMuted || volume === 0}
+                onToggleMute={(event) => { if (volume === 0) setVolumeTo(0.8); else toggleMute(event); }}
+                onUnmute={() => { if (isMuted || volume === 0) setVolumeTo(volume || 0.8); }} />
+              </Suspense>
+            ) : <VideoVolumeControl
+              layout="below"
+              volume={volume} muted={isMuted || volume === 0}
+              onToggleMute={handleSpeakerClick} onVolume={setVolumeTo}
+              open={volumeOpen} onOpenChange={setVolumeOpen}
+              label={t('videoPlayer.volume')}
+              sliderLabel={t('videoPlayer.volume')}
+              buttonClassName="h-8 w-8 text-white flex items-center justify-center"
+            >
+              {isMuted || volume === 0 ? <MediaControlIcon icon={VolumeX} /> : <MediaControlIcon icon={Volume2} />}
+            </VideoVolumeControl>}
+
+          </div>
+        )}
+
+        {/* Keep the timeline mounted before metadata arrives. Lite mode starts
+            from the centered Play button; seeking enables once the length is
+            known. Audio posts and live streams own their transport. */}
+        {!feedPreview && !video.isAudio && !(video.isLivePost && video.isLiveNow) && (
+          <div data-video-controls data-video-control-strip={splitControls || undefined} data-no-swipe data-controls-hidden={!controlsVisible ? "true" : undefined} data-video-scrubber={bareControls ? 'line' : undefined} className={cn("absolute bottom-0 left-0 right-0 z-10", bareControls ? "pb-1.5" : "px-2 pb-3 pt-6 bg-gradient-to-t from-black/80 to-transparent", bareControls && overlayControls && "pt-8 bg-gradient-to-t from-black/60 to-transparent")}>
+
+            {bareControls && <div data-video-scrub-surface className="absolute bottom-0 left-0 right-0 h-16 touch-pan-y" />}
+
+            <StoryboardPreview
+              storyboard={isContentGated ? undefined : video.storyboard}
+              fraction={!scrubbing && hoverFraction !== null ? hoverFraction : currentTime / (duration || 1)}
+              duration={duration}
+              visible={scrubbing || hoverFraction !== null}
+              // A mouse over the bar with no sheet yet still gets the time.
+              timeWithoutSheet={hoverFraction !== null}
+              // Fetch the sheet as soon as the video plays. Waiting for the
+              // controls meant a phone's line scrubber, which shows them only
+              // when the scrub starts, began the download mid-gesture and a
+              // quick scrub ended before any frame arrived.
+              armed={showControls || isPlaying}
+            />
+
+            <div data-video-button-row className="flex items-center justify-between gap-1 px-2">
+              <div data-video-transport className="flex items-center gap-1">
+                {splitControls && <button data-video-bare type="button"
+                  aria-label={t(isPlaying ? 'audioPost.pause' : 'audioPost.play')}
+                  className="flex h-8 w-8 items-center justify-center text-white"
+                  onClick={event => { event.stopPropagation(); showControlsBriefly(); handlePlayClick(); }}>
+                  <MediaControlIcon icon={isPlaying ? Pause : Play} plain />
+                </button>}
+                {volumeInRow && <div data-video-volume>
+            {dubAvailable ? (
+              <Suspense fallback={<span className="h-8 w-8" />}>
+              <DubVolumeControl plain={splitControls} open={volumeOpen} onOpenChange={setVolumeOpen} muted={isMuted || volume === 0}
+                onToggleMute={(event) => { if (volume === 0) setVolumeTo(0.8); else toggleMute(event); }}
+                onUnmute={() => { if (isMuted || volume === 0) setVolumeTo(volume || 0.8); }} />
+              </Suspense>
+            ) : <VideoVolumeControl
+              layout="beside"
+              volume={volume} muted={isMuted || volume === 0}
+              onToggleMute={handleSpeakerClick} onVolume={setVolumeTo}
+              open={volumeOpen} onOpenChange={setVolumeOpen}
+              label={isMuted ? _copy("copy.ce4ee4efc5e3", { defaultValue: "Unmute" }) : _copy("copy.8dd6857baf02", { defaultValue: "Mute" })}
+              sliderLabel={t('videoPlayer.volume')}
+              buttonData={{ 'data-video-bare': true }}
+              buttonClassName="h-8 w-8 text-white flex items-center justify-center"
+            >
+              {isMuted || volume === 0 ? <MediaControlIcon icon={VolumeX} plain={splitControls} /> : <MediaControlIcon icon={Volume2} plain={splitControls} />}
+            </VideoVolumeControl>}
+                </div>}
+                <span data-video-bare data-video-time data-keep-dark={!splitControls || undefined} className="min-w-[36px] text-center text-xs font-medium tabular-nums text-white">{formatTime(Math.max(0, Math.ceil(duration - currentTime)))}</span>
+              </div>
+              <div data-video-inline-tools className="ml-auto flex shrink-0 items-center gap-1">
+            {/* Keep the CC slot and glyph in place while the subtitle menu loads. */}
+            <div ref={setCcSlot} data-video-caption-slot className="relative h-8 w-8 shrink-0 [&:has(button)>[data-video-caption-placeholder]]:hidden">
+              <span data-video-caption-placeholder aria-hidden="true" className="absolute inset-0 flex items-center justify-center">
+                <MediaControlIcon captions plain={splitControls} />
+              </span>
+            </div>
+
+            <button
+              data-on-media
+              data-video-speed
+              className="h-8 w-[44px] text-white flex items-center justify-center tabular-nums"
+              style={{ fontFamily: 'Manrope, sans-serif', touchAction: 'manipulation' }}
+              onClick={cyclePlaybackRate}
+              aria-label={_copy("copy.afec2b22114c", { defaultValue: "Playback speed" })}
+            >
+              <span>{playbackRate}x</span>
+            </button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+              data-on-media
+                  className={cn(
+                    "h-8 w-8 text-white flex items-center justify-center ",
+                  )}
+                  onClick={toggleLoop}
+                  aria-label={isLooping ? _copy("copy.5178a4089a25", { defaultValue: "Disable loop" }) : _copy("copy.833dcdfad12f", { defaultValue: "Enable loop" })}
+                  aria-pressed={isLooping}
+                >
+                  <MediaControlIcon icon={Repeat} active={isLooping} plain={splitControls} />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>{isLooping ? _copy("copy.2e68f91aef20", { defaultValue: "Loop on" }) : _copy("copy.daee48e3d2b7", { defaultValue: "Loop off" })}</TooltipContent>
+            </Tooltip>
+            {document.pictureInPictureEnabled && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+              data-on-media
+                    className="h-8 w-8 text-white flex items-center justify-center "
+                    onClick={handlePictureInPicture}
+                    aria-label={_copy("copy.c49677dc5ccd", { defaultValue: "Picture in picture" })}
+                  >
+                    <MediaControlIcon icon={PictureInPicture2} plain={splitControls} />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>{_copy("copy.bc8805b92ad0", { defaultValue: "Picture in Picture (P)" })}</TooltipContent>
+              </Tooltip>
+            )}
+                <button data-video-bare onClick={handleFullscreen}
+                  aria-label={t(isFullscreen ? 'stages.exitFullscreen' : 'stages.fullscreen', isFullscreen ? 'Exit fullscreen' : 'Fullscreen')}
+                  className="flex h-8 w-8 shrink-0 items-center justify-center text-white">
+                  <MediaControlIcon icon={isFullscreen ? Minimize : Maximize} plain={splitControls} />
+                </button>
+              </div>
+            </div>
+              <input
+                type="range"
+                min={0}
+                max={duration || 100}
+                value={currentTime}
+                onChange={handleSeek}
+                onTouchStart={(event) => event.stopPropagation()}
+                onTouchEnd={(event) => event.stopPropagation()}
+                onPointerDown={(event) => {
+                  if (bareControls) return;
+                  event.stopPropagation();
+                  scrubbingRef.current = true;
+                  setScrubbing(true);
+                  hiddenScrubStart.current = controlsVisible ? null : { x: event.clientX, y: event.clientY };
+                  if (controlsTimerRef.current) clearTimeout(controlsTimerRef.current);
+                }}
+                onPointerMove={(event) => {
+                  if (event.pointerType === 'mouse' && duration > 0) {
+                    const rect = event.currentTarget.getBoundingClientRect();
+                    if (rect.width > 0) setHoverFraction(Math.max(0, Math.min(1, (event.clientX - rect.left) / rect.width)));
+                  }
+                  if (bareControls) return;
+                  const start = hiddenScrubStart.current;
+                  if (!start) return;
+                  const dx = Math.abs(event.clientX - start.x);
+                  const dy = Math.abs(event.clientY - start.y);
+                  if (dx > 6 && dx > dy) {
+                    hiddenScrubStart.current = null;
+                    setShowControls(true);
+                    const time = Number(event.currentTarget.value);
+                    if (videoRef.current) videoRef.current.currentTime = time;
+                    setCurrentTime(time);
+                  }
+                }}
+                onPointerLeave={(event) => { if (event.pointerType === 'mouse') setHoverFraction(null); }}
+                onPointerUp={bareControls ? undefined : finishScrubbing}
+                onPointerCancel={bareControls ? undefined : finishScrubbing}
+                onLostPointerCapture={bareControls ? undefined : finishScrubbing}
+                onClick={(e) => e.stopPropagation()}
+                disabled={duration <= 0}
+                aria-label={_copy("copy.fbf43b093f92", { defaultValue: "Video progress" })}
+                data-scrubber-line={bareControls ? '' : undefined}
+                className="flex-1 h-6 bg-transparent rounded-full appearance-none cursor-pointer touch-pan-y
+                  [&::-webkit-slider-thumb]:appearance-none 
+                  [&::-webkit-slider-thumb]:w-3 
+                  [&::-webkit-slider-thumb]:h-3 
+                  [&::-webkit-slider-thumb]:bg-white 
+                  [&::-webkit-slider-thumb]:rounded-full
+                  [&::-webkit-slider-thumb]:shadow-md
+                  [&::-moz-range-thumb]:w-3
+                  [&::-moz-range-thumb]:h-3
+                  [&::-moz-range-thumb]:bg-white
+                  [&::-moz-range-thumb]:rounded-full
+                  [&::-moz-range-thumb]:border-0"
+                style={{
+                  backgroundImage: `linear-gradient(to right, var(--video-strip-ink, white) ${(currentTime / (duration || 1)) * 100}%, var(--video-strip-track, rgba(255,255,255,0.3)) ${(currentTime / (duration || 1)) * 100}%), linear-gradient(var(--video-strip-rim, rgba(0,0,0,0.65)), var(--video-strip-rim, rgba(0,0,0,0.65)))`,
+                  backgroundPosition: 'center',
+                  backgroundRepeat: 'no-repeat',
+                  backgroundSize: '100% 4px',
+                }}
+              />
+
+          </div>
+        )}
+
+        {/* Feedback for explicit seek controls and keyboard/media-session seeking. */}
+        <AnimatePresence>
+          {seekIndicator && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              className={`absolute top-1/2 -translate-y-1/2 ${seekIndicator === 'right' ? 'right-8' : 'left-8'}`}
+            >
+              <div className="w-12 h-12 rounded-xl bg-black/40 backdrop-blur-[24px] backdrop-saturate-[180%] flex items-center justify-center border border-white/10">
+                {seekIndicator === 'right' ? (
+                  <FastForward className="h-6 w-6 text-white" />
+                ) : (
+                  <Rewind className="h-6 w-6 text-white" />
+                )}
+              </div>
+              <p className="text-white text-xs text-center mt-1">{_copy("copy.7819f63beefe", { defaultValue: "10s" })}</p>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Error state - show thumbnail naturally, toast on click */}
+        </>}
+
+        {/* Duration badge for gated content - always visible on locked thumbnails */}
+        {isContentGated && video.duration && (
+          <div className={`absolute bottom-2 right-2 bg-black/40 backdrop-blur-[24px] backdrop-saturate-[180%] px-1.5 py-0.5 rounded border border-white/10 text-xs text-white font-medium z-10`}>
+            {video.duration}
+          </div>
+        )}
+        
+      </div>
+      {/* Desktop: the player is fixed over the page while full screen, so this
+          holds its place in the card. */}
+      {isFullscreen && wideViewport && inlineBox && (
+        <div aria-hidden="true" data-video-inline-hold style={{ width: inlineBox.width, height: inlineBox.height, flex: 'none' }} />
+      )}
+      </WideRailsRow>
+
+      {/* Compact avatar row for carousel mode (hideActions) - avatar + AI + dots below thumbnail */}
+      {hideActions && !isImmersive && (
+        <div className="flex items-center justify-between pt-2">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              const cleanUsername = video.creatorUsername?.replace('@', '');
+              if (cleanUsername) navigate(profilePath(cleanUsername));
+              else if (video.creatorId) navigate(`/app/profile?id=${video.creatorId}`);
+            }}
+            className="cursor-pointer"
+          >
+            <Avatar className="w-7 h-7 rounded-md">
+              {video.channelAvatar && <AvatarImage src={video.channelAvatar} className="rounded-md" />}
+              <AvatarFallback className="bg-zinc-700 text-white font-medium rounded-md text-xs">{video.channel?.[0]?.toUpperCase()}</AvatarFallback>
+            </Avatar>
+          </button>
+          <div className="flex items-center gap-1">
+            {isOwnPost && (
+              <motion.button
+                onClick={(e) => { e.stopPropagation(); setShowBoostModal(true); }}
+                className="mr-[1.6px] text-zinc-400 hover:text-white transition-colors"
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.95 }}
+                aria-label={t('postOptions.boostPost')}
+              >
+                <Zap className="w-4 h-4" />
+              </motion.button>
+            )}
+            <button 
+              onClick={(e) => { e.stopPropagation(); if (!walletAddress) { openLoginModal(); return; } setShowOptionsDrawer(true); }}
+              className="text-zinc-400 hover:text-white transition-colors"
+            >
+              <MoreVertical className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Info & Actions.
+          The immersive `px-3` is for MOBILE, where the media runs edge-to-edge
+          and the copy under it needs its own gutter. At `lg` the immersive card
+          sits inside the post page's `p-3` bento with the media inset by that
+          padding, so keeping px-3 there indented the title and action bar 12px
+          further than the video above them — the one place this layout didn't
+          line up with the home feed card. Drop it back to the bento's gutter. */}
+      <div data-card-info className={`pt-3${isImmersive || stage ? ' px-3 lg:px-0' : ''}`}>
+        {/* System theme phone feed only (index.css): the options button sits
+            here, top right of the caption, instead of on the media. */}
+        {!isImmersive && !postPage && !stage && !hideActions && (
+          <div data-caption-options data-video-caption-actions data-has-boost={isOwnPost ? "" : undefined} className="hidden">
+            {isOwnPost && (
+              <button data-caption-boost onClick={() => setShowBoostModal(true)} aria-label={t('postOptions.boostPost')} className="flex h-8 w-8 items-center justify-center">
+                <Zap className="w-5 h-5" />
+              </button>
+            )}
+            <PostHeaderOptionsButton iconSize={20} corner={false} className="text-white" onClick={() => { if (!walletAddress) { openLoginModal(); return; } setShowOptionsDrawer(true); }} />
+          </div>
+        )}
+        {/* Creator info with action buttons - mobile/tablet immersive view only (hidden on desktop where SinglePostPage renders DesktopCreatorInfo) */}
+        {(isImmersive || stage) && (
+          <div className="lg:hidden">
+          <MobileCreatorInfo
+            stage={!!stage}
+            channel={video.channel}
+            channelAvatar={video.channelAvatar}
+            creatorUsername={video.creatorUsername}
+            creatorId={video.creatorId}
+            badgeBalance={video.creatorBadgeBalance}
+            verified={video.verified}
+            onBoostClick={!postPage && !stage && isOwnPost ? () => setShowBoostModal(true) : undefined}
+            onMenuClick={postPage || stage ? undefined : () => { if (!walletAddress) { openLoginModal(); return; } setShowOptionsDrawer(true); }}
+            isPPV={isPPVLocked ? video.isPPV : false}
+            tokenId={video.id}
+            ppvPrice={video.ppvPrice}
+            ppvCurrency={video.ppvCurrency}
+            isW2E={video.isW2E}
+            bountyAmount={video.bountyAmount}
+            bountyCurrency={video.bountyCurrency}
+            bountyViews={video.bountyViews}
+            bountyComments={video.bountyComments}
+            isLocked={isHoldingsLocked}
+            lockedPrice={video.lockedPrice}
+            lockedCurrency={video.lockedCurrency}
+            lockedTokenAddress={video.lockedTokenAddress}
+            lockedChainId={video.lockedChainId}
+            chainId={video.chainId}
+            onUnlocked={() => {
+              setLocallyUnlocked(true);
+              markTokenUnlocked(video.id);
+              queryClient.invalidateQueries({ queryKey: ['unified-feed'] });
+              queryClient.invalidateQueries({ queryKey: ['dehub-feed'] });
+              queryClient.invalidateQueries({ queryKey: ['nft-info', video.id] });
+            }}
+          />
+          </div>
+        )}
+        {video.duetOf && <DuetCredit duetOf={video.duetOf} className="mb-1.5" />}
+        <div ref={captionRef} className="relative" data-card-caption={(video.title || ownDescription) && !/https?:\/\/|0x[0-9a-fA-F]{40}/.test(`${video.title ?? ''} ${ownDescription ?? ''}`) ? '' : undefined} data-no-navigate {...captionTapGestures} onClick={(event) => event.stopPropagation()}>
+        {!hideActions && !isContentGated && <TapReactionBurst postId={video.id} />}
+        <SharedTranslationProvider>
+          {(() => {
+            // Split translated text back into title + description. When the
+            // separator did not survive translation the whole body lands in the
+            // description, which is the half that clamps and has a "See more" —
+            // putting it in the unclamped title made translate behave like an
+            // expand button. See splitTranslatedTitleAndBody.
+            let shownTitle: string | undefined = video.title;
+            let shownDesc: string | undefined = ownDescription;
+
+            if (isVideoTranslated && videoTranslatedText) {
+              [shownTitle, shownDesc] = splitTranslatedTitleAndBody(
+                videoTranslatedText,
+                video.title,
+                ownDescription,
+              );
+            }
+
+            return (
+              <>
+                {/* Behind a content warning, the caption opens with the post.
+                    Glass rails show the caption in the panel beside the video. */}
+                {!contentWarning.hidden && !wideRails && (<>
+                {/* auto={false}: the card's own useTranslation above already
+                    translated this text and hands the result down. Left on, this
+                    asked the edge function to translate the translation. */}
+                {shownTitle && (
+                  <div style={tabletPortrait ? { fontSize: tabletPortraitTitleSize(shownTitle), fontWeight: tabletPortraitTitleSize(shownTitle) > 17 ? 600 : 400 } : undefined}>
+                    <TranslatableText publicContent text={shownTitle} className={tabletPortrait ? "text-white text-inherit leading-snug mb-3 break-words" : stage ? "text-white text-[15px] font-bold mb-0.5" : "text-white text-[14px] mb-1"} as="h3" hideControls auto={false} />
+                  </div>
+                )}
+                {shownDesc && (
+                  <ExpandableDescription
+                    description={shownDesc}
+                    isImmersive={isImmersive || !!stage || tabletPortrait}
+                    clampLines={stage ? (shownTitle ? 2 : 3) : 4}
+                    hideAssetCards={video.hideAssetCards}
+                    hiddenLinkPreviews={video.hiddenLinkPreviews}
+                  />
+                )}
+                </>)}
+              </>
+            );
+          })()}
+        </SharedTranslationProvider>
+        </div>
+        {!video.isAudio && parseInt(video.id, 10) > 0 && (
+          <div data-video-reactions className="mt-2 flex flex-wrap gap-1.5 empty:hidden">
+            <ReactionOfChip tokenId={video.id} className="bg-white/10" />
+            <ReactionsLink tokenId={video.id} className="bg-white/10" />
+          </div>
+        )}
+        {!video.isAudio && !video.isAd && <StitchAttribution tokenId={video.id} postPage={postPage} className="mt-2" />}
+        <div data-video-metadata className="mb-3">
+          <PostMetadata 
+            className="!mt-3"
+            timestamp={video.createdAt || video.uploadedAgo}
+            viewCount={video.views?.replace(' views', '') || '0'}
+            tokenId={video.id}
+            isAd={video.isAd}
+            isAudio={video.isAudio}
+            isOwnPost={isOwnPost}
+            // With Glass rails the Translate button sits in the panel, under the caption it translates.
+            translateControl={wideRails ? undefined : videoTranslateControl}
+            watched={isWatchedVideo && !video.isW2E}
+          />
+        </div>
+        {!hideActions && (
+          <>
+            {((postPage && !postHeadSlot) || stage) && (!stage || isOwnPost) && (
+              <div data-post-panel-actions className="flex items-center justify-end gap-1 mb-2">
+                {isOwnPost && (
+                  <button type="button" aria-label={t('postOptions.boostPost')} className="h-8 w-8 flex items-center justify-center text-zinc-400 hover:text-white" onClick={(event) => { event.stopPropagation(); setShowBoostModal(true); }}>
+                    <Zap className="h-5 w-5" />
+                  </button>
+                )}
+                {!stage && <PostHeaderOptionsButton iconSize={20} corner={false} aria-label={t('postStage.more', 'Post options')} onClick={(event) => { event.stopPropagation(); if (!walletAddress) { openLoginModal(); return; } setShowOptionsDrawer(true); }} />}
+              </div>
+            )}
+            {parseInt(video.id, 10) > 0 && <PollCard tokenId={parseInt(video.id, 10)} />}
+            {video.hasQuiz && parseInt(video.id, 10) > 0 && <LazyQuizCard tokenId={parseInt(video.id, 10)} />}
+            {/* The creator's Shop board. Inline rather than over the player:
+                this card runs an immersive mode that reflows the video, and an
+                absolutely-positioned board would have to track it. Live keeps
+                the overlay, where not leaving the stream is the point. */}
+            <ShopBoardLazy tokenId={video.id} links={video.shopLinks} listingCount={video.shopListingCount} variant="inline" />
+            <ActionBar
+              liveShare={video.isLivePost}
+              onLiveReaction={video.isLivePost && video.isLiveNow ? sendLiveReaction : undefined}
+              postId={video.id}
+              articleSlug={video.articleSlug}
+              newPostSlug={video.status === 'signed' ? video.newPostId ?? null : null}
+              tokenId={parseInt(video.id, 10) || undefined}
+              streamMomentTokenId={video.isLivePost ? getStreamMomentTokenId({ ...video, isLive: !!video.isLiveNow }) : undefined}
+              isOwnPost={!!isOwnPost}
+              quotePolicy={video.quotePolicy}
+              visibility={video.visibility}
+              stage={stage}
+              utilityDesktopAnchor
+              className="p-0"
+              isLiked={video.isLiked}
+              isDisliked={video.isDisliked}
+              myReaction={video.myReaction}
+              reactionCounts={video.reactionCounts}
+              onComment={() => {
+                if (onOpenComments) {
+                  onOpenComments();
+                  return;
+                }
+                setCommentsInitialTab(undefined);
+                setShowComments(!showComments);
+              }}
+              onRepost={handleRepost}
+              onQuote={handleQuote}
+              likeCount={video.likeCount}
+              dislikeCount={video.dislikeCount}
+              commentCount={video.commentCount}
+              repostCount={video.repostCount}
+              isReposted={video.isReposted}
+              isOptimistic={video.isOptimistic}
+              tipCount={tipCount}
+              onTip={video.creatorPaymentsDisabled ? undefined : () => setShowTipModal(true)}
+              onSeeEngagements={() => {
+                if (onOpenComments) {
+                  onOpenComments('reposts');
+                  return;
+                }
+                setCommentsInitialTab('reposts');
+                setShowComments(true);
+              }}
+            />
+
+            {/* Comments — drawer in immersive mode (video shrinks to make room),
+                inline bento expansion in the feed. */}
+            {!onOpenComments && video.isLivePost ? (
+              /* A live post keeps one conversation: its chat room, the one the
+                 post page, the feed's live card and the app all join. This
+                 card still opened the comments drawer for a live post, so a
+                 line typed here was filed as a comment that no live surface
+                 ever showed again. */
+              showComments && (
+                <div className="mt-3" data-no-navigate onClick={(e) => e.stopPropagation()}>
+                  <Suspense fallback={null}>
+                    <LiveAudienceProfileContext.Provider value={openAudienceProfile}>
+                      <LivePostChat
+                        tokenId={video.id}
+                        streamId={video.liveStreamId}
+                        isOffline={!video.isLiveNow}
+                      />
+                    </LiveAudienceProfileContext.Provider>
+                  </Suspense>
+                </div>
+              )
+            ) : !onOpenComments && (
+              <CommentsWrapper
+                open={showComments}
+                onOpenChange={setShowComments}
+                tokenId={video.id}
+                initialTab={commentsInitialTab}
+                commentsDisabled={!!(video as { commentsDisabled?: boolean }).commentsDisabled}
+                replyPolicy={video.replyPolicy}
+                forKids={!!video.forKids}
+                immersive={isImmersive}
+              />
+            )}
+          </>
+        )}
+      </div>
+
+      {/* AI Chat */}
+      <PostAIChatLazy
+        isOpen={showAIChat}
+        onClose={() => setShowAIChat(false)}
+        postContext={{
+          tokenId: video.id,
+          type: 'video',
+          author: video.channel,
+          title: video.title,
+          imageUrl: thumbnail,
+          videoUrl: playableVideoUrl ?? video.videoUrl,
+        }}
+      />
+
+      {/* Report Modal */}
+      <ReportModal
+        open={showReportModal}
+        onOpenChange={setShowReportModal}
+        tokenId={video.id}
+        contentType="video"
+      />
+
+      {/* Skippable sections — reads the player's clock live, so marking a
+          sponsor read is two taps while it plays underneath. Mounted only once
+          it has been asked for; the chunk is prefetched when the options
+          drawer opens. */}
+      {segmentDrawerMounted && (
+        <Suspense fallback={null}>
+          <SegmentMarkerDrawer
+            open={showSegmentDrawer}
+            onOpenChange={setShowSegmentDrawer}
+            tokenId={video.id}
+            getCurrentTime={() => videoRef.current?.currentTime ?? 0}
+          />
+        </Suspense>
+      )}
+
+      {/* The card's only options sheet, for all three openers: the feed-card
+          header, the carousel avatar row, and the immersive creator bar. They
+          share one piece of state, so a second <Drawer> reading it — there used
+          to be one in the header — mounted a duplicate sheet on top of this one
+          on every non-immersive card. Items stay conditional, not the sheet. */}
+      <Drawer open={showOptionsDrawer} onOpenChange={setShowOptionsDrawer}>
+        <DrawerContent scrollable column glass className="px-4 pb-6">
+          <DrawerHeader className="pb-2">
+            <DrawerTitle className="text-white text-lg">{t('postOptions.options')}</DrawerTitle>
+          </DrawerHeader>
+          <div className="flex flex-col gap-1">
+            {!video.isAudio && !video.isLivePost && !video.isAd && !isContentGated && !requiresVideoAccess && !accessFallback
+              && !contentWarning.hidden && (!video.visibility || video.visibility === 'public')
+              && playableVideoUrl && (
+              <RemixMenuItems source={{ videoUrl: playableVideoUrl, sourceUrl: `https://riftn.com/app/post/${video.id}`,
+                title: video.title || 'Video', creator: video.creatorUsername, tokenId: String(video.id), creatorAddress: video.creatorId,
+                quotePolicy: video.quotePolicy }}
+                isOwner={!!isOwnPost}
+                onStart={() => { videoRef.current?.pause(); setShowOptionsDrawer(false); }} />
+            )}
+            {/* Bookmark / pin / post info. Also on the action bar as icons on
+                desktop — both surfaces read the same state, so the menu is a
+                reliable place to find them at every width. */}
+            <PostUtilityMenuItems
+                onActionBar={!hideActions}
+              onAskAI={() => { setShowOptionsDrawer(false); if (!walletAddress) { openLoginModal(); return; } setShowAIChat(true); }}
+              postId={video.id}
+              tokenId={videoTokenId}
+              isOwnPost={!!isOwnPost}
+              canShareToMoment={!!video.videoUrl && !video.isAudio && canShareToMoment(video)}
+              onBeforeNavigate={() => setShowOptionsDrawer(false)}
+              linkText={video.description}
+              onClose={() => setShowOptionsDrawer(false)}
+            />
+            {/* Tip is on the action bar on a phone (Requests 7399dd7d). */}
+            {!isOwnPost && !(isPhone && !hideActions) && (
+              <button
+                onClick={() => { setShowOptionsDrawer(false); setShowTipModal(true); }}
+                className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left"
+              >
+                <Gem className="w-5 h-5" /> {t('postOptions.sendTip')}
+              </button>
+            )}
+            <button className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left">
+              <ListPlus className="w-5 h-5" /> {t('postOptions.queue')}
+            </button>
+            <button className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left">
+              <Clock className="w-5 h-5" /> {t('postOptions.watchList')}
+            </button>
+            {!video.isAudio && (
+              <button
+                onClick={() => { setShowOptionsDrawer(false); setSegmentDrawerMounted(true); }}
+                className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left"
+              >
+                <FastForward className="w-5 h-5" /> {t('postOptions.markSection', 'Skippable sections')}
+              </button>
+            )}
+            {!video.isAudio && !isContentGated && video.videoUrl && (
+              <Suspense fallback={null}>
+              <DubMenuItem
+                tokenId={video.id}
+                onDone={() => setShowOptionsDrawer(false)}
+                onEnabled={() => {
+                  // A dub nobody can hear looks broken; switching it on is a
+                  // request for sound.
+                  if (!isMuted) return;
+                  setIsMuted(false);
+                  videoPlaybackManager.globalMuted = false;
+                  videoPlaybackManager.claimAudio(instanceId);
+                  if (videoRef.current) videoRef.current.muted = false;
+                }}
+                className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left"
+              />
+              </Suspense>
+            )}
+            <button 
+              onClick={() => {
+                setShowOptionsDrawer(false);
+                setShowReportModal(true);
+              }}
+              className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left"
+            >
+              <Flag className="w-5 h-5" /> {t('postOptions.report')}
+            </button>
+            {!isContentGated && !isHoldingsLocked && (
+              <button onClick={handleDownloadVideo} className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left">
+                <Download className="w-5 h-5" /> {t('postOptions.download')}
+              </button>
+            )}
+            {!video.isAudio && !video.isLivePost && !isContentGated && !isHoldingsLocked && !!playableVideoUrl && (
+              <CastMenuItem
+                onBeforeCast={() => setShowOptionsDrawer(false)}
+                getSource={() => ({
+                  url: playableVideoUrl,
+                  title: video.title,
+                  poster: thumbnail || video.thumbnail,
+                  startAt: videoRef.current?.currentTime,
+                  pageVideo: videoRef.current,
+                })}
+              />
+            )}
+            <button 
+              onClick={() => {
+                const link = `${window.location.origin}/app/post/${video.articleSlug || video.id}`;
+                const url = video.isLivePost ? viewerLiveShareUrl(link, !video.visibility || video.visibility === 'public') : viewerShareUrl(link);
+                navigator.clipboard.writeText(url);
+                toast.success(t('postOptions.linkCopied'));
+                trackLinkCopy(video.id, walletAddress, linkCopyCount);
+                setShowOptionsDrawer(false);
+              }}
+              className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left"
+            >
+              <Link2 className="w-5 h-5" /> {t('postOptions.copyLink')}
+            </button>
+            {!isContentGated && (!video.visibility || video.visibility === 'public') && /^\d+$/.test(String(video.id)) && (
+              <button
+                onClick={() => { copyPostEmbedCode(video.id, t); setShowOptionsDrawer(false); }}
+                className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left"
+              >
+                <Code className="w-5 h-5" /> {t('postOptions.copyEmbedCode')}
+              </button>
+            )}
+            {!isOwnPost && (
+              <button onClick={handleMuteCreator} className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left">
+                <VolumeX className="w-5 h-5" /> {t('postOptions.muteCreator')}
+              </button>
+            )}
+            {!isOwnPost && (
+              <button onClick={handleBlockCreator} className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left">
+                <Ban className="w-5 h-5" /> {t('postOptions.blockCreator')}
+              </button>
+            )}
+            {!isOwnPost && canGiftBoost && (
+              <button
+                onClick={() => { setShowOptionsDrawer(false); setTimeout(() => setShowBoostModal(true), 300); }}
+                disabled={!videoTokenId}
+                className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left disabled:opacity-40"
+              >
+                <Gift className="w-5 h-5" /> {t('postOptions.giftBoost', { defaultValue: 'Gift a boost' })}
+              </button>
+            )}
+            {isOwnPost && (
+              <>
+                <div className="border-t border-white/10 my-1" />
+                <button
+                  onClick={() => { setShowOptionsDrawer(false); setShowEditModal(true); }}
+                  className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left"
+                >
+                  <Pencil className="w-5 h-5" /> {t('postOptions.editPost')}
+                </button>
+                {/* Boost. Offered to every owner rather than only to badge holders:
+                    the sheet explains what a badge buys and links to staking, which is
+                    worth more than hiding the row from the people who have not staked. */}
+                <button
+                  onClick={() => { setShowOptionsDrawer(false); setTimeout(() => setShowBoostModal(true), 300); }}
+                  disabled={!videoTokenId}
+                  className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left disabled:opacity-40"
+                >
+                  <ThemedIcon icon="superpowers" alt="" className="w-5 h-5 object-contain" /> {t('postOptions.boostPost')}
+                </button>
+                <button
+                  onClick={() => { setShowOptionsDrawer(false); setShowDeleteModal(true); }}
+                  className="flex items-center gap-3 px-4 py-3 text-red-400 hover:bg-white/10 rounded-xl transition-colors text-left"
+                >
+                  <Trash2 className="w-5 h-5" /> {t('postOptions.deletePost')}
+                </button>
+              </>
+            )}
+          </div>
+        </DrawerContent>
+      </Drawer>
+
+      {/* Delete Post Modal */}
+      <DeletePostModal
+        open={showDeleteModal}
+        onOpenChange={setShowDeleteModal}
+        tokenId={video.id}
+        onSuccess={() => {
+          queryClient.invalidateQueries({ queryKey: ['unified-feed'] });
+          queryClient.invalidateQueries({ queryKey: ['dehub-feed'] });
+        }}
+      />
+
+      {/* Boost Modal — mounted only while open, so the chunk is fetched on the
+          tap that opens it rather than with the feed. */}
+      {showBoostModal && (
+        <Suspense fallback={null}>
+          <BoostModal
+            open={showBoostModal}
+            onOpenChange={setShowBoostModal}
+            tokenId={videoTokenId}
+            postTitle={video.title ?? video.description ?? ''}
+          />
+        </Suspense>
+      )}
+
+      {/* Edit Post Modal — mounted on first open and kept, so the drawer's
+          close animation still runs. */}
+      {editModalMounted && (
+        <Suspense fallback={null}>
+          <EditPostModal
+            open={showEditModal}
+            onOpenChange={setShowEditModal}
+            canReplaceVideo={!video.isAudio}
+            tokenId={video.id}
+            currentTitle={video.title}
+            currentDescription={video.description ?? ''}
+            currentCategories={video.categories ?? []}
+            currentContentRating={video.contentRating}
+            currentSpoilerText={video.spoilerText}
+            currentQuotePolicy={video.quotePolicy}
+            currentReplyPolicy={video.replyPolicy}
+            currentVisibility={(video as any).justMe ? 'self' : (video as any).visibility}
+            currentForKids={video.forKids}
+            currentShopLinks={video.shopLinks}
+            onSuccess={(edited) => {
+              applyOptimisticEdit(queryClient, video.id, edited);
+            }}
+          />
+        </Suspense>
+      )}
+
+      {/* Tip Modal */}
+      <TipModal
+        open={showTipModal}
+        onOpenChange={setShowTipModal}
+        creatorAddress={video.creatorId}
+        creatorName={video.channel}
+        tokenId={video.id}
+      />
+
+      {/* PPV Drawer - controlled, rendered at root level for mobile compatibility */}
+      {video.isPPV && video.ppvPrice && (
+        <Drawer open={showPPVDrawer} onOpenChange={setShowPPVDrawer}>
+          <PPVDrawerContent open={showPPVDrawer}
+            tokenId={video.id}
+            price={Number(video.ppvPrice)}
+            currency={video.ppvCurrency || 'DHB'}
+            creatorAddress={video.creatorId}
+            chainId={video.chainId}
+            onClose={() => setShowPPVDrawer(false)}
+            onUnlocked={() => {
+              setLocallyUnlocked(true);
+              markTokenUnlocked(video.id);
+              queryClient.invalidateQueries({ queryKey: ['unified-feed'] });
+              queryClient.invalidateQueries({ queryKey: ['dehub-feed'] });
+              queryClient.invalidateQueries({ queryKey: ['nft-info', video.id] });
+            }}
+            formatCompact={formatCompact}
+          />
+        </Drawer>
+      )}
+
+      {/* Bounty Drawer - controlled, rendered at root level for mobile compatibility */}
+      {video.isW2E && (
+        <Drawer open={showBountyDrawer} onOpenChange={setShowBountyDrawer}>
+          <DrawerContent scrollable column glass className="px-4 pb-6">
+            <DrawerHeader className="pb-3 relative">
+              <DrawerTitle className="text-white text-lg flex items-center gap-2">
+                <Gift className="w-5 h-5 text-white" />
+                {t('drawers.bountyTitle')}
+              </DrawerTitle>
+              <button onClick={() => setShowBountyDrawer(false)} className="absolute top-3 right-0 p-1.5 rounded-lg bg-white/[0.06] hover:bg-white/[0.12] transition-colors">
+                <X className="w-4 h-4 text-zinc-400" />
+              </button>
+            </DrawerHeader>
+            <div className="flex flex-col gap-4">
+              <div className="space-y-3">
+                {video.bountyViews && video.bountyViews > 0 && (
+                  <div className="flex items-center gap-3 px-4 py-3 bg-white/5 rounded-xl border border-white/10">
+                    <div className="w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center">
+                      <Eye className="w-4 h-4 text-white" />
+                    </div>
+                    <div>
+                      <p className="text-white text-sm font-medium">{t('drawers.firstViews', { count: video.bountyViews })}</p>
+                      <p className="text-zinc-400 text-xs">{t('drawers.rewardedWatching')}</p>
+                    </div>
+                  </div>
+                )}
+                {video.bountyComments && video.bountyComments > 0 && (
+                  <div className="flex items-center gap-3 px-4 py-3 bg-white/5 rounded-xl border border-white/10">
+                    <div className="w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center">
+                      <MessageCircle className="w-4 h-4 text-white" />
+                    </div>
+                    <div>
+                      <p className="text-white text-sm font-medium">{t('drawers.firstComments', { count: video.bountyComments })}</p>
+                      <p className="text-zinc-400 text-xs">{t('drawers.rewardedEngaging')}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+              {video.bountyAmount && video.bountyAmount > 0 && (
+                <div className="flex items-center justify-between px-4 py-4 bg-white/5 rounded-xl border border-white/10">
+                  <span className="text-white text-sm">{t('drawers.rewardPerUser')}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-white text-lg font-bold"><DhbAmount amount={video.bountyAmount} currency={video.bountyCurrency} /></span>
+                  </div>
+                </div>
+              )}
+              <p className="text-center text-white/60 text-sm">
+                {t('drawers.bountyDescription')}
+              </p>
+              {/* Close / View action buttons */}
+              <Suspense fallback={null}>
+                <BountyClaimActions tokenId={video.id} open={showBountyDrawer} />
+              </Suspense>
+              <div className="flex items-center gap-3">
+                <LiquidGlassBubble
+                  shimmer={false}
+                  className="flex-1 cursor-pointer"
+                  onClick={() => setShowBountyDrawer(false)}
+                >
+                  <span className="block text-center text-white text-sm font-medium">
+                    {t('drawers.bountyClose')}
+                  </span>
+                </LiquidGlassBubble>
+                <LiquidGlassBubble
+                  shimmer={false}
+                  className="flex-1 cursor-pointer"
+                  onClick={() => {
+                    setShowBountyDrawer(false);
+                    cacheVideoForNavigation(queryClient, video);
+                    navigate(`/app/post/${video.articleSlug || video.id}`, { state: { fromFeed: true } });
+                  }}
+                >
+                  <span className="block text-center text-white text-sm font-medium">
+                    {t('drawers.bountyView')}
+                  </span>
+                </LiquidGlassBubble>
+              </div>
+            </div>
+          </DrawerContent>
+        </Drawer>
+      )}
+
+      {/* Subscriber sheet — a different gate to the holdings one below. */}
+      {isSubGated && (
+        <Drawer open={showSubDrawer} onOpenChange={setShowSubDrawer}>
+          <DrawerContent scrollable column glass className="px-4 pb-6">
+            <Suspense fallback={<div className="py-10 text-center text-white/60 text-sm">{_copy("copy.ba3bbbe10d8b", { defaultValue: "Loading…" })}</div>}>
+              <SubscriberGateDrawer
+                creatorAddress={video.creatorId || ""}
+                creatorName={video.channel}
+                previewPlans={video.subscriberPlans}
+                onSubscribed={() => {
+                  setLocallySubscribed(true);
+                  setShowSubDrawer(false);
+                  queryClient.invalidateQueries({ queryKey: ["unified-feed"] });
+                  queryClient.invalidateQueries({ queryKey: ["dehub-feed"] });
+                }}
+              />
+            </Suspense>
+          </DrawerContent>
+        </Drawer>
+      )}
+
+      {/* Locked Drawer - controlled, rendered at root level for mobile compatibility */}
+      {isHoldingsLocked && (
+        <Drawer open={showLockedDrawer} onOpenChange={setShowLockedDrawer}>
+          <DrawerContent scrollable column glass className="px-4 pb-6">
+            <DrawerHeader className="pb-3 relative">
+              <DrawerTitle className="text-white text-lg flex items-center gap-2">
+                <Lock className="w-5 h-5 text-white" />
+                {t('drawers.gatedTitle')}
+              </DrawerTitle>
+              <button onClick={() => setShowLockedDrawer(false)} className="absolute top-3 right-0 p-1.5 rounded-lg bg-white/[0.06] hover:bg-white/[0.12] transition-colors">
+                <X className="w-4 h-4 text-zinc-400" />
+              </button>
+            </DrawerHeader>
+            <div className="flex flex-col gap-4">
+              {video.lockedPrice && video.lockedPrice > 0 && (
+                <div className="flex items-center justify-between px-4 py-4 bg-white/5 rounded-xl border border-white/10">
+                  <span className="text-white text-sm">{t('drawers.mustHoldToView')}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-white text-lg font-bold"><DhbAmount amount={formatCompact(video.lockedPrice)} currency={video.lockedCurrency} /></span>
+                  </div>
+                </div>
+              )}
+              <p className="text-center text-white/60 text-sm">
+                {t('drawers.gatedDescription')}
+              </p>
+              {video.lockedPrice && video.lockedPrice > 0 && (
+                <VerifyUnlockButton
+                  requiredAmount={video.lockedPrice}
+                  currency={video.lockedCurrency || 'DHB'}
+                  tokenAddress={video.lockedTokenAddress}
+                  chainId={video.lockedChainId}
+                  onUnlocked={() => {
+                    setShowLockedDrawer(false);
+                    setLocallyUnlocked(true);
+                    markTokenUnlocked(video.id);
+                    queryClient.invalidateQueries({ queryKey: ['unified-feed'] });
+                    queryClient.invalidateQueries({ queryKey: ['dehub-feed'] });
+                    queryClient.invalidateQueries({ queryKey: ['nft-info', video.id] });
+                  }}
+                />
+              )}
+            </div>
+          </DrawerContent>
+        </Drawer>
+      )}
+
+      {/* Quote Post Modal */}
+      <QuotePostModalLazy
+        open={showQuoteModal}
+        onOpenChange={setShowQuoteModal}
+        quotedPost={videoAsNFT as any}
+      />
+    </div>
+  );
+});
+
+/** Every post passes the viewer's keyword filters first — see KeywordFilterGate. */
+
+/**
+ * Stands in for the audio deck while its code loads. Once the deck has been
+ * seen it takes the deck's height (the deck sizes its card), so the card and
+ * everything under it stay put when the deck arrives.
+ */
+function AudioStudioPlaceholder() {
+  const [height] = useState(audioStudioPlaceholderHeight);
+  return height
+    ? <div data-audio-studio-placeholder className="relative w-full rounded-xl bg-black/40" style={{ height }} />
+    : <div className="w-full h-full rounded-xl bg-black/40" />;
+}
+
+export const VideoCard = memo(function FilteredVideoCard(props: VideoCardProps) {
+  const { video } = props;
+  return (
+    <KeywordFilterGate
+      texts={[video.title, video.description, video.spoilerText, ...(video.mediaDescriptions ?? [])]}
+      authorId={video.creatorId}
+    >
+      <VideoCardBody {...props} />
+    </KeywordFilterGate>
+  );
+});

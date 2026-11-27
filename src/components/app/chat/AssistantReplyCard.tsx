@@ -1,0 +1,84 @@
+import { formatMessageTime } from '@/i18n/date-locale';
+import { useTranslation as _useCopy } from 'react-i18next';
+/**
+ * AssistantReplyCard
+ * ==================
+ * How an @assistant reply is rendered in chat. The reply itself is a real
+ * message posted by the API under the assistant account, so it arrives over the
+ * socket like any other — this only changes how it looks, and everyone in the
+ * room sees the same thing.
+ * Visual layout MUST match ChatMessage exactly (spacing, avatar size, timestamp format)
+ * so it sits inline naturally with surrounding messages.
+ */
+import { CornerDownRight } from "lucide-react";
+import Sparkles from "@/components/ui/cut-icons/assistant";
+
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { renderTextWithLinks } from '../TranslatableText';
+import { Link } from 'react-router-dom';
+import { ASSISTANT_AVATAR as assistantAvatar } from '@/lib/assistant';
+import { ASSISTANT_PROFILE_PATH } from '@/lib/profile-path';
+
+interface AssistantReplyCardProps {
+  rowId: string;
+  content: string;
+  timestamp: Date;
+  replyToName?: string;
+  onReplyPress?: () => void;
+}
+
+
+const formatDate = (date: Date) => {
+  const dd = String(date.getDate()).padStart(2, '0');
+  const mm = String(date.getMonth() + 1).padStart(2, '0');
+  const yy = String(date.getFullYear()).slice(-2);
+  return `${dd}/${mm}/${yy}`;
+};
+
+export function AssistantReplyCard({ rowId, content, timestamp, replyToName, onReplyPress }: AssistantReplyCardProps) {
+  const { t: _copy } = _useCopy();
+  const ReplyTag = onReplyPress ? 'button' : 'div';
+  return (
+    <div id={rowId} className="flex gap-3 py-2 px-4 hover:bg-zinc-800/30 transition-colors group">
+      <Link to={ASSISTANT_PROFILE_PATH} className="flex-shrink-0" aria-label={_copy("copy.a39a7ffad4a3", { defaultValue: "assistant" })}>
+        <Avatar className="w-8 h-8">
+          <AvatarImage src={assistantAvatar} alt={_copy("copy.a39a7ffad4a3", { defaultValue: "assistant" })} />
+          <AvatarFallback className="bg-primary/20 text-primary">
+            <Sparkles className="w-4 h-4" />
+          </AvatarFallback>
+        </Avatar>
+      </Link>
+
+      <div className="flex-1 min-w-0">
+        {replyToName && (
+          <ReplyTag
+            type={onReplyPress ? 'button' : undefined}
+            onClick={onReplyPress}
+            className="flex items-center gap-1.5 text-[11px] text-zinc-500 mb-0.5"
+          >
+            <CornerDownRight className="w-3 h-3" />
+            <span className="font-medium">{replyToName}</span>
+          </ReplyTag>
+        )}
+
+        <div className="flex items-baseline gap-2">
+          <Link to={ASSISTANT_PROFILE_PATH} className="font-semibold text-white text-sm truncate hover:underline">{_copy("copy.a39a7ffad4a3", { defaultValue: "assistant" })}</Link>
+          <span className="text-[10px] uppercase tracking-wide px-1.5 py-px rounded bg-primary/20 text-primary border border-primary/30">
+            {_copy("copy.11fb682be0a0", { defaultValue: "AI" })}
+          </span>
+        </div>
+
+        <div>
+          <p className="text-zinc-300 text-sm break-words whitespace-pre-wrap">
+            {renderTextWithLinks(content)}
+          </p>
+          <div className="flex items-center gap-1.5 mt-0.5">
+            <span className="text-zinc-500 text-[10px] whitespace-nowrap">
+              {formatDate(timestamp)} {formatMessageTime(timestamp)}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

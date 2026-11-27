@@ -1,0 +1,1262 @@
+import { useTranslation as _useCopy } from 'react-i18next';
+import { confirmChatDelivery, roomMessageMatches } from '@/lib/chat-delivery';
+import { useState, useEffect, useLayoutEffect, useCallback, useRef } from 'react';
+import { toast } from 'sonner';
+import {
+  getLiveChatRooms,
+  getLiveChatRoom,
+  getLiveChatMessages as fetchApiMessages,
+  getLiveChatMessagePage,
+  getLiveChatUserProfile,
+  getLiveChatOnlineCount,
+  type LiveChatRoom,
+  type LiveChatMessage,
+  type LiveChatUserProfile,
+} from '@/lib/api/dehub';
+import {
+  getSocket, joinRoom, leaveRoom, emitSendMessage, waitForLiveChatSend,
+  onLiveChatMessage, onRoomJoined, onMessageDeleted,
+  onUserBanned, onUserUnbanned, onReactionUpdated, onMessageEdited, onStreamModeration,
+  emitAddReaction, emitRemoveReaction, emitEditMessage, emitDeleteMessage,
+  onLiveChatError, debugSocketEvents,
+} from '@/lib/api/dehub/socket';
+import { useAuth } from '@/contexts/AuthContext';
+import type { ReactionData, ReplyToData } from '@/components/app/chat/ChatMessage';
+import { translateCopy as _translateCopy } from '@/i18n/copy';
+import { chatRefusalText, isAuthRefusal, ShownChatError, wasShownToUser } from '@/lib/chat-refusal';
+import { ensureFreshToken, refreshTokenShared } from '@/lib/api/dehub/core';
+import { parseChatBadges, type ChatCreatorBadge } from '@/lib/live/chat-badges';
+import { parseBadgeLock, type BadgeLock } from '@/lib/staking-badges';
+
+/** Shape of a livechat message used internally in the UI */
+export interface SupabaseLiveChatMessage {
+  id: string;
+  room_id: string;
+  sender_address: string;
+  sender_username: string | null;
+  sender_display_name: string | null;
+  sender_avatar_url: string | null;
+  sender_badge_balance?: number | null;
+  /**
+   * The sender's grandfathered tier. Most holders' badge comes from this, and
+   * a provided balance skips the account lookup, so without it the line
+   * draws no badge at all.
+   */
+  sender_badge_lock?: BadgeLock | null;
+  /** Badges earned from the stream's creator, in a stream's chat. */
+  sender_creator_badges?: ChatCreatorBadge[];
+  content: string;
+  message_type: string;
+  image_url: string | null;
+  is_pinned: boolean;
+  is_edited?: boolean;
+  created_at: string;
+  reactions?: ReactionData;
+  reply_to?: {
+    id: string;
+    content: string;
+    sender_name: string;
+  };
+  audio_url?: string | null;
+  audio_duration?: number | null;
+  /**
+   * Local only. The id a line of your own was first drawn under. It is carried
+   * onto the server's copy so the row keeps its element when the send lands.
+   */
+  client_key?: string;
+  /** Local only. Set while your send is in flight, or after it failed. */
+  send_state?: 'sending' | 'failed';
+}
+
+export function useLiveChatRooms() {
+  const [rooms, setRooms] = useState<LiveChatRoom[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const { isAuthenticated } = useAuth();
+
+  const fetchRooms = useCallback(() => {
+    setIsLoading(true);
+    setError(null);
+    getLiveChatRooms()
+      .then((data) => {
+        setRooms(data);
+        if (data.length === 0) {
+          console.warn('[LiveChat] Rooms loaded but list is empty');
+        }
+      })
+      .catch((err) => {
+        console.error('[LiveChat] Failed to fetch rooms:', err);
+        setError(err?.message || _translateCopy("copy.ab29d84b39de", { defaultValue: "Failed to load chat rooms" }));
+      })
+      .finally(() => setIsLoading(false));
+  }, []);
+
+  useEffect(() => {
+    fetchRooms();
+  }, [fetchRooms, isAuthenticated]);
+
+  return { rooms, isLoading, error, refetch: fetchRooms };
+}
+
+/** Parse reaction data from API — could be { emoji: [addr] } or { emoji: count } */
+function parseReactions(raw: unknown): ReactionData | undefined {
+  if (!raw || typeof raw !== 'object') return undefined;
+  const result: ReactionData = {};
+  for (const [key, val] of Object.entries(raw as Record<string, unknown>)) {
+    if (Array.isArray(val)) {
+      result[key] = val as string[];
+    } else if (typeof val === 'number' && val > 0) {
+      // If API only gives counts, create placeholder array
+      result[key] = Array.from({ length: val }, (_, i) => `unknown-${i}`);
+    }
+  }
+  return Object.keys(result).length > 0 ? result : undefined;
+}
+
+/** Parse reply-to data from API */
+function parseReplyTo(raw: unknown): { id: string; content: string; sender_name: string } | undefined {
+  if (!raw || typeof raw !== 'object') return undefined;
+  const r = raw as Record<string, unknown>;
+  const id = r.id || r._id || r.messageId;
+  if (!id) return undefined;
+  const sender = r.sender as Record<string, unknown> | undefined;
+  // Try nested sender object first, then top-level fields
+  const senderName =
+    sender?.displayName || sender?.username || sender?.name ||
+    r.senderDisplayName || r.senderUsername || r.sender_display_name || r.sender_username ||
+    r.displayName || r.username || r.name ||
+    sender?.address ||
+    'Unknown';
+  return {
+    id: String(id),
+    content: String(r.content || r.message || ''),
+    sender_name: String(senderName),
+  };
+}
+
+/** Normalize API message type to the set ChatMessage understands: 'text' | 'image' | 'gif' */
+function normalizeMsgType(raw: string | undefined | null): string {
+  if (!raw) return 'text';
+  if (raw === 'media') return 'image'; // API uses "media", ChatMessage expects "image"
+  if (raw === 'voice') return 'audio'; // map legacy voice to audio type
+  return raw;
+}
+
+/** Convert a Riftn API message to our internal format */
+function apiMsgToLocal(msg: LiveChatMessage & { gif?: { url?: string } }, roomId?: string): SupabaseLiveChatMessage {
+  const raw = msg as unknown as Record<string, unknown>;
+  const sender = (msg.sender || (raw.sender as Record<string, unknown> | undefined)) as Record<string, unknown> | undefined;
+  const gifUrl = raw?.gif && typeof raw.gif === 'object' && (raw.gif as Record<string, unknown>)?.url;
+
+  return {
+    id: msg.id,
+    room_id: msg.roomId || roomId || '',
+    sender_address: String(sender?.address ?? raw.senderAddress ?? raw.sender_address ?? ''),
+    sender_username: (sender?.username ?? raw.senderUsername ?? raw.sender_username ?? null) as string | null,
+    sender_display_name: (sender?.displayName ?? sender?.display_name ?? raw.senderDisplayName ?? raw.sender_display_name ?? null) as string | null,
+    sender_avatar_url: (sender?.avatarUrl ?? sender?.avatarImageUrl ?? sender?.avatar_url ?? sender?.avatar_image_url ?? raw.senderAvatarUrl ?? raw.sender_avatar_url ?? null) as string | null,
+    sender_badge_balance: Number(sender?.badgeBalance ?? sender?.badge_balance ?? raw.senderBadgeBalance ?? raw.sender_badge_balance ?? 0) || null,
+    sender_badge_lock: parseBadgeLock(sender?.badgeLock ?? sender?.badge_lock ?? raw.senderBadgeLock ?? raw.sender_badge_lock),
+    sender_creator_badges: parseChatBadges(sender?.creatorBadges),
+    content: msg.content || (typeof gifUrl === 'string' ? gifUrl : ''),
+    message_type: normalizeMsgType(msg.type || msg.messageType),
+    image_url: msg.imageUrl || (typeof gifUrl === 'string' ? gifUrl : null) || ((raw as any).media?.[0]?.url ?? null),
+    is_pinned: msg.isPinned || false,
+    is_edited: Boolean((raw as any).isEdited ?? (raw as any).is_edited),
+    created_at: msg.createdAt,
+    reactions: parseReactions(msg.reactions || (raw as any).reactions),
+    reply_to: parseReplyTo((raw as any).replyTo || (raw as any).reply_to || (raw as any).parentMessage),
+    audio_url: msg.audioUrl || (raw.audioUrl as string) || (raw.audio_url as string) || null,
+    audio_duration: msg.audioDuration || (raw.audioDuration as number) || (raw.audio_duration as number) || null,
+  };
+}
+
+/** Deduplicate messages by id, keeping latest version but preserving rich reply_to data */
+function deduplicateMessages(msgs: SupabaseLiveChatMessage[]): SupabaseLiveChatMessage[] {
+  const seen = new Map<string, SupabaseLiveChatMessage>();
+
+  for (const m of msgs) {
+    const existing = seen.get(m.id);
+    if (existing) {
+      const merged: SupabaseLiveChatMessage = {
+        ...existing,
+        ...m,
+        room_id: m.room_id || existing.room_id,
+        sender_address: m.sender_address || existing.sender_address,
+        sender_username: m.sender_username || existing.sender_username,
+        sender_display_name: m.sender_display_name || existing.sender_display_name,
+        sender_avatar_url: m.sender_avatar_url || existing.sender_avatar_url,
+        content: m.content || existing.content,
+        message_type: m.message_type || existing.message_type,
+        image_url: m.image_url || existing.image_url,
+        created_at: m.created_at || existing.created_at,
+      };
+
+      if (existing.reply_to && (!merged.reply_to || merged.reply_to.sender_name === 'Unknown' || merged.reply_to.sender_name === 'User')) {
+        merged.reply_to = existing.reply_to;
+      }
+
+      seen.set(m.id, merged);
+    } else {
+      seen.set(m.id, m);
+    }
+  }
+
+  return Array.from(seen.values()).sort(
+    (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+  );
+}
+
+/**
+ * Cap the retained history: an active room appends via socket forever, and
+ * every message stays in state, the module cache AND the DOM. Keep the newest
+ * MAX_LIVECHAT_MESSAGES (input is sorted oldest→newest) plus any pinned ones.
+ */
+const MAX_LIVECHAT_MESSAGES = 300;
+/** Lines read either side of a search result when it is opened in context. */
+const AROUND_WINDOW = 40;
+
+/**
+ * How long arrivals are pooled before one render. One frame's worth: below
+ * anything a reader can perceive, and enough that a burst lands together.
+ */
+const FLUSH_INTERVAL_MS = 16;
+
+/** How often a stream's chat is read back over REST to catch anything the socket missed. */
+const STREAM_GAP_CHECK_MS = 20_000;
+/** The same, while the socket is down and nothing is arriving at all. */
+const DISCONNECTED_GAP_CHECK_MS = 5_000;
+
+/**
+ * Key an optimistic row by who sent it and what it said.
+ *
+ * Length-prefixed rather than joined on a separator, because any character
+ * picked as a separator is a character somebody can type into chat to make two
+ * different messages collide.
+ */
+function senderContentKey(m: SupabaseLiveChatMessage): string {
+  // Lower-cased: our own row holds the address lower-case, the gateway's copy
+  // may be checksummed, and a miss left the pending line next to its twin.
+  const address = (m.sender_address || '').toLowerCase();
+  return `${address.length}:${address}${m.content}`;
+}
+
+/**
+ * Pair each confirmed copy with the pending line it confirms, carrying that
+ * line's client key over so the row keeps its element. Returns the confirmed
+ * copies (keyed) and the ids of the pending lines they replace.
+ */
+function claimPending(
+  prev: SupabaseLiveChatMessage[],
+  confirmed: SupabaseLiveChatMessage[],
+): { rows: SupabaseLiveChatMessage[]; claimed: Set<string> } {
+  const waiting = new Map<string, SupabaseLiveChatMessage[]>();
+  for (const m of prev) {
+    if (!m.id.startsWith('temp-') || m.send_state === 'failed') continue;
+    const key = senderContentKey(m);
+    waiting.set(key, [...(waiting.get(key) ?? []), m]);
+  }
+  const claimed = new Set<string>();
+  if (waiting.size === 0) return { rows: confirmed, claimed };
+  const rows = confirmed.map((m) => {
+    const queue = waiting.get(senderContentKey(m));
+    const pending = queue?.shift();
+    if (!pending) return m;
+    claimed.add(pending.id);
+    return { ...m, client_key: pending.client_key ?? pending.id };
+  });
+  return { rows, claimed };
+}
+function capMessages(msgs: SupabaseLiveChatMessage[], cap = MAX_LIVECHAT_MESSAGES): SupabaseLiveChatMessage[] {
+  if (msgs.length <= cap) return msgs;
+  const cut = msgs.length - cap;
+  const pinnedOverflow = msgs.slice(0, cut).filter((m) => m.is_pinned);
+  return [...pinnedOverflow, ...msgs.slice(cut)];
+}
+
+/**
+ * Fold a batch of freshly-arrived socket messages into the list we already hold.
+ *
+ * The cheap path for the case that is almost always true: messages arrive in
+ * order, newer than everything on screen, and none of them is already there.
+ * `deduplicateMessages` was doing this job and it costs a Map build plus a full
+ * comparator sort of up to 300 rows — per message. A stream taking twenty lines
+ * a second was therefore doing twenty full sorts a second on the main thread,
+ * on top of twenty React renders, which is exactly the load a busy stream puts
+ * on it and exactly when the chat would start dropping frames.
+ *
+ * Correctness is unchanged: ids in the batch still replace their existing rows,
+ * confirmed messages still evict the optimistic row they match, and the result
+ * is still sorted — it just only pays for a sort when the batch actually
+ * arrived out of order, which is the rare case (a reconnect replaying history).
+ */
+export function mergeIncoming(
+  prev: SupabaseLiveChatMessage[],
+  batch: SupabaseLiveChatMessage[],
+  cap = MAX_LIVECHAT_MESSAGES,
+): SupabaseLiveChatMessage[] {
+  if (batch.length === 0) return prev;
+
+  const incomingIds = new Set(batch.map((m) => m.id));
+  // An optimistic row is confirmed by content and sender, not by id: the
+  // gateway assigns the real id and never sees ours. The confirmed copy takes
+  // over the pending row's client key, so React keeps the same element.
+  const fresh = batch.filter((m) => !prev.some((p) => p.id === m.id));
+  const { rows, claimed } = claimPending(prev, fresh);
+  const keyed = new Map(rows.map((m) => [m.id, m]));
+  const incoming = batch.map((m) => keyed.get(m.id) ?? m);
+
+  const kept = prev.filter((m) => !incomingIds.has(m.id) && !claimed.has(m.id));
+  // A row that already existed keeps its client key through an update.
+  const carried = incoming.map((m) => {
+    const before = prev.find((p) => p.id === m.id);
+    return before?.client_key && !m.client_key ? { ...m, client_key: before.client_key } : m;
+  });
+
+  const merged = [...kept, ...carried];
+
+  // Only pay for a sort if something actually landed out of order.
+  let ordered = true;
+  for (let i = 1; i < merged.length; i += 1) {
+    if (new Date(merged[i - 1].created_at).getTime() > new Date(merged[i].created_at).getTime()) {
+      ordered = false;
+      break;
+    }
+  }
+  return capMessages(ordered ? merged : deduplicateMessages(merged), cap);
+}
+
+/**
+ * Module-level cache so remounts (auth flicker, navigate back) show last-known
+ * messages. Room-capped: each entry holds up to 300 messages forever, so
+ * browsing many live posts in a session would otherwise accumulate them all.
+ * Map preserves insertion order — delete+set keeps the active room newest.
+ */
+const MAX_CACHED_ROOMS = 8;
+const liveChatMessagesCache = new Map<string, SupabaseLiveChatMessage[]>();
+/** Rooms whose list is a window into old history (opened from search), not the live tail. */
+const roomsReadingHistory = new Set<string>();
+function cacheRoomMessages(roomId: string, msgs: SupabaseLiveChatMessage[]) {
+  // A window into old history is not what the room should reopen on.
+  if (roomsReadingHistory.has(roomId)) return;
+  if (liveChatMessagesCache.has(roomId)) {
+    liveChatMessagesCache.delete(roomId);
+  } else if (liveChatMessagesCache.size >= MAX_CACHED_ROOMS) {
+    const oldest = liveChatMessagesCache.keys().next().value;
+    if (oldest !== undefined) liveChatMessagesCache.delete(oldest);
+  }
+  liveChatMessagesCache.set(roomId, msgs);
+}
+
+/**
+ * Normalize socket message to our format.
+ *
+ * Exported because use-public-chat-alerts listens to the same socket to decide
+ * whether to interrupt the reader, and a second hand-rolled copy of this field
+ * salad would drift the first time the gateway renamed anything.
+ */
+export function socketMsgToLocal(msg: unknown, roomId: string): SupabaseLiveChatMessage | null {
+  const m = msg as Record<string, unknown>;
+  if (!m || typeof m !== 'object') return null;
+  const id = String(m.id ?? m._id ?? '');
+  if (!id) return null;
+
+  const sender = m.sender as Record<string, unknown> | undefined;
+
+  return {
+    id,
+    room_id: roomId,
+    sender_address: String(sender?.address ?? m.senderAddress ?? m.sender_address ?? ''),
+    sender_username: (sender?.username ?? m.senderUsername ?? m.sender_username ?? null) as string | null,
+    sender_display_name: (sender?.displayName ?? sender?.display_name ?? m.senderDisplayName ?? m.sender_display_name ?? null) as string | null,
+    sender_avatar_url: (sender?.avatarUrl ?? sender?.avatarImageUrl ?? sender?.avatar_url ?? sender?.avatar_image_url ?? m.senderAvatarUrl ?? m.sender_avatar_url ?? null) as string | null,
+    sender_badge_balance: Number(sender?.badgeBalance ?? sender?.badge_balance ?? m.senderBadgeBalance ?? m.sender_badge_balance ?? 0) || null,
+    sender_badge_lock: parseBadgeLock(sender?.badgeLock ?? sender?.badge_lock ?? m.senderBadgeLock ?? m.sender_badge_lock),
+    sender_creator_badges: parseChatBadges(sender?.creatorBadges),
+    content: (m.content ?? '') as string,
+    message_type: normalizeMsgType((m.type ?? m.messageType ?? m.message_type) as string | undefined),
+    image_url: (m.imageUrl ?? m.image_url ?? (Array.isArray(m.media) ? (m.media as any[])[0]?.url : null) ?? null) as string | null,
+    is_pinned: (m.isPinned ?? m.is_pinned ?? false) as boolean,
+    is_edited: Boolean(m.isEdited ?? m.is_edited),
+    created_at: (m.createdAt ?? m.created_at ?? new Date().toISOString()) as string,
+    reactions: parseReactions(m.reactions),
+    reply_to: parseReplyTo(m.replyTo || m.reply_to || m.parentMessage),
+    audio_url: (m.audioUrl ?? m.audio_url ?? null) as string | null,
+    audio_duration: (m.audioDuration ?? m.audio_duration ?? null) as number | null,
+  };
+}
+
+/**
+ * Livechat messages hook.
+ */
+export interface LiveChatPagingOptions {
+  /**
+   * Page the history: open on the newest `pageSize` lines and fetch older ones
+   * with `loadOlder` as the reader scrolls up. Left off, the hook reads one
+   * window of the newest lines, as the side chat and stream chats do.
+   */
+  pageSize?: number;
+}
+
+export function useLiveChatMessages(roomId: string | null, options: LiveChatPagingOptions = {}) {
+  const pageSize = options.pageSize;
+  const { t: _copy } = _useCopy();
+  const [messageRows, setMessages] = useState<SupabaseLiveChatMessage[]>([]);
+  const [loadedRoom, setLoadedRoom] = useState<string | null>(null);
+  const [loading, setIsLoading] = useState(true);
+  const [historyError, setHistoryError] = useState(false);
+  const historyScope = useRef(0);
+  useLayoutEffect(() => {
+    return () => { historyScope.current += 1; };
+  }, [roomId]);
+  const messages = loadedRoom === roomId ? messageRows : (roomId && liveChatMessagesCache.get(roomId)) || [];
+  const isLoading = !!roomId && (loadedRoom !== roomId || loading);
+  const [isSending, setIsSending] = useState(false);
+  const [isConnected, setIsConnected] = useState(false);
+  const [isBanned, setIsBanned] = useState(false);
+  /** This viewer moderates the room: a stream's creator, their moderators, staff. */
+  const [isModerator, setIsModerator] = useState(false);
+  /** Platform chat staff, and whether this viewer is a super moderator: only they can ban, mute or kick staff. */
+  const [staff, setStaff] = useState<string[]>([]);
+  const [isSuperModerator, setIsSuperModerator] = useState(false);
+  /** Until when a stream timeout keeps this viewer quiet here, if one does. */
+  const [mutedUntil, setMutedUntil] = useState<number | null>(null);
+  const { isAuthenticated, user, walletAddress } = useAuth();
+  const initialLoadDone = useRef(false);
+  // Read inside the room's socket handlers, which are bound once per room.
+  const walletRef = useRef(walletAddress);
+  walletRef.current = walletAddress;
+  /**
+   * The current list, for callbacks that need to read it without being rebuilt
+   * every time it changes. `send` used to depend on `messages` purely to look
+   * up the row being replied to, so on a busy room the callback — and every
+   * component memoised on it — was recreated on every single arrival.
+   */
+  const messagesRef = useRef<SupabaseLiveChatMessage[]>([]);
+  messagesRef.current = messages;
+  const sweepRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  /** What each pending line asked for, so a failed one can go again as it was. */
+  const pendingSendsRef = useRef(new Map<string, [string, 'text' | 'image' | 'gif' | 'audio', string | undefined, string | undefined, string | undefined, number | undefined]>());
+
+  // ── Paging (pageSize only) ──
+  /** Older lines exist on the server past the oldest one held. */
+  const [hasOlder, setHasOlder] = useState(false);
+  const [loadingOlder, setLoadingOlder] = useState(false);
+  /** Signed out and at the end of what a guest may read. */
+  const [signInWall, setSignInWall] = useState(false);
+  /** Older pages fetched since the room opened. Past 0 nothing is capped. */
+  const olderPagesRef = useRef(0);
+  const loadingOlderRef = useRef(false);
+  const hasOlderRef = useRef(false);
+  hasOlderRef.current = hasOlder;
+  const authRef = useRef(isAuthenticated);
+  authRef.current = isAuthenticated;
+  /** History the reader scrolled back for is kept whole, not trimmed to 300. */
+  const capFor = () => (olderPagesRef.current > 0 ? Number.MAX_SAFE_INTEGER : MAX_LIVECHAT_MESSAGES);
+  /** Newer lines exist past the newest one held: the list is a window into old history. */
+  const [hasNewer, setHasNewer] = useState(false);
+  const hasNewerRef = useRef(false);
+  const loadingNewerRef = useRef(false);
+
+  const fetchMessages = useCallback(async (showLoading = false) => {
+    if (!roomId) return;
+    // Reading old history: the newest window would land far below a gap.
+    if (hasNewerRef.current) return;
+    const scope = historyScope.current;
+    if (showLoading) setIsLoading(true);
+    try {
+      let apiMessages: LiveChatMessage[];
+      if (pageSize) {
+        const page = await getLiveChatMessagePage(roomId, { limit: pageSize, signedIn: authRef.current });
+        if (scope !== historyScope.current) return;
+        apiMessages = page.messages;
+        // Only the opening read decides; a refresh keeps the scrollback state.
+        if (olderPagesRef.current === 0) setHasOlder(page.hasMore);
+        if (page.signInRequired) setSignInWall(true);
+      } else {
+        apiMessages = await fetchApiMessages(roomId, { limit: 200 });
+      }
+      if (scope !== historyScope.current) return;
+      setHistoryError(false);
+      const mapped = apiMessages.map((m) => apiMsgToLocal(m, roomId));
+      setMessages((prev) => {
+        // Confirmed copies take over their pending line's client key; lines
+        // still pending (or failed, waiting on Retry) stay as they are.
+        const { rows, claimed } = claimPending(prev, mapped);
+        const known = new Map(prev.filter((m) => m.client_key).map((m) => [m.id, m.client_key!]));
+        const keyedRows = rows.map((m) => (!m.client_key && known.has(m.id) ? { ...m, client_key: known.get(m.id) } : m));
+        const keepOptimistic = prev.filter((m) => m.id.startsWith('temp-') && !claimed.has(m.id));
+        // Scrolled-back history older than this window stays: a refresh after
+        // a reconnect must not throw away the pages the reader loaded.
+        const oldestFetched = mapped.length ? Math.min(...mapped.map((m) => new Date(m.created_at).getTime())) : Infinity;
+        const keepOlder = olderPagesRef.current > 0
+          ? prev.filter((m) => !m.id.startsWith('temp-') && new Date(m.created_at).getTime() < oldestFetched)
+          : [];
+        const next = capMessages(deduplicateMessages([...keepOlder, ...keyedRows, ...keepOptimistic]), capFor());
+        cacheRoomMessages(roomId, next);
+        return next;
+      });
+    } catch (err) {
+      if (scope !== historyScope.current) return;
+      console.error('[LiveChat] REST messages fetch failed:', err);
+      setHistoryError(true);
+    } finally {
+      if (scope === historyScope.current) setIsLoading(false);
+    }
+  }, [roomId, pageSize]);
+
+  /**
+   * The next page back. Signed out, one page past the opening one is all a
+   * guest reads; after that the reader gets the sign-in wall instead (the
+   * server enforces the same depth).
+   */
+  const loadOlder = useCallback(async () => {
+    if (!roomId || !pageSize || loadingOlderRef.current || !hasOlderRef.current) return;
+    if (!authRef.current && olderPagesRef.current >= 1) {
+      setSignInWall(true);
+      return;
+    }
+    const oldest = messagesRef.current.find((m) => !m.id.startsWith('temp-'));
+    if (!oldest) return;
+    loadingOlderRef.current = true;
+    setLoadingOlder(true);
+    try {
+      const page = await getLiveChatMessagePage(roomId, { limit: pageSize, before: oldest.id, signedIn: authRef.current });
+      if (page.signInRequired) {
+        setSignInWall(true);
+        setHasOlder(false);
+        return;
+      }
+      olderPagesRef.current += 1;
+      const mapped = page.messages.map((m) => apiMsgToLocal(m, roomId));
+      setHasOlder(page.hasMore);
+      if (!mapped.length) return;
+      setMessages((prev) => {
+        const next = deduplicateMessages([...mapped, ...prev]);
+        cacheRoomMessages(roomId, next);
+        return next;
+      });
+    } catch (err) {
+      console.error('[LiveChat] older page failed:', err);
+    } finally {
+      loadingOlderRef.current = false;
+      setLoadingOlder(false);
+    }
+  }, [roomId, pageSize]);
+
+  /**
+   * Open the room on one line, wherever it is in the history (a search
+   * result). If the line is not among those held, the list becomes the window
+   * around it; `loadNewer` then reads forward until it meets the live tail.
+   */
+  const jumpTo = useCallback(async (messageId: string, onSignInRequired?: () => void): Promise<boolean> => {
+    if (!roomId || !pageSize) return false;
+    if (messagesRef.current.some((m) => m.id === messageId)) return true;
+    const scope = historyScope.current;
+    try {
+      const page = await getLiveChatMessagePage(roomId, { limit: AROUND_WINDOW, around: messageId, signedIn: authRef.current });
+      if (scope !== historyScope.current) return false;
+      if (page.signInRequired) {
+        setSignInWall(true);
+        onSignInRequired?.();
+        return false;
+      }
+      const mapped = page.messages.map((m) => apiMsgToLocal(m, roomId));
+      if (!mapped.some((m) => m.id === messageId)) return false;
+      olderPagesRef.current = Math.max(olderPagesRef.current, 1);
+      hasNewerRef.current = page.hasNewer;
+      if (page.hasNewer) roomsReadingHistory.add(roomId);
+      setHasNewer(page.hasNewer);
+      setHasOlder(page.hasMore);
+      setMessages(deduplicateMessages(mapped));
+      return true;
+    } catch (err) {
+      console.error('[LiveChat] jump to message failed:', err);
+      return false;
+    }
+  }, [roomId, pageSize]);
+
+  /** The next page forward while reading old history. */
+  const loadNewer = useCallback(async () => {
+    if (!roomId || !pageSize || loadingNewerRef.current || !hasNewerRef.current) return;
+    const held = messagesRef.current;
+    let newest: SupabaseLiveChatMessage | undefined;
+    for (let i = held.length - 1; i >= 0 && !newest; i -= 1) if (!held[i].id.startsWith('temp-')) newest = held[i];
+    if (!newest) return;
+    loadingNewerRef.current = true;
+    try {
+      const page = await getLiveChatMessagePage(roomId, { limit: pageSize, after: newest.id, signedIn: authRef.current });
+      const mapped = page.messages.map((m) => apiMsgToLocal(m, roomId));
+      const more = page.hasMore && mapped.length > 0;
+      hasNewerRef.current = more;
+      if (!more) roomsReadingHistory.delete(roomId);
+      setHasNewer(more);
+      if (mapped.length) setMessages((prev) => deduplicateMessages([...prev, ...mapped]));
+    } catch (err) {
+      console.error('[LiveChat] newer page failed:', err);
+    } finally {
+      loadingNewerRef.current = false;
+    }
+  }, [roomId, pageSize]);
+
+  /** Leave old history and reopen the room on its newest lines. */
+  const backToLatest = useCallback(async () => {
+    if (!roomId) return;
+    hasNewerRef.current = false;
+    roomsReadingHistory.delete(roomId);
+    setHasNewer(false);
+    olderPagesRef.current = 0;
+    setMessages([]);
+    await fetchMessages(true);
+  }, [roomId, fetchMessages]);
+
+  // A new room starts at its newest page again.
+  useEffect(() => {
+    olderPagesRef.current = 0;
+    hasNewerRef.current = false;
+    setHasOlder(false);
+    setHasNewer(false);
+    setSignInWall(false);
+    return () => { if (roomId) roomsReadingHistory.delete(roomId); };
+  }, [roomId]);
+
+  // Signing in lifts the wall; the older pages are open again.
+  useEffect(() => {
+    if (!isAuthenticated || !signInWall) return;
+    setSignInWall(false);
+    setHasOlder(true);
+  }, [isAuthenticated, signInWall]);
+
+  /**
+   * Fold the room's newest lines in without replacing what is on screen, so a
+   * busy room keeps its scrollback while the gap check runs.
+   */
+  const catchUp = useCallback(async () => {
+    if (!roomId || hasNewerRef.current) return;
+    try {
+      const apiMessages = await fetchApiMessages(roomId, { limit: 50 });
+      if (!apiMessages.length) return;
+      const mapped = apiMessages.map((m) => apiMsgToLocal(m, roomId));
+      setMessages((prev) => {
+        const known = new Set(prev.map((m) => m.id));
+        const fresh = mapped.filter((m) => !known.has(m.id));
+        if (!fresh.length) return prev;
+        const next = mergeIncoming(prev, fresh, capFor());
+        cacheRoomMessages(roomId, next);
+        return next;
+      });
+    } catch (err) {
+      console.error('[LiveChat] REST catch-up failed:', err);
+    }
+  }, [roomId]);
+
+  /**
+   * One reconciliation per burst of sends, not one per send.
+   *
+   * A message the gateway neither broadcast back nor refused leaves an
+   * optimistic row on screen forever. That is worth catching — but it is rare,
+   * so it is checked once things go quiet rather than on a timer attached to
+   * every message. If nothing is still pending by then, no request is made at
+   * all, which is the normal outcome.
+   */
+  const scheduleOptimisticSweep = useCallback(() => {
+    if (sweepRef.current) clearTimeout(sweepRef.current);
+    sweepRef.current = setTimeout(() => {
+      sweepRef.current = null;
+      if (messagesRef.current.some((m) => m.id.startsWith('temp-'))) fetchMessages(false);
+    }, 4000);
+  }, [fetchMessages]);
+
+  useEffect(() => () => {
+    if (sweepRef.current) clearTimeout(sweepRef.current);
+  }, []);
+
+  useEffect(() => {
+    setLoadedRoom(roomId);
+    setMessages((roomId && liveChatMessagesCache.get(roomId)) || []);
+    setHistoryError(false);
+    if (roomId) void fetchMessages(true);
+  }, [roomId, fetchMessages]);
+
+  // Socket connection for real-time updates
+  useEffect(() => {
+    if (!roomId) return;
+
+    initialLoadDone.current = false;
+
+    // Every socket event logged with its payload is real work per chat line
+    // and reaction on a busy stream; keep it to local dev.
+    const unsubDebug = import.meta.env.DEV ? debugSocketEvents(roomId) : () => {};
+    const socket = getSocket(roomId);
+    setIsConnected(socket.connected);
+
+    // Counted once per mounted chat, whatever the connection is doing. It used
+    // to be counted on every connect: a chat that mounted before the socket
+    // connected was not counted yet, so another chat for the same room
+    // unmounting in that window closed the socket under it. Its sends then went
+    // out on a fresh connection that never joined the room, landed in the
+    // platform chat, and never echoed back, so the box kept the sent text.
+    // The socket re-joins by itself on every (re)connect.
+    joinRoom(roomId);
+    // A reconnect re-joins the room but the socket does not replay what was
+    // said while it was away (a background tab, a dropped network), so read
+    // the gap back over REST.
+    let droppedOnce = false;
+    const onConnect = () => {
+      setIsConnected(true);
+      if (droppedOnce) void fetchMessages(false);
+    };
+    const onDisconnect = () => { droppedOnce = true; setIsConnected(false); };
+    // Back in a tab that sat in the background: catch up even if the socket
+    // never noticed it was throttled.
+    let hiddenAt = 0;
+    const onVisibility = () => {
+      if (document.visibilityState === 'hidden') { hiddenAt = Date.now(); return; }
+      if (hiddenAt && Date.now() - hiddenAt > 10_000) void fetchMessages(false);
+      hiddenAt = 0;
+    };
+    document.addEventListener('visibilitychange', onVisibility);
+
+    // A safety net under the socket. A connection can look healthy and still
+    // not deliver (a room membership lost on the server, a proxy holding a
+    // dead long-poll), and nothing on screen says so: a streamer just stops
+    // seeing their viewers. Every so often the room is read back over REST and
+    // anything missed is folded in. Quicker while the socket is known to be
+    // down. A stream's room only: the platform chat is open in every tab.
+    let lastPoll = Date.now();
+    const gapCheck = setInterval(() => {
+      if (document.visibilityState === 'hidden') return;
+      const due = socket.connected ? STREAM_GAP_CHECK_MS : DISCONNECTED_GAP_CHECK_MS;
+      if (!roomId.startsWith('stream:') && socket.connected) return;
+      if (Date.now() - lastPoll < due) return;
+      lastPoll = Date.now();
+      void catchUp();
+    }, DISCONNECTED_GAP_CHECK_MS);
+
+    socket.on('connect', onConnect);
+    socket.on('disconnect', onDisconnect);
+
+    const unsubJoined = onRoomJoined(roomId, (data) => {
+      console.log('[LiveChat] Room joined, banned:', data.isBanned);
+      setIsBanned(data.isBanned || false);
+      setIsModerator(!!(data.yourUser as { isModerator?: boolean } | null)?.isModerator);
+      setIsSuperModerator(!!(data.yourUser as { isSuperModerator?: boolean } | null)?.isSuperModerator);
+      setStaff(Array.isArray(data.staff) ? data.staff.map((a) => String(a).toLowerCase()) : []);
+      initialLoadDone.current = true;
+    });
+
+    /*
+     * Arrivals are coalesced into one state update per frame's worth of time.
+     *
+     * Every socket message used to be its own setState, so a room doing twenty
+     * lines a second asked React for twenty renders of the whole list in that
+     * second — and on a top streamer's chat, which is the only place the rate
+     * gets interesting, that is where the frames go. Nothing is delayed that a
+     * reader can perceive: 16ms, and the messages still appear in the order
+     * they were sent. What changes is that ten messages landing together cost
+     * one render instead of ten.
+     *
+     * A timer rather than requestAnimationFrame, deliberately: rAF does not run
+     * at all in a hidden tab, so a viewer who switched away from a busy stream
+     * would accumulate an unbounded buffer and take the whole backlog as one
+     * render on returning. A timeout still fires when hidden (throttled to
+     * about a second, which is the right cadence for a tab nobody is looking
+     * at), and the buffer is capped either way.
+     */
+    const pending: SupabaseLiveChatMessage[] = [];
+    let flushHandle: ReturnType<typeof setTimeout> | null = null;
+
+    const flush = () => {
+      flushHandle = null;
+      if (pending.length === 0) return;
+      const batch = pending.splice(0, pending.length);
+      // Reading old history: new lines join once the reader is back at the tail.
+      if (hasNewerRef.current) return;
+      setMessages((prev) => {
+        const next = mergeIncoming(prev, batch, capFor());
+        cacheRoomMessages(roomId, next);
+        return next;
+      });
+    };
+
+    const unsubMsg = onLiveChatMessage(roomId, (msg) => {
+      const local = socketMsgToLocal(msg, roomId);
+      if (!local) return;
+      pending.push(local);
+      // The list only ever renders MAX_LIVECHAT_MESSAGES anyway, so holding
+      // more than that buys nothing and costs memory on a tab left open on a
+      // fire-hose room.
+      if (pending.length > MAX_LIVECHAT_MESSAGES) {
+        pending.splice(0, pending.length - MAX_LIVECHAT_MESSAGES);
+      }
+      // A hidden tab's timers can be held back for up to a minute, so there
+      // the batch goes in now rather than waiting on one.
+      if (document.visibilityState === 'hidden') flush();
+      else if (flushHandle === null) flushHandle = setTimeout(flush, FLUSH_INTERVAL_MS);
+    });
+
+    const unsubEdited = onMessageEdited(roomId, (msg) => {
+      const local = socketMsgToLocal(msg, roomId);
+      if (!local) return;
+      setMessages((prev) => {
+        // Merged onto the row we already hold, not swapped for it: the edit
+        // payload is a fresh format of the message and carries no reply_to
+        // sender name, so a straight replace would blank the reply header on
+        // an edited line.
+        const next = prev.map((m) =>
+          m.id === local.id ? { ...m, ...local, is_edited: true, reply_to: local.reply_to || m.reply_to } : m
+        );
+        cacheRoomMessages(roomId, next);
+        return next;
+      });
+    });
+
+    const unsubDeleted = onMessageDeleted(roomId, (data) => {
+      setMessages((prev) => {
+        const next = prev.filter((m) => m.id !== data.messageId);
+        cacheRoomMessages(roomId, next);
+        return next;
+      });
+    });
+
+    // Edits and deletes are fire-and-forget emits — a refusal only ever
+    // arrives here, so without this the row silently snaps back on the next
+    // refetch with nothing said.
+    // Every refusal the gateway sends back lands here — a send it turned down
+    // (not signed in, banned, slow mode, stake floor, blocked link) as much as
+    // an edit or delete. The gateway acknowledges nothing on success, so a
+    // refused send used to vanish without a word: the optimistic row stayed
+    // until the 1.5s refetch replaced the list, and the creator saw their
+    // message simply disappear. Say what happened and drop the row that will
+    // never be confirmed.
+    const unsubError = onLiveChatError(roomId, (data) => {
+      // Signed-out refusals are healed by the send that got them (new token,
+      // sent again); only a session that is really over is shown, by the send.
+      if (isAuthRefusal(data)) return;
+      const message = chatRefusalText(data);
+      // One toast per refusal even if several sends come back refused at once.
+      toast.error(message, { id: data?.code === 'SLOW_DOWN' ? 'chat-slow-down' : undefined });
+      // The refused line itself is marked by its own send (below), which is
+      // waiting on exactly this event; other lines still in flight are left be.
+      if (/edit|delete|not authorised|not authorized|own messages/i.test(message)) {
+        fetchMessages(false);
+      }
+    });
+
+    // Handle reaction updates from other users
+    const unsubReaction = onReactionUpdated(roomId, (data: unknown) => {
+      const d = data as Record<string, unknown>;
+      const messageId = String(d.messageId || d.message_id || '');
+      if (!messageId) return;
+      const reactions = parseReactions(d.reactions);
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === messageId ? { ...m, reactions } : m
+        )
+      );
+    });
+
+    // A stream creator's own moderation. About this viewer: they are timed
+    // out or banned in this room only. About someone else: a banned viewer's
+    // lines leave the room, as they do on every stream chat people know.
+    const unsubModerated = onStreamModeration(roomId, ({ address, action, seconds }) => {
+      const me = (walletRef.current || '').toLowerCase();
+      if (me && address === me) {
+        if (action === 'ban') setIsBanned(true);
+        else setMutedUntil(Date.now() + (seconds ?? 60) * 1000);
+        return;
+      }
+      if (action === 'ban') setMessages((prev) => prev.filter((m) => m.sender_address.toLowerCase() !== address));
+    });
+
+    const unsubBanned = onUserBanned(roomId, (data) => {
+      setIsBanned(true);
+      toast.error(data.message || _translateCopy("copy.38e7a424a9d7", { defaultValue: "You have been banned from chat" }));
+    });
+    const unsubUnbanned = onUserUnbanned(roomId, (data) => {
+      setIsBanned(false);
+      toast.success(data.message || _translateCopy("copy.7deb65a4e9e4", { defaultValue: "You have been unbanned" }));
+    });
+
+    return () => {
+      if (flushHandle !== null) clearTimeout(flushHandle);
+      pending.length = 0;
+      leaveRoom(roomId);
+      unsubJoined();
+      unsubMsg();
+      unsubEdited();
+      unsubDeleted();
+      unsubError();
+      unsubReaction();
+      unsubBanned();
+      unsubUnbanned();
+      unsubModerated();
+      unsubDebug();
+      socket.off('connect', onConnect);
+      socket.off('disconnect', onDisconnect);
+      document.removeEventListener('visibilitychange', onVisibility);
+      clearInterval(gapCheck);
+      setIsConnected(false);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [roomId]);
+
+  const send = useCallback(
+    async (
+      content: string,
+      type: 'text' | 'image' | 'gif' | 'audio' = 'text',
+      imageUrl?: string,
+      replyToId?: string,
+      audioUrl?: string,
+      audioDuration?: number,
+      /** Resend a failed line where it is: its client key. */
+      retryKey?: string,
+    ) => {
+      if (!roomId || !isAuthenticated || !walletAddress) throw new Error(_translateCopy("copy.bc30560b2f21", { defaultValue: "Sign in to send a message" }));
+      if (isBanned) {
+        toast.error(_copy("copy.4d7240d59cda", { defaultValue: "You are banned from chat" }));
+        throw new Error(_translateCopy("copy.4d7240d59cda", { defaultValue: "You are banned from chat" }));
+      }
+      setIsSending(true);
+
+      // Build reply_to data from the original message so sender_name is correct
+      let replyToData: SupabaseLiveChatMessage['reply_to'];
+      if (replyToId) {
+        const original = messagesRef.current.find((m) => m.id === replyToId);
+        if (original) {
+          replyToData = {
+            id: original.id,
+            content: original.content || 'Media',
+            sender_name: original.sender_display_name || original.sender_username || original.sender_address?.slice(0, 6) || 'User',
+          };
+        }
+      }
+
+      const optimisticId = retryKey ?? `temp-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+      pendingSendsRef.current.set(optimisticId, [content, type, imageUrl, replyToId, audioUrl, audioDuration]);
+      const optimisticMsg: SupabaseLiveChatMessage = {
+        id: optimisticId,
+        client_key: optimisticId,
+        send_state: 'sending',
+        room_id: roomId,
+        sender_address: walletAddress.toLowerCase(),
+        sender_username: user?.username || null,
+        sender_display_name: user?.displayName || null,
+        sender_avatar_url: user?.avatarImageUrl || null,
+        content,
+        message_type: type,
+        image_url: imageUrl || null,
+        audio_url: audioUrl || null,
+        audio_duration: audioDuration || null,
+        is_pinned: false,
+        created_at: new Date().toISOString(),
+        reply_to: replyToData,
+      };
+      // Drawn exactly as it will look once delivered; only a small ring says
+      // it is still going. A retry flips the failed row back where it stands.
+      setMessages((prev) => {
+        const next = retryKey && prev.some((m) => m.id === retryKey)
+          ? prev.map((m) => (m.id === retryKey ? { ...m, send_state: 'sending' as const } : m))
+          : [...prev, optimisticMsg];
+        if (roomId) cacheRoomMessages(roomId, next);
+        return next;
+      });
+
+      try {
+        const apiType = type === 'image' ? 'media' : type;
+        // A refusal is already toasted by the room's error listener with the
+        // server's reason (slow down, blocked link, ...); remember it so the
+        // send does not add a second, vaguer toast on top.
+        let refused = false;
+        let signedOut = false;
+        // The send carries the token, so a connection that came back from a
+        // sleep as a guest is signed in again by the send itself. Make sure
+        // it is a live one first.
+        await ensureFreshToken().catch(() => undefined);
+        const socket = getSocket(roomId);
+        const deliver = async () => {
+          if (!(await waitForLiveChatSend(socket, roomId)) || !socket.connected) {
+            throw new Error(_translateCopy("copy.7fbd7933cfe0", { defaultValue: "Socket connection timeout" }));
+          }
+          return confirmChatDelivery({
+            listen: (event, handler) => {
+              if (event === 'message') return onLiveChatMessage(roomId, handler);
+              if (event === 'error') return onLiveChatError(roomId, (data) => {
+                if (isAuthRefusal(data)) signedOut = true; else refused = true;
+                handler(data);
+              });
+              socket.on(event, handler); return () => { socket.off(event, handler); };
+            },
+            emit: () => {
+              emitSendMessage({
+                roomId,
+                content,
+                messageType: apiType,
+                imageUrl,
+                audioUrl,
+                audioDuration,
+                replyTo: replyToId,
+              });
+            },
+            messageEvent: 'message', errorEvent: 'error',
+            matches: message => roomMessageMatches(message, { account: walletAddress, content, room: roomId, attachment: imageUrl || audioUrl }),
+          });
+        };
+        let confirmed = await deliver();
+        // Refused as signed out while signed in here: get a new token and
+        // send once more, quietly. Only a session that is really over says so.
+        if (!confirmed && signedOut) {
+          signedOut = false;
+          const fresh = await refreshTokenShared().catch(() => null);
+          if (!fresh) throw new Error(_translateCopy("copy.de1ad7135e96", { defaultValue: "Your sign-in session expired. Please sign in again." }));
+          confirmed = await deliver();
+          if (!confirmed && signedOut) throw new Error(_translateCopy("copy.de1ad7135e96", { defaultValue: "Your sign-in session expired. Please sign in again." }));
+        }
+        if (!confirmed && refused) throw new ShownChatError('refused');
+        if (!confirmed) throw new Error(_translateCopy("copy.b13c7f1738c8", { defaultValue: "Message was not confirmed. Your draft has been kept." }));
+
+        /*
+         * No refetch here.
+         *
+         * This used to pull the room's last 200 messages over REST 1.5 seconds
+         * after every send — from every sender, on every message. On a quiet
+         * room that is invisible; on a top streamer's chat it is the single
+         * most expensive thing the client does, and it scales with the exact
+         * thing we want to scale with: a room doing 20 messages a second was
+         * asking the API for 4,000 messages a second, and each response
+         * rebuilt and re-sorted the whole list on the main thread.
+         *
+         * It bought nothing the socket does not already do. The gateway
+         * re-broadcasts the message to the sender too, which is what clears
+         * the optimistic row, and a send the gateway REFUSES comes back on the
+         * error channel — where it is already handled and already drops the
+         * row. The only case left is a send that is silently lost, and the
+         * sweep below covers it without a request per message.
+         */
+        pendingSendsRef.current.delete(optimisticId);
+        scheduleOptimisticSweep();
+      } catch (err: any) {
+        // The line stays where it was sent, marked "Not sent" with Retry.
+        setMessages((prev) => {
+          const next = prev.map((m) => (m.id === optimisticId ? { ...m, send_state: 'failed' as const } : m));
+          if (roomId) cacheRoomMessages(roomId, next);
+          return next;
+        });
+        if (!wasShownToUser(err)) {
+          toast.error(_translateCopy("copy.9b9ec2e38a00", { defaultValue: "Failed to send: {{value1}}", value1: err?.message || _translateCopy("copy.27c2ccd962c2", { defaultValue: "Unknown error" }) }));
+        }
+        console.error('[LiveChat] Failed to send message:', err);
+        throw err;
+      } finally {
+        setIsSending(false);
+      }
+    },
+    // Deliberately NOT depending on `messages` — it is read through
+    // messagesRef, so this callback stays identical for the life of the room
+    // instead of being rebuilt on every arrival.
+    [roomId, isAuthenticated, walletAddress, user, isBanned, scheduleOptimisticSweep, _copy]
+  );
+
+  /**
+   * Rewrite one of your own lines.
+   *
+   * Optimistic: the gateway acknowledges nothing, it just re-broadcasts the
+   * message, so waiting would leave the row stale for a round trip. A refusal
+   * comes back on the error channel and puts the room straight again.
+   */
+  const editMessage = useCallback(async (messageId: string, content: string) => {
+    const trimmed = content.trim();
+    if (!trimmed || !walletAddress) return false;
+    const target = messagesRef.current.find((m) => m.id === messageId);
+    if (!target) return false;
+    if (target.sender_address?.toLowerCase() !== walletAddress.toLowerCase()) {
+      toast.error(_copy("copy.50164dfe3302", { defaultValue: "You can only edit your own messages" }));
+      return false;
+    }
+    if (messageId.startsWith('temp-')) {
+      toast.error(_copy("copy.284407e430a6", { defaultValue: "Message is still sending" }));
+      return false;
+    }
+    if (trimmed === target.content) return true;
+
+    setMessages((prev) => {
+      const next = prev.map((m) => (m.id === messageId ? { ...m, content: trimmed, is_edited: true } : m));
+      if (roomId) cacheRoomMessages(roomId, next);
+      return next;
+    });
+    const socket = getSocket(roomId ?? undefined);
+    const confirmed = await confirmChatDelivery({
+      listen: (event, handler) => {
+        if (event === 'message') return onMessageEdited(roomId ?? undefined, handler);
+        if (event === 'error') return onLiveChatError(roomId ?? undefined, handler);
+        socket.on(event, handler); return () => { socket.off(event, handler); };
+      },
+      emit: () => emitEditMessage(roomId ?? undefined, messageId, trimmed),
+      messageEvent: 'message', errorEvent: 'error',
+      matches: message => roomMessageMatches(message, { account: walletAddress, content: trimmed, messageId }),
+    });
+    if (!confirmed) {
+      setMessages(previous => previous.map(message => message.id === messageId && message.content === trimmed ? target : message));
+      toast.error(_copy("copy.9b102aa14105", { defaultValue: "Edit was not confirmed. Your draft has been kept." }));
+    }
+    return confirmed;
+  }, [walletAddress, roomId, _copy]);
+
+  /** Remove a message — your own, or anyone's if you moderate the room. */
+  const deleteMessage = useCallback(async (messageId: string) => {
+    if (messageId.startsWith('temp-')) return;
+    setMessages((prev) => {
+      const next = prev.filter((m) => m.id !== messageId);
+      if (roomId) cacheRoomMessages(roomId, next);
+      return next;
+    });
+    emitDeleteMessage(roomId ?? undefined, messageId);
+  }, [roomId]);
+
+  const addReaction = useCallback((messageId: string, emoji: string) => {
+    // eslint-disable-next-line no-console
+    console.log('[LiveChat] addReaction called', { roomId, messageId, emoji });
+    // Allow optimistic UI reaction as long as we know the current wallet address.
+    // Auth state can briefly flicker during Web3Auth/Wagmi handshakes, which was
+    // blocking reactions even for already-signed-in users.
+    if (!walletAddress) {
+      toast.error(_copy("copy.e8cb7197e531", { defaultValue: "Sign in to react" }));
+      return;
+    }
+    // Optimistic update
+    setMessages((prev) =>
+      prev.map((m) => {
+        if (m.id !== messageId) return m;
+        const reactions = { ...(m.reactions || {}) };
+        const existing = reactions[emoji] || [];
+        if (!existing.some((a) => a.toLowerCase() === walletAddress.toLowerCase())) {
+          reactions[emoji] = [...existing, walletAddress.toLowerCase()];
+        }
+        return { ...m, reactions };
+      })
+    );
+    emitAddReaction(roomId, messageId, emoji);
+  }, [roomId, walletAddress, _copy]);
+
+  const removeReaction = useCallback((messageId: string, emoji: string) => {
+    if (!walletAddress) return;
+    // Optimistic update
+    setMessages((prev) =>
+      prev.map((m) => {
+        if (m.id !== messageId) return m;
+        const reactions = { ...(m.reactions || {}) };
+        reactions[emoji] = (reactions[emoji] || []).filter(
+          (a) => a.toLowerCase() !== walletAddress.toLowerCase()
+        );
+        if (reactions[emoji].length === 0) delete reactions[emoji];
+        return { ...m, reactions: Object.keys(reactions).length > 0 ? reactions : undefined };
+      })
+    );
+    emitRemoveReaction(roomId, messageId, emoji);
+  }, [roomId, walletAddress]);
+
+  /** Send a failed line again, in place. */
+  const retrySend = useCallback((clientKey: string) => {
+    const args = pendingSendsRef.current.get(clientKey);
+    if (!args) return;
+    void send(...args, clientKey).catch(() => {});
+  }, [send]);
+
+  /** Drop a failed line the sender no longer wants. */
+  const discardSend = useCallback((clientKey: string) => {
+    pendingSendsRef.current.delete(clientKey);
+    setMessages((prev) => {
+      const next = prev.filter((m) => m.id !== clientKey);
+      if (roomId) cacheRoomMessages(roomId, next);
+      return next;
+    });
+  }, [roomId]);
+
+  // Stable: Public Chat's ban/unban handlers depend on it, and a new function
+  // each render redrew every line on screen while scrolling.
+  const refetch = useCallback(() => fetchMessages(true), [fetchMessages]);
+
+  return {
+    messages, isLoading, historyError, isSending, isConnected, isBanned, isModerator, mutedUntil, staff, isSuperModerator,
+    send, retrySend, discardSend, addReaction, removeReaction, editMessage, deleteMessage,
+    refetch,
+    hasOlder, loadingOlder, loadOlder, signInWall,
+    hasNewer, jumpTo, loadNewer, backToLatest,
+  };
+}
+
+/**
+ * How many people are connected to the ONE global platform chat.
+ *
+ * NOT a room figure and NOT a stream figure, despite the argument: the id is
+ * accepted for call-site symmetry and then ignored, because the endpoint behind
+ * it — `GET /api/livechat/online` — has no room dimension at all. It was being
+ * rendered beside a live stream under a people icon, where it read as "this
+ * many people are watching"; a host with an empty stream saw three, because
+ * three people were in the platform chat.
+ *
+ * For a stream's actual audience use `useStreamAudience`
+ * (src/hooks/use-stream-presence.ts). Only the global chat surfaces
+ * (PublicChat, SidebarChat) should be reading this.
+ */
+export function useLiveChatPresence(_roomId: string | null) {
+  const [onlineCount, setOnlineCount] = useState(0);
+
+  useEffect(() => {
+    if (!_roomId) return;
+    getLiveChatOnlineCount().then(setOnlineCount).catch(() => {});
+    const interval = setInterval(() => {
+      getLiveChatOnlineCount().then(setOnlineCount).catch(() => {});
+    }, 30000);
+    return () => clearInterval(interval);
+  }, [_roomId]);
+
+  return {
+    onlineUsers: [] as Array<{ address: string; username?: string; avatar?: string }>,
+    onlineCount,
+  };
+}
+
+export function useLiveChatRoomDetails(roomId: string | null) {
+  const [room, setRoom] = useState<LiveChatRoom | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const fetch = useCallback(async () => {
+    if (!roomId) { setRoom(null); return; }
+    setIsLoading(true);
+    try {
+      const data = await getLiveChatRoom(roomId);
+      setRoom(data);
+    } catch (err) {
+      console.error('[LiveChat] Failed to fetch room details:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [roomId]);
+
+  useEffect(() => { fetch(); }, [fetch]);
+
+  return { room, isLoading, refetch: fetch };
+}
+
+export function useLiveChatUser(address: string | null) {
+  const [profile, setProfile] = useState<LiveChatUserProfile | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const fetch = useCallback(async () => {
+    if (!address) { setProfile(null); return; }
+    setIsLoading(true);
+    try {
+      const data = await getLiveChatUserProfile(address);
+      setProfile(data);
+    } catch (err) {
+      console.error('[LiveChat] Failed to fetch user profile:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [address]);
+
+  useEffect(() => { fetch(); }, [fetch]);
+
+  return { profile, isLoading, refetch: fetch };
+}

@@ -1,0 +1,85 @@
+import { useTranslation as _useCopy } from 'react-i18next';
+import React from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
+import { useTranslation } from 'react-i18next';
+import { badgeImage } from '@/lib/staking-badges';
+import { DhbAmount } from '@/components/app/DhbAmount';
+
+/**
+ * The Badge of Honour ladder, for the docs dApp page.
+ *
+ * Two numbers per rung, because two things are true at once. The DOLLAR cost is
+ * the invariant the peg preserves — Megalodon is about $50,000 whatever DHB is
+ * trading at. The DHB figure is the reference ladder: what that dollar cost
+ * asks for at the $0.001 anchor `BADGE_PRICE_ANCHOR` was written against, and
+ * what the app actually asks for is that ladder scaled by anchor ÷ live price.
+ * Showing only the DHB column (which this did until the peg landed) reads as a
+ * fixed requirement, which is exactly what it stopped being.
+ *
+ * The weight column is the same ladder again: what a view or a reaction from
+ * that tier counts for, one above the badgeless account's single count.
+ */
+const BadgeFlowchart = () => {
+  const { t: _copy } = _useCopy();
+  const { t } = useTranslation();
+  const badges = [
+    { threshold: "10,000", usd: "$10", badge: "Crab Badge", color: "bg-muted", image: badgeImage('Crab') },
+    { threshold: "25k", usd: "$25", badge: "Ghost Lobster Badge", color: "bg-muted", image: badgeImage('Ghost Lobster') },
+    { threshold: "50k", usd: "$50", badge: "Piranha Badge", color: "bg-muted", image: badgeImage('Piranha') },
+    { threshold: "100k", usd: "$100", badge: "Giant Tortoise Badge", color: "bg-muted", image: badgeImage('Giant Tortoise') },
+    { threshold: "250k", usd: "$250", badge: "King Cobra Badge", color: "bg-muted", image: badgeImage('King Cobra') },
+    { threshold: "500k", usd: "$500", badge: "Octopus Badge", color: "bg-muted", image: badgeImage('Octopus') },
+    { threshold: "1m", usd: "$1,000", badge: "Crocodile Badge", color: "bg-muted", image: badgeImage('Crocodile') },
+    { threshold: "2m", usd: "$2,000", badge: "Dolphin Badge", color: "bg-muted", image: badgeImage('Dolphin') },
+    { threshold: "3m", usd: "$3,000", badge: "Tiger Shark Badge", color: "bg-muted", image: badgeImage('Tiger Shark') },
+    { threshold: "5m", usd: "$5,000", badge: "Great White Shark Badge", color: "bg-muted", image: badgeImage('Great White Shark') },
+    { threshold: "10m", usd: "$10,000", badge: "Killer Whale Badge", color: "bg-muted", image: badgeImage('Killer Whale') },
+    { threshold: "25m", usd: "$25,000", badge: "Blue Whale Badge", color: "bg-muted", image: badgeImage('Blue Whale') },
+    { threshold: "50m", usd: "$50,000", badge: "Megalodon Badge", color: "bg-muted", image: badgeImage('Megalodon') }
+  ];
+
+  return (
+    <Card className="w-full">
+      <CardHeader>
+        <CardTitle className="text-center">{_copy("copy.d7d78eb92b79", { defaultValue: "Badge of Honour System" })}</CardTitle>
+        <p className="text-center text-sm text-muted-foreground">
+          {t('badgeLadder.intro')}
+        </p>
+      </CardHeader>
+      <CardContent>
+        <div className="grid gap-3">
+          {badges.map((badge, index) => (
+            <div key={badge.threshold} className="flex items-center justify-between gap-3 p-3 rounded-lg docs-glass">
+              <div className="flex items-center gap-3 min-w-0">
+                <img
+                  src={badge.image}
+                  alt={badge.badge}
+                  className="w-8 h-8 object-contain shrink-0"
+                />
+                <span className="font-medium truncate">{badge.badge}</span>
+              </div>
+              <div className="text-right shrink-0">
+                <span className="text-sm font-mono text-foreground">{badge.usd}</span>
+                <span className="block text-xs font-mono text-muted-foreground">
+                  <DhbAmount amount={badge.threshold} iconClassName="w-3 h-3" />{_copy("copy.b1452e410b70", { defaultValue: " · ×{{value1}} weight", value1: index + 2 })}</span>
+              </div>
+            </div>
+          ))}
+          <div className="flex items-center justify-between gap-3 p-3 rounded-lg docs-glass">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-8 h-8 rounded-full bg-muted border border-border shrink-0"></div>
+              <span className="font-medium text-muted-foreground truncate">{_copy("copy.6883cefe9094", { defaultValue: "No Badge" })}</span>
+            </div>
+            <div className="text-right shrink-0">
+              <span className="text-sm font-mono text-muted-foreground">{_copy("copy.b93ceb710a1d", { defaultValue: "under $10" })}</span>
+              <span className="block text-xs font-mono text-muted-foreground">
+                <DhbAmount amount="< 10,000" iconClassName="w-3 h-3" />{_copy("copy.40df4f441d1b", { defaultValue: " · ×1 weight" })}</span>
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
+export default BadgeFlowchart;

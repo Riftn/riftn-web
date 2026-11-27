@@ -1,0 +1,471 @@
+/**
+ * Post Reactions
+ * ==============
+ * Mirror of the API's `config/reactions.ts`. Keep the three copies in sync:
+ *   - backend : config/reactions.ts        (source of truth)
+ *   - web     : src/lib/reactions.ts       (this file)
+ *   - mobile  : libs/reactions.ts
+ *
+ * WHY REACTIONS AND LIKES COEXIST
+ * The API never migrated its boolean vote. Each reaction has a POLARITY, and
+ * that polarity is what `totalVotes.for` / `totalVotes.against`, `isLiked` /
+ * `isDisliked` and the whole likers list keep counting:
+ *
+ *   positive → isLiked    (like, love, respect, hot, hundred, lol, sad, cry, poo)
+ *   negative → isDisliked (dislike)
+ *
+ * So `likeCount` still means "how many people reacted positively" — it does not
+ * become a like-only count when someone loves a post. The per-reaction split
+ * lives in `reactionCounts`, which is only used to decide which icon leads.
+ *
+ * @module lib/reactions
+ */
+
+import { Heart, Flame, type LucideIcon } from "lucide-react";
+import ThumbsDown from "@/components/ui/cut-icons/dislike";
+
+import ThumbsUp from "@/components/ui/cut-icons/like";
+import { translateCopy as _translateCopy } from "@/i18n/copy";
+
+
+/** Every reaction, in picker order — also the deterministic tiebreak order. */
+export const POST_REACTIONS = [
+  'like',
+  'love',
+  'respect',
+  'hot',
+  'hundred',
+  'lol',
+  'sad',
+  'cry',
+  'poo',
+  'dislike',
+] as const;
+
+export type PostReaction = (typeof POST_REACTIONS)[number];
+
+/**
+ * Reactions that land in `totalVotes.against` and light the thumbs-down.
+ *
+ * Just the one, since 2026-09-07. 💩 was negative until then and is now an
+ * ordinary positive reaction: it was always cast as a joke, but polarity is
+ * not a joke — a negative reaction feeds `totalVotes.against` and
+ * `totalVoters.against`, which is what the API's downvote-burial filter
+ * measures, so two of them dropped a post out of public discovery. The
+ * thumbs-DOWN is the one control that means "no".
+ */
+export const NEGATIVE_REACTIONS: readonly PostReaction[] = ['dislike'] as const;
+
+export const DEFAULT_POSITIVE_REACTION: PostReaction = 'like';
+export const DEFAULT_NEGATIVE_REACTION: PostReaction = 'dislike';
+
+export interface ReactionMeta {
+  key: PostReaction;
+  label: string;
+  emoji: string;
+  /**
+   * Lucide icon for the four reactions that have a real glyph in the icon set.
+   * The rest render as emoji — the monochrome design system has no fist/laugh/
+   * tear/poo icon, and inventing one from a generic glyph would read wrong.
+   */
+  icon?: LucideIcon;
+  positive: boolean;
+}
+
+const META: Record<PostReaction, ReactionMeta> = {
+  like: { key: 'like', get label() { return _translateCopy('reactionInfo.labels.like', { defaultValue: 'Like' }); }, emoji: '👍', icon: ThumbsUp, positive: true },
+  love: { key: 'love', get label() { return _translateCopy('reactionInfo.labels.love', { defaultValue: 'Love' }); }, emoji: '❤️', icon: Heart, positive: true },
+  respect: { key: 'respect', get label() { return _translateCopy('reactionInfo.labels.respect', { defaultValue: 'Respect' }); }, emoji: '✊', positive: true },
+  hot: { key: 'hot', get label() { return _translateCopy('reactionInfo.labels.hot', { defaultValue: 'Hot' }); }, emoji: '🔥', icon: Flame, positive: true },
+  hundred: { key: 'hundred', get label() { return _translateCopy('reactionInfo.labels.hundred', { defaultValue: '100' }); }, emoji: '💯', positive: true },
+  lol: { key: 'lol', get label() { return _translateCopy('reactionInfo.labels.lol', { defaultValue: 'LOL' }); }, emoji: '😂', positive: true },
+  sad: { key: 'sad', get label() { return _translateCopy('reactionInfo.labels.sad', { defaultValue: 'Sad' }); }, emoji: '😢', positive: true },
+  cry: { key: 'cry', get label() { return _translateCopy('reactionInfo.labels.cry', { defaultValue: 'Crying' }); }, emoji: '😭', positive: true },
+  poo: { key: 'poo', get label() { return _translateCopy('reactionInfo.labels.poo', { defaultValue: 'Poo' }); }, emoji: '💩', positive: true },
+  dislike: { key: 'dislike', get label() { return _translateCopy('reactionInfo.labels.dislike', { defaultValue: 'Dislike' }); }, emoji: '👎', icon: ThumbsDown, positive: false },
+};
+
+/** Ordered metadata for the picker. */
+export const REACTION_LIST: ReactionMeta[] = POST_REACTIONS.map((key) => META[key]);
+
+/**
+ * The picker's two halves.
+ *
+ * Posts and comments carry a single thumbs-up whose tray holds every reaction:
+ * the positive faces first, then a divider, then the ones that count against.
+ * The split is what draws that divider, so a vote against never reads as one
+ * more face that counts as a like. Surfaces that keep a plain up/down pair
+ * (governance, feature requests) have no tray at all.
+ *
+ * Derived from POST_REACTIONS so both halves keep the canonical order and a
+ * new reaction lands on the right side of the divider without a second edit.
+ */
+export const POSITIVE_REACTION_LIST: ReactionMeta[] = REACTION_LIST.filter((r) => r.positive);
+export const NEGATIVE_REACTION_LIST: ReactionMeta[] = REACTION_LIST.filter((r) => !r.positive);
+
+/**
+ * Whether the thumbs-DOWN has a tray worth opening.
+ *
+ * It has held a single 👎 since poo crossed to the positive side, and a
+ * hold-to-open menu of one option is worse than no menu: the hold swallows
+ * the press that would have cast the plain downvote, so the gesture appears
+ * to do nothing. Call sites pass this as the tray's `enabled`, so the tray
+ * comes back on its own the day a second negative reaction is added.
+ */
+export const HAS_NEGATIVE_TRAY = NEGATIVE_REACTION_LIST.length > 1;
+
+/**
+ * The thumbs-DOWN's accessible name.
+ *
+ * It only promises a hold while there is a tray behind it — telling a screen
+ * reader to hold a button that has one option is worse than saying nothing,
+ * because the hold eats the press that would have cast the downvote.
+ */
+export function negativeThumbLabel(myReaction: PostReaction | null | undefined): string {
+  const held =
+    myReaction && !isPositiveReaction(myReaction) ? reactionMeta(myReaction).label : null;
+  if (!HAS_NEGATIVE_TRAY) return held ?? META.dislike.label;
+  return held
+    ? _translateCopy('copy.a3156ed263d2', { defaultValue: '{{value1}} — hold to change your reaction', value1: held })
+    : _translateCopy('copy.12b91b0ac5dd', { defaultValue: '{{value1}} — hold to react', value1: META.dislike.label });
+}
+
+/**
+ * Past-tense verb phrase for notification copy ("Ada loved your post").
+ * Mirrors the API's REACTION_VERBS so a locally-rendered fallback reads the
+ * same as the server-rendered `content`.
+ */
+export const REACTION_VERBS: Record<PostReaction, string> = {
+  like: 'liked',
+  love: 'loved',
+  respect: 'respected',
+  hot: 'thinks 🔥 of',
+  hundred: 'gave 💯 to',
+  lol: 'laughed at',
+  sad: 'felt sad about',
+  cry: 'cried at',
+  poo: 'pooed on',
+  dislike: 'disliked',
+};
+
+export function reactionMeta(reaction: PostReaction): ReactionMeta {
+  return META[reaction];
+}
+
+export function isPositiveReaction(reaction: PostReaction): boolean {
+  return META[reaction].positive;
+}
+
+/** The reaction a legacy boolean vote means. */
+export function voteToReaction(vote: boolean): PostReaction {
+  return vote ? DEFAULT_POSITIVE_REACTION : DEFAULT_NEGATIVE_REACTION;
+}
+
+const REACTION_SET = new Set<string>(POST_REACTIONS);
+
+/** Coerce an untrusted API value to a reaction, or null. */
+export function asReaction(value: unknown): PostReaction | null {
+  if (typeof value !== 'string') return null;
+  const key = value.trim().toLowerCase();
+  return REACTION_SET.has(key) ? (key as PostReaction) : null;
+}
+
+export type ReactionCounts = Partial<Record<PostReaction, number>>;
+
+/**
+ * The single reaction the thumbs-up button leads with on a card.
+ *
+ * One glyph, never a row of them: the button stands for the post's reaction as
+ * a whole, so it shows whichever reaction has the most — ties broken by
+ * POST_REACTIONS order, which is why a post split evenly between 👍 and ❤️
+ * still reads as a like.
+ *
+ * Two rules sit on top of the count:
+ *
+ * 1. **The viewer's own reaction wins.** Seeing your 😂 on the post you laughed
+ *    at is what tells you the reaction registered; the crowd's pick is the
+ *    fallback, not the override.
+ * 2. **Negative reactions never lead.** They belong to the thumbs-DOWN button,
+ *    and a 👎 drawn beside the *like* count reads as a rendering bug rather
+ *    than as data. A post whose only reaction is a dislike leads with the plain
+ *    thumbs-up, exactly as it did before anyone touched it.
+ *
+ * Null means "draw the plain thumbs-up icon" — returned both when no positive
+ * reaction leads and when the leader is a plain like, since the icon is already
+ * that reaction's glyph and swapping in the 👍 emoji would just make one card
+ * in the feed look different from the rest.
+ *
+ * Whatever this returns is also what a tap on the thumb casts — the glyph and
+ * the vote are one promise, kept in `reactionForTap`.
+ */
+export function resolveLeadReaction(
+  counts: ReactionCounts | null | undefined,
+  myReaction?: PostReaction | null,
+): PostReaction | null {
+  const own = myReaction && isPositiveReaction(myReaction) ? myReaction : null;
+  const lead = own ?? topPositiveReaction(counts);
+  return lead && lead !== DEFAULT_POSITIVE_REACTION ? lead : null;
+}
+
+/**
+ * The one glyph the thumbs-DOWN wears — the viewer's own negative reaction,
+ * else null for the plain icon.
+ *
+ * Currently always null, because 👎 is the only negative reaction left and the
+ * button already draws that glyph. Kept rather than deleted: it is the rule,
+ * not a special case, and the day a second negative reaction is added the
+ * thumb wears it again with no change here.
+ *
+ * Deliberately NOT the mirror of `resolveLeadReaction`: it never leads with
+ * the crowd's pick. Negative reactions are anonymous across the whole product
+ * — they raise no notification and appear in no likers list — so drawing one
+ * on every reader's copy of a post because some of them cast it would be the
+ * one place the app pointed at them. Your own is different: you already know
+ * what you cast, and the glyph is what proves it landed.
+ */
+export function resolveNegativeLeadReaction(
+  myReaction: PostReaction | null | undefined,
+): PostReaction | null {
+  if (!myReaction || isPositiveReaction(myReaction)) return null;
+  return myReaction === DEFAULT_NEGATIVE_REACTION ? null : myReaction;
+}
+
+/** Most-used positive reaction, ties broken by picker order. */
+function topPositiveReaction(counts: ReactionCounts | null | undefined): PostReaction | null {
+  if (!counts) return null;
+  let top: PostReaction | null = null;
+  let best = 0;
+  for (const key of POST_REACTIONS) {
+    if (!isPositiveReaction(key)) continue;
+    const value = counts[key] ?? 0;
+    if (value > best) {
+      best = value;
+      top = key;
+    }
+  }
+  return top;
+}
+
+/**
+ * The reaction a plain tap on a thumb casts.
+ *
+ * The thumbs-up wears whatever `resolveLeadReaction` picks, so a tap has to
+ * send that same reaction: a post leading with 🔥 draws a 🔥 thumb, and tapping
+ * it must react 🔥 — casting a 👍 the viewer never chose makes the button lie
+ * about what it does. The plain 👍 is only the fallback, for a thumb that is
+ * drawing the plain icon because nothing leads.
+ *
+ * Re-sending the reaction the viewer already holds is what the server reads as
+ * "remove it", so this doubles as the un-react path — tapping the thumb clears
+ * a 🔥 the same way it clears a 👍, rather than downgrading it to a like.
+ *
+ * The thumbs-DOWN never wears a glyph — 👎 is the only reaction on that side
+ * and the button is already drawing it — so a tap there is always a plain
+ * dislike, cast or toggled off.
+ */
+export function reactionForTap(
+  positive: boolean,
+  myReaction: PostReaction | null | undefined,
+  counts?: ReactionCounts | null,
+): PostReaction {
+  const held = myReaction ?? null;
+  if (held && isPositiveReaction(held) === positive) return held;
+  if (!positive) return DEFAULT_NEGATIVE_REACTION;
+  return resolveLeadReaction(counts, held) ?? DEFAULT_POSITIVE_REACTION;
+}
+
+/**
+ * True when a post's dislikes outnumber every positive reaction combined.
+ * A tie stays with the likes.
+ */
+export function dislikesOutnumberLikes(counts: ReactionCounts | null | undefined): boolean {
+  if (!counts) return false;
+  let likes = 0;
+  let dislikes = 0;
+  for (const key of POST_REACTIONS) {
+    const value = Math.max(0, counts[key] ?? 0);
+    if (isPositiveReaction(key)) likes += value;
+    else dislikes += value;
+  }
+  return dislikes > likes;
+}
+
+/**
+ * The glyph a thumbs-up wears when it is the only vote control on the row.
+ *
+ * Posts and comments no longer carry a separate thumbs-DOWN: 👎 sits at the
+ * end of the thumbs-up's tray. So a viewer who disliked something has to see
+ * that on the one thumb left, or the vote would be invisible and impossible to
+ * take back. Your own reaction always wins. Without one, a post whose dislikes
+ * outnumber its likes wears 👎 (and `resolveThumbCount` shows the dislike
+ * total); otherwise it is the same pick as `resolveLeadReaction`.
+ *
+ * A tap is unaffected: with nothing held it still casts the positive lead, see
+ * `reactionForThumbTap`.
+ */
+export function resolveThumbReaction(
+  counts: ReactionCounts | null | undefined,
+  myReaction?: PostReaction | null,
+): PostReaction | null {
+  if (myReaction && !isPositiveReaction(myReaction)) return myReaction;
+  if (!myReaction && dislikesOutnumberLikes(counts)) return DEFAULT_NEGATIVE_REACTION;
+  return resolveLeadReaction(counts, myReaction);
+}
+
+/** The displayed total follows the polarity of the thumb's visible reaction. */
+export function resolveThumbCount(
+  likeCount: number,
+  dislikeCount: number,
+  thumbReaction: PostReaction | null | undefined,
+): number {
+  return thumbReaction && !isPositiveReaction(thumbReaction) ? dislikeCount : likeCount;
+}
+
+/**
+ * What a plain tap on that lone thumbs-up casts.
+ *
+ * Holding a 👎, the thumb is wearing it, so a tap re-sends it — which the
+ * server reads as "remove it". It never flips a dislike straight into a like:
+ * the glyph and the vote stay one promise, and changing your mind to a
+ * positive reaction is what holding the thumb is for.
+ */
+export function reactionForThumbTap(
+  myReaction: PostReaction | null | undefined,
+  counts?: ReactionCounts | null,
+): PostReaction {
+  if (myReaction && !isPositiveReaction(myReaction)) return myReaction;
+  return reactionForTap(true, myReaction, counts);
+}
+
+/**
+ * Apply a reaction change to a counts map.
+ *
+ * Pure, so the optimistic UI and the vote cache derive the same numbers from
+ * the same inputs. `previous` is the reaction being replaced (null when the
+ * user had none) and `next` the new one (null when toggling off).
+ *
+ * `weight` is the reactor's badge multiplier — the server moves both the
+ * headline count and the per-reaction split by it, so a tray that moved by one
+ * while the headline moved by three would visibly disagree with itself. It is
+ * one reaction either way; the weight is only what that reaction counts for.
+ * Dislikes are the exception: they always display as one.
+ */
+export function applyReactionDelta(
+  counts: ReactionCounts | null | undefined,
+  previous: PostReaction | null,
+  next: PostReaction | null,
+  weight = 1,
+): ReactionCounts {
+  const result: ReactionCounts = { ...(counts ?? {}) };
+  if (previous === next) return result;
+  const by = Number.isFinite(weight) ? Math.max(1, Math.floor(weight)) : 1;
+  // A dislike always shows as one. Its badge weight still counts toward
+  // moderation on the server, it just is not what the post displays.
+  const shown = (reaction: PostReaction) => (isPositiveReaction(reaction) ? by : 1);
+  if (previous) result[previous] = Math.max(0, (result[previous] ?? 0) - shown(previous));
+  if (next) result[next] = (result[next] ?? 0) + shown(next);
+  return result;
+}
+
+/**
+ * Seed a counts map for a post the API has no per-reaction data for yet.
+ *
+ * Every vote cast before multi-reaction shipped is a bare boolean, so a busy
+ * old post arrives with `totalVotes: { for: 140 }` and no `reactionCounts` —
+ * showing "no reactions" there would be wrong. Attributing that history to
+ * like/dislike is exactly what those votes were. The API seeds the same way on
+ * its first write, so the two agree.
+ */
+export function seedReactionCounts(likeCount: number, dislikeCount: number): ReactionCounts {
+  const seeded: ReactionCounts = {};
+  if (likeCount > 0) seeded.like = likeCount;
+  if (dislikeCount > 0) seeded.dislike = dislikeCount;
+  return seeded;
+}
+
+/** True when two counts maps hold the same non-zero entries. */
+export function sameReactionCounts(a: ReactionCounts, b: ReactionCounts): boolean {
+  const keys = POST_REACTIONS.filter((key) => (a[key] ?? 0) > 0 || (b[key] ?? 0) > 0);
+  return keys.every((key) => (a[key] ?? 0) === (b[key] ?? 0));
+}
+
+/**
+ * Stretch or shrink a stored per-reaction split until its sums match the
+ * like/dislike counts the card displays.
+ *
+ * WHY THIS EXISTS HERE
+ * The two numbers on a post come from different fields — the row's count from
+ * `totalVotes`, the hover tray's breakdown from `reactionCounts`. The backend
+ * writes them together, but hand-edited totals (the admin panel) and rows
+ * from before the split existed leave them disagreeing: a post reading 10
+ * likes whose tray can only account for 4. The count people see is the one
+ * that has to be right, so the stored distribution is scaled to fit it —
+ * keeping whatever shape it had (4×👍+1×❤️ against 10 reads as 8×👍+2×❤️) —
+ * rather than showing a tray that contradicts the card.
+ *
+ * Mirrors reconcileReactionCounts in the API's config/reactions.ts, largest-
+ * remainder rounding with POST_REACTIONS order as the tiebreak so every
+ * client derives identical numbers. With no stored split at all this is just
+ * seedReactionCounts.
+ */
+export function reconcileReactionCounts(
+  likeCount: number,
+  dislikeCount: number,
+  stored?: ReactionCounts | null,
+): ReactionCounts {
+  const source: ReactionCounts = stored && typeof stored === 'object' ? stored : {};
+  const result: ReactionCounts = {};
+
+  const applySide = (positive: boolean, targetRaw: number) => {
+    const target = Math.max(0, Math.floor(Number(targetRaw) || 0));
+    if (target === 0) return;
+
+    const entries = POST_REACTIONS.filter((key) => isPositiveReaction(key) === positive)
+      .map((key) => ({ key, count: Math.max(0, Math.floor(source[key] ?? 0)) }))
+      .filter((entry) => entry.count > 0);
+
+    // Sum the FLOORED entries, not the raw stored values. Summing raw values
+    // meant a fractional count like `{ like: 0.5 }` produced sum = 0.5, which
+    // is neither 0 nor the target — so both early branches were skipped while
+    // `entries` was empty (0.5 floors to 0 and is filtered out). The loop then
+    // evaluated `fractional[0 % 0]`, i.e. `fractional[NaN]`, and threw
+    // `Cannot read properties of undefined` during render. Flooring first is
+    // also exactly what the API's copy does, so all three agree on this input
+    // instead of two of them crashing.
+    const sum = entries.reduce((total, entry) => total + entry.count, 0);
+    if (sum === 0) {
+      // No shape to keep on this side — attribute the whole total to the
+      // side's default reaction, same rule seeding uses for legacy votes.
+      result[positive ? DEFAULT_POSITIVE_REACTION : DEFAULT_NEGATIVE_REACTION] = target;
+      return;
+    }
+    if (sum === target) {
+      // Already agrees; serve the stored numbers untouched.
+      for (const entry of entries) result[entry.key] = entry.count;
+      return;
+    }
+
+    let allocated = 0;
+    const fractional: Array<{ key: PostReaction; fraction: number }> = [];
+    for (const entry of entries) {
+      const exact = (entry.count * target) / sum;
+      const base = Math.floor(exact);
+      allocated += base;
+      result[entry.key] = base;
+      fractional.push({ key: entry.key, fraction: exact - base });
+    }
+    fractional.sort((a, b) => b.fraction - a.fraction || POST_REACTIONS.indexOf(a.key) - POST_REACTIONS.indexOf(b.key));
+    let remainder = target - allocated;
+    let index = 0;
+    while (remainder > 0) {
+      result[fractional[index % fractional.length].key] =
+        (result[fractional[index % fractional.length].key] ?? 0) + 1;
+      remainder--;
+      index++;
+    }
+  };
+
+  applySide(true, likeCount);
+  applySide(false, dislikeCount);
+  return result;
+}

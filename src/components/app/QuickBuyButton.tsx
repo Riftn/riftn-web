@@ -1,0 +1,139 @@
+import { useTranslation as _useCopy } from 'react-i18next';
+/**
+ * Quick Buy Button — shown on cashtag/ticker cards in search.
+ * Opens a Uniswap swap drawer for Base tokens, or DPay for tokens.
+ */
+
+import { useState } from 'react';
+import { ShoppingCart, CreditCard, ArrowRightLeft } from "lucide-react";
+import Wallet from "@/components/ui/cut-icons/wallet";
+
+import { useNavigate } from 'react-router-dom';
+import {
+  Drawer,
+  DrawerContent,
+  DrawerTitle,
+} from '@/components/ui/drawer';
+import { CrossChainDepositDrawer } from '@/components/app/command-centre/CrossChainDepositDrawer';
+import { SwapToTokenDrawer } from '@/components/app/SwapToTokenDrawer';
+
+interface QuickBuyButtonProps {
+  symbol: string;
+  tokenType: 'stock' | 'crypto';
+  /** On-chain contract address (Base) — required for crypto tokens to enable instant swap */
+  tokenAddress?: string;
+  /** Decimals of the token (default 18) */
+  tokenDecimals?: number;
+  /** Logo URL for the token */
+  tokenLogo?: string;
+  /** Chain ID where the token lives */
+  chainId?: string;
+}
+
+export function QuickBuyButton({ symbol, tokenAddress, tokenDecimals, tokenLogo, chainId }: QuickBuyButtonProps) {
+  const { t: _copy } = _useCopy();
+  const [open, setOpen] = useState(false);
+  const [crossChainOpen, setCrossChainOpen] = useState(false);
+  const [swapTokenOpen, setSwapTokenOpen] = useState(false);
+  const navigate = useNavigate();
+
+  const isDHB = symbol.toUpperCase() === 'DHB';
+  const isBaseChain = !chainId || chainId === 'base';
+  const hasSwapSupport = isBaseChain && !!tokenAddress && !isDHB;
+
+  // Tokens that can be received cross-chain
+  const crossChainSymbols = ['ETH', 'USDC', 'USDT', 'BTC', 'BNB'];
+  const hasCrossChain = crossChainSymbols.includes(symbol.toUpperCase());
+
+  return (
+    <>
+      <button
+        onClick={(e) => { e.stopPropagation(); if (isDHB) navigate('/app/buy'); else setOpen(true); }}
+        className="text-zinc-400 hover:text-white transition-colors p-1.5"
+        title={_copy("copy.9b5f8d89fc43", { defaultValue: "Buy {{value1}}", value1: symbol })}
+      >
+        <ShoppingCart className="w-4 h-4" />
+      </button>
+
+      {/* Buy Method Drawer */}
+      <Drawer open={open} onOpenChange={setOpen}>
+        <DrawerContent column glass>
+          <DrawerTitle className="sr-only">{_copy("copy.9b5f8d89fc43", { defaultValue: "Buy {{value1}}", value1: symbol })}</DrawerTitle>
+          <div className="p-5 pb-8 space-y-2">
+            <h3 className="text-white font-semibold text-base mb-4">{_copy("copy.19cc62df5710", { defaultValue: "Buy ${{value1}}", value1: symbol })}</h3>
+
+            {!isDHB && (
+              <>
+                {/* Instant Swap via Uniswap (Base tokens only) */}
+                {hasSwapSupport && (
+                  <button
+                    onClick={() => {
+                      setOpen(false);
+                      setTimeout(() => setSwapTokenOpen(true), 200);
+                    }}
+                    className="w-full flex items-center gap-3 p-3.5 rounded-xl bg-white/[0.06] hover:bg-white/[0.10] backdrop-blur-sm border border-white/10 transition-colors"
+                  >
+                    <ArrowRightLeft className="w-5 h-5 text-white/70" />
+                    <div className="text-left">
+                      <span className="text-sm font-medium text-white">{_copy("copy.023f2e9719bd", { defaultValue: "Instant Swap" })}</span>
+                      <p className="text-xs text-white/40">{_copy("copy.5ec47858822e", { defaultValue: "Swap ETH or any Base token via Uniswap" })}</p>
+                    </div>
+                  </button>
+                )}
+
+                {/* Buy with Card (coming soon for non-DHB) */}
+                <button
+                  disabled
+                  className="w-full flex items-center gap-3 p-3.5 rounded-xl bg-white/[0.06] border border-white/10 opacity-50 cursor-not-allowed"
+                >
+                  <CreditCard className="w-5 h-5 text-white/70" />
+                  <div className="text-left flex-1">
+                    <span className="text-sm font-medium text-white">{_copy("copy.a0027ccd58bf", { defaultValue: "Buy with Card" })}</span>
+                    <p className="text-xs text-white/40">{_copy("copy.20cc4ce111fa", { defaultValue: "Purchase using Visa, Mastercard, Apple Pay" })}</p>
+                  </div>
+                  <span className="text-[10px] text-white/30 font-medium bg-white/[0.06] px-2 py-0.5 rounded">{_copy("copy.4f7d64017689", { defaultValue: "Coming soon" })}</span>
+                </button>
+
+                {/* Cross-chain deposit */}
+                {hasCrossChain && (
+                  <button
+                    onClick={() => {
+                      setOpen(false);
+                      setTimeout(() => setCrossChainOpen(true), 200);
+                    }}
+                    className="w-full flex items-center gap-3 p-3.5 rounded-xl bg-white/[0.06] hover:bg-white/[0.10] backdrop-blur-sm border border-white/10 transition-colors"
+                  >
+                    <Wallet className="w-5 h-5 text-white/70" />
+                    <div className="text-left">
+                      <span className="text-sm font-medium text-white">{_copy("copy.69cda82c3af5", { defaultValue: "Buy with Crypto" })}</span>
+                      <p className="text-xs text-white/40">{_copy("copy.4be8f5f56303", { defaultValue: "BTC, SOL, ETH, USDC & more from any chain" })}</p>
+                    </div>
+                  </button>
+                )}
+              </>
+            )}
+          </div>
+        </DrawerContent>
+      </Drawer>
+
+      {/* Cross-chain deposit for non-DeHub tokens */}
+      <CrossChainDepositDrawer
+        open={crossChainOpen}
+        onOpenChange={setCrossChainOpen}
+        destinationSymbol={symbol.toUpperCase()}
+      />
+
+      {/* Generic swap drawer for any Base token */}
+      {hasSwapSupport && (
+        <SwapToTokenDrawer
+          open={swapTokenOpen}
+          onOpenChange={setSwapTokenOpen}
+          targetSymbol={symbol.toUpperCase()}
+          targetAddress={tokenAddress!}
+          targetDecimals={tokenDecimals}
+          targetLogo={tokenLogo}
+        />
+      )}
+    </>
+  );
+}

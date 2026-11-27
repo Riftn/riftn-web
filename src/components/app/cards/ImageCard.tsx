@@ -1,0 +1,2233 @@
+import { ppvTokenLabel } from '@/lib/token-label';
+import { canShareToMoment } from '@/lib/moment-share';
+import { useTranslation as _useCopy } from 'react-i18next';
+import { useSurfaceDraft, draftIdentity } from '@/hooks/use-surface-draft';
+/**
+ * Image Card Component
+ * ====================
+ * Displays image post content with Instagram-style swipeable carousel for multi-image posts.
+ * 
+ * @example
+ * ```tsx
+ * <ImageCard post={imageData} />
+ * ```
+ */
+
+import { useState, memo, useCallback, useEffect, useRef, useMemo, lazy, Suspense, type ReactNode } from 'react';
+const BountyClaimActions = lazy(() => import('./BountyClaimActions'));
+const PhotoTagger = lazy(() => import('@/components/app/photo-tags/PhotoTagger').then((module) => ({ default: module.PhotoTagger })));
+import { DhbAmount } from '@/components/app/DhbAmount';
+import { useImageSoundtrack } from '@/hooks/use-image-soundtrack';
+import { useHorizontalBitmap } from '@/hooks/use-horizontal-bitmap';
+import { SoundtrackControl } from './SoundtrackControl';
+import { DehubLinkEmbeds, useDehubLinks } from '@/components/app/cards/DehubLinkEmbedsLazy';
+import { FeedLinkPreviews } from '@/components/app/cards/FeedLinkPreviews';
+import { AssetRefCards, useAssetRefsInText } from '@/components/app/cards/AssetRefCards';
+import { stripDehubLinkMatches } from '@/lib/dehub-links';
+import { stripAssetRefs } from '@/lib/asset-refs';
+import { useAutoOpenComments } from '@/hooks/use-auto-open-comments';
+import { usePostMenuContext } from '@/lib/post-menu';
+import { useNavigate } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
+import { ChevronDown, ChevronUp, ChevronLeft, Globe, Ticket, BarChart2, Star, UserRound, UserX } from "lucide-react";
+import { setPhotoTags as savePhotoTags, removeMyPhotoTag } from "@/lib/api/dehub";
+import Eye from "@/components/ui/cut-icons/visibility";
+import Flag from "@/components/ui/cut-icons/report";
+import Ban from "@/components/ui/cut-icons/blocked";
+import VolumeX from "@/components/ui/cut-icons/mute";
+import EyeOff from "@/components/ui/cut-icons/hidden";
+import Link2 from "@/components/ui/cut-icons/link";
+import Languages from "@/components/ui/cut-icons/language";
+import Trash2 from "@/components/ui/cut-icons/delete";
+import Gift from "@/components/ui/cut-icons/gifts";
+import Lock from "@/components/ui/cut-icons/privacy";
+import Pencil from "@/components/ui/cut-icons/edit";
+import BookOpen from "@/components/ui/cut-icons/docs";
+
+import Download from "@/components/ui/cut-icons/download";
+import ChevronRight from "@/components/ui/cut-icons/next";
+import MessageSquare from "@/components/ui/cut-icons/messages";
+import MessageCircle from "@/components/ui/cut-icons/messages";
+import Gem from "@/components/ui/cut-icons/diamond";
+import X from "@/components/ui/cut-icons/close";
+import Plus from "@/components/ui/cut-icons/add";
+
+import { ThemedIcon } from '@/components/app/war/WarHudIcon';
+import { useSuperpowers } from '@/hooks/use-superpowers';
+import { useCreatePoll } from '@/hooks/use-polls';
+import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
+import { cdnImage, cdnImageSrcSet, cdnImageSource } from '@/lib/media-url';
+import { useFeedFrameAspect } from '@/hooks/use-feed-frame-aspect';
+import { motion, AnimatePresence } from 'framer-motion';
+import dehubCoin from '@/assets/dehub-coin.png';
+import { CardHeader } from './CardHeader';
+import { FeedCaptionExpander, squeezeBlankLines } from './FeedCaptionExpander';
+import { PostHeaderBoostButton, PostHeaderOptionsButton } from './PostHeaderOptionsButton';
+import { useBoostedPost } from './boosted-post';
+import { MatureContentGate, useMatureGate } from './MatureContentGate';
+import { ContentWarningGate, useContentWarning } from './ContentWarningGate';
+import { ActionBar } from './ActionBar';
+import { ShopBoardLazy } from '../live/ShopBoardLazy';
+import { PollCard } from './PollCard';
+import { LazyQuizCard } from '@/components/app/quiz/LazyQuizCard';
+import { PhotoTagsOverlay } from '@/components/app/photo-tags/PhotoTagsOverlay';
+import type { PhotoTag } from '@/lib/api/dehub';
+import { CommentsWrapper } from './CommentsWrapper';
+import { PostMetadata } from './PostMetadata';
+import { PPVDrawerContent } from './LazyPPVDrawerContent';
+import { useTranslation, LANGUAGE_NAMES, renderTextWithLinks, splitTranslatedTitleAndBody } from '../TranslatableText';
+import { useTranslation as useI18n } from 'react-i18next';
+import { PostAIChatLazy } from './PostAIChatLazy';
+import { ReportModal } from '../modals/ReportModal';
+
+import { DeletePostModal } from '../modals/DeletePostModal';
+// Lazy, mounted on demand — see the note on the same pair in VideoCard.
+const EditPostModal = lazy(() =>
+  import('../modals/EditPostModal').then((m) => ({ default: m.EditPostModal }))
+);
+const BoostModal = lazy(() =>
+  import('../modals/BoostModal').then((m) => ({ default: m.BoostModal }))
+);
+import { applyOptimisticEdit } from '@/lib/optimistic-edit';
+import { QuotePostModalLazy } from '../modals/QuotePostModalLazy';
+import { QuotedPostEmbed, RemovedQuoteNotice } from './QuotedPostEmbed';
+import { TipModalLazy as TipModal } from '../modals/TipModalLazy';
+import { SwipeableCarousel } from '../SwipeableCarousel';
+import { usePostTipCount } from '@/hooks/use-post-tip-count';
+import { useTapGestures } from '@/hooks/use-tap-gestures';
+import { TapReactionBurst } from '@/components/app/cards/TapReactionBurst';
+import { FullscreenImageViewerLazy } from './FullscreenImageViewerLazy';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { ImageTranslationSheet } from './ImageTranslationSheet';
+import { useFeedViewTracking } from '@/hooks/use-view-tracking';
+import { useImageTranslation } from '@/hooks/use-image-translation';
+import { useAuth } from '@/contexts/AuthContext';
+import { usePostLinkCopyCount, useTrackPostLinkCopy } from '@/hooks/use-link-copy-count';
+import { VerifyUnlockButton } from './VerifyUnlockButton';
+import { updateTokenVisibility, repostPost, editPost, type TokenVisibility } from '@/lib/api/dehub';
+import { PostUtilityMenuItems } from './PostUtilityMenuItems';
+import { useBlockAuthor } from '@/hooks/use-block-author';
+import { useMuteAuthor } from '@/hooks/use-mute-author';
+import { HandoffImage } from './HandoffImage';
+import { galleryIndex, rememberGalleryIndex, subscribeGallery } from '@/lib/media-presentation';
+import { warmPostPage } from '@/lib/preload-post-page';
+import { cacheImageForNavigation } from '@/lib/post-cache';
+import { useRetainedPostPinned } from '@/lib/retained-post-surface';
+import { openBrainrotFeed } from '@/lib/brainrot-feed';
+import { FEED_IMAGE_MAX_HEIGHT } from '@/lib/feed-image-layout';
+import { useWideVideoMode, WIDE_RAILS_MAX_ASPECT, type WideVideoMode } from '@/lib/wide-video-mode';
+import { useInMasonryColumn } from '@/components/app/feeds/masonry-context';
+import { useIsDesktopViewport } from '@/hooks/use-is-desktop';
+import { WideVideoPanel } from '@/components/app/video/WideVideoRails';
+import type { VideoItem } from '@/types/feed.types';
+import { chainVerticalWheel } from '@/lib/chain-vertical-wheel';
+import { downloadMedia, imageDownloadName } from '@/lib/download-media';
+import { isHoldGated, isSubscriberGated, cheapestSubscriberQuote } from '@/lib/content-gate';
+import { SubscribeFromPrice } from './SubscribeFromPrice';
+
+/** Lazy: only comic posts load the collector cards. */
+const ComicDeckLazy = lazy(() => import('@/components/app/comic/ComicDeck').then(m => ({ default: m.ComicDeck })));
+/** Lazy: PlanCard reaches the subscription contracts, and this card boots. */
+const SubscriberGateDrawer = lazy(() =>
+  import('./SubscriberGateDrawer').then((m) => ({ default: m.SubscriberGateDrawer }))
+);
+import { isTokenUnlocked, markTokenUnlocked } from '@/lib/unlocked-tokens-store';
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  wasDrawerJustDismissed,
+} from '@/components/ui/drawer';
+import type { ImagePost } from '@/types/feed.types';
+import { usePostStage } from '@/components/app/post-stage/post-stage-context';
+import { useImagesFeedScrollView } from '@/lib/images-feed-mode';
+import { StageCreatorRow } from '@/components/app/post-stage/StageCreatorRow';
+
+// Use lg breakpoint (1024px) to determine if we show drawer vs inline
+function useIsTabletOrMobile() {
+  const [isTabletOrMobile, setIsTabletOrMobile] = useState(false);
+  
+  useEffect(() => {
+    const mql = window.matchMedia('(max-width: 1023px)');
+    const onChange = () => setIsTabletOrMobile(mql.matches);
+    mql.addEventListener('change', onChange);
+    setIsTabletOrMobile(mql.matches);
+    return () => mql.removeEventListener('change', onChange);
+  }, []);
+  
+  return isTabletOrMobile;
+}
+
+/**
+ * Tallest a photo gets on the post page — the same cap the post page video
+ * uses (index.css, --post-media-max-h). On phones that is at least a
+ * full-width 9:16 frame, so a tall photo runs edge to edge like a vertical
+ * video instead of stopping a few pixels short of both sides.
+ */
+const IMMERSIVE_IMAGE_MAX_HEIGHT = 'var(--post-media-max-h, 80dvh)';
+
+/**
+ * Tallest a photo gets in feeds (index.css, --feed-image-max-h), the same cap
+ * as feed videos: 75% of the screen on desktop, 55% (at most 600px) on phones.
+ * A tall photo hugs the left with empty space on the right.
+ */
+const FEED_IMAGE_CAP = `var(--feed-image-max-h, ${FEED_IMAGE_MAX_HEIGHT}px)`;
+
+interface ImageCardProps {
+  post: ImagePost;
+  /** Dedicated pages own one shared comments window below the post card. */
+  onOpenComments?: (tab?: 'replies' | 'quotes' | 'reposts' | 'search') => void;
+  /** First few feed items — skip lazy loading so LCP image loads immediately */
+  aboveFold?: boolean;
+  /**
+   * Phone/tablet post page: the image owns the top of the screen the way an
+   * immersive video does — edge to edge, square corners, centred on black —
+   * and the creator row moves under it, where the video post draws its own.
+   */
+  isImmersive?: boolean;
+  /** Photo taps open the viewer only on the dedicated post page. */
+  postPage?: boolean;
+}
+
+/**
+ * Measured width/height ratio per image URL. The feed API sends no
+ * dimensions, so this is how repeat mounts reserve the right height
+ * before the image loads (CLS fix). Session-scoped, bounded by feed size.
+ */
+import { createMediaAspectCache } from '@/lib/media-aspect-cache';
+import { hintedImageRatio } from '@/lib/image-size-hints';
+import { viewerShareUrl } from '@/lib/share-url';
+import { AltTextBadge } from './AltTextBadge';
+import { KeywordFilterGate } from './KeywordFilterGate';
+import { noteProfileFeedOpen, useProfileFeedContext } from '@/lib/profile-feed-origin';
+const measuredAspectCache = createMediaAspectCache(
+  () => localStorage.getItem('media-aspects-v1'), value => localStorage.setItem('media-aspects-v1', value),
+);
+// The size the API sent wins: it is there before anything loads, and never
+// changes, so the frame is right on first paint.
+const imageAspectRatioCache = {
+  get: (url: string) => hintedImageRatio(url) ?? measuredAspectCache.get(url),
+  set: (url: string, ratio: number) => measuredAspectCache.set(url, ratio),
+};
+function cacheAspectRatio(url: string, ratio: number) {
+  imageAspectRatioCache.set(url, ratio);
+}
+
+/**
+ * Single slide inside the Instagram-style carousel. Extracted so we can
+ * safely call the double-tap-to-like hook per-image (hooks may not run
+ * inside a .map callback).
+ */
+/**
+ * Candidate widths (device px) for a feed image and the slot it renders into
+ * (CSS px). The card is edge-to-edge on a phone and ~640 px wide beside the
+ * sidebars, so a 1x desktop takes the 720 and a 3x phone the 1080 or 1440 —
+ * instead of every device taking the 1080 the URL was built with.
+ */
+// Widths sit just above what common phones ask for at sizes=100vw, or the
+// browser rounds up to the next rung: 412 CSS px at 1.75x is 721 device px,
+// so a 720 rung loses to 1080; 412 at 2.625x is 1081.5, so 1080 lost to 1440.
+const FEED_IMAGE_WIDTHS = [480, 736, 1100, 1440];
+const FEED_IMAGE_SIZES = '(max-width: 767px) 100vw, 640px';
+const BITMAP_RETAIN_MARGIN = '1200px 100%';
+const BITMAP_RELEASE_DELAY_MS = 15_000;
+
+function ImageSlide({
+  img,
+  description,
+  idx,
+  aboveFold,
+  postId,
+  onImageClick,
+  viewportRef,
+  immersive = false,
+  pinned = false,
+  knownRatio,
+  fill = false,
+  centered = false,
+}: {
+  /** A framed gallery's shorter photo: cropped to fill the whole frame. */
+  fill?: boolean;
+  /** Wide-screen Ambient: the photo sits in the middle of the glow. */
+  centered?: boolean;
+  pinned?: boolean;
+  /** The shape the gallery measured ahead, or its tallest photo's while this one is unknown. */
+  knownRatio?: number;
+  img: string;
+  description?: string;
+  idx: number;
+  aboveFold: boolean;
+  postId?: string;
+  onImageClick: (index: number, onPicture: boolean) => void;
+  viewportRef: React.RefObject<HTMLDivElement>;
+  immersive?: boolean;
+}) {
+  // Upgraded from the click-only double-tap to the shared ladder, so a photo
+  // gets the same triple-tap ❤️ and hold-for-the-tray as every other surface.
+  const tapGestures = useTapGestures({
+    postId,
+    // Two taps anywhere on the photo like it, not only in the middle.
+    reactionArea: 'surface',
+    onSingleTap: (event) => {
+      // A narrow photo sits left-aligned in its frame, so a tap can land beside
+      // it. Report whether it landed on the picture itself. The tap can resolve
+      // after a double-tap window, when React has already cleared
+      // event.currentTarget, so read the frame from its ref.
+      const rect = slideRef.current?.querySelector('img')?.getBoundingClientRect();
+      const onPicture = !rect
+        || (event.clientX >= rect.left && event.clientX <= rect.right && event.clientY >= rect.top && event.clientY <= rect.bottom);
+      onImageClick(idx, onPicture);
+    },
+  });
+  // Feed items carry no image dimensions, so first paint reserves minHeight and
+  // the card grows on load (CLS). Remembering the measured ratio per URL means
+  // every LATER mount (tab switch, feed revisit, carousel re-render) reserves
+  // the exact final height up front.
+  const [measurement, setMeasurement] = useState<{ img: string; ratio: number }>();
+  const measuredRatio = hintedImageRatio(img) ?? (measurement?.img === img ? measurement.ratio : imageAspectRatioCache.get(img) ?? knownRatio);
+  const slideRef = useRef<HTMLDivElement>(null);
+  // All slides share the row's vertical visibility: a late hidden neighbour
+  // must not increase the carousel's height while its first photo is in view.
+  const ratio = useFeedFrameAspect(`image:${postId ?? ''}:${idx}:${cdnImageSource(img)}`, measuredRatio ?? 1, viewportRef, !immersive, measuredRatio);
+  const [retainBitmap, setRetainBitmap] = useState(aboveFold || immersive);
+  const horizontalBitmap = useHorizontalBitmap(img, !!ratio, viewportRef, slideRef, pinned);
+  // Resolve the ratio during render so a replaced image never paints with the
+  // previous image's dimensions or needs a second render just to reset them.
+
+  useEffect(() => {
+    if (aboveFold || typeof IntersectionObserver === 'undefined') {
+      setRetainBitmap(true);
+      return;
+    }
+
+    let releaseTimer: ReturnType<typeof setTimeout> | undefined;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          if (releaseTimer) clearTimeout(releaseTimer);
+          releaseTimer = undefined;
+          setRetainBitmap(true);
+          return;
+        }
+
+        // A feed kept alive on a hidden page has no box at all. That is not
+        // "scrolled far away", and releasing there leaves blank photos when
+        // the page comes back, so only release a slide that is laid out.
+        const box = entry.boundingClientRect;
+        if (box && box.width === 0 && box.height === 0) {
+          if (releaseTimer) clearTimeout(releaseTimer);
+          releaseTimer = undefined;
+          return;
+        }
+
+        // Native lazy-loading never unloads an image once decoded. Release it
+        // only after it has stayed far outside the viewport, leaving a wide
+        // buffer and grace period so ordinary scroll-back remains instant.
+        if (!releaseTimer) {
+          releaseTimer = setTimeout(() => setRetainBitmap(false), BITMAP_RELEASE_DELAY_MS);
+        }
+      },
+      { rootMargin: BITMAP_RETAIN_MARGIN },
+    );
+    const node = slideRef.current;
+    if (node) observer.observe(node);
+    return () => {
+      observer.disconnect();
+      if (releaseTimer) clearTimeout(releaseTimer);
+    };
+  }, [aboveFold, img]);
+
+  return (
+    <div
+      ref={slideRef}
+      className={cn('relative flex cursor-pointer select-none', immersive || centered ? 'justify-center' : 'justify-start', fill && 'h-full w-full')}
+      data-feed-image-frame={!immersive || undefined}
+      data-media-frame-key={!immersive ? `image:${postId ?? img}:${idx}` : undefined}
+      // Still stops the click reaching the card's navigate handler; the ladder
+      // itself now runs off pointer events, which embla's drag does not consume.
+      onClick={(e) => e.stopPropagation()}
+      {...tapGestures}
+    >
+      <TapReactionBurst postId={postId} />
+      <AltTextBadge text={description} className="absolute left-2 top-2" />
+      {/* The image sizes itself: fills the card width when it's wide enough,
+          otherwise caps at 600px tall and shrinks its own width — so a narrow /
+          portrait image is just the image, hugged to the left, with no blurred
+          side-fill. width/height attrs (from the cached ratio) reserve the box
+          up front so there's no layout shift on load. */}
+      <HandoffImage
+        mediaKey={`${postId ?? img}:${idx}`}
+        alt={description}
+        priority={immersive ? 1 : 0}
+        fixedFrame={!immersive}
+        src={retainBitmap && horizontalBitmap ? img : undefined}
+        srcSet={retainBitmap && horizontalBitmap ? cdnImageSrcSet(img, FEED_IMAGE_WIDTHS) : undefined}
+        sizes={FEED_IMAGE_SIZES}
+        width={ratio ? Math.round(ratio * 1000) : undefined}
+        height={ratio ? 1000 : undefined}
+        className={cn('block w-auto h-auto max-w-full', fill ? 'object-cover' : 'object-contain', immersive ? 'rounded-none' : 'rounded-2xl')}
+        // Keep the slide's geometry when its offscreen bitmap is released.
+        // An img without src otherwise collapses and changes the feed height.
+        // On the post page (immersive) the photo follows the post page video
+        // rule: it grows until it fills the width or 80% of the screen height,
+        // whichever comes first, keeping its real shape.
+        style={fill
+          ? { width: '100%', height: '100%', aspectRatio: 'auto' }
+          : immersive
+          ? { maxHeight: IMMERSIVE_IMAGE_MAX_HEIGHT, width: ratio ? `calc(${IMMERSIVE_IMAGE_MAX_HEIGHT} * ${ratio.toFixed(4)})` : undefined, aspectRatio: ratio }
+          : { maxHeight: FEED_IMAGE_CAP, width: ratio ? `calc(${FEED_IMAGE_CAP} * ${ratio.toFixed(4)})` : undefined, aspectRatio: ratio }}
+        loading={aboveFold && idx === 0 ? 'eager' : 'lazy'}
+        fetchPriority={aboveFold && idx === 0 ? 'high' : 'auto'}
+        onImageLoad={(el) => {
+          if (el.naturalWidth > 0 && el.naturalHeight > 0) {
+            const measured = el.naturalWidth / el.naturalHeight;
+            cacheAspectRatio(img, measured);
+            setMeasurement((previous) => previous?.img === img && previous.ratio === measured
+              ? previous
+              : { img, ratio: measured });
+          }
+        }}
+      />
+    </div>
+  );
+}
+
+/**
+ * Every gallery photo's shape, measured up front from a small copy. A photo
+ * not loaded yet used to hold a square guess, and the strip grew to that
+ * guess: a post of wide screenshots showed a huge empty band under its first
+ * photo until it was tapped.
+ */
+const EAGER_SHAPE_PROBES = 6;
+const NO_IMAGES: string[] = [];
+
+function whenIdle(run: () => void): () => void {
+  if (typeof window.requestIdleCallback === 'function') {
+    const id = window.requestIdleCallback(run, { timeout: 1500 });
+    return () => window.cancelIdleCallback(id);
+  }
+  const id = window.setTimeout(run, 300);
+  return () => window.clearTimeout(id);
+}
+
+function useGalleryAspects(images: string[], enabled: boolean) {
+  const [measured, setMeasured] = useState<Record<string, number>>({});
+  useEffect(() => {
+    if (!enabled || typeof Image === 'undefined') return;
+    let live = true;
+    // The first few shapes are probed now; a long carousel's rest wait for an
+    // idle moment so they never compete with the photos in view.
+    const probeOne = (img: string) => {
+      if (!live || imageAspectRatioCache.get(img)) return;
+      const probe = new Image();
+      probe.decoding = 'async';
+      probe.onload = () => {
+        if (!probe.naturalWidth || !probe.naturalHeight) return;
+        const ratio = probe.naturalWidth / probe.naturalHeight;
+        cacheAspectRatio(img, ratio);
+        if (live) setMeasured((previous) => ({ ...previous, [img]: ratio }));
+      };
+      probe.src = cdnImage(img, { width: 160 });
+    };
+    images.slice(0, EAGER_SHAPE_PROBES).forEach(probeOne);
+    const rest = images.slice(EAGER_SHAPE_PROBES);
+    const idle = rest.length ? whenIdle(() => rest.forEach(probeOne)) : undefined;
+    return () => { live = false; idle?.(); };
+  }, [images, enabled]);
+  return images.map((img) => measured[img] ?? imageAspectRatioCache.get(img));
+}
+
+/**
+ * Instagram-style image carousel component
+ * Supports swipe navigation with dot indicators
+ */
+function ImageCarousel({
+  images,
+  descriptions,
+  onImageClick,
+  onIndexChange,
+  aboveFold = false,
+  postId,
+  immersive = false,
+  overlay,
+  soundPlaying = false,
+  wide,
+  railPanel,
+  imageTags,
+}: {
+  /** People tagged on the photos, shown behind a small person button. */
+  imageTags?: PhotoTag[];
+  /**
+   * Desktop "Long form media on wide screens" setting, applied to a single
+   * tall photo the same way: Ambient fills the space beside it with the photo
+   * blurred, Rails puts the info panel beside it. Undefined everywhere else.
+   */
+  wide?: WideVideoMode;
+  railPanel?: ReactNode;
+  images: string[];
+  /** Alt text per image, by position. */
+  descriptions?: string[];
+  onImageClick: (index: number, onPicture: boolean) => void;
+  onIndexChange?: (index: number) => void;
+  aboveFold?: boolean;
+  postId?: string;
+  immersive?: boolean;
+  /** Sits on the bottom edge of the photo, inside its clip. */
+  overlay?: ReactNode;
+  /** The photo's soundtrack is playing: the photo drifts slowly. */
+  soundPlaying?: boolean;
+}) {
+  const { t: _copy } = _useCopy();
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
+  /** Where the current photo sits inside the gallery, for the overlay. */
+  const [photoBox, setPhotoBox] = useState<{ left: number; width: number; bottom: number }>();
+  const hasOverlay = !!overlay;
+  const galleryKey = postId ?? images.join('|');
+  const [currentIndex, setCurrentIndex] = useState(() => galleryIndex(galleryKey));
+  const selectedRef = useRef(currentIndex);
+  const [activeHeight, setActiveHeight] = useState<number>();
+  const [currentSlideFillsViewport, setCurrentSlideFillsViewport] = useState(false);
+
+  useEffect(() => {
+    const viewport = scrollRef.current;
+    if (!viewport) return;
+    const onWheel = (event: WheelEvent) => chainVerticalWheel(event, viewport);
+    viewport.addEventListener('wheel', onWheel, { passive: false });
+    return () => viewport.removeEventListener('wheel', onWheel);
+  }, []);
+
+  const updateCurrentIndex = useCallback(() => {
+    const viewport = scrollRef.current;
+    if (!viewport) return;
+    const slides = Array.from(viewport.children) as HTMLElement[];
+    if (!slides.length) return;
+    const viewportCenter = viewport.scrollLeft + viewport.clientWidth / 2;
+    const idx = slides.reduce((nearest, slide, index) => {
+      const center = slide.offsetLeft + slide.offsetWidth / 2;
+      const nearestSlide = slides[nearest];
+      const nearestCenter = nearestSlide.offsetLeft + nearestSlide.offsetWidth / 2;
+      return Math.abs(center - viewportCenter) < Math.abs(nearestCenter - viewportCenter)
+        ? index
+        : nearest;
+    }, 0);
+    setCurrentIndex(idx);
+    selectedRef.current = idx;
+    rememberGalleryIndex(galleryKey, idx);
+    // The slot, not the img: the img is scaled while its soundtrack plays.
+    const photo = (slides[idx].querySelector('[data-image-slot]') ?? slides[idx].querySelector('img'))?.getBoundingClientRect();
+    const height = photo?.height;
+    setActiveHeight(height && height > 0 ? height : undefined);
+    // A portrait photo is narrower than the card, and in a gallery a short one
+    // sits above the tallest one's bottom: the overlay follows the photo, not
+    // the card, or it hangs off the side of it and below it.
+    const gallery = hasOverlay ? rootRef.current?.getBoundingClientRect() : undefined;
+    const left = photo && gallery ? Math.round(Math.max(0, photo.left - gallery.left)) : 0;
+    const right = photo && gallery ? Math.round(Math.min(gallery.width, photo.right - gallery.left)) : 0;
+    const bottom = photo && gallery ? Math.round(Math.max(0, gallery.bottom - photo.bottom)) : 0;
+    setPhotoBox(previous => right - left <= 0 ? undefined
+      : previous?.left === left && previous.width === right - left && previous.bottom === bottom ? previous
+      : { left, width: right - left, bottom });
+    // A narrower/tall image already reveals the next image, which is the best
+    // possible scroll affordance. Keep the buttons for edge-to-edge slides,
+    // where the rest of the gallery would otherwise be completely hidden.
+    setCurrentSlideFillsViewport(slides[idx].offsetWidth >= viewport.clientWidth - 1);
+    onIndexChange?.(idx);
+  }, [onIndexChange, galleryKey, hasOverlay]);
+
+  useEffect(() => {
+    const restore = () => {
+      const viewport = scrollRef.current;
+      const index = Math.min(galleryIndex(galleryKey), images.length - 1);
+      if (index === 0 && selectedRef.current === 0) return;
+      if (index === selectedRef.current && viewport?.scrollLeft) return;
+      const slide = viewport?.children[index] as HTMLElement | undefined;
+      if (viewport && slide) {
+        selectedRef.current = index;
+        setCurrentIndex(index);
+        viewport.scrollLeft = slide.offsetLeft;
+      }
+    };
+    restore();
+    return subscribeGallery(galleryKey, restore);
+  }, [galleryKey, images.length]);
+
+  useEffect(() => {
+    const viewport = scrollRef.current;
+    if (!viewport) return;
+
+    // The first ResizeObserver delivery includes the initial dimensions after
+    // layout. Measuring here instead flushes the whole feed once per gallery.
+    if (typeof ResizeObserver === 'undefined') {
+      updateCurrentIndex();
+      return;
+    }
+
+    const observer = new ResizeObserver(updateCurrentIndex);
+    observer.observe(viewport);
+    Array.from(viewport.children).forEach((slide) => {
+      observer.observe(slide);
+      const image = slide.querySelector("img");
+      if (image) observer.observe(image);
+    });
+    return () => observer.disconnect();
+  }, [images, updateCurrentIndex]);
+
+  const scrollToImage = useCallback((index: number) => {
+    const viewport = scrollRef.current;
+    const slide = viewport?.children[index] as HTMLElement | undefined;
+    if (!viewport || !slide) return;
+    viewport.scrollTo({ left: slide.offsetLeft, behavior: 'smooth' });
+  }, []);
+
+  const scrollPrev = useCallback(() => scrollToImage(Math.max(0, currentIndex - 1)), [currentIndex, scrollToImage]);
+  const scrollNext = useCallback(() => scrollToImage(Math.min(images.length - 1, currentIndex + 1)), [currentIndex, images.length, scrollToImage]);
+
+  // Keep horizontal trackpad momentum inside the gallery while allowing the
+  // browser to move the strip by the gesture's full, continuous distance.
+  const handleWheel = useCallback((e: React.WheelEvent) => {
+    if (images.length <= 1) return;
+    const absDeltaX = Math.abs(e.deltaX);
+    const absDeltaY = Math.abs(e.deltaY);
+    if (absDeltaX >= absDeltaY && absDeltaX > 0) e.stopPropagation();
+  }, [images.length]);
+  
+  const hasMultiple = images.length > 1;
+  // A feed gallery is framed: the strip is as tall as its tallest photo, in a
+  // thin outline, so posts with mixed photo sizes look the same.
+  const framed = hasMultiple && !immersive;
+  // A single photo is probed too: the card mounts long before it scrolls in,
+  // so its frame takes the real shape instead of a square that snaps later.
+  const measuredAspects = useGalleryAspects(images, !immersive);
+  const tallestAspect = useMemo(() => {
+    const known = measuredAspects.filter((ratio): ratio is number => !!ratio);
+    return known.length ? Math.min(...known) : undefined;
+  }, [measuredAspects]);
+  // Centre the arrows on the photo in view, not on the strip: a lazy neighbour
+  // can make the strip taller than a wide photo and leave them in the gap.
+  // Shorter photos are cropped to fill the frame, so no post shows blank
+  // space inside its outline. Unmeasured ones wait for their shape.
+  const fillsFrame = (idx: number) => {
+    const ratio = measuredAspects[idx];
+    return framed && !!ratio && !!tallestAspect && ratio > tallestAspect * 1.01;
+  };
+  // A framed gallery centres its photos, so the frame's middle is theirs.
+  const arrowTop = activeHeight && !framed ? { top: activeHeight / 2 } : undefined;
+  const singleRatio = !hasMultiple ? measuredAspects[0] : undefined;
+  const wideShape = !!wide && !!singleRatio && singleRatio < WIDE_RAILS_MAX_ASPECT;
+  const wideAmbient = wideShape && wide === 'ambient';
+  const wideRails = wideShape && wide === 'rails' && !!railPanel;
+  const wideCap = immersive ? IMMERSIVE_IMAGE_MAX_HEIGHT : FEED_IMAGE_CAP;
+
+  const gallery = (
+    <div ref={rootRef} data-media-full data-wide-ambient-photo={wideAmbient || undefined}
+      style={wideRails && singleRatio ? { flex: 'none', width: `min(calc(${wideCap} * ${singleRatio.toFixed(4)}), calc(100% - 272px))` } : undefined} data-gallery-frame={framed || undefined} data-sound-playing={soundPlaying || undefined} className={cn('relative overflow-hidden', immersive && !wideRails && !wideAmbient ? 'rounded-none' : 'rounded-2xl')} onWheel={handleWheel} data-no-navigate data-no-swipe={hasMultiple ? true : undefined}>
+      {wideAmbient && (
+        // The photo itself, blurred and dimmed, fills the space beside it.
+        <div aria-hidden="true" data-keep-dark className="pointer-events-none absolute inset-0 overflow-hidden bg-black">
+          <img src={cdnImage(images[0], { width: 160 })} alt="" decoding="async" className="h-full w-full scale-125 object-cover opacity-60 blur-[40px] saturate-150" />
+        </div>
+      )}
+      {/* Carousel container */}
+      <div
+        ref={scrollRef}
+        onScroll={updateCurrentIndex}
+        style={{ height: immersive ? activeHeight : undefined }}
+        className={cn("flex gap-2 scrollbar-hide", wideAmbient && "relative", framed ? 'items-stretch' : 'items-start', hasMultiple ? "overflow-x-auto overscroll-x-contain touch-auto" : "overflow-x-hidden touch-pan-y")}
+      >
+        {images.map((img, idx) => (
+          <div
+            key={idx}
+            className={cn(
+              'relative min-w-0',
+              hasMultiple ? 'flex-none max-w-full' : 'flex-[0_0_100%]',
+              framed && 'flex flex-col justify-center',
+              fillsFrame(idx) && 'flex-[0_0_100%]',
+            )}
+          >
+            <ImageSlide
+              img={img}
+              description={descriptions?.[idx]}
+              idx={idx}
+              aboveFold={aboveFold}
+              postId={postId}
+              onImageClick={onImageClick}
+              viewportRef={scrollRef}
+              immersive={immersive}
+              pinned={images.length <= 1 || (idx >= currentIndex - 1 && idx <= currentIndex + 2)}
+              knownRatio={measuredAspects[idx] ?? tallestAspect}
+              fill={fillsFrame(idx)}
+              centered={wideAmbient || wideRails}
+            />
+            <PhotoTagsOverlay tags={imageTags} index={idx} />
+          </div>
+        ))}
+      </div>
+      
+      {/* A peeking next image explains the scroll itself; full-width slides need controls. */}
+      {hasMultiple && currentSlideFillsViewport && (
+        <>
+          {currentIndex > 0 && (
+            <button
+              onClick={scrollPrev}
+              data-on-media
+              data-keep-dark
+              style={arrowTop}
+              className="hidden lg:flex absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-xl bg-black/55 backdrop-blur-[24px] backdrop-saturate-[180%] border border-white/25 shadow-[0_2px_12px_rgba(0,0,0,0.35)] items-center justify-center text-white hover:bg-black/70 transition-colors"
+              aria-label={_copy("copy.f0a859a7ecd7", { defaultValue: "Previous image" })}
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+          )}
+          {currentIndex < images.length - 1 && (
+            <button
+              onClick={scrollNext}
+              data-on-media
+              data-keep-dark
+              style={arrowTop}
+              className="hidden lg:flex absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-xl bg-black/55 backdrop-blur-[24px] backdrop-saturate-[180%] border border-white/25 shadow-[0_2px_12px_rgba(0,0,0,0.35)] items-center justify-center text-white hover:bg-black/70 transition-colors"
+              aria-label={_copy("copy.a4903f732746", { defaultValue: "Next image" })}
+            >
+              <ChevronRight className="w-5 h-5" />
+            </button>
+          )}
+        </>
+      )}
+      {overlay && (
+        <div
+          className={cn('pointer-events-none absolute inset-x-0 bottom-0 z-10', !immersive && 'overflow-hidden rounded-b-2xl')}
+          style={photoBox && { left: photoBox.left, right: 'auto', width: photoBox.width, bottom: photoBox.bottom }}
+        >
+          {overlay}
+        </div>
+      )}
+    </div>
+  );
+  return wideRails ? <div data-wide-rails-row className="flex items-stretch gap-3">{railPanel}{gallery}</div> : gallery;
+}
+
+/**
+ * Feed description component with expandable text
+ * Uses useTranslation hook directly to properly display translated content
+ */
+function FeedDescription({ 
+  postId,
+  disabled,
+  title, 
+  description,
+  isTranslated,
+  translatedText,
+  onOpen,
+  stage = false,
+  hideAssetCards = false,
+  hiddenLinkPreviews,
+}: { 
+  /** The poster closed the market card for this post. */
+  hideAssetCards?: boolean;
+  /** Links whose preview card the poster closed. */
+  hiddenLinkPreviews?: string[];
+  onOpen?: () => void;
+  /** Phone post page: a shorter clamp (about three lines) with "more". */
+  stage?: boolean;
+  postId: string;
+  disabled?: boolean;
+  title?: string; 
+  description?: string;
+  isTranslated?: boolean;
+  translatedText?: string;
+}) {
+  const { t: _copy } = _useCopy();
+  const [expanded, setExpanded] = useState(false);
+  // Text opens immediately. Media retains multi-tap reactions; links and
+  // "See more" keep their own actions.
+  const tapGestures = useTapGestures({
+    postId,
+    singleTapOnly: true,
+    reactionArea: 'center',
+    disabled,
+    enableLongPress: false,
+    onSingleTap: (event) => {
+      if ((event.target as HTMLElement | null)?.closest?.('button, a, input, textarea, [role="button"]')) return;
+      const selection = window.getSelection();
+      if (selection && selection.toString().length > 0) return;
+      // A cut-off caption opens the rest of its text first; the next tap opens the post.
+      const more = (event.target as HTMLElement | null)?.closest?.('[data-no-navigate]')?.querySelector<HTMLButtonElement>('[data-caption-more]');
+      if (more) { more.click(); return; }
+      onOpen?.();
+    },
+  });
+  const MAX_LENGTH = stage ? (title ? 90 : 140) : 150;
+  
+  // Parse translated text back into title/description.
+  //
+  // The old version took parts[0] as the title and fell back to the ORIGINAL
+  // description whenever the rest came back empty. On a translation that lost
+  // its blank line that put the entire post in the title — which renders
+  // unclamped here, while the description is capped at MAX_LENGTH — so pressing
+  // translate on a long post expanded it to full length and left the body
+  // untranslated underneath. See splitTranslatedTitleAndBody.
+  const [displayTitle, displayDescription] = useMemo(() => {
+    if (isTranslated && translatedText) {
+      return splitTranslatedTitleAndBody(translatedText, title, description);
+    }
+    return [title, description];
+  }, [isTranslated, translatedText, title, description]);
+  
+  // Riftn links become cards, so they come out of the text — and they come out
+  // BEFORE the truncation below, not after. Stripping afterwards meant a URL
+  // could be cut in half by the 150-character clamp and then no longer match,
+  // leaving half a link on screen next to its own card; it also spent a third
+  // of the visible budget on a URL nobody reads.
+  const linkSource = useMemo(
+    () => [displayTitle, displayDescription].filter(Boolean).join('\n'),
+    [displayTitle, displayDescription],
+  );
+  const { links: dehubLinks } = useDehubLinks(linkSource);
+  // Contract addresses come out here too, for the same reason and at the same
+  // stage: half a stripped address left behind by the clamp is worse than none.
+  const { refs: assetRefs } = useAssetRefsInText(linkSource, undefined, hideAssetCards);
+  const linkFreeTitle = useMemo(
+    () => stripAssetRefs(
+      dehubLinks.length ? stripDehubLinkMatches(displayTitle, dehubLinks) : displayTitle,
+      assetRefs,
+    ),
+    [displayTitle, dehubLinks, assetRefs],
+  );
+  const linkFreeDescription = useMemo(
+    () => stripAssetRefs(
+      dehubLinks.length ? stripDehubLinkMatches(displayDescription, dehubLinks) : displayDescription,
+      assetRefs,
+    ),
+    [displayDescription, dehubLinks, assetRefs],
+  );
+
+  // Suppress duplicate: if description starts with the title text, strip it out
+  const dedupedDescription = useMemo(() => {
+    if (!linkFreeTitle || !linkFreeDescription) return linkFreeDescription;
+    const trimTitle = linkFreeTitle.trim();
+    const trimDesc = linkFreeDescription.trim();
+    if (trimDesc === trimTitle) return undefined;
+    if (trimDesc.startsWith(trimTitle)) {
+      const rest = trimDesc.slice(trimTitle.length).replace(/^\s*\n+/, '').trim();
+      return rest || undefined;
+    }
+    return linkFreeDescription;
+  }, [linkFreeTitle, linkFreeDescription]);
+
+  const hasLongDescription = dedupedDescription && dedupedDescription.length > MAX_LENGTH;
+  const shownDescription = expanded || !hasLongDescription
+    ? dedupedDescription
+    : `${dedupedDescription.slice(0, MAX_LENGTH)}...`;
+
+  // A post whose whole caption was a link still has something to show.
+  if (!title && !description && dehubLinks.length === 0) return null;
+
+  return (
+    <div className="relative space-y-1" data-card-caption={(linkFreeTitle || shownDescription) && dehubLinks.length === 0 && assetRefs.length === 0 && !/https?:\/\//.test(linkSource ?? '') ? '' : undefined} data-no-navigate {...tapGestures} onClick={(event) => event.stopPropagation()}>
+      {!disabled && <TapReactionBurst postId={postId} />}
+      {linkFreeTitle && (
+        <h3 className={stage ? "text-white text-[15px] font-bold leading-tight whitespace-pre-wrap break-words" : "text-white text-[14px] leading-tight whitespace-pre-wrap break-words"}>
+          {renderTextWithLinks(linkFreeTitle)}
+        </h3>
+      )}
+      {!stage && dedupedDescription ? (
+        <FeedCaptionExpander
+          textKey={dedupedDescription}
+          preview={<p className="text-zinc-300 text-[14px] leading-relaxed whitespace-pre-wrap break-words">{renderTextWithLinks(squeezeBlankLines(dedupedDescription))}</p>}
+        >
+          <p className="text-zinc-300 text-[14px] leading-relaxed whitespace-pre-wrap break-words">{renderTextWithLinks(dedupedDescription)}</p>
+        </FeedCaptionExpander>
+      ) : shownDescription && (
+        <div>
+          <p className="text-zinc-300 text-[14px] leading-relaxed whitespace-pre-wrap break-words">
+            {renderTextWithLinks(shownDescription)}
+            {stage && hasLongDescription && !expanded && (
+              <button type="button" data-stage-more onClick={() => setExpanded(true)} className="ml-1 font-bold">{_copy("copy.187897ce0afc", { defaultValue: "more" })}</button>
+            )}
+          </p>
+          {hasLongDescription && !(stage && !expanded) && (
+            <button
+              onClick={() => setExpanded(!expanded)}
+              className="text-zinc-500 text-xs flex items-center gap-0.5 mt-1 hover:text-zinc-400 transition-colors"
+            >
+              {expanded ? (
+                <>{_copy("copy.c0aab98fd372", { defaultValue: "Show less " })}<ChevronUp className="w-3 h-3" /></>
+              ) : (
+                <>{_copy("copy.d7cb0dc5c172", { defaultValue: "Show more " })}<ChevronDown className="w-3 h-3" /></>
+              )}
+            </button>
+          )}
+        </div>
+      )}
+      <DehubLinkEmbeds links={dehubLinks} />
+      <FeedLinkPreviews text={linkSource} hidden={hiddenLinkPreviews} />
+      <AssetRefCards refs={assetRefs} />
+    </div>
+  );
+}
+
+const ImageCardBody = memo(function ImageCard({ post, aboveFold = false, onOpenComments, isImmersive = false, postPage = false }: ImageCardProps) {
+  const { t: _copy } = _useCopy();
+  const [showComments, setShowComments] = useState(false);
+  const [commentsInitialTab, setCommentsInitialTab] = useState<'replies' | 'quotes' | 'reposts' | 'search' | undefined>(undefined);
+  useAutoOpenComments(setShowComments, post.id);
+  const { t } = useI18n();
+  const [showAIChat, setShowAIChat] = useState(false);
+  const isPhone = useIsMobile();
+  // The feed moves this very card onto the post page (RetainedPostSurface);
+  // while it sits there it is the post page's comic, not a feed teaser.
+  const dockedOnPostPage = useRetainedPostPinned(post.id);
+  const [fullscreenOpen, setFullscreenOpen] = useState(false);
+  const [fullscreenIndex, setFullscreenIndex] = useState(0);
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editModalMounted, setEditModalMounted] = useState(false);
+  useEffect(() => {
+    if (showEditModal) setEditModalMounted(true);
+  }, [showEditModal]);
+  const [showBoostModal, setShowBoostModal] = useState(false);
+
+  // caption holds the raw API description including any [soundtrack:...] tag
+  // that `description` strips for display — edit the raw text so saving
+  // doesn't silently drop the post's soundtrack.
+  const editDescription = /\[soundtrack:/.test(post.caption) ? post.caption : (post.description ?? '');
+  const [showTranslationSheet, setShowTranslationSheet] = useState(false);
+  const [visibility, setVisibility] = useState<TokenVisibility>('public');
+  const [showPPVDrawer, setShowPPVDrawer] = useState(false);
+  const [showBountyDrawer, setShowBountyDrawer] = useState(false);
+  const [showLockedDrawer, setShowLockedDrawer] = useState(false);
+  const [showOptionsDrawer, setShowOptionsDrawer] = useState(false);
+  // The phone post page ("Stage"). Null in every feed.
+  const stage = usePostStage();
+  const imagesFeedScrollView = useImagesFeedScrollView();
+  const [showTipModal, setShowTipModal] = useState(false);
+  const [showQuoteModal, setShowQuoteModal] = useState(false);
+  const [showPollCreator, setShowPollCreator] = useState(false);
+  /** People tagged on the photos, as saved from this card (until the feed refetches). */
+  const [tagsOverride, setTagsOverride] = useState<PhotoTag[] | null>(null);
+  const [showTagger, setShowTagger] = useState(false);
+  const imageTags = tagsOverride ?? post.imageTags ?? [];
+  const [pollQuestion, setPollQuestion] = useSurfaceDraft("components/app/cards/ImageCard.tsx:pollQuestion", '', draftIdentity(post));
+  const [pollOptions, setPollOptions] = useState(['', '']);
+  const [pollMultiple, setPollMultiple] = useState(false);
+  const [pollExpiry, setPollExpiry] = useSurfaceDraft("components/app/cards/ImageCard.tsx:pollExpiry", '', draftIdentity(post));
+  const createPollMutation = useCreatePoll();
+  const { data: tipCount = 0 } = usePostTipCount(post.id, post.totalTips);
+  const isTabletOrMobile = useIsTabletOrMobile();
+  const navigate = useNavigate();
+  const boosted = useBoostedPost();
+  const queryClient = useQueryClient();
+  // The author can switch a photo post between comic and carousel from the
+  // menu; this holds their pick until the feed refetches.
+  const [layoutOverride, setLayoutOverride] = useState<'comic' | null | undefined>(undefined);
+  const layout = layoutOverride !== undefined ? layoutOverride : post.layout;
+  const profileFeed = useProfileFeedContext();
+  const { walletAddress, openLoginModal } = useAuth();
+  const registerOptions = stage?.registerOptions;
+  const openPostOptions = useCallback(() => {
+    if (!walletAddress) { openLoginModal(); return; }
+    setShowOptionsDrawer(true);
+  }, [walletAddress, openLoginModal]);
+  useEffect(() => {
+    if (!registerOptions) return;
+    registerOptions(openPostOptions);
+    return () => registerOptions(null);
+  }, [registerOptions, openPostOptions]);
+  // Deep Current is the one power spent on somebody ELSE's post, so it is
+  // the one row that belongs in this half of the menu. `status.powers` is
+  // the authority for whether this account has it — the badge the client
+  // draws from a live wallet read deliberately over-reports.
+  const { data: superpowerStatus } = useSuperpowers(!!walletAddress);
+  const canGiftBoost = !!superpowerStatus?.powers.some(
+    p => p.key === 'deep_current' && p.unlocked && p.available,
+  );
+  // The options menu offers the same copy as the share sheet, so it counts the
+  // same. Shares one react-query key with the ActionBar below, so no extra
+  // request — and the bump lands on the card's own share counter.
+  const { data: linkCopyCount = 0 } = usePostLinkCopyCount(post.id);
+  const trackLinkCopy = useTrackPostLinkCopy();
+  const isOwnPost = !!post.isOwner || !!(
+    walletAddress && post.creatorId?.toLowerCase() === walletAddress.toLowerCase()
+  );
+  const { blockAuthor } = useBlockAuthor();
+  const { muteAuthor } = useMuteAuthor();
+  const handleBlockCreator = useCallback(() => {
+    if (!walletAddress) { openLoginModal(); return; }
+    if (!post.creatorId) return;
+    setShowOptionsDrawer(false);
+    blockAuthor(post.creatorId, post.username || undefined);
+  }, [walletAddress, openLoginModal, post.creatorId, post.username, blockAuthor]);
+  const handleMuteCreator = useCallback(() => {
+    if (!walletAddress) { openLoginModal(); return; }
+    if (!post.creatorId) return;
+    setShowOptionsDrawer(false);
+    muteAuthor(post.creatorId, post.username || undefined);
+  }, [walletAddress, openLoginModal, post.creatorId, post.username, muteAuthor]);
+  const postTokenId = parseInt(post.id, 10) || undefined;
+
+  // PPV/Bounty/Locked status - bypass for owners & already-unlocked content
+  const [locallyUnlocked, setLocallyUnlocked] = useState(false);
+  const [locallySubscribed, setLocallySubscribed] = useState(false);
+  const [showSubDrawer, setShowSubDrawer] = useState(false);
+  const storedUnlocked = isTokenUnlocked(post.id);
+  const canBypassGating = !!(isOwnPost || post.isOwner || post.isUnlocked || locallyUnlocked || storedUnlocked);
+  const isPPV = (post.isPPV || false) && !canBypassGating;
+  const isW2E = (post.isW2E || false) && !canBypassGating;
+  const isLocked = isHoldGated(post.isLocked, post.lockedPrice) && !canBypassGating;
+  // A second, independent gate — subscribe to this creator, not own a token.
+  const isSubGated = isSubscriberGated(post.subscriberPlans, !!isOwnPost || !!post.isOwner || locallySubscribed);
+  // Cheapest plan a reader can actually buy. The price lives on the plan's
+  // chain entry, not on `plan.price` — that field does not exist on this
+  // payload, and reading it gave NaN, which formatCompact renders as "0".
+  const cheapestQuote = cheapestSubscriberQuote(post.subscriberPlans);
+  const isComboLocked = isPPV && isLocked;
+  // Independent of the monetisation gates above: a post can be both mature and
+  // pay-per-view, and the creator's own post is warned about too — the warning
+  // is for whoever is looking at the screen.
+  const matureGate = useMatureGate(post.contentRating);
+  const contentWarning = useContentWarning(post.spoilerText);
+  // PPV/Lock badges are redundant with the centered overlay, so only show bounty here
+  const hasBadges = isW2E;
+
+
+  // Format numbers with abbreviations (1K, 1M, etc.)
+  const formatCompact = (num: number | null | undefined): string => {
+    const n = Number(num);
+    if (!Number.isFinite(n) || n <= 0) return '0';
+    if (n >= 1000000) return `${Math.floor(n / 1000000)}M`;
+    if (n >= 1000) return `${Math.floor(n / 1000)}K`;
+    return String(Math.floor(n));
+  };
+  
+  // View tracking - batches views when post is visible for 2+ seconds
+  const viewRef = useFeedViewTracking(post.id);
+
+  const mediaAccessible = !matureGate.isGated && !isPPV && !isLocked && !isSubGated && !isW2E;
+  const canDownloadImage = mediaAccessible && !contentWarning.hidden;
+  const soundtrack = useImageSoundtrack(post.soundtrackUrl, viewRef, mediaAccessible, post.id);
+  const soundtrackControl = post.soundtrackUrl && mediaAccessible ? (
+    <SoundtrackControl title={post.soundtrackTitle} creator={post.soundtrackCreator} url={post.soundtrackUrl} {...soundtrack} />
+  ) : null;
+  // While the song plays its player docks under the photo, not over it.
+  const soundtrackOpen = !!soundtrackControl && (soundtrack.playing || soundtrack.loading);
+  
+  // Translation hook for text content
+  const descriptionText = [post.title, post.description].filter(Boolean).join('\n\n');
+  const {
+    isTranslated,
+    translatedText,
+    isLoading: isTranslateLoading,
+    error: translateError,
+    handleTranslate,
+    handleShowOriginal,
+    sourceLang,
+    isTooShort: nothingToTranslate,
+  } = useTranslation(descriptionText, true, viewRef, true);
+  // Glass rails show the caption in the panel beside the photo: same
+  // translated title and description, same Translate button.
+  const [railTitle, railDescription] = useMemo(
+    () => (isTranslated && translatedText
+      ? splitTranslatedTitleAndBody(translatedText, post.title, post.description)
+      : [post.title, post.description]),
+    [isTranslated, translatedText, post.title, post.description],
+  );
+  const translateControl = nothingToTranslate ? undefined : {
+    isTranslated,
+    isLoading: isTranslateLoading,
+    error: translateError,
+    onTranslate: handleTranslate,
+    onShowOriginal: handleShowOriginal,
+    sourceLang,
+  };
+  const { isLoading: isTranslating, error: translationError, result: translationResult, translateImage, clearResult } = useImageTranslation();
+
+  // Get images array - use imageUrls if available, otherwise fall back to single image
+  const images = useMemo(() => post.imageUrls && post.imageUrls.length > 0 
+    ? post.imageUrls 
+    : [post.image], [post.imageUrls, post.image]);
+
+  // Long form media on wide screens (Settings > Appearance > Media) covers a
+  // single tall photo too: desktop feed card and post page only.
+  const isDesktopViewport = useIsDesktopViewport();
+  const wideVideoMode = useWideVideoMode();
+  const inMasonryColumn = useInMasonryColumn();
+  const widePhoto = isDesktopViewport && !isPhone && !inMasonryColumn && !stage && images.length === 1 && layout !== 'comic' && wideVideoMode !== 'standard'
+    ? wideVideoMode : undefined;
+  const [singlePhotoRatio] = useGalleryAspects(widePhoto ? images : NO_IMAGES, !!widePhoto);
+  const widePhotoRails = widePhoto === 'rails' && !!singlePhotoRatio && singlePhotoRatio < WIDE_RAILS_MAX_ASPECT;
+
+  const [isDownloading, setIsDownloading] = useState(false);
+  const handleDownloadImage = useCallback(async () => {
+    const index = Math.min(activeImageIndex, images.length - 1);
+    const source = cdnImageSource(images[index]);
+    if (!canDownloadImage || !source || isDownloading) return;
+    setShowOptionsDrawer(false);
+    setIsDownloading(true);
+    const toastId = `image-download-${post.id}`;
+    toast.loading(_copy("copy.757726036c1c", { defaultValue: "Preparing download..." }), { id: toastId });
+    try {
+      await downloadMedia(source, imageDownloadName(source, post.id, index));
+      toast.success(_copy("copy.efece5dd1933", { defaultValue: "Download started" }), { id: toastId });
+    } catch {
+      toast.error(_copy("copy.d2bde7afd757", { defaultValue: "Download failed. Please try again." }), { id: toastId });
+    } finally {
+      setIsDownloading(false);
+    }
+  }, [images, activeImageIndex, canDownloadImage, isDownloading, post.id, _copy]);
+
+  const openPost = useCallback(() => {
+    if (wasDrawerJustDismissed() || showPPVDrawer || showBountyDrawer || showLockedDrawer) return;
+    if (window.location.pathname === `/app/post/${post.id}` || (post.articleSlug && window.location.pathname === `/app/post/${post.articleSlug}`)) return;
+    // Opens its own post page like a text post: the feed keeps this very card
+    // (RetainedPostSurface) and the page shows it as it was, under the same
+    // top bar, with Back in the pill.
+    cacheImageForNavigation(queryClient, post);
+    noteProfileFeedOpen(profileFeed, post.id);
+    navigate(`/app/post/${post.articleSlug || post.id}`, { state: { fromFeed: true } });
+  }, [navigate, queryClient, post, showPPVDrawer, showBountyDrawer, showLockedDrawer, profileFeed]);
+
+  const handleImageClick = (index: number, onPicture = true) => {
+    if (wasDrawerJustDismissed()) return;
+    const gated = isPPV || isLocked || isSubGated || isW2E || matureGate.isGated;
+    // A post opened from the feed keeps this feed card on its page, so being
+    // on the post's own URL counts as the post page: the photo opens full screen.
+    const onPostPage = postPage || window.location.pathname === `/app/post/${post.id}` || (!!post.articleSlug && window.location.pathname === `/app/post/${post.articleSlug}`);
+    // The picture itself opens full screen; the bento around it (here, the
+    // space beside a narrow photo) opens the post page.
+    if (!onPicture && !onPostPage && !imagesFeedScrollView && !gated) {
+      openPost();
+      return;
+    }
+    // Phones open a plain photo full screen over the feed, so closing it lands
+    // back on the same card. Desktop still opens the post page.
+    if (!onPostPage && isPhone && !post.soundtrackUrl && !gated) {
+      setFullscreenIndex(index);
+      setFullscreenOpen(true);
+      return;
+    }
+    // Only photos with a song continue in the shorts viewer; plain photos open their post.
+    if (!onPostPage && (!post.soundtrackUrl || gated)) {
+      openPost();
+      return;
+    }
+    if (!onPostPage) {
+      rememberGalleryIndex(String(post.id), index);
+      openBrainrotFeed(post.id, {
+        ...post,
+        type: 'short',
+        imageUrls: images,
+        videoUrl: '',
+        thumbnail: images[index] || post.image,
+        likes: String(post.likes),
+        comments: String(post.comments),
+      });
+      return;
+    }
+    setFullscreenIndex(index);
+    setFullscreenOpen(true);
+  };
+  
+  const handleTranslateImage = useCallback(async () => {
+    // Use the first image for translation (or could allow selecting which image)
+    const imageUrl = images[0];
+    if (!imageUrl) return;
+    
+    setShowTranslationSheet(true);
+    await translateImage(imageUrl);
+  }, [images, translateImage]);
+  
+  const handleCloseTranslation = useCallback(() => {
+    setShowTranslationSheet(false);
+    clearResult();
+  }, [clearResult]);
+
+  // Repost handler
+  const handleRepost = useCallback(async () => {
+    if (!walletAddress) { openLoginModal(); return; }
+    const numericId = parseInt(post.id, 10);
+    if (isNaN(numericId)) return;
+    try {
+      await repostPost(numericId);
+      // Mark caches stale WITHOUT refetching now — refetching the unified feed
+      // tears down the infinite-scroll list and snaps the user back to the top.
+      queryClient.invalidateQueries({ queryKey: ['unified-feed'], refetchType: 'none' });
+      queryClient.invalidateQueries({ queryKey: ['user-reposts'], refetchType: 'none' });
+    } catch (err) {
+      toast.error(_copy("copy.7527dc6722fc", { defaultValue: "Failed to repost" }));
+      throw err; // let ActionBar roll back its optimistic repost state
+    }
+  }, [post.id, walletAddress, openLoginModal, queryClient, _copy]);
+
+  // Quote handler
+  const handleQuote = useCallback(() => {
+    if (!walletAddress) { openLoginModal(); return; }
+    setShowQuoteModal(true);
+  }, [walletAddress, openLoginModal]);
+
+  // Build minimal NFT for quote modal
+  const postAsNFT = {
+    tokenId: parseInt(post.id, 10) || 0,
+    name: post.title || post.caption || '',
+    description: post.description || post.caption || '',
+    imageUrl: post.image || '',
+    postType: 'feed-images' as const,
+    minter: post.creatorId || '',
+    minterUsername: post.creatorUsername || '',
+    minterDisplayName: post.username,
+    minterAvatarUrl: post.avatar,
+    createdAt: post.createdAt || '',
+  };
+
+  // Navigate to single post page when clicking non-interactive areas
+  // Pre-cache post data for instant display on the single post page
+  const handleCardClick = useCallback((e: React.MouseEvent) => {
+    // Don't navigate if a drawer is open, or was just dismissed by a scrim tap
+    // (that tap leaves a ghost click that would otherwise open the post).
+    if (wasDrawerJustDismissed()) return;
+    if (showPPVDrawer || showBountyDrawer || showLockedDrawer) return;
+
+    const target = e.target as HTMLElement;
+    const isInteractive = target.closest('button, a, input, textarea, [role="button"], [data-no-navigate]');
+    if (isInteractive) return;
+    // Allow text selection without navigating
+    const selection = window.getSelection();
+    if (selection && selection.toString().length > 0) return;
+    
+    openPost();
+  }, [openPost, showPPVDrawer, showBountyDrawer, showLockedDrawer]);
+
+  // Right-click anywhere on the card: every action for the post at the pointer.
+  const onPostContextMenu = usePostMenuContext(() => ({
+    id: post.id,
+    newPostId: post.status === 'signed' ? post.newPostId ?? null : null,
+    articleSlug: post.articleSlug,
+    authorId: post.creatorId,
+    authorName: post.username,
+    authorHandle: post.creatorUsername,
+    text: [post.title, post.description || post.caption].filter(Boolean).join('\n\n'),
+    title: post.title ?? post.caption ?? '',
+    isOwn: isOwnPost,
+    visibility: post.visibility,
+    quotePolicy: post.quotePolicy,
+    myReaction: post.myReaction,
+    isReposted: post.isReposted,
+    noTip: !!post.creatorPaymentsDisabled,
+    actions: {
+      comments: () => {
+        if (onOpenComments) { onOpenComments(); return; }
+        setCommentsInitialTab(undefined);
+        setShowComments(true);
+      },
+      askAI: () => { if (!walletAddress) { openLoginModal(); return; } setShowAIChat(true); },
+      seeEngagements: () => {
+        if (onOpenComments) { onOpenComments('reposts'); return; }
+        setCommentsInitialTab('reposts');
+        setShowComments(true);
+      },
+      quote: handleQuote,
+      tip: () => setShowTipModal(true),
+      report: () => setShowReportModal(true),
+      boost: () => setShowBoostModal(true),
+      edit: isOwnPost ? () => setShowEditModal(true) : undefined,
+      delete: isOwnPost ? () => setShowDeleteModal(true) : undefined,
+    },
+  }));
+
+  const headerRow = (
+    <div data-card-head={stage ? undefined : 'plain'} className={stage ? 'contents' : 'flex items-start justify-between'} style={{ paddingBottom: 0 }}>
+      {stage ? (
+        <StageCreatorRow
+          tokenId={postTokenId}
+          name={post.username}
+          avatar={post.avatar}
+          handle={post.creatorUsername}
+          creatorId={post.creatorId}
+          badgeBalance={post.creatorBadgeBalance}
+          verified={post.verified}
+        />
+      ) : (
+      <CardHeader
+        postPage={postPage}
+        tokenId={postTokenId}
+        username={post.username}
+        visibility={post.visibility}
+        handle={post.creatorUsername}
+        avatarSeed={post.avatar}
+        verified={post.verified}
+        contentType="image"
+        creatorId={post.creatorId}
+        creatorUsername={post.creatorUsername}
+        badgeBalance={post.creatorBadgeBalance}
+      />
+      )}
+      {/* The phone menu sits beside Recent; its drawer remains owned by this card. */}
+      <div className={stage ? 'hidden' : 'flex items-center gap-1 pb-3'}>
+        {(isOwnPost || boosted) && (
+          <PostHeaderBoostButton
+            rowGap={4}
+            lit={boosted}
+            onClick={() => (isOwnPost ? setShowBoostModal(true) : navigate('/app/superpowers'))}
+            disabled={isOwnPost && !postTokenId}
+            aria-label={isOwnPost ? t('postOptions.boostPost') : _copy("copy.c1f1c8819e33", { defaultValue: "Boosted" })}
+          />
+        )}
+        <Drawer open={showOptionsDrawer} onOpenChange={setShowOptionsDrawer}>
+          {/* State-driven, not DrawerTrigger — see PostCard: a trigger pins
+              vaul's Root (and its window scroll listener) into every card. */}
+          <PostHeaderOptionsButton
+            onClick={() => { if (!walletAddress) { openLoginModal(); return; } setShowOptionsDrawer(true); }}
+          />
+          <DrawerContent scrollable column glass className="px-4 pb-6">
+            <DrawerHeader className="pb-2">
+              <DrawerTitle className="text-white text-lg">{t('postOptions.options')}</DrawerTitle>
+            </DrawerHeader>
+            <div className="flex flex-col gap-1">
+              {/* Bookmark / pin / post info. Also on the action bar as icons
+                  on desktop — both surfaces read the same state, so the menu
+                  is a reliable place to find them at every width. */}
+              <PostUtilityMenuItems
+                onActionBar
+                onAskAI={() => { setShowOptionsDrawer(false); if (!walletAddress) { openLoginModal(); return; } setShowAIChat(true); }}
+                postId={post.id}
+                tokenId={postTokenId}
+                isOwnPost={isOwnPost}
+                canShareToMoment={canShareToMoment(post)}
+                onBeforeNavigate={() => setShowOptionsDrawer(false)}
+                linkText={[post.title, post.description].filter(Boolean).join('\n')}
+                onClose={() => setShowOptionsDrawer(false)}
+              />
+              {/* Tip is on the action bar on a phone (Requests 7399dd7d). */}
+              {!isOwnPost && !isPhone && (
+                <button
+                  onClick={() => { setShowOptionsDrawer(false); setShowTipModal(true); }}
+                  className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left"
+                >
+                  <Gem className="w-5 h-5" /> {t('postOptions.sendTip')}
+                </button>
+              )}
+              <button
+                onClick={() => { setShowOptionsDrawer(false); setTimeout(() => handleTranslateImage(), 300); }}
+                className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left"
+              >
+                <Languages className="w-5 h-5" /> {t('postOptions.translateImage')}
+              </button>
+              {canDownloadImage && (
+                <button onClick={handleDownloadImage} disabled={isDownloading} className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left disabled:opacity-50">
+                  <Download className="w-5 h-5" /> {t('postOptions.download')}
+                </button>
+              )}
+              <button
+                onClick={() => setShowReportModal(true)}
+                className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left"
+              >
+                <Flag className="w-5 h-5" /> {t('postOptions.report')}
+              </button>
+              <button
+                onClick={() => {
+                  const url = viewerShareUrl(`${window.location.origin}/app/post/${post.articleSlug || post.id}`);
+                  navigator.clipboard.writeText(url);
+                  toast.success(t('postOptions.postUrlCopied'));
+                  trackLinkCopy(post.id, walletAddress, linkCopyCount);
+                }}
+                className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left"
+              >
+                <Link2 className="w-5 h-5" /> {t('postOptions.copyPostUrl')}
+              </button>
+              {!isOwnPost && (
+                <button onClick={handleMuteCreator} className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left">
+                  <VolumeX className="w-5 h-5" /> {t('postOptions.muteCreator')}
+                </button>
+              )}
+              {!isOwnPost && (
+                <button onClick={handleBlockCreator} className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left">
+                  <Ban className="w-5 h-5" /> {t('postOptions.blockCreator')}
+                </button>
+              )}
+              {!isOwnPost && canGiftBoost && (
+                <button
+                  onClick={() => { setShowOptionsDrawer(false); setTimeout(() => setShowBoostModal(true), 300); }}
+                  disabled={!postTokenId}
+                  className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left disabled:opacity-40"
+                >
+                  <Gift className="w-5 h-5" /> {t('postOptions.giftBoost', { defaultValue: 'Gift a boost' })}
+                </button>
+              )}
+              {!isOwnPost && postTokenId && walletAddress && imageTags.some((tag) => tag.address?.toLowerCase() === walletAddress.toLowerCase()) && (
+                <button
+                  onClick={async () => {
+                    setShowOptionsDrawer(false);
+                    try {
+                      const { imageTags: next } = await removeMyPhotoTag(Number(postTokenId));
+                      setTagsOverride(next);
+                      toast.success(t('photoTags.removedMe', { defaultValue: 'Your tag was removed' }));
+                    } catch (err: any) {
+                      toast.error(err?.message || t('photoTags.saveFailed', { defaultValue: 'Could not save tags' }));
+                    }
+                  }}
+                  className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left"
+                >
+                  <UserX className="w-5 h-5" /> {t('photoTags.removeMe', { defaultValue: 'Remove me from this photo' })}
+                </button>
+              )}
+              {isOwnPost && (
+                <>
+                  <div className="border-t border-white/10 my-1" />
+                  <button
+                    onClick={() => { setShowOptionsDrawer(false); setTimeout(() => setShowPollCreator(true), 300); }}
+                    className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left"
+                  >
+                    <BarChart2 className="w-5 h-5" />{_copy("copy.b8e082c979d9", { defaultValue: " Create Poll" })}</button>
+                  {postTokenId && images.length > 0 && (
+                    <button
+                      onClick={() => { setShowOptionsDrawer(false); setTimeout(() => setShowTagger(true), 300); }}
+                      className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left"
+                    >
+                      <UserRound className="w-5 h-5" /> {t('photoTags.title', { defaultValue: 'Tag people' })}
+                    </button>
+                  )}
+                  <button
+                    onClick={() => { setShowOptionsDrawer(false); setTimeout(() => setShowEditModal(true), 300); }}
+                    className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left"
+                  >
+                    <Pencil className="w-5 h-5" /> {t('postOptions.editPost')}
+                  </button>
+                  {/* Comic or carousel: same pages, only the layout changes. */}
+                  {(images.length > 1 || layout === 'comic') && postTokenId && (
+                    <button
+                      onClick={async () => {
+                        const next = layout === 'comic' ? null : 'comic';
+                        setShowOptionsDrawer(false);
+                        setLayoutOverride(next);
+                        try {
+                          await editPost(postTokenId, { layout: next ?? '' });
+                          queryClient.invalidateQueries({ queryKey: ['single-post', post.id] });
+                          toast.success(next ? _copy('comic.converted', { defaultValue: 'Now showing as a comic' }) : _copy('comic.unconverted', { defaultValue: 'Now showing as a carousel' }));
+                        } catch {
+                          setLayoutOverride(undefined);
+                          toast.error(_copy('comic.convertFailed', { defaultValue: "Couldn't change the layout" }));
+                        }
+                      }}
+                      className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left"
+                    >
+                      <BookOpen className="w-5 h-5" />
+                      {layout === 'comic' ? _copy('comic.toCarousel', { defaultValue: 'Show as carousel' }) : _copy('comic.toComic', { defaultValue: 'Make it a comic' })}
+                    </button>
+                  )}
+                  {/* Boost. Offered to every owner rather than only to badge holders:
+                      the sheet explains what a badge buys and links to staking, which is
+                      worth more than hiding the row from the people who have not staked. */}
+                  <button
+                    onClick={() => { setShowOptionsDrawer(false); setTimeout(() => setShowBoostModal(true), 300); }}
+                    disabled={!postTokenId}
+                    className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left disabled:opacity-40"
+                  >
+                    <ThemedIcon icon="superpowers" alt="" className="w-5 h-5 object-contain" /> {t('postOptions.boostPost')}
+                  </button>
+                  <button
+                    onClick={() => { setShowOptionsDrawer(false); setTimeout(() => setShowDeleteModal(true), 300); }}
+                    className="flex items-center gap-3 px-4 py-3 text-red-400 hover:bg-white/10 rounded-xl transition-colors text-left"
+                  >
+                    <Trash2 className="w-5 h-5" /> {t('postOptions.deletePost')}
+                  </button>
+                  <button
+                    onClick={async () => {
+                      const next: TokenVisibility = visibility === 'public' ? 'private' : 'public';
+                      try {
+                        await updateTokenVisibility(post.id, next);
+                        setVisibility(next);
+                        toast.success(next === 'private' ? _copy("copy.bc3aabd76a18", { defaultValue: "Post set to private" }) : _copy("copy.30a9e349befb", { defaultValue: "Post set to public" }));
+                      } catch { toast.error(_copy("copy.67ca6fcb8233", { defaultValue: "Failed to update visibility" })); }
+                    }}
+                    className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left"
+                  >
+                    {visibility === 'public' ? <EyeOff className="w-5 h-5" /> : <Globe className="w-5 h-5" />}
+                    {visibility === 'public' ? _copy("copy.ffab73178509", { defaultValue: "Make Private" }) : _copy("copy.24139936d627", { defaultValue: "Make Public" })}
+                  </button>
+                </>
+              )}
+            </div>
+          </DrawerContent>
+        </Drawer>
+      </div>
+    </div>
+  );
+
+  return (
+    <div
+      ref={viewRef}
+      data-image-card
+      data-stats-token={post.id}
+      onClick={handleCardClick}
+      onContextMenu={onPostContextMenu}
+      onPointerDownCapture={warmPostPage}
+      className={isImmersive ? 'overflow-hidden isolate' : 'overflow-visible cursor-pointer isolate'}
+    >
+      {/* Header with AI and menu buttons. Immersive draws it under the image. */}
+      {!isImmersive && headerRow}
+
+      {/* Image Carousel - wrapped to prevent tab switching on swipe */}
+      <div data-image-media className="relative">
+        {/* Mature warning sits outermost: revealing it falls through to
+            whatever gate the post actually has (PPV, holdings), rather than
+            replacing it. */}
+        {contentWarning.hidden ? (
+          <ContentWarningGate text={contentWarning.text} preview={images[0]} onReveal={contentWarning.reveal} className={isImmersive ? 'rounded-none' : undefined} />
+        ) : matureGate.isGated ? (
+          <MatureContentGate preview={images[0]} onReveal={matureGate.reveal} />
+        ) : isComboLocked ? (
+          <>
+            {/* Combo PPV + Holdings Locked: blurred image with dual icons */}
+            <div data-media-full className={cn('relative overflow-hidden', isImmersive ? 'rounded-none' : 'rounded-2xl')}>
+              <img
+                src={images[0]}
+                alt=""
+                className="w-full object-cover blur-lg"
+                style={{ maxHeight: FEED_IMAGE_CAP }}
+                loading={aboveFold ? 'eager' : 'lazy'}
+                fetchPriority={aboveFold ? 'high' : 'auto'}
+                decoding={aboveFold ? 'sync' : 'async'}
+              />
+              <div 
+                data-gate-overlay
+                data-keep-dark
+                className="absolute inset-0 flex flex-col items-center justify-center bg-black/30 cursor-pointer"
+                onClick={(e) => { e.stopPropagation(); setShowPPVDrawer(true); }}
+                onTouchStart={(e) => { (e.currentTarget as any)._touchStart = { x: e.touches[0].clientX, y: e.touches[0].clientY }; }}
+                onTouchEnd={(e) => {
+                  e.stopPropagation();
+                  const start = (e.currentTarget as any)._touchStart;
+                  if (!start) return;
+                  const touch = e.changedTouches[0];
+                  if (Math.abs(touch.clientX - start.x) < 10 && Math.abs(touch.clientY - start.y) < 10) { e.preventDefault(); setShowPPVDrawer(true); }
+                }}
+              >
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-14 h-14 rounded-2xl bg-black/40 backdrop-blur-[24px] backdrop-saturate-[180%] flex items-center justify-center border border-white/10">
+                    <Ticket className="h-6 w-6 text-white" />
+                  </div>
+                  <div className="w-14 h-14 rounded-2xl bg-black/40 backdrop-blur-[24px] backdrop-saturate-[180%] flex items-center justify-center border border-white/10">
+                    <Lock className="h-6 w-6 text-white" />
+                  </div>
+                </div>
+                <p className="text-white font-semibold text-sm mb-1">{_copy("copy.0249799121f4", { defaultValue: "Unlock for " })}<DhbAmount amount={formatCompact(Number(post.ppvPrice))} currency={post.ppvCurrency} />
+                </p>
+                <p className="text-white/70 text-xs">{_copy("copy.5ec168a82232", { defaultValue: "Must be holding " })}<DhbAmount amount={formatCompact(Number(post.lockedPrice))} currency={post.lockedCurrency} />
+                </p>
+              </div>
+            </div>
+          </>
+        ) : isPPV ? (
+          <>
+            {/* PPV only: blurred image with ticket overlay */}
+            <div data-media-full className={cn('relative overflow-hidden', isImmersive ? 'rounded-none' : 'rounded-2xl')}>
+              <img
+                src={images[0]}
+                alt=""
+                className="w-full object-cover blur-lg"
+                style={{ maxHeight: FEED_IMAGE_CAP }}
+                loading={aboveFold ? 'eager' : 'lazy'}
+                fetchPriority={aboveFold ? 'high' : 'auto'}
+                decoding={aboveFold ? 'sync' : 'async'}
+              />
+              <div 
+                data-gate-overlay
+                data-keep-dark
+                className="absolute inset-0 flex flex-col items-center justify-center bg-black/30 cursor-pointer"
+                onClick={(e) => { e.stopPropagation(); setShowPPVDrawer(true); }}
+                onTouchStart={(e) => { (e.currentTarget as any)._touchStart = { x: e.touches[0].clientX, y: e.touches[0].clientY }; }}
+                onTouchEnd={(e) => {
+                  e.stopPropagation();
+                  const start = (e.currentTarget as any)._touchStart;
+                  if (!start) return;
+                  const touch = e.changedTouches[0];
+                  if (Math.abs(touch.clientX - start.x) < 10 && Math.abs(touch.clientY - start.y) < 10) { e.preventDefault(); setShowPPVDrawer(true); }
+                }}
+              >
+                <div data-keep-dark className="w-16 h-16 rounded-2xl bg-black/40 backdrop-blur-[24px] backdrop-saturate-[180%] flex items-center justify-center border border-white/10 mb-3">
+                  <Ticket className="h-7 w-7 text-white" />
+                </div>
+                <p className="text-white font-semibold text-sm mb-1">{_copy("copy.48e072480fc5", { defaultValue: "Pay-Per-View Content" })}</p>
+                <p className="text-white/70 text-xs">{_copy("copy.f298ff07e69b", { defaultValue: "Unlock for {{value1}} {{value2}}", value1: formatCompact(Number(post.ppvPrice)), value2: ppvTokenLabel(post.ppvCurrency || 'DHB') })}
+                </p>
+                
+              </div>
+            </div>
+          </>
+        ) : isSubGated ? (
+          <>
+            {/* Subscriber gated: same blur, different ask. Ordered above the
+                holdings branch because a post carrying both is more likely to
+                be a creator's subscriber post than a token play. */}
+            <div data-media-full className={cn('relative overflow-hidden', isImmersive ? 'rounded-none' : 'rounded-2xl')}>
+              <img
+                src={images[0]}
+                alt=""
+                className="w-full object-cover blur-lg"
+                style={{ maxHeight: FEED_IMAGE_CAP }}
+                loading={aboveFold ? 'eager' : 'lazy'}
+                fetchPriority={aboveFold ? 'high' : 'auto'}
+                decoding={aboveFold ? 'sync' : 'async'}
+              />
+              <div
+                data-gate-overlay
+                data-keep-dark
+                className="absolute inset-0 flex flex-col items-center justify-center bg-black/30 cursor-pointer"
+                onClick={(e) => { e.stopPropagation(); setShowSubDrawer(true); }}
+                onTouchStart={(e) => { (e.currentTarget as any)._touchStart = { x: e.touches[0].clientX, y: e.touches[0].clientY }; }}
+                onTouchEnd={(e) => {
+                  e.stopPropagation();
+                  const start = (e.currentTarget as any)._touchStart;
+                  if (!start) return;
+                  const touch = e.changedTouches[0];
+                  if (Math.abs(touch.clientX - start.x) < 10 && Math.abs(touch.clientY - start.y) < 10) { e.preventDefault(); setShowSubDrawer(true); }
+                }}
+              >
+                <div data-keep-dark className="w-16 h-16 rounded-2xl bg-black/40 backdrop-blur-[24px] backdrop-saturate-[180%] flex items-center justify-center border border-white/10 mb-3">
+                  <Star className="h-7 w-7 text-white" />
+                </div>
+                <p className="text-white font-semibold text-sm mb-1">{_copy("copy.109ddfc1cc4a", { defaultValue: "Subscribers only" })}</p>
+                <p className="text-white/70 text-xs">
+                  {cheapestQuote ? (
+                    <SubscribeFromPrice quote={cheapestQuote} />
+                  ) : (
+                    _copy("copy.855f365abafc", { defaultValue: "Subscribe to {{value1}}", value1: post.username })
+                  )}
+                </p>
+              </div>
+            </div>
+          </>
+        ) : isLocked ? (
+          <>
+            {/* Holdings Locked: blurred image with lock icon overlay */}
+            <div data-media-full className={cn('relative overflow-hidden', isImmersive ? 'rounded-none' : 'rounded-2xl')}>
+              <img
+                src={images[0]}
+                alt=""
+                className="w-full object-cover blur-lg"
+                style={{ maxHeight: FEED_IMAGE_CAP }}
+                loading={aboveFold ? 'eager' : 'lazy'}
+                fetchPriority={aboveFold ? 'high' : 'auto'}
+                decoding={aboveFold ? 'sync' : 'async'}
+              />
+              <div
+                data-gate-overlay
+                data-keep-dark
+                className="absolute inset-0 flex flex-col items-center justify-center bg-black/30 cursor-pointer"
+                onClick={(e) => { e.stopPropagation(); setShowLockedDrawer(true); }}
+                onTouchStart={(e) => { (e.currentTarget as any)._touchStart = { x: e.touches[0].clientX, y: e.touches[0].clientY }; }}
+                onTouchEnd={(e) => {
+                  e.stopPropagation();
+                  const start = (e.currentTarget as any)._touchStart;
+                  if (!start) return;
+                  const touch = e.changedTouches[0];
+                  if (Math.abs(touch.clientX - start.x) < 10 && Math.abs(touch.clientY - start.y) < 10) { e.preventDefault(); setShowLockedDrawer(true); }
+                }}
+              >
+                <div data-keep-dark className="w-16 h-16 rounded-2xl bg-black/40 backdrop-blur-[24px] backdrop-saturate-[180%] flex items-center justify-center border border-white/10 mb-3">
+                  <Lock className="h-7 w-7 text-white" />
+                </div>
+                <p className="text-white font-semibold text-sm mb-1">{_copy("copy.490f4babbf34", { defaultValue: "Holdings Required" })}</p>
+                <p className="text-white/70 text-xs">{_copy("copy.5ec168a82232", { defaultValue: "Must be holding " })}<DhbAmount amount={formatCompact(Number(post.lockedPrice))} currency={post.lockedCurrency} />
+                </p>
+              </div>
+            </div>
+          </>
+        ) : (() => {
+          if (layout === 'comic' && images.length > 0) {
+            const onPostPage = postPage || isImmersive || dockedOnPostPage;
+            return (
+              <Suspense fallback={<div style={{ aspectRatio: '4 / 5' }} />}>
+                <ComicDeckLazy
+                  onIndexChange={setActiveImageIndex}
+                  images={images}
+                  captions={post.mediaCaptions}
+                  border={post.comicBorder}
+                  descriptions={post.mediaDescriptions}
+                  title={post.title}
+                  aboveFold={aboveFold}
+                  full={onPostPage}
+                  onOpen={onPostPage ? undefined : openPost}
+                />
+              </Suspense>
+            );
+          }
+          const carousel = (
+            <ImageCarousel
+              images={images}
+              descriptions={post.mediaDescriptions}
+              imageTags={imageTags}
+              onImageClick={handleImageClick}
+              onIndexChange={setActiveImageIndex}
+              aboveFold={aboveFold}
+              postId={post.id}
+              immersive={isImmersive}
+              overlay={fullscreenOpen || soundtrackOpen ? undefined : soundtrackControl}
+              soundPlaying={soundtrack.playing && !fullscreenOpen}
+              wide={widePhoto}
+              railPanel={widePhoto === 'rails' ? (
+                <WideVideoPanel
+                  video={{ id: post.id, title: post.title, description: post.description, commentCount: post.comments, creatorId: post.creatorId, channel: post.username, creatorUsername: post.username } as unknown as VideoItem}
+                  walletAddress={walletAddress}
+                  onLogin={openLoginModal}
+                  isOwnPost={isOwnPost}
+                  hideCaption={contentWarning.hidden}
+                  title={railTitle}
+                  body={railDescription ? (
+                    <FeedDescription
+                      postId={post.id}
+                      onOpen={openPost}
+                      disabled={matureGate.isGated || isPPV || isW2E || isLocked || isSubGated}
+                      description={railDescription}
+                      hideAssetCards={post.hideAssetCards}
+                      hiddenLinkPreviews={post.hiddenLinkPreviews}
+                    />
+                  ) : null}
+                  translate={translateControl}
+                  onOpenComments={() => {
+                    if (onOpenComments) { onOpenComments(); return; }
+                    setCommentsInitialTab(undefined);
+                    setShowComments(true);
+                  }}
+                />
+              ) : undefined}
+            />
+          );
+          // Only a gallery keeps sideways swipes; a single photo lets the
+          // Home tab swipe through.
+          return images.length > 1 ? <SwipeableCarousel>{carousel}</SwipeableCarousel> : carousel;
+        })()}
+
+
+        {/* Content Type Badges - Bounty only (PPV/Lock are shown via centered overlay) */}
+        {hasBadges && (
+          /* Immersive: the post page's back button owns the top-left corner. */
+          <div className={cn('absolute z-10 flex items-center gap-1.5', stage ? 'top-[58px] left-2.5' : isImmersive ? 'top-2 left-12' : 'top-2 left-2')}>
+            {/* Bounty Badge */}
+            {isW2E && (
+              <button 
+                className="flex items-center gap-1 bg-black/40 backdrop-blur-[24px] backdrop-saturate-[180%] px-2 py-1 rounded-lg border border-white/10 hover:bg-black/60 transition-colors"
+                onClick={(e) => { e.stopPropagation(); setShowBountyDrawer(true); }}
+              >
+                <Gift className="w-3 h-3 text-white" />
+                <span className="text-white text-xs font-medium">
+                  {post.bountyAmount && post.bountyAmount > 0 
+                    ? <DhbAmount amount={formatCompact(post.bountyAmount)} currency={post.bountyCurrency} />
+                    : _copy("copy.0abbc4ecb2b0", { defaultValue: "Bounty" })}
+                </span>
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+
+      {soundtrackOpen && !fullscreenOpen && (
+        <div className={cn('mt-2', isImmersive && 'px-3')} onClick={(event) => event.stopPropagation()}>
+          <SoundtrackControl title={post.soundtrackTitle} creator={post.soundtrackCreator} url={post.soundtrackUrl} {...soundtrack} layout="bar" />
+        </div>
+      )}
+
+      {/* Info & Actions. Immersive media runs edge to edge, so the copy under it
+          brings its own gutter — the same px-3 the immersive video card uses. */}
+      <div data-card-info className={cn('pt-3 space-y-2', isImmersive && 'px-3')}>
+        {isImmersive && headerRow}
+        {/* Title & Description (in the rails panel when rails are on) */}
+        {!contentWarning.hidden && !widePhotoRails && (
+        <FeedDescription 
+          postId={post.id}
+          onOpen={openPost}
+          disabled={matureGate.isGated || isPPV || isW2E || isLocked || isSubGated}
+          title={post.title} 
+          description={post.description}
+          hideAssetCards={post.hideAssetCards}
+          hiddenLinkPreviews={post.hiddenLinkPreviews}
+          isTranslated={isTranslated}
+          translatedText={translatedText}
+          stage={!!stage}
+        />
+        )}
+
+        {/* Quoted post embed (Twitter-style) */}
+        {post.isQuotePost && post.quotedPost && (
+          <QuotedPostEmbed quotedPost={post.quotedPost} quoteTokenId={post.id} className="mt-2" />
+        )}
+        {post.isQuotePost && post.quoteRevoked && <RemovedQuoteNotice className="mt-2" />}
+        
+        {/* Metadata: timestamp and views */}
+        <PostMetadata 
+          className="!mt-3"
+          timestamp={post.createdAt || post.timeAgo}
+          viewCount={post.views}
+          tokenId={post.id}
+          isOwnPost={isOwnPost}
+          // With Glass rails the Translate button sits in the panel, under the caption it translates.
+          translateControl={widePhotoRails ? undefined : translateControl}
+        />
+
+        {/* A photo post can carry a poll too, under the caption as on text posts.
+            On the post page the page itself places it. */}
+        {!postPage && !isLocked && !isSubGated && !isPPV && parseInt(post.id, 10) > 0 && <PollCard tokenId={parseInt(post.id, 10)} />}
+        {!postPage && !isLocked && !isSubGated && !isPPV && post.hasQuiz && parseInt(post.id, 10) > 0 && <LazyQuizCard tokenId={parseInt(post.id, 10)} />}
+
+        {/* The creator's Shop board — affiliate links, opened in place. */}
+        <ShopBoardLazy tokenId={post.id} links={post.shopLinks} listingCount={post.shopListingCount} variant="inline" />
+
+        <ActionBar
+          postId={post.id}
+          articleSlug={post.articleSlug}
+          newPostSlug={post.status === 'signed' ? post.newPostId ?? null : null}
+          tokenId={parseInt(post.id, 10) || undefined}
+          isOwnPost={!!isOwnPost}
+          quotePolicy={post.quotePolicy}
+          visibility={post.visibility}
+          stage={stage}
+          utilityDesktopAnchor
+          className="p-0"
+          // While fullscreen is open its own action bar owns double-tap-to-like;
+          // mute this one so a single double-tap doesn't cast two votes.
+          enableDoubleTapLike={!fullscreenOpen}
+          onComment={() => {
+            if (onOpenComments) {
+              onOpenComments();
+              return;
+            }
+            setCommentsInitialTab(undefined);
+            setShowComments(prev => !prev);
+          }} 
+          onRepost={handleRepost}
+          onQuote={handleQuote}
+          isLiked={post.isLiked}
+          isDisliked={post.isDisliked}
+          myReaction={post.myReaction}
+          reactionCounts={post.reactionCounts}
+          likeCount={post.likes}
+          dislikeCount={post.dislikes}
+          commentCount={post.comments}
+          repostCount={post.repostCount}
+          isReposted={post.isReposted}
+          isOptimistic={post.isOptimistic}
+          tipCount={tipCount}
+          onTip={post.creatorPaymentsDisabled ? undefined : () => setShowTipModal(true)}
+          onSeeEngagements={() => {
+            if (onOpenComments) {
+              onOpenComments('reposts');
+              return;
+            }
+            setCommentsInitialTab('reposts');
+            setShowComments(true);
+          }}
+        />
+        
+
+        {/* Comments */}
+        {!onOpenComments && (
+          <CommentsWrapper
+            open={showComments}
+            onOpenChange={setShowComments}
+            tokenId={post.id}
+            initialTab={commentsInitialTab}
+            commentsDisabled={!!(post as { commentsDisabled?: boolean }).commentsDisabled}
+            replyPolicy={post.replyPolicy}
+            forKids={!!post.forKids}
+          />
+        )}
+      </div>
+
+      {/* AI Chat */}
+      <PostAIChatLazy
+        isOpen={showAIChat}
+        onClose={() => setShowAIChat(false)}
+        postContext={{
+          tokenId: post.id,
+          type: 'image',
+          author: post.username,
+          caption: post.description || post.title || post.caption,
+          imageUrl: images[activeImageIndex] || post.image,
+          imageUrls: images.length > 1 ? images : undefined,
+          activeImageIndex: images.length > 1 ? activeImageIndex : undefined,
+        }}
+      />
+
+      {/* Fullscreen Image Viewer */}
+      <FullscreenImageViewerLazy
+        downloadable={canDownloadImage}
+        images={images}
+        soundtrackControl={soundtrackControl && (
+          <SoundtrackControl title={post.soundtrackTitle} creator={post.soundtrackCreator} url={post.soundtrackUrl} {...soundtrack} layout="inline" />
+        )}
+        initialIndex={fullscreenIndex}
+        isOpen={fullscreenOpen}
+        onClose={() => setFullscreenOpen(false)}
+        postId={post.id}
+        author={{
+          name: post.username,
+          avatar: post.avatar,
+          handle: post.creatorUsername,
+          creatorId: post.creatorId,
+          verified: post.verified,
+          caption: isTranslated && translatedText ? translatedText : descriptionText,
+        }}
+        actions={{
+          isLiked: post.isLiked,
+          isDisliked: post.isDisliked,
+          myReaction: post.myReaction,
+          reactionCounts: post.reactionCounts,
+          likeCount: post.likes,
+          dislikeCount: post.dislikes,
+          commentCount: post.comments,
+          repostCount: post.repostCount,
+          isReposted: post.isReposted,
+          tipCount,
+          isOwnPost: !!isOwnPost,
+          tokenId: parseInt(post.id, 10) || undefined,
+          // This bar owns double-tap-to-like while fullscreen is open.
+          enableDoubleTapLike: fullscreenOpen,
+          // Comment/tip need drawers (z-[100]) that would sit behind the viewer —
+          // close fullscreen first, then open them on the card.
+          onComment: () => {
+            setFullscreenOpen(false);
+            setCommentsInitialTab(undefined);
+            setShowComments(true);
+          },
+          onRepost: handleRepost,
+          onTip: () => {
+            setFullscreenOpen(false);
+            setShowTipModal(true);
+          },
+        }}
+      />
+
+      {/* Image Translation Sheet */}
+      <ImageTranslationSheet
+        isOpen={showTranslationSheet}
+        onClose={handleCloseTranslation}
+        isLoading={isTranslating}
+        error={translationError}
+        result={translationResult}
+      />
+
+      {/* Report Modal */}
+      <ReportModal
+        open={showReportModal}
+        onOpenChange={setShowReportModal}
+        tokenId={post.id}
+        contentType="image"
+      />
+
+      {/* Delete Post Modal */}
+      <DeletePostModal
+        open={showDeleteModal}
+        onOpenChange={setShowDeleteModal}
+        tokenId={post.id}
+        onSuccess={() => {
+          queryClient.invalidateQueries({ queryKey: ['unified-feed'] });
+          queryClient.invalidateQueries({ queryKey: ['dehub-feed'] });
+        }}
+      />
+
+      {/* Boost Modal — mounted only while open, so the chunk is fetched on the
+          tap that opens it rather than with the feed. */}
+      {showBoostModal && (
+        <Suspense fallback={null}>
+          <BoostModal
+            open={showBoostModal}
+            onOpenChange={setShowBoostModal}
+            tokenId={postTokenId}
+            postTitle={post.title ?? post.caption ?? ''}
+          />
+        </Suspense>
+      )}
+
+      {/* Edit Post Modal — mounted on first open and kept, so the drawer's
+          close animation still runs. */}
+      {editModalMounted && (
+        <Suspense fallback={null}>
+          <EditPostModal
+            open={showEditModal}
+            onOpenChange={setShowEditModal}
+            tokenId={post.id}
+            currentTitle={post.title ?? ''}
+            currentDescription={editDescription}
+            currentCategories={post.categories ?? []}
+            currentContentRating={post.contentRating}
+            currentSpoilerText={post.spoilerText}
+            currentQuotePolicy={post.quotePolicy}
+            currentReplyPolicy={post.replyPolicy}
+            currentVisibility={(post as any).justMe ? 'self' : (post as any).visibility}
+            currentForKids={post.forKids}
+            currentShopLinks={post.shopLinks}
+            onSuccess={(edited) => {
+              applyOptimisticEdit(queryClient, post.id, edited);
+            }}
+          />
+        </Suspense>
+      )}
+
+      {/* Tip Modal */}
+      <TipModal
+        open={showTipModal}
+        onOpenChange={setShowTipModal}
+        creatorAddress={post.creatorId}
+        creatorName={post.username}
+        tokenId={post.id}
+      />
+
+      {/* PPV Drawer - controlled, rendered at root level for mobile compatibility */}
+      {(isPPV || isComboLocked) && (
+        <Drawer open={showPPVDrawer} onOpenChange={setShowPPVDrawer}>
+          <PPVDrawerContent open={showPPVDrawer}
+            tokenId={post.id}
+            price={Number(post.ppvPrice ?? 0)}
+            currency={post.ppvCurrency || 'DHB'}
+            creatorAddress={post.creatorId}
+            chainId={post.chainId}
+            onClose={() => setShowPPVDrawer(false)}
+            onUnlocked={() => {
+              setLocallyUnlocked(true);
+              markTokenUnlocked(post.id);
+              queryClient.invalidateQueries({ queryKey: ['unified-feed'] });
+              queryClient.invalidateQueries({ queryKey: ['dehub-feed'] });
+              queryClient.invalidateQueries({ queryKey: ['nft-info', post.id] });
+            }}
+            formatCompact={formatCompact}
+          />
+        </Drawer>
+      )}
+
+      {/* Bounty Drawer - controlled, rendered at root level for mobile compatibility */}
+      {isW2E && (
+        <Drawer open={showBountyDrawer} onOpenChange={setShowBountyDrawer}>
+          <DrawerContent scrollable column glass className="px-4 pb-6">
+            <DrawerHeader className="pb-3 relative">
+              <DrawerTitle className="text-white text-lg flex items-center gap-2">
+                <Gift className="w-5 h-5 text-white" />
+                {t('drawers.bountyTitle')}
+              </DrawerTitle>
+              <button onClick={() => setShowBountyDrawer(false)} className="absolute top-3 right-0 p-1.5 rounded-lg bg-white/[0.06] hover:bg-white/[0.12] transition-colors">
+                <X className="w-4 h-4 text-zinc-400" />
+              </button>
+            </DrawerHeader>
+            <div className="flex flex-col gap-4">
+              <div className="space-y-3">
+                {post.bountyViews && post.bountyViews > 0 && (
+                  <div className="flex items-center gap-3 px-4 py-3 bg-white/5 rounded-xl border border-white/10">
+                    <div className="w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center">
+                      <Eye className="w-4 h-4 text-white" />
+                    </div>
+                    <div>
+                      <p className="text-white text-sm font-medium">{t('drawers.firstViews', { count: post.bountyViews })}</p>
+                      <p className="text-zinc-400 text-xs">{t('drawers.rewardedWatching')}</p>
+                    </div>
+                  </div>
+                )}
+                {post.bountyComments && post.bountyComments > 0 && (
+                  <div className="flex items-center gap-3 px-4 py-3 bg-white/5 rounded-xl border border-white/10">
+                    <div className="w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center">
+                      <MessageCircle className="w-4 h-4 text-white" />
+                    </div>
+                    <div>
+                      <p className="text-white text-sm font-medium">{t('drawers.firstComments', { count: post.bountyComments })}</p>
+                      <p className="text-zinc-400 text-xs">{t('drawers.rewardedEngaging')}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+              {post.bountyAmount && post.bountyAmount > 0 && (
+                <div className="flex items-center justify-between px-4 py-4 bg-white/5 rounded-xl border border-white/10">
+                  <span className="text-white text-sm">{t('drawers.rewardPerUser')}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-white text-lg font-bold"><DhbAmount amount={post.bountyAmount} currency={post.bountyCurrency} /></span>
+                  </div>
+                </div>
+              )}
+              <p className="text-center text-white/60 text-sm">
+                {t('drawers.bountyDescription')}
+              </p>
+              <Suspense fallback={null}>
+                <BountyClaimActions tokenId={post.id} open={showBountyDrawer} />
+              </Suspense>
+            </div>
+          </DrawerContent>
+        </Drawer>
+      )}
+
+      {/* Subscriber sheet — a different gate to the holdings one below. */}
+      {isSubGated && (
+        <Drawer open={showSubDrawer} onOpenChange={setShowSubDrawer}>
+          <DrawerContent scrollable column glass className="px-4 pb-6">
+            <Suspense fallback={<div className="py-10 text-center text-white/60 text-sm">{_copy("copy.ba3bbbe10d8b", { defaultValue: "Loading…" })}</div>}>
+              <SubscriberGateDrawer
+                creatorAddress={post.creatorId || ""}
+                creatorName={post.username}
+                previewPlans={post.subscriberPlans}
+                onSubscribed={() => {
+                  setLocallySubscribed(true);
+                  setShowSubDrawer(false);
+                  queryClient.invalidateQueries({ queryKey: ["unified-feed"] });
+                  queryClient.invalidateQueries({ queryKey: ["dehub-feed"] });
+                }}
+              />
+            </Suspense>
+          </DrawerContent>
+        </Drawer>
+      )}
+
+      {/* Locked Drawer - controlled, rendered at root level for mobile compatibility */}
+      {isLocked && (
+        <Drawer open={showLockedDrawer} onOpenChange={setShowLockedDrawer}>
+          <DrawerContent scrollable column glass className="px-4 pb-6">
+            <DrawerHeader className="pb-3 relative">
+              <DrawerTitle className="text-white text-lg flex items-center gap-2">
+                <Lock className="w-5 h-5 text-white" />
+                {t('drawers.gatedTitle')}
+              </DrawerTitle>
+              <button onClick={() => setShowLockedDrawer(false)} className="absolute top-3 right-0 p-1.5 rounded-lg bg-white/[0.06] hover:bg-white/[0.12] transition-colors">
+                <X className="w-4 h-4 text-zinc-400" />
+              </button>
+            </DrawerHeader>
+            <div className="flex flex-col gap-4">
+              {post.lockedPrice && post.lockedPrice > 0 && (
+                <div className="flex items-center justify-between px-4 py-4 bg-white/5 rounded-xl border border-white/10">
+                  <span className="text-white text-sm">{t('drawers.mustHoldToView')}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-white text-lg font-bold"><DhbAmount amount={formatCompact(post.lockedPrice)} currency={post.lockedCurrency} /></span>
+                  </div>
+                </div>
+              )}
+              <p className="text-center text-white/60 text-sm">
+                {t('drawers.gatedDescription')}
+              </p>
+              {post.lockedPrice && post.lockedPrice > 0 && (
+                <VerifyUnlockButton
+                  requiredAmount={post.lockedPrice}
+                  currency={post.lockedCurrency || 'DHB'}
+                  tokenAddress={post.lockedTokenAddress}
+                  chainId={post.lockedChainId}
+                  onUnlocked={() => {
+                    setShowLockedDrawer(false);
+                    setLocallyUnlocked(true);
+                    markTokenUnlocked(post.id);
+                    queryClient.invalidateQueries({ queryKey: ['unified-feed'] });
+                    queryClient.invalidateQueries({ queryKey: ['dehub-feed'] });
+                    queryClient.invalidateQueries({ queryKey: ['nft-info', post.id] });
+                  }}
+                />
+              )}
+            </div>
+          </DrawerContent>
+        </Drawer>
+      )}
+
+      {/* Quote Post Modal */}
+      <QuotePostModalLazy
+        open={showQuoteModal}
+        onOpenChange={setShowQuoteModal}
+        quotedPost={postAsNFT as any}
+      />
+
+      {showTagger && postTokenId && (
+        <Suspense fallback={null}>
+          <PhotoTagger
+            open={showTagger}
+            onOpenChange={setShowTagger}
+            images={images}
+            value={imageTags}
+            onDone={async (tags) => {
+              try {
+                const { imageTags: saved } = await savePhotoTags(Number(postTokenId), tags);
+                setTagsOverride(saved);
+                toast.success(t('photoTags.saved', { defaultValue: 'Tags saved' }));
+              } catch (err: any) {
+                toast.error(err?.message || t('photoTags.saveFailed', { defaultValue: 'Could not save tags' }));
+                throw err;
+              }
+            }}
+          />
+        </Suspense>
+      )}
+
+      {/* Poll Creator Drawer */}
+      <Drawer open={showPollCreator} onOpenChange={setShowPollCreator}>
+        <DrawerContent scrollable column glass className="px-4 pb-6">
+          <DrawerHeader className="pb-2">
+            <DrawerTitle className="text-white text-lg">{_copy("copy.b2b9c2e81c4c", { defaultValue: "Create Poll" })}</DrawerTitle>
+          </DrawerHeader>
+          <div className="flex flex-col gap-3">
+            <input
+              className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white text-sm placeholder-zinc-500 outline-none"
+              placeholder={_copy("copy.d6a2035c7300", { defaultValue: "Ask a question…" })}
+              value={pollQuestion}
+              onChange={e => setPollQuestion(e.target.value)}
+            />
+            {pollOptions.map((opt, i) => (
+              <div key={i} className="flex items-center gap-2">
+                <input
+                  className="flex-1 bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white text-sm placeholder-zinc-500 outline-none"
+                  placeholder={_copy("copy.c553678c42d5", { defaultValue: "Option {{value1}}", value1: i + 1 })}
+                  value={opt}
+                  onChange={e => { const next = [...pollOptions]; next[i] = e.target.value; setPollOptions(next); }}
+                />
+                {pollOptions.length > 2 && (
+                  <button onClick={() => setPollOptions(pollOptions.filter((_, j) => j !== i))} className="text-zinc-500 hover:text-white">
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+            ))}
+            {pollOptions.length < 4 && (
+              <button onClick={() => setPollOptions([...pollOptions, ''])} className="flex items-center gap-2 text-sm text-zinc-400 hover:text-white">
+                <Plus className="w-4 h-4" />{_copy("copy.d66886c7e738", { defaultValue: " Add option" })}</button>
+            )}
+            <label className="flex items-center gap-2 text-sm text-zinc-300 cursor-pointer">
+              <input type="checkbox" checked={pollMultiple} onChange={e => setPollMultiple(e.target.checked)} className="accent-white" />{_copy("copy.3c1cc071d396", { defaultValue: "Allow multiple choices" })}</label>
+            <input
+              type="datetime-local"
+              className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white text-sm outline-none"
+              value={pollExpiry}
+              onChange={e => setPollExpiry(e.target.value)}
+            />
+            <button
+              className="w-full py-2.5 rounded-xl bg-white text-black text-sm font-semibold disabled:opacity-50"
+              disabled={!pollQuestion.trim() || pollOptions.filter(o => o.trim()).length < 2 || createPollMutation.isPending}
+              onClick={async () => {
+                const tokenIdNum = parseInt(post.id, 10);
+                if (!tokenIdNum) return;
+                await createPollMutation.mutateAsync({
+                  tokenId: tokenIdNum,
+                  question: pollQuestion.trim(),
+                  options: pollOptions.filter(o => o.trim()),
+                  isMultipleChoice: pollMultiple,
+                  expiresAt: pollExpiry || undefined,
+                });
+                setShowPollCreator(false);
+                setPollQuestion.complete(pollQuestion, '');
+                setPollOptions(['', '']);
+                setPollMultiple(false);
+                setPollExpiry.complete(pollExpiry, '');
+                queryClient.invalidateQueries({ queryKey: ['polls', tokenIdNum] });
+              }}
+            >
+              {createPollMutation.isPending ? _copy("copy.c79ed9492e3c", { defaultValue: "Creating…" }) : _copy("copy.b2b9c2e81c4c", { defaultValue: "Create Poll" })}
+            </button>
+          </div>
+        </DrawerContent>
+      </Drawer>
+    </div>
+  );
+});
+
+/** Every post passes the viewer's keyword filters first — see KeywordFilterGate. */
+export const ImageCard = memo(function FilteredImageCard(props: ImageCardProps) {
+  const { post } = props;
+  return (
+    <KeywordFilterGate
+      texts={[post.title, post.description, post.caption, post.spoilerText, ...(post.mediaDescriptions ?? [])]}
+      authorId={post.creatorId}
+    >
+      <ImageCardBody {...props} />
+    </KeywordFilterGate>
+  );
+});

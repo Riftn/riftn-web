@@ -1,0 +1,418 @@
+import { translateCopy as _translateCopy } from '@/i18n/copy';
+import { useTranslation as _useCopy } from 'react-i18next';
+/**
+ * Prize Draws landing — /raffle
+ * =============================
+ * The successor page for the retired dehub.net/prize-draw and
+ * raffle.dehub.net, both of which the SEO worker now 301s here. It is a
+ * marketing landing page in the /depin idiom: standalone chrome, no app
+ * dependencies, no wallet, so it renders for a cold crawler as happily as for
+ * a signed-in user.
+ *
+ * Nothing on this page reads live draw state on purpose. A landing page that
+ * promises "1 draw live now" and renders a zero is worse than one that
+ * explains the mechanism and points at the app, and the app is the only place
+ * that actually knows.
+ */
+import type { ReactNode } from 'react';
+import { motion, useReducedMotion } from 'framer-motion';
+import { ArrowDown, ArrowRight, Boxes, Dice5, ScrollText, Ticket, Timer } from "lucide-react";
+import Coins from "@/components/ui/cut-icons/coins";
+import Gamepad2 from "@/components/ui/cut-icons/arcade";
+import PenLine from "@/components/ui/cut-icons/edit";
+import ShieldCheck from "@/components/ui/cut-icons/security";
+import Trophy from "@/components/ui/cut-icons/leaderboard";
+
+import Mic from "@/components/ui/cut-icons/mic";
+
+import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { SEOHead } from '@/components/SEOHead';
+import riftnWordmark from '@/assets/riftn-wordmark-flat-white.png';
+
+const pageDescription = () =>
+  _translateCopy("copy.4883563fdbe1", { defaultValue: "Riftn prize draws hand out tokens, hardware and NFT prizes to the community. Entries are earned by taking part, and every winner is drawn on-chain." });
+
+function Reveal({
+  children,
+  className,
+  delay = 0,
+}: {
+  children: ReactNode;
+  className?: string;
+  delay?: number;
+}) {
+  const reduceMotion = useReducedMotion();
+
+  return (
+    <motion.div
+      className={className}
+      initial={reduceMotion ? false : { opacity: 0, y: 24 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.2 }}
+      transition={{ duration: 0.6, delay, ease: [0.16, 1, 0.3, 1] }}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+function SectionHeading({ title, body }: { title: string; body: string }) {
+  return (
+    <div className="max-w-3xl">
+      <h2 className="text-3xl font-semibold tracking-[-0.04em] text-white sm:text-4xl lg:text-5xl">
+        {title}
+      </h2>
+      <p className="mt-5 max-w-2xl text-base leading-7 text-zinc-400 sm:text-lg">{body}</p>
+    </div>
+  );
+}
+
+const steps = [
+  {
+    icon: ScrollText,
+    get title() { return _translateCopy("copy.9ee0c33ce682", { defaultValue: "A draw is announced" }); },
+    get body() { return _translateCopy("copy.4fe3045bc30f", { defaultValue: "Every draw opens with its prize, its closing time and the exact ways to earn an entry, posted in the app and pinned to the feed." }); },
+  },
+  {
+    icon: Ticket,
+    get title() { return _translateCopy("copy.4421a7fc1a47", { defaultValue: "You collect entries" }); },
+    get body() { return _translateCopy("copy.15e724bd7efe", { defaultValue: "Entries are earned by doing things you already do on Riftn. The announcement lists which actions count for that draw and how many entries each is worth." }); },
+  },
+  {
+    icon: Dice5,
+    get title() { return _translateCopy("copy.824aa76a3c5b", { defaultValue: "The draw is run" }); },
+    get body() { return _translateCopy("copy.aa706a587eeb", { defaultValue: "At the closing time the entry list is snapshotted and the winning index is drawn from an on-chain source of randomness — not from a spreadsheet." }); },
+  },
+  {
+    icon: Trophy,
+    get title() { return _translateCopy("copy.2bb86501f564", { defaultValue: "The result is published" }); },
+    get body() { return _translateCopy("copy.1f79129ca709", { defaultValue: "The snapshot, the transaction and the winning entry all go up together, so anyone can re-check the result rather than take our word for it." }); },
+  },
+];
+
+const entryRoutes = [
+  { icon: PenLine, get title() { return _translateCopy("copy.2cb38f414419", { defaultValue: "Post and engage" }); }, get body() { return _translateCopy("copy.3cce984f2403", { defaultValue: "Original posts, videos and comments count towards draws that name them." }); } },
+  { icon: Coins, get title() { return _translateCopy("copy.976d2eedb273", { defaultValue: "Stake tokens" }); }, titleKey: 'raffle.stakeTitle', get body() { return _translateCopy("copy.b3eafb80f775", { defaultValue: "An open staking position earns entries for the draws that weight it." }); }, to: '/stake' },
+  { icon: Gamepad2, get title() { return _translateCopy("copy.1fd5bacb3230", { defaultValue: "Play the arcade" }); }, get body() { return _translateCopy("copy.c5e5c4543f00", { defaultValue: "Arcade sessions and leaderboard placings feed draws built around games." }); }, to: '/arcade' },
+  { icon: Mic, get title() { return _translateCopy("copy.6187be8f1d9c", { defaultValue: "Join a stage" }); }, get body() { return _translateCopy("copy.a7bbd0187b6f", { defaultValue: "Turning up to live audio stages counts, whether you speak or listen." }); }, to: '/stages' },
+  { icon: Ticket, get title() { return _translateCopy("copy.8f1e95313a14", { defaultValue: "Buy a ticket" }); }, get body() { return _translateCopy("copy.f1244f375661", { defaultValue: "Some draws also sell a token ticket. Where they do, the price and the per-wallet cap are published up front." }); }, bodyKey: 'raffle.ticketBody' },
+  { icon: Boxes, get title() { return _translateCopy("copy.bcc9000c9751", { defaultValue: "Hold a collectible" }); }, get body() { return _translateCopy("copy.bf6c632a4b3c", { defaultValue: "Selected NFT collections carry standing entries into draws that name them." }); } },
+];
+
+const fairness = [
+  {
+    icon: Timer,
+    get title() { return _translateCopy("copy.4363d1d9deed", { defaultValue: "The list is frozen first" }); },
+    get body() { return _translateCopy("copy.ffd00f323789", { defaultValue: "The entry list is snapshotted at the stated closing time and published before the draw runs. Nothing can be added to it afterwards, including by us." }); },
+  },
+  {
+    icon: Dice5,
+    get title() { return _translateCopy("copy.251de59d8a37", { defaultValue: "Randomness comes from the chain" }); },
+    get body() { return _translateCopy("copy.777c40f2354b", { defaultValue: "The winning index is derived on-chain, so the number that decides the draw exists in a public transaction rather than in an internal tool." }); },
+  },
+  {
+    icon: ShieldCheck,
+    get title() { return _translateCopy("copy.b90da6a8778f", { defaultValue: "The whole result is checkable" }); },
+    get body() { return _translateCopy("copy.630766dc19d2", { defaultValue: "Snapshot, transaction hash and winning entry are published as one set. Re-running the arithmetic from public data has to reach the same winner." }); },
+  },
+];
+
+const faqItems = [
+  {
+    get question() { return _translateCopy("copy.8a7dab8cbe5b", { defaultValue: "Do I have to buy anything to enter a Riftn prize draw?" }); },
+    get answer() { return _translateCopy("copy.62953bc91936", { defaultValue: "No. Every draw carries at least one free entry route, earned by taking part on Riftn. Some draws additionally sell a token ticket, but a ticket is never the only way in." }); },
+    answerKey: 'raffle.faqPurchaseAnswer',
+  },
+  {
+    get question() { return _translateCopy("copy.2b758e52dcd0", { defaultValue: "How do I know the draw was not fixed?" }); },
+    get answer() { return _translateCopy("copy.4e522361ec4f", { defaultValue: "The entry list is snapshotted and published before the draw runs, and the winning index is drawn from an on-chain source of randomness. The snapshot, the transaction and the winning entry are published together so the result can be recomputed by anyone." }); },
+  },
+  {
+    get question() { return _translateCopy("copy.d9998563e1f1", { defaultValue: "How are winners notified?" }); },
+    get answer() { return _translateCopy("copy.1fe16b6365aa", { defaultValue: "Winners are notified in the app and named in the result post. There is no email asking for a payment, a seed phrase or a wallet signature — Riftn will never ask for any of those to release a prize." }); },
+  },
+  {
+    get question() { return _translateCopy("copy.fd85ca1f018e", { defaultValue: "How long do I have to claim?" }); },
+    get answer() { return _translateCopy("copy.05467bd0cc71", { defaultValue: "Fourteen days from the result being published. Token prizes settle to the winner’s Riftn wallet on Base. Physical prizes are arranged directly with the team, and shipping is covered where we can legally ship." }); },
+  },
+  {
+    get question() { return _translateCopy("copy.20a3cfd2ee63", { defaultValue: "Who is eligible?" }); },
+    get answer() { return _translateCopy("copy.a424d0cc4ec7", { defaultValue: "Anyone with a Riftn account who is over 18 and lives somewhere the draw is lawful. Riftn staff, contractors and their households are not eligible, and draws are void where local law prohibits them." }); },
+  },
+  {
+    get question() { return _translateCopy("copy.b58e28adfd7f", { defaultValue: "How often do draws run?" }); },
+    get answer() { return _translateCopy("copy.024625f15255", { defaultValue: "There is no fixed schedule. Draws are tied to launches, milestones and partner campaigns, and each is announced in the app when it opens." }); },
+  },
+];
+
+export default function RafflePage() {
+  const { t: _copy } = _useCopy();
+  const { t } = useTranslation();
+  const reduceMotion = useReducedMotion();
+
+  return (
+    <>
+      <SEOHead
+        title={_copy("copy.61a267af92e3", { defaultValue: "Prize Draws: Win tokens, Hardware and NFTs on Riftn" })}
+        description={pageDescription()}
+        image="https://riftn.com/og/raffle.jpg"
+        url="https://riftn.com/raffle"
+        jsonLd={{
+          '@context': 'https://schema.org',
+          '@graph': [
+            {
+              '@type': 'WebPage',
+              name: _copy("copy.42478a42211c", { defaultValue: "Riftn Prize Draws" }),
+              url: 'https://riftn.com/raffle',
+              description: pageDescription(),
+              isPartOf: {
+                '@type': 'WebSite',
+                name: 'Riftn',
+                url: 'https://riftn.com',
+              },
+            },
+            {
+              '@type': 'FAQPage',
+              mainEntity: faqItems.map((item) => ({
+                '@type': 'Question',
+                name: item.question,
+                acceptedAnswer: {
+                  '@type': 'Answer',
+                  text: item.answer,
+                },
+              })),
+            },
+          ],
+        }}
+      />
+
+      <div data-glass-page className="min-h-[100dvh] overflow-x-clip bg-zinc-950 text-white">
+        <header data-clear-top-bar className="sticky top-0 z-30 border-b border-white/10 bg-zinc-950/85 backdrop-blur-xl">
+          <nav
+            aria-label={_copy("copy.f956d69eeb1f", { defaultValue: "Prize draws navigation" })}
+            className="mx-auto flex h-[72px] max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8"
+          >
+            <Link to="/" aria-label={_copy("copy.73d01ae84196", { defaultValue: "Riftn home" })} className="shrink-0 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70">
+              <img src={riftnWordmark} alt="Riftn" className="h-7 w-auto" />
+            </Link>
+
+            <div className="hidden items-center gap-7 text-sm font-medium text-zinc-400 md:flex">
+              <a href="#how-it-works" className="transition-colors hover:text-white focus-visible:text-white">{_copy("copy.9c870aa6e5e9", { defaultValue: "How it works" })}</a>
+              <a href="#entries" className="transition-colors hover:text-white focus-visible:text-white">{_copy("copy.7cb76b4af12a", { defaultValue: "Entries" })}</a>
+              <a href="#fairness" className="transition-colors hover:text-white focus-visible:text-white">{_copy("copy.6fb6cce430a2", { defaultValue: "Fairness" })}</a>
+              <a href="#faq" className="transition-colors hover:text-white focus-visible:text-white">{_copy("copy.dbc468a14b60", { defaultValue: "FAQ" })}</a>
+            </div>
+
+            <Link
+              to="/"
+              className="whitespace-nowrap rounded-xl border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold text-white backdrop-blur-xl transition hover:border-white/40 hover:bg-white/20 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+            >{_copy("copy.efc85ecfd402", { defaultValue: "Open Riftn" })}</Link>
+          </nav>
+        </header>
+
+        <main>
+          <section className="relative isolate overflow-hidden border-b border-white/10">
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_78%_18%,rgba(255,255,255,0.09),transparent_38%)]" />
+            <div className="relative mx-auto grid min-h-[calc(100dvh-72px)] max-w-7xl items-center gap-10 px-4 py-12 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:px-8 lg:py-16">
+              <motion.div
+                initial={reduceMotion ? false : { opacity: 0, x: -28 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.75, ease: [0.16, 1, 0.3, 1] }}
+                className="relative z-10 max-w-2xl"
+              >
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-400">{_copy("copy.7be7e0c287c7", { defaultValue: "Community prize draws" })}</p>
+                <h1 className="mt-6 max-w-3xl text-5xl font-semibold leading-[0.96] tracking-[-0.055em] text-white sm:text-6xl lg:text-7xl">{_copy("copy.f45afe59e4d8", { defaultValue: "Every draw, settled on-chain." })}</h1>
+                <p className="mt-6 max-w-xl text-base leading-7 text-zinc-300 sm:text-lg">
+                  {t('raffle.heroBody')}
+                </p>
+                <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                  <a
+                    href="#how-it-works"
+                    className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-zinc-100 px-5 py-3 text-sm font-semibold text-zinc-950 transition hover:bg-white active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                  >{_copy("copy.c2113022d81f", { defaultValue: "See how a draw works" })}<ArrowDown aria-hidden="true" className="h-4 w-4" strokeWidth={1.8} />
+                  </a>
+                  <Link
+                    to="/"
+                    className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl border border-white/20 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:border-white/40 hover:bg-white/10 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                  >{_copy("copy.1e1eeb9bc771", { defaultValue: "Find the live draw in the app" })}<ArrowRight aria-hidden="true" className="h-4 w-4" strokeWidth={1.8} />
+                  </Link>
+                </div>
+                <p className="mt-6 max-w-xl text-sm leading-6 text-zinc-500">
+                  {t('raffle.noPurchase')}
+                </p>
+              </motion.div>
+
+              <motion.div
+                initial={reduceMotion ? false : { opacity: 0, scale: 0.96 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.8, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+                className="relative"
+              >
+                <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-6 backdrop-blur-xl sm:p-8">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">{_copy("copy.99310ccb97ff", { defaultValue: "Anatomy of a draw" })}</p>
+                  <dl className="mt-6 space-y-5">
+                    {[
+                      [_copy("copy.0a489d848c5a", { defaultValue: "Prize" }), _copy("copy.faad0a0c8426", { defaultValue: "Stated when the draw opens. Never changed afterwards." })],
+                      [_copy("copy.0974c4de9d07", { defaultValue: "Entry routes" }), _copy("copy.3c14e0a8be68", { defaultValue: "Listed in full, with the weight each one carries." })],
+                      [_copy("copy.43894b0babe9", { defaultValue: "Closing time" }), _copy("copy.ad4c5db4ac02", { defaultValue: "A fixed timestamp, not \"when we get round to it\"." })],
+                      [_copy("copy.6ad27bd4ec33", { defaultValue: "Snapshot" }), _copy("copy.4d35444fabcf", { defaultValue: "Published before the draw is run." })],
+                      [_copy("copy.64afedc44de8", { defaultValue: "Randomness" }), _copy("copy.61edf5d25d08", { defaultValue: "Drawn on-chain, in a transaction you can open." })],
+                      [_copy("copy.61862f07e956", { defaultValue: "Claim window" }), _copy("copy.128910cec32d", { defaultValue: "14 days from the published result." })],
+                    ].map(([term, detail]) => (
+                      <div key={term} className="border-b border-white/10 pb-5 last:border-b-0 last:pb-0">
+                        <dt className="text-sm font-semibold text-white">{term}</dt>
+                        <dd className="mt-1 text-sm leading-6 text-zinc-400">{detail}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                </div>
+              </motion.div>
+            </div>
+          </section>
+
+          <section id="how-it-works" className="border-b border-white/10 py-20 sm:py-24 lg:py-28">
+            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+              <Reveal>
+                <SectionHeading
+                  title={_copy("copy.f7c0e941ca42", { defaultValue: "How a draw works" })}
+                  body={_copy("copy.b08a32d9eda9", { defaultValue: "Four steps, in the same order, every time. The parts that decide who wins happen in public." })}
+                />
+              </Reveal>
+              <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+                {steps.map((step, i) => (
+                  <Reveal key={step.title} delay={i * 0.06}>
+                    <div className="h-full rounded-2xl border border-white/10 bg-white/[0.03] p-6">
+                      <step.icon aria-hidden="true" className="h-6 w-6 text-white" strokeWidth={1.6} />
+                      <h3 className="mt-5 text-lg font-semibold tracking-[-0.02em] text-white">
+                        {step.title}
+                      </h3>
+                      <p className="mt-3 text-sm leading-6 text-zinc-400">{step.body}</p>
+                    </div>
+                  </Reveal>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          <section id="entries" className="border-b border-white/10 py-20 sm:py-24 lg:py-28">
+            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+              <Reveal>
+                <SectionHeading
+                  title={_copy("copy.05ed765615c5", { defaultValue: "Entries are earned, not bought" })}
+                  body={_copy("copy.e2c592b3cd95", { defaultValue: "Draws are weighted towards people who use Riftn. Each announcement names the routes that count for it — these are the ones draws are usually built from." })}
+                />
+              </Reveal>
+              <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                {entryRoutes.map((route, i) => (
+                  <Reveal key={route.title} delay={i * 0.05}>
+                    <div className="h-full rounded-2xl border border-white/10 bg-white/[0.03] p-6">
+                      <route.icon aria-hidden="true" className="h-6 w-6 text-white" strokeWidth={1.6} />
+                      <h3 className="mt-5 text-lg font-semibold tracking-[-0.02em] text-white">
+                        {route.titleKey ? t(route.titleKey) : route.title}
+                      </h3>
+                      <p className="mt-3 text-sm leading-6 text-zinc-400">{route.bodyKey ? t(route.bodyKey) : route.body}</p>
+                      {route.to && (
+                        <Link
+                          to={route.to}
+                          className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-white transition hover:text-zinc-300"
+                        >{_copy("copy.ed077f3d8125", { defaultValue: "Open" })}<ArrowRight aria-hidden="true" className="h-3.5 w-3.5" strokeWidth={1.8} />
+                        </Link>
+                      )}
+                    </div>
+                  </Reveal>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          <section id="fairness" className="border-b border-white/10 py-20 sm:py-24 lg:py-28">
+            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+              <Reveal>
+                <SectionHeading
+                  title={_copy("copy.bc5281a40c17", { defaultValue: "Why the result can be trusted" })}
+                  body={_copy("copy.afa0226bfe44", { defaultValue: "A raffle is only worth entering if the operator cannot quietly pick the winner. Three things make that true here." })}
+                />
+              </Reveal>
+              <div className="mt-12 grid gap-5 lg:grid-cols-3">
+                {fairness.map((item, i) => (
+                  <Reveal key={item.title} delay={i * 0.06}>
+                    <div className="h-full rounded-2xl border border-white/10 bg-white/[0.03] p-6">
+                      <item.icon aria-hidden="true" className="h-6 w-6 text-white" strokeWidth={1.6} />
+                      <h3 className="mt-5 text-lg font-semibold tracking-[-0.02em] text-white">
+                        {item.title}
+                      </h3>
+                      <p className="mt-3 text-sm leading-6 text-zinc-400">{item.body}</p>
+                    </div>
+                  </Reveal>
+                ))}
+              </div>
+              <Reveal delay={0.1}>
+                <div className="mt-10 rounded-2xl border border-white/10 bg-white/[0.03] p-6 sm:p-8">
+                  <h3 className="text-lg font-semibold tracking-[-0.02em] text-white">{_copy("copy.8d0cd01995e2", { defaultValue: "Riftn will never ask you to pay to release a prize" })}</h3>
+                  <p className="mt-3 max-w-3xl text-sm leading-6 text-zinc-400">{_copy("copy.5ab00110ad6b", { defaultValue: "Winners are named in the app and in the public result post. Nobody from Riftn will contact you for a fee, a seed phrase, a private key or a wallet signature to hand over a prize. Any message that does is an impersonation — report it and delete it." })}</p>
+                </div>
+              </Reveal>
+            </div>
+          </section>
+
+          <section id="faq" className="border-b border-white/10 py-20 sm:py-24 lg:py-28">
+            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+              <Reveal>
+                <SectionHeading
+                  title={_copy("copy.9a72221a2747", { defaultValue: "Questions" })}
+                  body={_copy("copy.8f1b3a38a34c", { defaultValue: "The ones we get asked most often about draws, entries and prizes." })}
+                />
+              </Reveal>
+              <div className="mt-12 grid gap-5 lg:grid-cols-2">
+                {faqItems.map((item, i) => (
+                  <Reveal key={item.question} delay={i * 0.05}>
+                    <div className="h-full rounded-2xl border border-white/10 bg-white/[0.03] p-6">
+                      <h3 className="text-base font-semibold tracking-[-0.02em] text-white">
+                        {item.question}
+                      </h3>
+                      <p className="mt-3 text-sm leading-6 text-zinc-400">{item.answerKey ? t(item.answerKey) : item.answer}</p>
+                    </div>
+                  </Reveal>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          <section className="py-20 sm:py-24 lg:py-28">
+            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+              <Reveal>
+                <SectionHeading
+                  title={_copy("copy.205af87306b5", { defaultValue: "Draws run inside Riftn" })}
+                  body={_copy("copy.3da323657e3c", { defaultValue: "Open the app to see whatever is live now, and turn on notifications so the next one does not pass you by." })}
+                />
+              </Reveal>
+              <Reveal delay={0.08}>
+                <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                  <Link
+                    to="/"
+                    className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-zinc-100 px-5 py-3 text-sm font-semibold text-zinc-950 transition hover:bg-white active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                  >{_copy("copy.efc85ecfd402", { defaultValue: "Open Riftn" })}<ArrowRight aria-hidden="true" className="h-4 w-4" strokeWidth={1.8} />
+                  </Link>
+                  <Link
+                    to="/docs/token/overview"
+                    className="inline-flex items-center justify-center whitespace-nowrap rounded-xl border border-white/20 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:border-white/40 hover:bg-white/10 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                  >
+                    {t('raffle.readAboutTokens')}
+                  </Link>
+                </div>
+              </Reveal>
+            </div>
+          </section>
+        </main>
+
+        <footer className="border-t border-white/10 bg-zinc-950">
+          <div className="mx-auto flex max-w-7xl flex-col gap-5 px-4 py-8 text-sm text-zinc-500 sm:px-6 md:flex-row md:items-center md:justify-between lg:px-8">
+            <img src={riftnWordmark} alt="Riftn" className="h-6 w-auto self-start opacity-80" loading="lazy" />
+            <p className="max-w-2xl md:text-right">{_copy("copy.cbbe14a2e25e", { defaultValue: "Prize draws are promotional and open to Riftn account holders aged 18 or over, void where local law prohibits them. Riftn staff, contractors and their households are not eligible. Prizes are not exchangeable for cash unless stated, and each draw’s own announcement carries its full terms." })}</p>
+          </div>
+        </footer>
+      </div>
+    </>
+  );
+}

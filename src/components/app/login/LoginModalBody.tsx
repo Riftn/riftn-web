@@ -1,0 +1,1231 @@
+import { useSurfaceDraft } from '@/hooks/use-surface-draft';
+import '@/styles/login-stack.css';
+/**
+ * Everything inside the login sheet below the header.
+ *
+ * Split out of LoginModal so the sheet itself — the drawer, the backdrop, the
+ * header, the terms footer — can ship in the entry bundle and slide up on the
+ * same frame as the click, while this (wagmi, the wallet steps, RainbowKit)
+ * arrives behind it. See the note at the top of LoginModal.tsx.
+ */
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useAccount, useConnect, useConnectors, useDisconnect } from 'wagmi';
+import { useTranslation } from 'react-i18next';
+import { Mail, Phone, Loader2, Fingerprint, KeyRound } from "lucide-react";
+import Wallet from "@/components/ui/cut-icons/wallet";
+
+import X from "@/components/ui/cut-icons/close";
+
+import { DeHubPageLoader } from '@/components/app/DeHubLoader';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Separator } from '@/components/ui/separator';
+import { useAuth } from '@/contexts/AuthContext';
+import { getWalletBrowserName, getWalletDeepLink, isMobileDevice, isWalletInAppBrowser } from '@/lib/web3auth';
+import { embeddedBrowserApp, systemBrowserUrl } from '@/lib/embedded-browser';
+import { isChunkLoadError, recoverFromChunkError } from '@/lib/lazy-with-retry';
+import { clearWagmiStorage } from '@/lib/wagmi';
+import { WagmiScope } from '@/components/app/WagmiScope';
+import { connectorMatchesWallet } from '@/lib/wallet-connectors';
+import { PasskeyCancelledError, PasskeyLoginError, PasskeyUnsupportedError } from '@/lib/passkey-login';
+import { loginProbesSnapshot, resolveLoginProbes, type LoginProbes } from '@/lib/login-probes';
+import { LoginSavedProfiles } from './LoginSavedProfiles';
+import { LoginBodySkeleton } from './LoginBodySkeleton';
+import { type LoginStep, isInlineLoginStep } from './steps';
+import type { DiscoveredWallet, WalletId } from './LoginWalletsStep';
+import { createLogger } from '@/lib/logger';
+import { suggestEmailFix } from '@/lib/email-typo';
+import { toast } from 'sonner';
+import { PROFILE_MOVED_EVENT, WALLET_SIGNUP_BLOCKED_EVENT } from '@/lib/api/dehub/auth';
+
+const flowLog = createLogger('LoginFlow');
+
+// The wallet list carries RainbowKit — ~270 KB that has to be evaluated before
+// it can render, for a step most people never open. It loads when they do.
+const LoginWalletsStep = React.lazy(() =>
+  import('./LoginWalletsStep').then(m => ({ default: m.LoginWalletsStep })),
+);
+// Both wallet-setup steps pull the whole wallet-core stack (mnemonic
+// derivation, WebCrypto, the encrypted store, biometrics). Nobody reaches them
+// without first completing an identity, and the sheet holds the site loader
+// over that gap anyway — so the code arrives during the gap, not before it.
+const WalletCreateStep = React.lazy(() =>
+  import('@/components/app/wallet-setup/WalletCreateStep').then(m => ({ default: m.WalletCreateStep })),
+);
+const WalletUnlockStep = React.lazy(() =>
+  import('@/components/app/wallet-setup/WalletUnlockStep').then(m => ({ default: m.WalletUnlockStep })),
+);
+const LoginImportWalletStep = React.lazy(() =>
+  import('./LoginImportWalletStep').then(m => ({ default: m.LoginImportWalletStep })),
+);
+
+/**
+ * How long the option list will hold for the probes before drawing itself
+ * anyway. Long enough to cover a normal edge-function round trip, short enough
+ * that a stalled one is never the reason someone cannot sign in.
+ */
+const PROBE_WAIT_MS = 700;
+
+/** The wallets that already have a button of their own. */
+const NAMED_WALLETS: WalletId[] = ['metamask', 'phantom', 'trust'];
+
+// Social provider icons
+const GoogleIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24">
+    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.47 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+  </svg>
+);
+
+// Telegram's mark, single-path so it tints with whatever colour the row uses
+// rather than carrying its own blue into a monochrome sheet.
+const TelegramIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" className="fill-white">
+    <path d="M21.94 4.6 18.63 20.2c-.25 1.1-.9 1.38-1.83.86l-5.05-3.72-2.44 2.35c-.27.27-.5.5-1.02.5l.36-5.14 9.36-8.46c.4-.36-.09-.56-.63-.2L6.01 13.67l-4.98-1.56c-1.08-.34-1.1-1.08.23-1.6l19.47-7.5c.9-.33 1.69.2 1.4 1.6z" />
+  </svg>
+);
+
+const AppleIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" className="fill-white">
+    <path d="M17.05 12.536c-.03-2.087 1.706-3.087 1.783-3.14-.972-1.42-2.484-1.615-3.025-1.638-1.372-.14-2.635.797-3.318.797-.699 0-1.767-.777-2.9-.757-1.49.023-2.865.866-3.626 2.2-1.548 2.685-.397 6.86.98 9.11.677 1.106 1.487 2.346 2.55 2.3.994-.038 1.386-.647 2.6-.647 1.21 0 1.567.647 2.62.63 1.08-.018 1.766-.976 2.44-2.083.775-1.253 1.09-2.487 1.109-2.552-.024-.01-2.19-.844-2.213-3.22zM14.85 5.865c.564-.68.945-1.63.842-2.573-.812.033-1.798.542-2.383 1.222-.522.6-.98 1.567-.857 2.492.902.07 1.827-.457 2.398-1.14z"/>
+  </svg>
+);
+
+interface LoginModalBodyProps {
+  signingUp?: boolean;
+  /** Whether the sheet is open — the field reset hangs off this. */
+  open: boolean;
+  step: LoginStep;
+  setStep: (step: LoginStep) => void;
+  /**
+   * `stack`: the phone sheet's email-first list under the Shorts Stack hero
+   * (email field up front, the other ways in as round buttons, crypto as a
+   * row of links). Desktop keeps the default list.
+   */
+  layout?: 'default' | 'stack';
+}
+
+/**
+ * WagmiProvider no longer wraps the app (see WagmiRuntime.tsx), so this body —
+ * which calls wagmi hooks — provides it for its own subtree. This file is
+ * lazy, so the import of wagmi here stays off the boot path.
+ */
+export function LoginModalBody(props: LoginModalBodyProps) {
+  return (
+    <WagmiScope>
+      <LoginModalBodyInner {...props} />
+    </WagmiScope>
+  );
+}
+
+function LoginModalBodyInner({ open, step, setStep, layout = 'default', signingUp = false }: LoginModalBodyProps) {
+  const {
+    connectWithProvider, connectWithEmail, cancelEmailMagicLink, verifyEmailOtp, connectWithSMS, verifyPhoneOtp,
+    connectWithTelegram, connectWithPasskey, connectWithWallet, completeSmartWalletLogin, setWagmiAuthIntent, isConnecting,
+    supabaseUserId, disconnect, isAuthenticated, switchToProfile, closeLoginModal,
+  } = useAuth();
+  const {
+    isConnected: isWagmiAlreadyConnected,
+    address: wagmiCurrentAddress,
+  } = useAccount();
+  const { disconnectAsync: wagmiDisconnectAsync } = useDisconnect();
+  const { connectAsync } = useConnect();
+  const allConnectors = useConnectors();
+  const { t } = useTranslation();
+
+  /**
+   * The wallets actually installed here, minus the ones that already have a
+   * named button.
+   *
+   * wagmi discovers these over EIP-6963 (`multiInjectedProviderDiscovery` is on
+   * by default) and has been doing so all along — the sheet just dropped them
+   * and offered three fixed names. Anyone running Rabby, Coinbase Wallet, OKX
+   * or Brave had to guess that "MetaMask" would reach their wallet, which it
+   * does only when that extension happens to win the injection race.
+   *
+   * `injected` is the deliberately-hidden in-app-browser fallback (see
+   * lib/wagmi.ts) and never belongs in a list of choices.
+   */
+  const discoveredWallets = useMemo<DiscoveredWallet[]>(() => {
+    const seen = new Set<string>();
+    return allConnectors
+      .filter(connector => {
+        if (connector.type !== 'injected') return false;
+        if (connector.id === 'injected') return false;
+        // One extension reaches wagmi twice — as the curated RainbowKit
+        // connector and as its own EIP-6963 announcement — and the two carry
+        // different ids, so the match has to go through the shared mapping
+        // (which also checks the name) rather than an id comparison. Without
+        // it Trust announces as `com.trustwallet.app` and gets a second row
+        // directly under its own button.
+        if (NAMED_WALLETS.some(wallet => connectorMatchesWallet(connector, wallet))) return false;
+        const key = connector.name.toLowerCase();
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      })
+      .map(connector => ({
+        id: connector.id,
+        name: connector.name,
+        icon: connector.icon,
+      }));
+  }, [allConnectors]);
+
+  const [email, setEmail] = useSurfaceDraft("src/components/app/login/LoginModalBody.tsx:email", '');
+  const [emailCode, setEmailCode] = useState('');
+  const [emailError, setEmailError] = useState('');
+  // "Did you mean name@gmail.com?" for a misspelled provider. Shown once per
+  // typed address; pressing Continue again sends to it as typed.
+  const [emailSuggestion, setEmailSuggestion] = useState<string | null>(null);
+  const emailTypoShownForRef = useRef<string | null>(null);
+  const emailInputRef = useRef<HTMLInputElement>(null);
+  const [phone, setPhone] = useSurfaceDraft("src/components/app/login/LoginModalBody.tsx:phone", '');
+  const [phoneCode, setPhoneCode] = useState('');
+  const [phoneError, setPhoneError] = useState('');
+  const [activeProvider, setActiveProvider] = useState<string | null>(null);
+  const [walletAccountUnchanged, setWalletAccountUnchanged] = useState(false);
+  useEffect(() => {
+    if (!isConnecting) {
+      setActiveProvider((provider) => provider === 'google' || provider === 'apple' ? null : provider);
+    }
+  }, [isConnecting]);
+  // Set to the app's name ('' when unnamed) after Google was tapped inside a
+  // social app's built-in browser, where Google refuses to sign anyone in.
+  const [googleBlockedIn, setGoogleBlockedIn] = useState<string | null>(null);
+  // Set when the server refused to open an account for the wallet just
+  // signed with because it has no on-chain history. Shown on the options list
+  // so the next tap is one of the ways in that work.
+  const [walletSignupBlocked, setWalletSignupBlocked] = useState(false);
+  const [profileMovedMessage, setProfileMovedMessage] = useState<string | null>(null);
+  /**
+   * Resolve device support before offering passkey sign-in. Telegram remains
+   * a stable option even if its background availability request fails; the
+   * sign-in action validates the current bot configuration itself.
+   */
+  const [probes, setProbes] = useState<LoginProbes | null>(() => loginProbesSnapshot());
+  const passkeyAvailable = probes?.passkey ?? false;
+  const [passkeyError, setPasskeyError] = useState('');
+  // Set when a sign-in attempt found a passkey with no account behind it, so
+  // the step can lead with "create one instead".
+  const [passkeyUnknown, setPasskeyUnknown] = useState(false);
+  useEffect(() => {
+    if (open && (emailError || phoneError || passkeyError)) {
+      flowLog.trace?.('error-visible', { screen: step, surface: 'login-sheet' });
+    }
+  }, [open, step, emailError, phoneError, passkeyError]);
+
+  // Clear what was typed once the sheet is shut. The step itself is reset by
+  // the shell; this is the other half of the old handleClose, and doing it on
+  // a closed sheet means nothing flashes on the way out.
+  useEffect(() => {
+    if (open) return;
+    setWalletAccountUnchanged(false);
+    setEmail('');
+    setEmailCode('');
+    setEmailError('');
+    setPhone('');
+    setPhoneCode('');
+    setPhoneError('');
+    setPasskeyError('');
+    setPasskeyUnknown(false);
+    setActiveProvider(null);
+  }, [open, setEmail, setPhone]);
+
+  /**
+   * Both answers, once, the moment the sheet opens — and normally already in
+   * hand from the hover that preceded the click (see warmLoginSheet). Cached
+   * for the tab by lib/login-probes, so every reopen after the first renders
+   * the finished list on its first frame with no probe at all.
+   *
+   * The cap is the safety valve: on a network slow enough that the Telegram
+   * config has not come back yet, the list stops waiting and draws what it
+   * knows rather than holding a skeleton over a working sign-in sheet. A late
+   * answer still applies — one deferred row on a bad connection beats a
+   * missing way in.
+   */
+  useEffect(() => {
+    if (!open || probes) return;
+    let cancelled = false;
+    const cap = window.setTimeout(() => {
+      if (!cancelled) setProbes(current => current ?? { passkey: false, telegram: false });
+    }, PROBE_WAIT_MS);
+    void resolveLoginProbes().then(resolved => {
+      if (!cancelled) setProbes(resolved);
+    });
+    return () => { cancelled = true; window.clearTimeout(cap); };
+  }, [open, probes]);
+
+  // Once the connector has agreed, the wallet list is done: what happens next
+  // is a signature request, and everything on that screen either does nothing
+  // (the buttons are disabled) or actively misleads — the "Connected · 0x…"
+  // banner appears at exactly the moment the signature goes out, so a login
+  // that was working read as a login that had bounced back to the picker.
+  // Swap it for the same "Signing you in…" loader the social/email resume
+  // uses, and put the list back if the attempt ends without a session.
+  //
+  // Gated on `open` so the revert can't fire on the way out: a successful login
+  // drops isConnecting and closes the sheet in the same commit, and without
+  // this the wallet list would flash back for the length of the exit animation.
+  useEffect(() => {
+    if (!open) return;
+    if (step === 'wallets' && isConnecting && isWagmiAlreadyConnected && wagmiCurrentAddress) {
+      setStep('wallet-signing');
+    } else if (step === 'wallet-signing' && !isConnecting) {
+      setStep('wallets');
+    }
+  }, [open, step, isConnecting, isWagmiAlreadyConnected, wagmiCurrentAddress, setStep]);
+
+  // Escape hatch from the wallet-unlock/create dead-end: sign out of the
+  // half-established identity (clears the Supabase session + pending flag so it
+  // doesn't loop back to unlock) and return to the login options, modal open.
+  const handleWalletLogout = async () => {
+    await disconnect();
+    setStep('main');
+    setEmail('');
+    setEmailCode('');
+    setEmailError('');
+    setPhone('');
+    setPhoneCode('');
+    setPhoneError('');
+    setActiveProvider(null);
+  };
+
+  // Restores that account's stored session and reloads. Resolves without
+  // reloading only when the snapshot could not be restored, in which case
+  // switchToProfile has already opened the sheet on a real login.
+  const handleSwitchProfile = (id: string) => {
+    void switchToProfile(id);
+  };
+
+  const handleSocialLogin = async (provider: 'google' | 'apple', anyway = false) => {
+    if (provider === 'google' && !anyway) {
+      const app = embeddedBrowserApp() ?? (isWalletInAppBrowser() ? getWalletBrowserName() ?? '' : null);
+      if (app !== null) {
+        setGoogleBlockedIn(app);
+        return;
+      }
+    }
+    setGoogleBlockedIn(null);
+    setActiveProvider(provider);
+    try {
+      // Full-page OAuth redirect — the modal reopens at the wallet step on return.
+      await connectWithProvider(provider);
+    } catch (error) {
+      console.error(`${provider} login failed:`, error);
+      setActiveProvider(null);
+    }
+  };
+
+  // Resolves `true` once the redirect is under way, and the spinner stays up
+  // over it — the browser is leaving, and a row that snaps back to its idle
+  // label in that gap reads as a click that did nothing.
+  const handleTelegramLogin = async () => {
+    setActiveProvider('telegram');
+    try {
+      if (await connectWithTelegram()) return;
+    } catch (error) {
+      console.error('Telegram login failed:', error);
+    }
+    setActiveProvider(null);
+  };
+
+  const handlePasskey = async (mode: 'signin' | 'signup') => {
+    setPasskeyError('');
+    setActiveProvider(mode === 'signup' ? 'passkey-signup' : 'passkey-signin');
+    try {
+      await connectWithPasskey(mode);
+    } catch (error) {
+      if (error instanceof PasskeyCancelledError) {
+        // Dismissing the OS sheet isn't a failure — no message.
+      } else if (error instanceof PasskeyUnsupportedError) {
+        setPasskeyError(t('loginModal.passkeyUnsupported', "This device can't sign in with a fingerprint or face. Use another option."));
+      } else if (error instanceof PasskeyLoginError && error.code === 'UNKNOWN_CREDENTIAL') {
+        setPasskeyUnknown(true);
+        setPasskeyError(t('loginModal.passkeyNotLinked', 'No account is linked to that fingerprint yet. Create a new account instead.'));
+      } else if (error instanceof PasskeyLoginError && error.code === 'ALREADY_REGISTERED') {
+        setPasskeyError(t('loginModal.passkeyAlreadyRegistered', 'That fingerprint already has an account. Use Sign in instead.'));
+      } else if (isChunkLoadError(error) && recoverFromChunkError(error) === 'reloading') {
+        // A tab from before a deploy: reloading fetches the passkey code again.
+      } else {
+        console.error('Passkey login failed:', error);
+        setPasskeyError(error instanceof Error && error.message
+          ? error.message
+          : t('loginModal.passkeyFailed', 'Fingerprint sign-in failed. Please try again.'));
+      }
+    } finally {
+      setActiveProvider(null);
+    }
+  };
+
+  const handleEmailSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setEmailError('');
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email.trim())) {
+      setEmailError(email.trim() ? t('loginModal.invalidEmail') : t('loginModal.emailPlaceholder'));
+      emailInputRef.current?.focus();
+      return;
+    }
+
+    const typed = email.trim();
+    const fix = suggestEmailFix(typed);
+    if (fix && emailTypoShownForRef.current !== typed) {
+      emailTypoShownForRef.current = typed;
+      setEmailSuggestion(fix);
+      return;
+    }
+    setEmailSuggestion(null);
+
+    setActiveProvider('email');
+    try {
+      await connectWithEmail(email.trim());
+      setStep('email-waiting');
+    } catch (error) {
+      console.error('Email login failed:', error);
+    } finally {
+      setActiveProvider(null);
+    }
+  };
+
+  const handleEmailCodeSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setEmailError('');
+    if (!/^\d{6}$/.test(emailCode.trim())) {
+      setEmailError(t('loginModal.invalidCode', 'Enter the 6-digit code from your email'));
+      return;
+    }
+    setActiveProvider('email-code');
+    try {
+      await verifyEmailOtp(email, emailCode.trim());
+    } catch (error: any) {
+      console.error('Email OTP verification failed:', error);
+      setEmailError(error?.message || t("copy.d0a5eff9cf29", { defaultValue: "Invalid code. Please try again." }));
+    } finally {
+      setActiveProvider(null);
+    }
+  };
+
+  const handlePhoneSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPhoneError('');
+
+    const e164Regex = /^\+[1-9]\d{6,14}$/;
+    if (!e164Regex.test(phone.trim())) {
+      setPhoneError(t('loginModal.invalidPhone', 'Enter your number with country code, e.g. +14155552671'));
+      return;
+    }
+
+    setActiveProvider('phone');
+    try {
+      await connectWithSMS(phone.trim());
+      setStep('phone-code');
+    } catch (error) {
+      console.error('Phone login failed:', error);
+    } finally {
+      setActiveProvider(null);
+    }
+  };
+
+  const handlePhoneCodeSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPhoneError('');
+    if (!/^\d{6}$/.test(phoneCode.trim())) {
+      setPhoneError(t('loginModal.invalidCode', 'Enter the 6-digit code we texted you'));
+      return;
+    }
+    setActiveProvider('phone');
+    try {
+      await verifyPhoneOtp(phone.trim(), phoneCode);
+    } catch (error: any) {
+      console.error('Phone OTP verification failed:', error);
+      setPhoneError(error?.message || t("copy.d0a5eff9cf29", { defaultValue: "Invalid code. Please try again." }));
+    } finally {
+      setActiveProvider(null);
+    }
+  };
+
+  // Drop the wallet currently attached without touching the Riftn session —
+  // `disconnect()` from the auth context is a full sign-out, which is not what
+  // someone standing at the login sheet is asking for. wagmi's disconnect also
+  // revokes the site's permission where the wallet supports it, so the next
+  // connect offers the account picker rather than silently reusing the account
+  // that was already approved.
+  const handleUseDifferentWallet = async () => {
+    setWagmiAuthIntent(false);
+    setActiveProvider(null);
+    clearWagmiStorage();
+    try {
+      await wagmiDisconnectAsync();
+    } catch { /* already gone */ }
+  };
+
+  // A brand-new wallet cannot open an account, and it will still be brand new
+  // on the next tap — so leave the wallet list for the options that can, with
+  // the reason on screen, and let go of the wallet so its Continue button is
+  // not sitting there to be tapped again.
+  useEffect(() => {
+    const onBlocked = () => {
+      toast.dismiss('wallet-signup-blocked');
+      setWalletSignupBlocked(true);
+      setStep('main');
+      void handleUseDifferentWallet();
+    };
+    window.addEventListener(WALLET_SIGNUP_BLOCKED_EVENT, onBlocked);
+    return () => window.removeEventListener(WALLET_SIGNUP_BLOCKED_EVENT, onBlocked);
+    // handleUseDifferentWallet only reads stable setters and the wagmi hooks.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [setStep]);
+
+  // This wallet's profile moved to a Google/email/phone login. Signing with
+  // the wallet again gets the same answer, so go back to the options (where
+  // that login is) with the reason on screen, and let go of the wallet.
+  useEffect(() => {
+    const onMoved = (event: Event) => {
+      const message = (event as CustomEvent<{ message?: string }>).detail?.message;
+      if (!message) return;
+      setProfileMovedMessage(message);
+      setStep('main');
+      void handleUseDifferentWallet();
+    };
+    window.addEventListener(PROFILE_MOVED_EVENT, onMoved);
+    return () => window.removeEventListener(PROFILE_MOVED_EVENT, onMoved);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [setStep]);
+
+  const profileMovedNotice = profileMovedMessage ? (
+    <div role="alert" className="flex items-start gap-2 rounded-xl border border-white/15 bg-white/10 p-3 text-sm text-white">
+      <Wallet className="w-4 h-4 mt-0.5 shrink-0" />
+      <div className="flex-1 min-w-0 space-y-1">
+        <p className="font-medium">{t('loginModal.profileMovedTitle', 'Your profile moved')}</p>
+        <p className="text-white/70">{profileMovedMessage}</p>
+      </div>
+      <button
+        type="button"
+        onClick={() => setProfileMovedMessage(null)}
+        aria-label={t('common.close', 'Close')}
+        className="p-1 -m-1 rounded-lg text-white/50 hover:text-white hover:bg-white/10 transition-colors shrink-0"
+      >
+        <X className="w-4 h-4" />
+      </button>
+    </div>
+  ) : null;
+
+  const handleWalletConnect = async (wallet: WalletId, _connect: () => void) => {
+    setActiveProvider(wallet);
+    setWalletAccountUnchanged(false);
+
+    // Mobile: Use deep link to open wallet app and load dapp in its in-app browser.
+    if (isMobileDevice() && !isWalletInAppBrowser()) {
+      const deepLink = getWalletDeepLink(wallet);
+      if (deepLink) {
+        window.location.href = deepLink;
+        return;
+      }
+    }
+
+    // Use connectWithWallet (wagmi connectAsync) instead of RainbowKit's connect()
+    // because RainbowKit's connect can become stale after a disconnect cycle.
+    // connectWithWallet resolves to false (never rejects — it catches its own
+    // errors and shows its own toast) on failure, so reset our local spinner
+    // state here — without this, activeProvider stays stuck on this wallet
+    // until the next click, since nothing else in this component learns the
+    // attempt failed.
+    connectWithWallet(wallet as any).then((success) => {
+      if (success !== true) setActiveProvider(null);
+      if (success === 'same-account') setWalletAccountUnchanged(true);
+    });
+  };
+
+  const handleWalletConnectConnect = (connect: () => void) => {
+    setActiveProvider('walletconnect');
+    setWagmiAuthIntent(true, 'walletconnect');
+    connect();
+  };
+
+  const handleDiscoveredWalletConnect = (connectorId: string) => {
+    // Same path as the named buttons — connectWithWallet resolves a connector
+    // id it doesn't recognise as a wallet name by matching the id directly.
+    void handleWalletConnect(connectorId as WalletId, () => {});
+  };
+
+  // Google answers "Access blocked" inside Instagram, TikTok, Facebook and
+  // the like, and the person is stranded on its error page. Say so before
+  // sending them there, and offer the way out: the phone's own browser.
+  const renderGoogleBlockedNotice = () => {
+    if (googleBlockedIn === null) return null;
+    const escape = systemBrowserUrl(window.location.href);
+    const copyLink = async () => {
+      try {
+        await navigator.clipboard.writeText(window.location.href);
+        toast.success(t('toasts.link_copied', 'Link copied!'));
+      } catch { /* clipboard blocked in this browser */ }
+    };
+    return (
+      <div role="alert" className="flex items-start gap-2 rounded-xl border border-white/15 bg-white/10 p-3 text-sm text-white">
+        <span className="shrink-0"><GoogleIcon /></span>
+        <div className="flex-1 min-w-0 space-y-2">
+          <p className="font-medium">
+            {googleBlockedIn
+              ? t('loginModal.googleInAppTitle', "Google won't sign in inside {{app}}", { app: googleBlockedIn })
+              : t('loginModal.googleInAppTitleUnnamed', "Google won't sign in inside this app")}
+          </p>
+          <p className="text-white/70">
+            {t('loginModal.googleInAppBody', 'Open Riftn in your browser to use Google, or sign in with email here.')}
+          </p>
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+            {escape ? (
+              <a href={escape} className="font-semibold underline underline-offset-4">
+                {t('loginModal.openInBrowser', 'Open in browser')}
+              </a>
+            ) : null}
+            <button type="button" onClick={copyLink} className="font-semibold underline underline-offset-4">
+              {t('loginModal.copyLink', 'Copy link')}
+            </button>
+            <button type="button" onClick={() => handleSocialLogin('google', true)} className="text-white/60 underline underline-offset-4">
+              {t('loginModal.tryAnyway', 'Try anyway')}
+            </button>
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={() => setGoogleBlockedIn(null)}
+          aria-label={t('common.close', 'Close')}
+          className="p-1 -m-1 rounded-lg text-white/50 hover:text-white hover:bg-white/10 transition-colors shrink-0"
+        >
+          <X className="w-4 h-4" />
+        </button>
+      </div>
+    );
+  };
+
+  const renderMainStep = () => (
+    <div className="space-y-4">
+      {/* Signed-out only. Over a live session this sheet is "Add a profile",
+          where the accounts already on the device are the one thing it is not
+          offering to do. */}
+      {!isAuthenticated && (
+        <LoginSavedProfiles disabled={isConnecting} onSwitch={handleSwitchProfile} />
+      )}
+      {profileMovedNotice}
+      {walletSignupBlocked && (
+        <div role="alert" className="flex items-start gap-2 rounded-xl border border-white/15 bg-white/10 p-3 text-sm text-white">
+          <Wallet className="w-4 h-4 mt-0.5 shrink-0" />
+          <div className="flex-1 min-w-0 space-y-1">
+            <p className="font-medium">{t('loginModal.walletBlockedTitle', 'This wallet is brand new')}</p>
+            <p className="text-white/70">
+              {t('loginModal.walletBlockedBody', 'New wallets need a balance or a past transaction to open an account. Sign up with one of the options below, then connect this wallet from Settings.')}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setWalletSignupBlocked(false)}
+            aria-label={t('common.close', 'Close')}
+            className="p-1 -m-1 rounded-lg text-white/50 hover:text-white hover:bg-white/10 transition-colors shrink-0"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+      {renderGoogleBlockedNotice()}
+      <div className="space-y-3">
+        <Button
+          onClick={() => setStep('email')}
+          disabled={isConnecting}
+          className="w-full h-12 bg-white/10 hover:bg-white/15 text-white rounded-xl flex items-center justify-center gap-3 border border-white/10"
+        >
+          <Mail className="w-5 h-5" aria-hidden="true" />
+          <span>{t('loginModal.continueEmail')}</span>
+        </Button>
+
+        {passkeyAvailable && (
+          <Button
+            onClick={() => setStep('passkey')}
+            disabled={isConnecting}
+            className="w-full h-12 bg-white/10 hover:bg-white/15 text-white rounded-xl flex items-center justify-center gap-3 border border-white/10"
+          >
+            <Fingerprint className="w-5 h-5" />
+            <span>{t('loginModal.continuePasskey', 'Continue with Bio')}</span>
+          </Button>
+        )}
+
+        <Button
+          onClick={() => handleSocialLogin('google')}
+          disabled={isConnecting}
+          className="w-full h-12 bg-white/10 hover:bg-white/15 text-white rounded-xl flex items-center justify-center gap-3 border border-white/10"
+        >
+          {activeProvider === 'google' ? (
+            <Loader2 className="w-5 h-5 animate-spin" />
+          ) : (
+            <GoogleIcon />
+          )}
+          <span>{t('loginModal.continueGoogle')}</span>
+        </Button>
+
+        <Button
+          onClick={() => setStep('phone')}
+          disabled={isConnecting}
+          className="w-full h-12 bg-white/10 hover:bg-white/15 text-white rounded-xl flex items-center justify-center gap-3 border border-white/10"
+        >
+          <Phone className="w-5 h-5" />
+          <span>{t('loginModal.continuePhone', 'Continue with phone')}</span>
+        </Button>
+
+        <Button
+          onClick={() => handleSocialLogin('apple')}
+          disabled={isConnecting}
+          className="w-full h-12 bg-white/10 hover:bg-white/15 text-white rounded-xl flex items-center justify-center gap-3 border border-white/10"
+        >
+          {activeProvider === 'apple' ? (
+            <Loader2 className="w-5 h-5 animate-spin" />
+          ) : (
+            <AppleIcon />
+          )}
+          <span>{t('loginModal.continueApple', 'Continue with Apple')}</span>
+        </Button>
+
+        {(
+          <Button
+            onClick={handleTelegramLogin}
+            disabled={isConnecting}
+            className="w-full h-12 bg-white/10 hover:bg-white/15 text-white rounded-xl flex items-center justify-center gap-3 border border-white/10"
+          >
+            {activeProvider === 'telegram' ? (
+              <Loader2 className="w-5 h-5 animate-spin" />
+            ) : (
+              <TelegramIcon />
+            )}
+            <span>{t('loginModal.continueTelegram', 'Continue with Telegram')}</span>
+          </Button>
+        )}
+      </div>
+
+      <div className="flex items-center gap-3 py-2">
+        <Separator className="flex-1 bg-white/10" />
+        <span className="text-white/40 text-sm">{t('loginModal.or')}</span>
+        <Separator className="flex-1 bg-white/10" />
+      </div>
+
+      <Button
+        onClick={() => setStep('wallets')}
+        onPointerEnter={() => { void import('./LoginWalletsStep'); }}
+        disabled={isConnecting}
+        variant="outline"
+        className="w-full h-12 bg-transparent hover:bg-white/5 text-white rounded-xl flex items-center justify-center gap-3 border-white/10"
+      >
+        <Wallet className="w-5 h-5" />
+        <span>{t('loginModal.connectWallet')}</span>
+      </Button>
+
+      {/* Wallet import opens its own key/seed form and authenticates the
+          wallet directly. */}
+      <Button
+        onClick={() => setStep('import-wallet')}
+        disabled={isConnecting}
+        variant="outline"
+        className="w-full h-12 bg-transparent hover:bg-white/5 text-white rounded-xl flex items-center justify-center gap-3 border-white/10"
+      >
+        <KeyRound className="w-5 h-5 shrink-0" />
+        <span className="truncate">{t('copy.a865110e919b')}</span>
+      </Button>
+    </div>
+  );
+
+  const renderPasskeyStep = (compact = false) => (
+    <div className="space-y-4">
+      {!compact && <p className="text-white/60 text-sm">
+        {t('loginModal.passkeyIntro', 'Your fingerprint or face is your account. Nothing to remember, nothing to type.')}
+      </p>}
+      <Button
+        onClick={() => handlePasskey(signingUp ? 'signup' : 'signin')}
+        disabled={isConnecting}
+        className="w-full h-12 bg-white text-black hover:bg-white/90 rounded-xl flex items-center justify-center gap-3"
+      >
+        {activeProvider === (signingUp ? 'passkey-signup' : 'passkey-signin') ? (
+          <Loader2 className="w-5 h-5 animate-spin" />
+        ) : (
+          <Fingerprint className="w-5 h-5" />
+        )}
+        <span>{signingUp ? t('loginModal.passkeyCreate', 'Create a new account') : t('loginModal.passkeySignIn', 'Sign in with Bio')}</span>
+      </Button>
+      <Button
+        onClick={() => handlePasskey(signingUp ? 'signin' : 'signup')}
+        disabled={isConnecting}
+        variant="outline"
+        className={!signingUp && passkeyUnknown
+          ? 'w-full h-12 bg-white text-black hover:bg-white/90 rounded-xl flex items-center justify-center gap-3 border-transparent'
+          : 'w-full h-12 bg-transparent hover:bg-white/5 text-white rounded-xl flex items-center justify-center gap-3 border-white/10'}
+      >
+        {activeProvider === (signingUp ? 'passkey-signin' : 'passkey-signup') ? (
+          <Loader2 className="w-5 h-5 animate-spin" />
+        ) : (
+          <Fingerprint className="w-5 h-5" />
+        )}
+        <span>{signingUp ? t('loginModal.passkeySignIn', 'Sign in with Bio') : t('loginModal.passkeyCreate', 'Create a new account')}</span>
+      </Button>
+      {passkeyError && (
+        <p className="text-red-400 text-sm">{passkeyError}</p>
+      )}
+      {!compact && <p className="text-white/40 text-xs">
+        {t('loginModal.passkeyBackupHint', "Your account lives in this device's passkey. On most phones it syncs with your Google or Apple account, and you can add a password backup in Settings.")}
+      </p>}
+    </div>
+  );
+
+  // Phone sheet, options step. Same handlers as the default list; only the
+  // order and weight change: email is the field on screen, every other way in
+  // is one tap below it.
+  const stackOptionClass = 'login-stack-option text-white disabled:opacity-50';
+  const inlineLayout = layout === 'stack' && isInlineLoginStep(step);
+  const chooseInlineStep = (next: LoginStep) => {
+    cancelEmailMagicLink();
+    setStep(next);
+  };
+
+  // The open method's slot turns into Email, so the row keeps the same
+  // shape and switching back is the same tap in the same place.
+  const renderStackEmailOption = () => (
+    <button type="button" onClick={() => chooseInlineStep('main')} disabled={isConnecting} className={stackOptionClass} aria-label={t('loginModal.continueEmail')}>
+      <span className="login-stack-option__disc"><Mail className="w-5 h-5" /></span>
+      {t('loginStack.email', 'Email')}
+    </button>
+  );
+
+  const renderImportWalletStep = () => (
+        <React.Suspense fallback={<DeHubPageLoader size={56} minHeight="180px" />}>
+          <LoginImportWalletStep busy={isConnecting} onImport={async privateKey => {
+            await handleUseDifferentWallet();
+            const { prepareImportedWallet, ensureImportedWalletConnector, finishImportedWallet, IMPORTED_WALLET_ID } = await import('@/lib/imported-wallet');
+            try {
+              await prepareImportedWallet(privateKey);
+              setWagmiAuthIntent(true, IMPORTED_WALLET_ID);
+              await connectAsync({ connector: ensureImportedWalletConnector() });
+            } catch (error) {
+              setWagmiAuthIntent(false);
+              await finishImportedWallet(false);
+              throw error;
+            }
+          }} />
+        </React.Suspense>
+  );
+
+  const renderWalletsStep = () => (
+      <div className="space-y-3">
+        {walletAccountUnchanged && (
+          <p role="alert" className="rounded-xl border border-white/15 bg-white/10 p-3 text-sm text-white">
+            {t('loginModal.sameWalletAccount', 'That wallet is already open in Riftn. In your wallet, switch to the account you want to add. If asked which accounts to connect, select only that account.')}
+          </p>
+        )}
+        {isAuthenticated && !walletAccountUnchanged && (
+          <p className="text-sm text-white/70">
+            {t('loginModal.chooseWalletAccount', 'In your wallet, select only the account you want to add.')}
+          </p>
+        )}
+        <React.Suspense fallback={<DeHubPageLoader size={56} minHeight="180px" />}>
+          <LoginWalletsStep
+            isConnecting={isConnecting}
+            activeProvider={activeProvider}
+            discoveredWallets={discoveredWallets}
+            onWalletConnect={handleWalletConnect}
+            onDiscoveredWalletConnect={handleDiscoveredWalletConnect}
+            onWalletConnectConnect={handleWalletConnectConnect}
+            onImportWallet={layout === 'stack' ? () => setStep('import-wallet') : undefined}
+          />
+        </React.Suspense>
+      </div>
+  );
+
+  const renderStackMainStep = () => (
+    <div className="space-y-4">
+      {!isAuthenticated && (
+        <LoginSavedProfiles disabled={isConnecting} onSwitch={handleSwitchProfile} />
+      )}
+      {profileMovedNotice}
+      {walletSignupBlocked && (
+        <div role="alert" className="flex items-start gap-2 rounded-xl border border-white/15 bg-white/10 p-3 text-sm text-white">
+          <Wallet className="w-4 h-4 mt-0.5 shrink-0" />
+          <div className="flex-1 min-w-0 space-y-1">
+            <p className="font-medium">{t('loginModal.walletBlockedTitle', 'This wallet is brand new')}</p>
+            <p className="text-white/70">
+              {t('loginModal.walletBlockedBody', 'New wallets need a balance or a past transaction to open an account. Sign up with one of the options below, then connect this wallet from Settings.')}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setWalletSignupBlocked(false)}
+            aria-label={t('common.close', 'Close')}
+            className="p-1 -m-1 rounded-lg text-white/50 hover:text-white hover:bg-white/10 transition-colors shrink-0"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+      {renderGoogleBlockedNotice()}
+
+      <div className="login-stack-method" data-login-method={step}>
+        {(step === 'main' || step === 'email') && (
+      <form onSubmit={handleEmailSubmit} className="space-y-2.5" noValidate>
+        <label htmlFor="login-stack-email" className="sr-only">{t('loginModal.emailPlaceholder')}</label>
+        <div className="relative">
+          <Input
+            id="login-stack-email"
+            ref={emailInputRef}
+            type="email"
+            inputMode="email"
+            autoComplete="email"
+            placeholder={t('loginModal.emailPlaceholder')}
+            value={email}
+            onChange={(e) => { setEmail(e.target.value); if (emailError) setEmailError(''); if (emailSuggestion) setEmailSuggestion(null); }}
+            disabled={isConnecting}
+            className="h-14 text-center bg-transparent border-white/30 text-white text-base placeholder:text-white/40 rounded-2xl"
+          />
+        </div>
+        {emailError && <p className="text-red-400 text-sm">{emailError}</p>}
+        {renderEmailSuggestion()}
+        <Button
+          type="submit"
+          disabled={isConnecting}
+          className="w-full h-14 bg-white hover:opacity-90 text-black text-base font-bold rounded-2xl"
+        >
+          {activeProvider === 'email' ? (
+            <span className="flex items-center gap-2">
+              <Loader2 className="w-4 h-4 animate-spin" />
+              {t('loginModal.sendingLink')}
+            </span>
+          ) : (
+            t('loginModal.continueEmail')
+          )}
+        </Button>
+      </form>
+        )}
+        {step === 'phone' && renderPhoneStep(true)}
+        {step === 'phone-code' && renderPhoneCodeStep()}
+        {step === 'passkey' && renderPasskeyStep(true)}
+        {step === 'wallets' && renderWalletsStep()}
+        {step === 'import-wallet' && renderImportWalletStep()}
+        {step === 'email-waiting' && renderEmailWaitingStep()}
+      </div>
+
+      <div className="flex items-center gap-3">
+        <Separator className="flex-1 bg-white/10" />
+        <span className="text-white/40 text-xs font-medium">{t('loginStack.orContinueWith', 'or continue with')}</span>
+        <Separator className="flex-1 bg-white/10" />
+      </div>
+
+      <div className="flex gap-2">
+        <button type="button" onClick={() => handleSocialLogin('google')} disabled={isConnecting} className={stackOptionClass} aria-label={t('loginModal.continueGoogle')}>
+          <span className="login-stack-option__disc">{activeProvider === 'google' ? <Loader2 className="w-5 h-5 animate-spin" /> : <GoogleIcon />}</span>
+          Google
+        </button>
+        <button type="button" onClick={() => handleSocialLogin('apple')} disabled={isConnecting} className={stackOptionClass} aria-label={t('loginModal.continueApple', 'Continue with Apple')}>
+          <span className="login-stack-option__disc">{activeProvider === 'apple' ? <Loader2 className="w-5 h-5 animate-spin" /> : <AppleIcon />}</span>
+          Apple
+        </button>
+        {step === 'phone' || step === 'phone-code' ? renderStackEmailOption() : (
+          <button type="button" onClick={() => chooseInlineStep('phone')} disabled={isConnecting} className={stackOptionClass} aria-label={t('loginModal.continuePhone', 'Continue with phone')}>
+            <span className="login-stack-option__disc"><Phone className="w-5 h-5" /></span>
+            {t('loginStack.phone', 'Phone')}
+          </button>
+        )}
+        {passkeyAvailable && (step === 'passkey' ? renderStackEmailOption() : (
+          <button type="button" onClick={() => chooseInlineStep('passkey')} disabled={isConnecting} className={stackOptionClass} aria-label={t('loginModal.continuePasskey', 'Continue with Bio')}>
+            <span className="login-stack-option__disc"><Fingerprint className="w-5 h-5" /></span>
+            {t('loginStack.fingerprint', 'Bio')}
+          </button>
+        ))}
+        <button type="button" onClick={handleTelegramLogin} disabled={isConnecting} className={stackOptionClass} aria-label={t('loginModal.continueTelegram', 'Continue with Telegram')}>
+          <span className="login-stack-option__disc">{activeProvider === 'telegram' ? <Loader2 className="w-5 h-5 animate-spin" /> : <TelegramIcon />}</span>
+          Telegram
+        </button>
+        {/* One way in for every wallet: connect one, or import a key from
+            the list it opens. */}
+        {step === 'wallets' || step === 'import-wallet' ? renderStackEmailOption() : (
+          <button
+            type="button"
+            onClick={() => chooseInlineStep('wallets')}
+            onPointerEnter={() => { void import('./LoginWalletsStep'); }}
+            disabled={isConnecting}
+            className={stackOptionClass}
+            aria-label={t('loginModal.connectWallet')}
+          >
+            <span className="login-stack-option__disc"><Wallet className="w-5 h-5" /></span>
+            {t('nav.wallet', 'Wallet')}
+          </button>
+        )}
+      </div>
+
+    </div>
+  );
+
+  const renderEmailSuggestion = () => emailSuggestion && (
+    <button
+      type="button"
+      onClick={() => {
+        setEmail(emailSuggestion);
+        setEmailSuggestion(null);
+        emailInputRef.current?.focus();
+      }}
+      className="block w-full text-center text-sm text-white underline underline-offset-4 decoration-white/40 hover:decoration-white"
+    >
+      {t('loginModal.didYouMean', 'Did you mean {{email}}?', { email: emailSuggestion })}
+    </button>
+  );
+
+  const renderEmailStep = () => (
+    <div className="space-y-4">
+      <form onSubmit={handleEmailSubmit} className="space-y-4">
+        <div className="space-y-2">
+          <Input
+            type="email"
+            ref={emailInputRef}
+            placeholder={t('loginModal.emailPlaceholder')}
+            value={email}
+            onChange={(e) => { setEmail(e.target.value); if (emailSuggestion) setEmailSuggestion(null); }}
+            disabled={isConnecting}
+            className="h-12 bg-white/10 border-white/10 text-white placeholder:text-white/40 rounded-xl"
+            autoFocus
+          />
+          {emailError && (
+            <p className="text-red-400 text-sm">{emailError}</p>
+          )}
+          {renderEmailSuggestion()}
+        </div>
+
+        <Button
+          type="submit"
+          disabled={isConnecting || !email}
+          className="w-full h-12 bg-white hover:bg-white/90 text-black font-semibold rounded-xl"
+        >
+          {activeProvider === 'email' ? (
+            <span className="flex items-center gap-2">
+              <Loader2 className="w-4 h-4 animate-spin" />
+              {t('loginModal.sendingLink')}
+            </span>
+          ) : (
+            t('loginModal.continue')
+          )}
+        </Button>
+
+        <p className="text-white/40 text-xs text-center">
+          {t('loginModal.magicLinkInfo')}
+        </p>
+      </form>
+    </div>
+  );
+
+  const renderEmailWaitingStep = () => (
+    <div className="space-y-5">
+      <form onSubmit={handleEmailCodeSubmit} className="space-y-3">
+        <label htmlFor="login-email-code" className="sr-only">
+          {t('loginModal.enterCodeFromEmail', 'Enter the 6-digit code from the email')}
+        </label>
+        <Input
+          id="login-email-code"
+          autoFocus
+          type="text"
+          inputMode="numeric"
+          autoComplete="one-time-code"
+          maxLength={6}
+          placeholder="000000"
+          value={emailCode}
+          onChange={(e) => setEmailCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+          disabled={isConnecting}
+          className="h-12 text-center tracking-[0.4em] bg-white/10 border-white/10 text-white placeholder:text-white/30 rounded-xl"
+        />
+        {emailError && <p className="text-red-400 text-sm text-center">{emailError}</p>}
+        <Button
+          type="submit"
+          disabled={isConnecting || emailCode.length !== 6}
+          className="w-full h-12 bg-white hover:bg-white/90 text-black font-semibold rounded-xl"
+        >
+          {activeProvider === 'email-code' ? (
+            <span className="flex items-center gap-2">
+              <Loader2 className="w-4 h-4 animate-spin" />
+              {t('loginModal.verifying', 'Verifying…')}
+            </span>
+          ) : (
+            t('loginModal.continue')
+          )}
+        </Button>
+      </form>
+
+      <button
+        type="button"
+        onClick={() => { cancelEmailMagicLink(); setStep('email'); }}
+        className="w-full text-center text-xs text-white/40 hover:text-white/70 transition-colors"
+      >
+        {t('loginModal.wrongEmailGoBack', 'Wrong email? Go back')}
+      </button>
+    </div>
+  );
+
+  const renderPhoneStep = (compact = false) => (
+    <div className="space-y-4">
+      <form onSubmit={handlePhoneSubmit} className="space-y-4">
+        <div className="space-y-2">
+          <Input
+            type="tel"
+            placeholder={t('loginModal.phonePlaceholder', '+1 415 555 2671')}
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            disabled={isConnecting}
+            className="h-12 bg-white/10 border-white/10 text-white placeholder:text-white/40 rounded-xl"
+            autoFocus
+          />
+          {phoneError && (
+            <p className="text-red-400 text-sm">{phoneError}</p>
+          )}
+        </div>
+
+        <Button
+          type="submit"
+          disabled={isConnecting || !phone}
+          className="w-full h-12 bg-white hover:bg-white/90 text-black font-semibold rounded-xl"
+        >
+          {activeProvider === 'phone' ? (
+            <span className="flex items-center gap-2">
+              <Loader2 className="w-4 h-4 animate-spin" />
+              {t('loginModal.sendingLink')}
+            </span>
+          ) : (
+            t('loginModal.continue')
+          )}
+        </Button>
+
+        {!compact && <p className="text-white/40 text-xs text-center">
+          {t('loginModal.phoneCodeInfo', "We'll text you a 6-digit verification code.")}
+        </p>}
+      </form>
+    </div>
+  );
+
+  const renderPhoneCodeStep = () => (
+    <div className="space-y-4">
+      <form onSubmit={handlePhoneCodeSubmit} className="space-y-4">
+        <p className="text-white/60 text-sm text-center">
+          {t('loginModal.codeSentTo', 'Enter the 6-digit code sent to')}{' '}
+          <span className="text-white">{phone}</span>
+        </p>
+        <div className="space-y-2">
+          <Input
+            type="text"
+            inputMode="numeric"
+            autoComplete="one-time-code"
+            maxLength={6}
+            placeholder="123456"
+            value={phoneCode}
+            onChange={(e) => setPhoneCode(e.target.value.replace(/\D/g, ''))}
+            disabled={isConnecting}
+            className="h-12 bg-white/10 border-white/10 text-white placeholder:text-white/40 rounded-xl text-center text-lg tracking-[0.5em]"
+            autoFocus
+          />
+          {phoneError && (
+            <p className="text-red-400 text-sm">{phoneError}</p>
+          )}
+        </div>
+
+        <Button
+          type="submit"
+          disabled={isConnecting || phoneCode.length !== 6}
+          className="w-full h-12 bg-white hover:bg-white/90 text-black font-semibold rounded-xl"
+        >
+          {activeProvider === 'phone' ? (
+            <span className="flex items-center gap-2">
+              <Loader2 className="w-4 h-4 animate-spin" />
+              {t('loginModal.verifying', 'Verifying…')}
+            </span>
+          ) : (
+            t('loginModal.continue')
+          )}
+        </Button>
+
+        <button
+          type="button"
+          onClick={() => { setPhoneCode(''); setStep('phone'); }}
+          className="w-full text-center text-xs text-white/40 hover:text-white/70 transition-colors"
+        >
+          {t('loginModal.resendCodePhone', 'Wrong number or no code? Go back')}
+        </button>
+      </form>
+    </div>
+  );
+
+  return (
+    <>
+      {/* The same placeholder the shell shows while this chunk is in flight,
+          so the wait for the chunk and the wait for the probes read as one
+          beat rather than two — and the options appear once, complete. */}
+      {inlineLayout && (probes ? renderStackMainStep() : <LoginBodySkeleton layout="stack" />)}
+      {step === 'main' && !inlineLayout && (probes ? renderMainStep() : <LoginBodySkeleton />)}
+      {step === 'passkey' && !inlineLayout && renderPasskeyStep()}
+      {step === 'email' && !inlineLayout && renderEmailStep()}
+      {step === 'email-waiting' && !inlineLayout && renderEmailWaitingStep()}
+      {step === 'phone' && !inlineLayout && renderPhoneStep()}
+      {step === 'phone-code' && !inlineLayout && renderPhoneCodeStep()}
+      {step === 'import-wallet' && !inlineLayout && renderImportWalletStep()}
+      {step === 'wallets' && !inlineLayout && renderWalletsStep()}
+      {step === 'wallet-create' && supabaseUserId && (
+        <React.Suspense fallback={<DeHubPageLoader size={56} minHeight="180px" />}>
+          <WalletCreateStep
+            userId={supabaseUserId}
+            onComplete={completeSmartWalletLogin}
+          />
+        </React.Suspense>
+      )}
+      {step === 'wallet-secure' && supabaseUserId && (
+        <React.Suspense fallback={<DeHubPageLoader size={56} minHeight="180px" />}>
+          <WalletCreateStep
+            userId={supabaseUserId}
+            securing
+            onComplete={async () => {
+              const [{ clearDeviceSeed }, { finishWalletSecure }] = await Promise.all([
+                import('@/lib/wallet-core/device-seed'),
+                import('@/lib/wallet-secure-flow'),
+              ]);
+              await clearDeviceSeed(supabaseUserId);
+              finishWalletSecure(true);
+              // Let the waiting action resume first: closing the sheet cancels
+              // whatever is still waiting on it.
+              await new Promise((resolve) => setTimeout(resolve, 0));
+              closeLoginModal();
+            }}
+          />
+        </React.Suspense>
+      )}
+      {step === 'wallet-unlock' && supabaseUserId && (
+        <React.Suspense fallback={<DeHubPageLoader size={56} minHeight="180px" />}>
+          <WalletUnlockStep userId={supabaseUserId} onComplete={completeSmartWalletLogin} onLogout={handleWalletLogout} />
+        </React.Suspense>
+      )}
+      {/* The server's profile for this login lives on a different wallet
+          from the one saved for it, and the client refused to adopt it.
+          Nothing here can fix that safely, so nothing is offered but a way
+          out: support moves accounts by hand. */}
+      {step === 'wallet-restore' && supabaseUserId && (
+        <div className="space-y-4">
+          <p className="text-white/70 text-sm leading-relaxed">{t('loginModal.restoreContactSupport', 'Your profile is on a different wallet from the one saved for this login, so it can’t be opened here. Nothing has been changed. Contact Riftn support to have it moved.')}</p>
+          <button
+            type="button"
+            onClick={handleWalletLogout}
+            className="w-full text-center text-xs text-white/50 hover:text-white/80 transition-colors border-t border-white/10 pt-3"
+          >{t('loginModal.useAnotherLogin', 'Use a different login')}</button>
+        </div>
+      )}
+      {/* The site preloader carries every gap in the wallet handoff: the
+          resume itself, and a wallet step reached a beat before the identity
+          id lands (which used to render an empty sheet). Same mark as the
+          route loader, so the login flow doesn't invent its own idiom. */}
+      {step === 'resuming' || step === 'wallet-signing' ? (
+        // The wait for the session shows nothing of its own: the sheet dims and
+        // SignInHandoff holds the picture frame over it. Only the space is kept.
+        <div className={layout === 'stack' ? 'h-[250px]' : 'h-[180px]'} aria-hidden />
+      ) : step.startsWith('wallet-') && !supabaseUserId ? (
+        <DeHubPageLoader size={56} minHeight="180px" />
+      ) : null}
+    </>
+  );
+}
+
+export default LoginModalBody;

@@ -1,0 +1,3169 @@
+import { canShareToMoment } from '@/lib/moment-share';
+import { useTranslation as _useCopy } from 'react-i18next';
+import { useVideoDownload } from "@/hooks/use-video-download";
+import { useMatureGate } from "./MatureContentGate";
+/**
+ * Shorts Viewer Component
+ * =======================
+ * Full-screen shorts viewer with TikTok-style vertical carousel.
+ * Renders 3 videos (prev/current/next) for smooth transitions.
+ * Uses Framer Motion for smooth translateY animations.
+ */
+
+import { useState, useRef, useEffect, useCallback, useMemo, useId, lazy, Suspense } from 'react';
+import {
+  claimMediaSession,
+  releaseMediaSession,
+  setMediaSessionPlaying,
+} from '@/lib/media-session';
+import { createPortal } from 'react-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { openPostInfo } from '@/lib/preload-post-page';
+import { ChevronUp, ChevronDown, UserCheck, Loader2, Globe, RotateCcw } from "lucide-react";
+import Minimize from "@/components/ui/cut-icons/exit-fullscreen";
+import Volume2 from "@/components/ui/cut-icons/volume";
+import ArrowLeft from "@/components/ui/cut-icons/back";
+import VolumeX from "@/components/ui/cut-icons/mute";
+import Maximize from "@/components/ui/cut-icons/fullscreen";
+import MoreHorizontal from "@/components/ui/cut-icons/more";
+import PictureInPicture2 from "@/components/ui/cut-icons/picture-in-picture";
+import { VIEWER_CONTROL } from '@/lib/viewer-chrome';
+import { installFirstTap } from '@/lib/first-tap';
+import { useAppTheme } from '@/contexts/ThemeContext';
+import { GlassBackground } from '@/components/app/GlassBackground';
+import Eye from "@/components/ui/cut-icons/visibility";
+import Info from "@/components/ui/cut-icons/information";
+import Flag from "@/components/ui/cut-icons/report";
+import Ban from "@/components/ui/cut-icons/blocked";
+import UserPlus from "@/components/ui/cut-icons/add-account";
+import Trash2 from "@/components/ui/cut-icons/delete";
+import EyeOff from "@/components/ui/cut-icons/hidden";
+
+import Download from "@/components/ui/cut-icons/download";
+import { CastMenuItem } from './CastMenuItem';
+import { visibleVideo } from '@/lib/castToTv';
+import X from "@/components/ui/cut-icons/close";
+import Play from "@/components/ui/cut-icons/play";
+import Pause from "@/components/ui/cut-icons/pause";
+import MessageSquare from "@/components/ui/cut-icons/messages";
+import Bookmark from "@/components/ui/cut-icons/save";
+import Share2 from "@/components/ui/cut-icons/feedshare";
+import PostShareIcon from "@/components/ui/cut-icons/postshare";
+import Send from "@/components/ui/cut-icons/send";
+import Gem from "@/components/ui/cut-icons/diamond";
+import Gift from "@/components/ui/cut-icons/gifts";
+import { Zap } from "lucide-react";
+import { ThemedIcon } from '@/components/app/war/WarHudIcon';
+import { useSuperpowers } from '@/hooks/use-superpowers';
+
+import { motion, AnimatePresence, PanInfo, useMotionValue, useTransform, animate } from 'framer-motion';
+import { useTranslation as useContentTranslation, splitTranslatedTitleAndBody } from '../TranslatableText';
+import { useTranslation as useI18n } from 'react-i18next';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { BadgedName } from '@/components/app/BadgedName';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { useVisualViewportBox } from '@/hooks/use-keyboard-open';
+import { useCommentsPullDismiss } from '@/hooks/use-comments-pull-dismiss';
+import { useVideoViewTracking } from '@/hooks/use-view-tracking';
+import { useBlockAuthor } from '@/hooks/use-block-author';
+import { useAuth } from '@/contexts/AuthContext';
+import { useEngagementWeight } from '@/hooks/use-engagement-weight';
+import { useBookmarkPost } from '@/hooks/use-bookmarks';
+import { voteOnPost, reactToPost, isFollowing as checkIsFollowing, updateTokenVisibility, type TokenVisibility } from '@/lib/api/dehub';
+import {
+  applyReactionDelta,
+  isPositiveReaction,
+  reactionForThumbTap,
+  reactionMeta,
+  reconcileReactionCounts,
+  resolveThumbReaction,
+  resolveThumbCount,
+  type PostReaction,
+  type ReactionCounts,
+} from '@/lib/reactions';
+import { ReactionEmoji } from './ReactionEmoji';
+import { ThumbIcon } from './ThumbIcon';
+import { useReactionTray } from '@/hooks/use-reaction-tray';
+import { resolveMyReaction } from '@/lib/engagement';
+import { ReactionPicker } from './ReactionPicker';
+import { ReactionInfoDrawer } from './ReactionInfoDrawer';
+import { PostUtilityMenuItems } from './PostUtilityMenuItems';
+import { RemixMenuItems } from './LazyRemixMenuItems';
+import { DuetCredit } from './DuetCredit';
+import { ReactionOfChip, ReactionsLink } from '../remix/LazyReactionChips';
+import { StitchAttribution } from './StitchAttribution';
+import { useFollowOverrides, toggleFollowFor } from '@/hooks/use-follow';
+import { toast } from 'sonner';
+import { CommentsSection } from './CommentsSection';
+import { TipModalLazy as TipModal } from '../modals/TipModalLazy';
+import { ReportModal } from '../modals/ReportModal';
+import { DeletePostModal } from '../modals/DeletePostModal';
+import { usePostTipCount } from '@/hooks/use-post-tip-count';
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
+import Quote from "@/components/ui/cut-icons/quote";
+import Link from "@/components/ui/cut-icons/link";
+
+import Repeat2 from "@/components/ui/cut-icons/repost";
+import Captions from "@/components/ui/cut-icons/captions";
+
+import { cn } from '@/lib/utils';
+import type { ShortVideo } from '@/types/feed.types';
+import { useQueryClient } from '@tanstack/react-query';
+import { asViewerSlide } from '@/lib/short-video';
+import { VideoSlide } from './VideoSlide';
+import { postTileMenuProps } from '@/lib/post-menu';
+import { shortMenuTarget } from '@/lib/post-menu-targets';
+import { LiveSwipeSlide } from './LiveSwipeSlide';
+import { PostSwipeSlide } from './PostSwipeSlide';
+import { pauseMediaIn, resumeMedia } from '@/lib/pause-media-in';
+import { useVideoFullscreen } from '@/hooks/use-video-fullscreen';
+import { useInAppVideoMini } from '@/hooks/use-in-app-video-mini';
+import '@/styles/shorts-mini.css';
+import { setVoteCache, getVoteCache } from '@/lib/vote-cache';
+import { getVideoPreferences, getPlaybackRateFor, setPlaybackRate as vpSetPlaybackRate, PLAYBACK_RATES, formatRate, useMediaMuted, useMediaLooping, setIsLooping as vpSetIsLooping, useMediaVolume, setVolume as vpSetVolume } from '@/lib/video-preferences';
+import { VideoVolumeControl } from '@/components/app/video/VideoVolumeControl';
+import { videoPlaybackManager } from '@/lib/video-playback-manager';
+import { createWheelPager } from '@/lib/wheel-pager';
+import { commitsDismiss } from '@/lib/video-hold-gestures';
+import { useAnyOverlayOpen } from '@/lib/overlay-open';
+import { watchShortsEngagement, type ShortsEngagement } from '@/lib/shorts-engaged';
+import { UserMentionDropdown } from '@/components/app/mentions';
+import { usePostLinkCopyCount, useLinkCopyFloor, useTrackPostLinkCopy } from '@/hooks/use-link-copy-count';
+import { viewerShareUrl } from '@/lib/share-url';
+import { ShareToDmModal } from '@/components/app/modals/ShareToDmModal';
+import {
+  DOUBLE_TAP_LIKE_EVENT,
+  OPEN_REACTIONS_EVENT,
+  emitTapReactionCast,
+  type DoubleTapLikeEventDetail,
+  type OpenReactionsEventDetail,
+} from '@/lib/tap-reactions';
+import { profilePath } from '@/lib/profile-path';
+import { BoldText } from '@/lib/bold-markup';
+
+interface ShortsViewerProps {
+  shorts: ShortVideo[];
+  initialIndex: number;
+  onClose: () => void;
+  /** Callback to load more shorts when reaching near the end */
+  onLoadMore?: () => void;
+  /** Whether there are more shorts to load */
+  hasMore?: boolean;
+  /** Whether currently loading more shorts */
+  isLoadingMore?: boolean;
+  /** Reuse the tapped feed player, including its decoded frame and buffer. */
+  reuseInitialVideo?: boolean;
+}
+
+/** Format count for display (e.g., 1500 -> 1.5K) */
+function formatCount(count?: number | string): string {
+  if (typeof count === 'string') return count;
+  const value = count ?? 0;
+  if (value >= 1000000) return `${(value / 1000000).toFixed(1).replace(/\.0$/, '')}M`;
+  if (value >= 1000) return `${(value / 1000).toFixed(1).replace(/\.0$/, '')}K`;
+  return value.toString();
+}
+
+/** Expandable post description with Show more / Show less */
+function ExpandableDescription({ text }: { text: string }) {
+  const { t: _copy } = _useCopy();
+  const [expanded, setExpanded] = useState(false);
+  const ref = useRef<HTMLParagraphElement>(null);
+  const [clamped, setClamped] = useState(false);
+
+  useEffect(() => {
+    setExpanded(false);
+  }, [text]);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (el) setClamped(el.scrollHeight > el.clientHeight + 1);
+  }, [text]);
+
+  return (
+    // Spacing above belongs to ShortCaption, which may be drawing a title
+    // immediately over this.
+    <div className="flex-shrink-0">
+      <div data-shorts-scrollable={expanded || undefined} className={cn(expanded && "max-h-[7.5rem] overflow-y-auto") }>
+        <p
+          ref={ref}
+          className={cn("text-white/80 text-xs lg:text-sm", !expanded && "line-clamp-2")}
+        >
+          <BoldText text={text} />
+        </p>
+      </div>
+      {(clamped || expanded) && (
+        <button
+          onClick={() => setExpanded(p => !p)}
+          className="text-white/50 hover:text-white text-[11px] mt-0.5 transition-colors"
+        >
+          {expanded ? _copy("copy.94ea9b1d33a0", { defaultValue: "Show less" }) : _copy("copy.f5c9bd131486", { defaultValue: "Show more" })}
+        </button>
+      )}
+    </div>
+  );
+}
+
+/**
+ * A short's caption — its title, its body, and the way back to the original
+ * once they have been translated.
+ *
+ * Two things this fixes. Shorts showed the description only, so a post whose
+ * author filled in both a title and a description lost the title — and since
+ * the composer writes the caption into the *title* and leaves the description
+ * empty, the feed and the reel were reading different halves of the same post.
+ * And nothing here ever translated: the feed auto-translates every card, then
+ * opening one of those posts full-screen handed the reader back the original.
+ *
+ * Title and body go out as ONE request and come back split, the way the feed
+ * cards do it — one translation per post rather than two. See
+ * splitTranslatedTitleAndBody for what happens when the blank line separating
+ * them does not survive the round trip.
+ *
+ * The translation lives here, not in the viewer, because the viewer is a single
+ * component for the whole reel: a hook up there would still be holding the
+ * previous short's translated text at the moment you swiped, and print it under
+ * the next video. Callers key this on the post id so each short starts clean.
+ */
+function ShortCaption({
+  short,
+  variant,
+  expanded,
+  onToggleExpanded,
+}: {
+  short: ShortVideo;
+  /** 'stacked' clamps the body behind its own Show more; 'tap' opens on tap. */
+  variant: 'stacked' | 'tap';
+  /** 'tap' only — the open state lives in the viewer, which holds the chrome open while it is. */
+  expanded?: boolean;
+  onToggleExpanded?: () => void;
+}) {
+  const { t: _copy } = _useCopy();
+  const { t } = useI18n();
+
+  // "Untitled" is the uploader's placeholder, not a heading anybody wrote.
+  const rawTitle = (short.title || '').trim();
+  const title = rawTitle.toLowerCase() === 'untitled' ? '' : rawTitle;
+  // A description that only repeats the title earns neither a second line nor
+  // half of a translation request.
+  const rawBody = (short.description || '').trim();
+  const body = rawBody && rawBody !== title ? rawBody : '';
+
+  const {
+    isTranslated,
+    translatedText,
+    isLoading,
+    handleShowOriginal,
+  } = useContentTranslation([title, body].filter(Boolean).join('\n\n'));
+
+  let shownTitle: string | undefined = title || undefined;
+  let shownBody: string | undefined = body || undefined;
+  if (isTranslated && translatedText) {
+    [shownTitle, shownBody] = splitTranslatedTitleAndBody(translatedText, title || undefined, body || undefined);
+  }
+
+  const reactionChips = (
+    <div className="mt-1.5 flex flex-wrap gap-1.5 empty:hidden">
+      <ReactionOfChip tokenId={short.id} />
+      <ReactionsLink tokenId={short.id} />
+    </div>
+  );
+  if (!shownTitle && !shownBody) return reactionChips;
+
+  // Auto-translate is on by default, so the control this surface needs is the
+  // way back — not a button asking for something that already happened. Taking
+  // it holds the original until you swipe off this short and return.
+  const control = isLoading ? (
+    <span className="mt-1 flex items-center gap-1 text-white/50 text-[11px]">
+      <Loader2 className="w-3 h-3 animate-spin" />
+      {t('common.translating')}
+    </span>
+  ) : isTranslated ? (
+    <button
+      onClick={handleShowOriginal}
+      className="mt-1 flex items-center gap-1 text-white/50 hover:text-white text-[11px] transition-colors"
+    >
+      <RotateCcw className="w-3 h-3" />
+      {t('common.showOriginal')}
+    </button>
+  ) : null;
+
+  if (variant === 'tap') {
+    return (
+      <div>
+        <button
+          onClick={onToggleExpanded}
+          className="text-left w-full"
+        >
+          {/* Collapsed height comes from the line clamps below, not a fixed
+              max-height. The 2.5rem this used to carry was two lines of body
+              and nothing else; with a title above it, the first line of the
+              caption sat half outside the box. */}
+          <div
+            data-shorts-scrollable={expanded || undefined}
+            style={expanded ? { touchAction: 'pan-y' } : undefined}
+            className={`overflow-y-auto scrollbar-hide transition-all duration-200 ${
+              expanded ? 'max-h-[55svh]' : ''
+            }`}
+          >
+            {shownTitle && (
+              <p className={`text-white text-sm font-semibold leading-relaxed [text-shadow:0_10px_8px_rgb(0_0_0/0.04),0_4px_3px_rgb(0_0_0/0.1)] ${
+                expanded ? 'whitespace-pre-wrap' : 'line-clamp-1'
+              }`}>
+                <BoldText text={shownTitle} />
+              </p>
+            )}
+            {shownBody && (
+              <p className={`text-white text-sm leading-relaxed [text-shadow:0_10px_8px_rgb(0_0_0/0.04),0_4px_3px_rgb(0_0_0/0.1)] ${
+                expanded ? 'whitespace-pre-wrap' : 'line-clamp-2'
+              }`}>
+                <BoldText text={shownBody} />
+              </p>
+            )}
+          </div>
+          {((shownBody?.length ?? 0) > 80 || (shownTitle?.length ?? 0) > 40) && (
+            <span className="text-white/60 text-xs mt-1">
+              {expanded ? _copy("copy.4fdd3b6201a2", { defaultValue: "less" }) : _copy("copy.187897ce0afc", { defaultValue: "more" })}
+            </span>
+          )}
+        </button>
+        {control}
+        {reactionChips}
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-2 lg:mt-3 flex-shrink-0">
+      {shownTitle && (
+        <p className="text-white text-sm lg:text-base font-medium leading-snug mb-1">
+          <BoldText text={shownTitle} />
+        </p>
+      )}
+      {shownBody && <ExpandableDescription text={shownBody} />}
+      {control}
+      {reactionChips}
+    </div>
+  );
+}
+
+// Smooth tween transition - eliminates spring overshoot for buttery landing
+const SMOOTH_TRANSITION = {
+  type: 'tween',
+  duration: 0.35,
+  ease: [0.25, 0.1, 0.25, 1], // CSS ease-out equivalent
+} as const;
+
+// Desktop paging: a slightly springy settle (damping ratio ~0.85), so a wheel
+// or trackpad swipe lands with a little life instead of a flat tween. The page
+// and the drag offset share it, so their sum moves as one spring.
+const PAGE_SPRING = { type: 'spring', stiffness: 400, damping: 34, mass: 1 } as const;
+// A half push that springs back: bouncier, it is the "not far enough" answer.
+const SNAP_BACK_SPRING = { type: 'spring', stiffness: 520, damping: 28, mass: 1 } as const;
+
+// Tap-to-restore band used while the mobile chrome is hidden: the lower part of
+// the frame where the overlays live, stopping short of VideoSlide's bottom 15%
+// seek strip so a restore tap never scrubs the timeline.
+const RESTORE_ZONE_TOP = 0.61; // 30% -> 24% of the frame: 20% smaller.
+const RESTORE_ZONE_BOTTOM = 0.85;
+
+// The play/pause target: the middle third of the frame on both axes. A tap
+// outside it hides or shows the buttons instead.
+const PAUSE_ZONE_START = 1 / 3;
+const PAUSE_ZONE_END = 2 / 3;
+
+// How long a short plays untouched before the chrome clears itself. The
+// swipe-down is a deliberate act almost nobody discovers, so a short played
+// straight through kept its caption, avatar and action row over the frame for
+// its whole run. Long enough to read who posted it, short enough that the
+// video is unobstructed for most of its length.
+const AUTO_HIDE_MS = 3000;
+
+/** How far in from the left edge a swipe-back may start (the shell uses 28). */
+const EDGE_SWIPE_ZONE_PX = 44;
+/** Sideways travel before an edge drag counts as a swipe back. */
+const EDGE_SWIPE_CLAIM_PX = 12;
+/** The settle after letting go of a drag-to-leave that did not commit. */
+const DISMISS_SPRING = { type: 'spring', stiffness: 420, damping: 38, mass: 0.8 } as const;
+const DISMISS_OUT = { duration: 0.2, ease: 'easeOut' } as const;
+
+// The same idea on desktop, where there is a pointer to key off: the chrome
+// clears once the mouse has been still for this long, and the moment it leaves
+// the frame entirely. Shorter than the mobile timer because a mouse move brings
+// it straight back, so clearing early costs nothing.
+const DESKTOP_AUTO_HIDE_MS = 2000;
+
+/** Drag travel before the short it is heading for starts playing (silently). */
+const PEEK_START_PX = 8;
+
+/**
+ * The pair of controls in the video's top-right corner, as one class string.
+ *
+ * They read as a single two-button control, and they used to be built in two
+ * different components from hand-copied classes, which drifted: fullscreen
+ * carried a `saturate-[180%]` mute never had, so the two sat side by side in
+ * visibly different shades. Both are built from this now — position and the
+ * hidden state are all either is allowed to add.
+ */
+// Same lazy chunk the feed card uses: fetched on the tap that opens it.
+const BoostModal = lazy(() =>
+  import('../modals/BoostModal').then((m) => ({ default: m.BoostModal }))
+);
+
+const CORNER_CONTROL =
+  `absolute top-3 z-10 ${VIEWER_CONTROL} transition-opacity duration-300`;
+
+/**
+ * Follow answers outlive one viewer, "not following" included: reopening the
+ * reel or swiping back to a creator does not ask again, so the follow button
+ * no longer blinks a loading box on every slide. A follow or unfollow made
+ * since is in the follow overrides, which win over this.
+ */
+const followAnswers = new Map<string, boolean>();
+
+export function ShortsViewer({ shorts: entries, initialIndex, onClose, onLoadMore, hasMore, isLoadingMore, reuseInitialVideo = false }: ShortsViewerProps) {
+  const shorts = useMemo(() => entries.map(asViewerSlide), [entries]);
+  const { t: _copy } = _useCopy();
+  const { t } = useI18n();
+  const { theme } = useAppTheme();
+  const instanceId = useId();
+  useEffect(() => {
+    const paused = Array.from(document.querySelectorAll<HTMLElement>('[data-cached-page]'))
+      .flatMap((page) => pauseMediaIn(page));
+    return () => resumeMedia(paused);
+  }, []);
+  const [selection, setSelection] = useState(() => ({ id: shorts[initialIndex]?.id, index: initialIndex }));
+  const selectedIndex = shorts.findIndex(short => short.id === selection.id);
+  const currentIndex = selectedIndex >= 0 ? selectedIndex : Math.min(selection.index, Math.max(0, shorts.length - 1));
+  const prefMuted = useMediaMuted();
+  // The browser refused sound on a short (iPhone, fast swiping), so it plays
+  // silent until the viewer taps the speaker. Not saved as their choice.
+  const [autoMuted, setAutoMuted] = useState(false);
+  const isMuted = prefMuted || autoMuted;
+  const handleAutoMuted = useCallback(() => setAutoMuted(true), []);
+  const toggleMute = useCallback(() => {
+    if (autoMuted && !prefMuted) {
+      setAutoMuted(false);
+      // Inside the tap, so the browser lets the sound start.
+      document.querySelectorAll<HTMLVideoElement>('video.shorts-inline-video').forEach((v) => {
+        if (!v.paused) v.muted = false;
+      });
+      return;
+    }
+    videoPlaybackManager.globalMuted = getVideoPreferences().mediaMuted !== true;
+  }, [autoMuted, prefMuted]);
+  // The speaker's slider: the same saved level as feed and post videos.
+  // Down to nothing is muted; up off the bottom is sound again.
+  const shortsVolume = useMediaVolume();
+  const [volumeOpen, setVolumeOpen] = useState(false);
+  const setShortsVolume = useCallback((level: number) => {
+    vpSetVolume(level);
+    if (level === 0) {
+      if (!prefMuted) videoPlaybackManager.globalMuted = true;
+      return;
+    }
+    if (autoMuted) {
+      setAutoMuted(false);
+      document.querySelectorAll<HTMLVideoElement>('video.shorts-inline-video').forEach((v) => {
+        if (!v.paused) v.muted = false;
+      });
+    }
+    if (prefMuted) videoPlaybackManager.globalMuted = false;
+  }, [autoMuted, prefMuted]);
+  const speakerSilent = isMuted || shortsVolume === 0;
+  /** A level dragged down to nothing comes back up, or unmuting would stay silent. */
+  const handleSpeakerClick = useCallback(() => {
+    if (shortsVolume === 0) setShortsVolume(0.8);
+    else toggleMute();
+  }, [shortsVolume, setShortsVolume, toggleMute]);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const transitioningRef = useRef(false);
+  const queuedStep = useRef<'next' | 'prev' | null>(null);
+  useEffect(() => {
+    if (!isTransitioning) return;
+    const timer = setTimeout(() => {
+      transitioningRef.current = false;
+      setIsTransitioning(false);
+    }, SMOOTH_TRANSITION.duration * 1000);
+    return () => clearTimeout(timer);
+  }, [isTransitioning]);
+  const [showPlayIndicator, setShowPlayIndicator] = useState<'play' | 'pause' | null>(null);
+  const [showComments, setShowComments] = useState(false);
+  const commentsPullDismiss = useCommentsPullDismiss(() => setShowComments(false));
+  // The phone split mounts the comment list only once its slide has landed.
+  // Mounting it on the opening frame blocked the main thread for the first
+  // ~200ms of a 350ms slide, so the sheet and the player both skipped straight
+  // to the middle of the motion — the judder on open.
+  const [commentsLanded, setCommentsLanded] = useState(false);
+  useEffect(() => {
+    if (!showComments) setCommentsLanded(false);
+  }, [showComments]);
+  const [commentsInitialTab, setCommentsInitialTab] = useState<'replies' | 'quotes' | 'reposts' | 'search' | undefined>(undefined);
+  const [shareSheetOpen, setShareSheetOpen] = useState(false);
+  // Loop off (the default): a short that ends moves on to the next one.
+  const isLooping = useMediaLooping();
+  const [captionSlot, setCaptionSlot] = useState<HTMLDivElement | null>(null);
+  const [shareToDmOpen, setShareToDmOpen] = useState(false);
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showBoostModal, setShowBoostModal] = useState(false);
+  const [visibility, setVisibility] = useState<TokenVisibility>('public');
+  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+  const [overlaysHidden, setOverlaysHidden] = useState(false);
+  // The same clear, reached by playing untouched for AUTO_HIDE_MS. Separate
+  // from overlaysHidden: a swipe is deliberate, so it survives a tap and never
+  // re-arms itself, and neither is true of this one.
+  const [autoHidden, setAutoHidden] = useState(false);
+  const [isTimelineSeeking, setIsTimelineSeeking] = useState(false);
+  // A scrub is attention: it brings rested chrome back with it.
+  const beginTimelineSeek = useCallback(() => { setIsTimelineSeeking(true); setAutoHidden(false); }, []);
+  const endTimelineSeek = useCallback(() => setIsTimelineSeeking(false), []);
+  const [playbackRate, setPlaybackRate] = useState(() => getVideoPreferences().playbackRate);
+  
+  // Gesture tracking for overlay hide/show
+  const overlaySwipeStartY = useRef<number | null>(null);
+  const overlaySwipeStartX = useRef<number | null>(null);
+  // What the last video tap did, so the second tap of a double tap (a like)
+  // can put it back: a pause, or the chrome state from before the toggle.
+  const lastVideoTap = useRef<{ kind: 'pause' } | { kind: 'chrome'; overlaysHidden: boolean; autoHidden: boolean } | null>(null);
+
+  // Drag state for visual feedback
+  // Finger movement stays on the compositor, without rerendering every sheet,
+  // caption and player at touch frequency.
+  const dragOffset = useMotionValue(0);
+  const setDragOffset = useCallback((value: number) => dragOffset.set(value), [dragOffset]);
+  const resetDragOffset = useCallback(() => {
+    animate(dragOffset, 0, SMOOTH_TRANSITION);
+  }, [dragOffset]);
+  
+  // Voting state - synced with API
+  const [isLiked, setIsLiked] = useState(false);
+  const [isDisliked, setIsDisliked] = useState(false);
+  const [localLikeCount, setLocalLikeCount] = useState(0);
+  const [localDislikeCount, setLocalDislikeCount] = useState(0);
+  const [isVoting, setIsVoting] = useState(false);
+  const voteInFlightRef = useRef(false);
+  const [justVoted, setJustVoted] = useState<'like' | 'dislike' | null>(null);
+  const [myReaction, setMyReaction] = useState<PostReaction | null>(null);
+  const [localReactionCounts, setLocalReactionCounts] = useState<ReactionCounts>({});
+  // The two reaction trays are declared further down, past the vote handlers
+  // that have to put them away. These are how those handlers reach them.
+  const closeTrays = useRef<() => void>(() => {});
+  const openLikeTray = useRef<() => void>(() => {});
+  const [reactionInfoOpen, setReactionInfoOpen] = useState(false);
+
+  // Follow state — shared cross-surface overrides win over the local session set
+  const [followedCreators, setFollowedCreators] = useState<Set<string>>(new Set());
+  const [followCheckingCreators, setFollowCheckingCreators] = useState<Set<string>>(new Set());
+  const followOverrides = useFollowOverrides();
+  const isCreatorFollowed = useCallback((addr?: string | null) =>
+    !!addr && (followOverrides.get(addr.toLowerCase()) ?? followedCreators.has(addr)),
+  [followOverrides, followedCreators]);
+  
+  const containerRef = useRef<HTMLDivElement>(null);
+  // Back, like, share, mute... answer the first tap even straight after a
+  // flick, when the browser drops that tap's click. See lib/first-tap.
+  useEffect(() => {
+    const root = containerRef.current;
+    return root ? installFirstTap(root) : undefined;
+  }, []);
+  // Turns the trackpad's continuous wheel stream into a drag that follows the
+  // fingers and pages one short per swipe — see `createWheelPager`. Lazily
+  // built into a ref rather than a memo: it carries the live gesture, and a
+  // memo React is free to discard would drop it mid-swipe.
+  const wheelPagerRef = useRef<ReturnType<typeof createWheelPager>>();
+  if (!wheelPagerRef.current) wheelPagerRef.current = createWheelPager();
+  // The slide the pointer was last hit-tested onto — kept mounted, see
+  // visibleIndices.
+  const [pointerPinnedIndex, setPointerPinnedIndex] = useState<number | null>(null);
+  const isMobile = useIsMobile();
+  // A phone stays a phone when it is turned sideways, where it is wider than
+  // the phone layout's breakpoint.
+  const [isTouchPhone] = useState(() => typeof window !== 'undefined'
+    && window.matchMedia('(pointer: coarse)').matches
+    && Math.min(window.screen.width, window.screen.height) < 768);
+  // Around a video that does not fill a phone screen: the plain backdrop on
+  // System and Minimal, a mirrored floor on Osaka and Glass, and light from
+  // the picture on the other immersive themes.
+  const phoneStage = !(isMobile || isTouchPhone) ? undefined
+    : theme === 'system' || theme === 'minimal' || theme === 'light' ? 'clean' as const
+    : theme === 'osaka' || theme === 'glass' ? 'floor' as const
+    : 'glow' as const;
+  const [slideRatio, setSlideRatio] = useState<{ id: string | number; ratio: number } | null>(null);
+  const commentsViewport = useVisualViewportBox(isMobile && showComments);
+
+  /**
+   * Immersive fullscreen (desktop).
+   *
+   * The element that goes fullscreen is the VIDEO CONTAINER, not the <video>
+   * and not a slide: everything the viewer needs — mute, the action bar, the
+   * creator block, the seek strip — is inside that container, and only what
+   * lives inside the fullscreened element paints in the top layer. Fullscreening
+   * anything smaller returns a bare video with every control stranded on the
+   * hidden page below.
+   *
+   * The hook is handed NO video on purpose. Given one it prefers
+   * `video.webkitEnterFullscreen()`, the single path that cannot carry chrome
+   * (iOS fullscreens the media element itself, controls and all replaced by the
+   * system player). Fullscreen here is desktop-only, so the container path is
+   * the only one that should ever run.
+   */
+  const fullscreenTargetRef = useRef<HTMLDivElement>(null);
+  // The same node, as state: the active slide portals its progress bar in here
+  // (see `progressLayer` on VideoSlide), and a portal target has to be
+  // something a render can react to. The callback is memoised because an inline
+  // one changes identity every render, and React would then detach and re-attach
+  // the ref — setting this back to null and round-tripping forever.
+  const [videoContainer, setVideoContainer] = useState<HTMLDivElement | null>(null);
+  // The scrubber's slot in the phone stack, as state for the same reason.
+  const [seekSlot, setSeekSlot] = useState<HTMLDivElement | null>(null);
+  const attachVideoContainer = useCallback((node: HTMLDivElement | null) => {
+    fullscreenTargetRef.current = node;
+    setVideoContainer(node);
+  }, []);
+  // The player clips its slides, but a clipped box can still be scrolled by
+  // code: a chat scrolling to its newest line, or focus moving into the slide
+  // parked below. Scrolled, it showed the next short, paused, while the one
+  // playing sat out of sight. It never scrolls, so put it straight back.
+  useEffect(() => {
+    if (!videoContainer) return;
+    const pin = () => {
+      if (videoContainer.scrollTop) videoContainer.scrollTop = 0;
+      if (videoContainer.scrollLeft) videoContainer.scrollLeft = 0;
+    };
+    pin();
+    videoContainer.addEventListener('scroll', pin, { passive: true });
+    return () => videoContainer.removeEventListener('scroll', pin);
+  }, [videoContainer]);
+  const noVideoRef = useRef<HTMLVideoElement>(null);
+  const { isFullscreen, toggleFullscreen } = useVideoFullscreen(noVideoRef, fullscreenTargetRef, {
+    // Unlike a slide, this container has no transformed ancestor — the
+    // carousel's translateY is a *descendant* of it — so the simulated
+    // fallback's `fixed inset-0` resolves against the viewport and lands
+    // correctly. WebViews that fake the Fullscreen API get immersive mode too
+    // rather than a dead button.
+    allowSimulated: true,
+  });
+  const mini = useInAppVideoMini(containerRef, currentIndex, !isFullscreen && !showComments, isMobile);
+
+  /**
+   * Phones: a wide video and the way the phone is held.
+   *
+   * Turning the phone sideways plays a wide video full screen, and turning it
+   * back upright leaves again. Going full screen from the button turns the
+   * picture sideways where the browser can (Android), so nobody has to unlock
+   * rotation first. A tall video is left alone: sideways it would only shrink.
+   */
+  const fullscreenStateRef = useRef({ isFullscreen, toggleFullscreen, currentIndex });
+  fullscreenStateRef.current = { isFullscreen, toggleFullscreen, currentIndex };
+  const turnedIntoFullscreenRef = useRef(false);
+  const currentVideoIsWide = useCallback(() => {
+    const player = containerRef.current?.querySelector<HTMLVideoElement>(
+      `[data-shorts-slide="${fullscreenStateRef.current.currentIndex}"] [data-shorts-picture] video`,
+    );
+    return !!player && player.videoWidth > player.videoHeight * 1.1;
+  }, []);
+  useEffect(() => {
+    if (!isTouchPhone) return;
+    const sideways = window.matchMedia('(orientation: landscape)');
+    const onTurn = () => {
+      const state = fullscreenStateRef.current;
+      if (sideways.matches) {
+        if (!state.isFullscreen && currentVideoIsWide()) {
+          turnedIntoFullscreenRef.current = true;
+          state.toggleFullscreen();
+        }
+      } else if (turnedIntoFullscreenRef.current) {
+        turnedIntoFullscreenRef.current = false;
+        if (state.isFullscreen) state.toggleFullscreen();
+      }
+    };
+    sideways.addEventListener('change', onTurn);
+    return () => sideways.removeEventListener('change', onTurn);
+  }, [isTouchPhone, currentVideoIsWide]);
+  useEffect(() => {
+    if (!isTouchPhone) return;
+    const orientation = window.screen?.orientation as (ScreenOrientation & { lock?: (o: string) => Promise<void> }) | undefined;
+    if (!isFullscreen) {
+      turnedIntoFullscreenRef.current = false;
+      return;
+    }
+    // Only real fullscreen can hold the screen sideways; it is refused
+    // everywhere else, and the picture then simply follows the phone.
+    if (!document.fullscreenElement || !currentVideoIsWide()) return;
+    void orientation?.lock?.('landscape').catch(() => {});
+    return () => {
+      try { orientation?.unlock?.(); } catch { /* Not locked. */ }
+    };
+  }, [isFullscreen, isTouchPhone, currentVideoIsWide]);
+  // The whole viewer follows a drag-to-leave on phones: right from the left
+  // edge, or down on the first short. The page underneath shows as it goes.
+  const leaveX = useMotionValue(0);
+  const leaveY = useMotionValue(0);
+  const viewerY = useTransform([mini.y, leaveY], ([a, b]: number[]) => a + b);
+  const leaveScale = useTransform([leaveX, leaveY], ([x, y]: number[]) =>
+    1 - 0.08 * Math.min(1, Math.max(x / Math.max(1, window.innerWidth), y / Math.max(1, window.innerHeight))));
+  const viewerScale = useTransform([mini.scale, leaveScale], ([a, b]: number[]) => a * b);
+  const leaveRadius = useTransform([leaveX, leaveY], ([x, y]: number[]) => Math.min(28, (x + y) / 4));
+  const leaving = useRef(false);
+  const leaveViewer = useCallback((axis: 'x' | 'y') => {
+    if (leaving.current) return;
+    leaving.current = true;
+    const value = axis === 'x' ? leaveX : leaveY;
+    animate(value, axis === 'x' ? window.innerWidth : window.innerHeight, { ...DISMISS_OUT, onComplete: () => onClose() });
+  }, [leaveX, leaveY, onClose]);
+  /** A side hold (speed up / rewind) owns this finger, so the pager stays put. */
+  const holdOwnsGesture = useRef(false);
+  const handleHoldChange = useCallback((active: boolean) => {
+    if (active) holdOwnsGesture.current = true;
+  }, []);
+  const minimizedRef = useRef(mini.minimized);
+  minimizedRef.current = mini.minimized;
+
+  /**
+   * Radix portals every modal and drawer to <body>, which is *outside* the
+   * fullscreened element — in the top layer nothing else on the page paints, so
+   * a tip sheet opened from fullscreen would be perfectly invisible. Drop out
+   * first and open it over the normal viewer.
+   */
+  const leaveFullscreenThen = useCallback((open: () => void) => {
+    if (isFullscreen) toggleFullscreen();
+    open();
+  }, [isFullscreen, toggleFullscreen]);
+
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // The viewer is portalled to document.body, so it does not unmount with the
+  // page that opened it and no route change touches it. Anything that navigates
+  // from inside — a commenter's name, a link card, an @mention, browser Back —
+  // would otherwise leave it on screen and audible over the destination. The
+  // comments sheet's own onClose only hides the sheet, not this.
+  //
+  // Skipped on the first render so opening the viewer does not immediately shut
+  // it: the effect has to see the path actually change.
+  const openedAt = useRef(location.pathname);
+  useEffect(() => {
+    if (location.pathname === openedAt.current) return;
+    onClose();
+  }, [location.pathname, onClose]);
+  const { isAuthenticated, walletAddress, openLoginModal } = useAuth();
+  // What one reaction from this viewer counts for — their badge multiplier.
+  const voteWeight = useEngagementWeight();
+
+  const currentShort = shorts[currentIndex];
+  // A stream that is live right now, mixed in among the shorts. It draws its
+  // own chrome, and none of the post machinery below (votes, tips, comments,
+  // views) applies to it, so those get no id while it is on screen.
+  const isLiveSlide = !!currentShort?.live;
+  const postId = isLiveSlide ? undefined : currentShort?.id;
+  // A wide video held upright on the clean stage.
+  const wideRatio = slideRatio && currentShort && slideRatio.id === currentShort.id && slideRatio.ratio > 1.1 ? slideRatio.ratio : 0;
+  const cleanWide = isMobile && phoneStage === 'clean' && wideRatio > 0 && !isLiveSlide && !currentShort?.imageUrls?.length && !isFullscreen;
+  const downloadVideo = useVideoDownload();
+  const downloadGate = useMatureGate(currentShort?.contentRating);
+  /** Desktop puts the subtitles button in the top corner row, beside options. */
+  const hasDesktopCaptions = !isMobile && !isLiveSlide && !!currentShort?.videoUrl && !currentShort?.reelPost && !currentShort?.imageUrls?.length;
+  const isOwnShort = !!walletAddress && currentShort?.creatorId?.toLowerCase() === walletAddress.toLowerCase();
+  // Boost, as on the feed card: the owner boosts their own post, and anyone
+  // holding Deep Current can gift one to somebody else's.
+  const { data: superpowerStatus } = useSuperpowers(!!walletAddress);
+  const canGiftBoost = !!superpowerStatus?.powers.some(
+    p => p.key === 'deep_current' && p.unlocked && p.available,
+  );
+  const boostTokenId = parseInt(currentShort?.id ?? '', 10) || undefined;
+  const canBoostCurrent = !!boostTokenId && !isLiveSlide;
+
+  // Swiping to another creator picks up that creator's pinned rate, the same
+  // way opening one of their videos does. Creators with none keep the global.
+  useEffect(() => {
+    setPlaybackRate(getPlaybackRateFor(currentShort?.creatorId));
+  }, [currentShort?.creatorId]);
+  const { blockAuthor } = useBlockAuthor();
+  // Who reacted what is the author's to see — the ⓘ in the reaction tray only
+  // exists on your own shorts (and the API refuses the list to anyone else).
+  const canViewReactionInfo = isOwnShort && !!currentShort?.id;
+  const showReactionInfo = () => {
+    closeTrays.current();
+    setReactionInfoOpen(true);
+  };
+  const [showTipModal, setShowTipModal] = useState(false);
+  const { data: tipCount = 0 } = usePostTipCount(postId, currentShort?.totalTips);
+
+  // Share counter = reposts + link copies.
+  //
+  // shareDelta is the optimistic bump for a repost made here, cleared when the
+  // short changes. Link copies instead carry a FLOOR and are combined with
+  // max() rather than added: a delta would be added on top of the server total
+  // again as soon as the count query refetched and already contained that same
+  // copy, whereas a floor is absorbed the moment the server catches up.
+  const { data: linkCopyCount = 0 } = usePostLinkCopyCount(postId);
+  const linkCopyFloor = useLinkCopyFloor(postId);
+  const trackLinkCopy = useTrackPostLinkCopy();
+  const [shareDelta, setShareDelta] = useState(0);
+  const displayShareCount =
+    (currentShort?.repostCount ?? 0) +
+    shareDelta +
+    Math.max(linkCopyCount, linkCopyFloor);
+  
+  // View tracking for the current short
+  const { onTimeUpdate: trackView } = useVideoViewTracking(postId);
+  
+  // Compute visible indices for the 3-video window, plus whichever slide the
+  // pointer is still latched to.
+  //
+  // The browser only works out what is under the cursor when the cursor moves.
+  // Advancing a short is a transform, so after a flick the pointer is visually
+  // over the new slide while the browser still aims wheel events at the old
+  // one — harmless while that slide is mounted (the event still bubbles to the
+  // window handler), fatal the moment the render window drops it: the events
+  // then go to a node that is no longer in the document and reach no listener
+  // at all. That is the "scroll goes dead until I nudge the mouse" report — a
+  // nudge is simply the fresh hit-test.
+  //
+  // So the last slide the pointer actually landed on stays mounted until the
+  // pointer moves again and re-targets. One extra paused slide, and a gesture
+  // never loses its target. Desktop only: `pointerPinnedIndex` is never set on
+  // mobile, where touch re-targets every gesture anyway.
+  const visibleIndices = useMemo(() => {
+    const indices = [
+      currentIndex - 1, // Previous
+      currentIndex,     // Current
+      currentIndex + 1, // Next
+    ];
+    if (pointerPinnedIndex !== null && !indices.includes(pointerPinnedIndex)) {
+      indices.push(pointerPinnedIndex);
+    }
+    return indices.filter(i => i >= 0 && i < shorts.length).sort((a, b) => a - b);
+  }, [currentIndex, shorts.length, pointerPinnedIndex]);
+  
+  // Navigate to creator profile
+  const handleNavigateToProfile = useCallback(() => {
+    const username = currentShort?.creatorUsername || currentShort?.username;
+    if (username) {
+      onClose();
+      navigate(profilePath(username));
+    }
+  }, [currentShort?.creatorUsername, currentShort?.username, navigate, onClose]);
+  
+  const queryClient = useQueryClient();
+
+  // Handle follow creator — optimistic: flips everywhere instantly, reverts on error
+  const handleFollow = useCallback(() => {
+    const creatorAddress = currentShort?.creatorId;
+    if (!creatorAddress) {
+      toast.error(_copy("copy.cf8b4e247840", { defaultValue: "Unable to follow - creator not found" }));
+      return;
+    }
+
+    if (!isAuthenticated) {
+      openLoginModal();
+      return;
+    }
+
+    if (isCreatorFollowed(creatorAddress)) {
+      return;
+    }
+
+    setFollowedCreators(prev => new Set(prev).add(creatorAddress));
+    toggleFollowFor(queryClient, creatorAddress, false, {
+      name: currentShort.displayName || currentShort.creatorUsername || currentShort.username,
+      onError: (_error, info) => {
+        setFollowedCreators(prev => {
+          const next = new Set(prev);
+          next.delete(creatorAddress);
+          return next;
+        });
+        if (!info.handled) toast.error(_copy("copy.f5a7643bdaac", { defaultValue: "Failed to follow user" }));
+      },
+    });
+  }, [currentShort, isAuthenticated, openLoginModal, isCreatorFollowed, queryClient, _copy]);
+
+  // Bookmark hook
+  const { isBookmarked, isLoading: isBookmarkLoading, toggleBookmark } = useBookmarkPost(postId || '');
+  
+  // Sync voting state from short data when changing videos
+  // Check vote cache first to preserve optimistic updates across scroll
+  useEffect(() => {
+    const cached = currentShort?.id ? getVoteCache(String(currentShort.id)) : null;
+    if (cached) {
+      setIsLiked(cached.isLiked);
+      setIsDisliked(cached.isDisliked);
+      setLocalLikeCount(cached.likeCount);
+      setLocalDislikeCount(cached.dislikeCount);
+      if (cached.myReaction !== undefined) setMyReaction(cached.myReaction);
+      if (cached.reactionCounts) setLocalReactionCounts(cached.reactionCounts);
+    } else {
+      setIsLiked(currentShort?.isLiked ?? false);
+      setIsDisliked(currentShort?.isDisliked ?? false);
+      const likes = typeof currentShort?.likes === 'string'
+        ? parseInt(currentShort.likes.replace(/[^0-9]/g, '')) || 0
+        : (currentShort?.likes as unknown as number) || 0;
+      const dislikes = (currentShort as { dislikes?: number })?.dislikes ?? 0;
+      setLocalLikeCount(likes);
+      setLocalDislikeCount(dislikes);
+      setMyReaction(resolveMyReaction(currentShort as never));
+      // Reconciled against the row's counts for the same reason as ActionBar:
+      // a stored split that doesn't add up to the displayed counts is scaled
+      // to fit rather than served raw.
+      setLocalReactionCounts(reconcileReactionCounts(likes, dislikes, (currentShort as never as { reactionCounts?: ReactionCounts })?.reactionCounts));
+    }
+    closeTrays.current();
+    setShowComments(false);
+    setCommentsInitialTab(undefined);
+    setIsDescriptionExpanded(false);
+    setIsPaused(false);
+    setShareDelta(0);
+    setShareToDmOpen(false);
+  }, [currentIndex, currentShort?.id, currentShort?.likes, currentShort?.isLiked, currentShort?.isDisliked]);
+  
+  // Check follow status from API when creator changes
+  useEffect(() => {
+    const creatorAddress = currentShort?.creatorId;
+    if (!creatorAddress || !isAuthenticated || followedCreators.has(creatorAddress)) return;
+    const cacheKey = creatorAddress.toLowerCase();
+    const known = followAnswers.get(cacheKey);
+    if (known !== undefined) {
+      if (known) setFollowedCreators(prev => new Set(prev).add(creatorAddress));
+      return;
+    }
+
+    setFollowCheckingCreators(prev => new Set(prev).add(creatorAddress));
+    let cancelled = false;
+    const done = () => setFollowCheckingCreators(prev => {
+      if (!prev.has(creatorAddress)) return prev;
+      const next = new Set(prev);
+      next.delete(creatorAddress);
+      return next;
+    });
+    checkIsFollowing(creatorAddress).then(result => {
+      followAnswers.set(cacheKey, !!result);
+      if (!cancelled && result) setFollowedCreators(prev => new Set(prev).add(creatorAddress));
+    }).catch(() => {}).finally(() => { if (!cancelled) done(); });
+
+    // Swiping on before the answer used to leave this creator marked as
+    // checking for good: a "Loading…" box on every later visit.
+    return () => { cancelled = true; done(); };
+  }, [currentShort?.creatorId, isAuthenticated]);
+
+  /**
+   * Cast, switch or toggle off a reaction on the current short.
+   *
+   * Counts track POLARITY, so swapping like → love moves only
+   * `reactionCounts` — see the same reasoning in ActionBar.handleReaction.
+   *
+   * The viewer's badge decides what their one reaction counts for, so the
+   * optimistic move here is by that weight rather than by one.
+   */
+  const handleReaction = useCallback(async (reaction: PostReaction) => {
+    const tokenId = String(currentShort?.id);
+
+    if (!tokenId || tokenId === 'undefined' || isVoting || voteInFlightRef.current) return;
+
+    if (!isAuthenticated) {
+      openLoginModal();
+      return;
+    }
+
+    const previous = myReaction;
+    const isRemovingVote = previous === reaction;
+    const next: PostReaction | null = isRemovingVote ? null : reaction;
+
+    const wasPositive = previous ? isPositiveReaction(previous) : false;
+    const wasNegative = previous ? !wasPositive : false;
+    const nextPositive = next ? isPositiveReaction(next) : false;
+    const nextNegative = next ? !nextPositive : false;
+
+    // One reaction. A like counts for the reactor's badge weight, the same
+    // number the server moves it by.
+    let likeDelta = 0;
+    let dislikeDelta = 0;
+    if (wasPositive && !nextPositive) likeDelta = -voteWeight;
+    if (!wasPositive && nextPositive) likeDelta = voteWeight;
+    // A dislike always shows as one, whatever badge cast it.
+    if (wasNegative && !nextNegative) dislikeDelta = -1;
+    if (!wasNegative && nextNegative) dislikeDelta = 1;
+
+    const newLiked = nextPositive;
+    const newDisliked = nextNegative;
+    const newReactionCounts = applyReactionDelta(localReactionCounts, previous, next, voteWeight);
+
+    voteInFlightRef.current = true;
+    setIsVoting(true);
+    closeTrays.current();
+    if (!isRemovingVote) setJustVoted(nextPositive ? 'like' : 'dislike');
+
+    // Apply optimistic UI
+    setIsLiked(newLiked);
+    setIsDisliked(newDisliked);
+    setMyReaction(next);
+    setLocalReactionCounts(newReactionCounts);
+    setLocalLikeCount(prev => {
+      const newCount = Math.max(0, prev + likeDelta);
+      // Cache after computing final values
+      setVoteCache(tokenId, {
+        isLiked: newLiked,
+        isDisliked: newDisliked,
+        myReaction: next,
+        likeCount: newCount,
+        dislikeCount: Math.max(0, localDislikeCount + dislikeDelta),
+        reactionCounts: newReactionCounts,
+      });
+      return newCount;
+    });
+    setLocalDislikeCount(prev => Math.max(0, prev + dislikeDelta));
+
+    setTimeout(() => setJustVoted(null), 400);
+
+    try {
+      const numericId = parseInt(tokenId, 10);
+      if (reaction === 'like' || reaction === 'dislike') {
+        await voteOnPost({ tokenId: numericId, voteType: reaction === 'like' ? 'for' : 'against' });
+      } else {
+        await reactToPost({ tokenId: numericId, reaction });
+      }
+    } catch (error) {
+      // Revert on error
+      setIsLiked(isLiked);
+      setIsDisliked(isDisliked);
+      setMyReaction(previous);
+      setLocalReactionCounts(localReactionCounts);
+      setLocalLikeCount(prev => Math.max(0, prev - likeDelta));
+      setLocalDislikeCount(prev => Math.max(0, prev - dislikeDelta));
+      // Clear stale cache on error
+      setVoteCache(tokenId, {
+        isLiked,
+        isDisliked,
+        myReaction: previous,
+        likeCount: Math.max(0, localLikeCount),
+        dislikeCount: Math.max(0, localDislikeCount),
+        reactionCounts: localReactionCounts,
+      });
+      toast.error(_copy("copy.520424cf959c", { defaultValue: "Failed to react. Please try again." }));
+    } finally {
+      voteInFlightRef.current = false;
+      setIsVoting(false);
+    }
+  }, [currentShort?.id, isVoting, isLiked, isDisliked, myReaction, localReactionCounts, isAuthenticated, localLikeCount, localDislikeCount, voteWeight, _copy]);
+
+  /**
+   * The thumb casts whichever reaction it is WEARING, so a short leading with
+   * 🔥 reacts 🔥 on a tap; re-sending a reaction you hold toggles it off. With
+   * no thumbs-down beside it, a 👎 you hold is worn here and a tap removes it.
+   * Same contract as the feed card's bar — see ActionBar.handleVote.
+   */
+  const handleVote = useCallback(() => {
+    return handleReaction(reactionForThumbTap(myReaction, localReactionCounts));
+  }, [handleReaction, myReaction, localReactionCounts]);
+
+  /**
+   * The tap ladder on the slide itself — double 👍, triple ❤️, hold for the
+   * tray. This viewer renders no ActionBar, so the listener ActionBar owns
+   * never runs here and these events would otherwise fall on the floor.
+   *
+   * Guarded the same way ActionBar guards its own: a gesture only ever adds, so
+   * re-casting the reaction already held (which the server reads as "clear it")
+   * is refused rather than silently removing a like.
+   */
+  const handleReactionRef = useRef(handleReaction);
+  useEffect(() => { handleReactionRef.current = handleReaction; }, [handleReaction]);
+  useEffect(() => {
+    const id = currentShort?.id != null ? String(currentShort.id) : '';
+    if (!id) return;
+
+    const onTapReaction = (e: Event) => {
+      const detail = (e as CustomEvent<DoubleTapLikeEventDetail>).detail;
+      if (!detail || String(detail.postId) !== id) return;
+      const reaction = detail.reaction ?? 'like';
+      if (myReaction === reaction) return;
+      if (reaction === 'like' && isLiked) return;
+      // Past the guards, so the slide's burst may draw. Same reason as
+      // ActionBar: the burst listens to the cast, never the gesture, so a
+      // refused tap on something already liked stays silent.
+      emitTapReactionCast({ ...detail, reaction });
+      handleReactionRef.current(reaction);
+    };
+    const onOpenReactions = (e: Event) => {
+      const detail = (e as CustomEvent<OpenReactionsEventDetail>).detail;
+      if (!detail || String(detail.postId) !== id) return;
+      openLikeTray.current();
+    };
+
+    window.addEventListener(DOUBLE_TAP_LIKE_EVENT, onTapReaction as EventListener);
+    window.addEventListener(OPEN_REACTIONS_EVENT, onOpenReactions as EventListener);
+    return () => {
+      window.removeEventListener(DOUBLE_TAP_LIKE_EVENT, onTapReaction as EventListener);
+      window.removeEventListener(OPEN_REACTIONS_EVENT, onOpenReactions as EventListener);
+    };
+  }, [currentShort?.id, myReaction, isLiked]);
+
+  // Hold the thumb to open its reaction tray — every reaction, 👎 last (see
+  // ActionBar for the same tray).
+  // `hover: false` here alone: the shorts chrome auto-hides, and a resting
+  // cursor popping a tray open over the video is not what a viewer asked for.
+  const likeTray = useReactionTray(true, { hover: false });
+
+  useEffect(() => {
+    closeTrays.current = () => { likeTray.close(); };
+    openLikeTray.current = likeTray.openNow;
+  }, [likeTray.close, likeTray.openNow]);
+
+  /**
+   * One glyph on the thumb: your own reaction (a 👎 included — there is no
+   * thumbs-down beside it), else the post's most-used positive one.
+   */
+  const leadReaction = resolveThumbReaction(localReactionCounts, myReaction);
+  const thumbCount = resolveThumbCount(localLikeCount, localDislikeCount, leadReaction);
+  /** A 👍 or 👎 stays the plain thumb icon; your own fills and nods. */
+  const thumbDown = leadReaction === 'dislike';
+  const thumbMine = thumbDown ? myReaction === 'dislike' : isLiked;
+
+  const goToNext = useCallback(() => {
+    if (minimizedRef.current) return;
+    if (isMobile && showComments) return;
+    if (transitioningRef.current) { queuedStep.current = 'next'; return; }
+    if (currentIndex < shorts.length - 1) {
+      transitioningRef.current = true;
+      setIsTransitioning(true);
+      const index = currentIndex + 1;
+      setSelection({ id: shorts[index].id, index });
+    }
+  }, [currentIndex, shorts, isTransitioning, isMobile, showComments]);
+
+  // Load more when within 3 items of the end, however the viewer got there —
+  // opened near the end, a swipe, a key, a wheel. It used to run only inside
+  // goToNext, so a page that arrived while sitting on the last short (or one
+  // that added nothing new) never asked again and the feed just stopped.
+  // A few tries per list length covers pages that bring nothing new without
+  // hammering a feed that keeps failing.
+  const loadMoreTries = useRef({ length: -1, tries: 0 });
+  useEffect(() => {
+    if (currentIndex < shorts.length - 4 || !hasMore || isLoadingMore || !onLoadMore) return;
+    const tries = loadMoreTries.current;
+    if (tries.length !== shorts.length) { tries.length = shorts.length; tries.tries = 0; }
+    if (tries.tries >= 4) return;
+    tries.tries++;
+    onLoadMore();
+  }, [currentIndex, shorts.length, hasMore, isLoadingMore, onLoadMore]);
+
+  const goToPrev = useCallback(() => {
+    if (minimizedRef.current) return;
+    if (isMobile && showComments) return;
+    if (transitioningRef.current) { queuedStep.current = 'prev'; return; }
+    if (currentIndex > 0) {
+      transitioningRef.current = true;
+      setIsTransitioning(true);
+      const index = currentIndex - 1;
+      setSelection({ id: shorts[index].id, index });
+    }
+  }, [currentIndex, shorts, isTransitioning, isMobile, showComments]);
+
+  // Keep the wheel effect mounted once (below) while always calling the latest
+  // navigation handlers. Re-subscribing whenever goToNext/goToPrev changed
+  // identity (they depend on isTransitioning) would tear the listener down and
+  // back up in the middle of a swipe.
+  const goToNextRef = useRef(goToNext);
+  const goToPrevRef = useRef(goToPrev);
+  goToNextRef.current = goToNext;
+  goToPrevRef.current = goToPrev;
+  // Stable, so the memoised slides don't re-render for it. Not while a sheet
+  // or the menu is open over the video: moving on under it would lose the place.
+  const shortEndedBlockedRef = useRef(false);
+  shortEndedBlockedRef.current = shareSheetOpen || showComments;
+  // Typing a comment or reading the thread beside the video (the desktop
+  // panel is always open, so `showComments` never covers it): the post plays
+  // again instead of paging on, and the next end checks again, so the viewer
+  // carries on by itself once they are done.
+  const engagementRef = useRef<ShortsEngagement | null>(null);
+  useEffect(() => {
+    const root = containerRef.current;
+    if (!root) return;
+    const watch = watchShortsEngagement(root);
+    engagementRef.current = watch;
+    return () => { watch.dispose(); engagementRef.current = null; };
+  }, []);
+  const handleShortEnded = useCallback(() => {
+    if (shortEndedBlockedRef.current || getVideoPreferences().isLooping) return;
+    if (engagementRef.current?.isEngaged()) {
+      const player = containerRef.current?.querySelector<HTMLVideoElement>(`[data-shorts-slide="${currentIndexRef.current}"] video`);
+      if (player) {
+        player.currentTime = 0;
+        player.play().catch(() => {});
+      }
+      return;
+    }
+    goToNextRef.current();
+  }, []);
+  // Where the wheel can go right now, so a push past either end rubber bands.
+  const wheelNavRef = useRef({ index: currentIndex, count: shorts.length });
+  wheelNavRef.current = { index: currentIndex, count: shorts.length };
+  const videoContainerRef = useRef(videoContainer);
+  videoContainerRef.current = videoContainer;
+  useEffect(() => {
+    if (isTransitioning || !queuedStep.current) return;
+    const step = queuedStep.current;
+    queuedStep.current = null;
+    if (step === 'next') goToNextRef.current();
+    else goToPrevRef.current();
+  }, [isTransitioning]);
+
+  // Handle mouse wheel / trackpad scrolling.
+  //
+  // A trackpad fires a long *burst* of wheel events per physical swipe — a
+  // captured flick ran 31 events over 983ms — so guarding only on
+  // `isTransitioning` let one swipe advance several videos. `createWheelPager`
+  // turns it into a drag: the short follows the fingers, a push that stops
+  // short springs back (the 160ms quiet timer below, the only timer, where
+  // being late is harmless), and a swipe pages once while its inertia tail is
+  // ignored. Its timing is read off the events: overlapping swipes leave no
+  // silence to wait for.
+  //
+  // Bound to `window`, NOT to the viewer element. Advancing a slide unmounts the
+  // node the browser latched this wheel gesture to (the render window drops the
+  // outgoing short), and Chrome then re-targets the rest of the gesture at the
+  // nearest scrollable ancestor — the document. A listener on the viewer never
+  // sees those events, so the page scrolled behind the overlay and only a mouse
+  // move (which forces a fresh hit-test) restored control. From `window` the
+  // handler catches the gesture wherever it is dispatched.
+  useEffect(() => {
+    const handleWheel = (e: WheelEvent) => {
+      if (minimizedRef.current) return;
+      // Regions that own their own scrolling (the desktop comments panel) opt
+      // out by attribute. This has to be a target test rather than the
+      // `stopPropagation` it replaces: a window-level capture listener runs
+      // before any handler inside the panel could stop it.
+      if ((e.target as HTMLElement | null)?.closest?.('[data-shorts-scrollable], [data-vaul-drawer], [role="dialog"], [role="menu"]')) return;
+
+      if ((e.target as HTMLElement | null)?.closest?.('[data-shorts-photos]') && Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
+        e.preventDefault();
+        return;
+      }
+      e.preventDefault();
+      e.stopPropagation();
+
+      // The event's own target is the browser's answer to "which node is this
+      // gesture latched to", and it only changes when the pointer moves. If
+      // that is a slide, hold it mounted past the 3-slide window: dropping it
+      // is what kills the gesture (see visibleIndices). Anything else — the
+      // backdrop, the nav column, the action bar — is mounted for the life of
+      // the viewer anyway, so nothing needs pinning.
+      const latched = (e.target as HTMLElement | null)?.closest?.('[data-shorts-slide]');
+      const latchedIndex = latched ? Number(latched.getAttribute('data-shorts-slide')) : null;
+      setPointerPinnedIndex(Number.isInteger(latchedIndex) ? latchedIndex : null);
+
+      // `e.timeStamp`, not `performance.now()`: it is when the event was
+      // created, so a janked main thread delivering a batch late still reports
+      // the real spacing between swipes.
+      const { index, count } = wheelNavRef.current;
+      const frameHeight = videoContainerRef.current?.clientHeight || window.innerHeight;
+      const { offset, step } = wheelPagerRef.current!.read({
+        deltaY: e.deltaY,
+        deltaMode: e.deltaMode,
+        wheelDeltaY: (e as WheelEvent & { wheelDeltaY?: number }).wheelDeltaY,
+        timeStamp: e.timeStamp,
+      }, frameHeight, index < count - 1, index > 0);
+      if (step) {
+        // The short is already part way there under the fingers; the page
+        // change and this offset settle on the same spring from where it is.
+        animate(dragOffset, 0, PAGE_SPRING);
+        if (step === 'next') goToNextRef.current();
+        else goToPrevRef.current();
+      } else if (offset !== null) {
+        dragOffset.stop();
+        dragOffset.set(offset);
+      }
+      if (settleTimer) clearTimeout(settleTimer);
+      settleTimer = setTimeout(() => {
+        settleTimer = undefined;
+        if (wheelPagerRef.current!.settle()) animate(dragOffset, 0, SNAP_BACK_SPRING);
+      }, 160);
+    };
+
+    let settleTimer: ReturnType<typeof setTimeout> | undefined;
+    window.addEventListener('wheel', handleWheel, { passive: false, capture: true });
+    return () => {
+      if (settleTimer) clearTimeout(settleTimer);
+      window.removeEventListener('wheel', handleWheel, { capture: true });
+    };
+  }, [dragOffset]);
+
+  // Handle keyboard navigation
+  useEffect(() => {
+    if (mini.minimized) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || (e.target as HTMLElement)?.isContentEditable) return;
+      // A held arrow pages at the transition's pace instead of queueing a
+      // step behind every auto-repeat.
+      if ((e.key === 'ArrowDown' || e.key === 'ArrowUp') && e.repeat && transitioningRef.current) {
+        e.preventDefault();
+        return;
+      }
+      if (e.key === 'ArrowDown' || e.key === 'j') { e.preventDefault(); goToNext(); }
+      else if (e.key === 'ArrowUp' || e.key === 'k') { e.preventDefault(); goToPrev(); }
+      else if (e.key === 'Escape') {
+        // A sheet or dialog open over the viewer (options, share, report)
+        // closes on its own; Esc must not also close the player under it.
+        if (shareSheetOpen || document.querySelector('[data-vaul-drawer][data-state="open"], [role="dialog"][data-state="open"], [role="alertdialog"][data-state="open"]')) return;
+        // Esc steps back one level, it does not close everything: from
+        // fullscreen it returns to the windowed viewer. Browsers normally
+        // swallow the key themselves to exit native fullscreen, so in practice
+        // this branch covers the simulated path and the race where both fire.
+        if (showComments) setShowComments(false);
+        else if (isFullscreen) toggleFullscreen();
+        else onClose();
+      }
+      else if (e.key === 'f') toggleFullscreen();
+      else if (e.key === 'm') toggleMute();
+      else if (e.key === ' ') {
+        e.preventDefault();
+        togglePlayPause();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [goToNext, goToPrev, onClose, isFullscreen, toggleFullscreen, showComments, toggleMute, mini.minimized, shareSheetOpen]);
+
+  /**
+   * The short a drag is heading for, already playing (silently) while it
+   * slides in. Waiting for the finger to lift held it on a still frame for the
+   * whole drag plus the start of playback; started here it is moving the
+   * moment it shows. Driven on the element itself, not through state, so the
+   * drag's frames re-render nothing.
+   */
+  const peekRef = useRef<{ index: number; el: HTMLVideoElement; rewind: boolean } | null>(null);
+  const stopPeek = useCallback(() => {
+    const peek = peekRef.current;
+    peekRef.current = null;
+    if (!peek) return;
+    delete peek.el.dataset.shortsPeek;
+    peek.el.pause();
+    // The next short starts from the top when it is reached for real; one
+    // swiped back to keeps the spot it was left at.
+    if (peek.rewind) { try { peek.el.currentTime = 0; } catch { /* not seekable yet */ } }
+  }, []);
+  const startPeek = useCallback((index: number) => {
+    if (peekRef.current?.index === index) return;
+    stopPeek();
+    const short = shorts[index];
+    if (!short || short.live || short.reelPost || short.imageUrls?.length) return;
+    const el = document.querySelector<HTMLVideoElement>(`[data-shorts-slide="${index}"] video`);
+    if (!el || !el.paused) return;
+    peekRef.current = { index, el, rewind: index > currentIndex };
+    el.dataset.shortsPeek = '1';
+    el.muted = true;
+    el.play().catch(() => {});
+  }, [shorts, currentIndex, stopPeek]);
+  /** Hand the peeking short its sound as it becomes the one being watched. */
+  const promotePeek = useCallback((index: number) => {
+    const peek = peekRef.current;
+    if (!peek || peek.index !== index) { stopPeek(); return; }
+    peekRef.current = null;
+    const el = peek.el;
+    // VideoSlide clears this as the short becomes active; until then it keeps
+    // the hand-over from pausing the short it is handing over.
+    el.dataset.shortsPeek = 'promoted';
+    // Inside the finger-up handler, so Safari lets the sound come on.
+    el.muted = isMuted;
+    // Never left playing if the page change somehow did not happen.
+    setTimeout(() => {
+      if (el.dataset.shortsPeek !== 'promoted') return;
+      delete el.dataset.shortsPeek;
+      el.pause();
+    }, 1500);
+  }, [isMuted, stopPeek]);
+  useEffect(() => stopPeek, [stopPeek]);
+
+  // Handle drag for visual feedback during swipe
+  const isRestoreDrag = useCallback((info: PanInfo) => {
+    const frame = videoContainer?.getBoundingClientRect();
+    if (!isMobile || !overlaysHidden || showComments || !frame) return false;
+    const startY = info.point.y - window.scrollY - info.offset.y - frame.top;
+    return startY > frame.height * RESTORE_ZONE_TOP &&
+      startY < frame.height * RESTORE_ZONE_BOTTOM &&
+      info.offset.y < -16 && Math.abs(info.offset.y) > Math.abs(info.offset.x);
+  }, [isMobile, overlaysHidden, autoHidden, showComments, videoContainer]);
+
+  /** Phones: a drag down on the first short leaves, instead of paging back to nothing. */
+  const dragLeaves = useCallback((info: PanInfo) =>
+    isMobile && currentIndex === 0 && info.offset.y > 0 && Math.abs(info.offset.y) > Math.abs(info.offset.x),
+  [isMobile, currentIndex]);
+
+  const handleDrag = useCallback((_: any, info: PanInfo) => {
+    if (holdOwnsGesture.current) { stopPeek(); setDragOffset(0); return; }
+    if (mini.drag(info)) { stopPeek(); setDragOffset(0); return; }
+    if (dragLeaves(info)) {
+      stopPeek();
+      setDragOffset(0);
+      leaveY.set(info.offset.y);
+      return;
+    }
+    leaveY.set(0);
+    const vertical = Math.abs(info.offset.y) >= Math.abs(info.offset.x);
+    setDragOffset(vertical ? info.offset.y : 0);
+    if (vertical && info.offset.y < -PEEK_START_PX && currentIndex < shorts.length - 1) startPeek(currentIndex + 1);
+    else if (vertical && info.offset.y > PEEK_START_PX && currentIndex > 0) startPeek(currentIndex - 1);
+    else stopPeek();
+  }, [setDragOffset, mini.drag, dragLeaves, leaveY, currentIndex, shorts.length, startPeek, stopPeek]);
+
+  const handleDragEnd = useCallback((_: any, info: PanInfo) => {
+    // Whatever this drag turns out to be, a peek it started either becomes the
+    // short being watched below or stops here.
+    const pagesTo = (step: 1 | -1) => {
+      const target = currentIndex + step;
+      const pages = !minimizedRef.current && !(isMobile && showComments) && !transitioningRef.current &&
+        target >= 0 && target < shorts.length;
+      if (pages) promotePeek(target); else stopPeek();
+    };
+    if (_.type !== 'pointercancel' && _.type !== 'touchcancel' && !holdOwnsGesture.current &&
+        Math.abs(info.offset.y) >= Math.abs(info.offset.x) && !(leaveY.get() > 0 || dragLeaves(info))) {
+      if (info.offset.y < -80 || info.velocity.y < -300) pagesTo(1);
+      else if (info.offset.y > 80 || info.velocity.y > 300) pagesTo(-1);
+      else stopPeek();
+    } else stopPeek();
+    resetDragOffset();
+    if (holdOwnsGesture.current) { mini.cancel(); return; }
+    if (_.type === 'pointercancel' || _.type === 'touchcancel') {
+      mini.cancel();
+      animate(leaveY, 0, DISMISS_SPRING);
+      return;
+    }
+    if (mini.finish(info)) return;
+    if (leaveY.get() > 0 || dragLeaves(info)) {
+      if (dragLeaves(info) && commitsDismiss(info.offset.y, info.velocity.y, window.innerHeight)) leaveViewer('y');
+      else animate(leaveY, 0, DISMISS_SPRING);
+      return;
+    }
+
+    // Restoring the caption must not consume a valid navigation flick.
+    if (isRestoreDrag(info)) {
+      if (info.offset.y < -40) {
+        setOverlaysHidden(false);
+        setAutoHidden(false);
+      }
+    }
+    
+    if (Math.abs(info.offset.x) > Math.abs(info.offset.y)) return;
+    // Navigate based on drag velocity and offset (the peek above reads the
+    // same thresholds).
+    const swipeThreshold = 80;
+    const velocityThreshold = 300;
+    
+    if (info.offset.y < -swipeThreshold || info.velocity.y < -velocityThreshold) {
+      goToNext();
+    } else if (info.offset.y > swipeThreshold || info.velocity.y > velocityThreshold) {
+      goToPrev();
+    }
+  }, [goToNext, goToPrev, isRestoreDrag, resetDragOffset, mini.finish, mini.cancel, dragLeaves, leaveY, leaveViewer, currentIndex, isMobile, showComments, shorts.length, promotePeek, stopPeek]);
+
+  // Toggle play/pause - only shows indicator on explicit tap
+  /**
+   * Whether the last `togglePlayPause` actually flipped anything. Both early
+   * returns below leave the video exactly as it was, and `undoPlayPause` must
+   * not "reverse" a toggle that never happened — that would pause a playing
+   * short on the second tap of a double tap.
+   */
+  const lastToggleTookEffect = useRef(false);
+
+  const togglePlayPause = useCallback(() => {
+    // The auto-clear takes no restore band and swallows no tap: it was never
+    // asked for, so undoing it should not cost the viewer the play/pause they
+    // meant. The timer re-arms off the state change and clears it again.
+    setAutoHidden(false);
+    // Don't show indicator during transitions
+    if (isTransitioning) {
+      lastToggleTookEffect.current = false;
+      return;
+    }
+
+    lastToggleTookEffect.current = true;
+    setIsPaused(prev => {
+      const newPaused = !prev;
+      setShowPlayIndicator(newPaused ? 'pause' : 'play');
+      setTimeout(() => setShowPlayIndicator(null), 500);
+      return newPaused;
+    });
+  }, [isTransitioning]);
+
+  /**
+   * Put back a play/pause whose tap turned out to be half of a double tap.
+   *
+   * Silent on purpose: the first tap already flashed an indicator, and showing
+   * a second one on the way back would leave a pause→play flicker under the
+   * heart. The gesture should read as "liked", not "paused, resumed, liked".
+   */
+  const undoPlayPause = useCallback(() => {
+    if (!lastToggleTookEffect.current) return;
+    lastToggleTookEffect.current = false;
+    setIsPaused(prev => !prev);
+    setShowPlayIndicator(null);
+  }, []);
+
+  /**
+   * Hold the OS media session while a short is actually audible.
+   *
+   * Unlike the feed, the viewer opens unmuted — but the mute button is right
+   * there, and a muted short claiming the session would mean the headphone
+   * pause button stops a silent video instead of whatever the viewer is
+   * really listening to. Same `!isMuted` test the feed cards apply.
+   *
+   * previous/next are wired to the swipe navigation rather than to seeking:
+   * a short is a few seconds long, so skipping between them is what the
+   * transport buttons are actually good for here.
+   */
+  useEffect(() => {
+    if (!currentShort || isPaused || isMuted) {
+      releaseMediaSession(instanceId);
+      return;
+    }
+    claimMediaSession(
+      instanceId,
+      {
+        title: currentShort.title?.trim() || currentShort.description?.split(String.fromCharCode(10))[0] || _copy("copy.ed4fa5bea3cd", { defaultValue: "Riftn short" }),
+        artist: currentShort.displayName || currentShort.creatorUsername || currentShort.username,
+        artwork: currentShort.thumbnail || null,
+      },
+      {
+        play: togglePlayPause,
+        pause: togglePlayPause,
+        previoustrack: () => goToPrevRef.current(),
+        nexttrack: () => goToNextRef.current(),
+      },
+    );
+    setMediaSessionPlaying(instanceId, true);
+  }, [currentShort, isPaused, isMuted, instanceId, togglePlayPause, goToPrevRef, goToNextRef, _copy]);
+
+  // Closing the viewer must not leave the OS holding a session for a player
+  // that is no longer on the page.
+  useEffect(() => () => releaseMediaSession(instanceId), [instanceId]);
+
+  /**
+   * Swipe back: a drag that starts at the left edge and runs right closes the
+   * viewer, back to the tab it was opened from. The viewer follows the finger,
+   * so it can be dragged part way and let go to spring back. The shell's own swipe-back
+   * (useSwipeBack) is told to ignore the viewer, because it clicks the last
+   * visible back control and this one fades out with the chrome, which would
+   * leave it pressing the page's back button underneath instead.
+   *
+   * Only sideways travel counts, so the vertical flick between shorts and the
+   * tap ladder on the video are untouched: both give up on a horizontal move.
+   */
+  const anyOverlayOpen = useAnyOverlayOpen();
+  const edgeSwipe = useRef<{ id: number; x: number; y: number; at: number; claimed: boolean; lastX: number; lastAt: number; velocity: number } | null>(null);
+  const swipeDirection = typeof document !== 'undefined' && document.documentElement.dir === 'rtl' ? -1 : 1;
+
+  // Prevent touch events from bubbling to parent page
+  const handleTouchStart = (e: React.TouchEvent) => {
+    e.stopPropagation();
+    edgeSwipe.current = null;
+    if (!isMobile || showComments || anyOverlayOpen || e.touches.length !== 1) return;
+    const touch = e.touches[0];
+    const edge = swipeDirection < 0 ? window.innerWidth - touch.clientX : touch.clientX;
+    if (edge < 0 || edge > EDGE_SWIPE_ZONE_PX) return;
+    // The scrubber starts inside the edge zone: a drag that begins on it seeks.
+    if ((e.target as Element | null)?.closest?.("[data-shorts-scrubber],[data-no-swipe]")) return;
+    const now = performance.now();
+    edgeSwipe.current = { id: touch.identifier, x: touch.clientX, y: touch.clientY, at: now, claimed: false, lastX: touch.clientX, lastAt: now, velocity: 0 };
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    e.stopPropagation();
+    const origin = edgeSwipe.current;
+    if (!origin) return;
+    const touch = Array.from(e.touches).find(t => t.identifier === origin.id);
+    if (e.touches.length !== 1 || !touch) {
+      edgeSwipe.current = null;
+      if (origin.claimed) animate(leaveX, 0, DISMISS_SPRING);
+      return;
+    }
+    const dx = (touch.clientX - origin.x) * swipeDirection;
+    const dy = touch.clientY - origin.y;
+    if (!origin.claimed) {
+      // Vertical first: the pager keeps the flick, and the edge gives up.
+      if (Math.abs(dy) > EDGE_SWIPE_CLAIM_PX && Math.abs(dy) > dx) { edgeSwipe.current = null; return; }
+      if (dx < EDGE_SWIPE_CLAIM_PX) return;
+      origin.claimed = true;
+      resetDragOffset();
+    }
+    const now = performance.now();
+    if (now > origin.lastAt) {
+      origin.velocity = ((touch.clientX - origin.lastX) * swipeDirection) / (now - origin.lastAt) * 1000;
+      origin.lastX = touch.clientX;
+      origin.lastAt = now;
+    }
+    leaveX.set(Math.max(0, dx - EDGE_SWIPE_CLAIM_PX) * swipeDirection);
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    e.stopPropagation();
+    const origin = edgeSwipe.current;
+    edgeSwipe.current = null;
+    if (!origin?.claimed) return;
+    const travelled = Math.abs(leaveX.get());
+    if (e.type !== 'touchcancel' && commitsDismiss(travelled, origin.velocity, window.innerWidth)) leaveViewer('x');
+    else animate(leaveX, 0, DISMISS_SPRING);
+  };
+
+  // Overlay hide/show gesture handlers - integrated with drag system
+  const handleOverlayGestureTouchStart = useCallback((e: React.TouchEvent) => {
+    overlaySwipeStartY.current = null;
+    overlaySwipeStartX.current = null;
+    if (!isMobile || (e.target as HTMLElement)?.closest?.('[data-shorts-scrollable]')) return;
+    const touch = e.touches[0];
+    if (!touch) return;
+    
+    // These handlers are on the caption/action stack itself: all of that
+    // stack must accept the gesture, including captions above the bottom 20%.
+    overlaySwipeStartY.current = touch.clientY;
+    overlaySwipeStartX.current = touch.clientX;
+  }, [isMobile]);
+
+  const handleOverlayGestureTouchEnd = useCallback((e: React.TouchEvent) => {
+    if (!isMobile) return;
+    
+    const touch = e.changedTouches[0];
+    
+    // Need start position to determine gesture
+    if (overlaySwipeStartY.current === null || overlaySwipeStartX.current === null) {
+      return;
+    }
+    
+    const deltaY = touch.clientY - overlaySwipeStartY.current;
+    const deltaX = Math.abs(touch.clientX - overlaySwipeStartX.current);
+    const isVerticalSwipe = Math.abs(deltaY) > 40 && Math.abs(deltaY) > deltaX;
+
+    if (!overlaysHidden && isVerticalSwipe) {
+      const frame = e.currentTarget.getBoundingClientRect();
+      const inHideZone = overlaySwipeStartY.current >= frame.top + frame.height * 0.2;
+      if (deltaY > 40 && inHideZone) setOverlaysHidden(true);
+      else if (deltaY < -40) goToNext();
+      else if (deltaY > 40) goToPrev();
+    }
+
+    overlaySwipeStartY.current = null;
+    overlaySwipeStartX.current = null;
+  }, [isMobile, overlaysHidden, goToNext, goToPrev]);
+
+  /**
+   * A tap on the video itself (buttons, caption and avatar take their own).
+   *
+   * The centre of the frame, a third of its width and a third of its height,
+   * plays and pauses. Anywhere else clears every button off the video for an
+   * immersive view, and the next tap there brings them all back.
+   */
+  const handleVideoTap = useCallback((event?: React.PointerEvent) => {
+    const frame = videoContainer?.getBoundingClientRect();
+    const x = event && frame?.width ? (event.clientX - frame.left) / frame.width : 0.5;
+    const y = event && frame?.height ? (event.clientY - frame.top) / frame.height : 0.5;
+    const inPauseZone =
+      x >= PAUSE_ZONE_START && x <= PAUSE_ZONE_END &&
+      y >= PAUSE_ZONE_START && y <= PAUSE_ZONE_END;
+    if (inPauseZone) {
+      lastVideoTap.current = { kind: 'pause' };
+      togglePlayPause();
+      return;
+    }
+    lastVideoTap.current = { kind: 'chrome', overlaysHidden, autoHidden };
+    const hide = !(overlaysHidden || autoHidden);
+    setOverlaysHidden(hide);
+    setAutoHidden(false);
+    if (hide) setIsDescriptionExpanded(false);
+  }, [videoContainer, overlaysHidden, autoHidden, togglePlayPause]);
+
+  /** The second tap of a double tap turned the first into a like: undo it. */
+  const undoVideoTap = useCallback(() => {
+    const last = lastVideoTap.current;
+    lastVideoTap.current = null;
+    if (!last) return;
+    if (last.kind === 'pause') {
+      undoPlayPause();
+      return;
+    }
+    setOverlaysHidden(last.overlaysHidden);
+    setAutoHidden(last.autoHidden);
+  }, [undoPlayPause]);
+
+  /**
+   * Clear the chrome once the short has played untouched for AUTO_HIDE_MS.
+   *
+   * Every condition below is a reason the viewer is *reading* rather than
+   * watching, and each both blocks the timer and restarts it when it lifts:
+   * paused, description open, seeking, a sheet or modal up, or the chrome
+   * already cleared by the swipe. Desktop is excluded because its chrome sits
+   * beside the video rather than over it.
+   */
+  useEffect(() => {
+    if (
+      !isMobile ||
+      isPaused ||
+      autoHidden ||
+      overlaysHidden ||
+      isTransitioning ||
+      isTimelineSeeking ||
+      isDescriptionExpanded ||
+      showComments ||
+      shareSheetOpen ||
+      shareToDmOpen ||
+      showReportModal ||
+      showDeleteModal
+    ) {
+      return;
+    }
+    const timer = setTimeout(() => setAutoHidden(true), AUTO_HIDE_MS);
+    return () => clearTimeout(timer);
+  }, [
+    isMobile, isPaused, autoHidden, overlaysHidden, isTransitioning,
+    isTimelineSeeking, isDescriptionExpanded, showComments, shareSheetOpen, shareToDmOpen,
+    showReportModal, showDeleteModal,
+  ]);
+
+  /**
+   * Desktop equivalent, driven by the pointer instead of a play timer.
+   *
+   * Mouse still for DESKTOP_AUTO_HIDE_MS, or off the frame entirely, and the
+   * chrome clears. Any movement brings it back. Held open while scrubbing, so
+   * the timeline doesn't vanish out from under the drag.
+   */
+  const desktopHideTimer = useRef<ReturnType<typeof setTimeout>>();
+  const seekingRef = useRef(isTimelineSeeking);
+  seekingRef.current = isTimelineSeeking;
+
+  const scheduleDesktopHide = useCallback(() => {
+    if (desktopHideTimer.current) clearTimeout(desktopHideTimer.current);
+    desktopHideTimer.current = setTimeout(() => {
+      if (seekingRef.current) return;
+      setAutoHidden(true);
+    }, DESKTOP_AUTO_HIDE_MS);
+  }, []);
+
+  // Read through a ref so the handler keeps one identity for the life of the
+  // viewer instead of a new one per slide.
+  const currentIndexRef = useRef(currentIndex);
+  currentIndexRef.current = currentIndex;
+
+  // `setAutoHidden(false)` on an already-false state is a no-op in React, so
+  // this stays cheap even at mousemove rate — and so is re-pinning the index
+  // that is already pinned.
+  const handleDesktopPointerMove = useCallback(() => {
+    setAutoHidden(false);
+    // A move is the browser's own hit-test: whatever the wheel was aimed at
+    // before, it is aimed at this slide now, so this is the one that has to
+    // stay mounted (and the previous pin is free to go).
+    setPointerPinnedIndex(currentIndexRef.current);
+    scheduleDesktopHide();
+  }, [scheduleDesktopHide]);
+
+  const handleDesktopPointerLeave = useCallback(() => {
+    // Off the frame, the wheel is aimed at something outside the carousel —
+    // nothing left to hold mounted.
+    setPointerPinnedIndex(null);
+    if (desktopHideTimer.current) clearTimeout(desktopHideTimer.current);
+    if (seekingRef.current) return;
+    setAutoHidden(true);
+  }, []);
+
+  // Every short arrives with its chrome up and clears it again on its own, so
+  // a cleared frame never carries into the next one.
+  useEffect(() => {
+    setAutoHidden(false);
+    setOverlaysHidden(false);
+    if (!isMobile) scheduleDesktopHide();
+  }, [currentIndex, isMobile, scheduleDesktopHide]);
+
+  useEffect(() => () => {
+    if (desktopHideTimer.current) clearTimeout(desktopHideTimer.current);
+  }, []);
+
+  // A scrub keeps the chrome up for its whole duration; releasing re-arms.
+  useEffect(() => {
+    if (isMobile || isTimelineSeeking) return;
+    scheduleDesktopHide();
+  }, [isMobile, isTimelineSeeking, scheduleDesktopHide]);
+
+  // What the overlay actually reads. The gesture handlers stay keyed on
+  // `overlaysHidden` alone, so the tap-to-restore band belongs to the swipe.
+  const chromeHidden = overlaysHidden || autoHidden;
+  // The auto-clear only fades the buttons: they keep taking taps, so Back,
+  // mute or like work on the first tap instead of first fetching the chrome
+  // back. A deliberate swipe-down clear (overlaysHidden) still switches them off.
+  const chromeInert = overlaysHidden;
+
+  /** The playing short's <video>, for the player rows in the options menu. */
+  const activePlayer = () => containerRef.current?.querySelector<HTMLVideoElement>(`[data-shorts-slide="${currentIndex}"] video`) ?? null;
+  const cycleSpeed = () => {
+    const currentIdx = PLAYBACK_RATES.indexOf(getPlaybackRateFor(currentShort?.creatorId) as (typeof PLAYBACK_RATES)[number]);
+    const nextRate = PLAYBACK_RATES[(currentIdx + 1) % PLAYBACK_RATES.length];
+    // Apply to the current slide before rerendering its neighbours.
+    const player = activePlayer();
+    if (player) player.playbackRate = nextRate;
+    setPlaybackRate(nextRate);
+    vpSetPlaybackRate(nextRate, currentShort?.creatorId);
+  };
+
+  const handleCopyLink = () => {
+    const url = viewerShareUrl(`${window.location.origin}/app/post/${currentShort.articleSlug || currentShort.id}`);
+    navigator.clipboard.writeText(url);
+    toast.success(_copy("copy.e91de547a0b8", { defaultValue: "Post URL copied to clipboard" }));
+    // A copy is a share: it counts once per actor per post, next to reposts.
+    trackLinkCopy(currentShort?.id, walletAddress, linkCopyCount);
+    setShareSheetOpen(false);
+  };
+
+  const handleRepost = async () => {
+    if (!walletAddress) { setShareSheetOpen(false); return; }
+    const id = currentShort?.id;
+    if (!id) return;
+    const numericId = parseInt(id, 10);
+    if (isNaN(numericId)) return;
+    // Optimistic: bump the counter + toast instantly, revert on failure.
+    setShareDelta(prev => prev + 1);
+    toast.success(_copy("copy.5f39b8b65253", { defaultValue: "Reposted!" }));
+    setShareSheetOpen(false);
+    try {
+      const { repostPost } = await import('@/lib/api/dehub');
+      await repostPost(numericId);
+    } catch {
+      setShareDelta(prev => prev - 1);
+      toast.error(_copy("copy.7527dc6722fc", { defaultValue: "Failed to repost" }));
+    }
+  };
+
+  const handleQuote = () => {
+    toast.info(_copy("copy.5dd5e168bdf8", { defaultValue: "Quote for shorts coming soon!" }));
+    setShareSheetOpen(false);
+  };
+
+  // Portalled to <body>. `backdrop-filter` only samples what is painted inside
+  // its own *backdrop root*, and an ancestor carrying filter / opacity / mask /
+  // clip-path / transform / isolation starts a new one — inside which there is
+  // nothing behind this overlay to sample, so the blur silently renders as
+  // nothing while the `bg-black/60` scrim still paints. Mounted inline, the
+  // viewer inherited whichever of those the current page and theme happened to
+  // set, which is why the frost appeared for some users and not others on the
+  // same build. From <body> nothing can cut the root. It also frees the fixed
+  // positioning and the z-[60] from any ancestor stacking context.
+  // The phone's creator row, caption and action row. Over the picture it is
+  // pinned to the bottom of the screen; in the info stage the same block
+  // heads the sheet under the video.
+  // Chrome that rests after a few seconds of play. The info stage's sheet
+  // never rested, and the scrubber's row is left out on purpose.
+  const autoFade = (inInfo: boolean) => cn("transition-opacity duration-[250ms] ease-out", !inInfo && autoHidden && "opacity-0");
+  const phoneStack = (inInfo: boolean) => (
+      <div className={inInfo ? "relative flex-shrink-0 pt-3 pb-3" : "absolute inset-x-0 bottom-0 pb-[max(1.25rem,calc(env(safe-area-inset-bottom)+0.5rem))] pointer-events-none"}>
+                {/* Creator Info & Description */}
+                <div
+                  // Hidden chrome is opacity-0, which still takes taps — kill
+                  // pointer events too so a restore tap can't hit an invisible
+                  // avatar / follow button on its way in.
+                  className={cn("px-4 pointer-events-auto", autoFade(inInfo), !isDescriptionExpanded && "touch-none", (showComments || chromeInert) && "pointer-events-none")}
+                  onTouchStart={handleOverlayGestureTouchStart}
+                  onTouchEnd={handleOverlayGestureTouchEnd}
+                  onTouchCancel={() => { overlaySwipeStartY.current = null; overlaySwipeStartX.current = null; }}
+                >
+                  {/* Creator info row */}
+                  <div className="flex items-center gap-2 mb-3">
+                    <button
+                      onClick={() => handleNavigateToProfile()}
+                      className="flex-shrink-0"
+                    >
+                      <Avatar className="w-12 h-12 rounded-xl" key={currentShort.avatar || currentShort.id}>
+                        <AvatarImage src={currentShort.avatar} alt={currentShort.creatorUsername || currentShort.username} className="rounded-xl" />
+                        <AvatarFallback data-keep-dark className="bg-zinc-700 text-white font-medium rounded-xl">{(currentShort.creatorUsername || currentShort.username)[0]?.toUpperCase()}</AvatarFallback>
+                      </Avatar>
+                    </button>
+                    <button
+                      onClick={() => handleNavigateToProfile()}
+                      className="flex flex-col items-start text-left min-w-0"
+                    >
+                      {currentShort.displayName && (
+                        <BadgedName
+                          lookupId={currentShort.creatorUsername || currentShort.creatorId || currentShort.username}
+                          username={currentShort.creatorUsername || currentShort.username}
+                          className="text-white font-semibold text-base [text-shadow:0_10px_8px_rgb(0_0_0/0.04),0_4px_3px_rgb(0_0_0/0.1)] leading-tight"
+                          wrapperClassName="text-base leading-tight"
+                        >
+                          {currentShort.displayName}
+                        </BadgedName>
+                      )}
+                      <span className="text-white/70 text-sm [text-shadow:0_10px_8px_rgb(0_0_0/0.04),0_4px_3px_rgb(0_0_0/0.1)] truncate leading-tight">@{currentShort.creatorUsername || currentShort.username}</span>
+                    </button>
+                  </div>
+                  
+                  {/* Title + description - tap to expand/collapse */}
+                  <DuetCredit duetOf={currentShort.duetOf} className="mb-1.5" />
+                  {/* On a short phone the plain stage has no room for the caption
+                      between the video card and the scrubber; it is one tap away
+                      in the info stage. */}
+                  <div className={cn(cleanWide && !inInfo && "[@media(max-height:700px)]:hidden")}>
+                  <ShortCaption
+                    key={currentShort.id}
+                    short={currentShort}
+                    variant="tap"
+                    expanded={isDescriptionExpanded}
+                    onToggleExpanded={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
+                  />
+                  </div>
+                  <StitchAttribution key={`stitch-${currentShort.id}`} tokenId={currentShort.id} onNavigate={onClose} className="mt-2" />
+                </div>
+
+                {/* It steps aside during a scrub: the frame preview and its time
+                    float just above the scrubber, which is where this row is. */}
+                {/* Action bar — horizontal row evenly spread across the bottom,
+                    matching the feed post card action bar (like at far right). */}
+                <div
+                  data-shorts-actions
+                  data-on-media
+                  className={cn("mt-3 px-4 flex items-center justify-between pointer-events-auto", autoFade(inInfo), isTimelineSeeking && "opacity-0", (showComments || chromeInert) && "pointer-events-none")}
+                  onTouchStart={handleOverlayGestureTouchStart}
+                  onTouchEnd={handleOverlayGestureTouchEnd}
+                  onTouchCancel={() => { overlaySwipeStartY.current = null; overlaySwipeStartX.current = null; }}
+                >
+                  {/* Views */}
+                  <div className="flex min-w-10 items-center justify-center gap-1">
+                    <Eye className="w-5 h-5 text-white drop-shadow-lg" />
+                    <span className="text-xs font-medium text-white/70 [text-shadow:0_10px_8px_rgb(0_0_0/0.04),0_4px_3px_rgb(0_0_0/0.1)]">{currentShort.views || '0'}</span>
+                  </div>
+
+                  {/* Tip */}
+                  <button
+                    onClick={() => setShowTipModal(true)}
+                    className="flex min-w-10 items-center justify-center gap-1"
+                    aria-label={_copy("copy.a4245a3c4f56", { defaultValue: "Tip" })}
+                  >
+                    <Gem className="w-5 h-5 text-white drop-shadow-lg" />
+                    <span className="text-xs font-medium text-white/70 [text-shadow:0_10px_8px_rgb(0_0_0/0.04),0_4px_3px_rgb(0_0_0/0.1)]">{formatCount(tipCount)}</span>
+                  </button>
+
+                  {/* Share */}
+                  <button
+                    onClick={() => setShareSheetOpen(true)}
+                    className="flex min-w-10 items-center justify-center gap-1"
+                    aria-label={_copy("copy.29887a5ff984", { defaultValue: "Share" })}
+                  >
+                    <PostShareIcon className="w-5 h-5 text-white drop-shadow-lg" />
+                    <span className="text-xs font-medium text-white/70 [text-shadow:0_10px_8px_rgb(0_0_0/0.04),0_4px_3px_rgb(0_0_0/0.1)]">{formatCount(displayShareCount)}</span>
+                  </button>
+
+                  {/* Comments */}
+                  <button
+                    onClick={() => setShowComments(true)}
+                    className="flex min-w-10 items-center justify-center gap-1"
+                    aria-label={_copy("copy.355f79f29d7d", { defaultValue: "Comments" })}
+                  >
+                    <MessageSquare className="w-5 h-5 text-white drop-shadow-lg" />
+                    <span className="text-xs font-medium text-white/70 [text-shadow:0_10px_8px_rgb(0_0_0/0.04),0_4px_3px_rgb(0_0_0/0.1)]">{formatCount(currentShort.comments || 0)}</span>
+                  </button>
+
+                  {/* Like — furthest right for easy thumb reach, like feed cards */}
+                  <span className="relative flex items-center" {...likeTray.areaProps}>
+                    <ReactionPicker
+                      open={likeTray.open}
+                      current={myReaction}
+                      counts={localReactionCounts}
+                      onSelect={(reaction) => { likeTray.close(); handleReaction(reaction); }}
+                      onClose={likeTray.close}
+                      align="right"
+                      onShowInfo={canViewReactionInfo ? showReactionInfo : undefined}
+                    />
+                    <motion.button
+                      onClick={() => {
+                        // The click that ends a hold must not also cast a like.
+                        if (likeTray.consumePress()) return;
+                        handleVote();
+                      }}
+                      {...likeTray.buttonProps}
+                      disabled={isVoting}
+                      /* Same halo the tray puts on your pick — see ActionBar. */
+                      className="flex min-w-10 items-center justify-center gap-1 select-none touch-none"
+                      animate={justVoted ? { scale: [1, 1.3, 1] } : {}}
+                      transition={{ duration: 0.3, ease: "easeOut" }}
+                      aria-label={myReaction ? _copy("copy.a3156ed263d2", { defaultValue: "{{value1}} — hold to change your reaction", value1: reactionMeta(myReaction).label }) : _copy("copy.12b91b0ac5dd", { defaultValue: "{{value1}} — hold to react", value1: reactionMeta(reactionForThumbTap(myReaction, localReactionCounts)).label })}
+                      aria-haspopup="menu"
+                      aria-expanded={likeTray.open}
+                    >
+                      {leadReaction && !thumbDown ? (
+                        <span data-engaged-glyph className="w-5 h-5 flex items-center justify-center text-[1.05rem] leading-none drop-shadow-lg" aria-hidden="true">
+                          <ReactionEmoji reaction={leadReaction} animate={leadReaction === myReaction} />
+                        </span>
+                      ) : (
+                        <ThumbIcon down={thumbDown} nod={thumbMine} className={cn(
+                          "w-5 h-5 drop-shadow-lg",
+                          thumbMine ? "fill-white text-white" : "text-white"
+                        )} />
+                      )}
+                      <span className="text-xs font-medium text-white/70 [text-shadow:0_10px_8px_rgb(0_0_0/0.04),0_4px_3px_rgb(0_0_0/0.1)]">{formatCount(thumbCount)}</span>
+                    </motion.button>
+                  </span>
+                </div>
+
+                {/* The scrubber. The active slide draws itself in here, touch
+                    area included (see `seekLayer` on VideoSlide); a slide with
+                    nothing to play leaves it empty and it takes no room. */}
+                <div
+                  ref={setSeekSlot}
+                  data-shorts-seek-slot
+                  className={cn("relative z-10 mx-4 mt-1 h-11 empty:hidden pointer-events-auto", autoFade(inInfo), (showComments || chromeInert) && "pointer-events-none")}
+                />
+
+                {/* The player's buttons, on the bottom row under the scrubber. */}
+                <div
+                  data-shorts-tools
+                  data-on-media
+                  className={cn("px-4 flex items-center justify-between pointer-events-auto", autoFade(inInfo), (showComments || chromeInert) && "pointer-events-none")}
+                  onTouchStart={handleOverlayGestureTouchStart}
+                  onTouchEnd={handleOverlayGestureTouchEnd}
+                  onTouchCancel={() => { overlaySwipeStartY.current = null; overlaySwipeStartX.current = null; }}
+                >
+                  {/* A profile-reel slide that is not a video (text, photo, comic)
+                      has nothing to play, so it keeps only the options button. */}
+                  {(isMobile || !currentShort?.reelPost) && <>
+                  {/* On phones these buttons stay on every post, so the row does not
+                      reshuffle from slide to slide; where one cannot work it says so. */}
+                  {document.pictureInPictureEnabled && <button
+                    className={VIEWER_CONTROL}
+                    aria-label={_copy("copy.c49677dc5ccd", { defaultValue: "Picture in picture" })}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      if (currentShort?.imageUrls?.length || currentShort?.reelPost) { toast(_copy("toasts.not_available_for_this_post", { defaultValue: "Not available for this post" })); return; }
+                      const player = containerRef.current?.querySelector<HTMLVideoElement>(`[data-shorts-slide="${currentIndex}"] video`);
+                      if (player) void player.requestPictureInPicture().catch(() => {});
+                    }}
+                  ><PictureInPicture2 className="w-5 h-5" /></button>}
+                  {/* Playback speed */}
+                  <button
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      cycleSpeed();
+                    }}
+                    className={cn(VIEWER_CONTROL, 'min-w-[40px] px-1.5')}
+                    style={{ touchAction: 'manipulation' }}
+                    aria-label={_copy("copy.afec2b22114c", { defaultValue: "Playback speed" })}
+                  >
+                    <span className="text-white text-[11px] font-bold leading-none">{formatRate(playbackRate)}x</span>
+                  </button>
+
+                  {/* Subtitles: the playing short puts its CC button in here. */}
+                  {!currentShort?.reelPost && !currentShort?.imageUrls?.length && (
+                    <div ref={setCaptionSlot} data-shorts-caption-slot className="relative flex h-10 w-10 shrink-0 items-center justify-center empty:hidden" />
+                  )}
+
+                  {/* Full screen: a wide video also turns sideways where the browser allows it. */}
+                  {(isMobile || !currentShort?.imageUrls?.length) && <button
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      if (currentShort?.imageUrls?.length || currentShort?.reelPost) { toast(_copy("toasts.not_available_for_this_post", { defaultValue: "Not available for this post" })); return; }
+                      toggleFullscreen();
+                    }}
+                    className={VIEWER_CONTROL}
+                    style={{ touchAction: 'manipulation' }}
+                    aria-label={isFullscreen ? _copy("copy.37fd4e355ba3", { defaultValue: "Exit fullscreen" }) : _copy("copy.4a56b3cb6008", { defaultValue: "Enter fullscreen" })}
+                  >
+                    {isFullscreen ? <Minimize className="w-5 h-5 text-white" /> : <Maximize className="w-5 h-5 text-white" />}
+                  </button>}
+
+                  {/* Mute: hover (or press and hold on a phone) for the volume slider. */}
+                  <VideoVolumeControl
+                    layout="above"
+                    volume={shortsVolume} muted={speakerSilent}
+                    onToggleMute={handleSpeakerClick} onVolume={setShortsVolume}
+                    open={volumeOpen} onOpenChange={setVolumeOpen}
+                    label={speakerSilent ? _copy("copy.ce4ee4efc5e3", { defaultValue: "Unmute" }) : _copy("copy.8dd6857baf02", { defaultValue: "Mute" })}
+                    sliderLabel={t('videoPlayer.volume')}
+                    buttonClassName={VIEWER_CONTROL}
+                  >
+                    {speakerSilent ? (
+                      <VolumeX className="w-5 h-5 text-white" />
+                    ) : (
+                      <Volume2 className="w-5 h-5 text-white" />
+                    )}
+                  </VideoVolumeControl>
+                  </>}
+
+                  {/* The owner's Boost bolt, beside options as on the feed card. */}
+                  {isOwnShort && canBoostCurrent && (
+                    <button
+                      onClick={(event) => { event.stopPropagation(); setShowBoostModal(true); }}
+                      className={VIEWER_CONTROL}
+                      aria-label={t('postOptions.boostPost')}
+                      data-viewer-boost
+                    >
+                      <Zap className="w-5 h-5 text-white" />
+                    </button>
+                  )}
+
+                  {/* More options button */}
+                  <button
+                    onClick={() => setShareSheetOpen(true)}
+                    className={VIEWER_CONTROL}
+                  >
+                    <MoreHorizontal className="w-5 h-5 text-white" />
+                  </button>
+                </div>
+                </div>
+  );
+
+  return createPortal(
+    <motion.div
+      ref={containerRef}
+      initial={false}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      // Phones are all picture, so the whole viewer keeps its white chrome.
+      // On desktop only the player is: the side panels sit on the page's own
+      // colours, so in System Light they read ink on white and the scrim
+      // becomes the white page instead of letting the feed show through.
+      data-media-full={isMobile ? '' : undefined}
+      data-shorts-viewer
+      data-shorts-mini={mini.minimized || undefined}
+      data-shorts-mini-drag={mini.dragging || undefined}
+      layout
+      transition={{ layout: { duration: mini.reducedMotion ? 0 : 0.22, ease: 'easeOut' } }}
+      className={cn("fixed inset-0 z-[60] flex items-center justify-center", isMobile ? "bg-black" : "bg-black/60 backdrop-blur-[24px]")}
+      // The viewer runs its own swipe-back; see handleTouchStart.
+      data-swipe-back-ignore={isMobile ? '' : undefined}
+      // `overscroll-behavior: contain` stops scroll-chaining/rubber-banding
+      // without the `touch-action: none` that used to freeze the comments
+      // panel. The video carousel manages its own swipe gestures via Framer's
+      // drag (it sets `touch-action: pan-x` on the drag layer itself).
+      style={{
+        overscrollBehavior: 'contain',
+        scale: viewerScale,
+        x: leaveX,
+        y: viewerY,
+        borderRadius: leaveRadius,
+        ...{ ['--shorts-drag-chrome-opacity' as string]: mini.chromeOpacity },
+        ...(commentsViewport.height !== null ? {
+          top: commentsViewport.offsetTop,
+          bottom: 'auto',
+          height: commentsViewport.height,
+        } : {}),
+        ...mini.frame,
+      }}
+      // Pressing a faded button also brings the rest of the chrome back.
+      onPointerDownCapture={autoHidden ? (event) => { if ((event.target as Element).closest?.('button')) setAutoHidden(false); } : undefined}
+      onTouchStart={mini.minimized ? undefined : handleTouchStart}
+      onTouchMove={mini.minimized ? undefined : handleTouchMove}
+      onTouchEnd={mini.minimized ? undefined : handleTouchEnd}
+      onTouchCancel={mini.minimized ? undefined : handleTouchEnd}
+    >
+      {mini.dragging && <motion.div data-shorts-drag-backdrop className="absolute inset-0 bg-black pointer-events-none" style={{ opacity: mini.backdropOpacity }} />}
+      {theme === 'glass' && !isMobile && <GlassBackground />}
+      {/* Desktop Layout with Side Panels */}
+      <div data-shorts-layout className={cn("relative flex h-full", isMobile ? "w-full flex-col" : "items-center justify-center gap-4 px-4")}>
+        
+        {/* Left Side - Desktop Only: prev/next navigation. The action buttons
+            now live in a horizontal bar across the bottom of the video (feed
+            post card style) instead of a side panel.
+            Dropped in fullscreen: it is a sibling of the fullscreened container,
+            so it could not paint there anyway, and the immersive view carries
+            its own pair over the video. */}
+        {!isMobile && !isFullscreen && (
+          <div className="w-[60px] h-full flex flex-col items-center justify-center gap-3">
+            <button
+              onClick={goToPrev}
+              disabled={currentIndex === 0}
+              className="w-10 h-10 bg-zinc-800/80 hover:bg-zinc-700 disabled:opacity-30 disabled:cursor-not-allowed rounded-xl flex items-center justify-center transition-colors"
+            >
+              <ChevronUp className="w-5 h-5 text-white" />
+            </button>
+
+            <button
+              onClick={goToNext}
+              disabled={currentIndex === shorts.length - 1}
+              className="w-10 h-10 bg-zinc-800/80 hover:bg-zinc-700 disabled:opacity-30 disabled:cursor-not-allowed rounded-xl flex items-center justify-center transition-colors"
+            >
+              <ChevronDown className="w-5 h-5 text-white" />
+            </button>
+          </div>
+        )}
+
+        {/* Video Container - Vertical Carousel Stack.
+            On mobile, when comments are open it shrinks to the top half so the
+            comments panel below can take the bottom half (Instagram-style split). */}
+        <motion.div
+          ref={attachVideoContainer}
+          data-shorts-player
+          data-media-full
+          data-keep-dark
+          className={cn(
+            "relative overflow-hidden",
+            isMobile
+              ? "w-full shrink-0 bg-black"
+              : isFullscreen
+                // Native fullscreen already forces width/height/max-* to fill
+                // the screen with `!important` UA rules, so these classes are
+                // really for the simulated path — but they also drop the 9:16
+                // lock, which is the point: a landscape short stops being
+                // letterboxed inside a phone-shaped box and runs the full width
+                // of the display.
+                ? "fixed inset-0 z-[70] w-screen h-screen max-h-none rounded-none bg-black"
+                // Full height, edge to edge. It used to cap at 640px, so on any
+                // normal desktop the short sat in the middle of the screen with
+                // dead space above and below it however tall the display was.
+                // `max-w` is the guard for the other extreme: at 9:16 a very
+                // tall, narrow window would otherwise make the player wider
+                // than the space beside the rails. Nothing is cropped when it
+                // bites — the frame letterboxes instead.
+                : "shrink-0 h-full aspect-[9/16] w-auto max-w-[calc(100vw-8rem)] bg-zinc-900 rounded-none"
+          )}
+          // Comments get 75%: at half height the sheet held barely two comments.
+          animate={isMobile ? { height: showComments ? '25%' : '100%' } : undefined}
+          transition={SMOOTH_TRANSITION}
+          onPointerDownCapture={() => { holdOwnsGesture.current = false; }}
+          onPointerCancelCapture={() => { mini.cancel(); resetDragOffset(); endTimelineSeek(); }}
+          onMouseMove={isMobile ? undefined : handleDesktopPointerMove}
+          onMouseLeave={isMobile ? undefined : handleDesktopPointerLeave}
+        >
+          
+          {/* Draggable carousel container */}
+          <motion.div
+            data-shorts-pager
+            className="absolute inset-0"
+            drag={mini.minimized || isTimelineSeeking || (isMobile && showComments) ? false : 'y'}
+            dragListener={!mini.minimized && !isTimelineSeeking && !(isMobile && showComments)}
+            dragDirectionLock
+            dragConstraints={{ top: 0, bottom: 0 }}
+            dragElastic={0}
+            dragMomentum={false}
+            onDrag={handleDrag}
+            onDragStart={mini.start}
+            onDragEnd={handleDragEnd}
+          >
+            {/* Render window of 3 videos (prev/current/next), plus the slide
+                the pointer is still latched to, if it has fallen out of it */}
+            <AnimatePresence initial={false}>
+              {visibleIndices.map(index => {
+                const short = shorts[index];
+                const offset = index - currentIndex;
+                const isActive = index === currentIndex;
+                
+                return (
+                  <motion.div
+                    key={short.id}
+                    // Lets the wheel handler recognise its own latched slide
+                    // and keep it mounted — see visibleIndices.
+                    data-shorts-slide={index}
+                    className="absolute inset-0"
+                    initial={false}
+                    animate={{
+                      y: `${offset * 100}%`,
+                    }}
+                    transition={isMobile ? SMOOTH_TRANSITION : PAGE_SPRING}
+                    style={{ zIndex: isActive ? 2 : 1 }}
+                  >
+                    <motion.div
+                      className="absolute inset-0"
+                      style={{ y: dragOffset }}
+                      // Right-click a short: the post menu, with Copy video.
+                      {...(short.live || short.reelPost ? {} : postTileMenuProps(() => shortMenuTarget(short), { touch: false }))}
+                    >
+                    {short.live ? (
+                      <LiveSwipeSlide stream={short.live} isActive={isActive} onClose={onClose} />
+                    ) : short.reelPost ? (
+                      <PostSwipeSlide short={short} isActive={isActive} />
+                    ) : (
+                    <VideoSlide
+                      short={short}
+                      isActive={isActive && !isPaused}
+                      handoffKey={reuseInitialVideo && index === initialIndex ? short.id : undefined}
+                      isMuted={isMuted}
+                      onAutoMuted={handleAutoMuted}
+                      playbackRate={playbackRate}
+                      onTimeUpdate={isActive ? trackView : undefined}
+                      onEnded={isActive ? handleShortEnded : undefined}
+                      captionSlot={isActive ? captionSlot : null}
+                      onTap={handleVideoTap}
+                      onTapUndo={undoVideoTap}
+                      sideGestures={isMobile}
+                      onHoldChange={handleHoldChange}
+                      onSeekStart={beginTimelineSeek}
+                      onSeekEnd={endTimelineSeek}
+                      showPlayIndicator={isActive ? showPlayIndicator : null}
+                      letterbox
+                      phoneStage={phoneStage}
+                      stageInsetTop={0}
+                      onRatio={isActive ? (ratio: number) => setSlideRatio({ id: short.id, ratio }) : undefined}
+                      isFullscreen={isFullscreen}
+                      // Only the playing short draws a bar over the action
+                      // bar's gradient; the neighbours keep theirs in place,
+                      // where nothing can see it anyway.
+                      progressLayer={isActive ? videoContainer : null}
+                      seekLayer={isActive && isMobile && !overlaysHidden && !showComments ? seekSlot : null}
+                      // Buffer the current slide + the next one so a swipe lands
+                      // on an already-loaded video. The previous slide (offset
+                      // -1) is almost always still in the browser cache from
+                      // when it was watched, so keep it on metadata to avoid
+                      // three videos fighting for bandwidth on the active one.
+                      preload={offset === 0 || offset === 1 ? 'auto' : 'metadata'}
+                    />
+                    )}
+                    </motion.div>
+                  </motion.div>
+                );
+              })}
+            </AnimatePresence>
+          </motion.div>
+
+          {/* Desktop overlays — mute top-right on the video + feed-card style
+              action bar evenly spread across the bottom (replaces the old left
+              side panel of buttons). The wrapper is pointer-events-none and
+              carries the bottom padding so the timeline seek bar at the very
+              bottom stays reachable. A live slide brings its own. */}
+          {!isMobile && (
+            <>
+              {!isLiveSlide && <>
+              {/* Options, fullscreen and mute, in that order, parked left of each
+                  other. Fullscreen used to be drawn by the slide, which the carousel
+                  translates — so it slid away with the video on every step
+                  while its neighbour here held still. All three live in the
+                  container now, and none of them moves. */}
+              <button
+                onClick={() => {
+                  // The options drawer portals to <body>, which cannot paint
+                  // over a native-fullscreen element, so leave fullscreen first.
+                  if (isFullscreen) toggleFullscreen();
+                  setShareSheetOpen(true);
+                }}
+                className={cn(
+                  CORNER_CONTROL,
+                  // Fullscreen sits at `right-[3.75rem]` and is `w-10`, so it
+                  // ends 6.25rem in; 0.5rem gap after that.
+                  "right-[6.75rem]",
+                  chromeHidden && "opacity-0", chromeInert && "pointer-events-none",
+                )}
+                aria-label={t('postOptions.options')}
+              >
+                <MoreHorizontal className="w-5 h-5" />
+              </button>
+
+              {/* Subtitles, left of options: the playing short puts its CC button in here. */}
+              {hasDesktopCaptions && (
+                <div
+                  ref={setCaptionSlot}
+                  data-shorts-caption-slot
+                  className={cn(
+                    CORNER_CONTROL,
+                    "right-[9.75rem] empty:hidden",
+                    chromeHidden && "opacity-0", chromeInert && "pointer-events-none",
+                  )}
+                />
+              )}
+
+              {/* The owner's Boost bolt, left of options (and of subtitles when they are there). */}
+              {isOwnShort && canBoostCurrent && (
+                <button
+                  onClick={() => {
+                    if (isFullscreen) toggleFullscreen();
+                    setShowBoostModal(true);
+                  }}
+                  className={cn(
+                    CORNER_CONTROL,
+                    hasDesktopCaptions ? "right-[12.75rem]" : "right-[9.75rem]",
+                    chromeHidden && "opacity-0", chromeInert && "pointer-events-none",
+                  )}
+                  aria-label={t('postOptions.boostPost')}
+                  data-viewer-boost
+                >
+                  <Zap className="w-5 h-5" />
+                </button>
+              )}
+
+              <button
+                onClick={toggleFullscreen}
+                className={cn(
+                  CORNER_CONTROL,
+                  // Immediately left of mute: that one is `w-10` at `right-3`,
+                  // so it ends 3.25rem in, leaving a 0.5rem gap.
+                  "right-[3.75rem]",
+                  chromeHidden && "opacity-0", chromeInert && "pointer-events-none",
+                )}
+                aria-label={isFullscreen ? _copy("copy.37fd4e355ba3", { defaultValue: "Exit fullscreen" }) : _copy("copy.4a56b3cb6008", { defaultValue: "Enter fullscreen" })}
+              >
+                {isFullscreen ? (
+                  <Minimize className="w-5 h-5" />
+                ) : (
+                  <Maximize className="w-5 h-5" />
+                )}
+              </button>
+
+              <VideoVolumeControl
+                layout="below"
+                volume={shortsVolume} muted={speakerSilent}
+                onToggleMute={handleSpeakerClick} onVolume={setShortsVolume}
+                open={volumeOpen} onOpenChange={setVolumeOpen}
+                label={speakerSilent ? _copy("copy.ce4ee4efc5e3", { defaultValue: "Unmute" }) : _copy("copy.8dd6857baf02", { defaultValue: "Mute" })}
+                sliderLabel={t('videoPlayer.volume')}
+                // The corner look sits on the wrapper so the slider can hang below it.
+                className={cn(
+                  CORNER_CONTROL,
+                  "right-3",
+                  chromeHidden && "opacity-0", chromeInert && "pointer-events-none",
+                )}
+                buttonClassName="flex h-full w-full items-center justify-center rounded-xl text-white"
+              >
+                {speakerSilent ? (
+                  <VolumeX className="w-5 h-5" />
+                ) : (
+                  <Volume2 className="w-5 h-5" />
+                )}
+              </VideoVolumeControl>
+
+              <div
+                className={cn(
+                  "absolute inset-x-0 bottom-0 z-10 pb-4 pointer-events-none transition-[opacity,padding] duration-300",
+                  chromeHidden && "opacity-0",
+                  // Keep the bar clear of the comments rail, or its right-hand
+                  // half (share, comments, like) ends up underneath it.
+                  isFullscreen && showComments && "pr-[420px]",
+                )}
+              >
+                {/* Bottom gradient so the bar reads over bright video. Taller in
+                    fullscreen, where the creator block sits above the bar. */}
+                <div className={cn(
+                  "absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent",
+                  isFullscreen ? "h-72" : "h-24",
+                )} />
+
+                {/* Creator + description, fullscreen only. Windowed, both live
+                    in the right-hand panel; fullscreen drops that panel, and a
+                    short with no author on it is just a clip. */}
+                {isFullscreen && (
+                  <div className={cn(
+                    "relative px-4 pb-3 max-w-3xl",
+                    chromeInert ? "pointer-events-none" : "pointer-events-auto",
+                  )}>
+                    <div className="flex items-center gap-3 mb-2">
+                      <button onClick={() => handleNavigateToProfile()} className="flex-shrink-0">
+                        <Avatar className="w-11 h-11 rounded-xl border-2 border-white/20" key={currentShort.avatar || currentShort.id}>
+                          <AvatarImage src={currentShort.avatar} alt={currentShort.creatorUsername || currentShort.username} className="rounded-xl" />
+                          <AvatarFallback data-keep-dark className="bg-zinc-700 text-white font-medium rounded-xl">{(currentShort.creatorUsername || currentShort.username)[0]?.toUpperCase()}</AvatarFallback>
+                        </Avatar>
+                      </button>
+                      <button onClick={() => handleNavigateToProfile()} className="flex flex-col items-start text-left min-w-0">
+                        {currentShort.displayName && (
+                          <BadgedName
+                            lookupId={currentShort.creatorUsername || currentShort.creatorId || currentShort.username}
+                            username={currentShort.creatorUsername || currentShort.username}
+                            className="text-white font-semibold text-base [text-shadow:0_10px_8px_rgb(0_0_0/0.04),0_4px_3px_rgb(0_0_0/0.1)] leading-tight"
+                            wrapperClassName="text-base leading-tight"
+                          >
+                            {currentShort.displayName}
+                          </BadgedName>
+                        )}
+                        <span className="text-white/70 text-sm [text-shadow:0_10px_8px_rgb(0_0_0/0.04),0_4px_3px_rgb(0_0_0/0.1)] truncate leading-tight">@{currentShort.creatorUsername || currentShort.username}</span>
+                      </button>
+                    </div>
+                    <DuetCredit duetOf={currentShort.duetOf} className="mb-1.5" />
+                    <ShortCaption key={currentShort.id} short={currentShort} variant="stacked" />
+                    <StitchAttribution key={`stitch-${currentShort.id}`} tokenId={currentShort.id} onNavigate={onClose} className="mt-2" />
+                  </div>
+                )}
+
+                <div
+                  data-shorts-actions
+                  data-on-media
+                  className={cn(
+                    "relative flex items-center justify-between px-4 pt-2",
+                    chromeInert ? "pointer-events-none" : "pointer-events-auto",
+                  )}
+                >
+                  {/* Views */}
+                  <div className="flex items-center gap-1">
+                    <Eye className="w-5 h-5 text-white drop-shadow-lg" />
+                    <span className="text-xs font-medium text-white/70 [text-shadow:0_10px_8px_rgb(0_0_0/0.04),0_4px_3px_rgb(0_0_0/0.1)]">{currentShort.views || '0'}</span>
+                  </div>
+
+                  {/* Tip */}
+                  <button
+                    onClick={() => leaveFullscreenThen(() => setShowTipModal(true))}
+                    className="flex items-center gap-1"
+                    aria-label={_copy("copy.a4245a3c4f56", { defaultValue: "Tip" })}
+                  >
+                    <Gem className="w-5 h-5 text-white drop-shadow-lg" />
+                    <span className="text-xs font-medium text-white/70 [text-shadow:0_10px_8px_rgb(0_0_0/0.04),0_4px_3px_rgb(0_0_0/0.1)]">{formatCount(tipCount)}</span>
+                  </button>
+
+                  {/* Share */}
+                  <button
+                    onClick={() => leaveFullscreenThen(() => setShareSheetOpen(true))}
+                    className="flex items-center gap-1"
+                    aria-label={_copy("copy.29887a5ff984", { defaultValue: "Share" })}
+                  >
+                    <PostShareIcon className="w-5 h-5 text-white drop-shadow-lg" />
+                    <span className="text-xs font-medium text-white/70 [text-shadow:0_10px_8px_rgb(0_0_0/0.04),0_4px_3px_rgb(0_0_0/0.1)]">{formatCount(displayShareCount)}</span>
+                  </button>
+
+                  {/* Comments, fullscreen only — windowed, the panel beside the
+                      video already holds them, and that panel is gone here. */}
+                  {isFullscreen && (
+                    <button
+                      onClick={() => { setCommentsInitialTab('replies'); setShowComments(v => !v); }}
+                      className="flex items-center gap-1"
+                      aria-label={_copy("copy.355f79f29d7d", { defaultValue: "Comments" })}
+                    >
+                      <MessageSquare className="w-5 h-5 text-white drop-shadow-lg" />
+                      <span className="text-xs font-medium text-white/70 [text-shadow:0_10px_8px_rgb(0_0_0/0.04),0_4px_3px_rgb(0_0_0/0.1)]">{formatCount(currentShort.comments || 0)}</span>
+                    </button>
+                  )}
+
+                  {/* Like — furthest right, like feed cards */}
+                  <span className="relative flex items-center" {...likeTray.areaProps}>
+                    <ReactionPicker
+                      open={likeTray.open}
+                      current={myReaction}
+                      counts={localReactionCounts}
+                      onSelect={(reaction) => { likeTray.close(); handleReaction(reaction); }}
+                      onClose={likeTray.close}
+                      align="right"
+                      onShowInfo={canViewReactionInfo ? showReactionInfo : undefined}
+                    />
+                    <motion.button
+                      onClick={() => {
+                        // The click that ends a hold must not also cast a like.
+                        if (likeTray.consumePress()) return;
+                        handleVote();
+                      }}
+                      {...likeTray.buttonProps}
+                      disabled={isVoting}
+                      /* Same halo the tray puts on your pick — see ActionBar. */
+                      className="flex items-center gap-1 select-none touch-none"
+                      animate={justVoted ? { scale: [1, 1.3, 1] } : {}}
+                      transition={{ duration: 0.3, ease: "easeOut" }}
+                      aria-label={myReaction ? _copy("copy.a3156ed263d2", { defaultValue: "{{value1}} — hold to change your reaction", value1: reactionMeta(myReaction).label }) : _copy("copy.12b91b0ac5dd", { defaultValue: "{{value1}} — hold to react", value1: reactionMeta(reactionForThumbTap(myReaction, localReactionCounts)).label })}
+                      aria-haspopup="menu"
+                      aria-expanded={likeTray.open}
+                    >
+                      {leadReaction && !thumbDown ? (
+                        <span data-engaged-glyph className="w-5 h-5 flex items-center justify-center text-[1.05rem] leading-none drop-shadow-lg" aria-hidden="true">
+                          <ReactionEmoji reaction={leadReaction} animate={leadReaction === myReaction} />
+                        </span>
+                      ) : (
+                        <ThumbIcon down={thumbDown} nod={thumbMine} className={cn(
+                          "w-5 h-5 drop-shadow-lg",
+                          thumbMine ? "fill-white text-white" : "text-white"
+                        )} />
+                      )}
+                      <span className="text-xs font-medium text-white/70 [text-shadow:0_10px_8px_rgb(0_0_0/0.04),0_4px_3px_rgb(0_0_0/0.1)]">{formatCount(thumbCount)}</span>
+                    </motion.button>
+                  </span>
+                </div>
+              </div>
+              </>}
+            </>
+          )}
+
+          {/* Fullscreen-only chrome. Everything below is a CHILD of the
+              container that goes fullscreen — the side panels and the close
+              button are siblings of it, so they cannot paint in the top layer
+              and the immersive view has to carry its own. */}
+          {!isMobile && isFullscreen && (
+            <>
+              {/* Prev / next over the video, replacing the side column. Wheel,
+                  arrow keys and j/k all still work; this is the visible one.
+                  Left, not right: the comments rail comes in from the right and
+                  would sit straight on top of them. */}
+              <div
+                className={cn(
+                  "absolute left-3 top-1/2 -translate-y-1/2 z-20 flex flex-col gap-3 transition-opacity duration-300",
+                  chromeHidden && "opacity-0", chromeInert && "pointer-events-none",
+                )}
+              >
+                <button
+                  onClick={goToPrev}
+                  disabled={currentIndex === 0}
+                  className="w-10 h-10 bg-black/40 backdrop-blur-[24px] border border-white/10 hover:bg-black/60 disabled:opacity-30 disabled:cursor-not-allowed rounded-xl flex items-center justify-center transition-colors"
+                  aria-label={_copy("copy.ebb1fb9de107", { defaultValue: "Previous short" })}
+                >
+                  <ChevronUp className="w-5 h-5 text-white" />
+                </button>
+                <button
+                  onClick={goToNext}
+                  disabled={currentIndex === shorts.length - 1}
+                  className="w-10 h-10 bg-black/40 backdrop-blur-[24px] border border-white/10 hover:bg-black/60 disabled:opacity-30 disabled:cursor-not-allowed rounded-xl flex items-center justify-center transition-colors"
+                  aria-label={_copy("copy.680029c7141b", { defaultValue: "Next short" })}
+                >
+                  <ChevronDown className="w-5 h-5 text-white" />
+                </button>
+              </div>
+
+              {/* Comments as a rail over the video rather than beside it.
+                  `data-shorts-scrollable` is what stops the window-level wheel
+                  handler from turning a scroll through the thread into a jump
+                  to the next short. */}
+              <AnimatePresence>
+                {showComments && postId && (
+                  <motion.div
+                    key="fullscreen-comments"
+                    data-shorts-panel
+                    data-shorts-scrollable
+                    initial={{ x: '100%', opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    exit={{ x: '100%', opacity: 0 }}
+                    transition={SMOOTH_TRANSITION}
+                    // Starts below the top control row on purpose: run it to
+                    // `top-0` and it covers the mute and fullscreen buttons, so
+                    // the only way back out of fullscreen is the Esc key.
+                    className="absolute top-16 right-0 bottom-0 z-30 w-full max-w-[420px] flex flex-col bg-black/60 backdrop-blur-[24px] border-l border-t border-white/[0.08] rounded-tl-2xl overflow-hidden"
+                  >
+                    <div className="flex items-center justify-between px-4 py-3 flex-shrink-0 border-b border-white/[0.08]">
+                      <span className="text-white font-semibold text-sm">{_copy("copy.355f79f29d7d", { defaultValue: "Comments" })}</span>
+                      <button
+                        onClick={() => setShowComments(false)}
+                        className="w-8 h-8 rounded-lg bg-white/[0.08] hover:bg-white/15 flex items-center justify-center transition-colors"
+                        aria-label={_copy("copy.3530ee6dc03c", { defaultValue: "Close comments" })}
+                      >
+                        <X className="w-4 h-4 text-white/70" />
+                      </button>
+                    </div>
+                    <div
+                      className="flex-1 min-h-0 px-1 [&>div]:h-full [&>div]:min-h-0 [&>div]:max-h-none [&>div]:mt-0 [&>div]:p-0"
+                      style={{ overscrollBehavior: 'contain' }}
+                    >
+                      <CommentsSection
+                        key={currentShort.id}
+                        tokenId={currentShort.id}
+                        onClose={() => setShowComments(false)}
+                        initialTab={commentsInitialTab}
+                        placeholder={t('comments.shortsPlaceholder', 'Say something...')}
+                        embedded
+                      />
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </>
+          )}
+
+          {/* Mobile-only overlays - TikTok-style layout */}
+          {isMobile && !isLiveSlide && (
+            <>
+              {/* Lower-area upward swipes restore through the carousel; a tap
+                  outside the centre restores through handleVideoTap. */}
+
+              {/* Animated overlay container */}
+              {/* Only a deliberate clear fades the whole layer. The timed fade
+                  is applied piece by piece (`autoFade`), so the scrubber stays
+                  up, as the progress line always has, while the rest rests. */}
+              <motion.div
+                className="absolute inset-0 z-10 pointer-events-none"
+                animate={{ opacity: (overlaysHidden || showComments) ? 0 : 1 }}
+                transition={{ duration: 0.25, ease: 'easeOut' }}
+              >
+                {/* An open caption dims the video so it reads properly. A tap on
+                    the dimmed video closes it again. */}
+                <AnimatePresence>
+                  {isDescriptionExpanded && !showComments && !chromeHidden && (
+                    <motion.div
+                      key="caption-dim"
+                      data-keep-dark
+                      className="absolute inset-0 bg-black/70 pointer-events-auto"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.2, ease: 'easeOut' }}
+                      onClick={() => setIsDescriptionExpanded(false)}
+                    />
+                  )}
+                </AnimatePresence>
+
+                {/* Bottom gradient overlay - fades from transparent to black */}
+                {<div className={cn("absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/80 via-black/40 to-transparent pointer-events-none transition-opacity duration-[250ms] ease-out", autoHidden && "opacity-0")} />}
+                
+                {/* Bottom overlay stack — creator info + description, with the
+                    action bar below as the bottommost element (feed-card style
+                    horizontal row instead of the old side rail). The wrapper is
+                    pointer-events-none and carries the bottom padding, so the
+                    strip under the action row stays free for the timeline seek. */}
+                {phoneStack(false)}
+              </motion.div>
+            </>
+          )}
+        </motion.div>
+
+        {/* Mobile split comments panel - fills the bottom half when comments are
+            open, with the shrunken video pinned above (Instagram-style).
+            It slides on a transform at a fixed half height rather than growing
+            from 0: a growing panel re-laid out the whole comment list on every
+            frame, which is what made opening and closing judder. Same curve and
+            duration as the player's height, so the sheet's top edge and the
+            video's bottom edge stay together the whole way, both directions. */}
+        {isMobile && (
+          <AnimatePresence>
+            {showComments && postId && (
+              <motion.div
+                key="mobile-comments-split"
+                data-shorts-panel
+                {...commentsPullDismiss}
+                data-shorts-scrollable
+                initial={{ y: '100%' }}
+                animate={{ y: 0 }}
+                exit={{ y: '100%' }}
+                transition={SMOOTH_TRANSITION}
+                onAnimationComplete={(def) => {
+                  if (def && typeof def === 'object' && 'y' in def && def.y === 0) setCommentsLanded(true);
+                }}
+                // Solid black, not black/60 + backdrop blur: the only thing
+                // ever behind this panel is the viewer's own black floor, so
+                // the blur drew nothing, yet it was re-run every frame of the
+                // slide.
+                className="absolute inset-x-0 bottom-0 h-[75%] flex flex-col overflow-hidden bg-black border-t border-white/[0.08] rounded-t-2xl z-30 will-change-transform"
+              >
+                {/* Grab handle. The tab row below carries the close button. */}
+                <motion.div
+                  className="relative h-5 flex items-center justify-center flex-shrink-0 cursor-grab active:cursor-grabbing"
+                  style={{ touchAction: 'none' }}
+                  onPanEnd={(_, info) => {
+                    if (info.offset.y > 60 || info.velocity.y > 500) setShowComments(false);
+                  }}
+                >
+                  <div className="h-1 w-10 rounded-full bg-white/25" />
+                </motion.div>
+                <div
+                  className="flex-1 min-h-0 px-1 pb-[env(safe-area-inset-bottom)]"
+                  style={{ touchAction: 'pan-y', overscrollBehavior: 'contain' }}
+                >
+                  {commentsLanded ? (
+                    <CommentsSection
+                      key={currentShort.id}
+                      tokenId={currentShort.id}
+                      onClose={() => setShowComments(false)}
+                      initialTab={commentsInitialTab}
+                        placeholder={t('comments.shortsPlaceholder', 'Say something...')}
+                    />
+                  ) : (
+                    <div className="flex h-full items-start justify-center pt-8">
+                      <Loader2 className="w-5 h-5 animate-spin text-white/40" />
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        )}
+
+        {/* Right Side Panel - Desktop Only: Creator info and comments.
+            Fullscreen drops it — it is a sibling of the fullscreened container
+            and could not paint there — and moves both onto the video instead. */}
+        {!isMobile && !isFullscreen && (
+          // A live slide has no post to describe or comment on.
+          isLiveSlide ? null : <div className="w-[268px] lg:w-[320px] h-full py-4 flex flex-col">
+            {/* Creator Info - Top */}
+            <div data-shorts-panel className="bg-zinc-900/50 rounded-2xl p-3 lg:p-4 mb-3 relative">
+              <div className="absolute top-3 right-3 lg:top-4 lg:right-4 flex items-center gap-1.5">
+                <motion.button
+                  onClick={() => toggleBookmark()}
+                  disabled={isBookmarkLoading}
+                  className="w-8 h-8 bg-white/[0.08] hover:bg-white/15 rounded-lg flex items-center justify-center transition-colors"
+                  animate={isBookmarked ? { scale: [1, 1.2, 1] } : {}}
+                  transition={{ duration: 0.2, ease: "easeOut" }}
+                  aria-label={_copy("copy.1bac4007880b", { defaultValue: "Bookmark" })}
+                >
+                  <Bookmark className={cn("w-4 h-4", isBookmarked ? "fill-yellow-500 text-yellow-500" : "text-white/60")} />
+                </motion.button>
+                <button
+                  onClick={() => { openPostInfo(navigate, currentShort.id); onClose(); }}
+                  className="w-8 h-8 bg-white/[0.08] hover:bg-white/15 rounded-lg flex items-center justify-center transition-colors"
+                  aria-label={_copy("copy.8ec595494efe", { defaultValue: "Post info" })}
+                >
+                  <Info className="w-4 h-4 text-white/60" />
+                </button>
+              </div>
+              <button
+                onClick={() => handleNavigateToProfile()}
+                className="flex items-center gap-2 lg:gap-3 w-full text-left pr-20"
+              >
+                <Avatar className="w-10 h-10 lg:w-12 lg:h-12 border-2 border-white/20 flex-shrink-0 rounded-xl" key={currentShort.avatar || currentShort.id}>
+                  <AvatarImage src={currentShort.avatar} alt={currentShort.creatorUsername || currentShort.username} className="rounded-xl" />
+                  <AvatarFallback data-keep-dark className="bg-zinc-700 text-white font-medium rounded-xl">{(currentShort.creatorUsername || currentShort.username)[0]?.toUpperCase()}</AvatarFallback>
+                </Avatar>
+                <div className="flex flex-col flex-1 min-w-0">
+                  {currentShort.displayName && (
+                    <BadgedName
+                      lookupId={currentShort.creatorUsername || currentShort.creatorId || currentShort.username}
+                      username={currentShort.creatorUsername || currentShort.username}
+                      className="text-white font-semibold text-sm lg:text-base hover:underline"
+                      wrapperClassName="text-sm lg:text-base"
+                    >
+                      {currentShort.displayName}
+                    </BadgedName>
+                  )}
+                  <span className="text-white/60 text-xs lg:text-sm truncate">@{currentShort.creatorUsername || currentShort.username}</span>
+                </div>
+              </button>
+              <DuetCredit duetOf={currentShort.duetOf} className="mb-1.5" />
+              <ShortCaption key={currentShort.id} short={currentShort} variant="stacked" />
+              <StitchAttribution key={`stitch-${currentShort.id}`} tokenId={currentShort.id} onNavigate={onClose} className="mt-2" />
+              {/* No follow button on your own post. While the answer is out the
+                  button keeps its place unseen and fades in, instead of a
+                  pulsing loading box that blinked on every slide. */}
+              {!isOwnShort && (() => {
+                const checking = !!currentShort.creatorId && followCheckingCreators.has(currentShort.creatorId);
+                return (
+                  <button
+                    onClick={handleFollow}
+                    disabled={checking || isCreatorFollowed(currentShort.creatorId)}
+                    aria-hidden={checking || undefined}
+                    className={cn(
+                      'w-full mt-3 bg-white/10 backdrop-blur-sm text-white text-xs lg:text-sm font-semibold px-4 py-2 rounded-xl border border-white/20 hover:bg-white/20 transition-[opacity,background-color] duration-200 disabled:cursor-not-allowed',
+                      checking ? 'opacity-0' : isCreatorFollowed(currentShort.creatorId) ? 'opacity-50' : 'opacity-100',
+                    )}
+                  >
+                    {isCreatorFollowed(currentShort.creatorId) ? _copy("copy.ec7a1a6ce401", { defaultValue: "Following ✓" }) : _copy("copy.641d1ef657bd", { defaultValue: "Follow" })}
+                  </button>
+                );
+              })()}
+            </div>
+
+            {/* Desktop: Inline comments */}
+            <div
+              data-shorts-panel
+              data-shorts-scrollable
+              className="flex-1 bg-zinc-900/50 rounded-2xl p-3 lg:p-4 flex flex-col min-h-0 overflow-hidden"
+            >
+          <div className="flex-1 min-h-0 [&>div]:h-full [&>div]:min-h-0 [&>div]:max-h-none [&>div]:mt-0 [&>div]:p-0">
+                {/* Keyed on the short: this panel stays mounted while the reader
+                    scrolls, so without a fresh section the half-written reply,
+                    its target and every optimistic row from one short carried
+                    into the next — and a reply could post there under the
+                    previous short's parent. */}
+                <CommentsSection
+                  key={currentShort.id}
+                  tokenId={currentShort.id}
+                  onClose={() => {}}
+                  initialTab={commentsInitialTab}
+                        placeholder={t('comments.shortsPlaceholder', 'Say something...')}
+              embedded
+                />
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {mini.minimized && <div data-shorts-mini-controls>
+        <button className="absolute inset-0" onClick={mini.restore} aria-label={_copy('copy.a76e13b98392', { defaultValue: 'Restore' })} />
+        <div className="absolute top-1 right-1 flex gap-1">
+          <button className={VIEWER_CONTROL} onClick={() => setIsPaused(value => !value)} aria-label={isPaused ? _copy('copy.436e61016e26', { defaultValue: 'Play' }) : _copy('copy.858e4ba7a29f', { defaultValue: 'Pause' })}>
+            {isPaused ? <Play className="w-5 h-5" /> : <Pause className="w-5 h-5" />}
+          </button>
+          <button className={VIEWER_CONTROL} onClick={onClose} aria-label={_copy('copy.7d9eb7acb13e', { defaultValue: 'Close' })}><X className="w-5 h-5" /></button>
+        </div>
+      </div>}
+
+      {/* Mobile top header controls - TikTok style - animated with chromeHidden.
+          A live slide is the stream's own room, with its own close and sound. */}
+      {isMobile && !isLiveSlide && (
+        // Its own layer above the video. Mid-fade, opacity turns this wrapper
+        // into a stacking context at the page's level, and the buttons' z-20
+        // stopped counting: the playing video's slot (z-2) sat on top of them,
+        // so a tap on Back while the chrome faded in or out hit the video.
+        <motion.div
+          className={cn("absolute inset-0 z-20 pointer-events-none", !(chromeInert || showComments) && "[&>*]:pointer-events-auto")}
+          animate={{ opacity: (chromeHidden || showComments) ? 0 : 1 }}
+          transition={{ duration: 0.25, ease: 'easeOut' }}
+        >
+          {/* Back button - top left. All four buttons wear the black/50 square
+              and cut icons of the app's picture-in-picture button. */}
+          <button
+            onClick={onClose}
+            className={cn(VIEWER_CONTROL, 'absolute top-4 left-4 z-20')}
+          >
+            <ArrowLeft className="w-5 h-5 text-white" />
+          </button>
+          
+          {/* The player's own buttons live in the bottom stack (see `phoneStack`). */}
+        </motion.div>
+      )}
+
+      {/* Desktop close button */}
+      {!isMobile && (
+        <button
+          onClick={onClose}
+          aria-label={t('common.close')}
+          className="absolute top-0 right-0 w-10 h-10 flex items-center justify-center text-white/80 hover:text-white z-20 transition-colors"
+        >
+          <X className="w-5 h-5 text-white" />
+        </button>
+      )}
+
+      {/* Options Drawer — mirrors the main-feed post card's three-dot menu. */}
+      <ShareToDmModal
+        open={shareToDmOpen}
+        onOpenChange={setShareToDmOpen}
+        url={viewerShareUrl(`${window.location.origin}/app/post/${currentShort.articleSlug || currentShort.id}`)}
+      />
+      <Drawer open={shareSheetOpen} onOpenChange={setShareSheetOpen}>
+        {/* On desktop a centred column under the player, not a sheet across the whole window. */}
+        <DrawerContent scrollable glass className="px-4 pb-6 md:left-[calc(50%_-_15rem)] md:right-auto md:w-[30rem]">
+          <DrawerHeader className="relative pb-2">
+            <DrawerTitle className="text-white text-lg">{_copy("copy.d0db8b5e364b", { defaultValue: "Options" })}</DrawerTitle>
+          </DrawerHeader>
+          <div className="flex flex-col gap-1">
+            {/* The player's own buttons, as on a video in the feed: loop,
+                speed, subtitles, picture in picture, full screen, sound. The
+                toggles keep the menu open so you can see what changed. */}
+            {!!currentShort.videoUrl && !currentShort.imageUrls?.length && !currentShort.reelPost && (
+              <div data-shorts-player-rows className="flex flex-col gap-1 border-b border-white/10 pb-1 mb-1">
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={isLooping}
+                  onClick={() => {
+                    const next = !isLooping;
+                    const player = activePlayer();
+                    if (player) player.loop = next;
+                    vpSetIsLooping(next);
+                  }}
+                  className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left"
+                >
+                  <Repeat2 className="w-5 h-5" />
+                  <span className="flex-1">{isLooping ? _copy("copy.2e68f91aef20", { defaultValue: "Loop on" }) : _copy("copy.daee48e3d2b7", { defaultValue: "Loop off" })}</span>
+                  <span aria-hidden className={cn('relative h-5 w-9 rounded-full transition-colors', isLooping ? 'bg-white' : 'bg-white/20')}>
+                    <span className={cn('absolute top-0.5 h-4 w-4 rounded-full transition-all', isLooping ? 'left-[18px] bg-black' : 'left-0.5 bg-white')} />
+                  </span>
+                </button>
+                <button type="button" onClick={cycleSpeed} className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left">
+                  <span className="flex w-5 justify-center text-[11px] font-bold">{formatRate(playbackRate)}x</span>
+                  <span className="flex-1">{_copy("copy.afec2b22114c", { defaultValue: "Playback speed" })}</span>
+                  <span className="text-sm text-white/60 tabular-nums">{formatRate(playbackRate)}x</span>
+                </button>
+                {!!captionSlot && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShareSheetOpen(false);
+                      // The subtitles menu belongs to the CC button in the
+                      // control row; open it once the drawer has gone.
+                      window.setTimeout(() => captionSlot.querySelector<HTMLButtonElement>('button')?.click(), 320);
+                    }}
+                    className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left"
+                  >
+                    <Captions className="w-5 h-5" />{_copy("copy.0ee695bdeb26", { defaultValue: "Subtitles" })}
+                  </button>
+                )}
+                {document.pictureInPictureEnabled && !currentShort.gated && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShareSheetOpen(false);
+                      const player = activePlayer();
+                      if (player) void player.requestPictureInPicture().catch(() => {});
+                    }}
+                    className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left"
+                  >
+                    <PictureInPicture2 className="w-5 h-5" />{_copy("copy.c49677dc5ccd", { defaultValue: "Picture in picture" })}
+                  </button>
+                )}
+                <button type="button" onClick={() => { setShareSheetOpen(false); toggleFullscreen(); }} className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left">
+                  {isFullscreen ? <Minimize className="w-5 h-5" /> : <Maximize className="w-5 h-5" />}
+                  {isFullscreen ? _copy("copy.37fd4e355ba3", { defaultValue: "Exit fullscreen" }) : _copy("copy.4a56b3cb6008", { defaultValue: "Enter fullscreen" })}
+                </button>
+                <button type="button" onClick={toggleMute} className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left">
+                  {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+                  {isMuted ? _copy("copy.ce4ee4efc5e3", { defaultValue: "Unmute" }) : _copy("copy.8dd6857baf02", { defaultValue: "Mute" })}
+                </button>
+              </div>
+            )}
+            {!!currentShort.videoUrl && !currentShort.imageUrls?.length && !currentShort.gated
+              && !downloadGate.isGated && !currentShort.spoilerText
+              && visibility === 'public' && (!currentShort.visibility || currentShort.visibility === 'public') && (
+              <RemixMenuItems source={{ videoUrl: currentShort.videoUrl, sourceUrl: `https://riftn.com/app/post/${currentShort.id}`,
+                title: currentShort.title || 'Video', creator: currentShort.creatorUsername || currentShort.username,
+                tokenId: String(currentShort.id), creatorAddress: currentShort.creatorId, quotePolicy: currentShort.quotePolicy }}
+                isOwner={!!isOwnShort}
+                onStart={() => { setIsPaused(true); setShareSheetOpen(false); onClose(); }} />
+            )}
+            {visibility === 'public' && (!currentShort.visibility || currentShort.visibility === 'public') && (
+              <button
+                onClick={() => {
+                  setShareSheetOpen(false);
+                  if (!walletAddress) { openLoginModal(); return; }
+                  setShareToDmOpen(true);
+                }}
+                className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left"
+              >
+                <Share2 className="w-5 h-5" />{_copy("copy.20e392c29da3", { defaultValue: "Send in a message" })}
+              </button>
+            )}
+            {/* Bookmark / pin / post info — the same three the feed card's
+                menu and action bar carry. */}
+            {!!currentShort.videoUrl && !currentShort.imageUrls?.length && !downloadGate.isGated && (
+              <button onClick={() => {
+                setShareSheetOpen(false);
+                setIsPaused(true);
+                void downloadVideo({ url: currentShort.videoUrl, title: currentShort.title || "video", username: currentShort.creatorUsername || currentShort.username });
+              }} className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left">
+                <Download className="w-5 h-5" /> {t("postOptions.download")}
+              </button>
+            )}
+            {!!currentShort.videoUrl && !currentShort.imageUrls?.length && !currentShort.gated && !downloadGate.isGated && (
+              <CastMenuItem
+                onBeforeCast={() => setShareSheetOpen(false)}
+                onCasting={() => setIsPaused(true)}
+                getSource={() => {
+                  const pageVideo = visibleVideo('video.shorts-inline-video');
+                  return {
+                    url: currentShort.videoUrl,
+                    title: currentShort.title,
+                    poster: currentShort.thumbnail,
+                    startAt: pageVideo?.currentTime,
+                    pageVideo,
+                  };
+                }}
+              />
+            )}
+            <PostUtilityMenuItems
+              postId={currentShort.id}
+              tokenId={parseInt(currentShort.id, 10) || undefined}
+              isOwnPost={isOwnShort}
+              canShareToMoment={!currentShort.gated && (!!currentShort.videoUrl || !!currentShort.imageUrls?.length) && canShareToMoment(currentShort)}
+              onBeforeNavigate={() => { setShareSheetOpen(false); onClose(); }}
+            />
+            <button
+              onClick={() => { setShareSheetOpen(false); setTimeout(() => setShowReportModal(true), 300); }}
+              className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left"
+            >
+              <Flag className="w-5 h-5" />{_copy("copy.5d0faf6c887c", { defaultValue: " Report" })}</button>
+            <button
+              onClick={handleCopyLink}
+              className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left"
+            >
+              <Link className="w-5 h-5" />{_copy("copy.d9a664a0310b", { defaultValue: " Copy Link" })}</button>
+            <button
+              onClick={() => { setShareSheetOpen(false); setCommentsInitialTab('reposts'); setShowComments(true); }}
+              className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left"
+            >
+              <Repeat2 className="w-5 h-5" />{_copy("copy.3c6161e34023", { defaultValue: " See Engagements" })}</button>
+            <button
+              onClick={handleRepost}
+              className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left"
+            >
+              <Share2 className="w-5 h-5" />{_copy("copy.ae3db03ac230", { defaultValue: " Repost" })}</button>
+            <button
+              onClick={handleQuote}
+              className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left"
+            >
+              <Quote className="w-5 h-5" />{_copy("copy.4b24c14ae0eb", { defaultValue: " Quote" })}</button>
+            {!isOwnShort && currentShort?.creatorId && !isCreatorFollowed(currentShort.creatorId) && (
+              <button
+                onClick={handleFollow}
+                className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left disabled:opacity-50"
+              >
+                <UserPlus className="w-5 h-5" />{_copy("copy.641d1ef657bd", { defaultValue: "Follow" })}</button>
+            )}
+            {!isOwnShort && currentShort?.creatorId && isCreatorFollowed(currentShort.creatorId) && (
+              <button
+                disabled
+                className="flex items-center gap-3 px-4 py-3 text-zinc-500 rounded-xl text-left cursor-default"
+              >
+                <UserCheck className="w-5 h-5" />{_copy("copy.56a12e72f40d", { defaultValue: " Following" })}</button>
+            )}
+            {!isOwnShort && (
+              <button
+                onClick={() => {
+                  if (!walletAddress) { openLoginModal(); return; }
+                  if (!currentShort?.creatorId) return;
+                  blockAuthor(currentShort.creatorId, currentShort.displayName || currentShort.creatorUsername || undefined);
+                }}
+                className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left"
+              >
+                <Ban className="w-5 h-5" />{_copy("copy.eb326e0e85cf", { defaultValue: " Block Creator" })}</button>
+            )}
+            {!isOwnShort && canGiftBoost && canBoostCurrent && (
+              <button
+                onClick={() => { setShareSheetOpen(false); setTimeout(() => setShowBoostModal(true), 300); }}
+                className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left"
+              >
+                <Gift className="w-5 h-5" /> {t('postOptions.giftBoost', { defaultValue: 'Gift a boost' })}
+              </button>
+            )}
+            {isOwnShort && (
+              <>
+                <div className="border-t border-white/10 my-1" />
+                {canBoostCurrent && (
+                  <button
+                    onClick={() => { setShareSheetOpen(false); setTimeout(() => setShowBoostModal(true), 300); }}
+                    className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left"
+                  >
+                    <ThemedIcon icon="superpowers" alt="" className="w-5 h-5 object-contain" /> {t('postOptions.boostPost')}
+                  </button>
+                )}
+                <button
+                  onClick={async () => {
+                    const next: TokenVisibility = visibility === 'public' ? 'private' : 'public';
+                    try {
+                      await updateTokenVisibility(currentShort.id, next);
+                      setVisibility(next);
+                      toast.success(next === 'private' ? _copy("copy.bc3aabd76a18", { defaultValue: "Post set to private" }) : _copy("copy.30a9e349befb", { defaultValue: "Post set to public" }));
+                    } catch { toast.error(_copy("copy.67ca6fcb8233", { defaultValue: "Failed to update visibility" })); }
+                  }}
+                  className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-xl transition-colors text-left"
+                >
+                  {visibility === 'public' ? <EyeOff className="w-5 h-5" /> : <Globe className="w-5 h-5" />}
+                  {visibility === 'public' ? _copy("copy.ffab73178509", { defaultValue: "Make Private" }) : _copy("copy.24139936d627", { defaultValue: "Make Public" })}
+                </button>
+                <button
+                  onClick={() => { setShareSheetOpen(false); setTimeout(() => setShowDeleteModal(true), 300); }}
+                  className="flex items-center gap-3 px-4 py-3 text-red-400 hover:bg-white/10 rounded-xl transition-colors text-left"
+                >
+                  <Trash2 className="w-5 h-5" />{_copy("copy.3534d686f23a", { defaultValue: " Delete" })}</button>
+              </>
+            )}
+          </div>
+        </DrawerContent>
+      </Drawer>
+
+      {/* Tip Modal */}
+      <TipModal
+        open={showTipModal}
+        onOpenChange={setShowTipModal}
+        creatorAddress={currentShort?.creatorId || ''}
+        creatorName={currentShort?.creatorUsername || currentShort?.username || ''}
+        tokenId={currentShort?.id}
+        context="post"
+      />
+
+      {/* Boost Modal — mounted only while open. */}
+      {showBoostModal && (
+        <Suspense fallback={null}>
+          <BoostModal
+            open={showBoostModal}
+            onOpenChange={setShowBoostModal}
+            tokenId={boostTokenId}
+            postTitle={currentShort?.title ?? ''}
+          />
+        </Suspense>
+      )}
+
+      {/* Report Modal */}
+      <ReportModal
+        open={showReportModal}
+        onOpenChange={setShowReportModal}
+        tokenId={currentShort?.id}
+        contentType="video"
+      />
+
+      {/* Delete Modal — own shorts only */}
+      <DeletePostModal
+        open={showDeleteModal}
+        onOpenChange={setShowDeleteModal}
+        tokenId={currentShort?.id || ''}
+        onSuccess={() => {
+          queryClient.invalidateQueries({ queryKey: ['unified-feed'] });
+          onClose();
+        }}
+      />
+
+      {canViewReactionInfo && reactionInfoOpen && (
+        <ReactionInfoDrawer
+          open={reactionInfoOpen}
+          onOpenChange={setReactionInfoOpen}
+          tokenId={currentShort.id}
+        />
+      )}
+    </motion.div>,
+    document.body,
+  );
+}

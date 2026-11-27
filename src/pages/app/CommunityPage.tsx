@@ -1,0 +1,309 @@
+import { useTranslation as _useCopy } from 'react-i18next';
+/**
+ * Single Community Page
+ * ======================
+ * Header with banner/avatar, member-filtered feed, members tab, about tab, chat tab.
+ */
+
+import { useState, useMemo, useEffect } from 'react';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
+import Users from "@/components/ui/cut-icons/communities";
+
+import ArrowLeft from "@/components/ui/cut-icons/back";
+
+import { Button } from '@/components/ui/button';
+import { useAuth } from '@/contexts/AuthContext';
+import { useCommunity, useCommunityMembers, useIsCommunityMember, isMembershipLoading, useJoinCommunity, useLeaveCommunity } from '@/hooks/use-communities';
+import { useCommunityAbilities, isEffectivelyActive, isActivelyBanned } from '@/hooks/use-community-admin';
+import { CommunityManageSheet } from '@/components/app/communities/manage/CommunityManageSheet';
+import { holderGateOf, holderGateMessage, runHolderCheck } from '@/hooks/use-holder-gate';
+import { communityKindOf, entryPriceOf, isPublicChatCommunity, payCommunityEntry } from '@/lib/community-kinds';
+import { adminErrorMessage } from '@/hooks/use-community-admin';
+import { CommunityHeader } from '@/components/app/communities/CommunityHeader';
+import { CommunityFeed } from '@/components/app/communities/CommunityFeed';
+import { AddExistingPost } from '@/components/app/communities/AddExistingPost';
+import { CommunityMembers } from '@/components/app/communities/CommunityMembers';
+import { CommunityAbout } from '@/components/app/communities/CommunityAbout';
+import { CommunityChat } from '@/components/app/communities/CommunityChat';
+import { PublicChat } from '@/components/app/chat/PublicChat';
+import { CommunityEvents } from '@/components/app/communities/CommunityEvents';
+import { CommunityTabEmptyState, type CommunityTab } from '@/components/app/communities/CommunityTabEmptyState';
+import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
+import { SEOHead } from '@/components/SEOHead';
+import { AppState } from '@/components/app/AppState';
+import { useTranslation } from 'react-i18next';
+
+type Tab = CommunityTab;
+
+export default function CommunityPage() {
+  const { t: _copy } = _useCopy();
+  const { slug } = useParams<{ slug: string }>();
+  const navigate = useNavigate();
+  const { walletAddress, isAuthenticated, openLoginModal } = useAuth();
+  const [searchParams] = useSearchParams();
+  // ?tab=chat is where a chat notification lands.
+  const initialTab: Tab = searchParams.get('tab') === 'chat' ? 'chat' : 'posts';
+  const [tab, setTab] = useState<Tab>(initialTab);
+  // Lazy-mount-then-keep: only the Posts tab mounts on arrival; the others
+  // (chat = 200-message fetch + per-sender profile fan-out, events, members)
+  // mount on first activation and then stay mounted CSS-hidden as before.
+  const [visitedTabs, setVisitedTabs] = useState<Set<Tab>>(() => new Set<Tab>(['posts', initialTab]));
+  const [manageOpen, setManageOpen] = useState(false);
+  const activateTab = (next: Tab) => {
+    setTab(next);
+    setVisitedTabs(prev => (prev.has(next) ? prev : new Set(prev).add(next)));
+  };
+  const { t } = useTranslation();
+
+  const { data: community, isLoading, isError, isFetching, refetch } = useCommunity(slug);
+  const { data: members = [] } = useCommunityMembers(community?.id);
+  const membershipQuery = useIsCommunityMember(community?.id);
+  const membership = membershipQuery.data;
+  const membershipLoading = isMembershipLoading(membershipQuery);
+  const joinMutation = useJoinCommunity();
+  const [checkingHolder, setCheckingHolder] = useState(false);
+  const leaveMutation = useLeaveCommunity();
+
+  // Membership resolves through the same helper the permission mirror uses, so
+  // an elapsed timed ban reads as active here too -- the server already lets
+  // that member post again, and it reuses the row rather than re-inserting.
+  const isMember = isEffectivelyActive(membership);
+  const isPendingMember = !!membership && membership.status === 'pending';
+  const isBanned = isActivelyBanned(membership);
+  // Role alone no longer decides what an admin may do -- each control asks the
+  // ability it actually needs, so a partially-privileged admin gets exactly the
+  // subset of the panel the server would let them use.
+  const abilities = useCommunityAbilities(community, membership);
+  const memberAddresses = useMemo(() => new Set(members.map(m => m.wallet_address.toLowerCase())), [members]);
+
+  // Groups and channels open on their chat, unless a link asked for a tab.
+  const kind = communityKindOf(community);
+  const askedTab = searchParams.get('tab');
+  useEffect(() => {
+    if (kind !== 'community' && !askedTab) activateTab('chat');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [kind, askedTab, community?.id]);
+  const autoInvite = searchParams.get('invite') === '1';
+
+  if (isLoading) {
+    return (
+      <div className="max-w-2xl mx-auto px-3 py-4 space-y-4">
+        <div className="h-32 rounded-xl theme-skeleton animate-pulse" />
+        <div className="h-16 rounded-xl theme-skeleton animate-pulse" />
+      </div>
+    );
+  }
+
+  // A failed read is not a missing community: say it failed and offer a retry.
+  if (!community && isError) {
+    return (
+      <div className="max-w-2xl mx-auto px-3 py-4">
+        <SEOHead title={_copy("copy.62918f8e0390", { defaultValue: "{{value1}} - Riftn Community", value1: t('common.failedToLoad') })} description={t('common.somethingWentWrong')} noindex />
+        <AppState
+          kind="error"
+          title={t('common.failedToLoad')}
+          primaryAction={{ label: t('common.retry'), onClick: () => void refetch(), loading: isFetching }}
+          secondaryAction={{ label: t('communities.backButton'), onClick: () => navigate('/app/communities') }}
+        />
+      </div>
+    );
+  }
+
+  if (!community) {
+    return (
+      <div className="max-w-2xl mx-auto px-3 py-12 text-center">
+        <SEOHead title={_copy("copy.62918f8e0390", { defaultValue: "{{value1}} - Riftn Community", value1: t('communities.communityNotFound') })} description={t('communities.communityNotFound')} noindex />
+        <p className="text-zinc-500">{t('communities.communityNotFound')}</p>
+        <Button variant="outline" size="sm" className="mt-3 rounded-xl border-white/10 text-white" onClick={() => navigate('/app/communities')}>
+          {t('communities.backButton')}
+        </Button>
+      </div>
+    );
+  }
+
+  const handleJoinLeave = () => {
+    if (!isAuthenticated) { openLoginModal(); return; }
+    if (isBanned) { toast.error(t('communities.bannedFromCommunity', { defaultValue: 'You are banned from this community' })); return; }
+    if (isMember) {
+      // The owner has to transfer or delete rather than walk away -- the
+      // database refuses the delete, so do not offer it.
+      if (abilities.isOwner) return;
+      leaveMutation.mutate(community.id, {
+        onSuccess: () => { toast.success(t('communities.leftCommunity')); },
+      });
+    } else if (isPendingMember) {
+      leaveMutation.mutate(community.id, {
+        onSuccess: () => { toast.success(t('communities.requestCancelled')); },
+      });
+    } else {
+      const gate = holderGateOf(community);
+      const price = abilities.isOwner ? 0 : entryPriceOf(community);
+      const join = () => joinMutation.mutate({ communityId: community.id, isPrivate: community.is_private });
+      // Holder groups: the database reads the wallet's balance first, and only
+      // a passing read lets the membership row in.
+      const holderThenJoin = async () => {
+        if (!gate || abilities.isOwner) { join(); return; }
+        const result = await runHolderCheck(community.id, walletAddress)
+          .catch(() => ({ status: 'failed' as const }));
+        if (result.status === 'open' || ('eligible' in result && result.eligible)) join();
+        else toast.error(holderGateMessage(result, gate));
+      };
+      setCheckingHolder(true);
+      (async () => {
+        // Paid entry: tokens go straight to the owner, and the database reads
+        // the transfer off the chain before it lets the member in.
+        if (price > 0) {
+          const paid = await payCommunityEntry(community, walletAddress);
+          if (paid.status !== 'paid' && paid.status !== 'free') {
+            toast.error(t('communities.entry.failed', { defaultValue: "We couldn't confirm your payment yet. If tokens left your wallet, tap Join again in a minute." }));
+            return;
+          }
+        }
+        await holderThenJoin();
+      })()
+        .catch((e: any) => toast.error(adminErrorMessage(e, e?.message || t('common.somethingWentWrong'))))
+        .finally(() => setCheckingHolder(false));
+    }
+  };
+
+  return (
+    <div className="max-w-2xl mx-auto">
+      <SEOHead
+        title={_copy("copy.62918f8e0390", { defaultValue: "{{value1}} - Riftn Community", value1: community.name })}
+        description={community.description || _copy("copy.2dc2e3027208", { defaultValue: "Join {{value1}} on Riftn", value1: community.name })}
+      />
+
+      <button
+        onClick={() => navigate('/app/communities')}
+        className="flex items-center gap-1.5 px-3 pt-3 text-sm text-zinc-500 hover:text-white transition-colors"
+      >
+        <ArrowLeft className="w-4 h-4" />
+        {t('communities.backToCommunities')}
+      </button>
+
+      <CommunityHeader
+        community={community}
+        isMember={isMember}
+        isPendingMember={isPendingMember}
+        membershipLoading={membershipLoading}
+        isOwner={abilities.isOwner}
+        canEdit={abilities.can('change_info')}
+        canManage={abilities.canManage}
+        canInvite={!isMember || abilities.can('add_members')}
+        onManage={() => setManageOpen(true)}
+        isPending={checkingHolder || joinMutation.isPending || leaveMutation.isPending}
+        onJoinLeave={handleJoinLeave}
+        autoInvite={autoInvite}
+      />
+
+      {abilities.canManage && (
+        <CommunityManageSheet
+          community={community}
+          membership={membership}
+          open={manageOpen}
+          onOpenChange={setManageOpen}
+        />
+      )}
+
+      {/* Tabs */}
+      <div className="flex border-b border-white/[0.08] px-3">
+        {([
+          { key: 'posts' as Tab, label: t('communities.posts') },
+          { key: 'chat' as Tab, label: t('communities.chatTab') },
+          { key: 'events' as Tab, label: _copy("copy.8d14f6e72de8", { defaultValue: "Events" }) },
+          { key: 'members' as Tab, label: t('communities.membersLabel') },
+          { key: 'about' as Tab, label: t('communities.about') },
+        ]).map(tItem => (
+          <button
+            key={tItem.key}
+            onClick={() => activateTab(tItem.key)}
+            className={cn(
+              'relative px-4 py-3 text-sm font-medium transition-colors border-b-2 -mb-[1px] whitespace-nowrap',
+              tab === tItem.key
+                ? 'text-white border-white'
+                : 'text-zinc-500 border-transparent hover:text-white'
+            )}
+          >
+            {tItem.label}
+            {'badge' in tItem && (tItem as any).badge > 0 && (
+              <span data-unread-chip className="absolute top-1.5 -right-0.5 min-w-[18px] h-[18px] px-1 flex items-center justify-center bg-red-500 text-white text-[10px] font-bold rounded-full leading-none">
+                {(tItem as any).badge > 99 ? '99+' : (tItem as any).badge}
+              </span>
+            )}
+          </button>
+        ))}
+      </div>
+
+      <div className="px-3 py-4">
+        {community.is_private && !isMember && membershipLoading ? null : community.is_private && !isMember ? (
+          <CommunityTabEmptyState tab={tab} isPendingApproval={isPendingMember} />
+        ) : (
+          <>
+            <div className={tab === 'posts' ? '' : 'hidden'}>
+              {walletAddress && abilities.can('send_messages') && abilities.can('embed_links') && (
+                <AddExistingPost communityId={community.id} wallet={walletAddress} />
+              )}
+              <CommunityFeed
+                communityId={community.id}
+                wallet={walletAddress}
+                canModerate={abilities.can('delete_messages')}
+                communitySlug={community.slug}
+                memberAddresses={memberAddresses}
+                isMember={isMember}
+                tickerSymbol={community.ticker_symbol}
+                tickerContractAddress={community.ticker_contract_address}
+                tickerChainId={community.ticker_chain_id}
+                tickerPairAddress={community.ticker_pair_address}
+              />
+            </div>
+            {visitedTabs.has('chat') && (
+              <div className={tab === 'chat' ? '' : 'hidden'}>
+                {isPublicChatCommunity(community.id) ? (
+                  // The official Riftn community's chat is Public Chat.
+                  <div data-community-public-chat style={{ height: 'calc(100vh - 340px)', minHeight: '300px' }}>
+                    <PublicChat embedded onBack={() => activateTab('posts')} />
+                  </div>
+                ) : (
+                <CommunityChat
+                  active={tab === 'chat'}
+                  communityId={community.id}
+                  community={community}
+                  membership={membership}
+                  isMember={isMember}
+                  membershipLoading={membershipLoading}
+                  onJoin={handleJoinLeave}
+                  joining={joinMutation.isPending || checkingHolder}
+                />
+                )}
+              </div>
+            )}
+            {visitedTabs.has('events') && (
+              <div className={tab === 'events' ? '' : 'hidden'}>
+                <CommunityEvents
+                  communityId={community.id}
+                  canCreate={abilities.can('create_events')}
+                />
+              </div>
+            )}
+            {visitedTabs.has('members') && (
+              <div className={tab === 'members' ? '' : 'hidden'}>
+                <CommunityMembers
+                  members={members}
+                  community={community}
+                  membership={membership}
+                  onManage={() => setManageOpen(true)}
+                />
+              </div>
+            )}
+            {visitedTabs.has('about') && (
+              <div className={tab === 'about' ? '' : 'hidden'}>
+                <CommunityAbout community={community} canManageSettings={abilities.canManageSettings} />
+              </div>
+            )}
+          </>
+        )}
+      </div>
+    </div>
+  );
+}

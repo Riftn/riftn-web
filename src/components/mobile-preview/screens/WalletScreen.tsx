@@ -1,0 +1,109 @@
+import { useTranslation as _useCopy } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
+import { MobileStatusBar } from '../MobileStatusBar';
+import { DhbCoin } from '@/components/app/DhbAmount';
+import { MobileTopBar } from '../MobileTopBar';
+import { MobileBottomBar } from '../MobileBottomBar';
+import { MockAvatar } from '../MockAvatar';
+import { ArrowUpRight, ArrowDownLeft, QrCode } from "lucide-react";
+import Copy from "@/components/ui/cut-icons/copy";
+
+import Send from "@/components/ui/cut-icons/send";
+
+
+const mockTransactions = (t: TFunction) => [
+  { id: '1', type: 'received', user: 'bob_dev', amount: t('mobilePreview.tokenAmount', { amount: '+50' }), time: t("copy.51452941c07c", { defaultValue: "{{value1}}h ago", value1: 2 }) },
+  { id: '2', type: 'sent', user: 'crypto_sarah', amount: t('mobilePreview.tokenAmount', { amount: '-25' }), time: t("copy.51452941c07c", { defaultValue: "{{value1}}h ago", value1: 5 }) },
+  { id: '3', type: 'received', user: 'defi_whale', amount: t('mobilePreview.tokenAmount', { amount: '+100' }), time: t("copy.0dc906eaa41d", { defaultValue: "{{value1}}d ago", value1: 1 }) },
+  { id: '4', type: 'staking', user: t("copy.fcf8ba37dae3", { defaultValue: "Staking Reward" }), amount: t('mobilePreview.tokenAmount', { amount: '+12.4' }), time: t("copy.0dc906eaa41d", { defaultValue: "{{value1}}d ago", value1: 1 }) },
+  { id: '5', type: 'sent', user: 'nft_artist', amount: t('mobilePreview.tokenAmount', { amount: '-200' }), time: t("copy.0dc906eaa41d", { defaultValue: "{{value1}}d ago", value1: 3 }) },
+];
+
+export function WalletScreen() {
+  const { t: _copy } = _useCopy();
+  const { t } = useTranslation();
+  return (
+    <div className="min-h-full bg-black flex flex-col">
+      <MobileStatusBar />
+      <MobileTopBar title={_copy("copy.d1c9a01d57e9", { defaultValue: "Wallet" })} showAvatar={false} />
+
+      {/* Balance card */}
+      <div className="mx-4 my-3 p-5 rounded-2xl border border-white/[0.1] bg-white/[0.03] backdrop-blur-xl">
+        <p className="text-zinc-500 text-xs mb-1">{_copy("copy.41238b965aa9", { defaultValue: "Total Balance" })}</p>
+        <h2 className="text-white text-3xl font-bold">4,250.00 <span className="text-lg text-zinc-400"><DhbCoin /></span></h2>
+        <p className="text-zinc-500 text-sm mt-0.5">{_copy("copy.7bfe33be8737", { defaultValue: "≈ $1,275.00 USD" })}</p>
+
+        <div className="flex gap-3 mt-5">
+          {[
+            { icon: Send, label: _copy("copy.f6f4688ff23d", { defaultValue: "Send" }) },
+            { icon: ArrowDownLeft, label: _copy("copy.bac9d15ad9f1", { defaultValue: "Receive" }) },
+            { icon: Copy, label: _copy("copy.e21f935f11d7", { defaultValue: "Copy" }) },
+            { icon: QrCode, label: 'QR' },
+          ].map((action) => (
+            <button key={action.label} className="flex-1 flex flex-col items-center gap-1.5">
+              <div className="w-10 h-10 rounded-xl bg-white/[0.08] border border-white/[0.12] flex items-center justify-center">
+                <action.icon className="w-4 h-4 text-white" />
+              </div>
+              <span className="text-[10px] text-zinc-400">{action.label}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Tokens */}
+      <div className="px-4 mb-4">
+        <h3 className="text-white text-sm font-semibold mb-3">{_copy("copy.a039dfb9628b", { defaultValue: "Tokens" })}</h3>
+        <div className="rounded-xl border border-white/[0.08] bg-white/[0.02] divide-y divide-white/[0.04]">
+          {[
+            { name: 'Tokens', balance: '4,250.00', value: '$1,275.00' },
+            { name: 'ETH', balance: '0.52', value: '$1,820.00' },
+            { name: 'USDC', balance: '350.00', value: '$350.00' },
+          ].map((token) => (
+            <div key={token.name} className="flex items-center gap-3 px-3 py-3">
+              <div className="w-9 h-9 rounded-full bg-zinc-800 flex items-center justify-center text-white text-xs font-bold">
+                {token.name.charAt(0)}
+              </div>
+              <div className="flex-1">
+                <span className="text-white text-sm font-medium block">{token.name}</span>
+                <span className="text-zinc-600 text-xs">{token.value}</span>
+              </div>
+              <span className="text-white text-sm">{token.balance}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Recent transactions */}
+      <div className="px-4 flex-1">
+        <h3 className="text-white text-sm font-semibold mb-3">{_copy("copy.9ef7d438ce5b", { defaultValue: "Recent Activity" })}</h3>
+        <div className="space-y-2">
+          {mockTransactions(t).map((tx) => (
+            <div key={tx.id} className="flex items-center gap-3 py-2">
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                tx.type === 'received' || tx.type === 'staking' ? 'bg-white/[0.08]' : 'bg-white/[0.04]'
+              }`}>
+                {tx.type === 'sent' ? (
+                  <ArrowUpRight className="w-4 h-4 text-zinc-400" />
+                ) : (
+                  <ArrowDownLeft className="w-4 h-4 text-white" />
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <span className="text-white text-sm block truncate">{tx.user}</span>
+                <span className="text-zinc-600 text-[11px]">{tx.time}</span>
+              </div>
+              <span className={`text-sm font-medium ${
+                tx.amount.startsWith('+') ? 'text-white' : 'text-zinc-400'
+              }`}>
+                {tx.amount}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <MobileBottomBar />
+    </div>
+  );
+}

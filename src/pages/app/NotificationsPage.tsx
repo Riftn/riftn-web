@@ -1,0 +1,3021 @@
+import { deleteNotificationIds } from '@/lib/delete-notifications';
+import { formatCount } from '@/lib/format-count';
+import { useTranslation as _useCopy } from 'react-i18next';
+import { localizedNotificationContent } from "@/lib/notification-content";
+import appI18n from '@/i18n';
+import { ThemedIcon } from '@/components/app/war/WarHudIcon';
+import { memo, useContext, useState, useEffect, useLayoutEffect, useRef, useCallback, useMemo } from 'react';
+import { CachedPageActiveContext } from '@/contexts/CachedPageActiveContext';
+import { toast } from 'sonner';
+import { isDhb } from '@/components/app/DhbAmount';
+import { IslandAction, PageBody, PageIsland, PageTabs, usePhonePill } from '@/components/app/page-kit/PageKit';
+import { NotificationSearchLine, notificationMatches, type MeltFrom } from '@/components/app/notifications/NotificationSearchLine';
+import SearchIcon from '@/components/ui/cut-icons/search';
+import { useDrawerPullClose } from '@/hooks/use-drawer-pull-close';
+import { useTranslation } from 'react-i18next';
+import { AppealDrawer } from '@/components/app/notifications/AppealDrawer';
+import { NotificationCommentCard } from '@/components/app/notifications/NotificationCommentCard';
+import { NotificationCatchUp } from '@/components/app/notifications/NotificationCatchUp';
+import { notificationHasComment } from '@/lib/notification-comment';
+import { NotificationRequestCard } from '@/components/app/notifications/NotificationRequestCard';
+import { notificationHasRequestCard } from '@/lib/notification-request';
+import { useFollow } from '@/hooks/use-follow';
+import { AtSign, Heart, Loader2, AlertTriangle, Zap, Star, ShoppingBag, Scale, Siren, Award, ChevronDown, Sparkles, Filter as FilterIcon } from "lucide-react";
+import MessageSquareText from "@/components/ui/cut-icons/messages";
+import Users from "@/components/ui/cut-icons/communities";
+import Check from "@/components/ui/cut-icons/check";
+import UserPlus from "@/components/ui/cut-icons/add-account";
+import Trophy from "@/components/ui/cut-icons/leaderboard";
+import Video from "@/components/ui/cut-icons/video";
+import Store from "@/components/ui/cut-icons/store";
+import UsersRound from "@/components/ui/cut-icons/communities";
+import Lightbulb from "@/components/ui/cut-icons/feature-requests";
+import Radio from "@/components/ui/cut-icons/live";
+import Briefcase from "@/components/ui/cut-icons/bounties";
+import Blocks from "@/components/ui/cut-icons/apps";
+
+import Settings from "@/components/ui/cut-icons/settings";
+import ThumbsUp from "@/components/ui/cut-icons/like";
+import Gem from "@/components/ui/cut-icons/diamond";
+import Bell from "@/components/ui/cut-icons/alerts";
+import Repeat2 from "@/components/ui/cut-icons/repost";
+import XIcon from "@/components/ui/cut-icons/close";
+import Send from "@/components/ui/cut-icons/send";
+import Gift from "@/components/ui/cut-icons/gifts";
+
+import { useAuth } from '@/contexts/AuthContext';
+import { APP_TOKENS_QUERY_KEY } from '@/hooks/use-app-tokens';
+import { AuthGate } from '@/components/app/AuthGate';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+import { NotificationSettleAction } from '@/components/app/fractions/NotificationSettleAction';
+import { 
+  useNotifications,
+  notificationKeys,
+  useUnreadNotificationCount, 
+  useMarkAllNotificationsAsRead, 
+  useMarkNotificationAsRead,
+  prefetchNotificationsList,
+  type DeHubNotification,
+  type NotificationCategory,
+} from '@/hooks/use-notifications';
+import { customNotificationKeys, useCustomNotifications, useCustomUnreadCount, useMarkCustomNotificationAsRead, useMarkAllCustomNotificationsAsRead, useRequestNotificationHistory } from '@/hooks/use-custom-notifications';
+import {
+  communityNotificationIcon,
+  communityNotificationPath,
+  communityNotificationRef,
+  communityNotificationPreview,
+  communityNotificationSentence,
+  isCommunityNotificationType,
+} from '@/lib/community-notifications';
+import { formatTimeAgo } from '@/lib/feed-utils';
+import { BadgeIcon } from '@/components/app/BadgeIcon';
+import { Link, useNavigate } from 'react-router-dom';
+import dehubMarkWhite from '@/assets/dehub-mark-white.png';
+import { useQueries, useQuery, useMutation, useQueryClient, type InfiniteData } from '@tanstack/react-query';
+
+import { buildAvatarUrl, extractAvatarPath } from '@/lib/media-url';
+import { stageLiveSentence, stageReminderSentence, stageNotificationPath } from '@/lib/stage-notifications';
+import { ClearNotificationsControl } from '@/components/app/notifications/ClearNotificationsControl';
+import { seedProfileCache } from '@/lib/profile-cache-seed';
+import { warmNotificationTarget } from '@/lib/notification-prefetch';
+import { SEOHead } from '@/components/SEOHead';
+import { DEHUB_CDN_BASE, getNFTInfo, getFollowRequests, approveFollowRequest, rejectFollowRequest, getInAppPref, type NotificationKey } from '@/lib/api/dehub';
+import { mapNFTToFeedItem } from '@/lib/nft-to-feed-item';
+
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer';
+import { useIsDesktopViewport } from '@/hooks/use-is-desktop';
+import { Switch } from '@/components/ui/switch';
+import { BrowserNotificationsSetting } from '@/components/app/settings/BrowserNotificationsSetting';
+import { EmailNotificationsSetting } from '@/components/app/settings/EmailNotificationsSetting';
+import { SmsNotificationsSetting } from '@/components/app/settings/SmsNotificationsSetting';
+import { FollowersListDrawer } from '@/components/app/profile';
+import { VideoCard } from '@/components/app/cards/VideoCard';
+import { ImageCard } from '@/components/app/cards/ImageCard';
+import { PostCard } from '@/components/app/cards/PostCard';
+import { Skeleton } from '@/components/ui/skeleton';
+import type { FeedItem } from '@/types/feed.types';
+import { reactionMeta, type PostReaction } from '@/lib/reactions';
+import { getNotificationFilterLabel, type NotificationTypeFilter } from '@/lib/notification-filter-labels';
+import { orderNotificationTabKeys } from '@/lib/notification-tab-order';
+import { profilePath } from '@/lib/profile-path';
+
+// ============================================================================
+// NotificationPostCards — fetches full NFT data and renders real feed cards
+// ============================================================================
+function NotificationPostCards({ tokenIds }: { tokenIds: number[] }) {
+  const results = useQueries({
+    queries: tokenIds.map((id) => ({
+      queryKey: ['nft-info', String(id)],
+      queryFn: () => getNFTInfo(String(id)),
+      staleTime: 5 * 60 * 1000,
+    })),
+  });
+
+  const isLoading = results.some((r) => r.isLoading);
+
+  if (isLoading) {
+    return (
+      <div className="space-y-3">
+        {tokenIds.map((id) => (
+          <div key={id} className="rounded-xl border border-white/[0.12] bg-white/[0.03] p-3">
+            <div className="flex items-center gap-3 pb-3">
+              <Skeleton className="w-10 h-10 rounded-md" />
+              <div className="space-y-2 flex-1">
+                <Skeleton className="h-4 w-1/3 bg-white/[0.06]" />
+                <Skeleton className="h-3 w-1/4 bg-white/[0.06]" />
+              </div>
+            </div>
+            <Skeleton className="aspect-video w-full rounded-lg bg-white/[0.06]" />
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  const feedItems: FeedItem[] = results
+    .map((r) => r.data)
+    .filter((nft): nft is NonNullable<typeof nft> => nft != null)
+    .map(mapNFTToFeedItem);
+
+  return (
+    <div className="space-y-4">
+      {feedItems.map((item) => {
+        let card: React.ReactNode = null;
+        switch (item.type) {
+          case 'video':
+            card = <VideoCard key={item.id} video={item} />;
+            break;
+          case 'image':
+            card = <ImageCard key={item.id} post={item} />;
+            break;
+          case 'post':
+            card = <PostCard key={item.id} post={item} />;
+            break;
+          default:
+            return null;
+        }
+        return (
+          <div key={item.id} className="rounded-xl border border-white/[0.12] bg-white/[0.03] p-3">
+            {card}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// Batch avatar enrichment cache for fresh profile pictures
+interface EnrichedAvatar {
+  avatarUrl: string | null;
+  username: string | null;
+  displayName: string | null;
+  address?: string | null;
+}
+
+// Module-level caches survive component unmount/remount (tab switching, navigation)
+let moduleAvatarCache = new Map<string, EnrichedAvatar>();
+const moduleEnrichedKeys = new Set<string>();
+
+// Bundled notification: wraps one or more raw notifications into a display group
+export interface BundledNotification {
+  /** The primary notification (most recent in the bundle) */
+  primary: DeHubNotification;
+  /** All notification IDs in this bundle */
+  allIds: string[];
+  /** All raw notifications in this bundle (for same-actor: each has its own tokenId/title/thumbnail) */
+  allNotifications: DeHubNotification[];
+  /** For same-actor bundles: how many posts they interacted with */
+  postCount: number;
+  /** For multi-actor bundles: list of actor names */
+  actorNames: string[];
+  /** For multi-actor bundles: total actor count */
+  actorCount: number;
+  /** Bundle type */
+  bundleType: 'single' | 'same-actor' | 'multi-actor';
+}
+
+// No time window limit for same-actor bundling — all interactions from the same
+// actor of the same type are collapsed into a single bundle regardless of when
+// they occurred (e.g. "trustwallet1 liked 5 of your posts").
+
+/**
+ * Bundle notifications client-side:
+ * 1. Same actor + same type within 24h → "Frank liked 5 of your posts"
+ * 2. Same type (follows) from different actors within 24h → "okanbey and 2 others started following you"
+ */
+function bundleNotifications(notifications: DeHubNotification[], enrichedAvatars: Map<string, EnrichedAvatar>): BundledNotification[] {
+  if (!notifications.length) return [];
+
+  // Older replies can have both records. Keep the reply, which points directly
+  // to the parent conversation, and hide the redundant mention.
+  const deduped = notifications.filter((n, _idx, arr) => {
+    if (n.type !== 'mention') return true;
+    const commentId = (n as any).commentId;
+    if (!commentId) return true;
+    // Match the same event, not other mentions from this actor.
+    return !arr.some(other =>
+      other.id !== n.id &&
+      other.type === 'comment_reply' &&
+      (other as any).commentId === commentId &&
+      other.actorAddress?.toLowerCase() === n.actorAddress?.toLowerCase()
+    );
+  });
+
+  const bundles: BundledNotification[] = [];
+  const consumed = new Set<string>();
+
+  for (let i = 0; i < deduped.length; i++) {
+    const n = deduped[i];
+    if (consumed.has(n.id)) continue;
+
+    const nTime = new Date(n.createdAt).getTime();
+
+    // No client-side multi-actor bundling for follows — each follow stays individual.
+    // Backend-aggregated follows (with aggregatedCount > 1) are handled in getNotificationContent.
+
+    // Try same-actor bundling for likes/comments on different posts
+    if (['like', 'comment', 'repost', 'quote'].includes(n.type) && n.actorAddress) {
+      const group: DeHubNotification[] = [n];
+      for (let j = i + 1; j < deduped.length; j++) {
+        const m = deduped[j];
+        if (consumed.has(m.id)) continue;
+        if (m.type !== n.type) continue;
+        if (m.actorAddress?.toLowerCase() !== n.actorAddress?.toLowerCase()) continue;
+        // No time window — bundle all same-actor same-type notifications together
+        group.push(m);
+      }
+      if (group.length > 1) {
+        group.forEach(g => consumed.add(g.id));
+        bundles.push({
+          primary: group[0],
+          allIds: group.map(g => g.id),
+          allNotifications: group,
+          postCount: group.length,
+          actorNames: [],
+          actorCount: 1,
+          bundleType: 'same-actor',
+        });
+        continue;
+      }
+    }
+
+    // Single notification (no bundling)
+    consumed.add(n.id);
+    bundles.push({
+      primary: n,
+      allIds: [n.id],
+      allNotifications: [n],
+      postCount: 1,
+      actorNames: [],
+      actorCount: 1,
+      bundleType: 'single',
+    });
+  }
+
+  return bundles;
+}
+
+// Notification type tabs
+const tabs: { value: NotificationTypeFilter; icon: React.ElementType }[] = [
+  { value: 'all', icon: Bell },
+  { value: 'likes', icon: ThumbsUp },
+  { value: 'follows', icon: UserPlus },
+  { value: 'comments', icon: MessageSquareText },
+  { value: 'reposts', icon: Repeat2 },
+  { value: 'features', icon: Lightbulb },
+  { value: 'communities', icon: UsersRound },
+  { value: 'stores', icon: Store },
+  { value: 'subscriptions', icon: Users },
+  { value: 'tips', icon: Gem },
+  { value: 'livestreams', icon: Zap },
+];
+
+// Map tab filter to notification types.
+//
+// A tab can mix types from both sources: the Riftn API (snake_case types the
+// backend stores) and the Supabase `custom_notifications` table (feature
+// requests, governance, communities, stores). API_BACKED_TYPES below marks
+// which of them the API can filter on, so each tab can ask the server for its
+// own rows instead of relying on them landing in the first page of an
+// unfiltered feed.
+const filterTypeMap: Record<NotificationTypeFilter, string[] | null> = {
+  all: null,
+  likes: ['generation_like', 'generation_comment_like', 'like', 'comment_like', 'story_like', 'feature_request_like', 'feature_request_comment_like', 'governance_vote', 'governance_comment_like'],
+  follows: ['following', 'follow_request', 'follow_request_accepted', 'followRequest', 'follow-request'],
+  comments: ['generation_comment', 'generation_reply', 'comment', 'comment_reply', 'mention', 'story_mention', 'story_comment', 'community_mention', 'feature_request_comment', 'feature_request_reply', 'feature_request_mention', 'feature_request_activity', 'governance_comment', 'governance_reply', 'work_application_reply'],
+  reposts: ['repost', 'quote', 'remix'],
+  features: ['feature_request_like', 'feature_request_comment', 'feature_request_reply', 'feature_request_mention', 'feature_request_activity', 'feature_request_new', 'feature_request_comment_like', 'feature_request_status'],
+  communities: ['community_chat', 'community_mention', 'community_here', 'community_join'],
+  stores: ['store_order', 'fraction_offer', 'fraction_offer_accepted', 'fraction_offer_rejected', 'fraction_purchased', 'fraction_gift', 'fraction_sold', 'fraction_delivered', 'fraction_settled', 'username_offer', 'username_offer_accepted', 'username_offer_declined'],
+  subscriptions: ['subscription', 'ppv_purchase'],
+  tips: ['tip', 'bounty_available', 'bounty_claimed', 'work_application', 'work_submission'],
+  livestreams: ['livestream_start', 'stage_live', 'stage_reminder'],
+};
+
+/**
+ * Types the Riftn API stores and can filter on via `?types=`. Everything else in
+ * filterTypeMap comes from Supabase and is matched client-side only.
+ *
+ * Kept as an explicit list rather than derived: sending a name the API does not
+ * know makes it drop the filter and return an unfiltered page, which would
+ * quietly undo the narrowing for any tab that mixes the two sources.
+ */
+const API_BACKED_TYPES = new Set([
+  'like', 'comment_like', 'comment', 'comment_reply', 'mention', 'story_like', 'story_mention', 'story_comment',
+  'following', 'follow_request', 'follow_request_accepted',
+  'repost', 'quote',
+  'tip', 'bounty_available', 'bounty_claimed',
+  'subscription', 'ppv_purchase',
+  'fraction_offer', 'fraction_offer_accepted', 'fraction_offer_rejected', 'fraction_purchased', 'fraction_gift',
+  'username_offer', 'username_offer_accepted', 'username_offer_declined',
+  'livestream_start', 'signal_flare', 'video_milestone',
+  'coauthor_invite', 'coauthor_accepted',
+  'badge_delegated', 'badge_delegation_ended', 'badge_delegation_changed', 'badge_tier_up', 'badge_tier_down',
+  'video_removal', 'account_warning', 'system',
+  'community_chat',
+]);
+
+/**
+ * The bare Riftn fork glyph, white on transparent — the same brand asset the
+ * connector pages use. The tile behind it is drawn here rather than baked into
+ * the artwork: `/dehub-icon.png` carries its own black *circle*, which reads as
+ * a round avatar whatever radius the container has, and nothing else on this
+ * surface is round. Every square here is a `rounded-lg` tile, so the platform
+ * mark is one too.
+ */
+const DEHUB_MARK_SRC = dehubMarkWhite;
+
+/**
+ * Calls `onReach` once its children come within a screen and a half of the
+ * scroller's bottom, so the next page is already there when the reader gets
+ * to the end. Watches the nearest scrolling ancestor (the bell drawer's
+ * sheet) or the page itself.
+ */
+function LoadMoreSentinel({ onReach, busy, children }: { onReach: () => unknown; busy: boolean; children: React.ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const reach = useRef(onReach);
+  reach.current = onReach;
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || busy || typeof IntersectionObserver === 'undefined') return;
+    let root: HTMLElement | null = el.parentElement;
+    while (root && !/(auto|scroll)/.test(getComputedStyle(root).overflowY)) root = root.parentElement;
+    const height = root?.clientHeight || window.innerHeight;
+    const io = new IntersectionObserver(
+      (entries) => { if (entries.some((e) => e.isIntersecting)) void reach.current(); },
+      { root, rootMargin: `0px 0px ${Math.round(height * 1.5)}px 0px` },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [busy]);
+  return <div ref={ref} className="p-4 flex justify-center">{children}</div>;
+}
+
+/** The subset of a tab's types the API can filter on, or undefined for no server filter. */
+function apiTypesForTab(tab: NotificationTypeFilter): string[] | undefined {
+  const allowed = filterTypeMap[tab];
+  if (!allowed) return undefined;
+  const apiTypes = allowed.filter((t) => API_BACKED_TYPES.has(t));
+  return apiTypes.length ? apiTypes : undefined;
+}
+
+function getNotificationIcon(type: string, reaction?: PostReaction) {
+  switch (type) {
+    case 'like':
+      // Every positive reaction arrives as a `like`; show which one it was.
+      // No reaction means either a plain thumbs-up or an aggregated row whose
+      // actors disagreed — the thumb is right for both.
+      if (reaction && reaction !== 'like') {
+        return <span className="text-sm leading-none" aria-hidden="true">{reactionMeta(reaction).emoji}</span>;
+      }
+      return <ThumbsUp className="w-4 h-4 text-white/70" />;
+    case 'story_like':
+      return <Heart className="w-4 h-4 text-white/70" />;
+    case 'comment_like':
+    case 'feature_request_like':
+    case 'feature_request_comment_like':
+    case 'generation_like':
+    case 'generation_comment_like':
+    case 'governance_comment_like':
+      return <ThumbsUp className="w-4 h-4 text-white/70" />;
+    case 'comment':
+    case 'comment_reply':
+    case 'mention':
+    case 'story_mention':
+    case 'story_comment':
+    case 'feature_request_comment':
+    case 'feature_request_reply':
+    case 'feature_request_mention':
+    case 'feature_request_activity':
+    case 'feature_request_new':
+    case 'generation_comment':
+    case 'generation_reply':
+    case 'governance_comment':
+    case 'governance_reply':
+      return <MessageSquareText className="w-4 h-4 text-white/70" />;
+    // Joins, mentions and @here take their glyph from the shared community
+    // module, so the bell and the Communities page mark them the same way. An
+    // @here addresses the whole room, so it is a megaphone rather than one more
+    // reply in the thread.
+    case 'community_mention':
+    case 'community_here':
+    case 'community_chat':
+    case 'community_join': {
+      const CommunityIcon = communityNotificationIcon(type);
+      return <CommunityIcon className="w-4 h-4 text-white/70" />;
+    }
+    case 'work_application':
+    case 'work_submission':
+    case 'work_application_reply':
+      return <Briefcase className="w-4 h-4 text-white/70" />;
+    case 'stage_live':
+    case 'stage_reminder':
+      return <Radio className="w-4 h-4 text-white/70" />;
+    case 'miniapp':
+      return <Blocks className="w-4 h-4 text-white/70" />;
+    case 'tip':
+      return <Gem className="w-4 h-4 text-white/70" />;
+    case 'remix':
+      return <Repeat2 className="w-4 h-4 text-white/70" />;
+    case 'subscription':
+    case 'ppv_purchase':
+      return <Users className="w-4 h-4 text-white/70" />;
+    case 'following':
+    case 'follow_request':
+    case 'follow_request_accepted':
+    case 'followRequest':
+    case 'follow-request':
+      return <UserPlus className="w-4 h-4 text-white/70" />;
+    case 'bounty_available':
+    case 'bounty_claimed':
+      return <Gem className="w-4 h-4 text-white/70" />;
+    case 'video_milestone':
+      return <Trophy className="w-4 h-4 text-white/70" />;
+    case 'account_warning':
+      return <AlertTriangle className="w-4 h-4 text-white/70" />;
+    case 'livestream_start':
+      return <Zap className="w-4 h-4 text-white/70" />;
+    case 'signal_flare':
+      return <Siren className="w-4 h-4 text-white/70" />;
+    case 'coauthor_invite':
+    case 'coauthor_accepted':
+      return <UserPlus className="w-4 h-4 text-white/70" />;
+    // A lent badge is still a badge — same glyph the tier itself reads as,
+    // whichever direction the loan moved.
+    case 'badge_delegated':
+    case 'badge_delegation_ended':
+    case 'badge_delegation_changed':
+    case 'badge_tier_up':
+    case 'badge_tier_down':
+      return <Award className="w-4 h-4 text-white/70" />;
+    case 'video_removal':
+      return <AlertTriangle className="w-4 h-4 text-white/70" />;
+    case 'governance_vote':
+      return <Star className="w-4 h-4 text-white/70" />;
+    case 'feature_request_status':
+    case 'governance_result':
+      return <Trophy className="w-4 h-4 text-white/70" />;
+    case 'dao_proposal_open':
+    case 'dao_vote_deadline':
+    case 'dao_proposal_accepted':
+    case 'dao_proposal_rejected':
+    case 'dao_payment_deadline':
+    case 'dao_payment_submitted':
+    case 'dao_payment_expired':
+    case 'dao_proposal_completed':
+      return <Scale className="w-4 h-4 text-white/70" />;
+    case 'store_order':
+      return <ShoppingBag className="w-4 h-4 text-white/70" />;
+    case 'fraction_offer':
+    case 'fraction_offer_accepted':
+    case 'fraction_offer_rejected':
+    case 'fraction_settled':
+      return <Store className="w-4 h-4 text-white/70" />;
+    case 'fraction_gift':
+      return <Gift className="w-4 h-4 text-white/70" />;
+    // Its own glyph rather than the marketplace one: what is being bid for
+    // here is the reader's own name, not a thing on a shelf.
+    case 'username_offer':
+    case 'username_offer_accepted':
+    case 'username_offer_declined':
+      return <AtSign className="w-4 h-4 text-white/70" />;
+    // The two that carry an obligation get their own glyph: these are the rows
+    // with a deadline on them, and they should not read as one more Store note.
+    case 'fraction_sold':
+    case 'fraction_delivered':
+      return <Send className="w-4 h-4 text-white/70" />;
+    default:
+      return <Bell className="w-4 h-4 text-white/70" />;
+  }
+}
+
+/** Normalize a username for comparison: trim, strip leading @, lowercase */
+function normalizeUsername(name: string | null | undefined): string {
+  if (!name) return '';
+  return name.trim().replace(/^@/, '').toLowerCase();
+}
+
+function toUsernameCacheKey(name: string | null | undefined): string | null {
+  const normalized = normalizeUsername(name);
+  return normalized ? `username:${normalized}` : null;
+}
+
+interface CanonicalActor {
+  display: string;
+  key: string;
+  resolvedUsername?: string;
+  canonicalId: string;
+  address?: string;
+}
+
+function findActorEnrichment(actor: CanonicalActor, enrichedAvatarsMap?: Map<string, EnrichedAvatar>): EnrichedAvatar | undefined {
+  if (!enrichedAvatarsMap) return undefined;
+
+  const candidateKeys = new Set<string>();
+  if (actor.address) candidateKeys.add(actor.address.toLowerCase());
+  if (actor.canonicalId) {
+    candidateKeys.add(actor.canonicalId);
+    const canonicalUsernameKey = toUsernameCacheKey(actor.canonicalId);
+    if (canonicalUsernameKey) candidateKeys.add(canonicalUsernameKey);
+  }
+  const actorUsernameKey = toUsernameCacheKey(actor.key);
+  if (actorUsernameKey) candidateKeys.add(actorUsernameKey);
+  const resolvedUsernameKey = toUsernameCacheKey(actor.resolvedUsername);
+  if (resolvedUsernameKey) candidateKeys.add(resolvedUsernameKey);
+
+  for (const key of candidateKeys) {
+    const hit = enrichedAvatarsMap.get(key);
+    if (hit) return hit;
+  }
+
+  const normalizedActorKey = normalizeUsername(actor.resolvedUsername || actor.key || actor.display);
+  const actorAddress = (actor.address || '').toLowerCase();
+
+  for (const [, entry] of enrichedAvatarsMap) {
+    if (!entry) continue;
+    if (actorAddress && entry.address?.toLowerCase() === actorAddress) return entry;
+    if (normalizeUsername(entry.username) === normalizedActorKey) return entry;
+  }
+
+  return undefined;
+}
+
+/**
+ * Build a canonical, deduplicated actor list from latestActorNames + primary actor.
+ * Deduplicates by RESOLVED IDENTITY (address or canonical username from enrichment),
+ * not by raw display text — so the same person under different name forms only gets one slot.
+ */
+function buildCanonicalActors(
+  latestActorNames: string[] | undefined,
+  primaryUsername: string | null | undefined,
+  enrichedUsername: string | null | undefined,
+  enrichedAvatarsMap?: Map<string, EnrichedAvatar>,
+): CanonicalActor[] {
+  const actors: CanonicalActor[] = [];
+  const seenCanonicalIds = new Set<string>();
+
+  const resolveCanonicalIdentity = (nameOrKey: string): { canonicalId: string; resolvedUsername?: string; address?: string } => {
+    const normalized = normalizeUsername(nameOrKey);
+    if (!normalized) return { canonicalId: '' };
+
+    const usernameKey = toUsernameCacheKey(normalized);
+    const byUsername = usernameKey ? enrichedAvatarsMap?.get(usernameKey) : undefined;
+
+    if (byUsername) {
+      const resolvedAddress = byUsername.address?.toLowerCase();
+      const resolvedUsername = normalizeUsername(byUsername.username);
+      return {
+        canonicalId: resolvedAddress || resolvedUsername || normalized,
+        resolvedUsername: byUsername.username || undefined,
+        address: resolvedAddress || undefined,
+      };
+    }
+
+    if (enrichedAvatarsMap) {
+      for (const [, candidate] of enrichedAvatarsMap) {
+        if (normalizeUsername(candidate.username) === normalized || candidate.address?.toLowerCase() === normalized) {
+          const resolvedAddress = candidate.address?.toLowerCase();
+          const resolvedUsername = normalizeUsername(candidate.username);
+          return {
+            canonicalId: resolvedAddress || resolvedUsername || normalized,
+            resolvedUsername: candidate.username || undefined,
+            address: resolvedAddress || undefined,
+          };
+        }
+      }
+    }
+
+    return { canonicalId: normalized };
+  };
+
+  const addActorCandidate = (displayValue: string | null | undefined, preferredKey?: string | null) => {
+    const display = (displayValue || '').trim();
+    const key = normalizeUsername(preferredKey || displayValue);
+    if (!key) return;
+
+    const identity = resolveCanonicalIdentity(key);
+    if (!identity.canonicalId || seenCanonicalIds.has(identity.canonicalId)) return;
+
+    seenCanonicalIds.add(identity.canonicalId);
+    actors.push({
+      display: display || key,
+      key,
+      resolvedUsername: identity.resolvedUsername,
+      canonicalId: identity.canonicalId,
+      address: identity.address,
+    });
+  };
+
+  latestActorNames?.forEach((name) => addActorCandidate(name));
+  addActorCandidate(enrichedUsername || primaryUsername, enrichedUsername || primaryUsername);
+
+  return actors;
+}
+
+function resolveActorAvatarUrl(actor: CanonicalActor, enrichedAvatarsMap?: Map<string, EnrichedAvatar>): string | undefined {
+  return findActorEnrichment(actor, enrichedAvatarsMap)?.avatarUrl || undefined;
+}
+
+/** Resolve a safe profile link for an actor, avoiding broken display-name URLs */
+function resolveActorProfileLink(actor: CanonicalActor, enrichedAvatarsMap?: Map<string, EnrichedAvatar>): string | null {
+  const enriched = findActorEnrichment(actor, enrichedAvatarsMap);
+  const resolvedHandle = normalizeUsername(actor.resolvedUsername || enriched?.username);
+  if (resolvedHandle && /^[a-z0-9._]+$/.test(resolvedHandle)) return profilePath(resolvedHandle);
+
+  const safeKey = normalizeUsername(actor.key);
+  if (safeKey && /^[a-z0-9._]+$/.test(safeKey)) return `/${safeKey}`;
+
+  const address = (actor.address || enriched?.address || '').toLowerCase();
+  return address ? `/${address}` : null;
+}
+function notificationContentWithActorBadge(content: React.ReactNode, notification: DeHubNotification, actorCount: number): React.ReactNode {
+  const actor = notification.actor;
+  if (typeof content !== 'string' || !actor || actor.hideBadgeAndBalance || actorCount > 1) return content;
+  const name = actor.displayName || actor.username || notification.actorUsername;
+  const at = name ? content.indexOf(name) : -1;
+  if (at < 0 || /\w/.test(content.charAt(at - 1)) || /\w/.test(content.charAt(at + name.length))) return content;
+  return <>{content.slice(0, at)}{name}{'\u2009'}<BadgeIcon badgeBalance={actor.badgeBalance} badgeLock={actor.badgeLock} username={actor.username} />{content.slice(at + name.length)}</>;
+}
+
+function getNotificationContent(
+  notification: DeHubNotification,
+  bundle?: BundledNotification,
+  t?: (key: string, opts?: any) => string,
+  onOthersClick?: () => void,
+  canonicalActors?: CanonicalActor[],
+): React.ReactNode {
+
+  const tr = t || ((key: string) => key);
+  // Rows fanned into Supabase by a database trigger — community joins,
+  // feature-request likes, governance votes, bounty applications — carry an
+  // actor ADDRESS and nothing else: Postgres holds no profile table, so the
+  // trigger has no handle to write into actor_username. That is 268 of the
+  // 421 rows in the table, every one of them rendering "Someone" beside a
+  // correctly-resolved face. The page already resolves the address to a
+  // profile for the avatar and feeds it into canonicalActors, so read the
+  // handle back off that rather than fetching it twice.
+  const actorAddressFallback = notification.actorAddress
+    ? `${notification.actorAddress.slice(0, 6)}…${notification.actorAddress.slice(-4)}`
+    : tr('digest.someone');
+  const actorName = notification.actor?.displayName || canonicalActors?.[0]?.display || notification.actorUsername || actorAddressFallback;
+  
+  // Aggregated web rows retain their interactive list of other actors below.
+  if (!(notification.aggregatedCount && notification.aggregatedCount > 1) && !(bundle && bundle.postCount > 1)) {
+    const localized = localizedNotificationContent({ ...notification, actorUsername: actorName }, tr);
+    if (localized) return localized;
+  }
+  // Handle custom notification types outside the typed switch
+  if ((notification.type as string) === 'feature_request_like') {
+    const title = (notification as any)._customReferenceTitle || notification.tokenTitle;
+    return tr(title ? 'notifications.custom.featureLikeNamed' : 'notifications.custom.featureLike', { name: actorName, title });
+  }
+  if ((notification.type as string) === 'feature_request_comment') {
+    const title = (notification as any)._customReferenceTitle || notification.tokenTitle;
+    return tr(title ? 'notifications.custom.featureCommentNamed' : 'notifications.custom.featureComment', { name: actorName, title });
+  }
+  if ((notification.type as string) === 'feature_request_reply') {
+    const title = (notification as any)._customReferenceTitle || notification.tokenTitle;
+    return tr(title ? 'notifications.custom.featureReplyNamed' : 'notifications.custom.featureReply', { name: actorName, title });
+  }
+  if ((notification.type as string) === 'feature_request_mention') {
+    const title = (notification as any)._customReferenceTitle || notification.tokenTitle;
+    return tr(title ? 'notifications.custom.featureMentionNamed' : 'notifications.custom.featureMention', { name: actorName, title });
+  }
+  if ((notification.type as string) === 'feature_request_new') {
+    const title = (notification as any)._customReferenceTitle || notification.tokenTitle;
+    return tr(title ? 'notifications.custom.featureNewNamed' : 'notifications.custom.featureNew', { name: actorName, title });
+  }
+  if ((notification.type as string) === 'feature_request_activity') {
+    const title = (notification as any)._customReferenceTitle || notification.tokenTitle;
+    return tr(title ? 'notifications.custom.featureActivityNamed' : 'notifications.custom.featureActivity', { name: actorName, title });
+  }
+  if ((notification.type as string) === 'feature_request_comment_like') {
+    const title = (notification as any)._customReferenceTitle || notification.tokenTitle;
+    return tr(title ? 'notifications.custom.featureCommentLikeNamed' : 'notifications.custom.featureCommentLike', {
+      name: actorName, title,
+      defaultValue: title ? '{{name}} liked your comment on “{{title}}”' : '{{name}} liked your comment on a request',
+    });
+  }
+  if ((notification.type as string) === 'feature_request_status') {
+    const title = (notification as any)._customReferenceTitle || notification.tokenTitle || '';
+    const state = (notification as any).content;
+    if (state === 'shipped') return tr('notifications.custom.featureShipped', { title, defaultValue: 'Your request “{{title}}” shipped 🎉' });
+    if (state === 'shipped_liked') return tr('notifications.custom.featureShippedLiked', { title, defaultValue: 'A request you liked shipped: “{{title}}” 🎉' });
+    return tr('notifications.custom.featureQueued', { title, defaultValue: 'Your request “{{title}}” is queued to be built' });
+  }
+  if ((notification.type as string) === 'stage_live') {
+    const title = (notification as any)._customReferenceTitle || notification.tokenTitle;
+    return stageLiveSentence(actorName, title, tr);
+  }
+  if ((notification.type as string) === 'stage_reminder') {
+    const title = (notification as any)._customReferenceTitle || notification.tokenTitle;
+    return stageReminderSentence(title, tr);
+  }
+  // A duet, stitch or reaction of the recipient's video; the kind is in the title slot.
+  if ((notification.type as string) === 'remix') {
+    const kind = (notification as any)._customReferenceTitle;
+    const key = kind === 'stitch' ? 'stitch' : kind === 'react' ? 'react' : kind === 'react_live' ? 'reactLive' : 'duet';
+    return tr(`remixLinks.notify.${key}`, { name: actorName });
+  }
+  if ((notification.type as string).startsWith('generation_')) {
+    const kind = notification.type as string;
+    const fallback = kind === 'generation_like' ? '{{name}} reacted to your generation' : kind === 'generation_comment_like' ? '{{name}} reacted to your comment' : kind === 'generation_reply' ? '{{name}} replied to your comment' : '{{name}} commented on your generation';
+    return tr(`creator.gallery.notifications.${kind}`, { name: actorName, defaultValue: fallback });
+  }
+  if ((notification.type as string) === 'governance_vote') {
+    const title = (notification as any)._customReferenceTitle || notification.tokenTitle;
+    return tr(title ? 'notifications.custom.governanceVoteNamed' : 'notifications.custom.governanceVote', { name: actorName, title });
+  }
+  if ((notification.type as string) === 'governance_comment') {
+    const title = (notification as any)._customReferenceTitle || notification.tokenTitle;
+    return tr(title ? 'notifications.custom.governanceCommentNamed' : 'notifications.custom.governanceComment', { name: actorName, title });
+  }
+  if ((notification.type as string) === 'governance_comment_like') {
+    const title = (notification as any)._customReferenceTitle || notification.tokenTitle;
+    return tr(title ? 'notifications.custom.governanceCommentLikeNamed' : 'notifications.custom.governanceCommentLike', {
+      name: actorName, title,
+      defaultValue: title ? '{{name}} liked your comment on “{{title}}”' : '{{name}} liked your comment on a proposal',
+    });
+  }
+  if ((notification.type as string) === 'governance_result') {
+    const title = (notification as any)._customReferenceTitle || notification.tokenTitle || '';
+    const state = String((notification as any).content || '');
+    const passed = state.startsWith('passed');
+    if (state.endsWith('_voted')) {
+      return passed
+        ? tr('notifications.custom.governanceVotedPassed', { title, defaultValue: 'A proposal you voted on passed: “{{title}}”' })
+        : tr('notifications.custom.governanceVotedRejected', { title, defaultValue: 'A proposal you voted on did not pass: “{{title}}”' });
+    }
+    return passed
+      ? tr('notifications.custom.governancePassed', { title, defaultValue: 'Your proposal “{{title}}” passed 🎉' })
+      : tr('notifications.custom.governanceRejected', { title, defaultValue: 'Your proposal “{{title}}” did not pass' });
+  }
+  if ((notification.type as string) === 'governance_reply') {
+    const title = (notification as any)._customReferenceTitle || notification.tokenTitle;
+    return tr(title ? 'notifications.custom.governanceReplyNamed' : 'notifications.custom.governanceReply', { name: actorName, title });
+  }
+  // Joins, @mentions and @here all read the same way here and on the
+  // Communities page. Before this, only joins had a sentence: mention and
+  // @here rows carry the chat message in `content`, so they fell through the
+  // `default` branch below and rendered the bare message with no subject.
+  if (isCommunityNotificationType(notification.type as string)) {
+    return communityNotificationSentence(notification, actorName, tr);
+  }
+  if ((notification.type as string) === 'store_order') {
+    const title = (notification as any)._customReferenceTitle || notification.tokenTitle;
+    return tr(title ? 'notifications.custom.storeOrderNamed' : 'notifications.custom.storeOrder', { name: actorName, title });
+  }
+  // Fraction rows written before the API learned to describe them carry the
+  // placeholder "You have a new notification", so treat that as no content.
+  const fractionTypes = ['fraction_offer', 'fraction_offer_accepted', 'fraction_offer_rejected', 'fraction_purchased', 'fraction_gift'];
+  if (fractionTypes.includes(notification.type as string)) {
+    const apiContent = (notification as any).content;
+    const usableContent = apiContent && apiContent !== 'You have a new notification' ? apiContent : null;
+    if (usableContent) return usableContent;
+    switch (notification.type as string) {
+      case 'fraction_offer':
+        return tr('notifications.custom.fractionOffer', { name: actorName });
+      case 'fraction_offer_accepted':
+        return tr('notifications.custom.fractionOfferAccepted', { name: actorName });
+      case 'fraction_offer_rejected':
+        return tr('notifications.custom.fractionOfferRejected', { name: actorName });
+      case 'fraction_gift':
+        return tr('notifications.custom.fractionGift', { name: actorName });
+      default:
+        return tr('notifications.custom.fractionPurchased', { name: actorName });
+    }
+  }
+
+  // Backend-aggregated follow
+  if (notification.type === 'following' && (notification as any).aggregatedCount > 1) {
+    const othersCount = (notification as any).aggregatedCount - 1;
+    const othersText = othersCount === 1 ? tr('notifications.oneOther') : tr('notifications.nOthers', { count: othersCount });
+    return tr('notifications.andOthersFollowing', { name: actorName, others: othersText });
+  }
+  
+  // Same-actor bundle
+  if (bundle?.bundleType === 'same-actor' && bundle.postCount > 1) {
+    const count = bundle.postCount;
+    switch (notification.type) {
+      case 'like':
+        return tr('notifications.likedPosts', { name: actorName, count });
+      case 'comment':
+        return tr('notifications.commentedPosts', { name: actorName, count });
+      case 'comment_reply':
+        return tr('notifications.repliedComments', { name: actorName, count });
+      default:
+        return tr('notifications.interactedPosts', { name: actorName, count });
+    }
+  }
+  
+  // Backend-aggregated like/comment/repost (aggregatedCount > 1 with latestActorNames)
+  const aggCount = (notification as any).aggregatedCount || 1;
+  const aggNames = (notification as any).latestActorNames as string[] | undefined;
+  const typeStr = notification.type as string;
+  if (aggCount > 1 && ['like', 'comment', 'repost', 'story_like'].includes(typeStr)) {
+    const canonical = (canonicalActors && canonicalActors.length > 0)
+      ? canonicalActors
+      : buildCanonicalActors(aggNames, undefined, undefined);
+
+    if (canonical.length <= 1) {
+      const name = canonical[0]?.display || actorName;
+      const postCount = aggCount;
+      if (typeStr === 'story_like') return tr('notifications.custom.storyLiked', { name });
+      if (typeStr === 'like') return tr('notifications.likedPosts', { name, count: postCount });
+      if (typeStr === 'comment') return tr('notifications.commentedPosts', { name, count: postCount });
+      if (typeStr === 'repost') return tr('notifications.custom.repostedPosts', { name, count: postCount });
+    } else {
+      // Multiple users — first name and others count come from the exact same canonical source as the grid
+      const first = canonical[0]?.display || aggNames?.[0] || actorName;
+      const rest = Math.max(aggCount - 1, 0);
+      const othersText = rest === 1 ? tr('notifications.oneOther') : tr('notifications.nOthers', { count: rest });
+      const othersSpan = onOthersClick ? (
+        <span className="cursor-pointer hover:text-white hover:underline decoration-solid" onClick={(e) => { e.stopPropagation(); e.preventDefault(); onOthersClick(); }}>
+          {othersText}
+        </span>
+      ) : othersText;
+
+      const key = typeStr === 'like' ? 'notifications.likedPost'
+        : typeStr === 'story_like' ? 'notifications.custom.storyLiked'
+        : typeStr === 'comment' ? 'notifications.commentedPost' : 'reactionInfo.repostedPost';
+      const [before, after] = tr(key, { name: '\uFFFC' }).split('\uFFFC');
+      return <>{before}{first}, {othersSpan}{after}</>;
+    }
+  }
+
+  // Supabase-only types are absent from NotificationType, so they are matched
+  // ahead of the switch rather than as cases — same shape as the routing above.
+  // Naming the bounty matters here in a way it doesn't for a like: a poster with
+  // several open bounties can't act on "someone applied" alone.
+  if (typeStr === 'new_message') return tr('reactionInfo.newMessage', { name: actorName });
+  if (typeStr === 'work_application_reply') {
+    const jobTitle = (notification as DeHubNotification & { _customReferenceTitle?: string })._customReferenceTitle;
+    return tr(jobTitle ? 'notifications.custom.bountyReplyNamed' : 'notifications.custom.bountyReply', { name: actorName, title: jobTitle });
+  }
+  if (typeStr === 'work_application' || typeStr === 'work_submission') {
+    const jobTitle = (notification as DeHubNotification & { _customReferenceTitle?: string })._customReferenceTitle;
+    const action = typeStr === 'work_application' ? 'bountyApplied' : 'bountySubmitted';
+    return tr(`notifications.custom.${action}${jobTitle ? 'Named' : ''}`, { name: actorName, title: jobTitle });
+  }
+
+  switch (notification.type) {
+    case 'like':
+      return localizedNotificationContent({ ...notification, actorUsername: actorName }, tr)
+        ?? tr('notifications.likedPost', { name: actorName });
+    case 'comment':
+      return tr('notifications.commentedPost', { name: actorName });
+    case 'comment_reply':
+    case 'creator_comment_reply':
+      return tr('notifications.repliedComment', { name: actorName });
+    case 'mention': {
+      // Where the reader was named. Every mention used to say "in a comment",
+      // including the ones in a post or a live chat.
+      const where = notification.metadata?.mentionContext;
+      if (where === 'bio') return tr('notifications.custom.bioMention', { name: actorName });
+      if (where === 'live_chat') return tr('notifications.custom.liveChatMention', { name: actorName });
+      if (where === 'public_chat') return tr('notifications.custom.publicChatMention', { name: actorName });
+      if (where === 'post' || (!where && !notification.commentId)) return tr('notifications.custom.postMention', { name: actorName });
+      return tr('notifications.custom.commentMention', { name: actorName });
+    }
+    case 'tip':
+      const tipAmount = notification.amount
+        ? ` ${isDhb(notification.currency) ? tr('notifications.tipTokens', { amount: notification.amount }) : `${notification.amount} ${notification.currency}`}`
+        : '';
+      return tr('notifications.tippedYou', { name: actorName }) + tipAmount;
+    case 'subscription':
+      return tr('notifications.subscribedPlan', { name: actorName });
+    case 'ppv_purchase':
+      return tr('notifications.purchasedContent', { name: actorName });
+    case 'following':
+      return localizedNotificationContent({ ...notification, actorUsername: actorName }, tr)
+        ?? tr('notifications.startedFollowing', { name: actorName });
+    case 'follow_request':
+      return tr('notifications.custom.followRequest', { name: actorName });
+    // The server's sentence names the milestone ("reached 100 likes") but is
+    // English, so other languages get the shared "a new milestone" instead.
+    case 'video_milestone':
+      return ((appI18n.language || 'en').startsWith('en') && (notification as any).content)
+        || tr('notifications.postMilestone');
+    case 'livestream_start':
+      return tr('notifications.startedStreaming', { name: actorName });
+    case 'comment_like': {
+      const commentPreview = (notification as any).commentPreview;
+      const count = (notification as any).aggregatedCount || 1;
+      const names = (notification as any).latestActorNames as string[] | undefined;
+      if (count > 1 && names && names.length > 0) {
+        const first = names[0];
+        const rest = count - 1;
+        const othersText = rest === 1 ? tr('notifications.oneOther') : tr('notifications.nOthers', { count: rest });
+        return commentPreview
+          ? tr('notifications.andOthersLikedCommentPreview', { first, others: othersText, preview: commentPreview })
+          : tr('notifications.andOthersLikedComment', { first, others: othersText });
+      }
+      return commentPreview
+        ? tr('notifications.likedCommentPreview', { name: actorName, preview: commentPreview })
+        : tr('notifications.likedComment', { name: actorName });
+    }
+    case 'video_removal':
+      return tr('notifications.postRemoved');
+    // Reposts, quotes, flares, badges and accepted requests have a shared
+    // sentence too; the server's English is only for types that do not.
+    default:
+      return localizedNotificationContent({ ...notification, actorUsername: actorName } as any, tr)
+        ?? ((notification as any).content || tr('notifications.newNotification'));
+  }
+}
+
+/** Custom notifications carry their navigation target in a non-API field. */
+function customReferenceId(notification: DeHubNotification): string | undefined {
+  return (notification as DeHubNotification & { _customReferenceId?: string })._customReferenceId;
+}
+
+/** Rows about one comment: they open the comments, on that comment. */
+const COMMENT_NOTIFICATION_TYPES = new Set(['comment', 'comment_reply', 'creator_comment_reply', 'comment_like']);
+
+function getNavigationLink(notification: DeHubNotification): string | null {
+  if (notification.type === 'game_turn' && notification.metadata?.game === 'sillycoin') {
+    return '/arcade/sillycoin';
+  }
+
+  // A mini app's notification opens the app, at the page it named when it
+  // named one (miniapp-notify only accepts pages on the app's own domain).
+  if ((notification.type as string) === 'miniapp') {
+    const slug = customReferenceId(notification);
+    if (!slug) return '/apps';
+    const target = (notification as DeHubNotification & { _customReferenceTitle?: string })._customReferenceTitle;
+    return `/apps/${slug}?from=notification${target ? `&url=${encodeURIComponent(target)}` : ''}`;
+  }
+  if ((notification.type as string) === 'trench_price_alert') {
+    const symbol=(notification as DeHubNotification & {_customReferenceTitle?:string})._customReferenceTitle || 'BTC';
+    return `/arcade/trenchstar?symbol=${encodeURIComponent(symbol)}`;
+  }
+  // Handle custom notification types.
+  // A feature-request row carries the request's uuid, and every one of these
+  // used to throw it away and land on the board's first page — where the
+  // request being talked about may sit behind a tab, a sort, a category filter
+  // and several pages of infinite scroll. `?request=` pins it at the top
+  // instead, so the row always opens the thing it names. A comment row also
+  // asks for the comments to be open, the same way a post comment does.
+  const FEATURE_COMMENT_TYPES = ['feature_request_comment', 'feature_request_reply', 'feature_request_mention', 'feature_request_activity', 'feature_request_comment_like'];
+  if ((notification.type as string) === 'feature_request_like' || (notification.type as string) === 'feature_request_new' || (notification.type as string) === 'feature_request_status' || FEATURE_COMMENT_TYPES.includes(notification.type as string)) {
+    const requestId = customReferenceId(notification);
+    if (!requestId) return '/build';
+    if (!FEATURE_COMMENT_TYPES.includes(notification.type as string)) {
+      return `/build?request=${encodeURIComponent(requestId)}`;
+    }
+    // The row carries the comment it is about, so the thread opens on that row
+    // rather than at the top — the same `?comment=` a post notification uses.
+    const commentId = (notification as DeHubNotification & { _customCommentId?: string })._customCommentId;
+    const commentSuffix = commentId ? `&comment=${encodeURIComponent(commentId)}` : '';
+    return `/build?request=${encodeURIComponent(requestId)}&comments=1${commentSuffix}`;
+  }
+  // Joins, mentions and @here all land on the community they came from. The
+  // reference is normally its slug, but the join trigger has written the uuid
+  // too; `useCommunity` resolves either, and so does the shared helper.
+  if (isCommunityNotificationType(notification.type as string)) {
+    return communityNotificationPath(communityNotificationRef(notification), notification.type as string);
+  }
+  // Bounty applications/submissions store job_number, which is what the
+  // canonical /bounty/<n> URL is keyed on — not the job uuid.
+  if (['work_application', 'work_submission', 'work_application_reply'].includes(notification.type as string)) {
+    const jobNumber = customReferenceId(notification);
+    return jobNumber ? `/bounty/${jobNumber}` : '/work/history';
+  }
+  // A comment or reply row lands on the comment it is about — the proposal
+  // page reads the same `?comment=` the features board does.
+  if ((notification.type as string).startsWith('generation_')) {
+    const refId = customReferenceId(notification);
+    const commentId = (notification as DeHubNotification & { _customCommentId?: string })._customCommentId;
+    return refId ? `/creator/gallery/${encodeURIComponent(refId)}${commentId ? `?comment=${encodeURIComponent(commentId)}` : ''}` : '/creator/gallery';
+  }
+  const GOVERNANCE_COMMENT_TYPES = ['governance_comment', 'governance_reply', 'governance_comment_like'];
+  if ((notification.type as string) === 'governance_vote' || (notification.type as string) === 'governance_result' || GOVERNANCE_COMMENT_TYPES.includes(notification.type as string)) {
+    const refId = customReferenceId(notification);
+    if (!refId) return '/governance';
+    const commentId = GOVERNANCE_COMMENT_TYPES.includes(notification.type as string)
+      ? (notification as DeHubNotification & { _customCommentId?: string })._customCommentId
+      : undefined;
+    return commentId
+      ? `/app/governance/${refId}?comment=${encodeURIComponent(commentId)}`
+      : `/app/governance/${refId}`;
+  }
+  if ((notification.type as string) === 'remix') {
+    const refId = customReferenceId(notification);
+    return refId ? `/app/post/${refId}` : null;
+  }
+  if ((notification.type as string).startsWith('dao_')) {
+    const refId = customReferenceId(notification);
+    return refId ? `/dao?proposal=${encodeURIComponent(refId)}` : '/dao';
+  }
+  if ((notification.type as string) === 'stage_live' || (notification.type as string) === 'stage_reminder') {
+    // Shared with the live toast and the OS notification so all three land on
+    // the same room — see lib/stage-notifications.
+    return stageNotificationPath(customReferenceId(notification));
+  }
+
+  // Comment-type notifications open the comments on the post — and land on the
+  // comment itself, not on the top of a thread that may be hundreds long. The
+  // row carries the comment it is about (the new one, the liked one, the one
+  // you were named in); `?comment=` is the form the post page and the comments
+  // list both already read, and the list pins that comment in its first page
+  // rather than paging down to find it.
+  // A mention has no suffix of its own: mentioning somebody in a post carries
+  // no comment id, and opening the comments there points at nothing.
+  const isCommentType = COMMENT_NOTIFICATION_TYPES.has(notification.type as string);
+  const commentSuffix = notification.commentId
+    ? `?comments=1&comment=${notification.commentId}`
+    : isCommentType
+      ? '?comments=1'
+      : '';
+
+  // A tag in chat opens the room at the line: the live post (its stream while
+  // it is on air, the replay after) or the public chat.
+  if (notification.type === 'mention') {
+    const where = notification.metadata?.mentionContext;
+    const line = notification.metadata?.chatMessageId;
+    const query = line ? `chatMessage=${encodeURIComponent(String(line))}` : '';
+    if (where === 'live_chat' && notification.tokenId) {
+      return `/app/post/${notification.tokenId}${query ? `?${query}` : ''}`;
+    }
+    if (where === 'public_chat') return `/app/messages?chat=public${query ? `&${query}` : ''}`;
+    // A bio tag opens the profile whose bio names the reader ("Remove me" is in its menu).
+    if (where === 'bio') {
+      return notification.actorAddress
+        ? profilePath(notification.actorAddress)
+        : notification.actorUsername ? profilePath(notification.actorUsername) : null;
+    }
+  }
+
+  // A comment alert opens the thread directly, with playback paused.
+  if (['story_like', 'story_mention', 'story_comment'].includes(notification.type as string)) {
+    const storyId = notification.metadata?.storyId;
+    if (typeof storyId !== 'string' || !/^[a-f0-9]{24}$/i.test(storyId)) return null;
+    return `/moment/${storyId}${notification.type === 'story_comment' ? '?comments=1' : ''}`;
+  }
+
+  switch (notification.type) {
+    case 'new_message': {
+      const conversation = notification.metadata?.conversationId
+        || notification.metadata?.deepLink?.match(/^\/dm\/([^/?#]+)/)?.[1];
+      return conversation ? `/app/messages?conversation=${encodeURIComponent(conversation)}` : '/app/messages';
+    }
+    case 'like':
+    case 'comment':
+    case 'comment_reply':
+    // "The creator replied to your comment" — the server sends it instead of a
+    // plain reply. It had no case here, so the row was the one reply that went
+    // nowhere when clicked.
+    case 'creator_comment_reply':
+    case 'comment_like':
+    case 'mention':
+    case 'tip':
+    case 'video_milestone':
+      return notification.tokenId ? `/app/post/${notification.tokenId}${commentSuffix}` : null;
+    // Every remaining post-bound type lands on the post it refers to. Without
+    // these the rows rendered fine but were inert on click.
+    case 'repost':
+    case 'quote':
+    case 'bounty_available':
+    case 'bounty_claimed':
+    case 'fraction_offer':
+    case 'fraction_offer_accepted':
+    case 'fraction_offer_rejected':
+    case 'fraction_purchased':
+    case 'fraction_gift':
+      return notification.tokenId ? `/app/post/${notification.tokenId}` : null;
+    // Answering an offer and paying for an accepted one happen on the same
+    // tab, so all three rows lead to it.
+    case 'username_offer':
+    case 'username_offer_accepted':
+    case 'username_offer_declined':
+      return '/app/usernames?tab=offers';
+    case 'following':
+    case 'follow_request_accepted':
+      return notification.actorAddress
+        ? profilePath(notification.actorAddress)
+        : notification.actorUsername
+          ? profilePath(notification.actorUsername)
+          : null;
+    case 'follow_request':
+      // Follow requests don't navigate — they have inline accept/reject buttons
+      return null;
+    case 'subscription':
+    case 'ppv_purchase':
+      return notification.actorAddress 
+        ? profilePath(notification.actorAddress) 
+        : notification.actorUsername 
+          ? profilePath(notification.actorUsername) 
+          : '/app/command-centre';
+    case 'livestream_start':
+    case 'signal_flare':
+      return notification.tokenId ? `/app/post/${notification.tokenId}` : null;
+    case 'video_removal':
+      return '/app/settings';
+    // The delegation panel is the only place a loan can be seen or ended, and
+    // `?highlight=` alone opens the right tab — the search index knows which
+    // tab the setting lives in, so the link cannot name the wrong one.
+    case 'badge_delegated':
+    case 'badge_delegation_ended':
+    case 'badge_delegation_changed':
+      return '/app/settings?highlight=badge-delegation';
+    // A tier you climbed to has a page a loan does not: the ladder, with the
+    // next rung and what it costs already on it.
+    case 'badge_tier_up':
+    case 'badge_tier_down':
+      return '/app/stake';
+    default:
+      // A type this build does not know yet still names the post it is about;
+      // landing there beats a row that does nothing.
+      return notification.tokenId ? `/app/post/${notification.tokenId}${commentSuffix}` : null;
+  }
+}
+
+/**
+ * Where a platform announcement points. A broadcast puts the page it is about
+ * in `metadata.articleUrl` — the field mobile has always opened in its in-app
+ * browser — and the web rows read it nowhere, so every announcement since the
+ * feature shipped was inert on click. Scoped to the same three types mobile
+ * scopes it to, so nothing else changes behaviour.
+ *
+ * A dehub.io link comes back as a path so the SPA routes to it rather than
+ * reloading the entire app; anything else opens in a new tab. Only http(s)
+ * survives — the value is admin-authored, but a `javascript:` URL reaching a
+ * `window.open` is not a shape worth permitting on the strength of that.
+ */
+type AnnouncementTarget =
+  | { kind: 'internal'; path: string }
+  | { kind: 'external'; url: string };
+
+const ANNOUNCEMENT_TYPES = new Set(['system', 'video_removal', 'account_warning']);
+
+function announcementTarget(notification: DeHubNotification): AnnouncementTarget | null {
+  if (!ANNOUNCEMENT_TYPES.has(notification.type as string)) return null;
+
+  const raw = notification.metadata?.articleUrl;
+  if (typeof raw !== 'string' || !raw.trim()) return null;
+  const value = raw.trim();
+
+  // A bare path is always one of ours.
+  if (value.startsWith('/')) return { kind: 'internal', path: value };
+
+  let url: URL;
+  try {
+    url = new URL(value);
+  } catch {
+    return null;
+  }
+  if (url.protocol !== 'http:' && url.protocol !== 'https:') return null;
+
+  const host = url.hostname.replace(/^www\./, '');
+  if (host === 'riftn.com' || host === 'dehub.io' || url.hostname === window.location.hostname) {
+    return { kind: 'internal', path: `${url.pathname}${url.search}${url.hash}` };
+  }
+  return { kind: 'external', url: url.href };
+}
+
+// Memoized: the page stays mounted forever (PersistentPageCache), so any parent
+// re-render used to re-run every row's per-render work (canonical-actor
+// building, date formatting). All props are kept referentially stable in the
+// parent (memoized bundles/list, useCallback onMarkAsRead).
+export const NotificationItem = memo(function NotificationItem({
+  notification,
+  bundle,
+  onMarkAsRead,
+  isMarkingAsRead,
+  enrichedAvatars,
+  onSelect,
+  selecting = false,
+  selected = false,
+  selectionDisabled = false,
+}: {
+  notification: DeHubNotification;
+  bundle: BundledNotification;
+  onMarkAsRead: (id: string) => void;
+  isMarkingAsRead: boolean;
+  enrichedAvatars: Map<string, EnrichedAvatar>;
+  onSelect?: (ids: string[]) => void;
+  selecting?: boolean;
+  selected?: boolean;
+  selectionDisabled?: boolean;
+}) {
+  const { t: _copy } = _useCopy();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const { t } = useTranslation();
+  const [isClosing, setIsClosing] = useState(false);
+  const [showActorsDrawer, setShowActorsDrawer] = useState(false);
+  const [showPostsDrawer, setShowPostsDrawer] = useState(false);
+  const drawerJustClosed = useRef(false);
+  const [followRequestAction, setFollowRequestAction] = useState<'accepted' | 'rejected' | null>(null);
+  const [followRequestLoading, setFollowRequestLoading] = useState<'accept' | 'reject' | null>(null);
+
+  // Supabase-backed rows carry their reference id here (see
+  // use-custom-notifications); for a fraction row it is the post's token id.
+  const customReferenceId = (notification as { _customReferenceId?: string })._customReferenceId;
+
+  // A decision someone can disagree with, as opposed to something that merely
+  // happened. Matches the two types notifyModerationAction sends.
+  const isModerationDecision =
+    (notification.type as string) === 'video_removal' ||
+    (notification.type as string) === 'account_warning';
+  const [showAppealDrawer, setShowAppealDrawer] = useState(false);
+  const [appealRef, setAppealRef] = useState<string | null>(null);
+
+  const isFollowRequest = (notification.type as string) === 'follow_request' ||
+    (notification.type as string) === 'followRequest' ||
+    (notification.type as string) === 'follow-request' ||
+    ((notification.type as string) === 'following' && notification.content?.toLowerCase().includes('requested'));
+
+  const handleFollowRequestAction = async (action: 'accept' | 'reject') => {
+    if (!notification.actorAddress) return;
+    setFollowRequestLoading(action);
+    try {
+      // Fetch follow requests to find the matching request ID
+      const requests = await getFollowRequests();
+      console.log('[FollowRequest] fetched requests:', requests.map(r => ({ id: r.id, _id: (r as any)._id, address: r.address })));
+      const match = requests.find(
+        r => r.address?.toLowerCase() === notification.actorAddress?.toLowerCase()
+      );
+      const requestId = match?.id || match?._id;
+      console.log('[FollowRequest] matched:', { match: !!match, requestId, actorAddress: notification.actorAddress });
+      
+      if (!requestId) {
+        // No pending request found — it was likely already handled
+        setFollowRequestAction(action === 'accept' ? 'accepted' : 'rejected');
+        toast.info(_copy("copy.2a14c0b8505d", { defaultValue: "Request already handled" }));
+        return;
+      }
+      
+      if (action === 'accept') {
+        await approveFollowRequest(requestId);
+        setFollowRequestAction('accepted');
+        toast.success(notification.actorUsername
+          ? _copy("copy.d39dc495bc2f", { defaultValue: "Accepted {{value1}}'s follow request", value1: notification.actorUsername })
+          : _copy("copy.6ef938c24115", { defaultValue: "Follow request accepted" }));
+      } else {
+        await rejectFollowRequest(requestId);
+        setFollowRequestAction('rejected');
+        toast.success(notification.actorUsername
+          ? _copy("copy.002d8f205c6a", { defaultValue: "Rejected {{value1}}'s follow request", value1: notification.actorUsername })
+          : _copy("copy.962b110538f3", { defaultValue: "Follow request rejected" }));
+      }
+      // Mark as read
+      if (!notification.read) {
+        bundle.allIds.forEach(id => onMarkAsRead(id));
+      }
+    } catch (err: any) {
+      console.error('[FollowRequest] Error:', err);
+      const msg = err?.message?.toLowerCase() || '';
+      if (msg.includes('not found') || msg.includes('already')) {
+        setFollowRequestAction(action === 'accept' ? 'accepted' : 'rejected');
+        toast.info(_copy("copy.2a14c0b8505d", { defaultValue: "Request already handled" }));
+      } else {
+        toast.error(action === 'accept' ? _copy("copy.9a891fda4604", { defaultValue: "Failed to accept follow request" }) : _copy("copy.a6485001fd03", { defaultValue: "Failed to reject follow request" }));
+      }
+    } finally {
+      setFollowRequestLoading(null);
+    }
+  };
+
+  // Prefer fresh enriched avatar over stale API snapshot
+  const enriched = notification.actorAddress ? enrichedAvatars.get(notification.actorAddress.toLowerCase()) : undefined;
+  const freshAvatarPath = enriched?.avatarUrl;
+  const staleAvatarPath = extractAvatarPath(notification) || notification.actorAvatar;
+  
+  // Use fresh if available, otherwise fall back to stale (don't discard stale just because enrichment ran with null)
+  const effectiveAvatarPath = freshAvatarPath || staleAvatarPath;
+  
+  // If enriched avatar is already a full URL, use it directly with cache-busting
+  const cacheBust = Math.floor(Date.now() / 300000);
+  const avatarUrl = effectiveAvatarPath?.startsWith('http')
+    ? `${effectiveAvatarPath}${effectiveAvatarPath.includes('?') ? '&' : '?'}v=${cacheBust}`
+    : notification.actorAddress && effectiveAvatarPath
+      ? buildAvatarUrl(notification.actorAddress, effectiveAvatarPath)
+      : undefined;
+  
+   // No dicebear fallback — let AvatarFallback show the greyed-out letter
+  const fallbackLetter = (enriched?.displayName || enriched?.username || notification.actorUsername || 'U').charAt(0).toUpperCase();
+
+  // Broadcasts and system notices are sent by the platform, not by a user: they
+  // carry no actor, so the letter fallback had nothing to work with and drew an
+  // empty grey circle. Those rows wear the Riftn mark instead. Anything with an
+  // actor — even one whose picture fails to load — keeps its own avatar.
+  const isPlatformNotice = !notification.actorAddress && !notification.actorUsername && !avatarUrl;
+    
+  const isMomentRow = ['story_like', 'story_mention', 'story_comment'].includes(notification.type as string);
+  const momentLink = isMomentRow ? getNavigationLink(notification) : null;
+  const postThumbnail = !isMomentRow && notification.tokenThumbnail
+    ? (notification.tokenThumbnail.startsWith('http') ? notification.tokenThumbnail : `${DEHUB_CDN_BASE}${notification.tokenThumbnail}`)
+    : null;
+  
+  const profileLink = notification.actorAddress 
+    ? profilePath(notification.actorAddress) 
+    : notification.actorUsername 
+      ? profilePath(notification.actorUsername) 
+      : null;
+
+  const aggregatedActorNames = (notification as any).latestActorNames as string[] | undefined;
+  // Memoized: walks the enrichedAvatars Map per actor — without the memo this
+  // re-ran for every row on every parent render.
+  const canonicalActors = useMemo(() => {
+    const fromAggregated = buildCanonicalActors(aggregatedActorNames, undefined, undefined, enrichedAvatars);
+    if (fromAggregated.length > 0) return fromAggregated;
+    return buildCanonicalActors(undefined, notification.actorUsername, enriched?.username, enrichedAvatars);
+  }, [aggregatedActorNames, notification.actorUsername, enriched?.username, enrichedAvatars]);
+  const aggregatedCount = (notification as any).aggregatedCount || 1;
+  const isBackendAggregatedMultiActor =
+    canonicalActors.length >= 2 &&
+    aggregatedCount > 1 &&
+    ['like', 'comment', 'repost', 'following'].includes(notification.type as string) &&
+    bundle.bundleType !== 'same-actor';
+
+  const primaryKey = normalizeUsername(enriched?.username || notification.actorUsername);
+  const primaryAddress = notification.actorAddress?.toLowerCase();
+
+  const resolveActorAvatar = (actor: CanonicalActor | null | undefined): string | undefined => {
+    if (!actor) return undefined;
+
+    const resolved = resolveActorAvatarUrl(actor, enrichedAvatars);
+    if (resolved) return resolved;
+
+    // Critical: for backend multi-actor aggregates, never borrow the primary actor avatar
+    // for other actors (this causes "wrong face under correct name" mismatches).
+    if (isBackendAggregatedMultiActor) return undefined;
+
+    const actorAddress = actor.address?.toLowerCase();
+    if (primaryAddress && actorAddress && actorAddress === primaryAddress) return avatarUrl;
+
+    return actor.key === primaryKey ? avatarUrl : undefined;
+  };
+
+  const hasUnread = bundle.bundleType !== 'single' 
+    ? bundle.allIds.some(id => {
+        // Check if any notification in the bundle is unread - we only have the primary easily
+        return !notification.read;
+      })
+    : !notification.read;
+  const { walletAddress } = useAuth();
+
+  // Follow back, right on the row. A follow row names one person; the shared
+  // override keeps this pill in step with every other Follow button.
+  const followActor = notification.actor?.address || notification.actorAddress;
+  const { isFollowing: followOverride, toggleFollow } = useFollow(followActor);
+  const followsActor = followOverride ?? !!notification.actor?.isFollowing;
+  const showFollowBack =
+    (notification.type as string) === 'following' &&
+    !isBackendAggregatedMultiActor &&
+    bundle.bundleType === 'single' &&
+    !!followActor &&
+    followActor.toLowerCase() !== walletAddress?.toLowerCase() &&
+    !notification.actor?.isFollowRequestPending;
+  // A live row is a door: Watch goes straight in.
+  const watchLink = (notification.type as string) === 'livestream_start' && notification.tokenId
+    ? `/app/post/${notification.tokenId}`
+    : null;
+  // Likes and reposts are about your own post: show it big enough to tell
+  // which one, not as a 44px chip.
+  const bigPostPicture = !!postThumbnail &&
+    bundle.bundleType !== 'same-actor' &&
+    ['like', 'repost'].includes(notification.type as string);
+  const markEngaged = () => { if (hasUnread) bundle.allIds.forEach(id => onMarkAsRead(id)); };
+
+  // Seed profile cache before navigating to a profile so the header renders instantly
+  const seedAndNavigateToProfile = (n: DeHubNotification) => {
+    const actor = n.actor;
+    const username = (actor?.username || n.actorUsername)?.replace('@', '');
+    const address = actor?.address || n.actorAddress;
+    if (username || address) {
+      seedProfileCache(queryClient, {
+        address: address || '',
+        username,
+        avatarUrl: n.actorAvatar || actor?.avatarImageUrl,
+        displayName: actor?.displayName || username,
+        badgeBalance: actor?.badgeBalance,
+        followers: typeof actor?.followers === 'number' ? actor.followers : undefined,
+        following: typeof actor?.followings === 'number' ? actor.followings : undefined,
+        postsCount: actor?.uploads,
+        isFollowing: actor?.isFollowing,
+        followsYou: actor?.followsYou,
+        isPending: actor?.isFollowRequestPending,
+        isPrivate: actor?.isPrivate,
+      }, walletAddress || undefined);
+    }
+    const target = username || address;
+    if (target) navigate(profilePath(target));
+  };
+
+  const handleClick = () => {
+    // If a drawer is open or just closed, don't navigate
+    if (showActorsDrawer || showPostsDrawer || drawerJustClosed.current) return;
+    
+    // Mark all notifications in bundle as read
+    if (hasUnread) {
+      bundle.allIds.forEach(id => onMarkAsRead(id));
+    }
+    
+    // Follow request notifications — clicking row navigates to requester's profile
+    if (isFollowRequest) {
+      seedAndNavigateToProfile(notification);
+      return;
+    }
+
+    // Several new followers in one row open your followers list with the new
+    // ones marked, rather than the latest follower's profile. Two counts too:
+    // "Ada and 1 other" used to land on Ada alone.
+    const isAggregatedFollow = notification.type === 'following' && (notification as any).aggregatedCount > 1;
+    if (isAggregatedFollow && walletAddress) {
+      window.dispatchEvent(new CustomEvent('open-followers-drawer', {
+        detail: {
+          count: (notification as any).aggregatedCount,
+          usernames: (notification as any).latestActorNames,
+        },
+      }));
+      return;
+    }
+    
+    // Same-actor bundle with multiple posts → open posts drawer
+    if (bundle.bundleType === 'same-actor' && bundle.postCount > 1) {
+      setShowPostsDrawer(true);
+      return;
+    }
+    
+    // A platform announcement names its own destination, which no type-keyed
+    // switch can know. Checked ahead of getNavigationLink so a moderation notice
+    // carrying a link lands on the link rather than on the settings page.
+    const announcement = announcementTarget(notification);
+    if (announcement) {
+      if (announcement.kind === 'external') {
+        window.open(announcement.url, '_blank', 'noopener,noreferrer');
+      } else {
+        if (announcement.path === '/app/wallet') {
+          void queryClient.invalidateQueries({ queryKey: [APP_TOKENS_QUERY_KEY] });
+        }
+        navigate(announcement.path);
+      }
+      return;
+    }
+
+    // Navigate to appropriate destination
+    const navLink = getNavigationLink(notification);
+    if (navLink) {
+      // Keyboard activation has no press to warm on.
+      warmTarget();
+      // Seed profile cache for profile-bound navigations
+      const isProfileNav = ['following', 'subscription', 'ppv_purchase'].includes(notification.type);
+      if (isProfileNav) {
+        seedAndNavigateToProfile(notification);
+      } else {
+        navigate(navLink);
+      }
+    }
+  };
+
+  
+
+  const isUnreadRow = hasUnread && !isClosing;
+
+  // The press is ~100ms ahead of the click, and the post page's chunk, the
+  // comments chunk and the page pinned on the linked comment can all start
+  // loading in that gap instead of one after another once the page mounts.
+  const warmTarget = () => {
+    if (!notification.tokenId || isFollowRequest) return;
+    warmNotificationTarget(queryClient, {
+      tokenId: notification.tokenId,
+      commentId: notification.commentId,
+      walletAddress,
+    });
+  };
+
+  const hold = useRef<{ timer: number; x: number; y: number } | null>(null);
+  const held = useRef(false);
+  const cancelHold = useCallback(() => {
+    if (!hold.current) return;
+    window.clearTimeout(hold.current.timer);
+    hold.current = null;
+  }, []);
+  useEffect(() => cancelHold, [cancelHold]);
+  const rowContent = useCallback((node: HTMLDivElement | null) => {
+    if (node) node.inert = selecting;
+  }, [selecting]);
+
+  return (
+    <div
+      onClick={selecting ? undefined : handleClick}
+      onClickCapture={(event) => {
+        if (!held.current || event.detail === 0) return;
+        held.current = false;
+        event.preventDefault();
+        event.stopPropagation();
+      }}
+      onPointerDown={(event) => {
+        held.current = false;
+        if (selecting) return;
+        warmTarget();
+        if (!onSelect || !event.isPrimary || event.button !== 0) return;
+        cancelHold();
+        hold.current = {
+          x: event.clientX,
+          y: event.clientY,
+          timer: window.setTimeout(() => {
+            hold.current = null;
+            held.current = true;
+            onSelect(bundle.allIds);
+          }, 450),
+        };
+      }}
+      onPointerMove={(event) => {
+        const start = hold.current;
+        if (start && Math.hypot(event.clientX - start.x, event.clientY - start.y) > 8) cancelHold();
+      }}
+      onPointerUp={cancelHold}
+      onPointerLeave={cancelHold}
+      onPointerCancel={cancelHold}
+      onContextMenu={(event) => {
+        if (onSelect && (held.current || hold.current)) event.preventDefault();
+      }}
+      data-notification-row
+      data-notification-selectable={onSelect ? '' : undefined}
+      data-notification-selected={selected ? '' : undefined}
+      data-feed-row
+      data-unread={isUnreadRow ? '' : undefined}
+      className="relative flex items-start gap-3 rounded-2xl py-3 pl-[18px] transition-colors duration-300 cursor-pointer"
+      style={{ paddingRight: selecting ? 44 : 16 }}
+    >
+      {selecting && (
+        <button
+          type="button"
+          className="absolute inset-0 z-10 flex items-center justify-end rounded-2xl pr-3 focus-visible:outline focus-visible:-outline-offset-2 focus-visible:outline-2 focus-visible:outline-ring"
+          aria-pressed={selected}
+          aria-label={notification.content || t('notifications.title')}
+          disabled={selectionDisabled}
+          onClick={() => onSelect?.(bundle.allIds)}
+        >
+          <span data-notification-selection-check aria-hidden="true">
+            {selected && <Check className="size-3.5" />}
+          </span>
+        </button>
+      )}
+      <div ref={rowContent} className="contents">
+      {/* Unread is a solid dot, not a filled block. It doubles as the
+          per-row "mark as read" control the old round button gave. */}
+      {isUnreadRow && (
+        <button
+          type="button"
+          data-feed-unread-dot
+          onClick={(e) => {
+            e.stopPropagation();
+            setIsClosing(true);
+            bundle.allIds.forEach(id => onMarkAsRead(id));
+          }}
+          className="absolute left-0 top-[19px] flex h-6 w-[18px] items-center justify-center"
+          aria-label={_copy("copy.50c8b81faf51", { defaultValue: "Mark as read" })}
+          title={_copy("copy.50c8b81faf51", { defaultValue: "Mark as read" })}
+        >
+          <span className="block h-[7px] w-[7px] rounded-full" />
+        </button>
+      )}
+      {/* Avatar with type icon overlay — stacked for aggregated notifications */}
+      <div className="relative flex-shrink-0">
+        {(() => {
+          const hasMultipleActors = isBackendAggregatedMultiActor;
+          
+          if (hasMultipleActors) {
+            // 2×2 grid: TL=actor1, TR=actor2, BL=actor3, BR=type icon
+            const [actor1, actor2, actor3] = canonicalActors.slice(0, 3);
+            const avatar1Url = resolveActorAvatar(actor1);
+            const avatar2Url = resolveActorAvatar(actor2);
+            const avatar3Url = resolveActorAvatar(actor3);
+
+            const renderGridAvatar = (
+              url: string | undefined,
+              name: string | null,
+              link: string | null,
+              size: string
+            ) => {
+              const avatarEl = (
+                <Avatar className={`${size} ring-1 ring-zinc-800`}>
+                  {url && <AvatarImage src={url} />}
+                  <AvatarFallback className="bg-zinc-700 text-white text-[10px] font-medium">
+                    {name ? name.charAt(0).toUpperCase() : '?'}
+                  </AvatarFallback>
+                </Avatar>
+              );
+              return link ? (
+                <Link to={link} onClick={(e) => e.stopPropagation()}>
+                  {avatarEl}
+                </Link>
+              ) : avatarEl;
+            };
+            
+            return (
+              <div data-feed-avatar-grid className="grid grid-cols-2 grid-rows-2 gap-0.5 w-[46px] h-[46px] flex-shrink-0">
+                {renderGridAvatar(avatar1Url, actor1?.display || fallbackLetter, actor1 ? resolveActorProfileLink(actor1, enrichedAvatars) || profileLink : profileLink, 'w-[22px] h-[22px]')}
+                {renderGridAvatar(avatar2Url, actor2?.display || null, actor2 ? resolveActorProfileLink(actor2, enrichedAvatars) : null, 'w-[22px] h-[22px]')}
+                {actor3 ? (
+                  renderGridAvatar(avatar3Url, actor3.display, resolveActorProfileLink(actor3, enrichedAvatars), 'w-[22px] h-[22px]')
+                ) : (
+                  <span className="invisible w-[22px] h-[22px]" aria-hidden />
+                )}
+                <button
+                  data-feed-type-badge
+                  className="w-[22px] h-[22px] rounded-full flex items-center justify-center transition-colors cursor-pointer [&_svg]:h-[11px] [&_svg]:w-[11px]"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    setShowActorsDrawer(true);
+                  }}
+                  title={_copy("copy.30a64216eaea", { defaultValue: "View all" })}
+                >
+                  {getNotificationIcon(notification.type, notification.reaction)}
+                </button>
+              </div>
+            );
+          }
+          
+          // Platform announcement — no one to link to, so no <Link> wrapper, and
+          // no <Avatar> either: Radix would only add a fallback this can never
+          // need. The tile carries the same radius and zinc fill as the type
+          // badges beside it, so the mark sits square with the rest of the row
+          // instead of reading as somebody's round profile picture.
+          if (isPlatformNotice) {
+            return (
+              <div data-feed-platform-mark data-keep-dark className="w-[46px] h-[46px] shrink-0 rounded-lg bg-black border border-white/10 flex items-center justify-center">
+                <img
+                  src={DEHUB_MARK_SRC}
+                  alt="Riftn"
+                  className="w-6 h-auto object-contain"
+                  loading="lazy"
+                  decoding="async"
+                />
+              </div>
+            );
+          }
+
+          // Single avatar (default)
+          return profileLink ? (
+            <Link to={profileLink} onClick={(e) => e.stopPropagation()}>
+              <Avatar className="w-[46px] h-[46px]">
+                <AvatarImage src={avatarUrl} />
+                <AvatarFallback className="bg-zinc-700 text-white font-medium">
+                  {fallbackLetter}
+                </AvatarFallback>
+              </Avatar>
+            </Link>
+          ) : (
+            <Avatar className="w-[46px] h-[46px]">
+              <AvatarImage src={avatarUrl} />
+              <AvatarFallback className="bg-zinc-700 text-white font-medium">
+                {fallbackLetter}
+              </AvatarFallback>
+            </Avatar>
+          );
+        })()}
+        {/* Type icon badge — only for single-actor notifications (aggregated ones render it inside) */}
+        {!isBackendAggregatedMultiActor && (
+          <div data-feed-type-badge className="absolute -bottom-[3px] -right-[3px] flex h-5 w-5 items-center justify-center rounded-full [&_svg]:h-[11px] [&_svg]:w-[11px]">
+            {getNotificationIcon(notification.type, notification.reaction)}
+          </div>
+        )}
+      </div>
+
+      {/* Content */}
+      <div className="flex-1 min-w-0">
+        <p data-feed-text data-read={notification.read || isClosing ? "" : undefined} className="text-[14.5px] leading-[1.38]">
+          {notificationContentWithActorBadge(
+            getNotificationContent(notification, bundle, t, () => setShowActorsDrawer(true), canonicalActors),
+            notification,
+            canonicalActors.length,
+          )}
+          <span data-feed-time className="text-[13px] text-zinc-500 whitespace-nowrap">{' · '}{formatTimeAgo(String(notification.createdAt))}</span>
+        </p>
+        
+        {/* The comment itself, whole, with Reply / Like / Tip right here. */}
+        {bundle.bundleType !== 'same-actor' && notificationHasComment(notification) && (
+          <>
+            {notification.tokenTitle && (notification.type === 'comment_reply' || notification.type === 'mention') && (
+              <p data-feed-quote className="text-xs text-zinc-500 mt-0.5 line-clamp-1">{_copy("copy.2c26ae1e5724", { defaultValue: "on: " })}{notification.tokenTitle}
+              </p>
+            )}
+            <NotificationCommentCard
+              notification={notification}
+              onEngaged={() => { if (hasUnread) bundle.allIds.forEach(id => onMarkAsRead(id)); }}
+            />
+          </>
+        )}
+
+        {/* A Requests-board row: the comment or the new request itself, with
+            Reply / Like or Upvote. */}
+        {bundle.bundleType !== 'same-actor' && notificationHasRequestCard(notification) && (
+          <NotificationRequestCard notification={notification} onEngaged={markEngaged} />
+        )}
+
+        {/* Post preview snippet — for replies/mentions show the comment text, otherwise the post title */}
+        {bundle.bundleType !== 'same-actor' && !notificationHasComment(notification) && !notificationHasRequestCard(notification) && !bigPostPicture && (() => {
+          const commentPreview = (notification as any).commentPreview;
+          const isReplyOrMention = notification.type === 'comment_reply' || notification.type === 'mention';
+          // Strip leading @mention from comment preview
+          const cleanedPreview = commentPreview ? commentPreview.replace(/^@\w+\s*/, '') : null;
+          // A community @mention or @here stores the chat message itself, which
+          // the sentence above deliberately leaves out — it belongs here, as the
+          // quoted line, the same as a comment reply's. A join has no message,
+          // and `tokenTitle` on these rows is the community name the sentence
+          // has already spent, so it would otherwise quote it back at itself.
+          const previewText = isCommunityNotificationType(notification.type as string)
+            ? communityNotificationPreview(notification)
+            : (isReplyOrMention && cleanedPreview ? cleanedPreview : notification.tokenTitle);
+          if (!previewText) return null;
+          return (
+            <>
+              <p data-feed-quote className="text-[13.5px] text-zinc-500 mt-0.5 line-clamp-1">
+                {previewText}
+              </p>
+              {/* Secondary post title context for reply/mention */}
+              {isReplyOrMention && notification.tokenTitle && (
+                <p data-feed-quote className="text-xs text-zinc-500 mt-0.5 line-clamp-1">{_copy("copy.2c26ae1e5724", { defaultValue: "on: " })}{notification.tokenTitle}
+                </p>
+              )}
+            </>
+          );
+        })()}
+        
+        {bigPostPicture && (
+          <Link
+            to={`/app/post/${notification.tokenId}`}
+            onClick={(e) => { e.stopPropagation(); markEngaged(); }}
+            className="mt-2 block w-fit"
+          >
+            <img
+              src={postThumbnail!}
+              alt={notification.tokenTitle || _copy("copy.a5554622c655", { defaultValue: "Post" })}
+              loading="lazy"
+              decoding="async"
+              data-feed-comment-media
+              className="block h-[132px] w-auto max-w-full min-w-[100px] rounded-xl object-cover"
+            />
+          </Link>
+        )}
+
+        {(showFollowBack || watchLink) && (
+          <div className="flex items-center gap-2 mt-2.5" onClick={(e) => e.stopPropagation()}>
+            {showFollowBack && (
+              <button
+                type="button"
+                onClick={() => {
+                  markEngaged();
+                  void toggleFollow(followsActor, { name: notification.actor?.username || notification.actorUsername });
+                }}
+                data-feed-pill={followsActor ? 'ghost' : 'primary'}
+                className={`h-[30px] px-3.5 rounded-full text-[13px] font-semibold flex items-center gap-1 transition-opacity ${followsActor ? 'border border-white/20 text-white' : ''}`}
+              >
+                {followsActor
+                  ? <><Check className="w-3 h-3" />{t('follow.following', { defaultValue: 'Following' })}</>
+                  : <><UserPlus className="w-3 h-3" />{t('follow.followBack', { defaultValue: 'Follow back' })}</>}
+              </button>
+            )}
+            {watchLink && (
+              <button
+                type="button"
+                onClick={() => { markEngaged(); navigate(watchLink); }}
+                data-feed-pill="primary"
+                className="h-[30px] px-3.5 rounded-full text-[13px] font-semibold flex items-center gap-1 transition-opacity"
+              >
+                <Radio className="w-3 h-3" />{t('copy.42f3cc7b5f71', { defaultValue: 'Watch now' })}
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* Show individual actor names below backend-aggregated follows */}
+        {notification.type === 'following' && (notification as any).aggregatedCount > 1 && (notification as any).latestActorNames?.length > 1 && (
+          <p className="text-xs text-zinc-500 mt-0.5">
+            {(notification as any).latestActorNames.join(', ')}
+          </p>
+        )}
+        
+
+        {/* Settle a fraction trade from the notification that told you about it.
+            Renders nothing unless this wallet actually owes the leg. */}
+        <NotificationSettleAction
+          type={notification.type as string}
+          tokenId={customReferenceId}
+        />
+
+        {/* Follow request accept/reject buttons — inline under text on mobile */}
+        {isFollowRequest && !followRequestAction && (
+          <div className="flex items-center gap-2 mt-2.5" onClick={(e) => e.stopPropagation()}>
+            <button
+              onClick={() => handleFollowRequestAction('accept')}
+              disabled={followRequestLoading !== null}
+              data-feed-pill="primary"
+              className="h-[30px] px-3.5 rounded-full text-[13px] font-semibold flex items-center gap-1 transition-opacity disabled:opacity-50"
+            >
+              {followRequestLoading === 'accept' ? <Loader2 className="w-3 h-3 animate-spin" /> : <Check className="w-3 h-3" />}{_copy("copy.89713b9c9c1b", { defaultValue: "Accept" })}</button>
+            <button
+              onClick={() => handleFollowRequestAction('reject')}
+              disabled={followRequestLoading !== null}
+              data-feed-pill="ghost"
+              className="h-[30px] px-3.5 rounded-full border border-white/20 text-white text-[13px] font-semibold flex items-center gap-1 transition-colors disabled:opacity-50"
+            >
+              {followRequestLoading === 'reject' ? <Loader2 className="w-3 h-3 animate-spin" /> : <XIcon className="w-3 h-3" />}{_copy("copy.ab604a360777", { defaultValue: "Reject" })}</button>
+          </div>
+        )}
+        {isFollowRequest && followRequestAction && (
+          <span className={`text-xs font-medium mt-2 inline-block px-2 py-1 rounded-lg ${
+            followRequestAction === 'accepted' ? 'text-green-400 bg-green-500/10' : 'text-zinc-500 bg-zinc-800/50'
+          }`}>
+            {followRequestAction === 'accepted' ? _copy("copy.9d93faae179b", { defaultValue: "✓ Accepted" }) : _copy("copy.5bf903ccf3b7", { defaultValue: "✗ Rejected" })}
+          </span>
+        )}
+
+        {/* A moderation decision is the one notification a reader may actually
+            disagree with. The line it used to end with asked them to email
+            support; this files it against the decision itself. */}
+        {isModerationDecision && !appealRef && (
+          <div className="flex items-center gap-1.5 mt-2" onClick={(e) => e.stopPropagation()}>
+            <button
+              onClick={() => setShowAppealDrawer(true)}
+              data-feed-pill="ghost"
+              className="h-[30px] px-3.5 rounded-full border border-white/20 text-white text-[13px] font-semibold flex items-center gap-1 transition-colors"
+            >
+              <Scale className="w-3 h-3" />{_copy("copy.b8b66bda14ac", { defaultValue: "Appeal" })}</button>
+          </div>
+        )}
+        {isModerationDecision && appealRef && (
+          <span className="text-xs font-medium mt-2 inline-block px-2 py-1 rounded-lg text-zinc-400 bg-zinc-800/50">{_copy("copy.0c243417b8de", { defaultValue: "Appeal sent · " })}{appealRef}
+          </span>
+        )}
+        {isModerationDecision && (
+          <AppealDrawer
+            open={showAppealDrawer}
+            onOpenChange={setShowAppealDrawer}
+            notificationId={notification.id}
+            subject={notification.tokenTitle ? `"${notification.tokenTitle}"` : undefined}
+            onFiled={setAppealRef}
+          />
+        )}
+      </div>
+
+      {momentLink && (
+        <Link
+          to={momentLink}
+          onClick={(e) => { e.stopPropagation(); markEngaged(); }}
+          className="shrink-0 self-center rounded-md px-2 py-1 text-sm font-medium text-foreground hover:bg-muted focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring"
+        >
+          {t('stories.watchOriginal', { defaultValue: 'Watch original moment' })}
+        </Link>
+      )}
+
+      {/* Post thumbnail if applicable */}
+      {postThumbnail && bundle.bundleType !== 'same-actor' && !bigPostPicture && (
+        <Link 
+          to={`/app/post/${notification.tokenId}`}
+          onClick={(e) => e.stopPropagation()}
+          className="flex-shrink-0"
+        >
+          <img 
+            src={postThumbnail} 
+            alt={notification.tokenTitle || _copy("copy.a5554622c655", { defaultValue: "Post" })} 
+            className="w-11 h-11 rounded-[10px] object-cover"
+          />
+        </Link>
+      )}
+
+
+      {/* Actors drawer — shows all users who performed this action */}
+      <Drawer open={showActorsDrawer} onOpenChange={(open) => {
+        if (!open) { drawerJustClosed.current = true; setTimeout(() => { drawerJustClosed.current = false; }, 300); }
+        setShowActorsDrawer(open);
+      }}>
+        <DrawerContent column hideHandle={false} handleClassName="lg:hidden" data-notifications-page data-notification-surface className="border-white/10 max-h-[70dvh]">
+          <DrawerHeader className="text-center pb-2">
+            <DrawerTitle className="text-white text-base">
+              {(notification.type as string) === 'like' ? _copy("copy.0cd09d44006a", { defaultValue: "Reacted by" }) : (notification.type as string) === 'repost' ? _copy("copy.5b79c5daab9d", { defaultValue: "Reposted by" }) : (notification.type as string) === 'comment' ? _copy("copy.03a8c852177a", { defaultValue: "Commented by" }) : _copy("copy.6b0cc904d081", { defaultValue: "Users" })}
+            </DrawerTitle>
+          </DrawerHeader>
+          <div className="px-4 pb-6 space-y-1 overflow-y-auto max-h-[50vh]" data-vaul-no-drag>
+            {canonicalActors.map((actor) => {
+              const actorLink = resolveActorProfileLink(actor, enrichedAvatars);
+              const actorAvatar = resolveActorAvatar(actor);
+              const actorHandle = normalizeUsername(actor.resolvedUsername || actor.key || actor.display) || actor.display;
+
+              return (
+                <Link
+                  key={actor.canonicalId}
+                  to={actorLink || '#'}
+                  onClick={() => setShowActorsDrawer(false)}
+                  className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-white/5 transition-colors"
+                >
+                  <Avatar className="w-10 h-10">
+                    {actorAvatar && <AvatarImage src={actorAvatar} />}
+                    <AvatarFallback className="bg-zinc-700 text-white font-medium">{actor.display.charAt(0).toUpperCase()}</AvatarFallback>
+                  </Avatar>
+                  <span className="text-white text-sm font-medium">@{actorHandle}</span>
+                </Link>
+              );
+            })}
+            {aggregatedCount > canonicalActors.length && (
+              <p className="text-center text-zinc-500 text-xs py-2">{_copy("copy.427a379ae3e6", { defaultValue: "and " })}{aggregatedCount - canonicalActors.length}{_copy("copy.226ba18bbcdb", { defaultValue: " more" })}</p>
+            )}
+          </div>
+        </DrawerContent>
+      </Drawer>
+
+      {/* Posts drawer — shows all posts in a same-actor bundle */}
+      <Drawer open={showPostsDrawer} onOpenChange={(open) => {
+        if (!open) { drawerJustClosed.current = true; setTimeout(() => { drawerJustClosed.current = false; }, 300); }
+        setShowPostsDrawer(open);
+      }}>
+        <DrawerContent column hideHandle={false} handleClassName="lg:hidden" data-notifications-page data-notification-surface className="border-white/10 max-h-[80dvh]">
+          <DrawerHeader className="text-center pb-2">
+            <DrawerTitle className="text-white text-base">
+              {notification.type === 'like' ? _copy("copy.376bde01356c", { defaultValue: "Reacted posts" }) : notification.type === 'comment' ? _copy("copy.25eee375e3f4", { defaultValue: "Commented posts" }) : (notification.type as string) === 'repost' ? _copy("copy.1318b0271dac", { defaultValue: "Reposted posts" }) : _copy("copy.a80811cf6889", { defaultValue: "Posts" })}
+            </DrawerTitle>
+          </DrawerHeader>
+          <div className="px-4 pb-6 overflow-y-auto max-h-[65vh] space-y-4" data-vaul-no-drag>
+            <NotificationPostCards tokenIds={bundle.allNotifications.map(n => n.tokenId).filter((id): id is number => id != null)} />
+          </div>
+        </DrawerContent>
+      </Drawer>
+      </div>
+    </div>
+  );
+});
+
+/**
+ * What the reader's notification filters held back. Lives only in Settings →
+ * Notifications → Filter notifications from, so readers who never use filters
+ * never see it on the notifications page. Collapsed until opened, and only
+ * fetched then, so a reader without filters pays nothing for it.
+ */
+export function FilteredNotificationsSection() {
+  const { t } = useTranslation();
+  const [open, setOpen] = useState(false);
+  const markAsRead = useMarkNotificationAsRead();
+  const [markingNotificationId, setMarkingNotificationId] = useState<string | null>(null);
+  const handleMarkAsRead = useCallback((notificationId: string) => {
+    setMarkingNotificationId(notificationId);
+    markAsRead.mutate(notificationId, { onSettled: () => setMarkingNotificationId(null) });
+  }, [markAsRead.mutate]);
+  const { notifications, isLoading, hasNextPage, fetchNextPage, isFetchingNextPage } = useNotifications(undefined, undefined, {
+    filtered: true,
+    enabled: open,
+    notifyOnNew: false,
+  });
+  const enrichedAvatars = moduleAvatarCache;
+  const bundles = useMemo(
+    () => bundleNotifications(notifications.filter(n => n && n.id), enrichedAvatars),
+    [notifications, enrichedAvatars],
+  );
+
+  return (
+    <div data-filtered-notifications data-notifications-page data-notification-surface className="mt-4 overflow-hidden rounded-2xl border border-white/5">
+      <button
+        type="button"
+        onClick={() => setOpen(v => !v)}
+        aria-expanded={open}
+        className="flex w-full items-center justify-between gap-3 px-4 py-3 text-sm text-zinc-400 hover:text-white"
+      >
+        <span className="flex items-center gap-2">
+          <FilterIcon className="h-4 w-4" aria-hidden="true" />
+          {t('notificationFilters.filteredTitle')}
+        </span>
+        <ChevronDown className={`h-4 w-4 transition-transform ${open ? 'rotate-180' : ''}`} aria-hidden="true" />
+      </button>
+      {open && (
+        isLoading ? (
+          <div className="flex justify-center p-4"><Loader2 className="h-4 w-4 animate-spin text-zinc-500" /></div>
+        ) : bundles.length === 0 ? (
+          <p className="px-4 pb-4 text-sm text-zinc-500">{t('notificationFilters.filteredEmpty')}</p>
+        ) : (
+          <div className="divide-y divide-zinc-800 border-t border-zinc-800">
+            {bundles.map(bundle => (
+              <NotificationItem
+                key={bundle.primary.id}
+                notification={bundle.primary}
+                bundle={bundle}
+                onMarkAsRead={handleMarkAsRead}
+                isMarkingAsRead={bundle.allIds.includes(markingNotificationId || '')}
+                enrichedAvatars={enrichedAvatars}
+              />
+            ))}
+            {hasNextPage && (
+              <div className="flex justify-center p-3">
+                <Button variant="ghost" onClick={() => fetchNextPage()} disabled={isFetchingNextPage} className="text-zinc-400 hover:text-white">
+                  {isFetchingNextPage ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                  {t('notifications.loadMore')}
+                </Button>
+              </div>
+            )}
+          </div>
+        )
+      )}
+    </div>
+  );
+}
+
+export default function NotificationsPage({ inDrawer = false }: { inDrawer?: boolean } = {}) {
+  const { t: _copy } = _useCopy();
+  const { t } = useTranslation();
+  const [activeTab, setActiveTab] = useState<NotificationTypeFilter>('all');
+  const isPageActive = useContext(CachedPageActiveContext);
+  const isNotificationListActive = inDrawer || isPageActive;
+  const { isAuthenticated, walletAddress: pageWalletAddress } = useAuth();
+  const navigate = useNavigate();
+  const [selection, setSelection] = useState<Set<string> | null>(null);
+  const selecting = selection !== null;
+  const selectButton = useRef<HTMLButtonElement>(null);
+  const cancelSelectionButton = useRef<HTMLButtonElement>(null);
+  const restoreSelectionFocus = useRef(false);
+  useLayoutEffect(() => {
+    if (!restoreSelectionFocus.current) return;
+    if (selecting) {
+      cancelSelectionButton.current?.focus({ preventScroll: true });
+    } else {
+      selectButton.current?.focus({ preventScroll: true });
+      restoreSelectionFocus.current = false;
+    }
+  }, [selecting]);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const deleting = useRef(false);
+  const currentWallet = useRef(pageWalletAddress);
+  currentWallet.current = pageWalletAddress;
+  // Phones: the search button turns the whole pill into a search box that
+  // filters the rows already loaded, as Home's pill does.
+  const phonePill = usePhonePill();
+  const [search, setSearch] = useState<{ query: string; from: MeltFrom } | null>(null);
+  const searchQuery = search?.query.trim().toLowerCase() ?? '';
+  useEffect(() => {
+    setSelection(null);
+  }, [activeTab, searchQuery, isNotificationListActive, pageWalletAddress]);
+  const toggleSelection = useCallback((ids: string[]) => {
+    if (deleting.current) return;
+    setSelection(previous => {
+      const next = new Set(previous);
+      const remove = ids.some(id => next.has(id));
+      for (const id of ids) {
+        if (remove) next.delete(id);
+        else next.add(id);
+      }
+      return next;
+    });
+  }, []);
+  const isDesktopViewport = useIsDesktopViewport();
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [catchUpOpen, setCatchUpOpen] = useState(false);
+  const settingsSheetRef = useRef<HTMLDivElement>(null);
+  const closeSettings = useCallback(() => setSettingsOpen(false), []);
+  useDrawerPullClose(settingsSheetRef, null, settingsOpen && !isDesktopViewport, closeSettings, { snap: false });
+
+  // In the bell drawer the island must not hide on scroll; the kit island
+  // takes no data-nav-hide prop, so mark its outer element directly.
+  const islandHostRef = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
+    const outer = islandHostRef.current?.querySelector('[data-feed-nav-outer]');
+    if (!outer) return;
+    if (inDrawer) outer.setAttribute('data-nav-hide', 'off');
+    else outer.removeAttribute('data-nav-hide');
+  }, [inDrawer, isAuthenticated]);
+
+  const handleTabClick = useCallback((tab: NotificationTypeFilter) => {
+    setActiveTab(tab);
+  }, []);
+
+  // Followers drawer state (opened inline from aggregated follow notifications)
+  const [followDrawerOpen, setFollowDrawerOpen] = useState(false);
+  const [newFollowers, setNewFollowers] = useState<{ count?: number; usernames?: string[] }>({});
+  
+  // Listen for open-followers-drawer events from notification items
+  useEffect(() => {
+    const handler = (e: Event) => {
+      setNewFollowers((e as CustomEvent).detail || {});
+      setFollowDrawerOpen(true);
+    };
+    window.addEventListener('open-followers-drawer', handler);
+    return () => window.removeEventListener('open-followers-drawer', handler);
+  }, []);
+  
+  const queryClient = useQueryClient();
+
+  // Notification preference toggles. These were local useState, so the sheet
+  // remembered a choice until you navigated away and then silently forgot it —
+  // nothing was ever persisted. They now read and write the same account-level
+  // preferences as Settings → Notifications.
+  const notifPrefsKey = ['account-notification-preferences', pageWalletAddress?.toLowerCase() ?? null];
+
+  const { data: notificationPrefs } = useQuery({
+    queryKey: notifPrefsKey,
+    queryFn: () => import('@/lib/api/dehub').then(m => m.getAccountNotificationPreferences(pageWalletAddress!)),
+    enabled: isAuthenticated && !!pageWalletAddress,
+    staleTime: 5 * 60_000,
+  });
+
+  const updateNotifPref = useMutation({
+    mutationFn: ({ key, value }: { key: NotificationKey; value: boolean }) =>
+      import('@/lib/api/dehub').then(m => m.updateInAppNotificationPref(key, value)),
+    onMutate: async ({ key, value }) => {
+      await queryClient.cancelQueries({ queryKey: notifPrefsKey });
+      const prev = queryClient.getQueryData(notifPrefsKey);
+      queryClient.setQueryData(notifPrefsKey, (old: any) => ({
+        ...old,
+        inApp: { ...(old?.inApp ?? {}), [key]: value },
+      }));
+      return { prev };
+    },
+    onError: (_err, _vars, context) => {
+      if (context?.prev) queryClient.setQueryData(notifPrefsKey, context.prev);
+      toast.error(_copy("copy.688844358512", { defaultValue: "Failed to update notification settings" }));
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: notifPrefsKey }),
+  });
+
+  const prefToggle = (key: NotificationKey) => ({
+    checked: getInAppPref(notificationPrefs, key),
+    onCheckedChange: (checked: boolean) => updateNotifPref.mutate({ key, value: checked }),
+  });
+
+  // Unfiltered feed. Drives the per-tab unread badges and the browser
+  // notification hand-off, both of which need to see every type. On the All tab
+  // this is the same query key as the list below, so it costs no extra request.
+  const { notifications: unfilteredNotifications, hasNextPage: hasMoreUnfiltered } = useNotifications();
+
+  // The list itself. Ask the API for just this tab's types; the client-side
+  // filter below still runs, because it also covers the Supabase-backed types
+  // and it keeps the list correct against an API that predates `types`.
+  const activeApiTypes = useMemo(() => apiTypesForTab(activeTab), [activeTab]);
+  const isRequestsTab = activeTab === 'features';
+  const { notifications: dehubNotifications, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage, isPlaceholderData } =
+    useNotifications(undefined, activeApiTypes, { enabled: isNotificationListActive && !isRequestsTab, notifyOnNew: false });
+  const { data: unreadCount } = useUnreadNotificationCount();
+  const markAllAsRead = useMarkAllNotificationsAsRead();
+  const markAsRead = useMarkNotificationAsRead();
+  
+  // Fetch custom notifications (feature request likes, etc.)
+  const { customNotifications, isLoading: customLoading } = useCustomNotifications();
+  const requestHistory = useRequestNotificationHistory(isNotificationListActive && isRequestsTab, filterTypeMap.features!);
+  const requestPages = requestHistory.data?.pages;
+  const { data: customUnreadCount } = useCustomUnreadCount();
+  const markCustomAsRead = useMarkCustomNotificationAsRead();
+  const markAllCustomAsRead = useMarkAllCustomNotificationsAsRead();
+  
+  // Keep history cleared on this browser before the server operation existed.
+  const clearedAtTs = useMemo(() => {
+    if (!pageWalletAddress) return 0;
+    try {
+      return Number(localStorage.getItem(`notifications_cleared_at:${pageWalletAddress.toLowerCase()}`)) || 0;
+    } catch {
+      return 0;
+    }
+  }, [pageWalletAddress]);
+
+  const isVisibleNotification = useCallback(
+    (n: DeHubNotification) => {
+      if (clearedAtTs && new Date(n.createdAt).getTime() <= clearedAtTs) return false;
+      if (!pageWalletAddress || !n.actorAddress) return true;
+      return n.actorAddress.toLowerCase() !== pageWalletAddress.toLowerCase();
+    },
+    [clearedAtTs, pageWalletAddress]
+  );
+
+  const byNewestFirst = (a: DeHubNotification, b: DeHubNotification) =>
+    new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+
+  // Merge Riftn + custom notifications, sorted by date (memoized to prevent re-triggering enrichment)
+  const allNotifications = useMemo(() => {
+    const rows = isRequestsTab
+      ? requestPages?.flatMap((page) => page.rows) ?? customNotifications.filter((row) => filterTypeMap.features!.includes(row.type))
+      : [...dehubNotifications, ...customNotifications];
+    return rows.filter(isVisibleNotification).sort(byNewestFirst);
+  }, [isRequestsTab, requestPages, dehubNotifications, customNotifications, isVisibleNotification]);
+  const loadNextPage = isRequestsTab ? requestHistory.fetchNextPage : fetchNextPage;
+  const showLoadMore = isRequestsTab ? requestHistory.hasNextPage : hasNextPage && !isPlaceholderData;
+  const loadingNextPage = isRequestsTab ? requestHistory.isFetching : isFetchingNextPage;
+  const loadingRows = isRequestsTab ? requestHistory.isLoading && !allNotifications.length : isLoading;
+
+  // Same merge over the unfiltered feed, used only for the tab badges so they
+  // keep counting every type while the list itself is narrowed to one tab.
+  const countableNotifications = useMemo(
+    () => [...unfilteredNotifications, ...customNotifications].filter(isVisibleNotification),
+    [unfilteredNotifications, customNotifications, isVisibleNotification]
+  );
+
+  // Rank categories by the unread counts printed on the tabs. Historical read
+  // rows must not outrank a category whose visible badge is larger.
+  const tabUnreadCounts = useMemo(() => {
+    const unreadNotifications = countableNotifications.filter((item) => !item.read);
+    const counts = Object.fromEntries(
+      tabs.map(({ value }) => [value, value === 'all' ? unreadNotifications.length : 0]),
+    ) as Record<NotificationTypeFilter, number>;
+
+    for (const notification of unreadNotifications) {
+      for (const { value } of tabs) {
+        if (value !== 'all' && filterTypeMap[value]?.includes(notification.type)) {
+          counts[value] += 1;
+        }
+      }
+    }
+
+    return counts;
+  }, [countableNotifications]);
+
+  const orderedTabKeys = useMemo(
+    () => orderNotificationTabKeys(tabs.map(({ value }) => value), tabUnreadCounts, 'all'),
+    [tabUnreadCounts],
+  );
+
+  // Each tab's first page, fetched quietly once the page has settled, so
+  // switching tabs shows rows at once rather than waiting on a request.
+  const prefetchClient = useQueryClient();
+  useEffect(() => {
+    if (!isAuthenticated || !isNotificationListActive) return;
+    const id = window.setTimeout(() => {
+      // The leading tabs only: they are the ones with unread rows, and the
+      // ones a thumb reaches first.
+      for (const key of orderedTabKeys.slice(0, 6)) {
+        const types = apiTypesForTab(key);
+        if (types) void prefetchNotificationsList(prefetchClient, types).catch(() => {});
+      }
+    }, 1200);
+    return () => window.clearTimeout(id);
+  }, [isAuthenticated, isNotificationListActive, orderedTabKeys, prefetchClient]);
+  
+  // Batch-avatar enrichment for fresh profile pictures
+  // Module-level caches persist across navigations to prevent avatar flashing
+  const [enrichedAvatars, setEnrichedAvatars] = useState<Map<string, EnrichedAvatar>>(() => moduleAvatarCache);
+  
+
+  // Module-level caches persist across navigations — no clearing on mount
+
+  useEffect(() => {
+    if (!allNotifications.length) return;
+    
+    // Collect actor addresses
+    const newAddresses = allNotifications
+      .map(n => n.actorAddress?.toLowerCase())
+      .filter((addr): addr is string => Boolean(addr) && !moduleEnrichedKeys.has(addr));
+    
+    // Also collect ALL usernames from latestActorNames (for aggregated notification avatars)
+    const aggregatedActorUsernames = allNotifications
+      .filter(n => (n as any).aggregatedCount > 1 && (n as any).latestActorNames?.length > 0)
+      .flatMap(n => ((n as any).latestActorNames as string[]))
+      .map(name => normalizeUsername(name))
+      .filter((name): name is string => Boolean(name))
+      .filter(name => {
+        const cacheKey = toUsernameCacheKey(name);
+        return cacheKey ? !moduleEnrichedKeys.has(cacheKey) : false;
+      });
+    
+    const uniqueNewAddresses = [...new Set(newAddresses)];
+    const uniqueNewUsernames = [...new Set(aggregatedActorUsernames)];
+    
+    if (uniqueNewAddresses.length === 0 && uniqueNewUsernames.length === 0) {
+      return;
+    }
+    
+    // Mark as in-flight immediately to prevent duplicate calls
+    uniqueNewAddresses.forEach(addr => moduleEnrichedKeys.add(addr));
+    uniqueNewUsernames.forEach(name => {
+      const cacheKey = toUsernameCacheKey(name);
+      if (cacheKey) moduleEnrichedKeys.add(cacheKey);
+    });
+    
+    const addressFetches = Array.from(
+      { length: Math.ceil(uniqueNewAddresses.length / 100) },
+      (_, index) => uniqueNewAddresses.slice(index * 100, (index + 1) * 100),
+    ).map(async (addresses) => {
+      try {
+        const { getAccountSummaries } = await import('@/lib/api/dehub');
+        const { extractAvatarPath, buildAvatarUrl } = await import('@/lib/media-url');
+        const users = await getAccountSummaries(addresses);
+        const byAddress = new Map(users.map((user) => [user.address.toLowerCase(), user]));
+        return addresses.map((addr) => {
+          const user = byAddress.get(addr);
+          const rawPath = user ? extractAvatarPath(user) : null;
+          return {
+            resolved: true,
+            key: addr,
+            info: {
+              address: addr,
+              avatarUrl: user ? buildAvatarUrl(addr, rawPath) : null,
+              username: user?.username || null,
+              displayName: user?.displayName || null,
+            } as EnrichedAvatar,
+            extraKeys: [] as string[],
+          };
+        });
+      } catch {
+        return addresses.map((attemptedKey) => ({ resolved: false, attemptedKey }));
+      }
+    });
+    
+    const usernameFetches = uniqueNewUsernames.map(async (username) => {
+      const attemptedKey = toUsernameCacheKey(username);
+
+      try {
+        const { getAccountByUsername } = await import('@/lib/api/dehub');
+        const { extractAvatarPath, buildAvatarUrl } = await import('@/lib/media-url');
+        const user = await getAccountByUsername(username);
+        
+        // Detect empty API result (200 OK but no real user data) and avoid caching pseudo identities
+        if (!user._id && !user.address && !user.username) {
+          return { resolved: false, attemptedKey };
+        }
+
+        const resolvedUsername = normalizeUsername(user.username || username);
+        const inputKey = toUsernameCacheKey(username);
+        const resolvedKey = toUsernameCacheKey(resolvedUsername);
+        const addressKey = user.address?.toLowerCase() || null;
+        const primaryKey = addressKey || inputKey;
+
+        if (!primaryKey) {
+          return { resolved: false, attemptedKey };
+        }
+        
+        const rawPath = extractAvatarPath(user);
+        const avatarUrl = user.address ? buildAvatarUrl(user.address, rawPath) : null;
+        const info: EnrichedAvatar = {
+          address: user.address?.toLowerCase() || null,
+          avatarUrl,
+          username: user.username || resolvedUsername || null,
+          displayName: user.displayName || null,
+        };
+
+        const extraKeys = [inputKey, resolvedKey]
+          .filter((k): k is string => Boolean(k) && k !== primaryKey);
+
+        return {
+          resolved: true,
+          key: primaryKey,
+          info,
+          extraKeys,
+        };
+      } catch {
+        return { resolved: false, attemptedKey };
+      }
+    });
+    
+    // Batched enrichment: the old per-fetch setState re-rendered this
+    // 1700-line page once per resolved actor (~30 renders on first open,
+    // each re-running the O(n²) bundling). Wait for ALL fetches, then apply
+    // ONE state update with the whole batch.
+    // No cancellation on effect re-run: the actor keys were already claimed in
+    // moduleEnrichedKeys above, so discarding an in-flight batch would lose
+    // those avatars for the whole session. Concurrent batches fetch disjoint
+    // keys and merge via the functional setState, so applying all is safe
+    // (this page lives in PersistentPageCache and never unmounts).
+    const allFetches = [...addressFetches, ...usernameFetches];
+    Promise.allSettled(allFetches).then((outcomes) => {
+      const resolvedEntries: Array<{ key: string; info: EnrichedAvatar; extraKeys: string[] }> = [];
+      for (const outcome of outcomes) {
+        if (outcome.status !== 'fulfilled') continue;
+        const values = Array.isArray(outcome.value) ? outcome.value : [outcome.value];
+        for (const value of values) {
+          if (!value?.resolved) {
+            if ('attemptedKey' in value && value.attemptedKey) {
+              moduleEnrichedKeys.delete(value.attemptedKey);
+            }
+            continue;
+          }
+          if (!('key' in value) || !value.key || !value.info) continue;
+          resolvedEntries.push({
+            key: value.key,
+            info: value.info as EnrichedAvatar,
+            extraKeys: ('extraKeys' in value ? value.extraKeys || [] : []).filter(Boolean),
+          });
+        }
+      }
+      if (resolvedEntries.length === 0) return;
+
+      setEnrichedAvatars(prev => {
+        const next = new Map(prev);
+        for (const entry of resolvedEntries) {
+          next.set(entry.key, entry.info);
+          moduleEnrichedKeys.add(entry.key);
+          for (const ek of entry.extraKeys) {
+            next.set(ek, entry.info);
+            moduleEnrichedKeys.add(ek);
+          }
+        }
+        // Cap: this page never unmounts (PersistentPageCache), so one entry
+        // per distinct actor accumulates for the whole session. Evict oldest
+        // (insertion order) past 600 — far above one screenful of actors.
+        while (next.size > 600) {
+          const oldest = next.keys().next().value;
+          if (oldest === undefined) break;
+          next.delete(oldest);
+          moduleEnrichedKeys.delete(oldest);
+        }
+        // Sync to module-level cache
+        moduleAvatarCache = next;
+        return next;
+      });
+    });
+  }, [allNotifications]);
+
+  const [markingNotificationId, setMarkingNotificationId] = useState<string | null>(null);
+
+  // useCallback: passed to every memoized NotificationItem row — a fresh
+  // function per render would defeat the memo. mutate fns are stable.
+  const handleMarkAsRead = useCallback((notificationId: string) => {
+    setMarkingNotificationId(notificationId);
+    if (notificationId.startsWith('custom_')) {
+      markCustomAsRead.mutate(notificationId, {
+        onSettled: () => setMarkingNotificationId(null),
+      });
+    } else {
+      markAsRead.mutate(notificationId, {
+        onSettled: () => setMarkingNotificationId(null),
+      });
+    }
+  }, [markCustomAsRead.mutate, markAsRead.mutate]);
+
+  // Filter notifications by selected tab type
+  const notifications = useMemo(() => {
+    const filtered = activeTab === 'all'
+      ? allNotifications
+      : allNotifications.filter(n => {
+          const allowedTypes = filterTypeMap[activeTab];
+          return allowedTypes ? allowedTypes.includes(n.type) : true;
+        });
+    if (!searchQuery) return filtered;
+    return filtered.filter((n) => notificationMatches(n, searchQuery, enrichedAvatars));
+  }, [activeTab, allNotifications, searchQuery, enrichedAvatars]);
+
+  // Bundling is O(n²) over ~130 rows; memoized so the avatar-enrichment
+  // drip (one state update per resolved actor) doesn't recompute it every
+  // render — it re-runs only when the list or avatar map actually changes.
+  // Whether each bundle was unread when it was first listed. New is one block
+  // at the top (a reaction bundle bumped today sat among older read rows, so
+  // the headings ran New, This week, New), and a bundle you open stays where
+  // it was rather than dropping out from under you.
+  const listedUnreadRef = useRef(new Map<string, boolean>());
+  const listedUnread = useCallback((bundle: BundledNotification) => {
+    const key = String(bundle.primary.id);
+    if (!listedUnreadRef.current.has(key)) listedUnreadRef.current.set(key, !bundle.allNotifications.every((n) => n.read));
+    return listedUnreadRef.current.get(key)!;
+  }, []);
+  const bundledNotifications = useMemo(
+    () => [...bundleNotifications(notifications.filter(n => n && n.id), enrichedAvatars)]
+      .sort((a, b) => Number(listedUnread(b)) - Number(listedUnread(a))),
+    [notifications, enrichedAvatars, listedUnread]
+  );
+
+  const selectableIds = bundledNotifications.flatMap(bundle => bundle.allIds);
+  const selectedIds = selection ? selectableIds.filter(id => selection.has(id)) : [];
+  const selectedCount = selection
+    ? bundledNotifications.filter(bundle => bundle.allIds.some(id => selection.has(id))).length
+    : 0;
+  const allShownSelected = selectableIds.length > 0 && selectedIds.length === selectableIds.length;
+
+  const deleteSelected = async () => {
+    const wallet = pageWalletAddress;
+    if (!wallet || !selectedIds.length || deleting.current) return;
+    deleting.current = true;
+    setIsDeleting(true);
+    try {
+      const deleted = new Set(await deleteNotificationIds(selectedIds, wallet));
+      if (currentWallet.current !== wallet) return;
+      if (deleted.size) {
+        await Promise.all([
+          queryClient.cancelQueries({ queryKey: notificationKeys.all }),
+          queryClient.cancelQueries({ queryKey: customNotificationKeys.all }),
+        ]);
+        if (currentWallet.current !== wallet) return;
+        queryClient.setQueriesData<InfiniteData<{ items: DeHubNotification[] }>>(
+          { queryKey: [...notificationKeys.all, 'list'] },
+          old => old && {
+            ...old,
+            pages: old.pages.map(page => ({ ...page, items: page.items.filter(row => !deleted.has(row.id)) })),
+          },
+        );
+        queryClient.setQueryData<DeHubNotification[]>(customNotificationKeys.list(wallet),
+          old => old?.filter(row => !deleted.has(row.id)));
+      }
+      void queryClient.invalidateQueries({ queryKey: notificationKeys.all });
+      void queryClient.invalidateQueries({ queryKey: customNotificationKeys.all });
+      if (deleted.size === selectedIds.length) {
+        setSelection(null);
+      } else {
+        setSelection(new Set(selectedIds.filter(id => !deleted.has(id))));
+        toast.error(t('notifications.deleteSelectedError', { defaultValue: 'Some notifications could not be deleted. Try again.' }));
+      }
+    } finally {
+      deleting.current = false;
+      setIsDeleting(false);
+    }
+  };
+
+  // Hooks must run unconditionally on every render. This page stays mounted in
+  // the background even while signed out (PersistentPageCache never unmounts
+  // it), so an early return before this point used to skip the two hooks above
+  // whenever `isAuthenticated` flipped mid-session — throwing React's
+  // rendered-fewer/more-hooks invariant (#300/#310) the next time it flipped
+  // back, caught by the page's ErrorBoundary and self-healing on navigation.
+  if (!isAuthenticated) {
+    return (
+      <AuthGate description={t('notifications.loginDescription')} />
+    );
+  }
+
+  const handleMarkAllAsRead = () => {
+    markAllAsRead.mutate(undefined);
+    markAllCustomAsRead.mutate();
+  };
+
+  // Get total unread count (Riftn + custom)
+  const totalUnread = (unreadCount?.total ?? 0) + (customUnreadCount ?? 0);
+  
+  // Get count per tab. Counted over the unfiltered feed so the badges stay
+  // meaningful on every tab, not just the active one. Still bounded by how many
+  // pages have loaded — the API has no per-type unread count — so a tab badge
+  // can undercount where the All badge (a server total) does not.
+  const getTabCount = (tabValue: NotificationTypeFilter): number => {
+    if (tabValue === 'all') return totalUnread;
+    const allowedTypes = filterTypeMap[tabValue];
+    if (!allowedTypes) return 0;
+    return countableNotifications.filter(n => !n.read && allowedTypes.includes(n.type)).length;
+  };
+
+  const translateFilterLabel = (filter: NotificationTypeFilter) => getNotificationFilterLabel(
+    filter,
+    (key, defaultLabel) => t(key, { defaultValue: defaultLabel }),
+  );
+  const activeTabLabel = translateFilterLabel(activeTab);
+  // The header count corresponds to the active tab's name, so it counts the
+  // same thing that name does. Showing the all-tabs total beside "Mentions" read
+  // as "42 mentions" when 42 was every unread notification on the account.
+  const settingsTrigger = (
+    <button
+      type="button"
+      data-kit-square
+      data-notification-settings
+      className="text-white"
+      aria-label={t('notifications.settings')}
+      title={t('notifications.settings')}
+    >
+      <Settings className="size-5 text-white" />
+    </button>
+  );
+  const settingsBody = (
+    <>
+      {/* Actions Section */}
+      <div className="space-y-3 mb-6">
+        <p className="text-xs text-white/50 uppercase tracking-wider font-medium">{t('notifications.actions')}</p>
+        {isAuthenticated && pageWalletAddress && (
+          <button
+            type="button"
+            onClick={() => {
+              setSettingsOpen(false);
+              setCatchUpOpen(true);
+            }}
+            className="w-full flex items-center gap-3 p-4 rounded-xl bg-white/10 hover:bg-white/15 transition-colors"
+          >
+            <span className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center">
+              <Sparkles className="w-5 h-5 text-white" aria-hidden="true" />
+            </span>
+            <span className="text-white font-medium">
+              {t('notifications.catchUp.title', { defaultValue: 'Catch me up' })}
+            </span>
+          </button>
+        )}
+        <button
+          onClick={handleMarkAllAsRead}
+          disabled={markAllAsRead.isPending || totalUnread === 0}
+          className="w-full flex items-center gap-3 p-4 rounded-xl bg-white/10 hover:bg-white/15 transition-colors disabled:opacity-50"
+        >
+          <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center">
+            <Check className="w-5 h-5 text-white" />
+          </div>
+          <div className="flex-1 text-left">
+            <p className="text-white font-medium">{t('notifications.markAllAsRead')}</p>
+            <p className="text-white/50 text-sm">{t('notifications.clearAllIndicators')}</p>
+          </div>
+        </button>
+                
+        {pageWalletAddress && (
+          <ClearNotificationsControl
+            key={pageWalletAddress}
+            wallet={pageWalletAddress}
+            disabled={markAllAsRead.isPending || (!hasMoreUnfiltered && allNotifications.length === 0 && countableNotifications.length === 0 && totalUnread === 0)}
+          />
+        )}
+      </div>
+              
+      {/* This Browser Section */}
+      <div className="space-y-3 mb-6">
+        <p className="text-xs text-white/50 uppercase tracking-wider font-medium">
+          {t('notifications.thisBrowser', 'This browser')}
+        </p>
+        {/*
+          The rows below are account-level and follow you between
+          devices; this one is the browser's own permission, and it
+          is the only way back for anyone who blocked the native
+          prompt by accident or never saw it.
+        */}
+        <BrowserNotificationsSetting variant="card" />
+      </div>
+
+      {/* Account-level, and the only channel that reaches someone
+          who is not in the app at all. */}
+      <div className="space-y-3 mb-6">
+        <p className="text-xs text-white/50 uppercase tracking-wider font-medium">
+          {t('notifications.byEmail', 'By email')}
+        </p>
+        <EmailNotificationsSetting variant="card" />
+      </div>
+
+      {/* The same reach, paid for per message. */}
+      <div className="space-y-3 mb-6">
+        <p className="text-xs text-white/50 uppercase tracking-wider font-medium">
+          {t('notifications.byText', 'By text')}
+        </p>
+        <SmsNotificationsSetting variant="card" />
+      </div>
+
+      {/* Notification Types Section */}
+      <div className="space-y-3">
+        <p className="text-xs text-white/50 uppercase tracking-wider font-medium">{t('notifications.notificationTypes')}</p>
+                
+        <div className="space-y-2">
+          <label className="flex items-center justify-between p-4 rounded-xl bg-white/10 cursor-pointer">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center overflow-visible">
+                <ThemedIcon icon="trophy" alt="" className="w-8 h-8 object-contain" />
+              </div>
+              <div>
+                <p className="text-white font-medium">{t('notifications.likes')}</p>
+                <p className="text-white/50 text-sm">{t('notifications.likesDesc')}</p>
+              </div>
+            </div>
+            <Switch 
+              {...prefToggle('likes')}
+            />
+          </label>
+                  
+          <label className="flex items-center justify-between p-4 rounded-xl bg-white/10 cursor-pointer">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center overflow-visible">
+                <ThemedIcon icon="posts" alt="" className="w-8 h-8 object-contain" />
+              </div>
+              <div>
+                <p className="text-white font-medium">{t('notifications.comments')}</p>
+                <p className="text-white/50 text-sm">{t('notifications.commentsDesc')}</p>
+              </div>
+            </div>
+            <Switch 
+              {...prefToggle('comments')}
+            />
+          </label>
+                  
+          <label className="flex items-center justify-between p-4 rounded-xl bg-white/10 cursor-pointer">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center overflow-visible">
+                <ThemedIcon icon="accounts" alt="" className="w-8 h-8 object-contain" />
+              </div>
+              <div>
+                <p className="text-white font-medium">{t('notifications.follows')}</p>
+                <p className="text-white/50 text-sm">{t('notifications.followsDesc')}</p>
+              </div>
+            </div>
+            <Switch 
+              {...prefToggle('newFollowers')}
+            />
+          </label>
+                  
+          <label className="flex items-center justify-between p-4 rounded-xl bg-white/10 cursor-pointer">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center overflow-visible">
+                <ThemedIcon icon="superpowers" alt="" className="w-8 h-8 object-contain" />
+              </div>
+              <div>
+                <p className="text-white font-medium">{t('notifications.tips')}</p>
+                <p className="text-white/50 text-sm">{t('notifications.tipsDesc')}</p>
+              </div>
+            </div>
+            <Switch 
+              {...prefToggle('tips')}
+            />
+          </label>
+                  
+          <label className="flex items-center justify-between p-4 rounded-xl bg-white/10 cursor-pointer">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center overflow-visible">
+                <ThemedIcon icon="subscriptions" alt="" className="w-8 h-8 object-contain" />
+              </div>
+              <div>
+                <p className="text-white font-medium">{t('notifications.subscriptions')}</p>
+                <p className="text-white/50 text-sm">{t('notifications.subscriptionsDesc')}</p>
+              </div>
+            </div>
+            <Switch 
+              {...prefToggle('subscriptions')}
+            />
+          </label>
+                  
+          <label className="flex items-center justify-between p-4 rounded-xl bg-white/10 cursor-pointer">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center overflow-visible">
+                <ThemedIcon icon="live" alt="" className="w-8 h-8 object-contain" />
+              </div>
+              <div>
+                <p className="text-white font-medium">{t('notifications.livestreams')}</p>
+                <p className="text-white/50 text-sm">{t('notifications.livestreamsDesc')}</p>
+              </div>
+            </div>
+            <Switch 
+              {...prefToggle('livestreamStart')}
+            />
+          </label>
+        </div>
+      </div>
+    </>
+  );
+  // Desktop keeps its side-less bottom Sheet. On a phone it is a glass drawer
+  // like the notifications sheet it opens from: a handle, swipe down to close,
+  // and no close button.
+  const settingsTitle = (
+    <>
+      <Settings className="w-5 h-5 text-white" />
+      {t('notifications.settings')}
+    </>
+  );
+  const settingsControl = isDesktopViewport ? (
+    <Sheet open={settingsOpen} onOpenChange={setSettingsOpen}>
+      <SheetTrigger asChild>
+        {settingsTrigger}
+      </SheetTrigger>
+      <SheetContent
+        side="bottom"
+        data-notifications-page
+        data-notification-surface
+        className="border-t border-white/10 rounded-t-3xl max-h-[85vh] overflow-y-auto"
+      >
+        <SheetHeader className="pb-4">
+          <SheetTitle className="text-white text-lg font-bold flex items-center gap-2">
+            {settingsTitle}
+          </SheetTitle>
+        </SheetHeader>
+        {settingsBody}
+      </SheetContent>
+    </Sheet>
+  ) : (
+    // handleOnly: vaul's own drag lost the finger to the list's native scroll,
+    // so only a tap off closed it. The pull-close gesture drags it instead.
+    <Drawer open={settingsOpen} onOpenChange={setSettingsOpen} handleOnly animatedExit>
+      <DrawerTrigger asChild>
+        {settingsTrigger}
+      </DrawerTrigger>
+      <DrawerContent ref={settingsSheetRef} glass hideHandle={false} scrollable data-notifications-page data-notification-surface className="max-h-[85dvh]" aria-describedby={undefined}>
+        <div className="px-4 pt-1 pb-[calc(1.5rem_+_env(safe-area-inset-bottom,0px))]">
+          <DrawerTitle className="text-white text-lg font-bold flex items-center gap-2 pb-4">
+            {settingsTitle}
+          </DrawerTitle>
+          {settingsBody}
+        </div>
+      </DrawerContent>
+    </Drawer>
+  );
+
+  // Day headings for the feed: everything unread leads with no heading, the rest by
+  // when it happened.
+  const feedGroupOf = (bundle: BundledNotification): 'new' | 'today' | 'week' | 'earlier' => {
+    if (listedUnread(bundle)) return 'new';
+    const at = new Date(bundle.primary.createdAt).getTime();
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
+    if (at >= startOfToday.getTime()) return 'today';
+    if (Date.now() - at < 7 * 86_400_000) return 'week';
+    return 'earlier';
+  };
+  const feedGroupLabel = (group: 'new' | 'today' | 'week' | 'earlier') =>
+    group === 'new' ? t('notifications.groupNew', { defaultValue: 'New' })
+      : group === 'today' ? t('notifications.groupToday', { defaultValue: 'Today' })
+      : group === 'week' ? t('notifications.groupThisWeek', { defaultValue: 'This week' })
+      : t('notifications.groupEarlier', { defaultValue: 'Earlier' });
+
+  return (
+    // data-notifications-page scopes the light-mode remaps in index.css; the
+    // portaled settings sheet / actors drawer carry the same attribute
+    // (portals escape this subtree).
+    <div data-notifications-page className={inDrawer ? "min-h-full" : "min-h-screen"}>
+      {!inDrawer && <SEOHead title={_copy("copy.c598c6a2fa2a", { defaultValue: "Notifications - Stay Updated" })} description={_copy("copy.3ac4d647017f", { defaultValue: "Stay on top of likes, comments, follows, tips, mentions and more on Riftn. Never miss an interaction from your community." })} url="https://riftn.com/app/notifications" />}
+      <h1 className="sr-only">{_copy("copy.231ec14284fc", { defaultValue: "Riftn Notifications - Decentralised Social Media, Censorship Resistant & Freedom of Speech" })}</h1>
+      {/* Header */}
+      <div ref={islandHostRef} className="contents" data-drawer-grab={inDrawer ? '' : undefined}>
+        <PageIsland
+          className={inDrawer ? 'top-0 lg:top-0 pt-2' : undefined}
+          icon="notifications"
+          title={<span aria-live="polite">{activeTabLabel}</span>}
+          pillLine={phonePill && search && !selection ? (
+            <NotificationSearchLine
+              value={search.query}
+              from={search.from}
+              placeholder={t('notifications.searchPlaceholder', { defaultValue: 'Search notifications' })}
+              closeLabel={t('notifications.searchClose', { defaultValue: 'Close search' })}
+              onChange={(query) => setSearch((s) => (s ? { ...s, query } : s))}
+              onClose={() => setSearch(null)}
+            />
+          ) : undefined}
+          tabs={selection ? (
+            <div className="flex flex-wrap items-center justify-end gap-2 px-3 py-2" data-notification-selection-actions>
+              <Button type="button" variant="ghost" ref={cancelSelectionButton} className="min-h-11 px-2" disabled={isDeleting}
+                onClick={() => setSelection(null)}>
+                {t('common.cancel', { defaultValue: 'Cancel' })}
+              </Button>
+              <Button type="button" variant="secondary" className="min-h-11 px-2"
+                disabled={isDeleting || !selectableIds.length}
+                onClick={() => setSelection(new Set(allShownSelected ? [] : selectableIds))}>
+                {allShownSelected
+                  ? t('notifications.deselectAll', { defaultValue: 'Deselect all' })
+                  : t('notifications.selectAllShown', { defaultValue: 'Select all shown' })}
+              </Button>
+              <Button type="button" variant="destructive" className="min-h-11 min-w-[104px] px-2"
+                loading={isDeleting} disabled={!selectedIds.length} onClick={() => void deleteSelected()}>
+                {selectedCount
+                  ? t('notifications.deleteSelection', { selected: formatCount(selectedCount), defaultValue: 'Delete ({{selected}})' })
+                  : t('common.delete', { defaultValue: 'Delete' })}
+              </Button>
+            </div>
+          ) : (
+            <PageTabs
+              beforeTabs={
+                <div className="flex shrink-0 items-center gap-1.5">
+                  {settingsControl}
+                  <Button type="button" variant="ghost" ref={selectButton} className="min-h-11 px-2"
+                    disabled={!selectableIds.length}
+                    onClick={(event) => {
+                      restoreSelectionFocus.current = event.detail === 0;
+                      setSelection(new Set());
+                    }}>
+                    {t('notifications.select', { defaultValue: 'Select' })}
+                  </Button>
+                  {phonePill && (
+                    <IslandAction
+                      label={t('notifications.searchPlaceholder', { defaultValue: 'Search notifications' })}
+                      onClick={() => {
+                        const btn = islandHostRef.current?.querySelector('[data-notif-search-open]')?.closest('button')?.getBoundingClientRect();
+                        setSearch({ query: '', from: btn ? { left: btn.left, right: btn.right } : null });
+                      }}
+                    >
+                      <span data-notif-search-open className="flex"><SearchIcon className="size-5 text-white" /></span>
+                    </IslandAction>
+                  )}
+                  <IslandAction
+                    label={t('notifications.markAllRead')}
+                    onClick={handleMarkAllAsRead}
+                    disabled={totalUnread === 0 || markAllAsRead.isPending}
+                  >
+                    {markAllAsRead.isPending ? (
+                      <Loader2 className="size-5 animate-spin text-white" />
+                    ) : (
+                      <Check className="size-5 text-white" />
+                    )}
+                  </IslandAction>
+                </div>
+              }
+              value={activeTab}
+              onChange={handleTabClick}
+              tabs={orderedTabKeys.map((tabKey) => {
+                const tab = tabs.find(({ value }) => value === tabKey)!;
+                const count = getTabCount(tab.value);
+                return {
+                  id: tab.value,
+                  label: <span className="sr-only">{translateFilterLabel(tab.value)}</span>,
+                  icon: <tab.icon className={tab.value === 'reposts' ? 'size-[22px]' : 'size-5'} aria-hidden="true" />,
+                  pillIconSize: tab.value === 'reposts' ? 22 : 20,
+                  count: count > 0 ? count : undefined,
+                  hint: String(translateFilterLabel(tab.value)),
+                };
+              })}
+            />
+          )}
+        />
+      </div>
+
+      {/* Notifications List */}
+      <PageBody frameClip={inDrawer} className={inDrawer ? 'pt-0' : undefined}>
+        {!selection && isAuthenticated && pageWalletAddress && (
+          <NotificationCatchUp key={pageWalletAddress} wallet={pageWalletAddress} open={catchUpOpen} onOpenChange={setCatchUpOpen} isVisible={isVisibleNotification}
+            onOpenNotification={notification => {
+              const announcement = announcementTarget(notification);
+              if (announcement?.kind === 'external') {
+                window.open(announcement.url, '_blank', 'noopener,noreferrer');
+                return;
+              }
+              const path = announcement?.path ?? getNavigationLink(notification);
+              if (announcement?.path === '/app/wallet') {
+                void queryClient.invalidateQueries({ queryKey: [APP_TOKENS_QUERY_KEY] });
+              }
+              if (path) navigate(path);
+            }} />
+        )}
+        <div data-page-bento data-kit-section data-notification-list className="overflow-hidden">
+          {loadingRows || (notifications.length === 0 && !isRequestsTab && (customLoading || isPlaceholderData)) ? (
+            // Row skeletons that mirror the real list layout — a lone spinner
+            // reads as "empty page" instead of "content on the way".
+            <div className="pt-3">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="flex items-center gap-3 py-3 pl-[18px] pr-4 animate-pulse">
+                  <div className="w-[46px] h-[46px] rounded-full bg-zinc-800 flex-shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <div className="h-3.5 w-2/3 bg-zinc-800 rounded mb-2" />
+                    <div className="h-3 w-1/3 bg-zinc-800 rounded" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : notifications.length === 0 && searchQuery ? (
+            <p data-notification-search-empty className="p-8 text-center text-sm text-zinc-500">
+              {t('notifications.searchEmpty', { defaultValue: 'No notifications match' })}
+            </p>
+          ) : notifications.length === 0 ? (
+            <div className="p-8 flex flex-col items-center justify-center text-center">
+              <ThemedIcon icon="notifications" alt="" className="w-14 h-14 object-contain mb-4 opacity-70" />
+              <h3 className="text-white font-semibold text-lg mb-2">{t('notifications.noNotificationsYet')}</h3>
+            </div>
+          ) : (
+            // Keyed by tab: switching tabs swaps the list at once, instead of
+            // every row springing from its old place to its new one.
+            <div key={activeTab} data-notification-feed className="pb-2">
+              {/* Keep rows in normal flow so scroll anchoring can follow the
+                  visible row when a refresh inserts or reorders notifications. */}
+              {bundledNotifications.map((bundle, index) => {
+                const group = feedGroupOf(bundle);
+                // Unread rows lead with no heading: anything at the top is new.
+                const showLabel = group !== 'new' && (index === 0 || feedGroupOf(bundledNotifications[index - 1]) !== group);
+                return (
+                  <div key={bundle.primary.id}>
+                    {showLabel && (
+                      <div data-feed-group-label className={`px-[18px] pb-1 ${index === 0 ? 'pt-1.5' : 'pt-4'} text-xs font-semibold uppercase tracking-[0.06em] text-zinc-500`}>
+                        {feedGroupLabel(group)}
+                      </div>
+                    )}
+                    <NotificationItem
+                      notification={bundle.primary}
+                      bundle={bundle}
+                      onMarkAsRead={handleMarkAsRead}
+                      isMarkingAsRead={bundle.allIds.includes(markingNotificationId || '')}
+                      enrichedAvatars={enrichedAvatars}
+                      onSelect={toggleSelection}
+                      selecting={selecting}
+                      selected={bundle.allIds.some(id => selection?.has(id))}
+                      selectionDisabled={isDeleting}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+          )}
+          {showLoadMore && (notifications.length > 0 || isRequestsTab) && (
+            <LoadMoreSentinel
+              onReach={() => loadNextPage()}
+              busy={loadingNextPage || (isRequestsTab && (requestHistory.isFetchNextPageError || !!searchQuery))}
+            >
+              <Button
+                variant="ghost"
+                onClick={() => loadNextPage()}
+                disabled={loadingNextPage}
+                className="text-zinc-400 hover:text-white"
+              >
+                {loadingNextPage && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
+                {t('notifications.loadMore')}
+              </Button>
+            </LoadMoreSentinel>
+          )}
+        </div>
+      </PageBody>
+      {/* Followers drawer - opened inline from aggregated follow notifications */}
+      {pageWalletAddress && (
+        <FollowersListDrawer
+          open={followDrawerOpen}
+          onOpenChange={setFollowDrawerOpen}
+          profileAddress={pageWalletAddress}
+          listType="followers"
+          newCount={newFollowers.count}
+          newUsernames={newFollowers.usernames}
+        />
+      )}
+    </div>
+  );
+}

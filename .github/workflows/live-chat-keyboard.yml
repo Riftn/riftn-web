@@ -1,0 +1,54 @@
+name: Live chat box above the keyboard
+on:
+  pull_request:
+    paths:
+      - 'src/components/app/cards/LivePostChat.tsx'
+      - 'src/components/app/cards/LiveStreamCard.tsx'
+      - 'src/hooks/use-keyboard-open.ts'
+      - 'src/components/ui/textarea.tsx'
+      - 'index.html'
+      - 'tests/live-chat-keyboard-browser.mjs'
+      - '.github/workflows/live-chat-keyboard.yml'
+  schedule:
+    - cron: '17 6 * * *'
+  workflow_dispatch:
+    inputs:
+      production:
+        description: Check riftn.com instead of this branch
+        type: boolean
+        default: false
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        if: github.event_name == 'pull_request' || inputs.production != true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install the app
+        if: github.event_name == 'pull_request' || inputs.production != true
+        run: pnpm install --frozen-lockfile --ignore-scripts
+      - name: Prepare isolated browser dependencies
+        run: |
+          npm install --prefix "$RUNNER_TEMP/live-kb" --no-save --no-package-lock --ignore-scripts playwright@1.64.0
+          "$RUNNER_TEMP/live-kb/node_modules/.bin/playwright" install --with-deps chromium
+      - name: Start this branch
+        if: github.event_name == 'pull_request' || inputs.production != true
+        run: |
+          pnpm exec vite --port 5179 --host 127.0.0.1 > vite.log 2>&1 &
+          for i in $(seq 1 90); do curl -sf http://127.0.0.1:5179/ >/dev/null && exit 0; sleep 2; done
+          cat vite.log; exit 1
+      - name: Keyboard up on a live, then a long message
+        run: node tests/live-chat-keyboard-browser.mjs
+        env:
+          BROWSER_DEPS: ${{ runner.temp }}/live-kb
+          BASE_URL: ${{ (github.event_name != 'pull_request' && inputs.production == true) && 'https://riftn.com' || 'http://127.0.0.1:5179' }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: live-chat-keyboard-evidence
+          path: live-chat-keyboard-evidence/
+          retention-days: 14

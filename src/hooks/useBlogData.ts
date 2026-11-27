@@ -1,0 +1,141 @@
+import { useLocalizedBlogMetadata } from '@/hooks/useLocalizedBlogMetadata';
+import { useTranslation as _useCopy } from 'react-i18next';
+
+import { useState, useMemo, useCallback } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { getFeaturedPosts, getAllBlogListPosts } from '@/utils/blogUtils';
+import { BlogPost, BlogTag } from '@/types/blog';
+// Content-free metadata (bodies are fetched on demand by BlogPost.tsx) — the
+// full-content modules in src/data are generator-only inputs now.
+import { newPostsMetadata as newPosts, excludedTitles } from '@/data/blog-metadata.generated';
+
+// Posts pinned to the top of the Featured row, in this order. Everything else
+// that is featured follows, newest first.
+const PINNED_FEATURED_SLUGS = [
+  'open-appeal-binance-recover-876-bnb-pioneer-burn',
+  'dehub-next-chapter-riftn-bnb-recovery-relaunch',
+  'q4-development-overview',
+];
+const pinRank = (slug: string) => {
+  const rank = PINNED_FEATURED_SLUGS.indexOf(slug);
+  return rank === -1 ? PINNED_FEATURED_SLUGS.length : rank;
+};
+
+export const useBlogData = () => {
+  const { t: _copy } = _useCopy();
+  const [searchQuery, setSearchQuery] = useState('');
+  const translated = useLocalizedBlogMetadata();
+
+  // The active tag filter lives in the URL (?tag=…) so it is shareable,
+  // survives a refresh, and can be opened from a tag pill on any blog post.
+  // Scroll restoration for the list is handled by the Blog page itself
+  // (NOT here) — this hook is shared with the single-post page, which must
+  // always open at the top.
+  const [searchParams, setSearchParams] = useSearchParams();
+  // Blog tags renamed with the brand: an old ?tag=dehub link opens riftn.
+  const rawTag = searchParams.get('tag') || '';
+  const selectedTag = rawTag.toLowerCase() === 'dehub' ? 'riftn' : rawTag;
+  const setSelectedTag = useCallback((tag: string) => {
+    setSearchParams(
+      prev => {
+        const next = new URLSearchParams(prev);
+        if (tag) next.set('tag', tag);
+        else next.delete('tag');
+        return next;
+      },
+      { replace: false }
+    );
+  }, [setSearchParams]);
+
+  // Full list corpus (published + newPosts, deduped, display fix-ups applied)
+  // — extracted to blogUtils so the docs search index shares it exactly.
+  const allPosts = useMemo(() => getAllBlogListPosts().map(post => ({ ...post, ...translated?.[post.slug] })), [translated]);
+
+  const featuredPosts = useMemo(() => {
+    const oldFeatured = getFeaturedPosts().filter(p => !excludedTitles.includes(p.title));
+    const newFeatured = newPosts.filter(p => p.featured);
+    const combined = [...newFeatured, ...oldFeatured];
+    // Deduplicate by title to remove the duplicate post
+    const uniquePosts = Array.from(new Map(combined.map(post => [post.title, post])).values());
+    
+    const updatedPosts = uniquePosts.map(post => {
+      if (post.title === 'Faster and Sleeker: UI Overhaul and 200% Backend Speed Boost') {
+        return {
+          ...post,
+          title: _copy("copy.83473b97a77f", { defaultValue: "Faster and Sleeker: major app upgrade reveals UI Overhaul and 200% Backend Speed Boost" }),
+          publishedAt: '2024-10-28T12:00:00.000Z',
+          bannerImage: '/media/e9632af0-07c2-4ca8-9b82-fc255191358b.png',
+          bannerImageAlt: _copy("copy.3e108951b99b", { defaultValue: "Screenshot of the new Riftn application UI" })
+        };
+      }
+      if (post.title === 'Revolutionizing Access: On-Chain Tradable Subscriptions Launch') {
+        return {
+          ...post,
+          publishedAt: '2024-10-30T12:00:00.000Z'
+        };
+      }
+      if (post.slug === 'scaling-new-heights-livepeer-integration-for-50k-concurrent-viewers') {
+        return {
+          ...post,
+          title: _copy("copy.908faafd71bb", { defaultValue: "Scaling New Heights: Livepeer Integration for initially 50k+ Concurrent Viewers With Unlimited Viewer abilities as we scale up." })
+        };
+      }
+      if (post.slug === 'dhb-tradable-on-coinbase-soon') {
+        return {
+          ...post,
+          title: _copy("copy.82c85a8e86c6", { defaultValue: "Confirmed! $DHB To Be Available Directly On Coinbase CEX" })
+        };
+      }
+      return post;
+    });
+    
+    return updatedPosts
+      .filter(post => 
+        post.title !== 'Feature Spotlight: Ad Tech' && 
+        !(post.title.includes('Q1') && post.title.includes('Overview')) && 
+        post.title !== 'MVP App Released & Listed on Google Play Store'
+      )
+      .sort((a, b) => pinRank(a.slug) - pinRank(b.slug) || new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
+      .map(post => ({ ...post, ...translated?.[post.slug] }));
+  }, [_copy, translated]);
+
+  const allTags = useMemo((): BlogTag[] => {
+    const tagCounts: { [key: string]: number } = {};
+    allPosts.forEach(post => {
+      post.tags.forEach(tag => {
+        tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+      });
+    });
+    return Object.entries(tagCounts)
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count);
+  }, [allPosts]);
+
+  const filteredPosts = useMemo(() => {
+    let posts = allPosts;
+    if (searchQuery) {
+      const lowercasedQuery = searchQuery.toLowerCase();
+      posts = posts.filter(post => 
+        post.title.toLowerCase().includes(lowercasedQuery) || 
+        post.excerpt.toLowerCase().includes(lowercasedQuery)
+      );
+    }
+    if (selectedTag) {
+      posts = posts.filter(post => 
+        post.tags.some(tag => tag.toLowerCase() === selectedTag.toLowerCase())
+      );
+    }
+    return posts;
+  }, [searchQuery, selectedTag, allPosts]);
+
+  return {
+    searchQuery,
+    setSearchQuery,
+    selectedTag,
+    setSelectedTag,
+    allPosts,
+    featuredPosts,
+    allTags,
+    filteredPosts
+  };
+};

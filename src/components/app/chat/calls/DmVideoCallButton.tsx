@@ -1,0 +1,44 @@
+import { useTranslation as _useCopy } from 'react-i18next';
+import React from 'react';
+import Video from "@/components/ui/cut-icons/video";
+
+import { Button } from '@/components/ui/button';
+import { useCall } from '@/contexts/CallContext';
+import { useAuth } from '@/contexts/AuthContext';
+
+interface DmVideoCallButtonProps {
+  recipientAddress: string;
+  className?: string;
+}
+
+export const DmVideoCallButton: React.FC<DmVideoCallButtonProps> = ({ recipientAddress, className }) => {
+  const { t: _copy } = _useCopy();
+  const { startCall, currentCall } = useCall();
+  const { walletAddress } = useAuth();
+  const label = _copy("copy.7b79b4f67293", { defaultValue: "Video call" });
+
+  const handleStartCall = () => {
+    if (walletAddress && recipientAddress && walletAddress !== recipientAddress) {
+      startCall(recipientAddress, 'video');
+    }
+  };
+
+  if (!walletAddress || walletAddress === recipientAddress) {
+    return null;
+  }
+
+  return (
+    <Button
+      type="button"
+      onClick={handleStartCall}
+      disabled={!!currentCall}
+      variant="ghost"
+      size="icon"
+      className={className}
+      aria-label={label}
+      title={label}
+    >
+      <Video className="h-5 w-5" />
+    </Button>
+  );
+};

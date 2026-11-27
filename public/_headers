@@ -1,0 +1,347 @@
+# Remember HTTPS on return visits to the public site, including plain HTTP links.
+https://riftn.com/*
+  Strict-Transport-Security: max-age=31536000
+
+# connect-src must list https://live.dehub.io: the stream ingest is
+# deliberately grey-cloud (WebRTC cannot ride Cloudflare's proxy), so WHIP/WHEP
+# signaling, the go-live reachability probe and HLS playback all fetch it
+# directly — it is neither 'self' nor api.dehub.io. The policy is report-only
+# today, but an enforcing flip without this entry kills every one of those
+# fetches. TURN (turns:/turn.dehub.io) needs no entry: connect-src governs
+# fetches, not WebRTC/ICE transport.
+#
+# frame-src allows any https: origin because mini apps (/apps/:slug) are
+# third-party sites on their own domains, framed by design. What an app may do
+# is gated by the iframe sandbox and the SDK bridge, not by this list.
+/*
+  Cross-Origin-Opener-Policy: unsafe-none
+  Cross-Origin-Embedder-Policy: unsafe-none
+  Cross-Origin-Resource-Policy: cross-origin
+  X-Frame-Options: SAMEORIGIN
+  Content-Security-Policy-Report-Only: default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://open.spotify.com https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' https: blob: data:; worker-src 'self' blob: data:; frame-src 'self' https:; base-uri 'self'; form-action 'self'; object-src 'none'; connect-src 'self' https://open.spotify.com https://www.youtube.com https://hub.snapshot.org https://api.github.com https://api.llama.fi https://api.audius.co https://ipfs.filebase.io https://gamma-api.polymarket.com https://api.manifold.markets https://r2-pub.rork.com https://aigxuutjaqsywioxjefr.supabase.co wss://aigxuutjaqsywioxjefr.supabase.co https://api.dehub.io wss://api.dehub.io https://live.dehub.io https://*.publicnode.com https://bsc-dataseed.binance.org https://bsc-dataseed1.binance.org https://data-seed-prebsc-1-s2.binance.org https://api.pimlico.io https://api.bscscan.com https://testnet.bscscan.com https://s2.coinmarketcap.com https://dehubcdn.ams3.cdn.digitaloceanspaces.com https://cdn.dehub.io https://*.walletconnect.com https://*.walletconnect.org
+
+# The service worker must never be long-cached, or clients get stuck on an old
+# SW that can't pick up new caching logic. Always revalidate. Scope stays root.
+/sw.js
+  Cache-Control: public, max-age=0, must-revalidate
+  Service-Worker-Allowed: /
+
+# Deploy manifest behind the "new version available" toast. Must never be
+# cached: a cached copy is indistinguishable from "you are already up to date",
+# which is the one answer this file exists to disprove. ~150 bytes, and an open
+# tab asks for it at most once a minute.
+/version.json
+  Cache-Control: no-store
+
+# Which code files each deploy carries over from earlier deploys (see
+# scripts/carry-retired-assets.mjs). Read by the next deploy, never cached.
+/deploy-assets.json
+  Cache-Control: no-store
+
+# Hashed build chunks are content-addressed — cache for a year. Without this
+# every repeat visit revalidates each chunk (this was lost in the Cloudflare
+# migration and live assets served max-age=0).
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# LCP logo lives at site root (not hashed) — long cache; change filename when
+# the asset changes.
+/dehub-header-logo.png
+  Cache-Control: public, max-age=31536000, immutable
+
+# Same deal for the rest of the unhashed static art. Only /assets/* and the
+# header logo had a rule, so everything else in /public was served
+# `max-age=0, must-revalidate` and paid a revalidation round-trip on every
+# visit — measured live against dehub.io in Aug 2026 on /radio/*, /brand/*,
+# the icons and the loader GIF. None of these are content-hashed, so the
+# convention above applies: CHANGE THE FILENAME when the asset changes.
+/radio/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/brand/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# The welcome panel's art (bg-16.jpg, the globe, the wordmark) — on the LCP
+# path of every signed-out visit and revalidated every time until now.
+/brand-kit/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/osaka/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/media/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Icons + install art. manifest.json deliberately stays short-lived: it is the
+# one file a PWA re-reads to notice icon/name changes.
+/favicon.ico
+  Cache-Control: public, max-age=604800
+
+/favicon.svg
+  Cache-Control: public, max-age=604800
+
+/favicon-48.png
+  Cache-Control: public, max-age=604800
+
+/favicon-96.png
+  Cache-Control: public, max-age=604800
+
+/apple-touch-icon.png
+  Cache-Control: public, max-age=604800
+
+/dehub-icon.png
+  Cache-Control: public, max-age=604800
+
+/default-icon.png
+  Cache-Control: public, max-age=604800
+
+/default-icon-dark.png
+  Cache-Control: public, max-age=604800
+
+/og-image.png
+  Cache-Control: public, max-age=604800
+
+/dehub-loader.gif
+  Cache-Control: public, max-age=31536000, immutable
+
+/dehub-loader.webp
+  Cache-Control: public, max-age=31536000, immutable
+
+# The mark, re-cut at its native 240px and lossless (see DeHubLoader.tsx). The
+# old path above is served `immutable` for a year, so replacing its bytes would
+# never reach anyone who had already loaded the blurry one — hence a new name,
+# per the CHANGE THE FILENAME rule above. Both paths now hold the same art so a
+# JS chunk cached from before this deploy still gets the fixed mark.
+/dehub-loader-240.webp
+  Cache-Control: public, max-age=31536000, immutable
+
+/placeholder.svg
+  Cache-Control: public, max-age=31536000, immutable
+
+# The War theme's game runs in a sandboxed iframe WITHOUT allow-same-origin, so
+# the frame has an opaque origin. Its entry is a `<script type="module">`, and
+# module scripts are always fetched in CORS mode, so the request goes out with
+# `Origin: null`. Without a matching Access-Control-Allow-Origin the browser
+# drops the script silently: no error, no console output, just a black canvas.
+# That is exactly how this failed in testing, twice.
+#
+# Granting the frame allow-same-origin would also fix it, but the game is served
+# from this origin, so that would hand third party code real access to app
+# storage, cookies and the parent DOM. This header keeps the sandbox strict
+# instead. It is safe here because these are public static game assets with no
+# credentials and nothing user specific.
+# The rules are split at assets/ rather than written as one `/war-game/*`,
+# which is what this was. Everything under assets/ is content-hashed by Vite,
+# so a year of `immutable` is right for those — but index.html is NOT hashed
+# and is the exact file the iframe asks for by name, so the blanket rule pinned
+# it too and a re-vendored game would not have reached an existing visitor
+# until 2027. Splitting the paths (rather than adding a narrower override) is
+# deliberate: overlapping `_headers` rules combine, and two Cache-Control lines
+# for one file is not a state worth reasoning about.
+/war-game/assets/*
+  Access-Control-Allow-Origin: *
+  Cache-Control: public, max-age=31536000, immutable
+
+/war-game/index.html
+  Access-Control-Allow-Origin: *
+  Cache-Control: public, max-age=0, must-revalidate
+
+# The chess game is framed the same way, so it needs the same header for the
+# same reason — its entry is a module script and an opaque-origin frame fetches
+# those in CORS mode with `Origin: null`.
+#
+# It also fetches its armies (~44 MB of glTF and audio) from r2-pub.rork.com at
+# runtime, which is why `connect-src` above lists that host. None of that is
+# served from here; see public/chess-game/README.md.
+/chess-game/assets/*
+  Access-Control-Allow-Origin: *
+  Cache-Control: public, max-age=31536000, immutable
+
+/chess-game/index.html
+  Access-Control-Allow-Origin: *
+  Cache-Control: public, max-age=0, must-revalidate
+
+/chess-game/favicon.png
+  Access-Control-Allow-Origin: *
+  Cache-Control: public, max-age=604800
+
+# Street Slayer needs the same header for the same reason, but NOT the same
+# shape of rule, and the difference is the whole point of this block. The two
+# above are Vite builds, where only the module entry goes out in CORS mode, so
+# an `assets/*` rule covers it. Street Slayer is a Construct 2 export, and that
+# engine fetches EVERY one of its own files that way from an opaque origin:
+# data.js over XHR, every spritesheet with `crossOrigin = "anonymous"` (which
+# upstream's own comment marks "required for Arcade sandbox compatibility"),
+# and every .ogg over XHR on the way to decodeAudioData. Measured against this
+# build in a sandboxed frame: 122 of its 127 requests went out with
+# `Origin: null` and `Sec-Fetch-Mode: cors`. So the header belongs on the whole
+# directory. Narrowing this to a subtree does not half-break the game, it
+# black-frames it.
+#
+# One rule and not two, unlike the games above, because nothing here is
+# content-hashed — the filenames come straight out of the Construct 2 exporter
+# and a re-export reuses every one of them, index.html included. A day is the
+# compromise: repeat plays cost nothing, a re-delivered build reaches everyone
+# inside 24 hours, and no file can end up a year stale against a data.js that
+# has moved on. Do not split this into an `immutable` half; the asset names
+# would not change to go with it.
+/street-slayer-game/*
+  Access-Control-Allow-Origin: *
+  Cache-Control: public, max-age=86400
+
+# Jungle Trail is framed exactly like the games above — sandboxed WITHOUT
+# allow-same-origin, so the frame has an opaque origin and its module entry is
+# fetched in CORS mode with `Origin: null`. Without a matching
+# Access-Control-Allow-Origin the browser drops the script silently: no error,
+# no console output. The host's boot readout then sits at 99% forever, because
+# the percentage is modelled on a clock and only the engine's own `ready`
+# message takes it to 100 — and that message is sent by code that never ran.
+# What stays on screen underneath is the game's own `<div id="boot">jungle
+# trail</div>`, which is the "page that just says Jungle Trail" this was
+# reported as.
+#
+# The whole directory, like Street Slayer and unlike the two Vite builds: this
+# is not a bundle. main.js is raw ES modules importing 14 more out of src/, and
+# every one of those imports is its own CORS fetch from the opaque origin. An
+# entry-only rule would load main.js and then drop everything it imports.
+#
+# Revalidating rather than immutable, and one rule rather than two, because
+# nothing here is content-hashed — re-vendoring the game is a straight copy
+# over the top that reuses every filename, index.html included. A year of
+# immutable would mean a re-vendored game never reaching anyone who has
+# already played once.
+/jungle-game/*
+  Access-Control-Allow-Origin: *
+  Cache-Control: public, max-age=0, must-revalidate
+
+
+# LOVE LOCK BRIDGE. One self-contained document (textures embedded, engine
+# from a CDN), so no CORS block is needed. Unlisted while it is tested: the
+# file itself stays out of search as well as the player route.
+/love-lock-bridge-game/*
+  Cache-Control: public, max-age=0, must-revalidate
+  X-Robots-Tag: noindex
+
+# TRENCHSTAR. Same reasoning as jungle above, and for the same reason it needs
+# the whole directory rather than the entry: the page is an importmap over a
+# vendored three.js, so `vendor/three/build/three.module.js` and every addon it
+# pulls are each their own CORS fetch from the opaque origin. The .glb and .fbx
+# characters go out the same way — three's loaders fetch them with XHR, which
+# from a null origin is also CORS — so scoping this to the scripts would leave
+# a room with nobody in it.
+#
+# Revalidating, not immutable: nothing here is content-hashed, so re-vendoring
+# reuses every filename including index.html.
+/trenchstar-game/*
+  Access-Control-Allow-Origin: *
+  Cache-Control: public, max-age=0, must-revalidate
+
+# GOD'S EYE VIEW. The launch URL carries the current bundle fingerprint to
+# bypass immutable responses already stored by browsers from older deploys.
+/gods-eye-game/index.html
+  Access-Control-Allow-Origin: *
+  Cache-Control: public, max-age=0, must-revalidate
+
+/gods-eye-game/
+  Access-Control-Allow-Origin: *
+  Cache-Control: public, max-age=0, must-revalidate
+
+# The Vite assets are content-addressed and safe to keep immutable.
+/gods-eye-game/assets/*
+  Access-Control-Allow-Origin: *
+  Cache-Control: public, max-age=31536000, immutable
+
+# Cesium, models and root UI icons are fetched from the opaque sandbox origin,
+# so each subtree needs CORS. Their filenames are not content-addressed; keep
+# them revalidating so a re-vendored build cannot mix old runtime files with a
+# new entry module. These deliberately do not overlap index.html.
+/gods-eye-game/cesium/*
+  Access-Control-Allow-Origin: *
+  Cache-Control: public, max-age=0, must-revalidate
+
+/gods-eye-game/models/*
+  Access-Control-Allow-Origin: *
+  Cache-Control: public, max-age=0, must-revalidate
+
+/gods-eye-game/*.svg
+  Access-Control-Allow-Origin: *
+  Cache-Control: public, max-age=0, must-revalidate
+
+# On-device ML models (the camera background's person segmenter, see
+# src/lib/studio/segmenter.ts). Unhashed, so the same rule: CHANGE THE FILENAME
+# when the weights change — the current one carries a version for exactly that.
+# The WASM runtime that runs them is not here; it is a hashed /assets/ file.
+/models/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Arcade card art. Unhashed, so the convention for everything else in /public
+# applies: CHANGE THE FILENAME when the capture changes.
+/arcade/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# The shared touch controls, loaded by the war and jungle entry documents. They
+# sit outside both vendored directories so that re-vendoring a game — which for
+# jungle is a straight copy over the top — cannot delete them.
+#
+# Revalidating and NOT immutable, for the same reason index.html is: the
+# filename is not content-hashed, so a year of `immutable` would mean a fix to
+# the feel of the stick never reaching anyone who has already played once.
+#
+# Access-Control-Allow-Origin is not strictly required today — this is a
+# CLASSIC script, and those are fetched in no-cors mode, unlike the module
+# entries above that this repo has twice been caught out by. It is here so that
+# turning it into a module later cannot quietly resurrect that bug.
+# Android App Links and Apple Universal Links association files. Both must be
+# served as application/json or the verifier rejects them silently: Google's
+# Digital Asset Links checker requires application/json and refuses redirects,
+# and Apple's swcd requires it too. A rejected file is indistinguishable from
+# no file at all — no error, no status, the deep link just opens the browser.
+#
+# assetlinks.json would get application/json from its extension anyway; it is
+# written out regardless so the pair reads as one block.
+#
+# apple-app-site-association has NO extension, and must not have one — iOS asks
+# for exactly that path. Wrangler's MIME lookup therefore returns null and the
+# file is uploaded as "application/null", which is wrangler's signal to serve it
+# with no Content-Type header at all. This rule supplies one.
+#
+# Belt and braces: CLOUDFLARE_WORKER_SEO.js pins the same Content-Type in code,
+# because Cloudflare documents _headers as NOT applying when
+# assets.run_worker_first is set — which wrangler.jsonc does set.
+#
+# Short cache, unlike everything above: a fingerprint or Team ID change has to
+# reach Google's and Apple's fetchers quickly.
+/.well-known/assetlinks.json
+  Content-Type: application/json
+  Cache-Control: public, max-age=300
+
+/.well-known/apple-app-site-association
+  Content-Type: application/json
+  Cache-Control: public, max-age=300
+
+/.well-known/webauthn
+  Content-Type: application/json
+  Cache-Control: public, max-age=300
+
+/arcade-touch/*
+  Access-Control-Allow-Origin: *
+  Cache-Control: public, max-age=0, must-revalidate
+
+# Emoji picker keyword files. The path carries the Emojibase version
+# (scripts/build-emoji-data.mjs), so a rebuild lands at a new URL — safe to
+# cache for a year. The mobile app fetches these too.
+/emoji-data/*
+  Cache-Control: public, max-age=31536000, immutable
+  Access-Control-Allow-Origin: *
+
+# The mini app SDK is loaded by third-party pages on their own domains, as a
+# classic script or an ES module import. A module import is a CORS fetch, so it
+# needs the allow-origin; the short cache keeps a fix reaching every app fast.
+/sdk/*
+  Access-Control-Allow-Origin: *
+  Cache-Control: public, max-age=300
+
+# Self-hosted Manrope (index.html). File names carry the font version, so a
+# new version ships under a new name.
+/fonts/manrope/*
+  Cache-Control: public, max-age=31536000, immutable

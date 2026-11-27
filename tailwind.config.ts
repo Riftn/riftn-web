@@ -1,0 +1,231 @@
+import type { Config } from "tailwindcss";
+
+const EMOJI_FONTS = ['"DeHub Pistol"', '"Apple Color Emoji"', '"Noto Color Emoji"', '"Segoe UI Emoji"'];
+
+export default {
+  // A tap on a phone leaves `:hover` on whatever the finger touched until the
+  // next tap elsewhere, so drawer rows kept their hover fill after a scroll.
+  // Hover styles only apply where a real pointer can hover.
+  future: { hoverOnlyWhenSupported: true },
+  darkMode: ["class"],
+  content: ["./pages/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}", "./app/**/*.{ts,tsx}", "./src/**/*.{ts,tsx}"],
+  prefix: "",
+  theme: {
+    container: {
+      center: true,
+      padding: "2rem",
+      screens: {
+        "2xl": "1400px",
+      },
+    },
+    extend: {
+      // Every family ends in the same emoji stack as `* { font-family }` in
+      // index.css. A utility class replaces that rule on its element, so
+      // without it, text directly inside a `font-exo` or `font-mono` node
+      // skips the one-glyph pistol font (🔫 draws as the platform water gun)
+      // and, on Windows, the Noto webfont (flags draw as letter pairs).
+      fontFamily: {
+        // `font-exo` is kept as the class name (600+ uses) but now sets Manrope.
+        exo: ['Manrope', '"Manrope Fallback"', ...EMOJI_FONTS, 'sans-serif'],
+        manrope: ['Manrope', '"Manrope Fallback"', ...EMOJI_FONTS, 'sans-serif'],
+        mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', '"Liberation Mono"', '"Courier New"', ...EMOJI_FONTS, 'monospace'],
+      },
+      colors: {
+        border: "hsl(var(--border))",
+        input: "hsl(var(--input))",
+        ring: "hsl(var(--ring))",
+        background: "hsl(var(--background))",
+        foreground: "hsl(var(--foreground))",
+        // Muted grey. Stock zinc-500 (#71717a) measures 4.15:1 on the near-black
+        // cards, under the 4.5:1 WCAG AA floor, and it is the colour of every
+        // timestamp, handle and count in the feed. Backed by a CSS var so the
+        // light canvas theme and the docs paper surface keep the stock value,
+        // where the lighter grey would be the one that fails (see index.css).
+        zinc: {
+          500: "rgb(var(--zinc-500) / <alpha-value>)",
+        },
+        // DeHub "brand blue" docs palette. These class names (text-royal-blue,
+        // bg-sky-blue, from-middle-blue, text-jet-black, bg-plain-white …) are
+        // used across the docs/blog + a few app components but were never
+        // registered, so they silently no-op'd. Backed by CSS vars so they
+        // resolve to real brand blues globally and to theme-appropriate ink/
+        // paper/light tones inside .docs-root (see index.css docs token blocks).
+        "royal-blue": "hsl(var(--docs-royal))",
+        "middle-blue": "hsl(var(--docs-middle))",
+        "sky-blue": "hsl(var(--docs-sky))",
+        "jet-black": "hsl(var(--docs-ink))",
+        "plain-white": "hsl(var(--docs-paper))",
+        primary: {
+          DEFAULT: "hsl(var(--primary))",
+          foreground: "hsl(var(--primary-foreground))",
+        },
+        secondary: {
+          DEFAULT: "hsl(var(--secondary))",
+          foreground: "hsl(var(--secondary-foreground))",
+        },
+        destructive: {
+          DEFAULT: "hsl(var(--destructive))",
+          foreground: "hsl(var(--destructive-foreground))",
+        },
+        muted: {
+          DEFAULT: "hsl(var(--muted))",
+          foreground: "hsl(var(--muted-foreground))",
+        },
+        accent: {
+          DEFAULT: "hsl(var(--accent))",
+          foreground: "hsl(var(--accent-foreground))",
+        },
+        popover: {
+          DEFAULT: "hsl(var(--popover))",
+          foreground: "hsl(var(--popover-foreground))",
+        },
+        card: {
+          DEFAULT: "hsl(var(--card))",
+          foreground: "hsl(var(--card-foreground))",
+        },
+        sidebar: {
+          DEFAULT: "hsl(var(--sidebar-background))",
+          foreground: "hsl(var(--sidebar-foreground))",
+          primary: "hsl(var(--sidebar-primary))",
+          "primary-foreground": "hsl(var(--sidebar-primary-foreground))",
+          accent: "hsl(var(--sidebar-accent))",
+          "accent-foreground": "hsl(var(--sidebar-accent-foreground))",
+          border: "hsl(var(--sidebar-border))",
+          ring: "hsl(var(--sidebar-ring))",
+        },
+      },
+      borderRadius: {
+        lg: "var(--radius)",
+        md: "calc(var(--radius) - 2px)",
+        sm: "calc(var(--radius) - 4px)",
+      },
+      keyframes: {
+        "accordion-down": {
+          from: {
+            height: "0",
+          },
+          to: {
+            height: "var(--radix-accordion-content-height)",
+          },
+        },
+        "accordion-up": {
+          from: {
+            height: "var(--radix-accordion-content-height)",
+          },
+          to: {
+            height: "0",
+          },
+        },
+        "close-button-glitch": {
+          "0%": {
+            transform: "translate(0)",
+            opacity: "1",
+          },
+          "10%": {
+            transform: "translate(-2px, 1px)",
+            opacity: "0.8",
+          },
+          "20%": {
+            transform: "translate(2px, -1px)",
+            opacity: "1",
+          },
+          "30%": {
+            transform: "translate(-1px, -1px)",
+            opacity: "0.9",
+          },
+          "40%": {
+            transform: "translate(1px, 2px)",
+            opacity: "1",
+          },
+          "50%": {
+            transform: "translate(-2px, 1px)",
+            opacity: "0.85",
+          },
+          "60%": {
+            transform: "translate(2px, 1px)",
+            opacity: "1",
+          },
+          "70%": {
+            transform: "translate(-1px, -2px)",
+            opacity: "0.9",
+          },
+          "80%": {
+            transform: "translate(1px, 1px)",
+            opacity: "1",
+          },
+          "90%": {
+            transform: "translate(-1px, 1px)",
+            opacity: "0.95",
+          },
+          "100%": {
+            transform: "translate(0)",
+            opacity: "1",
+          },
+        },
+        "lava-flow": {
+          "0%": { backgroundPosition: "0% 50%" },
+          "50%": { backgroundPosition: "100% 50%" },
+          "100%": { backgroundPosition: "0% 50%" },
+        },
+        "float-up": {
+          "0%": { transform: "translateY(0)", opacity: "1" },
+          "100%": { transform: "translateY(-140px)", opacity: "0" },
+        },
+        "marquee": {
+          "0%": { transform: "translateX(0)" },
+          "100%": { transform: "translateX(-50%)" },
+        },
+        /* "Follow back all" arriving: a short, decaying side-to-side nudge,
+           once. Twin of the Reanimated sequence in the app's FollowListScreen. */
+        "follow-back-nudge": {
+          "0%, 100%": { transform: "translateX(0) rotate(0)" },
+          "14%": { transform: "translateX(-5px) rotate(-1.2deg)" },
+          "30%": { transform: "translateX(4px) rotate(1deg)" },
+          "46%": { transform: "translateX(-3px) rotate(-0.6deg)" },
+          "62%": { transform: "translateX(2px) rotate(0.3deg)" },
+          "78%": { transform: "translateX(-1px)" },
+        },
+        /* Reply-orb dust. Kept in lockstep with the Reanimated port in
+           dehub-mobile (components/DM/ReplyOrb.tsx).
+
+           One mote's trip around the ball. `--dust-r` is the radius of that
+           mote's latitude ring, set per element — custom properties resolve
+           against the animated element, so all thirty motes share one keyframe
+           track and differ only by that radius and a negative animation-delay
+           standing in for their starting angle.
+
+           translateX is r·sin(phase) and the opacity/scale pair is the depth
+           cue for cos(phase): a mote at the back of the ball is small and
+           faint, one at the front is full size and bright. Eight steps rather
+           than four, or the sine reads as a triangle wave and the ball looks
+           like it is sliding rather than turning. */
+        "dust-spin": {
+          "0%":    { transform: "translateX(0) scale(1)",                            opacity: "1" },
+          "12.5%": { transform: "translateX(calc(var(--dust-r) * 0.707)) scale(0.93)",  opacity: "0.88" },
+          "25%":   { transform: "translateX(var(--dust-r)) scale(0.78)",             opacity: "0.6" },
+          "37.5%": { transform: "translateX(calc(var(--dust-r) * 0.707)) scale(0.62)",  opacity: "0.32" },
+          "50%":   { transform: "translateX(0) scale(0.55)",                         opacity: "0.2" },
+          "62.5%": { transform: "translateX(calc(var(--dust-r) * -0.707)) scale(0.62)", opacity: "0.32" },
+          "75%":   { transform: "translateX(calc(var(--dust-r) * -1)) scale(0.78)",  opacity: "0.6" },
+          "87.5%": { transform: "translateX(calc(var(--dust-r) * -0.707)) scale(0.93)", opacity: "0.88" },
+          "100%":  { transform: "translateX(0) scale(1)",                            opacity: "1" },
+        },
+        "dust-haze": {
+          "0%, 100%": { transform: "scale(1)", opacity: "0.5" },
+          "50%": { transform: "scale(1.12)", opacity: "0.9" },
+        },
+      },
+      animation: {
+        "accordion-down": "accordion-down 0.2s ease-out",
+        "accordion-up": "accordion-up 0.2s ease-out",
+        "close-button-glitch": "close-button-glitch 0.4s ease-in-out",
+        "story-shimmer": "story-shimmer-rotate 4s linear infinite",
+        "lava-flow": "lava-flow 4s ease infinite",
+        "float-up": "float-up 2s ease-out forwards",
+        "marquee": "marquee 4s linear infinite",
+        "follow-back-nudge": "follow-back-nudge 0.62s cubic-bezier(0.36, 0.07, 0.19, 0.97) both",
+      },
+    },
+  },
+  plugins: [require("tailwindcss-animate")],
+} satisfies Config;

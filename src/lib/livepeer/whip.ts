@@ -1,0 +1,538 @@
+/**
+ * WHIP publisher (WebRTC-HTTP Ingestion Protocol, RFC 9725)
+ * =========================================================
+ * Publishes a local MediaStream straight from the browser to Livepeer, so a
+ * creator can go live from a webcam or a phone instead of installing OBS.
+ *
+ * The stream key is the same one the RTMP path already hands out — Livepeer
+ * accepts either ingest against the same stream — so nothing on the Riftn
+ * backend or the HLS playback side has to change. A stream published here
+ * comes out of the same `playbackId` the feed cards already read.
+ *
+ * Protocol, in full:
+ *   POST {base}/{streamKey}   Content-Type: application/sdp   body: SDP offer
+ *     -> 201 Created, body: SDP answer, Location: session resource URL
+ *   DELETE {resource}   ends the session
+ *
+ * Livepeer answers the POST with a 307 to a regional catalyst node. 307 (not
+ * 302) is what the spec mandates precisely because it preserves the method and
+ * body, so fetch's default redirect handling carries the offer through
+ * untouched. The Location header may be relative, so it is resolved against
+ * `response.url` — the URL *after* the redirect — not against the base.
+ */
+
+import { createLogger } from '@/lib/logger';
+import { paceDisplayFrames, type DisplayFramePacer } from './display-frame-pacer';
+import { ICE_SERVERS, waitForIceGathering, resolveSessionResource } from './ice';
+import { translateCopy as _translateCopy } from '@/i18n/copy';
+
+const logger = createLogger('WHIP');
+
+/** Overridable so a self-hosted catalyst can be pointed at without a rebuild. */
+const WHIP_BASE_URL =
+  import.meta.env.VITE_LIVEPEER_WHIP_URL || 'https://livepeer.studio/webrtc';
+
+export type WhipState =
+  | 'connecting'
+  | 'live'
+  | 'reconnecting'
+  | 'failed'
+  | 'closed';
+
+/**
+ * A response came back and it was a refusal. The status matters to callers as
+ * evidence about the PATH, not just the request: our own publish gate refuses
+ * with 401 (bad key — the same credentials fail everywhere), while any other
+ * status on a self-hosted endpoint came from a middlebox or edge answering in
+ * the server's place (observed: 403s on the relay path that never reached
+ * nginx, from a phone whose JSON API calls passed in the same minute). Those
+ * repeat identically on every retry, so callers fall back instead.
+ */
+export class WhipHttpError extends Error {
+  readonly status: number;
+  /** The endpoint the offer was POSTed to. */
+  readonly requestedUrl: string;
+  /**
+   * Where the response actually came from (`response.url`, i.e. after any
+   * redirect). Every refusal observed in the field arrived with zero packets
+   * at our servers or Cloudflare's edge, so identifying the responder is the
+   * whole game: a mismatch with requestedUrl means a redirect was followed,
+   * and the body snippet fingerprints whatever answered in our place.
+   */
+  readonly finalUrl: string;
+  readonly contentType: string;
+  readonly bodySnippet: string;
+
+  constructor(status: number, requestedUrl: string, finalUrl: string, contentType: string, bodySnippet: string) {
+    super(_translateCopy('copy.ab8f2c351837', { defaultValue: 'Streaming server rejected the broadcast (HTTP {{value1}}).', value1: status }));
+    this.name = 'WhipHttpError';
+    this.status = status;
+    this.requestedUrl = requestedUrl;
+    this.finalUrl = finalUrl;
+    this.contentType = contentType;
+    this.bodySnippet = bodySnippet;
+  }
+}
+
+export interface WhipSession {
+  /** Tears down the peer connection and DELETEs the session resource. */
+  stop: () => Promise<void>;
+  /**
+   * Swaps the outgoing track without renegotiating — this is how flipping the
+   * camera or changing microphone mid-broadcast stays seamless. Passing null
+   * mutes the sender at the transport level (viewers see a frozen frame /
+   * silence) rather than dropping the track from the session.
+   */
+  replaceTrack: (kind: 'video' | 'audio', track: MediaStreamTrack | null) => Promise<void>;
+  /** Updates the paced screen track after the capture's enabled state changes. */
+  syncVideoEnabled: () => void;
+}
+
+/**
+ * What the broadcast is actually putting on the wire, sampled from the sender.
+ *
+ * A creator's preview is the CAMERA, not the stream, so it stays perfect while
+ * viewers watch a frozen frame — the encoder starves, the capture does not. On
+ * 2026-09-01 a phone published 74 frames in 77 seconds at ~37 kbit/s while its
+ * host saw a flawless self-view and could not work out why the room had gone
+ * quiet. These are the numbers that would have said it out loud.
+ *
+ * `limitation` is the browser's own verdict on WHY it throttled: 'bandwidth'
+ * is the uplink, 'cpu' is the phone. They call for opposite advice, and
+ * guessing between them from a bitrate alone is how the wrong one gets given.
+ */
+export interface WhipHealth {
+  /** Outbound video, kilobits per second across the last sample window. */
+  videoKbps: number;
+  /** Frames per second actually ENCODED AND SENT, not captured. */
+  fps: number;
+  /** Outbound audio, kilobits per second. Near zero on silence even when well. */
+  audioKbps: number;
+  /** qualityLimitationReason: 'none' | 'bandwidth' | 'cpu' | 'other' | ''. */
+  limitation: string;
+  /** Round trip to the ingest in ms, where the candidate pair reports one. */
+  rttMs: number | null;
+}
+
+export interface PublishOptions {
+  streamKey: string;
+  stream: MediaStream;
+  /**
+   * Full WHIP endpoint. Given, it is used verbatim; otherwise the Livepeer
+   * base is joined with the stream key. The self-hosted ingest addresses a
+   * stream by its PUBLIC playbackId, so the URL cannot be derived from the
+   * key the way Livepeer's can.
+   */
+  endpoint?: string;
+  /** Publish credential, sent as a bearer token. See live-ingest.ts. */
+  token?: string;
+  /**
+   * Extra ICE servers (a TURN relay) appended to the STUN defaults. Given on
+   * the relayed path so media can travel even where the ingest's own address
+   * is unreachable; the browser still prefers a direct route when one works.
+   */
+  iceServers?: RTCIceServer[];
+  onStateChange?: (state: WhipState, detail?: string) => void;
+  /**
+   * Sampled every few seconds while the session is connected. Purely
+   * observational: nothing in the publish path reads it back, and the call is
+   * wrapped, so a throwing callback can never take a broadcast down.
+   */
+  onHealth?: (health: WhipHealth) => void;
+  /**
+   * Ceiling for the video encoder. Left unset the browser picks its own, which
+   * for a webcam is right and for a capture card is far too low: a 1080p60
+   * game at the default lands around 2.5 Mbit/s and smears on every fast pan.
+   */
+  videoEncoding?: VideoEncoding;
+}
+
+export interface VideoEncoding {
+  maxBitrateKbps: number;
+  maxFramerate?: number;
+}
+
+/** How often the sender is asked what it is really sending. */
+const HEALTH_SAMPLE_MS = 3000;
+
+/**
+ * Ask the Opus encoder for in-band forward error correction and stereo. The
+ * publish leg loses packets in bursts on home uplinks, and every missing 20ms
+ * audio frame is an audible click at the viewer; FEC lets the server rebuild
+ * a lost frame from the next packet instead. Stereo is only honoured when the
+ * track actually carries two channels, so a mono mic costs nothing. Applied
+ * to both the offer and the answer: Chrome reads the REMOTE fmtp to decide
+ * whether FEC and stereo are on.
+ */
+export function withOpusFec(sdp: string): string {
+  const pts = new Set<string>();
+  for (const line of sdp.split(/\r?\n/)) {
+    const m = /^a=rtpmap:(\d+) opus\/48000/i.exec(line);
+    if (m) pts.add(m[1]);
+  }
+  if (!pts.size) return sdp;
+  const wanted = ['useinbandfec=1', 'stereo=1', 'sprop-stereo=1', 'maxaveragebitrate=256000', 'maxplaybackrate=48000'];
+  return sdp
+    .split(/(\r?\n)/)
+    .map((line) => {
+      const m = /^a=fmtp:(\d+) (.*)$/.exec(line);
+      if (!m || !pts.has(m[1])) return line;
+      const params = m[2].split(';').map((p) => p.trim()).filter(Boolean);
+      const keys = new Set(params.map((p) => p.split('=')[0]));
+      for (const w of wanted) if (!keys.has(w.split('=')[0])) params.push(w);
+      return `a=fmtp:${m[1]} ${params.join(';')}`;
+    })
+    .join('');
+}
+
+/**
+ * Put H.264 at the front of the video codec list.
+ *
+ * Livepeer transcodes H.264 natively; a VP8/VP9 ingest costs it an extra
+ * decode step and, on some catalyst builds, is refused outright. Chrome offers
+ * VP8 first by default, so left alone a Chrome broadcast negotiates the slow
+ * path. This only reorders — every codec stays on offer, so a browser without
+ * H.264 still connects.
+ */
+function preferH264(transceiver: RTCRtpTransceiver): void {
+  if (typeof RTCRtpSender.getCapabilities !== 'function') return;
+  if (typeof transceiver.setCodecPreferences !== 'function') return;
+
+  const codecs = RTCRtpSender.getCapabilities('video')?.codecs;
+  if (!codecs?.length) return;
+
+  const h264 = codecs.filter((c) => c.mimeType.toLowerCase() === 'video/h264');
+  if (!h264.length) return;
+
+  try {
+    transceiver.setCodecPreferences([
+      ...h264,
+      ...codecs.filter((c) => c.mimeType.toLowerCase() !== 'video/h264'),
+    ]);
+  } catch (e) {
+    // Non-fatal: negotiation still succeeds on the browser's own ordering.
+    logger.warn('setCodecPreferences failed, using default codec order', e);
+  }
+}
+
+/**
+ * Opens a WHIP session and starts sending `stream` to Livepeer.
+ *
+ * Resolves once the SDP exchange succeeds — which means the server accepted
+ * the broadcast, not yet that media is flowing. Watch `onStateChange` for
+ * `'live'`, which fires when the peer connection actually reaches `connected`.
+ */
+export async function publishToWhip({
+  streamKey,
+  stream,
+  endpoint: endpointOverride,
+  token,
+  iceServers: extraIceServers,
+  onStateChange,
+  onHealth,
+  videoEncoding,
+}: PublishOptions): Promise<WhipSession> {
+  if (!streamKey) throw new Error(_translateCopy('copy.19e4e514a027', { defaultValue: 'A stream key is required to go live.' }));
+
+  const pc = new RTCPeerConnection({
+    iceServers: extraIceServers?.length
+      ? [...ICE_SERVERS, ...extraIceServers]
+      : ICE_SERVERS,
+    bundlePolicy: 'max-bundle',
+  });
+
+  let resourceUrl: string | null = null;
+  let stopped = false;
+  const transceivers: Partial<Record<'video' | 'audio', RTCRtpTransceiver>> = {};
+  let displayPacer: DisplayFramePacer | undefined;
+  let videoUpdate = Promise.resolve();
+
+  const updateVideo = (change: () => Promise<void>) => {
+    // A worker failure must not restore an old source over a newer user switch.
+    const pending = videoUpdate.then(change);
+    videoUpdate = pending.catch(() => undefined);
+    return pending;
+  };
+
+  const prepareDisplayVideo = (source: MediaStreamTrack) => {
+    const pacer = paceDisplayFrames(source, () => {
+      void updateVideo(async () => {
+        if (stopped || !pacer || displayPacer !== pacer) return;
+        try {
+          await transceivers.video?.sender.replaceTrack(source);
+          if (displayPacer === pacer) displayPacer = undefined;
+          pacer.stop();
+          logger.warn('Screen frame worker stopped; using the display capture directly');
+        } catch (error) {
+          logger.warn('Could not restore direct display capture', error);
+        }
+      });
+    });
+    return pacer;
+  };
+
+  const replaceTrack = async (
+    kind: 'video' | 'audio',
+    track: MediaStreamTrack | null
+  ): Promise<void> => {
+    if (stopped) return;
+    const sender = transceivers[kind]?.sender;
+    if (!sender) return;
+    if (kind === 'audio') {
+      await sender.replaceTrack(track);
+      return;
+    }
+    await updateVideo(async () => {
+      if (stopped) return;
+      let nextPacer = track ? prepareDisplayVideo(track) : undefined;
+      try {
+        await sender.replaceTrack(nextPacer?.track ?? track);
+      } catch (error) {
+        if (!nextPacer) throw error;
+        nextPacer.stop();
+        nextPacer = undefined;
+        await sender.replaceTrack(track);
+      }
+      if (stopped) {
+        nextPacer?.stop();
+        return;
+      }
+      displayPacer?.stop();
+      displayPacer = nextPacer;
+    });
+  };
+
+  const syncVideoEnabled = () => displayPacer?.syncEnabled();
+
+  const emit = (state: WhipState, detail?: string) => {
+    if (stopped && state !== 'closed') return;
+    onStateChange?.(state, detail);
+  };
+
+  /*
+   * Outbound sampler.
+   *
+   * getStats reports counters that only ever climb, so every figure here is a
+   * DELTA against the previous sample — a running average over a whole
+   * broadcast would flatten exactly the minute-long collapse this exists to
+   * catch. The first sample has nothing to subtract from and is skipped
+   * rather than reported as a spike.
+   */
+  let healthTimer: ReturnType<typeof setInterval> | undefined;
+  let previous: { at: number; videoBytes: number; audioBytes: number; frames: number } | null =
+    null;
+
+  const sampleHealth = async () => {
+    if (stopped || !onHealth) return;
+    let report: RTCStatsReport;
+    try {
+      report = await pc.getStats();
+    } catch {
+      return; // A closing connection refuses stats; nothing to report.
+    }
+
+    let videoBytes = 0;
+    let audioBytes = 0;
+    let frames = 0;
+    let limitation = '';
+    let rttMs: number | null = null;
+
+    // Record<string, any> rather than a typed stats union: the shape differs
+    // per browser and per stat type, and every field read here is coerced.
+    report.forEach((entry: Record<string, any>) => {
+      if (entry.type === 'outbound-rtp') {
+        const bytes = Number(entry.bytesSent) || 0;
+        if (entry.kind === 'video') {
+          videoBytes += bytes;
+          frames += Number(entry.framesSent) || 0;
+          if (typeof entry.qualityLimitationReason === 'string') {
+            limitation = entry.qualityLimitationReason;
+          }
+        } else if (entry.kind === 'audio') {
+          audioBytes += bytes;
+        }
+      } else if (entry.type === 'candidate-pair' && entry.state === 'succeeded') {
+        const rtt = entry.currentRoundTripTime;
+        if (typeof rtt === 'number') rttMs = Math.round(rtt * 1000);
+      }
+    });
+
+    const now = Date.now();
+    const last = previous;
+    previous = { at: now, videoBytes, audioBytes, frames };
+    if (!last) return;
+
+    const seconds = (now - last.at) / 1000;
+    if (seconds <= 0) return;
+
+    try {
+      onHealth({
+        videoKbps: Math.round(((videoBytes - last.videoBytes) * 8) / seconds / 1000),
+        audioKbps: Math.round(((audioBytes - last.audioBytes) * 8) / seconds / 1000),
+        fps: Math.round(((frames - last.frames) / seconds) * 10) / 10,
+        limitation,
+        rttMs,
+      });
+    } catch {
+      /* a broken indicator must never end a broadcast */
+    }
+  };
+
+  emit('connecting');
+
+  const stop = async (): Promise<void> => {
+    if (stopped) return;
+    stopped = true;
+    clearInterval(healthTimer);
+    displayPacer?.stop();
+    displayPacer = undefined;
+
+    // Close the peer connection first: it stops media immediately even if the
+    // DELETE is slow or the network has already gone away.
+    try {
+      pc.close();
+    } catch {
+      /* already closed */
+    }
+
+    if (resourceUrl) {
+      try {
+        // keepalive lets the DELETE outlive a page being closed, so shutting
+        // the tab ends the stream instead of stranding it until Livepeer's own
+        // ingest timeout fires.
+        await fetch(resourceUrl, { method: 'DELETE', keepalive: true });
+        logger.info('WHIP session deleted');
+      } catch (e) {
+        // The stream still ends server-side once ingest stops; this is tidiness.
+        logger.warn('WHIP DELETE failed; Livepeer will time the session out', e);
+      }
+    }
+
+    onStateChange?.('closed');
+  };
+
+  try {
+    // sendonly: this is an ingest, we never want a return path.
+    const videoTrack = stream.getVideoTracks()[0];
+    const audioTrack = stream.getAudioTracks()[0];
+
+    if (videoTrack) {
+      displayPacer = prepareDisplayVideo(videoTrack);
+      transceivers.video = pc.addTransceiver(displayPacer?.track ?? videoTrack, {
+        direction: 'sendonly',
+        streams: [stream],
+        // Set at creation: changing the encoding list after negotiation is
+        // refused, and this is the one spot every browser honours it.
+        ...(videoEncoding
+          ? {
+              sendEncodings: [
+                {
+                  maxBitrate: videoEncoding.maxBitrateKbps * 1000,
+                  ...(videoEncoding.maxFramerate
+                    ? { maxFramerate: videoEncoding.maxFramerate }
+                    : {}),
+                },
+              ],
+            }
+          : {}),
+      });
+      preferH264(transceivers.video);
+    }
+    if (audioTrack) {
+      transceivers.audio = pc.addTransceiver(audioTrack, {
+        direction: 'sendonly',
+        streams: [stream],
+        // Room for music in stereo; speech never gets near it.
+        sendEncodings: [{ maxBitrate: 256_000 }],
+      });
+    }
+
+    if (!videoTrack && !audioTrack) {
+      throw new Error(_translateCopy('copy.b74430089a1a', { defaultValue: 'No camera or microphone track to broadcast.' }));
+    }
+
+    pc.addEventListener('connectionstatechange', () => {
+      switch (pc.connectionState) {
+        case 'connected':
+          emit('live');
+          // Started here rather than at setup: before the pair is connected
+          // there is nothing sent to measure, and a reconnect keeps the
+          // counters it already has (they are cumulative for the session).
+          if (onHealth && !healthTimer) {
+            healthTimer = setInterval(() => void sampleHealth(), HEALTH_SAMPLE_MS);
+          }
+          break;
+        case 'disconnected':
+          // Often transient (a network handover on mobile). WebRTC retries ICE
+          // on its own, so report it without tearing the session down.
+          emit('reconnecting');
+          break;
+        case 'failed':
+          emit('failed', _translateCopy('copy.3bda4a262f4c', { defaultValue: 'The connection to the streaming server was lost.' }));
+          break;
+        default:
+          break;
+      }
+    });
+
+    const offer = await pc.createOffer();
+    await pc.setLocalDescription({ type: 'offer', sdp: withOpusFec(offer.sdp ?? '') });
+    await waitForIceGathering(pc);
+
+    const endpoint =
+      endpointOverride || `${WHIP_BASE_URL.replace(/\/$/, '')}/${streamKey}`;
+    logger.info('Posting WHIP offer', { endpoint });
+
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/sdp',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: pc.localDescription?.sdp ?? '',
+      // A host the network silently drops (null-routed IP, hostile middlebox)
+      // leaves this fetch pending for minutes while the UI says "Connecting…".
+      // Cap it so the creator gets an error screen they can act on instead.
+      signal: AbortSignal.timeout(15_000),
+    });
+
+    if (!response.ok) {
+      let bodySnippet = '';
+      try {
+        bodySnippet = (await response.text()).slice(0, 300);
+      } catch {
+        /* body unreadable — the status and urls still identify the responder */
+      }
+      throw new WhipHttpError(
+        response.status,
+        endpoint,
+        response.url,
+        response.headers.get('content-type') || '',
+        bodySnippet,
+      );
+    }
+
+    const answer = await response.text();
+    if (!answer.trim()) throw new Error(_translateCopy('copy.885f1ac84a0c', { defaultValue: 'Streaming server returned an empty answer.' }));
+
+    // Resolve against response.url so a relative Location lands on the
+    // regional catalyst we were redirected to, not on livepeer.studio.
+    resourceUrl = resolveSessionResource(response);
+    if (!resourceUrl) {
+      // Without a resource URL we cannot DELETE; closing the peer connection
+      // still ends the broadcast, Livepeer just reclaims it on its own timer.
+      logger.warn('WHIP response had no Location header; teardown will rely on ICE timeout');
+    }
+
+    // Chrome only turns FEC and stereo on when the REMOTE fmtp asks for them,
+    // so the answer gets the same parameters.
+    await pc.setRemoteDescription({ type: 'answer', sdp: withOpusFec(answer) });
+    logger.info('WHIP negotiation complete', { hasResource: !!resourceUrl });
+
+    return { stop, replaceTrack, syncVideoEnabled };
+  } catch (error) {
+    // Never leak a half-open peer connection or a live server-side session.
+    await stop();
+    throw error;
+  }
+}

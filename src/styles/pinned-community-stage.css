@@ -1,0 +1,88 @@
+/* Pinned community worn by the profile header
+   (components/app/profile/PinnedCommunityStage.tsx). */
+
+/* Carry the wash all the way to the cover. Fading it out at the top exposes
+   the page underneath as a dark band across the profile details. */
+[data-pinned-wash] > div {
+  filter: blur(52px) saturate(1.4);
+  opacity: 0.5;
+}
+/* Every fade here is eased (smoothstep), not a straight two-stop line: a
+   straight fade shows a visible edge where it starts and stops. */
+[data-pinned-wash] {
+  -webkit-mask-image: linear-gradient(#000 calc(100% - 128px), rgb(0 0 0 / 0.957) calc(100% - 112px), rgb(0 0 0 / 0.844) calc(100% - 96px), rgb(0 0 0 / 0.684) calc(100% - 80px), rgb(0 0 0 / 0.500) calc(100% - 64px), rgb(0 0 0 / 0.316) calc(100% - 48px), rgb(0 0 0 / 0.156) calc(100% - 32px), rgb(0 0 0 / 0.043) calc(100% - 16px), transparent);
+  mask-image: linear-gradient(#000 calc(100% - 128px), rgb(0 0 0 / 0.957) calc(100% - 112px), rgb(0 0 0 / 0.844) calc(100% - 96px), rgb(0 0 0 / 0.684) calc(100% - 80px), rgb(0 0 0 / 0.500) calc(100% - 64px), rgb(0 0 0 / 0.316) calc(100% - 48px), rgb(0 0 0 / 0.156) calc(100% - 32px), rgb(0 0 0 / 0.043) calc(100% - 16px), transparent);
+}
+
+/* Fades the strip's art from dark behind the text to clear on the right. */
+[data-pinned-strip-shade] {
+  background: linear-gradient(90deg, rgb(6 4 18 / 0.86) 0%, rgb(6 4 18 / 0.5) 45%, rgb(6 4 18 / 0.12) 100%);
+}
+
+/* The community art turns sharp gradually toward the row, like a lens
+   coming into focus: heavy, mid and soft blurred copies, then the picture.
+   All copies share one box so their features line up exactly. */
+[data-pinned-dissolve] { height: 210px; }
+[data-pinned-dissolve] > div {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+/* Bleeds past the sides and bottom (the header clips it) so no blur fades
+   out at an edge; the top edge is hidden by each layer's own fade. */
+[data-pinned-dissolve-layer] > div {
+  position: absolute;
+  inset: 0 -48px -48px;
+  background-size: cover;
+  background-position: center 60%;
+}
+[data-pinned-dissolve-layer="heavy"] { opacity: .7; }
+[data-pinned-dissolve-layer="heavy"] > div { filter: blur(40px) saturate(1.35); }
+[data-pinned-dissolve-layer="mid"] > div { filter: blur(16px) saturate(1.2); }
+[data-pinned-dissolve-layer="soft"] > div { filter: blur(5px); }
+[data-pinned-dissolve-layer="heavy"] {
+  -webkit-mask-image: linear-gradient(transparent 0%, rgb(0 0 0 / 0.043) 7.5%, rgb(0 0 0 / 0.156) 15.0%, rgb(0 0 0 / 0.316) 22.5%, rgb(0 0 0 / 0.500) 30.0%, rgb(0 0 0 / 0.684) 37.5%, rgb(0 0 0 / 0.844) 45.0%, rgb(0 0 0 / 0.957) 52.5%, #000 60%);
+  mask-image: linear-gradient(transparent 0%, rgb(0 0 0 / 0.043) 7.5%, rgb(0 0 0 / 0.156) 15.0%, rgb(0 0 0 / 0.316) 22.5%, rgb(0 0 0 / 0.500) 30.0%, rgb(0 0 0 / 0.684) 37.5%, rgb(0 0 0 / 0.844) 45.0%, rgb(0 0 0 / 0.957) 52.5%, #000 60%);
+}
+[data-pinned-dissolve-layer="mid"] {
+  -webkit-mask-image: linear-gradient(transparent 22%, rgb(0 0 0 / 0.043) 28.5%, rgb(0 0 0 / 0.156) 35.0%, rgb(0 0 0 / 0.316) 41.5%, rgb(0 0 0 / 0.500) 48.0%, rgb(0 0 0 / 0.684) 54.5%, rgb(0 0 0 / 0.844) 61.0%, rgb(0 0 0 / 0.957) 67.5%, #000 74%);
+  mask-image: linear-gradient(transparent 22%, rgb(0 0 0 / 0.043) 28.5%, rgb(0 0 0 / 0.156) 35.0%, rgb(0 0 0 / 0.316) 41.5%, rgb(0 0 0 / 0.500) 48.0%, rgb(0 0 0 / 0.684) 54.5%, rgb(0 0 0 / 0.844) 61.0%, rgb(0 0 0 / 0.957) 67.5%, #000 74%);
+}
+[data-pinned-dissolve-layer="soft"] {
+  -webkit-mask-image: linear-gradient(transparent 36%, rgb(0 0 0 / 0.043) 41.5%, rgb(0 0 0 / 0.156) 47.0%, rgb(0 0 0 / 0.316) 52.5%, rgb(0 0 0 / 0.500) 58.0%, rgb(0 0 0 / 0.684) 63.5%, rgb(0 0 0 / 0.844) 69.0%, rgb(0 0 0 / 0.957) 74.5%, #000 80%);
+  mask-image: linear-gradient(transparent 36%, rgb(0 0 0 / 0.043) 41.5%, rgb(0 0 0 / 0.156) 47.0%, rgb(0 0 0 / 0.316) 52.5%, rgb(0 0 0 / 0.500) 58.0%, rgb(0 0 0 / 0.684) 63.5%, rgb(0 0 0 / 0.844) 69.0%, rgb(0 0 0 / 0.957) 74.5%, #000 80%);
+}
+[data-pinned-dissolve-layer="sharp"] {
+  -webkit-mask-image: linear-gradient(transparent 50%, rgb(0 0 0 / 0.043) 55.2%, rgb(0 0 0 / 0.156) 60.5%, rgb(0 0 0 / 0.316) 65.8%, rgb(0 0 0 / 0.500) 71.0%, rgb(0 0 0 / 0.684) 76.2%, rgb(0 0 0 / 0.844) 81.5%, rgb(0 0 0 / 0.957) 86.8%, #000 92%);
+  mask-image: linear-gradient(transparent 50%, rgb(0 0 0 / 0.043) 55.2%, rgb(0 0 0 / 0.156) 60.5%, rgb(0 0 0 / 0.316) 65.8%, rgb(0 0 0 / 0.500) 71.0%, rgb(0 0 0 / 0.684) 76.2%, rgb(0 0 0 / 0.844) 81.5%, rgb(0 0 0 / 0.957) 86.8%, #000 92%);
+}
+[data-pinned-dissolve] > [data-pinned-strip-shade] {
+  -webkit-mask-image: linear-gradient(transparent 35%, rgb(0 0 0 / 0.043) 40.6%, rgb(0 0 0 / 0.156) 46.2%, rgb(0 0 0 / 0.316) 51.9%, rgb(0 0 0 / 0.500) 57.5%, rgb(0 0 0 / 0.684) 63.1%, rgb(0 0 0 / 0.844) 68.8%, rgb(0 0 0 / 0.957) 74.4%, #000 80%);
+  mask-image: linear-gradient(transparent 35%, rgb(0 0 0 / 0.043) 40.6%, rgb(0 0 0 / 0.156) 46.2%, rgb(0 0 0 / 0.316) 51.9%, rgb(0 0 0 / 0.500) 57.5%, rgb(0 0 0 / 0.684) 63.1%, rgb(0 0 0 / 0.844) 68.8%, rgb(0 0 0 / 0.957) 74.4%, #000 80%);
+}
+
+/* Artwork owns its foreground. A light page must not turn the profile's
+   white ink black or leave its coloured wash floating over white paper. */
+html:is([data-theme="light"], [data-system-tone="light"]):not(#_):not(#_):not(#_):not(#_):not(#_) [data-profile-art] {
+  background: #0b0b0d !important;
+  color: #fff !important;
+  --ink: #fff;
+  --ink-muted: rgba(255,255,255,.82);
+  --muted-foreground: 0 0% 82%;
+  --control-fill: rgba(255,255,255,.1);
+  --control-raised: rgba(255,255,255,.16);
+  --control-ink: #fff;
+  --control-edge: rgba(255,255,255,.2);
+}
+html[data-theme="minimal"] [data-pinned-wash] > div {
+  opacity: .3;
+}
+
+/* The strip always sits on dark art, so its text stays white even where a
+   light theme inverts white text to ink. */
+html[data-theme] [data-pinned-strip] .text-white {
+  color: #fff !important;
+}
+html[data-theme] [data-pinned-strip] [class*="text-white/"] {
+  color: rgb(255 255 255 / 0.82) !important;
+}

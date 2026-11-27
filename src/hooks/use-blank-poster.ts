@@ -1,0 +1,101 @@
+import { LruCache } from '@/lib/lru-cache';
+/**
+ * useBlankPoster
+ * ==============
+ * Detects whether a video poster/thumbnail is a "blank" auto-extracted frame —
+ * i.e. near-uniform in colour (a flat black / white / grey capture).
+ *
+ * Video thumbnails are grabbed from a frame of the clip. When the clip opens on
+ * black, the captured frame is a valid-but-empty JPEG that renders as a solid
+ * black box (see token 4909). We decode the poster onto a tiny canvas and flag
+ * it when the luminance spread across the frame is near zero.
+ *
+ * - Returns `false` until a poster is proven blank, so real thumbnails never
+ *   flash a fallback.
+ * - Returns `false` on any load/CORS error (tainted canvas) so we never
+ *   misclassify — the poster just behaves as it does today.
+ * - Classification is cached per URL so each thumbnail is decoded once across
+ *   every card and across navigations.
+ */
+import { useEffect, useState } from 'react';
+
+const cache = new LruCache<string, boolean>(500);
+
+/** Luminance spread below this (0–255) reads as a flat, contentless frame. */
+const UNIFORM_THRESHOLD = 12;
+
+/**
+ * Device-pixel width callers should request the poster at for this check.
+ *
+ * The classification draws onto a 32x18 canvas, so anything past that is
+ * decoded and thrown away. It matters more than it looks: this hook fetches
+ * with crossOrigin="anonymous", which is a separate HTTP cache entry from the
+ * <img>/<video poster> no-CORS request, so whatever size it asks for is
+ * downloaded IN ADDITION to the poster itself.
+ */
+export const BLANK_PROBE_WIDTH = 64;
+
+export function useBlankPoster(url?: string | null): boolean {
+  const [measured, setMeasured] = useState<{ url: string; blank: boolean } | null>(null);
+  const blank = url ? (measured?.url === url ? measured.blank : cache.get(url) ?? false) : false;
+
+  useEffect(() => {
+    if (!url) {
+      return;
+    }
+    const cached = cache.get(url);
+    if (cached !== undefined) {
+      setMeasured({ url, blank: cached });
+      return;
+    }
+
+    let cancelled = false;
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.decoding = 'async';
+
+    img.onload = () => {
+      if (cancelled) return;
+      try {
+        const w = 32;
+        const h = 18;
+        const canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+        if (!ctx) {
+          cache.set(url, false);
+          setMeasured({ url, blank: false });
+          return;
+        }
+        ctx.drawImage(img, 0, 0, w, h);
+        const { data } = ctx.getImageData(0, 0, w, h);
+        let min = 255;
+        let max = 0;
+        for (let i = 0; i < data.length; i += 4) {
+          // Rec. 601 luma
+          const lum = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
+          if (lum < min) min = lum;
+          if (lum > max) max = lum;
+        }
+        const isBlank = max - min < UNIFORM_THRESHOLD;
+        cache.set(url, isBlank);
+        setMeasured({ url, blank: isBlank });
+      } catch {
+        // Tainted canvas (missing CORS) or other read failure — do not flag.
+        cache.set(url, false);
+        setMeasured({ url, blank: false });
+      }
+    };
+    img.onerror = () => {
+      if (!cancelled) setMeasured({ url, blank: false });
+    };
+    img.src = url;
+
+    return () => {
+      cancelled = true;
+    };
+  }, [url]);
+
+  return blank;
+}

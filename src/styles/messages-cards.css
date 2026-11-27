@@ -1,0 +1,251 @@
+/* /app/messages: the inbox as glass cards (design B, 2026-11-18).
+   Every chat is its own card in the header pill's glass, apart from the next,
+   with no divider lines, and All / Unread / Groups / Requests (/ Archived)
+   tabs. Computers carry the tabs in the header pill; phones carry them in a
+   row at the top of the list. The full-screen /chat page never gets
+   [data-msg-cards]. */
+
+/* ---- Shared: colours, tabs, the lit unread bar, ticks, avatars ---- */
+[data-msg-cards] {
+  --mc-accent: color-mix(in srgb, var(--tint-accent, rgb(161 161 170)) 62%, white);
+  --mc-accent-ink: #fff;
+  --mc-soft: rgb(255 255 255 / 0.09);
+  --mc-hover: rgb(255 255 255 / 0.05);
+  --mc-card: linear-gradient(rgb(255 255 255 / 0.13), rgb(255 255 255 / 0.02) 45%, rgb(255 255 255 / 0)),
+    linear-gradient(var(--nav-glass, transparent), var(--nav-glass, transparent)),
+    var(--nav-glass-base, rgb(24 24 27 / 0.6));
+  --mc-rim: inset 0 0 0 1px rgb(255 255 255 / 0.14), inset 0 1px 0 rgb(255 255 255 / 0.22);
+  --mc-ink: #fff;
+}
+html[data-theme='system'] [data-msg-cards] {
+  --mc-accent: #fff;
+  --mc-accent-ink: #0b0b0c;
+  --mc-card: linear-gradient(rgb(255 255 255 / 0.1), rgb(255 255 255 / 0.03) 50%, rgb(255 255 255 / 0.02)), rgb(24 24 27 / 0.72);
+}
+html:is([data-system-tone='light'], [data-theme='light'], [data-theme='minimal']) [data-msg-cards] {
+  --mc-accent: #0b0b0c;
+  --mc-accent-ink: #fff;
+  --mc-soft: rgb(11 11 13 / 0.06);
+  --mc-hover: rgb(11 11 13 / 0.03);
+  --mc-card: rgb(250 250 252 / 0.85);
+  --mc-bar-fill: rgb(255 255 255 / 0.7);
+  --mc-rim: inset 0 0 0 0.5px rgb(11 11 13 / 0.08), inset 0 1px 0 rgb(255 255 255 / 0.9), 0 1px 2px rgb(11 11 13 / 0.04), 0 4px 12px -6px rgb(11 11 13 / 0.12);
+  --mc-ink: #0b0b0c;
+}
+html[data-theme='osaka'] [data-msg-cards] { --mc-accent: #ff6fb5; }
+
+/* Tabs: the selected one is lit with the Beam underline. */
+[data-msg-cards] [data-msg-cards-tab] {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  color: rgb(161 161 170);
+  transition: background-color 150ms ease, color 150ms ease;
+}
+[data-msg-cards] [data-msg-cards-tab] svg { width: 14px; height: 14px; }
+@media (hover: hover) { [data-msg-cards] [data-msg-cards-tab]:hover { color: var(--mc-ink); } }
+/* Selected: the ink and the Beam underline only, no box behind it. */
+  [data-msg-cards] [data-msg-cards-tab][aria-selected='true'] { color: var(--mc-ink); background: transparent; }
+[data-msg-cards] [data-msg-cards-tab][aria-selected='true']::after {
+  content: '';
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: -1px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--mc-accent);
+  box-shadow: 0 0 10px var(--mc-accent);
+}
+[data-msg-cards] [data-msg-cards-tab-count] {
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 6px;
+  background: var(--mc-accent);
+  color: var(--mc-accent-ink);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 18px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+[data-msg-cards] [data-msg-cards-tab-count][data-quiet] { background: var(--mc-soft); color: inherit; }
+
+/* The list: the rows live in [data-chat-list-body] (the pull-to-refresh
+   wrapper), so the gap sits there. */
+[data-msg-cards] [data-chat-list-body] {
+  display: flex;
+  flex-direction: column;
+}
+[data-msg-cards] [data-chat-list-body] > * { flex-shrink: 0; }
+[data-msg-cards] [data-chat-list-body] > :empty { display: none; }
+[data-msg-cards] [data-chat-list-scroll] .overflow-hidden:has(> .flex > .w-full > [data-chat-list-row]) { border-radius: 18px; }
+html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-cards] [data-chat-list-scroll] :is([data-chat-list-row], [data-chat-list-body] > button) {
+  position: relative;
+  border: 0 !important;
+  border-radius: 18px !important;
+  background: var(--mc-card) !important;
+  box-shadow: var(--mc-rim) !important;
+  transition: box-shadow 150ms ease, transform 150ms ease;
+}
+/* Something new in this chat: a lit bar on the card's left edge. */
+[data-msg-cards] [data-chat-list-row][data-unread]::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 4px;
+  height: 28px;
+  margin-top: -14px;
+  border-radius: 0 3px 3px 0;
+  background: var(--mc-accent);
+  box-shadow: 0 0 10px var(--mc-accent);
+}
+/* Ticked while picking: the card rings in the theme colour. */
+html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-cards] [data-chat-list-scroll] [data-chat-list-row][data-bulk-checked='true'] {
+  box-shadow: var(--mc-rim), inset 0 0 0 1.5px var(--mc-accent) !important;
+}
+html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-cards] [data-chat-list-row] :is(.w-12.h-12) {
+  width: 44px !important;
+  height: 44px !important;
+}
+html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-cards] [data-chat-list-row] [data-chat-row-avatar] { border-radius: 12px !important; }
+[data-msg-cards] [data-chat-list-row] p { margin-top: 1px; }
+[data-msg-cards] [data-chat-list-row] .tabular-nums { font-size: 12.5px; }
+/* The tab is the way back from Requests. */
+[data-msg-cards] [data-chat-requests-back] { display: none !important; }
+[data-msg-cards] [data-chat-requests-hint] { padding: 0 4px; }
+
+/* ---- Phones: cards 10px apart, 12px in from the screen edge; the tabs
+   ride in a row of their own at the top of the list. No backdrop blur on a
+   long list (it costs every scroll frame on a phone); the glass fill alone
+   reads the same over the page background. ---- */
+@media (max-width: 1023px) {
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-cards] [data-chat-list-scroll] {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+    padding-top: 6px !important;
+  }
+  [data-msg-cards] [data-chat-list-body] { gap: 10px; }
+  [data-msg-cards] [data-msg-cards-phone-tabs] {
+    display: flex;
+    gap: 4px;
+    margin: 0 -12px;
+    padding: 2px 12px 4px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  [data-msg-cards] [data-msg-cards-phone-tabs]::-webkit-scrollbar { display: none; }
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-cards] [data-chat-list-scroll] :is([data-chat-list-row], [data-chat-list-body] > button) {
+    min-height: 72px;
+    padding: 12px 14px 12px 12px !important;
+    gap: 12px !important;
+  }
+}
+
+/* ---- Computers: the B concept's spacing, header pill extras, floating bar ---- */
+@media (min-width: 1024px) {
+  /* Header pill: even 10px padding, search corners follow the pill's. */
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-cards] [data-kit-island] {
+    padding: 10px !important;
+  }
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-cards] [data-kit-island] > .min-h-9 { padding-left: 4px; }
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-cards] [data-kit-island] > .mt-2\.5 { margin-top: 8px; }
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-cards] [data-kit-island] > .mt-2\.5 > * + * { margin-top: 8px !important; }
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-cards] [data-msg-cards-search] {
+    border-radius: 12px !important;
+    height: 40px !important;
+  }
+  [data-msg-cards] [data-msg-cards-action] {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 32px;
+    min-width: 32px;
+    padding: 0 8px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    color: rgb(161 161 170);
+    transition: background-color 150ms ease, color 150ms ease;
+  }
+  [data-msg-cards] [data-msg-cards-action] svg { width: 16px; height: 16px; }
+  [data-msg-cards] [data-msg-cards-action]:hover { color: var(--mc-ink); background: var(--mc-hover); }
+  [data-msg-cards] [data-msg-cards-select],
+  [data-msg-cards] [data-msg-cards-select].is-on { color: var(--mc-ink); background: var(--mc-soft); }
+  [data-msg-cards] [data-msg-cards-select] svg { width: 15px; height: 15px; }
+
+  /* Cards 16px apart, lined up with the pill's edges, both 24px in from the
+     panel (the B concept's spacing). */
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-cards] [data-kit-island] {
+    margin-left: 12px;
+    margin-right: 12px;
+  }
+  [data-msg-cards] [data-chat-list-scroll] {
+    padding: 18px 24px 16px !important;
+  }
+  [data-msg-cards] [data-chat-list-body] { gap: 16px; }
+  [data-msg-cards][data-msg-cards-picking] [data-chat-list-scroll] { padding-bottom: 96px !important; }
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-cards] [data-chat-list-scroll] :is([data-chat-list-row], [data-chat-list-body] > button) {
+    min-height: 88px;
+    padding: 14px 16px 14px 14px !important;
+    gap: 12px !important;
+    /* Let the card tint and rim paint without a separate backdrop layer per row. */
+  }
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-cards] [data-chat-list-scroll] :is([data-chat-list-row], [data-chat-list-body] > button):hover {
+    box-shadow: var(--mc-rim), inset 0 0 0 100px var(--mc-hover) !important;
+  }
+
+  /* Picking: the actions float over the list in one glass bar. */
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-cards] [data-chat-bulk-bar] {
+    position: absolute;
+    z-index: 20;
+    left: 50%;
+    bottom: 12px;
+    width: min(540px, calc(100% - 48px));
+    margin: 0 !important;
+    transform: translateX(-50%);
+    border-radius: 18px !important;
+    border: 0 !important;
+    background: var(--mc-card), var(--mc-bar-fill, rgb(12 12 16 / 0.62)) !important;
+    -webkit-backdrop-filter: var(--nav-glass-blur, blur(24px) saturate(1.8));
+    backdrop-filter: var(--nav-glass-blur, blur(24px) saturate(1.8));
+    box-shadow: var(--mc-rim), 0 18px 40px -12px rgb(0 0 0 / 0.55) !important;
+  }
+}
+
+/* ---- Plain list (Settings > Appearance > Chats as cards, off): no cards,
+   no gaps, a line between chats. Tabs, header and the unread bar stay. ---- */
+[data-msg-cards][data-msg-plain] [data-chat-list-body] { gap: 0; }
+[data-msg-cards][data-msg-plain] [data-chat-list-scroll] .overflow-hidden:has(> .flex > .w-full > [data-chat-list-row]) { border-radius: 0; }
+html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-cards][data-msg-plain] [data-chat-list-scroll] :is([data-chat-list-row], [data-chat-list-body] > button) {
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: inset 0 -1px 0 var(--mc-soft) !important;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-cards][data-msg-plain] [data-chat-list-scroll] :is([data-chat-list-row], [data-chat-list-body] > button):hover {
+  background: var(--mc-hover) !important;
+  box-shadow: inset 0 -1px 0 var(--mc-soft) !important;
+}
+html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-cards][data-msg-plain] [data-chat-list-scroll] [data-chat-list-row]:is([data-selected], [data-bulk-checked='true']) {
+  background: var(--mc-soft) !important;
+  box-shadow: inset 0 -1px 0 var(--mc-soft) !important;
+}
+@media (min-width: 1024px) {
+  [data-msg-cards][data-msg-plain] [data-chat-list-scroll] { padding-top: 8px !important; }
+  html:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) [data-msg-cards][data-msg-plain] [data-chat-list-scroll] :is([data-chat-list-row], [data-chat-list-body] > button) {
+    min-height: 76px;
+  }
+}

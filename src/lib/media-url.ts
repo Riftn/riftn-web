@@ -1,0 +1,561 @@
+/**
+ * Media URL Utilities
+ * ====================
+ * Canonical URL construction for Riftn CDN assets.
+ * Strips folder prefixes (statics/, nfts/, etc.) and builds clean URLs.
+ * 
+ * @module lib/media-url
+ */
+
+import { noteImageSizes } from '@/lib/image-size-hints';
+import { DEHUB_CDN_BASE } from '@/lib/api/dehub';
+import { ASSISTANT_AVATAR, isAssistantAddress } from '@/lib/assistant';
+
+/**
+ * Extract avatar path from any API object.
+ * Handles all known field variations: avatarImageUrl, avatarUrl, avatar_url, minterAvatarUrl
+ * Use this as the single source of truth before calling buildAvatarUrl.
+ */
+export function extractAvatarPath(obj: Record<string, any> | null | undefined): string | undefined {
+  if (!obj) return undefined;
+  return obj.avatarImageUrl || obj.avatarUrl || obj.avatar_url || obj.minterAvatarUrl || obj.actorAvatar || undefined;
+}
+
+/**
+ * Extract file extension from API path
+ * Preserves original extension including .octet-stream, .gif, .jpeg, etc.
+ */
+export function getExtension(path: string): string {
+  const match = path.split(/[?#]/, 1)[0].match(/\.([a-zA-Z0-9-]+)$/);
+  if (!match) return 'jpg';
+  return match[1].toLowerCase();
+}
+
+/**
+ * Get the cache-bust value for a given address.
+ * After a profile image upload, we store an address-specific timestamp in localStorage.
+ * This ensures the browser fetches the updated image immediately after upload
+ * rather than serving the old cached version.
+ *
+ * New profile uploads carry a content revision in the stored filename. Legacy
+ * names use a stable fallback and retain the local upload invalidation marker.
+ * Reading the same image never creates a new source URL just because time passed.
+ *
+ * Reads are memoized: this runs per-avatar per-feed-mapper call, and
+ * synchronous localStorage.getItem in that hot path adds up.
+ */
+const versionCache = new Map<string, string>();
+
+function getProfileImageVersion(address: string): string {
+  const fallback = () => 'legacy';
+  if (typeof localStorage === 'undefined') return fallback();
+  const key = address.toLowerCase();
+  const cached = versionCache.get(key);
+  if (cached !== undefined) return cached || fallback();
+  const stored = localStorage.getItem(`profile_img_v_${key}`) ?? '';
+  versionCache.set(key, stored);
+  return stored || fallback();
+}
+
+function profileImageSource(url: string, address: string): string {
+  if (/-[a-f0-9]{32}\.(?:jpg|webp)(?:[?#]|$)/i.test(url) || /[?&]v=/.test(url)) return url;
+  return `${url}${url.includes('?') ? '&' : '?'}v=${getProfileImageVersion(address)}`;
+}
+
+// ── Cloudflare Image Transformations ────────────────────────────────────
+//
+// The DigitalOcean Spaces CDN serves originals and nothing else: no resizing,
+// no format negotiation, no `Vary: Accept`. A signed-out load of dehub.io in
+// Aug 2026 pulled 79 distinct CDN images totalling ~3.5 MB, with zero `srcset`
+// and zero `<picture>` in the app — a 1630x1570 avatar arriving for a 32x32
+// slot, a 170 KB feed JPEG for a 180px rail tile.
+//
+// Routing them through dehub.io's Cloudflare zone fixes both at once.
+// Measured against production:
+//
+//   avatar   27,940 B -> 1,523 B AVIF @ w=64
+//   feed img 170,931 B -> 7,835 B @ w=180 / 24,092 B @ w=360
+//   no-AVIF browser: 29,916 B JPEG @ w=360 — `format=auto` degrades cleanly
+//
+// ABSOLUTE origin, not a relative /cdn-cgi/ path: `/cdn-cgi/image/` only
+// exists on the Cloudflare edge, so a relative URL 404s every image on
+// localhost and in `vite preview`. Pinning the origin keeps dev, preview and
+// production on one code path.
+//
+// This is a live dependency on the zone's Transformations setting (Images ->
+// Transformations, with the Spaces host allowed as a remote source). If it is
+// ever switched off, these URLs 404 — they do NOT silently fall back to the
+// original. That is the trade for not needing an upload-side migration, and
+// it is why only our own CDN host is rewritten: anything else is left alone.
+const IMAGE_TRANSFORM_ORIGIN = 'https://dehub.io';
+
+// SVG has nothing to gain and animated GIF loses its animation unless
+// `anim=true` is threaded through, so both are passed through untouched.
+const NON_TRANSFORMABLE = /\.(svg|gif)(\?|$)/i;
+
+// Some networks cannot reach dehub.io at all while the Spaces CDN still
+// answers (UK and Spanish ISPs block whole Cloudflare ranges during football
+// matches; the app shell still runs from the service worker). Every transform
+// then hangs and the feed shows empty image boxes. Once transforms are known
+// to be failing (see installImageOriginFallback), originals are served for the
+// rest of the session.
+const TRANSFORMS_DOWN_KEY = 'dehub:image-transforms-down';
+let transformsDown = (() => {
+  try { return sessionStorage.getItem(TRANSFORMS_DOWN_KEY) === '1'; } catch { return false; }
+})();
+
+export function areImageTransformsDown(): boolean {
+  return transformsDown;
+}
+
+export function markImageTransformsDown(): void {
+  transformsDown = true;
+  try { sessionStorage.setItem(TRANSFORMS_DOWN_KEY, '1'); } catch { /* session-only is fine */ }
+}
+
+export interface CdnImageOptions {
+  /** Target width in DEVICE pixels — i.e. CSS px x DPR, not CSS px. */
+  width?: number;
+  quality?: number;
+  fit?: 'cover' | 'contain' | 'scale-down';
+}
+
+/**
+ * Wrap a Riftn CDN URL in a Cloudflare image transform. Any URL that is not on
+ * our CDN (dicebear, iHeart station art, blob:/data: previews) is returned
+ * untouched.
+ */
+export function cdnImage(url: string, opts?: CdnImageOptions): string;
+export function cdnImage(url: string | undefined, opts?: CdnImageOptions): string | undefined;
+export function cdnImage(
+  url: string | undefined,
+  opts: CdnImageOptions = {},
+): string | undefined {
+  if (!url) return url;
+  // Feed payloads arrive already wrapped at DEFAULT_IMAGE_WIDTH. Asking one of
+  // those for a different width used to hand the 1080 back unchanged, so the
+  // "160px" aspect probes and 64px blank-poster probes each pulled a full
+  // poster: ~75 of them for every profile opened on a phone. Re-wrap the
+  // source instead, keeping the quality and fit it carried.
+  const prefix = `${IMAGE_TRANSFORM_ORIGIN}/cdn-cgi/image/`;
+  if (opts.width && url.startsWith(prefix)) {
+    const rest = url.slice(prefix.length);
+    const slash = rest.indexOf('/');
+    if (slash === -1) return url;
+    const carried: CdnImageOptions = {};
+    for (const param of rest.slice(0, slash).split(',')) {
+      const [key, value] = param.split('=');
+      if (key === 'quality' && value) carried.quality = Number(value);
+      if (key === 'fit' && value) carried.fit = value as CdnImageOptions['fit'];
+    }
+    return cdnImage(rest.slice(slash + 1), { ...carried, ...opts });
+  }
+  if (!url.startsWith(DEHUB_CDN_BASE)) return url;
+  if (NON_TRANSFORMABLE.test(url)) return url;
+  if (transformsDown) return url;
+
+  const params = [`format=auto`, `quality=${opts.quality ?? 80}`];
+  if (opts.width) params.push(`width=${opts.width}`);
+  if (opts.fit) params.push(`fit=${opts.fit}`);
+  // `scale-down`-style behaviour is the default for width-only transforms:
+  // Cloudflare never upscales past the source, so a small original stays small.
+  return `${IMAGE_TRANSFORM_ORIGIN}/cdn-cgi/image/${params.join(',')}/${url}`;
+}
+
+/**
+ * The source URL behind a `cdnImage()` wrapper — the file as it was uploaded,
+ * before any width or quality transform. Anything that is not one of our own
+ * transform URLs (a raw CDN URL, a blob: preview, a third-party host) comes
+ * back untouched, so a caller can pass whatever it happens to hold.
+ *
+ * The fullscreen viewer is why this exists. Feed image URLs are built once, at
+ * `DEFAULT_IMAGE_WIDTH`, and handed on to everything downstream — so opening a
+ * photo fullscreen and zooming into it was zooming into a 1080px, quality-80
+ * re-encode rather than into the picture that was uploaded.
+ */
+export function cdnImageSource(url: string): string;
+export function cdnImageSource(url: string | undefined): string | undefined;
+export function cdnImageSource(url: string | undefined): string | undefined {
+  if (!url) return url;
+  const prefix = `${IMAGE_TRANSFORM_ORIGIN}/cdn-cgi/image/`;
+  if (!url.startsWith(prefix)) return url;
+  const rest = url.slice(prefix.length);
+  const slash = rest.indexOf('/');
+  return slash === -1 ? url : rest.slice(slash + 1);
+}
+
+/**
+ * The same image at several widths, as a `srcset` value — so the browser picks
+ * one that fits the slot it actually renders into, instead of the single width
+ * the caller guessed. Accepts either a raw CDN URL or one `cdnImage()` has
+ * already wrapped (the quality/fit it carried are kept), and returns undefined
+ * for anything it cannot resize, so the caller just omits the attribute.
+ *
+ * Why: the feed's image slot is 1080 device px wide on a desktop and ~650 on a
+ * phone, and every phone was fetching the 1080 — 300 KB of the "improve image
+ * delivery" savings on the 2026-09-02 Lighthouse run.
+ */
+export function cdnImageSrcSet(url: string | undefined, widths: number[]): string | undefined {
+  if (!url || transformsDown) return undefined;
+  const prefix = `${IMAGE_TRANSFORM_ORIGIN}/cdn-cgi/image/`;
+  let source = url;
+  let quality: number | undefined;
+  let fit: CdnImageOptions['fit'];
+  if (url.startsWith(prefix)) {
+    const rest = url.slice(prefix.length);
+    const slash = rest.indexOf('/');
+    if (slash === -1) return undefined;
+    source = rest.slice(slash + 1);
+    for (const param of rest.slice(0, slash).split(',')) {
+      const [key, value] = param.split('=');
+      if (key === 'quality' && value) quality = Number(value);
+      if (key === 'fit' && value) fit = value as CdnImageOptions['fit'];
+    }
+  }
+  if (!source.startsWith(DEHUB_CDN_BASE) || NON_TRANSFORMABLE.test(source)) return undefined;
+  return widths.map((width) => `${cdnImage(source, { width, quality, fit })} ${width}w`).join(', ');
+}
+
+// ── Site-bundled /media images ──────────────────────────────────────────
+//
+// Blog banners live in public/media as 1-2.6 MB PNGs and were served as-is
+// into h-40 card tiles. The same zone can resize them, but only when the
+// source is named by its ABSOLUTE production URL: a relative `/media/...`
+// source is refused (error 9401, origin not in the allowed list).
+//
+// That makes production the only host where this rewrite is safe. A post added
+// on staging or localhost has no copy on dehub.io yet, so those hosts get the
+// original path. No window means the worker's bot prerender, which renders for
+// production.
+function isProductionHost(): boolean {
+  if (typeof window === 'undefined') return true;
+  const host = window.location.hostname;
+  return host === 'riftn.com' || host === 'www.riftn.com' || host === 'dehub.io' || host === 'www.dehub.io';
+}
+
+/**
+ * Resize a site-bundled `/media/...` image through the same Cloudflare
+ * transform `cdnImage()` uses. Anything that is not a `/media/` path, and every
+ * path on a non-production host, is returned untouched.
+ */
+export function mediaImage(path: string, opts: CdnImageOptions = {}): string {
+  if (!path.startsWith('/media/') || NON_TRANSFORMABLE.test(path) || !isProductionHost()) return path;
+  const params = [`format=auto`, `quality=${opts.quality ?? 80}`];
+  if (opts.width) params.push(`width=${opts.width}`);
+  if (opts.fit) params.push(`fit=${opts.fit}`);
+  return `${IMAGE_TRANSFORM_ORIGIN}/cdn-cgi/image/${params.join(',')}/${IMAGE_TRANSFORM_ORIGIN}${path}`;
+}
+
+/** `srcset` for a `/media/` image, or undefined wherever `mediaImage()` would not resize. */
+export function mediaImageSrcSet(path: string | undefined, widths: number[]): string | undefined {
+  if (!path || mediaImage(path) === path) return undefined;
+  return widths.map((width) => `${mediaImage(path, { width })} ${width}w`).join(', ');
+}
+
+// ── Supabase Storage images ─────────────────────────────────────────────
+//
+// Community banners and avatars are uploaded to Supabase Storage and were
+// served as the uploaded originals: a profile with two pinned communities
+// pulled 3.9 MB + 3.7 MB of banner PNG and a 959 KB avatar PNG, for cards
+// 48 px tall. The dehub.io Cloudflare transform refuses this host (403, the
+// origin is not an allowed source), so these go through Supabase's own
+// resizer instead, which negotiates WebP from the Accept header:
+//
+//   dehub-debates/banner.png 3,784,726 B -> 31,750 B WebP @ w=736
+//   dehub-wave/avatar_….png    959 KB    ->  6,292 B WebP @ w=96
+//
+// `resize=contain` matters: the resizer's default is `cover` against the
+// ORIGINAL height, so a width-only request crops a 2412x1056 banner down to a
+// 480x1056 strip. `contain` with a width alone keeps the aspect ratio.
+const SUPABASE_PUBLIC_OBJECT = /^https:\/\/aigxuutjaqsywioxjefr\.supabase\.co\/storage\/v1\/object\/public\//;
+
+/**
+ * Resize a public Supabase Storage image to `width` device px. Anything that is
+ * not one of our public storage objects (a CDN URL, a blob: preview, SVG/GIF)
+ * is returned untouched.
+ */
+export function storageImage(url: string, width: number): string;
+export function storageImage(url: string | null | undefined, width: number): string | undefined;
+export function storageImage(url: string | null | undefined, width: number): string | undefined {
+  if (!url) return url ?? undefined;
+  if (!SUPABASE_PUBLIC_OBJECT.test(url) || NON_TRANSFORMABLE.test(url)) return url;
+  const rendered = url.replace('/storage/v1/object/public/', '/storage/v1/render/image/public/');
+  const sep = rendered.includes('?') ? '&' : '?';
+  return `${rendered}${sep}width=${width}&quality=80&resize=contain`;
+}
+
+// ── Sizing by what the element actually renders at ──────────────────────
+//
+// The first pass at this shipped one fixed width per media kind, each sized for
+// the LARGEST place that kind appears on a desktop viewport. That is device-
+// blind, and measuring dehub.io in Aug 2026 showed what it costs: a phone at
+// 375 CSS px pulled 1,555 KB of images and a 1280 px desktop pulled 1,666 KB —
+// near-identical payloads, because every device asks for the same URL. The
+// desktop can absorb that. A phone on a mobile radio cannot, which is why the
+// desktop got visibly faster and mobile barely moved.
+//
+// Concretely, on the mobile home feed: 30 video posters rendered into a 120 CSS
+// px reel tile, each fetched at width=1080 (29.0 KB vs 5.7 KB at width=240),
+// and 23 avatars rendered at 36 CSS px, each fetched at width=192 (5.6 KB vs
+// 1.3 KB at width=72).
+//
+// So callers now say how big the element is in CSS pixels and this works out
+// the device pixels, which is the only place DPR belongs. It cuts both ways:
+// the profile header avatar (w-24 sm:w-28) was UNDER-served at 192 on a 3x
+// phone and now gets 360.
+
+/**
+ * Widths are snapped to this ladder rather than passed through exactly. Every
+ * distinct width is a separate Cloudflare transform + cache object, so letting
+ * arbitrary viewport arithmetic reach the URL would shred the edge hit rate
+ * across the device population for pixels nobody can see.
+ */
+// 736 / 1100 rather than 720 / 1080: common phones ask for 721 (412 CSS px at
+// 1.75x) and 1081 (412 at 2.625x) device px, one over the old rungs, and the
+// pick is the first rung >= needed, so those phones jumped a whole rung.
+const WIDTH_LADDER = [64, 96, 128, 192, 256, 360, 480, 736, 1100, 1440, 1920];
+
+/**
+ * Device pixels needed to render `cssPx` crisply here, snapped up to the ladder.
+ *
+ * DPR is capped at 3: past that the extra pixels are well beyond what the eye
+ * resolves at phone viewing distance, and the byte cost is quadratic. Falls back
+ * to 2 when there is no window (the Cloudflare worker's bot prerender), which is
+ * the median of the real device population rather than a guess.
+ */
+export function deviceWidth(cssPx: number): number {
+  const dpr = typeof window === 'undefined' ? 2 : Math.min(window.devicePixelRatio || 1, 3);
+  const needed = cssPx * dpr;
+  return WIDTH_LADDER.find((w) => w >= needed) ?? WIDTH_LADDER[WIDTH_LADDER.length - 1];
+}
+
+/**
+ * Tailwind's `md` breakpoint, for call sites whose element has a responsive
+ * width (`w-[120px] md:w-[180px]`) and so cannot state one CSS size.
+ *
+ * Read at render, so it does not react to a resize across the breakpoint on its
+ * own. That is deliberate: the cost of being wrong is one slightly soft or
+ * slightly heavy image until the next render, and phones do not cross 768 px.
+ */
+let mdMatches: boolean | undefined;
+export function isMdUp(): boolean {
+  if (typeof window === 'undefined') return false;
+  if (mdMatches === undefined) {
+    const query = window.matchMedia('(min-width: 768px)');
+    mdMatches = query.matches;
+    query.addEventListener('change', (event) => { mdMatches = event.matches; });
+  }
+  // Feed cards call this while React commits DOM changes. Reading innerWidth
+  // there synchronously lays out the growing feed for a breakpoint boolean.
+  return mdMatches;
+}
+
+// Defaults for callers that don't state a size. These are the COMMON case, not
+// the largest one — the handful of genuinely large call sites pass their own
+// width (only four <Avatar> elements in the app render at 64 CSS px or more,
+// and two of those are static team photos).
+//   avatars — the default <Avatar> is h-10 w-10, i.e. 40 CSS px
+//   covers  — full-bleed profile banner
+//   images / feed-images — full-width feed media
+const DEFAULT_AVATAR_CSS_PX = 40;
+const DEFAULT_COVER_WIDTH = 1500;
+const DEFAULT_IMAGE_WIDTH = 1080;
+
+/**
+ * Call this after a successful profile image upload to force a fresh CDN fetch
+ * on the next render when an older upload path still uses a canonical key.
+ */
+export function bumpProfileImageVersion(address: string): void {
+  if (typeof localStorage !== 'undefined') {
+    const key = address.toLowerCase();
+    const stamp = String(Date.now());
+    localStorage.setItem(`profile_img_v_${key}`, stamp);
+    versionCache.set(key, stamp);
+  }
+}
+
+/**
+ * Build a direct CDN avatar URL: cdn/avatars/{address}.{ext}
+ * Used as a cascading fallback when the primary API-server URL fails.
+ *
+ * Deliberately NOT routed through cdnImage(): this is the last rung of the
+ * fallback ladder, so it must not share a failure mode with the primary URL.
+ * If the zone's Transformations setting is ever switched off, every
+ * cdnImage() URL 404s at once — and this path is what still resolves.
+ */
+export function buildAvatarCdnFallbackUrl(address: string, apiAvatarPath?: string | null, size?: number): string | undefined {
+  if (isAssistantAddress(address)) return ASSISTANT_AVATAR;
+  if (!address) return undefined;
+  const ext = apiAvatarPath ? getExtension(apiAvatarPath) : 'jpg';
+  const knownSource = buildAvatarSourceUrl(address, apiAvatarPath);
+  const source = knownSource?.startsWith(DEHUB_CDN_BASE)
+    ? knownSource
+    : profileImageSource(`${DEHUB_CDN_BASE}avatars/${address.toLowerCase()}.${ext}`, address);
+  const sizeParam = size ? `${source.includes('?') ? '&' : '?'}w=${size}&h=${size}` : '';
+  return `${source}${sizeParam}`;
+}
+
+/**
+ * Build canonical avatar URL: cdn/avatars/{address}.{ext}
+ * API may return paths like "avatars/xxx.jpg" or "statics/avatars/xxx.octet-stream"
+ * We normalize to: https://dehubcdn.../avatars/{address}.{ext}
+ */
+export function buildAvatarUrl(
+  address: string,
+  apiAvatarPath: string | undefined | null,
+  /**
+   * Device pixels — pass `deviceWidth(cssPx)` rather than a literal, so the
+   * value tracks the screen. Defaults to the app's standard h-10 w-10 avatar.
+   */
+  width: number = deviceWidth(DEFAULT_AVATAR_CSS_PX),
+): string | undefined {
+  if (isAssistantAddress(address)) return ASSISTANT_AVATAR;
+  return cdnImage(buildAvatarSourceUrl(address, apiAvatarPath), { width, fit: 'cover' });
+}
+
+/**
+ * The canonical, untransformed avatar URL. Split out so buildAvatarUrl can wrap
+ * it in one place instead of at each of the eight return paths below.
+ */
+function buildAvatarSourceUrl(address: string, apiAvatarPath: string | undefined | null): string | undefined {
+  if (!apiAvatarPath) return undefined;
+
+  // Blob or data URLs (optimistic previews) - return as-is
+  if (apiAvatarPath.startsWith('blob:') || apiAvatarPath.startsWith('data:')) {
+    return apiAvatarPath;
+  }
+
+  const normalizedAddress = address?.toLowerCase?.() || '';
+
+  // If it's already a dehubcdn URL, append cache-bust and return
+  if (apiAvatarPath.startsWith('https://dehubcdn')) {
+    return profileImageSource(apiAvatarPath, normalizedAddress);
+  }
+
+  // api.dehub.io/statics/... — strip statics/ prefix and route to CDN
+  // e.g. "https://api.dehub.io/statics/avatars/0x.png" → "https://dehubcdn.../avatars/0x.png"
+  if (apiAvatarPath.includes('api.dehub.io') && apiAvatarPath.includes('/statics/')) {
+    const match = apiAvatarPath.match(/statics\/([^?]+)/);
+    if (match) {
+      return profileImageSource(`${DEHUB_CDN_BASE}${match[1]}`, normalizedAddress);
+    }
+  }
+
+  // Any other api.dehub.io URL — extract path and route to CDN
+  // api.dehub.io does NOT serve avatar files directly (returns 404); CDN is the source of truth
+  if (apiAvatarPath.includes('api.dehub.io')) {
+    const match = apiAvatarPath.match(/api\.dehub\.io\/([^?]+)/);
+    if (match) {
+      return profileImageSource(`${DEHUB_CDN_BASE}${match[1]}`, normalizedAddress);
+    }
+  }
+
+  // Other full URLs (dicebear, external CDNs, etc.) - return as-is
+  if (apiAvatarPath.startsWith('http')) return apiAvatarPath;
+
+  // "statics/" prefix — strip it and serve from CDN
+  // e.g. "statics/avatars/0x.png" → "https://dehubcdn.../avatars/0x.png"
+  if (apiAvatarPath.startsWith('statics/')) {
+    const cdnPath = apiAvatarPath.slice('statics/'.length);
+    return profileImageSource(`${DEHUB_CDN_BASE}${cdnPath}`, normalizedAddress);
+  }
+
+  // For remaining relative paths, require a known address and a valid path (must contain /)
+  if (!normalizedAddress) return undefined;
+  if (!apiAvatarPath.includes('/')) return undefined;
+
+  // Relative path (including avatars/) — use CDN base
+  return profileImageSource(`${DEHUB_CDN_BASE}${apiAvatarPath}`, normalizedAddress);
+}
+
+/**
+ * Build canonical cover URL: cdn/covers/{address}.{ext}
+ * API may return paths like "covers/xxx.jpg" or "statics/covers/xxx.gif"
+ * We normalize to: https://dehubcdn.../covers/{address}.{ext}
+ */
+export function buildCoverUrl(
+  address: string,
+  apiCoverPath: string | undefined | null,
+  width: number = DEFAULT_COVER_WIDTH,
+): string | undefined {
+  if (!apiCoverPath) return undefined;
+  if (apiCoverPath.startsWith('blob:') || apiCoverPath.startsWith('data:')) return apiCoverPath;
+  if (apiCoverPath.startsWith('http')) {
+    if (apiCoverPath.startsWith(DEHUB_CDN_BASE)) return cdnImage(profileImageSource(apiCoverPath, address), { width });
+    const apiMatch = apiCoverPath.match(/^https?:\/\/api\.dehub\.io\/(?:statics\/)?(covers\/[^?#]+)(.*)$/);
+    if (apiMatch) return cdnImage(profileImageSource(`${DEHUB_CDN_BASE}${apiMatch[1]}${apiMatch[2]}`, address), { width });
+    return cdnImage(apiCoverPath, { width });
+  }
+  const storedPath = apiCoverPath.replace(/^statics\//, '');
+  if (storedPath.startsWith('covers/')) return cdnImage(profileImageSource(`${DEHUB_CDN_BASE}${storedPath}`, address), { width });
+  const ext = getExtension(apiCoverPath);
+  return cdnImage(profileImageSource(`${DEHUB_CDN_BASE}covers/${address}.${ext}`, address), { width });
+}
+
+/**
+ * Build canonical image URL: cdn/images/{tokenId}.{ext}
+ * API returns paths like "images/2008.jpg" or "nfts/images/61.jpeg"
+ * We normalize to: https://dehubcdn.../images/{tokenId}.{ext}
+ */
+export function buildImageUrl(
+  tokenId: number | string,
+  apiImagePath: string | undefined | null,
+  width: number = DEFAULT_IMAGE_WIDTH,
+): string {
+  if (!apiImagePath) return '';
+  if (apiImagePath.startsWith('http')) return cdnImage(apiImagePath, { width });
+  // Shorts thumbnails live in their own CDN folder — keep the path as-is.
+  // Rewriting them to images/{tokenId} 403s (the file was never uploaded there).
+  if (apiImagePath.startsWith('shorts/')) return cdnImage(`${DEHUB_CDN_BASE}${apiImagePath}`, { width });
+  // A changed cover lands on a fresh key (images/{tokenId}-{uuid}.jpg) so no
+  // cache in front of the bucket can keep serving the old one. Read it as-is.
+  if (apiImagePath.startsWith('images/')) return cdnImage(`${DEHUB_CDN_BASE}${apiImagePath}`, { width });
+  const ext = getExtension(apiImagePath);
+  return cdnImage(`${DEHUB_CDN_BASE}images/${tokenId}.${ext}`, { width });
+}
+
+/**
+ * Build video URL: cdn/videos/{tokenId}.mp4
+ */
+export function buildVideoUrl(tokenId: number | string): string {
+  return `${DEHUB_CDN_BASE}videos/${tokenId}.mp4`;
+}
+
+/**
+ * Build a post's HLS master playlist URL from the `hlsUrl` key the API sends
+ * (`videos/{tokenId}/hls/{rev}/master.m3u8`). The API only sends one for a
+ * public post with a rendition ready; everything else plays buildVideoUrl.
+ *
+ * Undefined for anything that is not a playlist on our own CDN, so a stray
+ * field can never become a video source. Already-built URLs pass through, so
+ * an item mapped once can be mapped again (lib/post-cache round-trips them).
+ */
+export function buildHlsUrl(path: string | null | undefined): string | undefined {
+  if (!path || !/\.m3u8$/i.test(path)) return undefined;
+  if (/^https?:\/\//i.test(path)) return path.startsWith(DEHUB_CDN_BASE) ? path : undefined;
+  return `${DEHUB_CDN_BASE}${path.replace(/^\/+/, '')}`;
+}
+
+/**
+ * Build multi-image URLs: cdn/feed-images/{filename}
+ * API returns array like ["feed-images/abc.jpg", "feed-images/def.png"]
+ * We extract filename and build: https://dehubcdn.../feed-images/{filename}
+ */
+export function buildFeedImageUrls(
+  apiImageUrls: string[] | undefined | null,
+  width: number = DEFAULT_IMAGE_WIDTH,
+  /** The post's `imageSizes`, so its cards can reserve each photo's shape. */
+  sizes?: unknown,
+): string[] | undefined {
+  if (sizes) noteImageSizes({ imageSizes: sizes });
+  if (!apiImageUrls || apiImageUrls.length === 0) return undefined;
+
+  return apiImageUrls.map((imgUrl) => {
+    if (imgUrl.startsWith('http')) return cdnImage(imgUrl, { width });
+    const filename = imgUrl.split('/').pop() || '';
+    if (filename) {
+      return cdnImage(`${DEHUB_CDN_BASE}feed-images/${filename}`, { width });
+    }
+    return imgUrl;
+  });
+}

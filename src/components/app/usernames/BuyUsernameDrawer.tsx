@@ -1,0 +1,213 @@
+import { useTranslation as _useCopy } from 'react-i18next';
+import { tokenLabel } from '@/lib/token-label';
+/**
+ * Buy Username Drawer
+ * ===================
+ * The handle, what it costs, what you give up, and one button.
+ *
+ * "What you give up" is the part that is easy to leave out and must not be:
+ * buying a handle **replaces** the one you are wearing, and nobody should
+ * discover that after paying. The drawer says the old name out loud, next to
+ * the new one, before the button is reachable.
+ *
+ * The price is quoted by the server when the drawer opens and re-quoted on
+ * every open — a listing can sit in the grid for days and the seller can
+ * reprice it. Nothing here computes an amount.
+ *
+ * There is no network picker. The payment goes out on whichever chain the
+ * buyer's DHB is actually sitting on, Base first, so the drawer only reports
+ * which one that is — still worth saying out loud before somebody spends, but
+ * not a decision to hand them.
+ */
+
+import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
+import { Button } from '@/components/ui/button';
+import { ArrowRight, Loader2 } from "lucide-react";
+import ShieldCheck from "@/components/ui/cut-icons/security";
+
+import Share2 from "@/components/ui/cut-icons/feedshare";
+
+import dehubCoin from '@/assets/dehub-coin.png';
+import { ShareEntityDrawer } from '@/components/app/ShareEntityDrawer';
+import { useAuth } from '@/contexts/AuthContext';
+import { useBuyUsername } from '@/hooks/use-username-market';
+import { usePayChain } from '@/hooks/use-pay-chain';
+import { SUPPORTED_CHAINS } from '@/components/app/ChainSelector';
+import type { UsernameListing, UsernameQuote } from '@/lib/api/dehub/username-market';
+
+interface Props {
+  listing: UsernameListing | null;
+  open: boolean;
+  onClose: () => void;
+}
+
+export function BuyUsernameDrawer({ listing, open, onClose }: Props) {
+  const { t: _copy } = _useCopy();
+  const { t } = useTranslation();
+  const { walletAddress, isAuthenticated, openLoginModal } = useAuth();
+  const { getQuote, buy, stage } = useBuyUsername();
+  const paying = useRef(false);
+  paying.current = buy.isPending;
+  const [quote, setQuote] = useState<UsernameQuote | null>(null);
+  const [quoteError, setQuoteError] = useState<string | null>(null);
+  const [shareOpen, setShareOpen] = useState(false);
+  const payChain = usePayChain(quote?.priceDhb, quote?.chains.map(c => c.chainId));
+
+  const isOwn = !!walletAddress && walletAddress.toLowerCase() === listing?.seller.address.toLowerCase();
+  const listingId = listing?.id;
+  // Quoting needs a Riftn token, so a signed-out browser would only get a 401.
+  // They see the asking price off the card and Buy opens the login modal; the
+  // quote fetches on its own once they are in, because this flips with it.
+  const canQuote = open && !!listingId && isAuthenticated && !isOwn;
+
+  useEffect(() => {
+    if (!canQuote) return;
+    let cancelled = false;
+    setQuote(null);
+    setQuoteError(null);
+    getQuote
+      .mutateAsync(listingId!)
+      .then(q => { if (!cancelled) setQuote(q); })
+      .catch((err: Error) => { if (!cancelled) setQuoteError(err.message); });
+    const interval = setInterval(() => {
+      if (paying.current) return;
+      getQuote.mutateAsync(listingId!).then(q => {
+        if (!cancelled && !paying.current) setQuote(q);
+      }).catch((err: Error) => { if (!cancelled) setQuoteError(err.message); });
+    }, 30_000);
+    return () => { cancelled = true; clearInterval(interval); };
+    // getQuote is a fresh mutation object each render; keying on the listing is
+    // what stops this re-firing forever.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [canQuote, listingId]);
+
+  if (!listing) return null;
+
+  const busy = stage === 'quoting' || stage === 'paying' || stage === 'confirming';
+  const payChainMeta = SUPPORTED_CHAINS.find(c => c.id === payChain?.chainId);
+
+  const handleBuy = async () => {
+    if (!isAuthenticated) return openLoginModal();
+    if (!quote) return;
+    const fresh = await getQuote.mutateAsync(quote.listingId).catch((err: Error) => { setQuoteError(err.message); return null; });
+    if (!fresh) return;
+    setQuote(fresh);
+    if (fresh.priceDhb !== quote.priceDhb || fresh.priceUsd !== quote.priceUsd) {
+      setQuoteError(t('usernames.priceUpdated', 'Price updated. Review the amount and tap Buy again.'));
+      return;
+    }
+    setQuoteError(null);
+    const result = await buy.mutateAsync(fresh).catch(() => null);
+    if (result && !result.pending) onClose();
+  };
+
+  return (
+    <>
+      <Drawer open={open} onOpenChange={o => { if (!o && !busy) onClose(); }}>
+        <DrawerContent column className="bg-zinc-950 border-white/10">
+          <DrawerHeader className="pb-2">
+            <DrawerTitle className="text-white break-all">
+              <span className="text-zinc-500">@</span>{listing.username}
+            </DrawerTitle>
+          </DrawerHeader>
+
+          <div className="px-4 pb-6 space-y-4 max-h-[70vh] overflow-y-auto">
+            {listing.description && (
+              <p className="text-sm text-zinc-300">{listing.description}</p>
+            )}
+
+            {/* Price */}
+            <div className="rounded-xl bg-white/5 border border-white/10 p-4">
+              <p className="text-xs text-zinc-500 mb-1">{t('usernames.askingPrice')}</p>
+              <p className="text-2xl font-bold text-white flex items-center gap-2">
+                ${(quote?.priceUsd ?? listing.priceUsd).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </p>
+              <p className="text-xs text-zinc-500 mt-1 flex items-center gap-1">
+                <img src={dehubCoin} alt={tokenLabel()} className="w-4 h-4" />
+                {(quote?.priceDhb ?? listing.priceDhb).toLocaleString(undefined, { maximumFractionDigits: 6 })}
+                {' · '}{t('usernames.tokensPaidToSeller', 'Paid directly to the seller')}
+              </p>
+            </div>
+
+            {/* Where the name goes, said out loud.
+                Buying does not rename you: the name lands in your usernames and
+                you keep wearing the one you have until you switch. Only an
+                account with no handle at all is moved onto it. */}
+            {quote && quote.currentUsername ? (
+              <div className="rounded-xl bg-white/5 border border-white/10 p-4">
+                <p className="text-xs text-zinc-500 mb-2">{t('usernames.addedToYourUsernames')}</p>
+                <p className="text-sm text-white font-semibold break-all">@{quote.username}</p>
+                <p className="text-[11px] text-zinc-400 mt-2">
+                  {t('usernames.boughtNameGoesToVault', { handle: quote.username, current: quote.currentUsername })}
+                </p>
+              </div>
+            ) : quote && (
+              <div className="rounded-xl bg-white/5 border border-white/10 p-4">
+                <p className="text-xs text-zinc-500 mb-2">{t('usernames.yourHandleChanges')}</p>
+                <div className="flex items-center gap-2 text-sm min-w-0">
+                  <span className="text-zinc-400 break-all">@—</span>
+                  <ArrowRight className="w-4 h-4 text-zinc-600 shrink-0" />
+                  <span className="text-white font-semibold break-all">@{quote.username}</span>
+                </div>
+                <p className="text-[11px] text-zinc-500 mt-2">{t('usernames.postsStayWithYou')}</p>
+              </div>
+            )}
+
+            {/* Network — reported, not chosen. */}
+            {payChainMeta && (
+              <p className="text-xs text-zinc-500 flex items-center gap-2">
+                <img src={payChainMeta.icon} alt="" className="w-4 h-4 rounded-full" />
+                {t(payChain?.covered ? 'usernames.payingWithDhbOn' : 'usernames.shortOfDhbPaidOn', { chain: payChainMeta.name })}
+              </p>
+            )}
+
+            {quoteError && (
+              <p className="text-sm text-red-400">{quoteError}</p>
+            )}
+
+            {isOwn && (
+              <p className="text-sm text-zinc-400">
+                {t('usernames.yourOwnListing')}
+              </p>
+            )}
+
+            {/* Actions */}
+            <div className="flex gap-2">
+              <Button
+                className="flex-1"
+                disabled={isOwn || busy || (isAuthenticated && !quote)}
+                onClick={handleBuy}
+              >
+                {busy && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                {stage === 'paying'
+                  ? _copy("copy.d978a5522ce4", { defaultValue: "Confirming" })
+                  : stage === 'confirming'
+                    ? t('usernames.confirmingOnChain')
+                    : !isAuthenticated
+                      ? t('usernames.signInToBuy')
+                      : t('usernames.buyHandle', { handle: listing.username })}
+              </Button>
+              <Button variant="outline" size="icon" onClick={() => setShareOpen(true)} disabled={busy}>
+                <Share2 className="w-4 h-4" />
+              </Button>
+            </div>
+
+            <p className="text-[11px] text-zinc-500 flex items-start gap-1.5">
+              <ShieldCheck className="w-3.5 h-3.5 shrink-0 mt-px" />
+              {t('usernames.transferGuarantee')}
+            </p>
+          </div>
+        </DrawerContent>
+      </Drawer>
+
+      <ShareEntityDrawer
+        open={shareOpen}
+        onOpenChange={setShareOpen}
+        url={`${window.location.origin}/usernames?handle=${encodeURIComponent(listing.username)}`}
+        shareTitle={t('usernames.shareTitle', { handle: listing.username })}
+      />
+    </>
+  );
+}

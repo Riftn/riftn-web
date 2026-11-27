@@ -1,0 +1,406 @@
+import { useTranslation as _useCopy } from 'react-i18next';
+import { useCallback, useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import {
+  getPlans,
+  getMySubscriptions,
+  createPlan,
+  updatePlan,
+  buyPlan,
+  confirmPlanPublished,
+  confirmSubscriptionPurchase,
+  rememberPendingSubscriptionPayment,
+  clearPendingSubscriptionPayment,
+  isSubscribedToCreator,
+  planPrice,
+  primaryPlanChain,
+  type SubscriptionPlan,
+} from '@/lib/api/dehub';
+import { normaliseDuration } from '@/lib/contracts/subscription-plan';
+import { BASE_CHAIN_ID } from '@/lib/contracts/dhb-token';
+import type { ChainId } from '@/components/app/ChainSelector';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
+import { toastTxError } from '@/lib/tx-error-toast';
+import { fundTipFromSource } from '@/lib/tip-funding-run';
+import type { TipFundingSource } from '@/lib/tip-funding';
+import i18n, { type TFunction } from 'i18next';
+import { translateCopy as _translateCopy } from '@/i18n/copy';
+
+/** Funding already showed its own error; the buy stops without a second toast. */
+const FUNDING_ABORTED = 'FUNDING_ABORTED';
+
+/**
+ * A subscription is two things happening in order: a row in our database and a
+ * transaction on chain. Neither half is a subscription on its own, and the old
+ * hooks only ever did the first — `useBuyPlan` posted an intent, toasted
+ * "Subscribed successfully!" and stopped, so nobody was ever charged and
+ * nothing was ever activated.
+ *
+ * Both mutations below run the whole sequence and report which leg they are
+ * on, because the middle one opens a wallet and can sit there for a while.
+ */
+export type ChainStage = 'idle' | 'preparing' | 'funding' | 'wallet' | 'confirming' | 'recording' | 'done';
+
+export const STAGE_LABELS: Record<ChainStage, string> = {
+  idle: '',
+  get preparing() { return _translateCopy("copy.5d1fa38bcf0d", { defaultValue: "Preparing…" }); },
+  get funding() { return _translateCopy("copy.0a9bbb5d3dc2", { defaultValue: "Funding with your wallet…" }); },
+  get wallet() { return _translateCopy("copy.d978a5522ce4", { defaultValue: "Confirming" }); },
+  get confirming() { return _translateCopy("copy.69114f6ee542", { defaultValue: "Waiting for the transaction…" }); },
+  get recording() { return _translateCopy("copy.4bc99680df20", { defaultValue: "Finishing up…" }); },
+  get done() { return _translateCopy("copy.11a6767d5674", { defaultValue: "Done" }); },
+};
+
+/**
+ * Hook for managing creator plans
+ */
+export function useCreatorPlans(creatorAddress?: string, enabled: boolean = true) {
+  const { walletAddress } = useAuth();
+
+  // Check if viewing own plans
+  const isOwnPlans = creatorAddress?.toLowerCase() === walletAddress?.toLowerCase();
+
+  // Always use the wallet address for fetching plans consistently
+  const resolvedAddress = (isOwnPlans ? walletAddress : creatorAddress)?.toLowerCase();
+
+  const plansQuery = useQuery({
+    queryKey: ['plans', resolvedAddress || 'self'],
+    // No address means "every plan on the platform" to this endpoint, not
+    // "mine" — it carries no auth guard. Ask for nothing instead.
+    queryFn: () => (resolvedAddress ? getPlans(resolvedAddress) : Promise.resolve([])),
+    enabled: enabled && !!resolvedAddress,
+    // Plans change only via this user's own mutations (which invalidate) —
+    // 5s staleTime made every consumer remount refetch.
+    staleTime: 5 * 60_000,
+  });
+
+  return {
+    plans: plansQuery.data || [],
+    isLoading: plansQuery.isLoading,
+    isError: plansQuery.isError,
+    error: plansQuery.error,
+    refetch: plansQuery.refetch,
+    hasPlans: (plansQuery.data?.length || 0) > 0,
+    isOwnPlans,
+  };
+}
+
+/**
+ * Hook for managing user's subscriptions (what they're subscribed to)
+ */
+export function useMySubscriptions() {
+  const { isAuthenticated } = useAuth();
+
+  const subscriptionsQuery = useQuery({
+    queryKey: ['subscriptions', 'me'],
+    queryFn: getMySubscriptions,
+    enabled: isAuthenticated,
+    staleTime: 30000,
+  });
+
+  return {
+    subscriptions: subscriptionsQuery.data || [],
+    isLoading: subscriptionsQuery.isLoading,
+    isError: subscriptionsQuery.isError,
+    error: subscriptionsQuery.error,
+    refetch: subscriptionsQuery.refetch,
+  };
+}
+
+/**
+ * Hook to check if subscribed to a specific creator
+ */
+export function useIsSubscribed(creatorAddress?: string, enabled: boolean = true) {
+  const { isAuthenticated } = useAuth();
+
+  const query = useQuery({
+    queryKey: ['subscription-check', creatorAddress?.toLowerCase()],
+    queryFn: () => isSubscribedToCreator(creatorAddress!),
+    enabled: enabled && isAuthenticated && !!creatorAddress,
+    staleTime: 30000,
+  });
+
+  return {
+    isSubscribed: query.data ?? false,
+    isLoading: query.isLoading,
+    refetch: query.refetch,
+  };
+}
+
+/** Shared cache busting after anything that changes plans or subscriptions. */
+function useSubscriptionInvalidation() {
+  const queryClient = useQueryClient();
+  const { walletAddress } = useAuth();
+  return useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: ['plans'] });
+    queryClient.invalidateQueries({ queryKey: ['subscriptions'] });
+    queryClient.invalidateQueries({ queryKey: ['subscription-check'] });
+    queryClient.invalidateQueries({ queryKey: ['subscription-earnings'] });
+    queryClient.refetchQueries({ queryKey: ['plans', walletAddress?.toLowerCase() || 'self'] });
+  }, [queryClient, walletAddress]);
+}
+
+/**
+ * Publish an existing plan on chain.
+ *
+ * Split out from creation on purpose: the database row and the on-chain
+ * listing are separate transactions, and the second one can fail on its own
+ * (rejected in the wallet, out of gas, wrong network). When it does, the plan
+ * survives as unpublished and this is how the creator finishes the job —
+ * rather than being told to delete it and start again.
+ */
+export function usePublishPlan() {
+  const { t: _copy } = _useCopy();
+  const invalidate = useSubscriptionInvalidation();
+  const [stage, setStage] = useState<ChainStage>('idle');
+
+  const mutation = useMutation({
+    mutationFn: async ({ plan, chainId }: { plan: SubscriptionPlan; chainId?: ChainId }) => {
+      const planId = plan.id || plan._id;
+      if (!planId) throw new Error(_translateCopy("copy.6eb84baaeabc", { defaultValue: "Plan is missing an id" }));
+
+      const chainEntry = primaryPlanChain(plan);
+      const targetChain = (chainId || chainEntry?.chainId || BASE_CHAIN_ID) as ChainId;
+      const price = planPrice(plan);
+      if (!price) throw new Error(_translateCopy("copy.b6ad75a5beb9", { defaultValue: "Plan is missing a price" }));
+      const token = chainEntry?.token || plan.token;
+      if (!token) throw new Error(_translateCopy("copy.4190c289a568", { defaultValue: "Plan is missing a payment token" }));
+
+      setStage('wallet');
+      // Loaded on publish: it brings the wallet stack, which a profile
+      // visitor looking at plans never needs.
+      const { publishPlanOnChain } = await import('@/lib/contracts/subscription');
+      const { confirmed } = await publishPlanOnChain({
+        planId,
+        duration: plan.duration,
+        title: plan.name,
+        description: plan.description,
+        price,
+        chainId: targetChain,
+        token,
+        decimals: chainEntry?.decimals ?? plan.decimals ?? 18,
+      });
+
+      setStage('confirming');
+      await confirmed;
+
+      setStage('recording');
+      await confirmPlanPublished(String(planId), targetChain);
+      setStage('done');
+      return plan;
+    },
+    onSuccess: () => {
+      invalidate();
+      toast.success(_copy("copy.5d6661a4d994", { defaultValue: "Plan is live — people can subscribe now" }));
+    },
+    onError: (error: Error) => {
+      setStage('idle');
+      toastTxError(error, _copy("copy.65d1dd3386b4", { defaultValue: "Could not publish plan" }), { context: 'publish plan' });
+    },
+    onSettled: () => setStage('idle'),
+  });
+
+  return { ...mutation, stage, stageLabel: STAGE_LABELS[stage] };
+}
+
+/**
+ * Create a plan, then list it on chain so it can actually be bought.
+ */
+export function useCreatePlan() {
+  const { t: _copy } = _useCopy();
+  const invalidate = useSubscriptionInvalidation();
+  const [stage, setStage] = useState<ChainStage>('idle');
+
+  const mutation = useMutation({
+    mutationFn: async (planData: {
+      name: string;
+      description?: string;
+      duration: number;
+      tier: number;
+      benefits?: string[];
+      chains: { chainId: number; token: string; price: number; currency?: string; decimals?: number }[];
+    }) => {
+      if (normaliseDuration(planData.duration) === null) {
+        throw new Error(_translateCopy("copy.906f81627a6a", { defaultValue: "Plan duration must be between 0 and 12 months (0 = lifetime)" }));
+      }
+
+      setStage('preparing');
+      const plan = await createPlan(planData);
+      if (!plan?.id && !plan?._id) {
+        throw new Error(_translateCopy("copy.801658c8e591", { defaultValue: "The plan was not created — please try again" }));
+      }
+      const planId = plan.id || plan._id;
+      const target = planData.chains[0];
+
+      setStage('wallet');
+      // Loaded on publish: it brings the wallet stack, which a profile
+      // visitor looking at plans never needs.
+      const { publishPlanOnChain } = await import('@/lib/contracts/subscription');
+      const { confirmed } = await publishPlanOnChain({
+        planId: planId!,
+        duration: planData.duration,
+        title: planData.name,
+        description: planData.description,
+        price: target.price,
+        chainId: target.chainId as ChainId,
+        token: target.token,
+        decimals: target.decimals ?? 18,
+      });
+
+      setStage('confirming');
+      await confirmed;
+
+      setStage('recording');
+      await confirmPlanPublished(String(planId), target.chainId);
+      setStage('done');
+      return plan;
+    },
+    onSuccess: () => {
+      invalidate();
+      toast.success(_copy("copy.12ccad25eaea", { defaultValue: "Plan created and published" }));
+    },
+    onError: (error: Error) => {
+      setStage('idle');
+      console.error('[useCreatePlan]', error);
+      // The row may well exist even when the chain step failed, so the copy
+      // has to point at Publish rather than implying nothing happened.
+      invalidate();
+      toastTxError(error, _copy("copy.7c7f65c3e17f", { defaultValue: "Could not create plan" }), { context: 'create plan' });
+    },
+    onSettled: () => setStage('idle'),
+  });
+
+  return { ...mutation, stage, stageLabel: STAGE_LABELS[stage] };
+}
+
+/**
+ * Hook for updating an existing plan
+ */
+export function useUpdatePlan() {
+  const invalidate = useSubscriptionInvalidation();
+
+  return useMutation({
+    mutationFn: ({
+      planId,
+      data,
+    }: {
+      planId: string;
+      data: Partial<{
+        isPinned: boolean;
+        name: string;
+        description: string;
+        price: number;
+        duration: number;
+        benefits: string[];
+        chains: { chainId: number; token: string; price: number; currency?: string; decimals?: number }[];
+      }>;
+    }) => updatePlan(planId, data).then((plan) => {
+      if (data.isPinned !== undefined && plan?.isPinned !== data.isPinned) {
+        throw new Error(_translateCopy("copy.d3f74b46d00a", { defaultValue: "Plan pin was not saved" }));
+      }
+      return plan;
+    }),
+    onSuccess: (_result, variables) => {
+      invalidate();
+      // Changing the price or duration revokes the on-chain listing, because
+      // the contract charges what it holds rather than what we display.
+      const republishes =
+        variables.data.price !== undefined ||
+        variables.data.chains !== undefined ||
+        variables.data.duration !== undefined;
+      toast.success(
+        republishes
+          ? _translateCopy("copy.73502b515223", { defaultValue: "Plan updated — publish it again to make the new price live" })
+          : _translateCopy("copy.670b64743d66", { defaultValue: "Plan updated" }),
+      );
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || _translateCopy("copy.eabb5c136be4", { defaultValue: "Failed to update plan" }));
+    },
+  });
+}
+
+/**
+ * Subscribe: reserve the row, pay on chain, then have the server verify it.
+ */
+export function useBuyPlan() {
+  const invalidate = useSubscriptionInvalidation();
+  const [stage, setStage] = useState<ChainStage>('idle');
+
+  const mutation = useMutation({
+    mutationFn: async ({ plan, chainId, fundFrom }: {
+      plan: SubscriptionPlan;
+      chainId?: ChainId;
+      /** Another token to turn into the plan's DHB first (Base plans only). */
+      fundFrom?: { source: TipFundingSource; walletAddress: string; t: TFunction } | null;
+    }) => {
+      const planId = plan.id || plan._id;
+      if (!planId) throw new Error(_translateCopy("copy.6eb84baaeabc", { defaultValue: "Plan is missing an id" }));
+
+      setStage('preparing');
+      const intent = await buyPlan(String(planId), chainId);
+      if (!intent?.id) {
+        throw new Error(_translateCopy("copy.c0a8bba560b1", { defaultValue: "Could not start the subscription — please try again" }));
+      }
+
+      const targetChain = (intent.chainId || chainId || BASE_CHAIN_ID) as ChainId;
+      if (
+        intent.settlementMode !== 'dhb_custody' ||
+        !intent.dhbToken ||
+        !intent.treasuryAddress ||
+        !intent.dhbAmount
+      ) {
+        throw new Error(i18n.t('subscriptions.tokenCheckoutNotReady'));
+      }
+
+      // Paying with another token: Riftn Pay (or Uniswap as the fallback)
+      // turns it into exactly this plan's DHB on Base before the transfer.
+      if (fundFrom && targetChain === BASE_CHAIN_ID) {
+        setStage('funding');
+        const ready = await fundTipFromSource(fundFrom.source, Number(intent.dhbAmount), fundFrom.walletAddress, fundFrom.t, 'subscribe-fund');
+        if (!ready) throw new Error(FUNDING_ABORTED);
+      }
+
+      // DHB stays in Riftn custody. Nothing is sold or swapped at checkout;
+      // the backend verifies this exact transfer before activating access and
+      // credits the creator the frozen USDT value of the plan.
+      setStage('wallet');
+      const { sendERC20Token } = await import('@/lib/wallet/send');
+      const tx = await sendERC20Token(
+        intent.dhbToken,
+        intent.treasuryAddress,
+        String(intent.dhbAmount),
+        18,
+        targetChain,
+      );
+
+      setStage('confirming');
+      await tx.wait();
+
+      setStage('recording');
+      rememberPendingSubscriptionPayment({
+        subId: String(intent.id),
+        hash: tx.hash,
+        chainId: targetChain,
+      });
+      await confirmSubscriptionPurchase(String(intent.id), tx.hash, targetChain);
+      clearPendingSubscriptionPayment(String(intent.id));
+      setStage('done');
+      return intent;
+    },
+    onSuccess: () => {
+      invalidate();
+      toast.success(i18n.t('subscriptions.subscribedToast'));
+    },
+    onError: (error: Error) => {
+      setStage('idle');
+      invalidate();
+      if (error.message === FUNDING_ABORTED) return;
+      toastTxError(error, _translateCopy("copy.f235711b36c4", { defaultValue: "Could not subscribe" }), { context: 'subscribe' });
+    },
+    onSettled: () => setStage('idle'),
+  });
+
+  return { ...mutation, stage, stageLabel: STAGE_LABELS[stage] };
+}

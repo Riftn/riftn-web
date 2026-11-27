@@ -1,0 +1,226 @@
+import { useTranslation as _useCopy } from 'react-i18next';
+import { createContext, useContext, useState, useCallback, useEffect, useRef, ReactNode } from 'react';
+import type { AttachedSound } from '@/features/post/hooks/usePostSound';
+
+interface GlobalDropZoneContextType {
+  isPostModalOpen: boolean;
+  openPostModal: (initialText?: string, initialCategory?: string) => void;
+  openPostModalWithFiles: (files: FileList, initialText?: string, initialCategory?: string) => void;
+  /** Open the composer with a post's song already attached ("use this sound"). */
+  openPostModalWithSound: (sound: AttachedSound) => void;
+  initialSound: AttachedSound | null;
+  clearInitialSound: () => void;
+  closePostModal: () => void;
+  pendingFiles: FileList | null;
+  clearPendingFiles: () => void;
+  initialText: string;
+  clearInitialText: () => void;
+  initialCategory: string;
+  clearInitialCategory: () => void;
+  suppressGlobalDrop: () => void;
+  unsuppressGlobalDrop: () => void;
+}
+
+const GlobalDropZoneContext = createContext<GlobalDropZoneContextType | null>(null);
+
+export function GlobalDropZoneProvider({ children }: { children: ReactNode }) {
+  const { t: _copy } = _useCopy();
+  const [isPostModalOpen, setIsPostModalOpen] = useState(false);
+  const [pendingFiles, setPendingFiles] = useState<FileList | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [isSuppressed, setIsSuppressed] = useState(false);
+  const suppressCountRef = useRef(0);
+
+  const [initialText, setInitialText] = useState('');
+  const [initialCategory, setInitialCategory] = useState('');
+  const [initialSound, setInitialSound] = useState<AttachedSound | null>(null);
+
+  const openPostModalWithSound = useCallback((sound: AttachedSound) => {
+    setInitialSound(sound);
+    setIsPostModalOpen(true);
+  }, []);
+
+  const clearInitialSound = useCallback(() => setInitialSound(null), []);
+
+  const openPostModal = useCallback((text?: string, category?: string) => {
+    if (text) setInitialText(text);
+    if (category) setInitialCategory(category);
+    setIsPostModalOpen(true);
+  }, []);
+
+  const openPostModalWithFiles = useCallback((files: FileList, text?: string, category?: string) => {
+    setPendingFiles(files);
+    if (text) setInitialText(text);
+    if (category) setInitialCategory(category);
+    setIsPostModalOpen(true);
+  }, []);
+
+  const clearInitialText = useCallback(() => {
+    setInitialText('');
+  }, []);
+
+  const clearInitialCategory = useCallback(() => {
+    setInitialCategory('');
+  }, []);
+
+  const closePostModal = useCallback(() => {
+    setIsPostModalOpen(false);
+  }, []);
+
+  const clearPendingFiles = useCallback(() => {
+    setPendingFiles(null);
+  }, []);
+
+  const suppressGlobalDrop = useCallback(() => {
+    suppressCountRef.current += 1;
+    setIsSuppressed(true);
+  }, []);
+
+  const unsuppressGlobalDrop = useCallback(() => {
+    suppressCountRef.current -= 1;
+    if (suppressCountRef.current <= 0) {
+      suppressCountRef.current = 0;
+      setIsSuppressed(false);
+    }
+  }, []);
+
+  // Global drag and drop handlers - only attach when NOT suppressed
+  useEffect(() => {
+    if (isSuppressed) {
+      // Don't attach any global drag/drop listeners when suppressed
+      setIsDragging(false);
+      return;
+    }
+
+    let dragCounter = 0;
+
+    // A comment, reply or message box takes the file itself: over one, the
+    // page-wide "drop to create post" steps aside.
+    const overAttachBox = (e: DragEvent) =>
+      e.target instanceof Element && !!e.target.closest('[data-drop-attach]');
+
+    const handleDragEnter = (e: DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      dragCounter++;
+      
+      if (e.dataTransfer?.types.includes('Files')) {
+        setIsDragging(!overAttachBox(e));
+      }
+    };
+
+    const handleDragLeave = (e: DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      dragCounter--;
+      
+      if (dragCounter === 0) {
+        setIsDragging(false);
+      }
+    };
+
+    const handleDragOver = (e: DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (e.dataTransfer?.types.includes('Files')) setIsDragging(!overAttachBox(e));
+    };
+
+    const handleDrop = (e: DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      dragCounter = 0;
+      setIsDragging(false);
+      if (overAttachBox(e)) return;
+
+      const files = e.dataTransfer?.files;
+      if (files && files.length > 0) {
+        const hasMedia = Array.from(files).some(file => 
+          file.type.startsWith('image/') || 
+          file.type.startsWith('video/') || 
+          file.type.startsWith('audio/')
+        );
+
+        if (hasMedia) {
+          setPendingFiles(files);
+          setIsPostModalOpen(true);
+        }
+      }
+    };
+
+    document.addEventListener('dragenter', handleDragEnter);
+    document.addEventListener('dragleave', handleDragLeave);
+    document.addEventListener('dragover', handleDragOver);
+    document.addEventListener('drop', handleDrop);
+
+    return () => {
+      document.removeEventListener('dragenter', handleDragEnter);
+      document.removeEventListener('dragleave', handleDragLeave);
+      document.removeEventListener('dragover', handleDragOver);
+      document.removeEventListener('drop', handleDrop);
+    };
+  }, [isSuppressed]);
+
+  return (
+    <GlobalDropZoneContext.Provider value={{ 
+      isPostModalOpen, 
+      openPostModal,
+      openPostModalWithFiles,
+      openPostModalWithSound,
+      initialSound,
+      clearInitialSound,
+      closePostModal, 
+      pendingFiles, 
+      clearPendingFiles,
+      initialText,
+      clearInitialText,
+      initialCategory,
+      clearInitialCategory,
+      suppressGlobalDrop,
+      unsuppressGlobalDrop,
+    }}>
+      {children}
+      
+      {/* Global drop overlay */}
+      {isDragging && !isSuppressed && (
+        <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center pointer-events-none">
+          <div className="border-2 border-dashed border-white/40 rounded-3xl p-12 flex flex-col items-center gap-4">
+            <div className="w-16 h-16 rounded-xl bg-white/10 flex items-center justify-center">
+              <svg 
+                className="w-8 h-8 text-white" 
+                fill="none" 
+                viewBox="0 0 24 24" 
+                stroke="currentColor"
+              >
+                <path 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round" 
+                  strokeWidth={2} 
+                  d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" 
+                />
+              </svg>
+            </div>
+            <p className="text-xl font-semibold text-white">{_copy("copy.e08411efaf82", { defaultValue: "Drop to create post" })}</p>
+            <p className="text-sm text-zinc-400">{_copy("copy.d86cfcbdaf60", { defaultValue: "Images, videos, or audio files" })}</p>
+          </div>
+        </div>
+      )}
+    </GlobalDropZoneContext.Provider>
+  );
+}
+
+export function useGlobalDropZone() {
+  const context = useContext(GlobalDropZoneContext);
+  if (!context) {
+    throw new Error('useGlobalDropZone must be used within GlobalDropZoneProvider');
+  }
+  return context;
+}
+
+/**
+ * The same context, or null outside the provider. For a component that can
+ * also mount away from the app shell — a price card in a post, say — and
+ * should just not offer the composer there rather than crash the surface.
+ */
+export function useOptionalGlobalDropZone() {
+  return useContext(GlobalDropZoneContext);
+}

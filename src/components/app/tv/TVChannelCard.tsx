@@ -1,0 +1,685 @@
+/**
+ * TV Channel Card Component
+ * =========================
+ * Displays individual TV channel with HLS video player.
+ * Glass-morphism style matching app aesthetic.
+ * 
+ * Pause = keep HLS alive, just pause video element.
+ * Stop  = destroy HLS instance entirely (used by VideoPlaybackManager).
+ * 
+ * @module components/app/tv/TVChannelCard
+ */
+
+import { LiveDot } from '@/components/app/live/LiveDot';
+import { useTranslation } from 'react-i18next';
+import { useRef, useEffect, useState, useCallback } from 'react';
+import { useLocation } from 'react-router-dom';
+import { releaseAfterPictureInPicture } from '@/lib/picture-in-picture';
+import { usePictureInPicture } from '@/hooks/use-picture-in-picture';
+import { Loader2, RotateCcw, Minimize, PictureInPicture2 } from "lucide-react";
+import Volume2 from "@/components/ui/cut-icons/volume";
+import VolumeX from "@/components/ui/cut-icons/mute";
+import Maximize from "@/components/ui/cut-icons/fullscreen";
+
+import Play from "@/components/ui/cut-icons/play";
+import Pause from "@/components/ui/cut-icons/pause";
+
+import { ThemedIcon } from '@/components/app/war/WarHudIcon';
+import { usePiP } from '@/contexts/PiPContext';
+import { cn } from '@/lib/utils';
+// Type-only: the hls.js runtime (~540 kB raw) loads dynamically at attach time
+// so it stays out of the eager entry bundle. See startPlayback below.
+import type Hls from 'hls.js';
+import { TVChannel } from '@/lib/api/live-tv';
+import { getCountryFlag, reportBrokenChannel } from '@/lib/api/live-tv';
+import { videoPlaybackManager } from '@/lib/video-playback-manager';
+import {
+  claimMediaSession,
+  releaseMediaSession,
+  setMediaSessionPlaying,
+} from '@/lib/media-session';
+import { TVChat } from './TVChat';
+import { getVideoPreferences, setPlaybackRate as vpSetPlaybackRate, PLAYBACK_RATES, formatRate } from '@/lib/video-preferences';
+import { createLogger } from '@/lib/logger';
+
+const logger = createLogger('TVChannelCard');
+
+interface TVChannelCardProps {
+  channel: TVChannel;
+}
+
+const MAX_RETRIES = 2;
+
+export function TVChannelCard({ channel }: TVChannelCardProps) {
+  const { t } = useTranslation();
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const hlsRef = useRef<Hls | null>(null);
+  const isStoppingRef = useRef(false);
+  // Guards for the attach-time dynamic import of hls.js: a bumped sequence or
+  // set disposed flag means "a stop / unmount happened while the chunk was
+  // loading — don't attach a stale player".
+  const playSeqRef = useRef(0);
+  const disposedRef = useRef(false);
+  const retryTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const cardId = `tv-${channel.id}`;
+  const { addPiP, removePiP, isPiP } = usePiP();
+  
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
+  const [hasError, setHasError] = useState(false);
+  const [showVideo, setShowVideo] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const isInPiP = usePictureInPicture(videoRef);
+  const [playbackRate, setPlaybackRate] = useState(() => getVideoPreferences().playbackRate);
+  const isMutedRef = useRef(isMuted);
+  isMutedRef.current = isMuted;
+
+  // Sync preferences from other players
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const prefs = (e as CustomEvent).detail;
+      setPlaybackRate(prefs.playbackRate);
+      if (videoRef.current) videoRef.current.playbackRate = prefs.playbackRate;
+    };
+    window.addEventListener('video-prefs-changed', handler);
+    return () => window.removeEventListener('video-prefs-changed', handler);
+  }, []);
+
+  /**
+   * Full stop — destroys HLS instance, clears video source.
+   * Used when another video takes over or on unmount.
+   */
+  const fullStop = useCallback(() => {
+    isStoppingRef.current = true;
+    // Invalidate any in-flight dynamic hls.js setup
+    playSeqRef.current++;
+    if (hlsRef.current) {
+      hlsRef.current.destroy();
+      hlsRef.current = null;
+    }
+    if (videoRef.current) {
+      videoRef.current.pause();
+      videoRef.current.removeAttribute('src');
+      videoRef.current.load();
+    }
+    setIsPlaying(false);
+    setIsPaused(false);
+    setShowVideo(false);
+    setIsLoading(false);
+    setTimeout(() => { isStoppingRef.current = false; }, 100);
+  }, []);
+
+  /**
+   * Pause — keeps HLS instance alive, just pauses the video element.
+   */
+  const pausePlayback = useCallback(() => {
+    if (videoRef.current) {
+      videoRef.current.pause();
+    }
+    setIsPlaying(false);
+    setIsPaused(true);
+    videoPlaybackManager.stop(cardId);
+  }, [cardId]);
+
+  /**
+   * Resume — resumes from paused state without reloading.
+   */
+  const resumePlayback = useCallback(() => {
+    if (videoRef.current) {
+      videoPlaybackManager.play(cardId);
+      videoRef.current.play().catch(() => {});
+      setIsPaused(false);
+    }
+  }, [cardId]);
+  
+  // /app/tv lives in PersistentPageCache and never unmounts — without this
+  // gate, a playing channel keeps downloading HLS segments and playing AUDIO
+  // behind a CSS-hidden page for the rest of the session. Only NATIVE PiP
+  // (same video element, isInPiP) exempts the stop; the in-app PiP button
+  // spawns a separate FloatingPiPPlayer with its own stream, so keeping this
+  // card's (muted) stream alive alongside it would just double the download.
+  // Trailing slash normalized so '/app/tv/' doesn't read as "left".
+  const { pathname } = useLocation();
+  const normalizedPath = pathname.replace(/\/+$/, '');
+  const isTvRouteActive = normalizedPath === '/tv' || normalizedPath === '/app/tv';
+  useEffect(() => {
+    if (isTvRouteActive) return;
+    if ((isPlaying || isPaused) && !isInPiP) {
+      fullStop();
+    }
+  }, [isTvRouteActive, isPlaying, isPaused, isInPiP, fullStop]);
+
+  // Register with VideoPlaybackManager — full stop when another video plays
+  useEffect(() => {
+    disposedRef.current = false;
+    const video = videoRef.current;
+    videoPlaybackManager.register(cardId, () => {
+      fullStop();
+    }, undefined, undefined, () => videoRef.current);
+
+    return () => {
+      disposedRef.current = true;
+      playSeqRef.current++;
+      if (retryTimeoutRef.current) {
+        clearTimeout(retryTimeoutRef.current);
+        retryTimeoutRef.current = null;
+      }
+      videoPlaybackManager.unregister(cardId);
+      isStoppingRef.current = true;
+      const hls = hlsRef.current;
+      hlsRef.current = null;
+      if (video) releaseAfterPictureInPicture(video, () => hls?.destroy());
+      else hls?.destroy();
+    };
+  }, [cardId, fullStop]);
+  
+  const startPlayback = useCallback(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    
+    // Notify manager to pause other media
+    videoPlaybackManager.play(cardId);
+    
+    setIsLoading(true);
+    setHasError(false);
+    setShowVideo(true);
+    setIsPaused(false);
+    
+    // Unmute on first play — user explicitly clicked play
+    setIsMuted(false);
+    if (video) video.muted = false;
+    videoPlaybackManager.globalMuted = false;
+    videoPlaybackManager.claimAudio(cardId);
+    
+    // Prefer native HLS wherever the browser provides it (Safari + every iOS
+    // browser) — short-circuit BEFORE the dynamic import so those devices
+    // neither download the ~540 kB hls.js chunk nor run its software MSE decoder
+    // (far hotter than the hardware pipeline). iOS 17+ added MediaSource, so the
+    // old `!('MediaSource' in window)` guard wrongly pushed modern iPhones onto
+    // hls.js. Chrome/Firefox/Android return "" here and fall through below.
+    if (video.canPlayType('application/vnd.apple.mpegurl')) {
+      video.src = channel.streamUrl;
+      video.play().catch(() => {});
+      return;
+    }
+
+    // hls.js loads dynamically at attach time so the runtime stays out of the
+    // eager entry bundle. The seq/disposed guard bails if a stop or unmount
+    // happened while the chunk was in flight.
+    const seq = ++playSeqRef.current;
+    (async () => {
+      const { default: Hls } = await import('hls.js');
+      if (seq !== playSeqRef.current || disposedRef.current) return;
+
+      if (Hls.isSupported()) {
+        const hls = new Hls({
+          enableWorker: true,
+          lowLatencyMode: true,
+          backBufferLength: 90,
+          fragLoadingTimeOut: 10000,
+          manifestLoadingTimeOut: 10000,
+          levelLoadingTimeOut: 10000,
+        });
+
+        console.log('[TVChannelCard] HLS supported, loading source...', channel.streamUrl);
+        hls.loadSource(channel.streamUrl);
+        hls.attachMedia(video);
+
+        hls.on(Hls.Events.MANIFEST_PARSED, () => {
+          video.play().catch(() => {
+            logger.warn('Autoplay blocked by browser', { channel: channel.name });
+          });
+        });
+
+        hls.on(Hls.Events.ERROR, (_, data) => {
+          logger.error('TV HLS Error', { channel: channel.name, type: data.type, details: data.details, fatal: data.fatal }, data);
+          if (isStoppingRef.current) return;
+          if (data.fatal) {
+            setHasError(true);
+            setIsLoading(false);
+            setIsPlaying(false);
+            if (retryCount >= MAX_RETRIES - 1) {
+              reportBrokenChannel(channel.id);
+            }
+          }
+        });
+
+        hlsRef.current = hls;
+      } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        video.src = channel.streamUrl;
+        video.play().catch(() => {});
+      } else {
+        setHasError(true);
+        setIsLoading(false);
+      }
+    })().catch(() => {
+      // hls.js chunk failed to load (flaky network / deploy skew)
+      setHasError(true);
+      setIsLoading(false);
+      setIsPlaying(false);
+    });
+  }, [cardId, channel.streamUrl, channel.id, channel.name, retryCount]);
+  
+  const handleClick = () => {
+    if (hasError) {
+      handleRetry();
+      return;
+    }
+    if (isPlaying) {
+      pausePlayback();
+    } else if (isPaused) {
+      resumePlayback();
+    } else {
+      startPlayback();
+    }
+  };
+  
+  const handleRetry = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    if (retryCount < MAX_RETRIES) {
+      setRetryCount(prev => prev + 1);
+      setHasError(false);
+      fullStop();
+      if (retryTimeoutRef.current) clearTimeout(retryTimeoutRef.current);
+      retryTimeoutRef.current = setTimeout(() => {
+        retryTimeoutRef.current = null;
+        if (disposedRef.current) return;
+        startPlayback();
+      }, 500);
+    }
+  };
+  
+  const handleMuteToggle = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (videoRef.current) {
+      videoRef.current.muted = !videoRef.current.muted;
+      setIsMuted(!isMuted);
+    }
+  };
+
+  // Toggle mute programmatically (used by PiP media session)
+  const toggleMuteProgrammatic = useCallback(() => {
+    if (videoRef.current) {
+      const newMuted = !videoRef.current.muted;
+      videoRef.current.muted = newMuted;
+      setIsMuted(newMuted);
+    }
+  }, []);
+
+  // PiP: set up MediaSession mute/unmute via next/previous track buttons
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    // Routed through lib/media-session rather than poking navigator directly,
+    // so a channel popped into PiP takes the session from the radio or a stage
+    // recording properly — and, more to the point, gives it back on the way out
+    // instead of clearing whatever claimed it in the meantime.
+    //
+    // The mute toggle still rides next/previous track. A live stream has no
+    // tracks to skip, and those two are the only buttons the PiP window offers
+    // beyond play/pause, so they are the only place a mute control can go.
+    const claimForPiP = (handler: () => void) => {
+      claimMediaSession(
+        cardId,
+        {
+          title: `${channel.name} ${isMutedRef.current ? '🔇' : '🔊'}`,
+          artist: 'Riftn TV',
+          artwork: channel.logo || null,
+        },
+        { nexttrack: handler, previoustrack: handler },
+      );
+      setMediaSessionPlaying(cardId, true);
+    };
+
+    const muteHandler = () => {
+      toggleMuteProgrammatic();
+      // Re-claim to redraw the title, which is carrying the mute state.
+      claimForPiP(muteHandler);
+    };
+
+    const onEnterPiP = () => {
+      claimForPiP(muteHandler);
+    };
+
+    const onLeavePiP = () => {
+      releaseMediaSession(cardId);
+    };
+
+    video.addEventListener('enterpictureinpicture', onEnterPiP);
+    video.addEventListener('leavepictureinpicture', onLeavePiP);
+    return () => {
+      video.removeEventListener('enterpictureinpicture', onEnterPiP);
+      video.removeEventListener('leavepictureinpicture', onLeavePiP);
+      // Unmounting straight out of PiP never fires leavepictureinpicture.
+      releaseMediaSession(cardId);
+    };
+  }, [channel.name, channel.logo, cardId, toggleMuteProgrammatic]);
+
+  const handleFullscreen = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const container = containerRef.current;
+    if (!container) return;
+
+    // Exit simulated fullscreen (SafePal/WebView)
+    if (isFullscreen && !document.fullscreenElement && !(document as any).webkitFullscreenElement) {
+      setIsFullscreen(false);
+      return;
+    }
+
+    if (document.fullscreenElement || (document as any).webkitFullscreenElement) {
+      document.exitFullscreen?.().catch(() => {});
+      (document as any).webkitExitFullscreen?.();
+    } else {
+      const el = container as HTMLElement & { webkitRequestFullscreen?: () => void; requestFullscreen?: () => Promise<void> };
+      const activateSimulated = () => {
+        if (!document.fullscreenElement && !(document as any).webkitFullscreenElement) {
+          setIsFullscreen(true);
+        }
+      };
+      if (el.requestFullscreen) {
+        el.requestFullscreen().catch(activateSimulated);
+        setTimeout(activateSimulated, 300);
+      } else if (el.webkitRequestFullscreen) {
+        try { el.webkitRequestFullscreen(); } catch { activateSimulated(); }
+        setTimeout(activateSimulated, 300);
+      } else {
+        setIsFullscreen(true);
+      }
+    }
+  };
+
+  // Track fullscreen state
+  useEffect(() => {
+    const onFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    document.addEventListener('fullscreenchange', onFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', onFullscreenChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', onFullscreenChange);
+      document.removeEventListener('webkitfullscreenchange', onFullscreenChange);
+    };
+  }, []);
+  
+  // Video event handlers
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    
+    const handlePlaying = () => {
+      setIsPlaying(true);
+      setIsPaused(false);
+      setIsLoading(false);
+      setRetryCount(0);
+    };
+    
+    const handlePause = () => {
+      setIsPlaying(false);
+    };
+    
+    const handleWaiting = () => {
+      if (!isStoppingRef.current) {
+        setIsLoading(true);
+      }
+    };
+    
+    const handleCanPlay = () => {
+      setIsLoading(false);
+    };
+    
+    const handleError = () => {
+      if (isStoppingRef.current) return;
+      setHasError(true);
+      setIsLoading(false);
+      setIsPlaying(false);
+      if (retryCount >= MAX_RETRIES) {
+        reportBrokenChannel(channel.id);
+      }
+    };
+    
+    video.addEventListener('playing', handlePlaying);
+    video.addEventListener('pause', handlePause);
+    video.addEventListener('waiting', handleWaiting);
+    video.addEventListener('canplay', handleCanPlay);
+    video.addEventListener('error', handleError);
+    
+    return () => {
+      video.removeEventListener('playing', handlePlaying);
+      video.removeEventListener('pause', handlePause);
+      video.removeEventListener('waiting', handleWaiting);
+      video.removeEventListener('canplay', handleCanPlay);
+      video.removeEventListener('error', handleError);
+    };
+  }, [channel.id, retryCount]);
+  
+  const countryFlag = getCountryFlag(channel.country);
+  const canRetry = retryCount < MAX_RETRIES;
+  const isActive = isPlaying || isPaused;
+  
+  return (
+    <div
+      data-glass-media-card
+      className={cn(
+        'w-full bg-black/40 backdrop-blur-[24px] backdrop-saturate-[180%] border border-white/10',
+        'rounded-2xl overflow-hidden',
+        'hover:bg-white/5 transition-all duration-200 cursor-pointer',
+        isActive && 'ring-1 ring-white/20 bg-white/5'
+      )}
+    >
+      {/* Video/Thumbnail Area */}
+      <div 
+        ref={containerRef}
+        onClick={handleClick}
+        className={cn(
+          'relative aspect-video bg-zinc-900',
+          isFullscreen && 'fixed inset-0 z-[9999] !aspect-auto w-screen h-screen bg-black'
+        )}
+      >
+        {/* Video Element */}
+        <video
+          ref={videoRef}
+          muted={isMuted}
+          playsInline
+          {...{"webkit-playsinline": ""}}
+          className={cn(
+            'absolute inset-0 w-full h-full',
+            isFullscreen ? 'object-contain' : 'object-cover',
+            showVideo ? 'opacity-100' : 'opacity-0'
+          )}
+        />
+        
+        {/* Channel Logo Overlay (when not active) */}
+        {!showVideo && (
+          <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-zinc-800 to-zinc-900">
+            {channel.logo ? (
+              <img
+                src={channel.logo}
+                alt={channel.name}
+                loading="lazy"
+                decoding="async"
+                className="w-20 h-20 object-contain"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).style.display = 'none';
+                }}
+              />
+            ) : (
+              <ThemedIcon icon="tv" alt="" className="w-16 h-16 object-contain opacity-70" />
+            )}
+          </div>
+        )}
+        
+        {/* Live Badge */}
+        <div className="absolute top-3 left-3 flex items-center gap-1.5 px-2 py-1 rounded-md bg-black/80 text-white text-xs font-semibold">
+          <LiveDot />
+          {t('tv.live')}
+        </div>
+        
+        {/* Error State */}
+        {hasError && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/80">
+            <ThemedIcon icon="tv" alt="" className="w-12 h-12 object-contain opacity-70 mb-2" />
+            <p className="text-zinc-400 text-sm">{t('tv.geoBlocked')}</p>
+            <p className="text-zinc-500 text-xs mb-3">{t('tv.sorryInconvenience')}</p>
+            {canRetry && (
+              <button
+                onClick={handleRetry}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-white text-sm transition-colors"
+              >
+                <RotateCcw className="w-4 h-4" />
+                {t('tv.retryCount', { count: MAX_RETRIES - retryCount })}
+              </button>
+            )}
+          </div>
+        )}
+        
+        {/* Loading Overlay */}
+        {isLoading && !hasError && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+            <Loader2 className="w-10 h-10 text-white animate-spin" />
+          </div>
+        )}
+        
+        {/* Play/Pause/Resume Center Icon */}
+        {!isLoading && !hasError && (
+          <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+            <div className="w-16 h-16 rounded-xl bg-black/40 backdrop-blur-[24px] backdrop-saturate-[180%] flex items-center justify-center border border-white/10">
+              {isPlaying ? (
+                <Pause className="w-8 h-8 text-white fill-white" />
+              ) : (
+                <Play className="w-8 h-8 text-white fill-white ml-1" />
+              )}
+            </div>
+          </div>
+        )}
+        
+        {/* Bottom Controls Bar (when active) */}
+        {isActive && (
+          <div className="absolute bottom-3 right-3 flex items-center gap-2">
+            {/* Mute Button */}
+            <button
+              onClick={handleMuteToggle}
+              className="w-10 h-10 rounded-xl bg-black/40 backdrop-blur-[24px] backdrop-saturate-[180%] border border-white/10 flex items-center justify-center hover:bg-black/60 transition-colors"
+            >
+              {isMuted ? (
+                <VolumeX className="w-5 h-5 text-white" />
+              ) : (
+                <Volume2 className="w-5 h-5 text-white" />
+              )}
+            </button>
+
+            {/* PiP Button */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                if (isPiP(channel.id)) {
+                  removePiP(channel.id);
+                } else {
+                  // Mute the original player when opening PiP
+                  if (videoRef.current) {
+                    videoRef.current.muted = true;
+                    setIsMuted(true);
+                  }
+                  addPiP({
+                    id: channel.id,
+                    name: channel.name,
+                    streamUrl: channel.streamUrl,
+                    logo: channel.logo,
+                    country: channel.country,
+                  });
+                }
+              }}
+              className={cn(
+                "w-10 h-10 rounded-xl backdrop-blur-[24px] backdrop-saturate-[180%] border border-white/10 flex items-center justify-center hover:bg-black/60 transition-colors",
+                isPiP(channel.id) ? "bg-white/20" : "bg-black/40"
+              )}
+            >
+              <PictureInPicture2 className="w-5 h-5 text-white" />
+            </button>
+
+            {/* Speed Button */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                const currentIdx = PLAYBACK_RATES.indexOf(getVideoPreferences().playbackRate as any);
+                const nextRate = PLAYBACK_RATES[(currentIdx + 1) % PLAYBACK_RATES.length];
+                if (videoRef.current) videoRef.current.playbackRate = nextRate;
+                setPlaybackRate(nextRate);
+                vpSetPlaybackRate(nextRate);
+              }}
+              className="h-10 w-[58px] rounded-xl bg-black/40 backdrop-blur-[24px] backdrop-saturate-[180%] border border-white/10 flex items-center justify-center hover:bg-black/60 transition-colors text-white text-sm font-medium"
+            >
+              {formatRate(playbackRate)}x
+            </button>
+
+            {/* Fullscreen Button */}
+            <button
+              onClick={handleFullscreen}
+              className="w-10 h-10 rounded-xl bg-black/40 backdrop-blur-[24px] backdrop-saturate-[180%] border border-white/10 flex items-center justify-center hover:bg-black/60 transition-colors"
+            >
+              {isFullscreen ? (
+                <Minimize className="w-5 h-5 text-white" />
+              ) : (
+                <Maximize className="w-5 h-5 text-white" />
+              )}
+            </button>
+          </div>
+        )}
+      </div>
+      
+      {/* Channel Info */}
+      <div className="p-3 sm:p-4 flex items-center gap-3">
+        {/* Logo */}
+        <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 bg-zinc-800">
+          {channel.logo ? (
+            <img
+              src={channel.logo}
+              alt={channel.name}
+              loading="lazy"
+              decoding="async"
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                (e.target as HTMLImageElement).style.display = 'none';
+                (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
+              }}
+            />
+          ) : null}
+          <div className={cn(
+            'w-full h-full flex items-center justify-center bg-zinc-800',
+            channel.logo && 'hidden'
+          )}>
+            <ThemedIcon icon="tv" alt="" className="w-7 h-7 object-contain opacity-70" />
+          </div>
+        </div>
+        
+        {/* Info */}
+        <div className="flex-1 min-w-0">
+          <h3 className="font-semibold text-white truncate text-sm sm:text-base">
+            {channel.name}
+          </h3>
+          <div className="flex items-center gap-1.5 mt-0.5">
+            <span className="text-base">{countryFlag}</span>
+            <span className="text-zinc-400 text-xs">
+              {channel.country}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Live chat — one room per channel.
+          Mounted only while this card is the one playing: /app/tv renders up to
+          50 cards and never unmounts, so an always-on panel would hold 50
+          realtime subscriptions open for the rest of the session. Hidden in
+          fullscreen, where the video takes the whole viewport. */}
+      {isActive && !isFullscreen && (
+        <div className="px-3 pb-3 sm:px-4 sm:pb-4">
+          <TVChat channelId={channel.id} channelName={channel.name} enabled={isTvRouteActive} />
+        </div>
+      )}
+    </div>
+  );
+}

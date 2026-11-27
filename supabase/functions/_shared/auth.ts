@@ -1,0 +1,209 @@
+// Shared authentication + rate-limiting helpers for Riftn edge functions.
+//
+// Riftn has no Supabase-auth users — identity is wallet-native (Web3Auth). A caller
+// proves identity by presenting the Riftn API token it received at login, together
+// with its wallet address; we verify the pair against api.dehub.io. Paid/abusable
+// endpoints should gate on requireDeHubAuth() and, where relevant, checkRateLimit().
+import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
+// The CORS list itself now lives in _shared/cors.ts, which has no dependencies
+// — a function that wants nothing but the headers should import it from there
+// rather than drag supabase-js and the api.dehub.io verifier along with them.
+// That weight is why so many functions hand-rolled a copy in the first place,
+// and every copy eventually drifted.
+//
+// Imported as well as re-exported: a bare `export … from` does not bind the
+// name locally, and jsonResponse below spreads it.
+import { corsHeaders, handleCorsPreflight } from "./cors.ts";
+export { corsHeaders, handleCorsPreflight };
+
+const DEHUB_API_BASE = "https://api.dehub.io";
+
+export function jsonResponse(data: unknown, status = 200): Response {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
+}
+
+/**
+ * Resolve the address a token actually belongs to, or null.
+ *
+ * This used to fetch `GET /account_info/{address}` and treat a 200 as proof
+ * the token was good. That route is a public profile endpoint with no guard —
+ * it answers 200 for any token, any address, and for no Authorization header
+ * at all — so the check always passed. Combined with taking the wallet from
+ * the caller's own `x-wallet-address` header, it meant any caller could act as
+ * any address they knew, and addresses are public.
+ *
+ * `/auth/verify` is guarded and returns the address off the verified token, so
+ * callers can stop believing the header.
+ */
+async function verifyDeHubAddress(token: string): Promise<{ wallet: string | null; unavailable?: boolean }> {
+  try {
+    const res = await fetch(`${DEHUB_API_BASE}/api/auth/verify`, {
+      headers: { Authorization: `Bearer ${token}` },
+      signal: AbortSignal.timeout(12000),
+    });
+    if ([400, 401, 403].includes(res.status)) return { wallet: null };
+    if (!res.ok) return { wallet: null, unavailable: true };
+    const data = await res.json();
+    const address = typeof data?.address === "string" ? data.address.toLowerCase() : "";
+    return /^0x[a-f0-9]{40}$/.test(address) ? { wallet: address } : { wallet: null, unavailable: true };
+  } catch {
+    // Fail closed: an unreachable auth service must not authenticate anyone.
+    return { wallet: null, unavailable: true };
+  }
+}
+
+export async function resolveDeHubAddress(token: string): Promise<string | null> {
+  return (await verifyDeHubAddress(token)).wallet;
+}
+
+export type AuthResult =
+  | { ok: true; wallet: string; token: string }
+  | { ok: false; response: Response };
+
+/**
+ * Require a valid Riftn token. On success returns the wallet the token
+ * actually belongs to; on failure a ready-to-send 401.
+ *
+ * The returned wallet comes from the verified token, NOT from the
+ * x-wallet-address header. That header is still read, but only to detect a
+ * mismatch — anything keyed on identity (spending a balance, reading private
+ * data) must use `wallet` from this result. Trusting the header is what let
+ * one account spend another's credit.
+ */
+export async function requireDeHubAuth(req: Request): Promise<AuthResult> {
+  const token = req.headers.get("x-dehub-token") || "";
+  if (!token) {
+    return {
+      ok: false,
+      response: jsonResponse({ error: "Authentication required: x-dehub-token header." }, 401),
+    };
+  }
+
+  const verified = await verifyDeHubAddress(token);
+  if (verified.unavailable) {
+    return { ok: false, response: jsonResponse({ error: 'Session verification is temporarily unavailable. Please retry.', code: 'AUTH_UNAVAILABLE' }, 503) };
+  }
+  const wallet = verified.wallet;
+  if (!wallet) {
+    return { ok: false, response: jsonResponse({ error: "Invalid or expired Riftn token." }, 401) };
+  }
+
+  // A claimed address that disagrees with the token is either a stale client
+  // or someone probing. Refuse rather than quietly acting as the real owner,
+  // so the caller cannot discover whose token they are holding.
+  const claimed = req.headers.get("x-wallet-address")?.toLowerCase();
+  if (claimed && claimed !== wallet) {
+    return {
+      ok: false,
+      response: jsonResponse({ error: "Token does not belong to the supplied wallet." }, 403),
+    };
+  }
+
+  return { ok: true, wallet, token };
+}
+
+/** Service-role client (bypasses RLS) for edge-function bookkeeping such as rate limits. */
+export function serviceClient(): SupabaseClient {
+  return createClient(
+    Deno.env.get("SUPABASE_URL")!,
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+    { auth: { persistSession: false } },
+  );
+}
+
+/**
+ * Best-effort client IP for rate-limiting anonymous endpoints.
+ *
+ * The FIRST x-forwarded-for entry is whatever the caller chose to send, so a
+ * script could rotate fake IPs in that header and skip every per-IP limit.
+ * Proxies APPEND their view of the peer address, so the last entry is the one
+ * our own edge actually observed; x-real-ip carries the same value when set.
+ */
+export function callerIp(req: Request): string {
+  const hops = (req.headers.get("x-forwarded-for") || "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  return hops[hops.length - 1] || req.headers.get("x-real-ip")?.trim() || "unknown";
+}
+
+export interface RateLimit {
+  limit: number;
+  windowMs: number;
+}
+
+/**
+ * Fixed-window rate limit keyed on (bucketKey, actionType) in public.edge_rate_limits.
+ * Consumes the budget atomically. Unavailable bookkeeping fails closed.
+ */
+export async function checkRateLimit(
+  supabase: SupabaseClient,
+  bucketKey: string,
+  actionType: string,
+  cfg: RateLimit,
+): Promise<{ allowed: boolean; remaining: number; resetAt: Date }> {
+  const unavailable = { allowed: false, remaining: 0, resetAt: new Date(Date.now() + 30_000) };
+  try {
+    const { data, error } = await supabase.rpc("consume_edge_rate_limit", {
+      p_bucket_key: bucketKey, p_action_type: actionType,
+      p_limit: cfg.limit, p_window_ms: cfg.windowMs,
+    });
+    const row = data?.[0];
+    if (error || !row || typeof row.allowed !== 'boolean' || !Number.isFinite(Date.parse(row.reset_at))) {
+      console.error('Rate limit storage unavailable', { actionType, code: error?.code });
+      return unavailable;
+    }
+    return { allowed: row.allowed, remaining: row.remaining, resetAt: new Date(row.reset_at) };
+  } catch {
+    console.error('Rate limit storage unavailable', { actionType });
+    return unavailable;
+  }
+}
+
+/**
+ * Per-IP rate limit for endpoints that must stay reachable without login (public or
+ * paid endpoints the client invokes with only the anon key). Returns a ready 429
+ * response when over the limit, or null to continue. Fails closed on any DB error.
+ */
+export async function rateLimitByIp(
+  req: Request,
+  actionType: string,
+  cfg: RateLimit,
+): Promise<Response | null> {
+  const rl = await checkRateLimit(serviceClient(), `ip:${callerIp(req)}`, actionType, cfg);
+  if (!rl.allowed) {
+    return jsonResponse(
+      { error: `Rate limit exceeded for this endpoint. Try again after ${rl.resetAt.toISOString()}.` },
+      429,
+    );
+  }
+  return null;
+}
+
+/**
+ * One-shot guard for paid/abusable endpoints: require a valid Riftn token, then
+ * enforce a per-wallet rate limit. Returns the wallet on success, or a 401/429 response.
+ */
+export async function guardPaidEndpoint(
+  req: Request,
+  actionType: string,
+  cfg: RateLimit,
+): Promise<{ ok: true; wallet: string } | { ok: false; response: Response }> {
+  const auth = await requireDeHubAuth(req);
+  if (!auth.ok) return auth;
+
+  const rl = await checkRateLimit(serviceClient(), auth.wallet, actionType, cfg);
+  if (!rl.allowed) {
+    return {
+      ok: false,
+      response: jsonResponse(
+        { error: `Rate limit exceeded. Try again after ${rl.resetAt.toISOString()}.` },
+        429,
+      ),
+    };
+  }
+  return { ok: true, wallet: auth.wallet };
+}

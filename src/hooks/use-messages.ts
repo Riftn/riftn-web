@@ -1,0 +1,1522 @@
+/**
+ * Direct Messages Hooks
+ * =====================
+ * React Query hooks for managing DM conversations and messages.
+ * Uses Socket.io /dm namespace for real-time events.
+ */
+
+import type { DmVideoOptions } from '@/lib/dm-video-options';
+import { destructFromChoice, type DmDestructChoice } from '@/lib/dm-destruct';
+import { useContext, useEffect, useRef, useReducer, useCallback, useMemo, useSyncExternalStore } from 'react';
+import { useLocation } from 'react-router-dom';
+import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
+import { useAuth } from '@/contexts/AuthContext';
+import { CachedPageActiveContext } from '@/contexts/CachedPageActiveContext';
+import {
+  getContacts,
+  getConversations,
+  getConversation,
+  getMessages,
+  createConversation,
+  markConversationAsRead,
+  deleteConversation,
+  searchUsersForDM,
+  normalizeUserSearchQuery,
+  blockConversation,
+  unblockConversation,
+  createGroup,
+  getGroupInfo,
+  joinGroup,
+  updateGroup,
+  leaveGroup,
+  blockUserInGroup,
+  getUserOnlineStatus,
+  getDMVideos,
+  type DeHubConversation,
+  type DmMessage,
+  type DmMsgType,
+  type DeHubUser,
+  type GroupInfo,
+} from '@/lib/api/dehub';
+import { isAllowedAttachment } from '@/lib/attachments';
+import {
+  emitCreateAndStart,
+  emitSendMessage,
+  waitForDmSocket,
+  emitReadReceipt,
+  onDmSendMessage,
+  onDmReconnect,
+  onEditMessage,
+  onDmDeleteMessage,
+  onDmDestructOpened,
+  onReValidateMessage,
+  onDmPhotoUpload,
+  onFeeConfirmed,
+  onReadReceipt,
+  onDmReactionUpdated,
+  emitAddDmReaction,
+  emitRemoveDmReaction,
+  type SendMessagePayload,
+} from '@/lib/api/dehub/dm-socket';
+import type { QueryClient } from '@tanstack/react-query';
+import { isEncryptedContent } from '@/lib/dm-e2ee/crypto';
+import { decryptFromPeer, decryptMessageInPlace, hasIdentityFor, loadIdentity, onIdentityChange, prepareOutgoing } from '@/lib/dm-e2ee/keys';
+import { translateOutgoing } from '@/lib/dm-translate-out';
+import { openMediaPlaintext } from '@/lib/dm-e2ee/media-message';
+import { messageHistoryItems, mergeMessageHead, needsMessageHistoryRecovery, nextMessagePage, markRecentlySent, isRecentlySent, type MessageHistory } from '@/lib/dm-head';
+import { translateCopy as _translateCopy } from '@/i18n/copy';
+import { setChatPref } from '@/lib/api/dehub/chat-prefs';
+import { lockDhbForUsd } from '@/lib/dm-lock-price';
+import { dismissReadMessageNotifications } from '@/lib/web-push';
+
+/**
+ * Blob URL for an optimistic message with auto-revoke. The optimistic entry is
+ * replaced by the server copy (socket refetch, 2-3s) or rolled back on error,
+ * so revoking after 60s cannot blank a visible image but prevents the full
+ * photo/voice blob leaking for the rest of the session.
+ */
+export function createTransientBlobUrl(file: Blob, ttlMs = 60_000): string {
+  const url = URL.createObjectURL(file);
+  setTimeout(() => {
+    try { URL.revokeObjectURL(url); } catch { /* noop */ }
+  }, ttlMs);
+  return url;
+}
+
+// ─── Read-state persistence (survives refresh) ───────────────────────────────
+
+const READ_CONVOS_KEY_PREFIX = 'dehub-read-conversations';
+
+/** Wallet-scoped storage key to prevent cross-account contamination */
+function getReadConvosKey(): string {
+  const wallet = typeof window !== 'undefined' ? localStorage.getItem('dehub_wallet') : null;
+  return wallet ? `${READ_CONVOS_KEY_PREFIX}:${wallet.toLowerCase()}` : READ_CONVOS_KEY_PREFIX;
+}
+
+/** Get durable read timestamps — no TTL pruning, entries persist until explicitly cleared */
+function getReadConversations(): Record<string, number> {
+  try {
+    const raw = localStorage.getItem(getReadConvosKey());
+    if (!raw) return {};
+    return JSON.parse(raw) as Record<string, number>;
+  } catch { return {}; }
+}
+
+function persistReadConversation(conversationId: string): void {
+  try {
+    const store = getReadConversations();
+    store[conversationId] = Date.now();
+    localStorage.setItem(getReadConvosKey(), JSON.stringify(store));
+  } catch { /* storage full */ }
+}
+
+// ─── Open conversation registry ──────────────────────────────────────────────
+// Tracks which conversations are currently rendered/open so we can force
+// their unreadCount to 0 — prevents the badge from re-appearing after a
+// socket-triggered refetch races ahead of the server's markAsRead processing.
+const openConversationIds = new Map<string, number>();
+const openConversationListeners = new Set<() => void>();
+
+function notifyOpenConversationsChanged() {
+  openConversationListeners.forEach(fn => { try { fn(); } catch { /* noop */ } });
+}
+
+function subscribeOpenConversations(listener: () => void) {
+  openConversationListeners.add(listener);
+  return () => { openConversationListeners.delete(listener); };
+}
+
+export function isConversationOpen(conversationId: string | null | undefined): boolean {
+  return !!conversationId && openConversationIds.has(conversationId);
+}
+
+export function registerOpenConversation(conversationId: string | null | undefined): () => void {
+  if (!conversationId) return () => {};
+  openConversationIds.set(conversationId, (openConversationIds.get(conversationId) ?? 0) + 1);
+  notifyOpenConversationsChanged();
+  let released = false;
+  return () => {
+    if (released) return;
+    released = true;
+    const remaining = (openConversationIds.get(conversationId) ?? 1) - 1;
+    if (remaining > 0) openConversationIds.set(conversationId, remaining);
+    else openConversationIds.delete(conversationId);
+    notifyOpenConversationsChanged();
+  };
+}
+
+// ─── Query keys ───────────────────────────────────────────────────────────────
+
+const MESSAGES_BASE_KEY = ['messages'] as const;
+
+export const messagesKeys = {
+  all: MESSAGES_BASE_KEY,
+  conversations: () => [...MESSAGES_BASE_KEY, 'conversations'] as const,
+  conversation: (id: string) => [...MESSAGES_BASE_KEY, 'conversation', id] as const,
+  messages: (conversationId: string) => [...MESSAGES_BASE_KEY, 'thread', conversationId] as const,
+  head: (conversationId: string) => [...MESSAGES_BASE_KEY, 'head', conversationId] as const,
+  userSearch: (query: string) => [...MESSAGES_BASE_KEY, 'userSearch', query] as const,
+};
+
+/**
+ * Open the newest encrypted line for every conversation before the list is
+ * cached. A stored identity must be loaded here, not only by the thread view,
+ * or the list incorrectly claims the same message cannot be opened.
+ */
+export async function decryptConversationPreviews(
+  items: DeHubConversation[],
+  walletAddress: string | null | undefined,
+): Promise<DeHubConversation[]> {
+  // Loading is synchronous and silent. A missing identity is still set up
+  // only after the user opens a chat, where the signing UI belongs.
+  if (walletAddress) loadIdentity(walletAddress);
+
+  const me = (walletAddress || '').toLowerCase();
+  return Promise.all(items.map(async (conv) => {
+    const lm = conv.lastMessage;
+    if (!lm || !isEncryptedContent(lm.content)) return conv;
+    const peer =
+      conv.otherUser?.address ||
+      conv.participants?.find((p) => p.address && p.address.toLowerCase() !== me)?.address;
+    const plain = peer ? await decryptFromPeer(peer, lm.content) : null;
+    // An attachment's descriptor is never preview text; the row labels it by kind.
+    return {
+      ...conv,
+      lastMessage: plain === null
+        ? { ...lm, content: '', encrypted: true, undecryptable: true }
+        : { ...lm, encrypted: true, undecryptable: false, ...openMediaPlaintext(plain) },
+    };
+  }));
+}
+
+// ─── Conversations ────────────────────────────────────────────────────────────
+
+export function useConversations(searchQuery: string = '', enabled = true) {
+  const { isAuthenticated, walletAddress, isLoading: isAuthResolving } = useAuth();
+  const queryClient = useQueryClient();
+
+  // Both branches of the queryFn below need an input: a search term, or an
+  // address to list contacts for. With neither, the query still ran, fell
+  // through both branches and RESOLVED with [] — which React Query caches as a
+  // genuine success, so consumers read isLoading:false plus an empty list and
+  // rendered "no conversations yet" at somebody who simply had no address yet.
+  // MessagesPage is in CACHED_PAGES and never unmounts, so that wrong empty
+  // state survived until a full page reload.
+  const hasQueryInput = !!walletAddress || !!searchQuery;
+
+  const query = useQuery({
+    queryKey: [...messagesKeys.conversations(), searchQuery, walletAddress],
+    queryFn: async () => {
+      console.log('[useConversations] Fetching...', { searchQuery, walletAddress });
+      let items: DeHubConversation[] = [];
+      try {
+        if (searchQuery) {
+          const response = await getConversations(0, 50, searchQuery);
+          items = response.items || [];
+        } else if (walletAddress) {
+          items = await getContacts(walletAddress, 0, 50);
+        }
+      } catch (error) {
+        console.error('[useConversations] Error:', error);
+        throw error;
+      }
+      // The list preview is the newest line of each thread; open the encrypted
+      // ones so the row shows text rather than an envelope.
+      items = await decryptConversationPreviews(items, walletAddress);
+      // Apply localStorage read overrides so unread badges don't reappear after refresh
+      const readOverrides = getReadConversations();
+      return items.map(conv => {
+        const convId = conv.id || (conv as any)._id;
+        if (convId && readOverrides[convId] && conv.unreadCount > 0) {
+          const lastMsgTime = conv.lastMessage?.createdAt ? new Date(conv.lastMessage.createdAt).getTime() : 0;
+          if (lastMsgTime <= readOverrides[convId]) {
+            return { ...conv, unreadCount: 0 };
+          }
+        }
+        return conv;
+      });
+    },
+    enabled: enabled && hasQueryInput,
+  });
+
+  // Real-time: when any DM message arrives, refresh the conversations list.
+  // Only subscribe after the first successful REST fetch (avoids eager socket connect on load).
+  const hasData = !!query.data;
+  useEffect(() => {
+    if (!enabled || !isAuthenticated || !hasData) return;
+    const unsub = onDmSendMessage(() => {
+      queryClient.invalidateQueries({ queryKey: messagesKeys.conversations() });
+    });
+    return unsub;
+  }, [enabled, isAuthenticated, hasData, queryClient]);
+
+  // Re-render when the set of open conversations changes so the badge clears instantly
+  const [, forceTick] = useReducer((x: number) => x + 1, 0);
+  useEffect(() => {
+    const listener = () => forceTick();
+    openConversationListeners.add(listener);
+    return () => { openConversationListeners.delete(listener); };
+  }, []);
+
+  // Zero-out unreadCount for any conversation currently open in the UI.
+  const conversations = (query.data || []).map(conv => {
+    const convId = conv.id || (conv as any)._id;
+    if (convId && openConversationIds.has(convId) && conv.unreadCount > 0) {
+      return { ...conv, unreadCount: 0 };
+    }
+    return conv;
+  });
+
+  return {
+    conversations,
+    allConversations: conversations,
+    // A disabled query is pending-but-idle, which TanStack v5 reports as
+    // isLoading:false — indistinguishable from "loaded, and there is nothing
+    // here". While auth is still resolving there IS an address coming, so keep
+    // saying loading and let the caller hold its skeleton. Once auth settles
+    // with no address this goes false, and a genuinely signed-out consumer
+    // gets its empty state exactly as before.
+    isLoading: (enabled && hasQueryInput && query.isPending) || (!hasQueryInput && isAuthResolving),
+    isError: query.isLoadingError,
+    error: query.error,
+    refetch: query.refetch,
+    isRefetching: query.isRefetching,
+  };
+}
+
+// ─── Encryption helpers ───────────────────────────────────────────────────────
+
+/**
+ * The address a conversation's messages are encrypted with. A DM has exactly
+ * two participants and the session key is symmetric, so the peer is whoever
+ * is not me — for messages they sent and for messages I sent alike. Sources:
+ * a virtual `new_0x…`/`0x…` id, the conversations cache, then any sender in
+ * the thread cache who is not me.
+ */
+export function peerAddressForConversation(
+  queryClient: QueryClient,
+  conversationId: string | null | undefined,
+  myAddress: string | null | undefined,
+): string | null {
+  if (!conversationId) return null;
+  if (conversationId.startsWith('new_')) return conversationId.slice(4).toLowerCase();
+  if (/^0x[0-9a-fA-F]{40}$/.test(conversationId)) return conversationId.toLowerCase();
+  const me = (myAddress || '').toLowerCase();
+
+  for (const [, data] of queryClient.getQueriesData<DeHubConversation[]>({ queryKey: messagesKeys.conversations() })) {
+    const conv = data?.find((c) => (c.id || (c as any)._id) === conversationId);
+    if (!conv) continue;
+    const addr =
+      conv.otherUser?.address ||
+      conv.participants?.find((p) => p.address && p.address.toLowerCase() !== me)?.address;
+    if (addr) return addr.toLowerCase();
+  }
+
+  const thread = queryClient.getQueryData<any>(messagesKeys.messages(conversationId));
+  for (const page of thread?.pages ?? []) {
+    for (const m of page?.items ?? []) {
+      const a = m?.sender?.address?.toLowerCase();
+      if (a && a !== me) return a;
+    }
+  }
+  return null;
+}
+
+/**
+ * Decrypt every encrypted line in a batch before it reaches the cache. The
+ * cache must never hold ciphertext: the optimistic reconcile compares text,
+ * search filters on it, and every bubble renders it.
+ */
+export async function decryptThread(
+  queryClient: QueryClient,
+  conversationId: string,
+  myAddress: string | null | undefined,
+  items: DmMessage[],
+): Promise<DmMessage[]> {
+  const needs = items.some((m) => isEncryptedContent(m?.content) || isEncryptedContent(m?.replyTo?.content));
+  if (!needs) return items;
+  const me = (myAddress || '').toLowerCase();
+  if (me) loadIdentity(me);
+  let peer = peerAddressForConversation(queryClient, conversationId, me);
+  if (!peer) {
+    const other = items.find((m) => m.sender?.address && m.sender.address.toLowerCase() !== me);
+    peer = other?.sender?.address?.toLowerCase() || null;
+  }
+  // A direct link may open before the inbox cache, with a page containing
+  // only the reader's own messages. Resolve the other participant once.
+  if (!peer && me && /^[0-9a-f]{24}$/i.test(conversationId)) {
+    const conversation = await queryClient.fetchQuery({
+      queryKey: [...messagesKeys.conversation(conversationId), 'participants', me],
+      queryFn: async () => {
+        try {
+          return await getConversation(conversationId, me);
+        } catch {
+          const contacts = await getContacts(me);
+          return contacts.find(contact => contact.id === conversationId) ?? null;
+        }
+      },
+      staleTime: 60_000,
+    }).catch(() => null);
+    peer = conversation?.otherUser?.address?.toLowerCase() || null;
+  }
+  const activePeer = me && hasIdentityFor(me) ? peer : null;
+  return Promise.all(items.map((m) => decryptMessageInPlace(m, activePeer)));
+}
+
+// ─── Messages ─────────────────────────────────────────────────────────────────
+
+export function useMessages(conversationId: string | null) {
+  const { isAuthenticated, walletAddress, user } = useAuth();
+  const queryClient = useQueryClient();
+
+  // Refs stay current across renders without re-running the socket effect.
+  // Same pattern as mobile DMContext.tsx (userIdRef / addressRef).
+  const userIdRef = useRef<string | undefined>(undefined);
+  const walletAddressRef = useRef<string | undefined>(undefined);
+  useEffect(() => { userIdRef.current = user?._id || (user as any)?.id; }, [user?._id]);
+  useEffect(() => { walletAddressRef.current = walletAddress?.toLowerCase(); }, [walletAddress]);
+
+  const isVirtual = conversationId?.startsWith('new_') || (conversationId ? /^0x[0-9a-fA-F]{40}$/i.test(conversationId) : false);
+  // Cached pages retain their last location and keep threads registered even
+  // when hidden. Use visibility to stop their refreshes, including reconnects.
+  const pageActive = useContext(CachedPageActiveContext);
+  const { pathname } = useLocation();
+  const isMessagesRoute = pathname === '/app/messages' || pathname === '/messages';
+  const dockOpen = useSyncExternalStore(
+    subscribeOpenConversations,
+    () => isConversationOpen(conversationId),
+    () => false,
+  );
+  const query = useInfiniteQuery({
+    queryKey: messagesKeys.messages(conversationId || ''),
+    queryFn: async ({ pageParam = 0 }) => {
+      if (!conversationId) return { items: [], totalCount: 0, hasMore: false };
+      const result = await getMessages(conversationId, pageParam, 30);
+      result.items = await decryptThread(queryClient, conversationId, walletAddressRef.current, result.items);
+      // A refresh can race an in-flight send. Keep its bubble until the send
+      // mutation receives the persisted server message or reports a failure.
+      if (pageParam === 0) {
+        const existing = queryClient.getQueryData<any>(messagesKeys.messages(conversationId));
+        // Also keep a line just sent whose save this response predates.
+        const fetchedIds = new Set(result.items.map((m: DmMessage) => m._id));
+        const pending = (existing?.pages?.[0]?.items ?? [])
+          .filter((m: DmMessage) => m._id.startsWith('temp-') || (isRecentlySent(m._id) && !fetchedIds.has(m._id)));
+        result.items = [...pending, ...result.items];
+        const existingReadIds = new Set<string>(
+          (existing?.pages?.[0]?.items ?? [])
+            .filter((m: DmMessage) => m.isRead)
+            .map((m: DmMessage) => m._id)
+        );
+        if (existingReadIds.size > 0) {
+          result.items = result.items.map((m: DmMessage) =>
+            (!m.isRead && existingReadIds.has(m._id)) ? { ...m, isRead: true } : m
+          );
+        }
+      }
+      return result;
+    },
+    getNextPageParam: (_lastPage, allPages) => nextMessagePage(allPages),
+    initialPageParam: 0,
+    enabled: isAuthenticated && !!conversationId && !isVirtual,
+    staleTime: 10 * 1000,
+    gcTime: 15 * 60 * 1000,
+    // Routine recovery belongs to the bounded head query below. Explicit
+    // retries and encryption-identity changes can still refresh the history.
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
+
+  const headEnabled = isAuthenticated && !!conversationId && !isVirtual
+    && !!query.data && pageActive && (isMessagesRoute || dockOpen);
+  useQuery({
+    queryKey: messagesKeys.head(conversationId || ''),
+    queryFn: async () => {
+      const key = messagesKeys.messages(conversationId!);
+      const before = queryClient.getQueryData<MessageHistory>(key);
+      // A manual retry/history load already owns recovery; don't race it.
+      if (queryClient.getQueryState(key)?.fetchStatus === 'fetching') return before?.pages[0] ?? null;
+      const startedAt = Date.now();
+      const head = await getMessages(conversationId!, 0, 30);
+      head.items = await decryptThread(queryClient, conversationId!, walletAddressRef.current, head.items);
+      const current = queryClient.getQueryData<MessageHistory>(key);
+      if (current && needsMessageHistoryRecovery(current, head)) {
+        // More than a head arrived while offline. Restore ordinary pagination
+        // rather than showing a gap between the fresh head and old history.
+        await queryClient.refetchQueries({ queryKey: key, exact: true });
+      } else if (current) {
+        queryClient.setQueryData<MessageHistory>(key, old => old ? mergeMessageHead(old, head, startedAt) : old);
+      }
+      return head;
+    },
+    initialData: () => queryClient.getQueryData<MessageHistory>(messagesKeys.messages(conversationId || ''))?.pages[0],
+    initialDataUpdatedAt: query.dataUpdatedAt,
+    enabled: headEnabled,
+    staleTime: 15_000,
+    refetchInterval: headEnabled ? 15_000 : false,
+    refetchIntervalInBackground: false,
+  });
+
+  useEffect(() => {
+    if (!headEnabled) return;
+    return onDmReconnect(() => {
+      if (document.visibilityState !== 'visible') return;
+      // A disconnected transport can also miss edits/deletions in history.
+      void queryClient.invalidateQueries({ queryKey: messagesKeys.messages(conversationId!), exact: true });
+    });
+  }, [headEnabled, conversationId, queryClient]);
+
+  // Flatten pages → single array, oldest first for chat display. Kept stable
+  // between renders so the thread's memoised rows don't all redraw each time.
+  const pages = query.data?.pages;
+  const messages: DmMessage[] = useMemo(() => messageHistoryItems(pages ?? []).reverse(), [pages]);
+
+  // Once the encryption identity comes online (first signature on this
+  // device), lines fetched before it are sitting in the cache as
+  // "undecryptable" — refetch so they open.
+  useEffect(() => {
+    if (!conversationId) return;
+    return onIdentityChange(() => {
+      queryClient.invalidateQueries({ queryKey: messagesKeys.messages(conversationId) });
+      queryClient.invalidateQueries({ queryKey: messagesKeys.conversations() });
+    });
+  }, [conversationId, queryClient]);
+
+  // Real-time: new messages from socket
+  useEffect(() => {
+    if (!isAuthenticated || !conversationId) return;
+
+    const receiveMessage = (incoming: DmMessage, photoUpload = false) => {
+      // Decrypt before anything looks at `content`: the optimistic reconcile
+      // below compares text, and the cache must never hold ciphertext.
+      void decryptThread(queryClient, conversationId, walletAddressRef.current, [incoming]).then(([msg]) => {
+      // The server sometimes sends `conversation` as a populated object (after HTTP upload)
+      // rather than a plain ID string (like client-emitted text messages).
+      // Normalise to a string so the match check works in both cases.
+      const rawConversation = msg.conversation;
+      const dmId: string =
+        typeof rawConversation === 'string'
+          ? rawConversation
+          : (rawConversation as any)?._id ||
+            (msg as any).dmId ||
+            (msg as any).conversationId ||
+            '';
+      const isMatch = dmId === conversationId ||
+        (conversationId.startsWith('new_') &&
+          msg.sender?.address?.toLowerCase() === conversationId.replace('new_', '').toLowerCase());
+      if (!isMatch) return;
+
+      // Implied read: if the OTHER user just sent a message, treat earlier sent lines as read
+      // when we never got a `readReceipt` broadcast (fallback UX).
+      const senderAddress = msg.sender?.address?.toLowerCase();
+      const senderUserId = msg.sender?._id;
+      // Use refs so the check always sees the latest identity even on first login
+      // (same pattern as mobile DMContext.tsx userIdRef / addressRef), and fallback
+      // to localStorage in case the effect hasn't synced the refs yet.
+      const fallbackUser = (() => {
+        try { return JSON.parse(localStorage.getItem('dehub_user') || '{}'); } catch { return {}; }
+      })();
+      const fallbackAddress = localStorage.getItem('dehub_wallet')?.toLowerCase();
+      const meId = userIdRef.current || fallbackUser?._id || fallbackUser?.id;
+      const meAddr = walletAddressRef.current || fallbackAddress;
+      
+      const isOwnMsg =
+        (!!senderAddress && !!meAddr && senderAddress === meAddr) ||
+        (!!senderUserId && !!meId && senderUserId === meId);
+      const isFromOther = !isOwnMsg;
+      if (isFromOther && !photoUpload) {
+        const msgTime = new Date(msg.createdAt ?? '').getTime();
+        queryClient.setQueryData(messagesKeys.messages(conversationId), (old: any) => {
+          if (!old?.pages) return old;
+          return {
+            ...old,
+            pages: old.pages.map((page: any) => ({
+              ...page,
+              items: page.items.map((m: DmMessage) => {
+                if (m.author !== 'me' || m.isRead) return m;
+                const mTime = new Date(m.createdAt ?? '').getTime();
+                // Mark as read any of our messages sent before their reply
+                return mTime <= msgTime ? { ...m, isRead: true } : m;
+              }),
+            })),
+          };
+        });
+      }
+      queryClient.setQueryData(
+        messagesKeys.messages(conversationId),
+        (old: any) => {
+          if (!old?.pages) return old;
+          const pages = old.pages as Array<{ items: DmMessage[]; totalCount: number; hasMore: boolean }>;
+          const newPages = pages.map(page => ({ ...page, items: [...page.items] }));
+          const firstItems = newPages[0]?.items ?? [];
+          const existingIdx = firstItems.findIndex(m => m._id === msg._id);
+          const ownAddress = walletAddressRef.current || localStorage.getItem('dehub_wallet')?.toLowerCase();
+          const fallbackUser = (() => {
+            try { return JSON.parse(localStorage.getItem('dehub_user') || '{}'); } catch { return {}; }
+          })();
+          const ownUserId = userIdRef.current || fallbackUser?._id || fallbackUser?.id;
+          const incomingAddress = msg.sender?.address?.toLowerCase();
+          const incomingUserId = msg.sender?._id;
+          const isOwnIncoming =
+            (!!incomingAddress && !!ownAddress && incomingAddress === ownAddress) ||
+            (!!incomingUserId && !!ownUserId && incomingUserId === ownUserId);
+
+          const normalizedMsg: DmMessage = {
+            ...msg,
+            conversation: dmId || conversationId,
+            // Keep explicit author so downstream read-receipt logic works reliably.
+            author: isOwnIncoming ? 'me' : 'other',
+            // Sender should not see own message as read until actual read receipt.
+            ...(isOwnIncoming ? { isRead: false } : {}),
+          } as DmMessage;
+          const incomingAddressFromNormalized = normalizedMsg.sender?.address?.toLowerCase();
+          const incomingUserIdFromNormalized = normalizedMsg.sender?._id;
+          const incomingCreatedAt = new Date(normalizedMsg.createdAt ?? '').getTime();
+
+          if (existingIdx >= 0) {
+            // Update in place (e.g. media upload completed — merge mediaUrls, uploadStatus)
+            const merged = {
+              ...firstItems[existingIdx],
+              ...normalizedMsg,
+              mediaUrls: (normalizedMsg.mediaUrls?.length ? normalizedMsg.mediaUrls : firstItems[existingIdx].mediaUrls) ?? [],
+              uploadStatus: normalizedMsg.uploadStatus ?? firstItems[existingIdx].uploadStatus,
+            };
+            newPages[0].items[existingIdx] = merged;
+          } else {
+            // Reconcile optimistic temp message (same sender + type + content within short window)
+            // so we don't briefly render duplicates (temp + server copy).
+            const optimisticIdx = firstItems.findIndex((candidate) => {
+              // A failed send is waiting on the user's Retry, not on this echo.
+              if (!candidate._id?.startsWith('temp-') || candidate.sendState === 'failed') return false;
+              if (photoUpload || (candidate.msgType === 'media' && candidate.mediaUrls.length > 1)) return false;
+
+              const sameType = (candidate.msgType ?? 'msg') === (normalizedMsg.msgType ?? 'msg');
+              if (!sameType) return false;
+
+              const candidateAddress = candidate.sender?.address?.toLowerCase();
+              const candidateUserId = candidate.sender?._id;
+
+              const isIncomingFromCurrentUser =
+                (!!incomingAddressFromNormalized && !!ownAddress && incomingAddressFromNormalized === ownAddress) ||
+                (!!incomingUserIdFromNormalized && !!ownUserId && incomingUserIdFromNormalized === ownUserId);
+              if (!isIncomingFromCurrentUser) return false;
+
+              const sameSender =
+                (!!incomingAddressFromNormalized && !!candidateAddress && incomingAddressFromNormalized === candidateAddress) ||
+                (!!incomingUserIdFromNormalized && !!candidateUserId && incomingUserIdFromNormalized === candidateUserId);
+              if (!sameSender) return false;
+
+              const candidateContent = (candidate.content || '').trim();
+              const incomingContent = (normalizedMsg.content || '').trim();
+              const sameContent = candidateContent === incomingContent;
+              const isMediaLike = ['media', 'voice', 'gif'].includes(normalizedMsg.msgType as string);
+
+              const candidateCreatedAt = new Date(candidate.createdAt ?? '').getTime();
+              const closeInTime =
+                Number.isFinite(candidateCreatedAt) && Number.isFinite(incomingCreatedAt)
+                  ? Math.abs(candidateCreatedAt - incomingCreatedAt) < 30_000
+                  : Number.isFinite(candidateCreatedAt)
+                    ? Date.now() - candidateCreatedAt < 30_000
+                    : true;
+
+              return (sameContent || isMediaLike) && closeInTime;
+            });
+
+            if (optimisticIdx >= 0) {
+              // Preserve `author` from the temp message — the server socket event doesn't
+              // include it, but we need it later so onReadReceipt can identify sent messages.
+              // For own messages, keep isRead:false from the optimistic entry — the server
+              // echo often returns isRead:true (auto-read by sender) which causes a brief
+              // double-tick flash before the real read receipt arrives.
+              const optimistic = firstItems[optimisticIdx];
+              const keepIsReadFalse = optimistic.author === 'me' && !optimistic.isRead;
+              newPages[0].items[optimisticIdx] = {
+                ...normalizedMsg,
+                // Preserve author from optimistic — normalizedMsg.author may be 'other' if
+                // address comparison fails (e.g. Smart Account vs EOA mismatch), which would
+                // put the bubble on the wrong side.
+                author: optimistic.author,
+                // An echo that carries the quote only as an id would wipe the
+                // one the pending bubble was already showing.
+                replyTo: normalizedMsg.replyTo?.sender ? normalizedMsg.replyTo : (optimistic.replyTo ?? normalizedMsg.replyTo),
+                ...(keepIsReadFalse ? { isRead: false } : {}),
+                // Same bubble, same element: only the status mark changes.
+                clientKey: optimistic.clientKey ?? optimistic._id,
+                sendState: undefined,
+              };
+            } else {
+              newPages[0] = { ...newPages[0], items: [normalizedMsg, ...firstItems] };
+            }
+          }
+          return { ...old, pages: newPages };
+        }
+      );
+      });
+    };
+    const unsubSend = onDmSendMessage(receiveMessage);
+    const unsubPhotoUpload = onDmPhotoUpload(message => receiveMessage(message, true));
+
+    const unsubEdit = onEditMessage((data) => {
+      const applyEdit = (content: string, undecryptable = false) => queryClient.setQueryData(
+        messagesKeys.messages(conversationId),
+        (old: any) => {
+          if (!old?.pages) return old;
+          const pages = old.pages.map((page: any) => ({
+            ...page,
+            items: page.items.map((m: DmMessage) =>
+              m._id === (data.messageId ?? data._id)
+                ? {
+                    ...m,
+                    content,
+                    isEdited: true,
+                    editedAt: data.editedAt,
+                    ...(data.original !== undefined ? { original: data.original } : {}),
+                    ...(isEncryptedContent(data.content) ? { encrypted: true, undecryptable } : {}),
+                  }
+                : m
+            ),
+          }));
+          return { ...old, pages };
+        }
+      );
+      if (!isEncryptedContent(data.content)) {
+        applyEdit(data.content);
+        return;
+      }
+      const peer = peerAddressForConversation(queryClient, conversationId, walletAddressRef.current);
+      void (peer ? decryptFromPeer(peer, data.content) : Promise.resolve(null)).then((plain) =>
+        applyEdit(plain ?? '', plain === null),
+      );
+    });
+
+    const unsubDelete = onDmDeleteMessage((data) => {
+      queryClient.setQueryData(
+        messagesKeys.messages(conversationId),
+        (old: any) => {
+          if (!old?.pages) return old;
+          const id = data._id ?? data.messageId;
+          const pages = old.pages.map((page: any) => ({
+            ...page,
+            // Deleted for me: gone from this chat. For everyone: the line says so.
+            items: data.forMe
+              ? page.items.filter((m: DmMessage) => m._id !== id)
+              : page.items.map((m: DmMessage) => (m._id === id
+                ? (data.marker && data.destruct
+                  // An opened view-once / on-open photo: the file goes, an "Opened" pill stays.
+                  ? { ...m, isDeleted: true, content: '', mediaUrls: [], encMedia: undefined, destruct: data.destruct }
+                  : { ...m, isDeleted: true, content: '' })
+                : m)),
+          }));
+          return { ...old, pages };
+        }
+      );
+    });
+
+    const unsubDestructOpened = onDmDestructOpened(({ dmId, messageId, openedAt }) => {
+      if (dmId !== conversationId) return;
+      queryClient.setQueryData(messagesKeys.messages(conversationId), (old: any) => {
+        if (!old?.pages) return old;
+        return {
+          ...old,
+          pages: old.pages.map((page: any) => ({
+            ...page,
+            items: page.items.map((m: DmMessage) =>
+              m._id === messageId && !m.isDeleted && m.destruct && !m.destruct.openedAt &&
+              (m.author === 'me' || m.destruct.mode === 'time')
+                ? { ...m, destruct: { ...m.destruct, openedAt } }
+                : m),
+          })),
+        };
+      });
+    });
+
+    const unsubReaction = onDmReactionUpdated(({ dmId, messageId, reactions }) => {
+      if (dmId !== conversationId) return;
+      queryClient.setQueryData(messagesKeys.messages(conversationId), (old: any) => {
+        if (!old?.pages) return old;
+        return {
+          ...old,
+          pages: old.pages.map((page: any) => ({
+            ...page,
+            items: page.items.map((message: DmMessage) =>
+              message._id === messageId ? { ...message, reactions } : message
+            ),
+          })),
+        };
+      });
+    });
+
+    const unsubFeeConfirmed = onFeeConfirmed(({ dmId }) => {
+      if (dmId === conversationId) {
+        queryClient.invalidateQueries({ queryKey: messagesKeys.messages(conversationId) });
+      }
+    });
+
+    const unsubRevalidate = onReValidateMessage(({ dmId, message: rawMessage }) => {
+      if (dmId !== conversationId) return;
+      void decryptThread(queryClient, conversationId, walletAddressRef.current, [rawMessage]).then(([message]) =>
+      queryClient.setQueryData(
+        messagesKeys.messages(conversationId),
+        (old: any) => {
+          if (!old?.pages) return old;
+          const pages = old.pages.map((page: any) => ({
+            ...page,
+            items: page.items.map((m: DmMessage) =>
+              m._id === message._id ? { ...m, ...message, mediaUrls: message.mediaUrls ?? m.mediaUrls, uploadStatus: message.uploadStatus ?? m.uploadStatus } : m
+            ),
+          }));
+          return { ...old, pages };
+        }
+      ));
+    });
+
+    // When the other person reads, mark all our sent messages as read
+    const unsubReadReceipt = onReadReceipt((data: any) => {
+      const dmId = data?.dmId || data?.conversationId;
+      const readBy = data?.readBy;
+      if (!dmId || dmId !== conversationId) return;
+      // Ignore self-receipts: server echoes readReceipt to all participants including us.
+      // readBy === our userId means WE read their messages, NOT that they read ours.
+      // Use refs so the check always sees the latest identity even if this closure was
+      // created before login completed — same pattern as mobile DMContext.tsx userIdRef.
+      if (!readBy) return;
+      const readByStr = String(readBy).toLowerCase();
+      const fallbackUser = (() => {
+        try { return JSON.parse(localStorage.getItem('dehub_user') || '{}'); } catch { return {}; }
+      })();
+      const fallbackAddress = localStorage.getItem('dehub_wallet')?.toLowerCase();
+      const meId = userIdRef.current || fallbackUser?._id || fallbackUser?.id;
+      const meAddr = walletAddressRef.current || fallbackAddress;
+      
+      // If we don't know our own MongoDB ID yet (during login), we cannot safely determine
+      // if this readReceipt from the backend (which ONLY contains an ObjectId) is ours or not.
+      // Eary return to avoid accidentally marking our own messages as read by the other person.
+      // The 5s background polling will naturally sync the correct read state once auth settles.
+      if (!meId) return;
+      
+      const isSelf =
+        (!!meId && readByStr === String(meId).toLowerCase());
+      if (isSelf) return; // Ignore our own read receipt
+      queryClient.setQueryData(
+        messagesKeys.messages(conversationId),
+        (old: any) => {
+          if (!old?.pages) return old;
+          const pages = old.pages.map((page: any) => ({
+            ...page,
+            items: page.items.map((m: DmMessage) => {
+              // author is 'me' for own messages (set by parseDmMessage or preserved on reconcile)
+              if (m.author !== 'me' || m.isRead) return m;
+              return { ...m, isRead: true };
+            }),
+          }));
+          return { ...old, pages };
+        }
+      );
+      // Do NOT invalidate here — an immediate refetch races with backend processing
+      // and overwrites the optimistic isRead:true with the still-stale server value.
+      // The 5s refetchInterval will sync naturally once the backend has caught up.
+    });
+
+    return () => {
+      unsubSend();
+      unsubPhotoUpload();
+      unsubEdit();
+      unsubDelete();
+      unsubDestructOpened();
+      unsubReaction();
+      unsubFeeConfirmed();
+      unsubRevalidate();
+      unsubReadReceipt();
+    };
+  }, [conversationId, isAuthenticated, queryClient]);
+
+  const updateReaction = useCallback(async (messageId: string, emoji: string, add: boolean) => {
+    if (!conversationId || !walletAddress) return;
+    const key = messagesKeys.messages(conversationId);
+    const previous = queryClient.getQueryData(key);
+    queryClient.setQueryData(key, (old: any) => {
+      if (!old?.pages) return old;
+      return {
+        ...old,
+        pages: old.pages.map((page: any) => ({
+          ...page,
+          items: page.items.map((message: DmMessage) => {
+            if (message._id !== messageId) return message;
+            const reactions = { ...(message.reactions || {}) };
+            const mine = walletAddress.toLowerCase();
+            const addresses = (reactions[emoji] || []).filter(address => address.toLowerCase() !== mine);
+            if (add) addresses.push(mine);
+            if (addresses.length) reactions[emoji] = addresses;
+            else delete reactions[emoji];
+            return { ...message, reactions };
+          }),
+        })),
+      };
+    });
+    try {
+      if (add) await emitAddDmReaction(conversationId, messageId, emoji);
+      else await emitRemoveDmReaction(conversationId, messageId, emoji);
+    } catch (error) {
+      queryClient.setQueryData(key, previous);
+      throw error;
+    }
+  }, [conversationId, queryClient, walletAddress]);
+
+  // Mark as read via socket + persist to localStorage
+  const markAsRead = useMutation({
+    mutationFn: () => {
+      if (conversationId && !conversationId.startsWith('new_') && !/^0x[0-9a-fA-F]{40}$/i.test(conversationId)) {
+        emitReadReceipt(conversationId);
+        void dismissReadMessageNotifications(conversationId);
+        // Persist to localStorage so it survives page refresh
+        persistReadConversation(conversationId);
+      }
+      return markConversationAsRead(conversationId!);
+    },
+    onMutate: async () => {
+      // Optimistically set unreadCount to 0 in the conversations cache
+      await queryClient.cancelQueries({ queryKey: messagesKeys.conversations() });
+      queryClient.setQueriesData(
+        { queryKey: messagesKeys.conversations() },
+        (old: any) => {
+          if (!Array.isArray(old)) return old;
+          return old.map((conv: any) => {
+            const convId = conv.id || conv._id;
+            if (convId === conversationId) {
+              return { ...conv, unreadCount: 0 };
+            }
+            return conv;
+          });
+        }
+      );
+    },
+    onSettled: () => {
+      // Don't force-refetch here — the optimistic update already cleared the badge,
+      // and the localStorage override protects against stale server counts on next
+      // natural refetch. An immediate invalidation risks the server returning
+      // unreadCount > 0 before markAsRead/readReceipt is fully processed on the server.
+    },
+  });
+
+  const addReaction = useCallback((messageId: string, emoji: string) => updateReaction(messageId, emoji, true), [updateReaction]);
+  const removeReaction = useCallback((messageId: string, emoji: string) => updateReaction(messageId, emoji, false), [updateReaction]);
+
+  return {
+    messages,
+    hasHistory: query.data !== undefined,
+    isLoading: !isVirtual && !!conversationId && query.isPending,
+    isError: query.isLoadingError,
+    error: query.error,
+    fetchNextPage: query.fetchNextPage,
+    hasNextPage: query.hasNextPage,
+    isFetchingNextPage: query.isFetchingNextPage,
+    refetch: query.refetch,
+    markAsRead: markAsRead.mutate,
+    addReaction,
+    removeReaction,
+  };
+}
+
+// ─── Create and Start ─────────────────────────────────────────────────────────
+
+/**
+ * Emit createAndStart to get/create a DM conversation.
+ * Returns DmConversation including dmFee.
+ */
+export function useCreateAndStart() {
+  return useMutation({
+    mutationFn: (userId: string) => emitCreateAndStart(userId),
+  });
+}
+
+// ─── Send Message ─────────────────────────────────────────────────────────────
+
+type SendVariables = {
+  content: string;
+  msgType?: DmMsgType;
+  gifUrl?: string;
+  mediaFile?: File;
+  photoBatch?: { files: File[]; id: string };
+  voiceDuration?: number;
+  replyTo?: string;
+  /** The quoted message as it should show on the pending bubble — the id alone renders nothing until the echo. */
+  replyPreview?: DmMessage['replyTo'];
+  txHash?: string;
+  forwardedFrom?: { messageId: string };
+  mediaOptions?: DmVideoOptions;
+  destruct?: DmDestructChoice;
+  /** Pay-to-unlock price for a photo or video. */
+  lockPrice?: number;
+  /** Text only: delivered when the other person next comes online. */
+  whenOnline?: boolean;
+  /** The clientKey of the line already on screen (a retry, or drawn before the mutation). */
+  retryKey?: string;
+};
+
+/** What each pending send asked for, so a failed one can be retried as it was. */
+const pendingSends = new Map<string, SendVariables>();
+
+function patchByClientKey(old: any, key: string, patch: Partial<DmMessage>) {
+  if (!old?.pages) return old;
+  return {
+    ...old,
+    pages: old.pages.map((page: any) => ({
+      ...page,
+      items: page.items.map((m: DmMessage) => (m.clientKey === key || m._id === key) ? { ...m, ...patch } : m),
+    })),
+  };
+}
+
+/** The original send behind a failed bubble, ready to go again with `retryKey`. */
+export function failedSendRetry(key: string): SendVariables | null {
+  const vars = pendingSends.get(key);
+  return vars ? { ...vars, retryKey: key } : null;
+}
+
+/** Drop a failed bubble the user no longer wants to send. */
+export function discardFailedSend(queryClient: ReturnType<typeof useQueryClient>, conversationId: string, key: string): void {
+  pendingSends.delete(key);
+  queryClient.setQueryData(messagesKeys.messages(conversationId), (old: any) => old?.pages ? {
+    ...old,
+    pages: old.pages.map((page: any) => ({
+      ...page, items: page.items.filter((m: DmMessage) => m.clientKey !== key && m._id !== key),
+    })),
+  } : old);
+}
+
+export function useSendMessage(conversationId: string) {
+  const queryClient = useQueryClient();
+  const { user, walletAddress } = useAuth();
+
+  /*
+   * Put the line on screen in the same task as the key press. Going through
+   * the mutation's onMutate first cost several scheduler hops (an awaited
+   * cancel, notify batching), and on a busy main thread — an animated theme,
+   * a long thread — that was a second or two of the box being empty with no
+   * line in the thread yet.
+   */
+  const insertOptimistic = (variables: SendVariables): string => {
+    const { content, msgType, gifUrl, mediaFile, photoBatch, voiceDuration, replyPreview, mediaOptions, destruct, lockPrice, whenOnline } = variables;
+    const tempId = `temp-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    pendingSends.set(tempId, variables);
+    // Optimistic: prepend temp message, drawn exactly as it will look delivered.
+    const optimisticMessage: DmMessage = {
+      _id: tempId,
+      clientKey: tempId,
+      sendState: 'sending',
+      conversation: conversationId,
+      sender: {
+        _id: user?._id || '',
+        username: user?.username || '',
+        address: walletAddress || '',
+        displayName: user?.displayName || user?.display_name || '',
+        avatarImageUrl: user?.avatarImageUrl || '',
+      },
+      content,
+      msgType: msgType || 'msg',
+      mediaUrls: photoBatch
+        ? photoBatch.files.map(file => ({ url: createTransientBlobUrl(file), type: 'image', mimeType: file.type }))
+        : mediaFile
+        ? [{
+            url: createTransientBlobUrl(mediaFile),
+            // A document has no renderable preview, so it must not be typed
+            // 'image' — the bubble would try to <img> a blob URL for a PDF.
+            type: msgType === 'voice' ? 'audio' : isAllowedAttachment(mediaFile.name) ? 'file'
+              : mediaFile.type.startsWith('video/') ? 'video' : 'image',
+            mimeType: mediaFile.type,
+            name: mediaFile.name,
+            size: mediaFile.size,
+          }]
+        : gifUrl ? [{ url: gifUrl, type: 'image', mimeType: 'image/gif' }] : [],
+      voiceDuration: voiceDuration ?? null,
+      ...(mediaOptions ? { mediaOptions } : {}),
+      ...(destruct ? { destruct: destructFromChoice(destruct) } : {}),
+      ...(whenOnline ? { whenOnline: true } : {}),
+      isRead: false,
+      isEdited: false,
+      editedAt: null,
+      isForwarded: false,
+      replyTo: replyPreview ?? null,
+      paymentStatus: null,
+      paymentTxHash: null,
+      tipAmount: null,
+      tipSymbol: null,
+      isDeleted: false,
+      author: 'me',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    // A locked send shows the sender their own photo, tagged with its price.
+    if (lockPrice && lockPrice > 0 && mediaFile && msgType === 'media') {
+      optimisticMessage.lock = {
+        price: lockDhbForUsd(lockPrice),
+        priceUsd: lockPrice,
+        symbol: 'DHB',
+        kind: mediaFile.type.startsWith('video/') ? 'video' : mediaFile.type.startsWith('image/') ? 'image' : 'file',
+        previewUrl: null,
+        unlocked: true,
+        mine: true,
+        ready: false,
+        ...(mediaFile.type.startsWith('video/') || mediaFile.type.startsWith('image/')
+          ? { mediaUrl: optimisticMessage.mediaUrls[0]?.url }
+          : { fileName: mediaFile.name, fileSize: mediaFile.size }),
+      };
+    }
+
+    queryClient.setQueryData(messagesKeys.messages(conversationId), (old: any) => {
+      const newPages = old?.pages?.length ? [...old.pages] : [{ items: [], totalCount: 0, hasMore: false }];
+      if (newPages[0]) {
+        newPages[0] = { ...newPages[0], items: [optimisticMessage, ...newPages[0].items] };
+      }
+      return { ...old, pageParams: old?.pageParams ?? [0], pages: newPages };
+    });
+
+    return tempId;
+  };
+
+  const mutation = useMutation({
+    mutationFn: async ({
+      content,
+      msgType = 'msg',
+      gifUrl,
+      mediaFile,
+      photoBatch,
+      voiceDuration,
+      replyTo,
+      replyPreview,
+      txHash,
+      forwardedFrom,
+      mediaOptions,
+      destruct,
+      lockPrice,
+      whenOnline,
+    }: SendVariables): Promise<DmMessage> => {
+      // Virtual conversations need createAndStart first to get real ID (applies to all message types)
+      const isVirtual = conversationId.startsWith('new_') || /^0x[0-9a-fA-F]{40}$/i.test(conversationId);
+      let resolvedId = conversationId;
+      if (isVirtual) {
+        const recipientAddress = conversationId.startsWith('new_')
+          ? conversationId.replace('new_', '')
+          : conversationId;
+        try {
+          const dmConversation = await emitCreateAndStart(recipientAddress);
+          if (dmConversation?._id) {
+            resolvedId = dmConversation._id;
+          } else {
+            throw new Error('Failed to create conversation');
+          }
+        } catch (err) {
+          console.error('[useSendMessage] createAndStart failed:', err);
+          throw new Error(_translateCopy("copy.e01fe7927536", { defaultValue: "Could not establish conversation. Please try again." }));
+        }
+      }
+
+      // Text (and captions) travel encrypted when both sides have keys. The
+      // peer is resolved from the conversation, not the message, because the
+      // session key is the same in both directions.
+      const peerAddress = peerAddressForConversation(queryClient, conversationId, walletAddress)
+        || peerAddressForConversation(queryClient, resolvedId, walletAddress);
+
+      // Media/voice: upload file then return — resolvedId is now guaranteed real.
+      // The file itself is encrypted on the same terms as the caption.
+      if (msgType === 'media' || msgType === 'voice') {
+        if (photoBatch) {
+          const [{ uploadDmPhotos }, { seedSentMedia }, { photoMediaKey }] = await Promise.all([
+            import('@/lib/dm-e2ee/media-send'),
+            import('@/lib/dm-e2ee/media-cache'),
+            import('@/lib/dm-e2ee/media'),
+          ]);
+          const { message, plaintext } = await uploadDmPhotos(photoBatch.files, resolvedId, user?._id || walletAddress || '', {
+            peerAddress, caption: content, batchId: photoBatch.id, replyTo, txHash,
+          });
+          plaintext.forEach((blob, index) => seedSentMedia(photoMediaKey(message._id, index), blob));
+          const opened = isEncryptedContent(message.content) && !message.encMedia
+            ? await decryptMessageInPlace(message, peerAddress)
+            : message;
+          return { ...opened, author: 'me', sender: opened.sender._id ? opened.sender : {
+            _id: user?._id || '', username: user?.username || '', address: walletAddress || '',
+            displayName: user?.displayName || user?.display_name || '', avatarImageUrl: user?.avatarImageUrl || '',
+          }, replyTo: opened.replyTo?.sender ? opened.replyTo : (replyPreview ?? opened.replyTo) };
+        }
+        if (!mediaFile) throw new Error('No file provided for media/voice message');
+        const senderId = user?._id || walletAddress || '';
+        // Loaded on first send: none of this is needed to paint the app.
+        const [{ uploadDmMedia }, { seedSentMedia }] = await Promise.all([
+          import('@/lib/dm-e2ee/media-send'),
+          import('@/lib/dm-e2ee/media-cache'),
+        ]);
+        const { message: sent, plain } = await uploadDmMedia(mediaFile, resolvedId, senderId, {
+          peerAddress,
+          caption: content,
+          msgType,
+          voiceDuration,
+          replyTo,
+          txHash,
+          mediaOptions,
+          destruct,
+          lockPrice,
+        });
+        if (plain) seedSentMedia(sent._id, plain);
+        return sent;
+      }
+
+      // "Send in their language": translated before it is sealed, so the
+      // line they get (and their push) is in their language. Plain text in a
+      // real one-to-one chat only; anything else goes as typed.
+      const translated = msgType === 'msg' && !isVirtual && !forwardedFrom
+        ? await translateOutgoing(resolvedId, content)
+        : null;
+      const wire = translated
+        ? { content: translated.content, encrypted: false }
+        : await prepareOutgoing(peerAddress, content);
+
+      /*
+       * Confirm the socket is up BEFORE emitting. socket.io's emit does not
+       * throw on a dead client, so without this the mutation always "succeeded":
+       * the optimistic bubble stayed on screen looking delivered, onError never
+       * ran, and the composer had already been cleared. The message was gone
+       * with nothing shown anywhere. Throwing here is what makes the existing
+       * rollback and the caller's toast reachable at all.
+       */
+      await waitForDmSocket();
+
+      // Real conversation: emit via socket. The server echoes `sendMessage`
+      // back, and that echo is what reconciles the optimistic entry below.
+      const payload: SendMessagePayload = {
+        dmId: resolvedId,
+        content: wire.content,
+        type: msgType,
+        gif: gifUrl,
+        replyTo,
+        txHash,
+        voiceDuration,
+        forwardedFrom,
+        ...(whenOnline ? { whenOnline: true } : {}),
+        ...(translated ? { original: translated.original, translatedTo: translated.lang } : {}),
+      };
+      const sent = await emitSendMessage(payload);
+      return {
+        ...sent,
+        conversation: resolvedId,
+        content: translated ? translated.content : content,
+        ...(translated ? { original: { content: translated.original, lang: translated.lang } } : {}),
+        encrypted: wire.encrypted,
+        author: 'me',
+        isRead: false,
+        replyTo: sent.replyTo?.sender ? sent.replyTo : (replyPreview ?? sent.replyTo),
+      };
+    },
+
+    onMutate: async (variables) => {
+      const { retryKey } = variables;
+      await queryClient.cancelQueries({ queryKey: messagesKeys.messages(conversationId) });
+      if (retryKey) {
+        // The failed bubble is still on screen; put it back to "sending" where it is.
+        queryClient.setQueryData(messagesKeys.messages(conversationId), (old: any) => patchByClientKey(old, retryKey, { sendState: 'sending' }));
+        return { optimisticId: retryKey };
+      }
+      return { optimisticId: insertOptimistic(variables) };
+    },
+
+    onError: (_err, _vars, context) => {
+      // Keep the line where it is and offer Retry on it; preserve everything else.
+      if (!context?.optimisticId) return;
+      queryClient.setQueryData(messagesKeys.messages(conversationId), (old: any) =>
+        patchByClientKey(old, context.optimisticId, { sendState: 'failed' }));
+    },
+
+    onSuccess: (sent, variables, context) => {
+      const key = context?.optimisticId;
+      if (key) pendingSends.delete(key);
+      markRecentlySent(sent._id);
+      const replacePending = (old: any) => {
+        const pages = old?.pages ?? [{ items: [], totalCount: 0, hasMore: false }];
+        // Update the pending line in place (it may already carry the server id
+        // if the socket echo got there first), so its element is never swapped.
+        const completed = variables.photoBatch && sent.uploadStatus === 'pending'
+          ? pages.flatMap((page: { items: DmMessage[] }) => page.items)
+            .find((m: DmMessage) => m._id === sent._id && (m.uploadStatus === 'success' || m.uploadStatus === 'failed'))
+          : undefined;
+        let placed = false;
+        const updated = pages.map((page: any) => ({
+          ...page,
+          items: page.items.flatMap((m: DmMessage) => {
+            const mine = (!!key && (m._id === key || m.clientKey === key)) || m._id === sent._id;
+            if (!mine) return [m];
+            if (placed) return [];
+            placed = true;
+            const keepPreview = variables.photoBatch && sent.uploadStatus === 'pending' && !sent.encMedia && !sent.mediaUrls.length;
+            // A progress event can beat the upload response to this cache.
+            return [{
+              ...m, ...(completed ?? sent), ...(keepPreview && !completed ? { mediaUrls: m.mediaUrls } : {}),
+              clientKey: key ?? m.clientKey, sendState: undefined,
+            }];
+          }),
+        }));
+        if (!placed) updated[0] = { ...updated[0], items: [{ ...sent, clientKey: key }, ...updated[0].items] };
+        return { ...old, pageParams: old?.pageParams ?? [0], pages: updated };
+      };
+      queryClient.setQueryData(messagesKeys.messages(conversationId), replacePending);
+      const resolvedId = typeof sent.conversation === 'string' ? sent.conversation : conversationId;
+      if (resolvedId !== conversationId) {
+        queryClient.setQueryData(messagesKeys.messages(resolvedId), replacePending);
+      }
+      queryClient.invalidateQueries({ queryKey: messagesKeys.conversations() });
+    },
+  });
+
+  // Every send goes through here, so the line is drawn before the mutation
+  // even starts; the mutation then only settles (or fails) that same line.
+  const withLine = (variables: SendVariables): SendVariables => {
+    if (variables.retryKey) return variables;
+    void queryClient.cancelQueries({ queryKey: messagesKeys.messages(conversationId) });
+    return { ...variables, retryKey: insertOptimistic(variables) };
+  };
+  return {
+    ...mutation,
+    mutate: (variables: SendVariables, options?: Parameters<typeof mutation.mutate>[1]) => mutation.mutate(withLine(variables), options),
+    mutateAsync: (variables: SendVariables) => mutation.mutateAsync(withLine(variables)),
+  };
+}
+
+// ─── Create Conversation (virtual, for new DM flow) ───────────────────────────
+
+export function useCreateConversation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ recipientAddress, recipientUser }: {
+      recipientAddress: string;
+      recipientUser?: Partial<DeHubUser>;
+    }) => createConversation(recipientAddress, recipientUser),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: messagesKeys.conversations() });
+    },
+  });
+}
+
+// ─── Delete Conversation ──────────────────────────────────────────────────────
+
+// ─── Deleted conversations persistence ────────────────────────────────────────
+
+const DELETED_CONVOS_KEY = 'dehub-deleted-conversations';
+
+export function getDeletedConversationIds(): Set<string> {
+  try {
+    const raw = localStorage.getItem(DELETED_CONVOS_KEY);
+    return raw ? new Set(JSON.parse(raw)) : new Set();
+  } catch {
+    return new Set();
+  }
+}
+
+function persistDeletedConversation(conversationId: string) {
+  const ids = getDeletedConversationIds();
+  ids.add(conversationId);
+  // Also persist the peer address variant so both "new_0x..." and the raw dmId are covered
+  if (conversationId.startsWith('new_')) {
+    ids.add(conversationId.replace('new_', ''));
+  }
+  localStorage.setItem(DELETED_CONVOS_KEY, JSON.stringify([...ids]));
+}
+
+export type DeleteConversationTarget = string | { id: string; forEveryone?: boolean };
+const deleteTargetId = (target: DeleteConversationTarget) => (typeof target === 'string' ? target : target.id);
+
+export function useDeleteConversation() {
+  const queryClient = useQueryClient();
+  const { walletAddress } = useAuth();
+
+  return useMutation({
+    // A bare id deletes the chat for you only; { id, forEveryone } on a 1:1
+    // chat deletes every message and the chat for both people.
+    mutationFn: (target: DeleteConversationTarget) =>
+      deleteConversation(deleteTargetId(target), walletAddress || undefined, { forEveryone: typeof target === 'object' && !!target.forEveryone }),
+    onMutate: async (target: DeleteConversationTarget) => {
+      const conversationId = deleteTargetId(target);
+      // Persist deletion so it survives refetches and page reloads
+      persistDeletedConversation(conversationId);
+
+      // Optimistically remove from ALL conversation query caches
+      await queryClient.cancelQueries({ queryKey: messagesKeys.conversations() });
+      const snapshot = queryClient.getQueriesData({ queryKey: messagesKeys.conversations() });
+      queryClient.setQueriesData(
+        { queryKey: messagesKeys.conversations() },
+        (old: any) => {
+          if (Array.isArray(old)) {
+            return old.filter((c: any) => c.id !== conversationId);
+          }
+          return old;
+        }
+      );
+      // Also remove cached messages for this conversation
+      queryClient.removeQueries({ queryKey: messagesKeys.messages(conversationId) });
+      return { snapshot };
+    },
+    onSuccess: () => {
+      // Don't invalidate — the deleted ID is persisted and will be filtered on next fetch
+    },
+    onError: (_err, target, context) => {
+      const conversationId = deleteTargetId(target);
+      // Rollback: remove from persisted deletions
+      const ids = getDeletedConversationIds();
+      ids.delete(conversationId);
+      if (conversationId.startsWith('new_')) ids.delete(conversationId.replace('new_', ''));
+      localStorage.setItem(DELETED_CONVOS_KEY, JSON.stringify([...ids]));
+      // Restore cache
+      queryClient.invalidateQueries({ queryKey: messagesKeys.conversations() });
+    },
+  });
+}
+
+// ─── User search ──────────────────────────────────────────────────────────────
+
+export function useUserSearchForDM(query: string, enabled = true) {
+  const { isAuthenticated } = useAuth();
+  // Normalised here too, not just in the API call: the `enabled` gate below
+  // counts characters, and a raw "@ab" would otherwise pass a two-character
+  // check on a one-character search term.
+  const debouncedQuery = normalizeUserSearchQuery(query);
+
+  return useQuery({
+    queryKey: messagesKeys.userSearch(debouncedQuery),
+    queryFn: () => searchUsersForDM(debouncedQuery, 0, 10),
+    enabled: enabled && isAuthenticated && debouncedQuery.length >= 2,
+    staleTime: 60 * 1000,
+  });
+}
+
+// ─── Unread count ─────────────────────────────────────────────────────────────
+
+export function useTotalUnreadCount() {
+  const { conversations } = useConversations();
+  // Message requests wait in their own list and never light the nav badge.
+  return conversations.reduce((sum, conv) => sum + (conv.isRequest ? 0 : conv.unreadCount || 0), 0);
+}
+
+/** Accept a message request: the chat moves from Requests to the inbox. */
+export function useAcceptMessageRequest() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (conversationId: string) => setChatPref(conversationId, { accepted: true }),
+    onMutate: async (conversationId: string) => {
+      await queryClient.cancelQueries({ queryKey: messagesKeys.conversations() });
+      queryClient.setQueriesData<DeHubConversation[]>({ queryKey: messagesKeys.conversations() }, (old) =>
+        Array.isArray(old) ? old.map((c) => (c.id === conversationId ? { ...c, isRequest: false } : c)) : old,
+      );
+    },
+    onSettled: () => { queryClient.invalidateQueries({ queryKey: messagesKeys.conversations() }); },
+  });
+}
+
+// ─── Block / Unblock ──────────────────────────────────────────────────────────
+
+export function useBlockConversation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (conversationId: string) => blockConversation(conversationId),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: messagesKeys.conversations() }); },
+  });
+}
+
+export function useUnblockConversation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (conversationId: string) => unblockConversation(conversationId),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: messagesKeys.conversations() }); },
+  });
+}
+
+// ─── Group Chat ───────────────────────────────────────────────────────────────
+
+export function useCreateGroup() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ name, memberAddresses, description }: {
+      name: string; memberAddresses: string[]; description?: string;
+    }) => createGroup(name, memberAddresses, description),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: messagesKeys.conversations() }); },
+  });
+}
+
+export function useGroupInfo(groupId: string | null) {
+  const { isAuthenticated } = useAuth();
+  return useQuery({
+    queryKey: [...messagesKeys.conversation(groupId || ''), 'groupInfo'],
+    queryFn: () => getGroupInfo(groupId!),
+    enabled: isAuthenticated && !!groupId,
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
+export function useJoinGroup() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (groupId: string) => joinGroup(groupId),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: messagesKeys.conversations() }); },
+  });
+}
+
+export function useUpdateGroup() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ groupId, updates }: {
+      groupId: string; updates: { name?: string; description?: string; avatarUrl?: string };
+    }) => updateGroup(groupId, updates),
+    onSuccess: (_, { groupId }) => {
+      queryClient.invalidateQueries({ queryKey: messagesKeys.conversation(groupId) });
+      queryClient.invalidateQueries({ queryKey: messagesKeys.conversations() });
+    },
+  });
+}
+
+export function useLeaveGroup() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (groupId: string) => leaveGroup(groupId),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: messagesKeys.conversations() }); },
+  });
+}
+
+export function useBlockUserInGroup() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ groupId, userAddress }: { groupId: string; userAddress: string }) =>
+      blockUserInGroup(groupId, userAddress),
+    onSuccess: (_, { groupId }) => {
+      queryClient.invalidateQueries({ queryKey: messagesKeys.conversation(groupId) });
+    },
+  });
+}
+
+// ─── User Status ──────────────────────────────────────────────────────────────
+
+export function useUserOnlineStatus(address: string | null) {
+  const { isAuthenticated } = useAuth();
+  // Consumers are conversation rows in the forever-mounted MessagesPage —
+  // route-gate the poll like the message poll above (N conversations would
+  // otherwise each ping status every 3 min for the whole session).
+  const { pathname } = useLocation();
+  const isMessagesRouteActive = pathname === '/app/messages';
+  return useQuery({
+    queryKey: [...messagesKeys.all, 'userStatus', address],
+    queryFn: () => getUserOnlineStatus(address!),
+    enabled: isAuthenticated && !!address,
+    staleTime: 2 * 60 * 1000,
+    refetchInterval: isMessagesRouteActive ? 3 * 60 * 1000 : false,
+  });
+}
+
+// ─── DM Videos ────────────────────────────────────────────────────────────────
+
+export function useDMVideos() {
+  const { isAuthenticated } = useAuth();
+  return useInfiniteQuery({
+    queryKey: [...messagesKeys.all, 'dmVideos'],
+    queryFn: async ({ pageParam = 0 }) => getDMVideos(pageParam, 20),
+    getNextPageParam: (lastPage, allPages) => lastPage.hasMore ? allPages.length : undefined,
+    initialPageParam: 0,
+    enabled: isAuthenticated,
+    staleTime: 5 * 60 * 1000,
+  });
+}

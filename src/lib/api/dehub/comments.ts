@@ -1,0 +1,498 @@
+import { apiCall, DEHUB_API_BASE, authedUpload } from './core';
+import { voiceRecordingFilename } from '@/lib/voice-recording';
+import type { DeHubUser } from './types';
+import i18n from 'i18next';
+import { translateCopy as _translateCopy } from '@/i18n/copy';
+
+// API comment response from /api/nft/{tokenId}/comments
+export interface ApiCommentResponse {
+  id: string;
+  tokenId: number;
+  address: string;
+  content: string;
+  imageUrl: string | null;
+  replyIds: number[];
+  parentId: number | null;
+  createdAt: string;
+  updatedAt: string;
+  likeCount?: number;
+  isLiked?: boolean;
+  dislikeCount?: number;
+  /** Times this comment has scrolled into a reader's viewport. */
+  views?: number;
+  /**
+   * The comment asked for by `commentId` no longer exists (deleted, hidden).
+   * The API still returns a placeholder row in its position so a caller can
+   * tell "gone" from "not on this page"; nothing renders one.
+   */
+  notFound?: boolean;
+  isDisliked?: boolean;
+  /**
+   * Which of the ten reactions the viewer holds on this comment.
+   * `isLiked`/`isDisliked` stay its polarity, so a comment somebody loved
+   * still reads as liked to every client that never learned about reactions.
+   */
+  myReaction?: string | null;
+  /** Per-reaction totals — what the tray on the comment's thumb shows. */
+  reactionCounts?: Record<string, number> | null;
+  /**
+   * The post's creator pinned this comment to the top of the thread.
+   *
+   * Theirs alone, free, one per post and with no expiry — not the paid Comment
+   * Anchor, which belongs to the comment's own author and lasts fifteen
+   * minutes. The API sorts a pinned comment above an anchored one.
+   */
+  isPinned?: boolean;
+  /**
+   * The post's creator hid this reply. Only ever sent to the reply's writer
+   * and to the creator; everyone else never receives the row at all.
+   */
+  hiddenByCreator?: boolean;
+  /** Where the post's creator placed this part of their thread (Reorder). Absent when never placed. */
+  threadPos?: number;
+  /**
+   * A top-level comment the post's creator has replied to somewhere in its
+   * thread. The API sorts these under the pin, the anchor and the tipped
+   * comments, and puts the creator's reply on the same page. Absent otherwise.
+   */
+  creatorReplied?: boolean;
+  /**
+   * A top-level comment written by somebody the post tags, or one they replied
+   * in. The API puts these first, under the creator's own thread, whatever
+   * the sort. Absent otherwise.
+   */
+  taggedReplied?: boolean;
+  /** Written by somebody the post tags (an @mention or a photo tag). */
+  byTagged?: boolean;
+  /**
+   * When a paid Comment Anchor on this comment runs out, ISO. Absent on every
+   * comment that has never been anchored, which is nearly all of them.
+   */
+  anchoredUntil?: string | null;
+  /** Sent with a tip on the post; only ever set by the server after the tip confirmed. */
+  tip?: { amount: number; symbol: string; chainId: number; txHash: string; value: number } | null;
+  writor: {
+    username: string;
+    displayName?: string;
+    avatarUrl?: string;
+    badgeBalance?: number;
+  };
+  /**
+   * The author's full account row. Unlike `writor` — which carries only a name
+   * and an avatar — this is where the API puts the staking balance, the
+   * grandfathered tier and the hide-badge preference, so it is what the badge
+   * beside a comment author's name is resolved from.
+   */
+  user?: DeHubUser;
+}
+
+interface CommentsApiResponse {
+  result: {
+    items: ApiCommentResponse[];
+    totalCount: number;
+    skip: number;
+    limit: number;
+    hasMore: boolean;
+  };
+}
+
+export interface PostCommentResponse {
+  result?: boolean;
+}
+
+export interface CommentResponse {
+  id: string;
+  tokenId: number;
+  content: string;
+  imageUrl?: string;
+  address: string;
+  createdAt: string;
+  updatedAt: string;
+  user?: DeHubUser;
+  likeCount?: number;
+  replyIds?: string[];
+  parentId?: string | null;
+}
+
+export interface EditCommentResponse {
+  success: boolean;
+  comment: CommentResponse;
+}
+
+/**
+ * Refusals from the comment endpoints arrive as `{result: false, error}` with
+ * HTTP 200 — "comments are turned off for this post", "over 500 characters",
+ * and now a link the scanner will not allow. Nothing read any of it: `result`
+ * was handed back as though it were the created comment, so a refused comment
+ * looked posted until the next refetch quietly removed it, and the reason was
+ * never shown to anybody.
+ */
+function assertCommentAccepted(response: unknown, fallback?: string): void {
+  if (response && typeof response === 'object' && (response as { result?: unknown }).result === false) {
+    // The author's reply controls refused this account
+    // (dehub-stream-backend src/reaction/reply-policy). Said in the reader's
+    // language rather than the server's English sentence.
+    if ((response as { code?: string }).code === 'REPLY_NOT_ALLOWED') {
+      throw new Error(i18n.t('replyPolicy.refused'));
+    }
+    const message = (response as { error?: string }).error;
+    throw new Error(message || (fallback ?? _translateCopy("copy.33eb41334d12", { defaultValue: "Could not post comment" })));
+  }
+}
+
+/**
+ * One page of a post's comments.
+ *
+ * `commentId` is the deep-link case: pass the comment somebody was sent here
+ * for and the API pins it as the first item of page 0 and backfills its
+ * ancestors, so the row is always in the first response no matter how far down
+ * a busy thread it actually sits. Ignored on later pages — the server only
+ * honours it at skip 0, and sending it again would duplicate the row.
+ *
+ * A `commentId` that has since been deleted comes back as a `notFound`
+ * placeholder with no author and no text. Dropped here: every caller renders
+ * these rows, and none of them has anything to render.
+ */
+export async function getNFTComments(
+  tokenId: string,
+  page: number = 0,
+  limit: number = 20,
+  address?: string,
+  commentId?: string,
+  topTipped?: string[],
+): Promise<ApiCommentResponse[]> {
+  const { items } = await getNFTCommentPage(tokenId, page, limit, address, commentId, topTipped);
+  return items;
+}
+
+/**
+ * The same page as {@link getNFTComments}, plus whether the server has more.
+ *
+ * A paging caller needs `hasMore` rather than "a short page is the last page":
+ * a page's length says nothing reliable about what is left. The deleted
+ * deep-link placeholder is dropped from page 0 (so a full page comes back one
+ * short and paging stopped dead), and the backfilled ancestors of a linked
+ * comment are appended to it (so page 0 can come back long).
+ */
+export async function getNFTCommentPage(
+  tokenId: string,
+  page: number = 0,
+  limit: number = 20,
+  address?: string,
+  commentId?: string,
+  topTipped?: string[],
+): Promise<{ items: ApiCommentResponse[]; hasMore: boolean }> {
+  const response = await apiCall<CommentsApiResponse>(`/api/nft/${tokenId}/comments`, {
+    params: {
+      page,
+      limit,
+      address,
+      ...(commentId ? { commentId } : {}),
+      // Which comments this post's readers have tipped the most, best first.
+      // The API cannot work this out — a comment tip is a Supabase
+      // `tip_records` row, written by whichever client confirmed the
+      // transaction — so we hand it the ids and it floats them onto page 0.
+      // Without this a heavily tipped comment on page 3 would stay on page 3.
+      ...(topTipped?.length ? { topTipped: topTipped.slice(0, 5).join(',') } : {}),
+    },
+  });
+  const rows = response.result?.items || [];
+  return {
+    items: rows.filter(item => !item.notFound),
+    // Counted on the raw rows, placeholder included, for a response that
+    // predates the flag.
+    hasMore: response.result?.hasMore ?? rows.length >= limit,
+  };
+}
+
+/**
+ * Toggle the creator's pin on a top-level comment.
+ *
+ * The post's creator only — the server refuses everyone else, the comment's
+ * own author included. Pinning a second comment moves the pin off the first.
+ */
+export async function pinComment(commentId: string | number): Promise<{
+  result: boolean;
+  commentId: number;
+  tokenId: number;
+  pinned: boolean;
+}> {
+  return apiCall("/api/pin_comment", {
+    method: "POST",
+    body: { commentId: Number(commentId) },
+    requiresAuth: true,
+  });
+}
+
+/**
+ * Hide somebody's reply on your own post, or bring it back (toggle).
+ *
+ * The post's creator only. A hidden reply is gone for everyone except its
+ * writer, who is not told, and the creator, who sees it faded to undo.
+ */
+export async function hideReply(commentId: string | number): Promise<{ result: boolean; commentId: number; tokenId: number; hidden: boolean }> {
+  const response = await apiCall<{ result: boolean; commentId: number; tokenId: number; hidden: boolean; error?: string }>("/api/hide_reply", {
+    method: "POST",
+    body: { commentId: Number(commentId) },
+    requiresAuth: true,
+  });
+  if (response?.result === false) throw new Error(response.error || i18n.t('hideReply.failed', 'Could not hide that reply'));
+  return response;
+}
+
+/** Save the order of the parts of your own thread, first to last. Creator only. */
+export async function setThreadOrder(tokenId: string | number, ids: string[]): Promise<{ result: boolean }> {
+  return apiCall("/api/thread_order", {
+    method: "POST",
+    body: { tokenId: Number(tokenId), ids },
+    requiresAuth: true,
+  });
+}
+
+export async function postComment(tokenId: string, content: string, replyToId?: string): Promise<PostCommentResponse> {
+  const body: Record<string, unknown> = {
+    streamTokenId: Number(tokenId),
+    content,
+  };
+  if (replyToId) {
+    body.commentId = Number(replyToId);
+  }
+
+  const hasMention = /@\w+/.test(content);
+  console.log('[postComment] →', {
+    method: 'POST',
+    body,
+    hasMention,
+    mentions: hasMention ? content.match(/@\w+/g) : [],
+  });
+
+  const result = await apiCall<PostCommentResponse>("/api/request_comment", {
+    method: "POST",
+    body,
+    requiresAuth: true,
+  });
+
+  console.log('[postComment] ← response:', result);
+  assertCommentAccepted(result);
+  return result;
+}
+
+export async function addComment(params: {
+  tokenId: number;
+  content: string;
+  parentId?: string;
+}): Promise<CommentResponse> {
+  const response = await apiCall<{ result: CommentResponse } | CommentResponse>("/api/request_comment", {
+    method: "POST",
+    body: {
+      tokenId: params.tokenId,
+      content: params.content,
+      parentId: params.parentId,
+    },
+    requiresAuth: true,
+  });
+  assertCommentAccepted(response);
+  if (response && typeof response === 'object' && 'result' in response) {
+    return response.result;
+  }
+  return response as CommentResponse;
+}
+
+export async function editComment(params: {
+  commentId: string;
+  content: string;
+}): Promise<EditCommentResponse> {
+  const response = await apiCall<{ result: EditCommentResponse } | EditCommentResponse>("/api/edit_comment", {
+    method: "POST",
+    body: {
+      commentId: params.commentId,
+      content: params.content,
+    },
+    requiresAuth: true,
+  });
+  assertCommentAccepted(response);
+  if (response && typeof response === 'object' && 'result' in response) {
+    return response.result;
+  }
+  return response as EditCommentResponse;
+}
+
+export interface VoiceCommentResponse {
+  result: boolean;
+  commentId: number;
+  audioUrl: string;
+  audioDuration: number;
+}
+
+export async function addVoiceComment(params: {
+  tokenId: number;
+  audioFile: Blob;
+  content?: string;
+  parentId?: string;
+}): Promise<VoiceCommentResponse> {
+  const formData = new FormData();
+  formData.append('file', params.audioFile, voiceRecordingFilename(params.audioFile.type));
+
+  const url = new URL('/api/comment_audio', DEHUB_API_BASE);
+  url.searchParams.set('streamTokenId', String(params.tokenId));
+  if (params.content?.trim()) {
+    url.searchParams.set('content', params.content);
+  }
+  if (params.parentId) {
+    url.searchParams.set('commentId', params.parentId);
+  }
+
+  const response = await authedUpload<VoiceCommentResponse>(`${url.pathname}${url.search}`, formData);
+  assertCommentAccepted(response);
+  return response;
+}
+
+export interface ImageCommentResponse {
+  result: boolean;
+  commentId: number;
+}
+
+/**
+ * `/api/comment_image` only ever reads the image from an uploaded file
+ * (`files[0].buffer` on the backend) — it has no JSON `imageUrl` fallback, so
+ * this has to be a multipart upload, not a pre-upload-then-post-URL flow.
+ */
+export async function addImageComment(params: {
+  tokenId: number;
+  imageFile: File;
+  content?: string;
+  parentId?: string;
+}): Promise<ImageCommentResponse> {
+  const formData = new FormData();
+  formData.append('file', params.imageFile, params.imageFile.name || `comment-${Date.now()}.jpg`);
+
+  const url = new URL('/api/comment_image', DEHUB_API_BASE);
+  url.searchParams.set('streamTokenId', String(params.tokenId));
+  if (params.content?.trim()) {
+    url.searchParams.set('content', params.content);
+  }
+  if (params.parentId) {
+    url.searchParams.set('commentId', params.parentId);
+  }
+
+  const response = await authedUpload<ImageCommentResponse>(`${url.pathname}${url.search}`, formData);
+  assertCommentAccepted(response);
+  return response;
+}
+
+/**
+ * A video or audio FILE on a comment or reply (an image keeps addImageComment).
+ * The backend tells the kinds apart by the file's type.
+ */
+export async function addMediaComment(params: {
+  tokenId: number;
+  file: File;
+  content?: string;
+  parentId?: string;
+}): Promise<ImageCommentResponse & { videoUrl?: string; audioUrl?: string; audioDuration?: number }> {
+  const formData = new FormData();
+  formData.append('file', params.file, params.file.name || `comment-${Date.now()}`);
+
+  const url = new URL('/api/comment_media', DEHUB_API_BASE);
+  url.searchParams.set('streamTokenId', String(params.tokenId));
+  if (params.content?.trim()) url.searchParams.set('content', params.content);
+  if (params.parentId) url.searchParams.set('commentId', params.parentId);
+
+  const response = await authedUpload<ImageCommentResponse & { videoUrl?: string; audioUrl?: string; audioDuration?: number }>(`${url.pathname}${url.search}`, formData);
+  assertCommentAccepted(response);
+  return response;
+}
+
+export async function addGifComment(params: {
+  tokenId: number;
+  gifUrl: string;
+  content?: string;
+  parentId?: string;
+}): Promise<ImageCommentResponse> {
+  const response = await apiCall<ImageCommentResponse>("/api/comment_gif", {
+    method: "POST",
+    body: {
+      streamTokenId: params.tokenId,
+      gifUrl: params.gifUrl,
+      content: params.content || '',
+      commentId: params.parentId,
+    },
+    requiresAuth: true,
+  });
+  assertCommentAccepted(response);
+  return response;
+}
+
+export async function deleteComment(commentId: string | number): Promise<{ result: boolean }> {
+  return apiCall<{ result: boolean }>("/api/delete_comment", {
+    method: "DELETE",
+    body: { commentId: Number(commentId) },
+    requiresAuth: true,
+  });
+}
+
+export async function recordCommentViews(commentIds: number[]): Promise<{ result: boolean; updated: number }> {
+  return apiCall<{ result: boolean; updated: number }>("/api/comment_views", {
+    method: "POST",
+    body: { commentIds },
+  });
+}
+
+/**
+ * Tip messages: write the message before sending the tip, bind the tx hash
+ * after it confirms. The server posts it (as a comment with `tip`, or only in
+ * the creator's notification when private) once the tip is seen on-chain, so
+ * nothing shows for a tip that never landed.
+ */
+export const TIP_MESSAGE_MAX_LENGTH = 280;
+
+export interface TipMessageResult {
+  result: boolean;
+  error?: string;
+  messageId?: string;
+  status?: 'pending' | 'confirming' | 'posted' | 'private' | 'refused';
+  commentId?: string;
+}
+
+export async function registerTipMessage(params: {
+  tokenId: string | number;
+  amount: number;
+  content: string;
+  isPrivate?: boolean;
+}): Promise<TipMessageResult> {
+  return apiCall<TipMessageResult>('/api/tip_message', {
+    method: 'POST',
+    body: {
+      streamTokenId: Number(params.tokenId),
+      amount: params.amount,
+      content: params.content,
+      isPrivate: !!params.isPrivate,
+    },
+    requiresAuth: true,
+  });
+}
+
+export async function bindTipMessage(messageId: string, txHash: string): Promise<TipMessageResult> {
+  return apiCall<TipMessageResult>('/api/tip_message', {
+    method: 'POST',
+    body: { messageId, txHash },
+    requiresAuth: true,
+  });
+}
+
+/** Drop a message whose tip never went out, so it can't ride on a later one. */
+export async function cancelTipMessage(messageId: string): Promise<TipMessageResult> {
+  return apiCall<TipMessageResult>('/api/tip_message', {
+    method: 'POST',
+    body: { messageId, cancel: true },
+    requiresAuth: true,
+  });
+}
+
+/** A post's tipped top-level comments, biggest tip first. */
+export async function getTipWall(tokenId: string, address?: string): Promise<ApiCommentResponse[]> {
+  const response = await apiCall<{ result?: ApiCommentResponse[] }>(`/api/nft/${tokenId}/tip_wall`, {
+    params: { ...(address ? { address } : {}) },
+  });
+  return Array.isArray(response?.result) ? response.result : [];
+}

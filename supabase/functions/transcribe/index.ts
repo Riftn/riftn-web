@@ -1,0 +1,709 @@
+// deno-lint-ignore-file no-explicit-any
+//
+// One transcriber for everything Riftn can transcribe.
+//
+// This replaces `transcribe-video` and `transcribe-stage`, which were two
+// programs doing one job with two status vocabularies, two retry stories (one
+// of which was "none") and two tables. Both old names still answer — they now
+// forward here — so a cached browser bundle and the shipped mobile build keep
+// working.
+//
+// What is genuinely per-kind is the engine, and only the engine. Everything
+// goes to our own Whisper worker first (services/whisper), diarized for a
+// stage because its speaker map is matched against the room's own
+// AI/soundboard timeline. When Whisper is switched off, full, unreachable,
+// reports a failure or never answers, the paid engines take over as before: a
+// stage goes to ElevenLabs Scribe, everything else to Deepgram nova-3 with
+// Scribe behind it when no words are recognized.
+import {
+  admin,
+  buildVtt,
+  corsHeaders,
+  FULL_COLUMNS,
+  isRetryable,
+  json,
+  MAX_ATTEMPTS,
+  mediaIsReachable,
+  normalizeLang,
+  parseTarget,
+  resolveMedia,
+  type Segment,
+  type Target,
+  TargetError,
+} from '../_shared/transcripts.ts';
+import { decideVisibility } from '../_shared/transcript-visibility.ts';
+import { hasCaptions, transcribeWithFallback } from '../_shared/transcription-fallback.ts';
+import {
+  dispatchWhisper,
+  fromWhisper,
+  resolveWhisperConfig,
+  secretMatches,
+  type WhisperConfig,
+} from '../_shared/whisper.ts';
+
+const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
+const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+const DEEPGRAM_API_KEY = Deno.env.get('DEEPGRAM_API_KEY');
+const ELEVENLABS_API_KEY = Deno.env.get('ELEVENLABS_API_KEY');
+
+let whisperCache: { value: WhisperConfig; expires: number } | null = null;
+async function whisperConfig(db: any): Promise<WhisperConfig> {
+  if (whisperCache && whisperCache.expires > Date.now()) return whisperCache.value;
+  // A missing table or row reads as "not configured", which is the old path.
+  const { data } = await db
+    .from('transcription_worker')
+    .select('enabled, worker_url, secret, runpod_api_key, runpod_endpoint_id')
+    .eq('id', 1)
+    .maybeSingle();
+  const value = resolveWhisperConfig((name) => Deno.env.get(name), data ?? null);
+  whisperCache = { value, expires: Date.now() + 60_000 };
+  return value;
+}
+
+function background(work: Promise<unknown>): Promise<unknown> | null {
+  // @ts-ignore EdgeRuntime is provided by Supabase
+  if (typeof EdgeRuntime !== 'undefined') {
+    // @ts-ignore EdgeRuntime is provided by Supabase
+    EdgeRuntime.waitUntil(work);
+    return null;
+  }
+  return work;
+}
+
+interface EngineResult {
+  segments: Segment[];
+  fullText: string;
+  lang: string | null;
+  durationSeconds: number | null;
+  provider: string;
+  model: string;
+  speakerMap?: Record<string, unknown>;
+}
+
+/* ─────────────────────────────── Deepgram ───────────────────────────────── */
+
+interface DgWord { word: string; punctuated_word?: string; start: number; end: number; speaker?: number }
+interface DgUtterance { start: number; end: number; transcript: string; speaker?: number }
+
+async function runDeepgram(url: string): Promise<EngineResult> {
+  if (!DEEPGRAM_API_KEY) throw new Error('DEEPGRAM_API_KEY not configured');
+
+  const dgUrl =
+    'https://api.deepgram.com/v1/listen' +
+    '?model=nova-3' +
+    '&smart_format=true' +
+    '&punctuate=true' +
+    '&utterances=true' +
+    // Diarization was off, so video segments had no speaker while stage
+    // segments did — the two shapes could not share a renderer.
+    '&diarize=true' +
+    '&detect_language=true';
+
+  const resp = await fetch(dgUrl, {
+    method: 'POST',
+    headers: {
+      Authorization: `Token ${DEEPGRAM_API_KEY}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ url }),
+  });
+  if (!resp.ok) {
+    const body = await resp.text();
+    throw new Error(`Deepgram ${resp.status}: ${body.slice(0, 500)}`);
+  }
+  const data = await resp.json();
+
+  const channel = data?.results?.channels?.[0];
+  const detected = channel?.detected_language || channel?.alternatives?.[0]?.language || null;
+  const utterances: DgUtterance[] = data?.results?.utterances ?? [];
+
+  let segments: Segment[];
+  if (utterances.length > 0) {
+    segments = utterances
+      .map((u) => ({
+        start: Number(u.start) || 0,
+        end: Number(u.end) || 0,
+        text: String(u.transcript || '').trim(),
+        speaker: u.speaker !== undefined ? `speaker_${u.speaker}` : undefined,
+      }))
+      .filter((s) => s.text.length > 0);
+  } else {
+    const words: DgWord[] = channel?.alternatives?.[0]?.words ?? [];
+    segments = [];
+    let cur: { start: number; end: number; words: string[]; speaker?: string } | null = null;
+    for (const w of words) {
+      const piece = w.punctuated_word ?? w.word;
+      const speaker = w.speaker !== undefined ? `speaker_${w.speaker}` : undefined;
+      if (!cur || (cur.speaker !== speaker) || w.end - cur.start > 6) {
+        if (cur) segments.push({ start: cur.start, end: cur.end, text: cur.words.join(' '), speaker: cur.speaker });
+        cur = { start: w.start, end: w.end, words: [piece], speaker };
+      } else {
+        cur.end = w.end;
+        cur.words.push(piece);
+      }
+    }
+    if (cur) segments.push({ start: cur.start, end: cur.end, text: cur.words.join(' '), speaker: cur.speaker });
+  }
+
+  return {
+    segments,
+    fullText: segments.map((s) => s.text).join(' '),
+    lang: normalizeLang(detected),
+    durationSeconds: Math.max(0, Math.floor(Number(data?.metadata?.duration ?? 0))) || null,
+    provider: 'deepgram',
+    model: 'nova-3',
+  };
+}
+
+/* ──────────────────────────── ElevenLabs Scribe ─────────────────────────── */
+
+interface ScribeWord { text: string; start: number; end: number; speaker_id?: string; speaker?: string; type?: string }
+
+interface TimelineWindow { start: number; end: number; kind: 'ai' | 'human'; source: string; label: string }
+interface SpeakerMapEntry { type: 'ai' | 'user' | 'unknown'; label?: string; source?: string; wallet?: string }
+
+const AUDIO_TYPE_BY_EXT: Record<string, string> = {
+  webm: 'audio/webm', aac: 'audio/aac', m4a: 'audio/mp4', mp4: 'audio/mp4',
+  mp3: 'audio/mpeg', ogg: 'audio/ogg', opus: 'audio/ogg', wav: 'audio/wav',
+  flac: 'audio/flac',
+};
+
+/**
+ * Name and type the multipart part after the bytes actually being sent.
+ * Recordings arrive in three shapes — dehubweb's MediaRecorder writes
+ * WebM/Opus, mobile uploads Agora's raw ADTS AAC, and one hand-remuxed Town
+ * Hall is M4A. Hardcoding `recording.webm` only ever worked because Scribe
+ * sniffs content, which nothing in its contract promises.
+ */
+function describeRecording(url: string, servedType: string): { name: string; type: string } {
+  const ext = (url.split('?')[0].split('/').pop() ?? '').split('.').pop()?.toLowerCase() ?? '';
+  const byExt = AUDIO_TYPE_BY_EXT[ext];
+  if (byExt) return { name: `recording.${ext}`, type: byExt };
+  const served = servedType.split(';')[0].trim().toLowerCase();
+  const knownExt = Object.keys(AUDIO_TYPE_BY_EXT).find((e) => AUDIO_TYPE_BY_EXT[e] === served);
+  return knownExt ? { name: `recording.${knownExt}`, type: served } : { name: 'recording.webm', type: 'audio/webm' };
+}
+
+function wordsToSegments(words: ScribeWord[]): Segment[] {
+  const segs: Segment[] = [];
+  let cur: Segment | null = null;
+  for (const w of words) {
+    if (w.type && w.type !== 'word' && w.type !== 'spacing') continue;
+    // Spacing has no speaker or reliable timestamp; attach it to the word.
+    if (w.type === 'spacing') {
+      if (cur) cur.text += w.text || '';
+      continue;
+    }
+    const speaker = w.speaker_id || w.speaker || 'speaker_1';
+    if (!cur || cur.speaker !== speaker || w.end - cur.start > 6 || w.start - cur.end > 1) {
+      if (cur) segs.push(cur);
+      cur = { speaker, text: w.text || '', start: w.start ?? 0, end: w.end ?? 0 };
+    } else {
+      cur.text += w.text;
+      cur.end = w.end ?? cur.end;
+    }
+  }
+  if (cur) segs.push(cur);
+  return segs.map((s) => ({ ...s, text: s.text.trim() })).filter((s) => s.text);
+}
+
+function overlap(a0: number, a1: number, b0: number, b1: number): number {
+  return Math.max(0, Math.min(a1, b1) - Math.max(a0, b0));
+}
+
+/** Decide which diarized speakers are the room's own AI/soundboard injections
+ *  and which is the host, by overlapping each against the timeline the client
+ *  recorded while the stage ran. */
+function buildSpeakerMap(
+  segments: Segment[],
+  timeline: TimelineWindow[],
+  hostWallet: string | null,
+): Record<string, SpeakerMapEntry> {
+  const map: Record<string, SpeakerMapEntry> = {};
+  const stats = new Map<string, { total: number; ai: number; window?: TimelineWindow }>();
+
+  for (const seg of segments) {
+    const spk = seg.speaker ?? 'speaker_1';
+    const entry = stats.get(spk) ?? { total: 0, ai: 0 };
+    entry.total += Math.max(0, seg.end - seg.start);
+    for (const w of timeline) {
+      if (w.kind !== 'ai') continue;
+      const ov = overlap(seg.start, seg.end, w.start, w.end);
+      if (ov > 0) {
+        entry.ai += ov;
+        if (!entry.window) entry.window = w;
+      }
+    }
+    stats.set(spk, entry);
+  }
+
+  const humans: string[] = [];
+  for (const [spk, s] of stats) {
+    if (s.total > 0 && s.ai / s.total > 0.5 && s.window) {
+      map[spk] = { type: 'ai', label: s.window.label, source: s.window.source };
+    } else {
+      humans.push(spk);
+    }
+  }
+
+  if (humans.length && hostWallet) {
+    humans.sort((a, b) => (stats.get(b)?.total ?? 0) - (stats.get(a)?.total ?? 0));
+    map[humans[0]] = { type: 'user', wallet: hostWallet.toLowerCase() };
+    for (const h of humans.slice(1)) map[h] = { type: 'unknown' };
+  } else {
+    for (const h of humans) map[h] = { type: 'unknown' };
+  }
+  return map;
+}
+
+async function runScribe(
+  url: string,
+  timeline: TimelineWindow[],
+  hostWallet: string | null,
+): Promise<EngineResult> {
+  if (!ELEVENLABS_API_KEY) throw new Error('ELEVENLABS_API_KEY not configured');
+
+  const audioRes = await fetch(url);
+  if (!audioRes.ok) throw new Error(`audio fetch ${audioRes.status}`);
+  const audioBlob = await audioRes.blob();
+  const audio = describeRecording(url, audioBlob.type);
+
+  const fd = new FormData();
+  fd.append('file', new Blob([audioBlob], { type: audio.type }), audio.name);
+  fd.append('model_id', 'scribe_v2');
+  fd.append('diarize', 'true');
+  fd.append('tag_audio_events', 'false');
+
+  const sttRes = await fetch('https://api.elevenlabs.io/v1/speech-to-text', {
+    method: 'POST',
+    headers: { 'xi-api-key': ELEVENLABS_API_KEY },
+    body: fd,
+  });
+  if (!sttRes.ok) {
+    const t = await sttRes.text();
+    throw new Error(`Scribe ${sttRes.status}: ${t.slice(0, 300)}`);
+  }
+  const jsonBody = await sttRes.json();
+  const segments = wordsToSegments(jsonBody.words || []);
+
+  return {
+    segments,
+    fullText: jsonBody.text || segments.map((s) => s.text).join(' '),
+    lang: normalizeLang(jsonBody.language_code || jsonBody.detected_language),
+    durationSeconds: null,
+    provider: 'elevenlabs',
+    model: 'scribe_v2',
+    speakerMap: buildSpeakerMap(segments, timeline, hostWallet),
+  };
+}
+
+/* ──────────────────────────────── the job ───────────────────────────────── */
+
+async function hostWalletOf(db: any, target: Target): Promise<string | null> {
+  if (target.kind !== 'stage') return null;
+  const { data } = await db
+    .from('audio_spaces')
+    .select('host_wallet_address')
+    .eq('id', target.ref)
+    .maybeSingle();
+  return data?.host_wallet_address ?? null;
+}
+
+/** The paid engines, exactly as they ran before Whisper existed. */
+async function runJob(target: Target, mediaUrl: string, timeline: TimelineWindow[], retryEmpty = false) {
+  const db = admin();
+  try {
+    const hostWallet = await hostWalletOf(db, target);
+
+    const result = target.kind === 'stage'
+      ? await runScribe(mediaUrl, timeline, hostWallet)
+      : retryEmpty
+      ? await runScribe(mediaUrl, [], null)
+      : await transcribeWithFallback(
+        () => runDeepgram(mediaUrl),
+        () => runScribe(mediaUrl, [], null),
+      );
+
+    await store(target, result);
+  } catch (e: any) {
+    await db.from('transcripts').update({
+      status: 'failed',
+      error: String(e?.message ?? e).slice(0, 1000),
+    }).eq('source_kind', target.kind).eq('source_ref', target.ref);
+  }
+}
+
+/**
+ * Take a Whisper job back and give the row to the paid engines.
+ *
+ * Compare-and-set on the job id: if the row has already moved on — the job
+ * answered after all, or the sweeper got there first — there is nothing to do,
+ * and doing it anyway would pay for a transcript that already exists.
+ */
+async function fallBack(target: Target, jobId: string, mediaUrl: string, timeline: TimelineWindow[], reason: string) {
+  const db = admin();
+  const { data } = await db.from('transcripts')
+    .update({ engine_job_id: null })
+    .eq('source_kind', target.kind)
+    .eq('source_ref', target.ref)
+    .eq('engine_job_id', jobId)
+    .select('id');
+  if (!data?.length) return;
+  console.warn(`whisper fallback ${target.kind}/${target.ref}: ${reason}`);
+  await runJob(target, mediaUrl, timeline);
+}
+
+/**
+ * Write a finished transcript and start what follows from it.
+ *
+ * With a `jobId` the write only lands while the row is still waiting for that
+ * Whisper job, so a late answer can never overwrite the fallback's transcript.
+ * Returns whether it landed.
+ */
+async function store(target: Target, result: EngineResult, jobId: string | null = null): Promise<boolean> {
+  const db = admin();
+  // Nothing said is its own outcome. Storing it as 'ready' is what left two
+  // videos and one stage permanently showing captions that never speak:
+  // every "already done" check passed and nothing could ever re-run them.
+  const isEmpty = !hasCaptions(result);
+
+  let write = db.from('transcripts').update({
+    status: isEmpty ? 'empty' : 'ready',
+    provider: result.provider,
+    model: result.model,
+    source_lang: result.lang,
+    segments: result.segments,
+    full_text: result.fullText,
+    vtt: isEmpty ? null : buildVtt(result.segments),
+    ...(result.durationSeconds === null
+      ? {}
+      : { duration_seconds: Math.round(result.durationSeconds) }),
+    speaker_map: result.speakerMap ?? {},
+    summary_status: isEmpty ? 'skipped' : 'processing',
+    engine_job_id: null,
+    error: null,
+  }).eq('source_kind', target.kind).eq('source_ref', target.ref);
+  if (jobId) write = write.eq('engine_job_id', jobId).eq('status', 'processing');
+  const { data: written, error: writeError } = await write.select('id');
+  // Transcribing and then failing to store it is the worst outcome
+  // available: it costs the money and leaves nothing behind. Say so.
+  if (writeError) throw new Error(`could not store the transcript: ${writeError.message}`);
+  if (!written?.length) return false;
+
+  if (!isEmpty) {
+    // Fire and forget. A missing summary is a cosmetic loss; failing the
+    // transcript over it is not.
+    fetch(`${SUPABASE_URL}/functions/v1/summarize-transcript`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${SERVICE_KEY}` },
+      body: JSON.stringify({ kind: target.kind, ref: target.ref, force: true }),
+    }).catch((e) => console.warn('summarize kick failed', e));
+  }
+
+  // Categories, from the same words. This is the only moment the platform
+  // knows what a video is actually about, so it is the moment to tag it —
+  // before this, a post got categories only if its author picked some in the
+  // composer or an admin drove the panel's bulk button at it by hand.
+  //
+  // Fired for an empty transcript too: "nothing was said" is still a post
+  // that has now been looked at, and the title and thumbnail are exactly
+  // what the manual path had to work from anyway. A stage has no post and
+  // therefore nothing to categorize.
+  if (target.kind !== 'stage') {
+    fetch(`${SUPABASE_URL}/functions/v1/auto-categorize`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${SERVICE_KEY}` },
+      body: JSON.stringify({ kind: target.kind, ref: target.ref }),
+    }).catch((e) => console.warn('categorize kick failed', e));
+  }
+  return true;
+}
+
+/* ──────────────────────────── Whisper callback ──────────────────────────── */
+
+/**
+ * The worker reporting a job. Only the job the row is still waiting for is
+ * heard: anything else is a late answer to a row the paid engines already
+ * took, and 409 tells the worker to stop retrying it.
+ */
+async function complete(target: Target, body: any): Promise<Response> {
+  const db = admin();
+  const whisper = await whisperConfig(db);
+  if (!whisper.secret || !secretMatches(String(body?.secret ?? ''), whisper.secret)) {
+    return json({ error: 'forbidden' }, 403);
+  }
+  const jobId = String(body?.jobId ?? '');
+  const { data: row } = await db
+    .from('transcripts')
+    .select('status, engine_job_id, speaker_timeline')
+    .eq('source_kind', target.kind)
+    .eq('source_ref', target.ref)
+    .maybeSingle();
+  if (!jobId || !row || row.status !== 'processing' || row.engine_job_id !== jobId) {
+    return json({ error: 'not waiting for this job' }, 409);
+  }
+  const timeline: TimelineWindow[] = Array.isArray(row.speaker_timeline) ? row.speaker_timeline : [];
+
+  const handOver = async (reason: string) => {
+    let media;
+    try {
+      media = await resolveMedia(target, db);
+    } catch (e: any) {
+      media = null;
+      reason = `${reason}; ${e?.message ?? e}`;
+    }
+    if (!media?.url) {
+      await db.from('transcripts').update({ status: 'failed', engine_job_id: null, error: reason.slice(0, 1000) })
+        .eq('source_kind', target.kind).eq('source_ref', target.ref).eq('engine_job_id', jobId);
+      return;
+    }
+    await fallBack(target, jobId, media.url, timeline, reason);
+  };
+
+  let result: EngineResult | null = null;
+  let problem = String(body?.error ?? 'whisper failed');
+  if (body?.ok === true) {
+    try {
+      const w = fromWhisper(body);
+      result = {
+        ...w,
+        lang: normalizeLang(w.lang),
+        provider: 'whisper',
+        speakerMap: target.kind === 'stage'
+          ? buildSpeakerMap(w.segments, timeline, await hostWalletOf(db, target))
+          : undefined,
+      };
+    } catch (e: any) {
+      problem = `unusable whisper result: ${e?.message ?? e}`;
+    }
+  }
+  const work = result
+    ? store(target, result, jobId).catch((e) => handOver(String(e?.message ?? e)))
+    : handOver(problem);
+  const pending = background(work);
+  if (pending) await pending;
+  return json({ ok: true }, 202);
+}
+
+/* ──────────────────────────────── handler ───────────────────────────────── */
+
+Deno.serve(async (req) => {
+  if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
+
+  try {
+    const body = await req.json().catch(() => ({}));
+    const target = parseTarget(body);
+    if (!target) return json({ error: 'a valid { kind, ref } is required' }, 400);
+
+    const action = String(body?.action ?? (body?.stageId ? 'start' : 'status'));
+    if (action === 'complete') return await complete(target, body);
+
+    /**
+     * `force` is an internal lever, not a request parameter.
+     *
+     * It skips every guard below it: the ready check, the processing check,
+     * the attempt ceiling and the backoff. Those are the only things standing
+     * between this endpoint and an unbounded transcription bill, and the
+     * function answers a publishable key that ships in the browser bundle — so
+     * `force: true` in a loop against one long video spends real credits until
+     * somebody notices the invoice.
+     *
+     * Nothing legitimate loses anything. Every internal caller already
+     * presents the service key, and the only one that forces is the admin
+     * panel's retry. A visitor's "Try again" is an ordinary start, which is
+     * what it was always meant to be: the attempt ceiling and the backoff are
+     * the answer to "has this had enough tries", not an obstacle to route past.
+     */
+    const bearer = (req.headers.get('Authorization') ?? '').replace(/^Bearer\s+/i, '').trim();
+    const force = body?.force === true && bearer === SERVICE_KEY;
+    const timeline: TimelineWindow[] = Array.isArray(body?.timeline) ? body.timeline : [];
+
+    // What goes back to the caller. The table's own read rule decides who may
+    // see a members-only or private transcript, and this handler reads with
+    // the service key, so answering with the whole row would hand the text to
+    // anyone who asked here instead of there. Only the progress of the job
+    // leaves for a transcript that is not public; both apps read the text
+    // from the table and use this answer for nothing but its status.
+    const internal = bearer === SERVICE_KEY;
+    const outward = (row: any) => {
+      if (!row || internal) return row;
+      if (String(row.visibility ?? 'public') === 'public') return row;
+      return {
+        source_kind: row.source_kind, source_ref: row.source_ref, status: row.status,
+        visibility: row.visibility, attempts: row.attempts, error: row.error, updated_at: row.updated_at,
+      };
+    };
+
+    const db = admin();
+    const { data: existing, error: readError } = await db
+      .from('transcripts')
+      .select(FULL_COLUMNS)
+      .eq('source_kind', target.kind)
+      .eq('source_ref', target.ref)
+      .maybeSingle();
+    // A failed read is not "no transcript yet": treating it as one would pay
+    // to transcribe again something that is already done.
+    if (readError) throw new Error(`could not read the transcript row: ${readError.message}`);
+
+    if (action !== 'start') {
+      return json(outward(existing) ?? { status: 'absent', source_kind: target.kind, source_ref: target.ref });
+    }
+
+    if (existing) {
+      const row = existing as any;
+      if (row.status === 'ready' && !force) return json(outward(row));
+      // Both engines have already listened. Repeating silence burns credits.
+      if (row.status === 'empty' && row.provider === 'elevenlabs' && !force) return json(outward(row));
+      if (row.status === 'processing' && !force && !isRetryable(row)) return json(outward(row));
+      if ((row.status === 'failed' || row.status === 'empty') && !force && row.attempts >= MAX_ATTEMPTS) {
+        return json(outward(row));
+      }
+      if ((row.status === 'failed' || row.status === 'pending') && !force && !isRetryable(row)) {
+        return json(outward(row));
+      }
+    }
+
+    // Only now does it cost anything to look the source up.
+    let media;
+    try {
+      media = await resolveMedia(target, db);
+    } catch (e) {
+      if (e instanceof TargetError) return json({ error: e.message }, e.status);
+      throw e;
+    }
+
+    /**
+     * Claim the row, and say so out loud if the write does not land.
+     *
+     * Every one of these used to be a bare `await` with the error discarded.
+     * A rejected write then read as a successful start — the caller got
+     * "processing" and no row ever appeared — which is the same class of
+     * silent failure this whole change exists to remove.
+     */
+    const claim = async (patch: Record<string, unknown>) => {
+      const { error } = await db.from('transcripts').upsert({
+        source_kind: target.kind,
+        source_ref: target.ref,
+        ...patch,
+      }, { onConflict: 'source_kind,source_ref' });
+      if (error) throw new Error(`could not write the transcript row: ${error.message}`);
+    };
+
+    // Never looser than what the row already carries — see the module for why
+    // a flat write republished transcripts an admin had locked.
+    /**
+     * Whether to touch the visibility column at all on this pass.
+     *
+     * A stage has nothing to derive a visibility from — `resolveMedia` answers
+     * the constant 'public' for one — so after the row exists there is nothing
+     * honest to write, and stamping the constant over it is what republished
+     * transcripts an admin had locked. A post genuinely knows, and is followed
+     * in both directions; `visibility_locked` is what protects a person's
+     * decision from that, in both directions too.
+     */
+    const decision = decideVisibility({
+      held: (existing as any)?.visibility,
+      locked: (existing as any)?.visibility_locked === true,
+      resolved: media.visibility,
+      sourceKnowsVisibility: target.kind !== 'stage',
+      isNew: !existing,
+    });
+    const visibilityPatch = decision.visibility === null
+      ? {}
+      : { visibility: decision.visibility };
+
+    // "Not yet" is not "no". A post asked for seconds after upload is still
+    // transcoding; the sweeper will come back for it, and the attempt counter
+    // is deliberately not touched so waiting never burns a retry.
+    if (media.notReady || !media.url) {
+      await claim({
+        status: 'pending',
+        ...visibilityPatch,
+        duration_seconds: media.durationSeconds === null ? null : Math.round(media.durationSeconds),
+        // Stamped but attempts untouched: waiting is not a failed try, and the
+        // backoff needs something to measure from or it re-queues every pass.
+        last_attempt_at: new Date().toISOString(),
+        error: media.notReady ?? 'no media yet',
+      });
+      return json({ status: 'pending', reason: media.notReady ?? 'no media yet' }, 202);
+    }
+
+    const reach = await mediaIsReachable(media.url);
+    if (!reach.ok) {
+      await claim({
+        status: 'pending',
+        ...visibilityPatch,
+        duration_seconds: media.durationSeconds === null ? null : Math.round(media.durationSeconds),
+        last_attempt_at: new Date().toISOString(),
+        error: `media not reachable yet (${reach.status})`,
+      });
+      return json({ status: 'pending', reason: `media ${reach.status}` }, 202);
+    }
+
+    // A retry from the sweeper carries no timeline. The one the room sent
+    // when it ended is still on the row, and is the only one there will be.
+    const stageTimeline: TimelineWindow[] = timeline.length
+      ? timeline
+      : Array.isArray((existing as any)?.speaker_timeline) ? (existing as any).speaker_timeline : [];
+
+    /**
+     * Whisper gets the first go, and only one. A row that comes back here
+     * still carrying a job id is a Whisper job that never answered (the stale
+     * 'processing' pass), and an empty result is re-checked by the paid
+     * engines, which is the only reason anybody asks for it again.
+     */
+    const { data: inFlight } = await db
+      .from('transcripts')
+      .select('engine_job_id')
+      .eq('source_kind', target.kind)
+      .eq('source_ref', target.ref)
+      .maybeSingle();
+    const whisper = await whisperConfig(db);
+    const whisperHadItsTurn = !!inFlight?.engine_job_id || existing?.status === 'empty' || force;
+    const jobId = whisper.configured && !whisperHadItsTurn ? crypto.randomUUID() : null;
+
+    const attempts = (existing as any)?.attempts ?? 0;
+    await claim({
+      status: 'processing',
+      ...visibilityPatch,
+      // The API reports fractional seconds and the column is an integer.
+      duration_seconds: media.durationSeconds === null ? null : Math.round(media.durationSeconds),
+      attempts: attempts + 1,
+      last_attempt_at: new Date().toISOString(),
+      ...(target.kind === 'stage' ? { speaker_timeline: stageTimeline } : {}),
+      engine_job_id: jobId,
+      error: null,
+    });
+
+    let work: Promise<unknown>;
+    if (jobId) {
+      const sent = await dispatchWhisper(whisper, {
+        jobId,
+        kind: target.kind,
+        ref: target.ref,
+        mediaUrl: media.url,
+        diarize: target.kind === 'stage',
+        callbackUrl: `${SUPABASE_URL}/functions/v1/transcribe`,
+      });
+      work = sent.ok
+        ? Promise.resolve()
+        : fallBack(target, jobId, media.url, stageTimeline, sent.reason);
+    } else {
+      work = runJob(target, media.url, stageTimeline, existing?.status === 'empty' && existing?.provider === 'deepgram');
+    }
+    const pending = background(work);
+    if (pending) await pending;
+
+    const { data: fresh } = await db
+      .from('transcripts')
+      .select(FULL_COLUMNS)
+      .eq('source_kind', target.kind)
+      .eq('source_ref', target.ref)
+      .maybeSingle();
+
+    return json(outward(fresh) ?? { status: 'processing' });
+  } catch (e: any) {
+    console.error('transcribe error', e);
+    return json({ error: String(e?.message ?? e) }, 500);
+  }
+});

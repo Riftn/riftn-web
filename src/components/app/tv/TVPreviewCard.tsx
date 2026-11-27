@@ -1,0 +1,467 @@
+/**
+ * TV Preview Card Component
+ * =========================
+ * Lightweight card that auto-plays a muted HLS stream as an animated thumbnail.
+ * Clicking toggles play/pause inline. Includes mute and fullscreen controls.
+ *
+ * @module components/app/tv/TVPreviewCard
+ */
+
+import { LiveDot } from '@/components/app/live/LiveDot';
+import { useTranslation } from 'react-i18next';
+import { useRef, useEffect, useState, useCallback } from 'react';
+import { useLocation } from 'react-router-dom';
+import { isVideoInPictureInPicture, releaseAfterPictureInPicture } from '@/lib/picture-in-picture';
+import { usePictureInPicture } from '@/hooks/use-picture-in-picture';
+import { Minimize, PictureInPicture2 } from "lucide-react";
+import Volume2 from "@/components/ui/cut-icons/volume";
+import VolumeX from "@/components/ui/cut-icons/mute";
+import Maximize from "@/components/ui/cut-icons/fullscreen";
+
+import Play from "@/components/ui/cut-icons/play";
+import Pause from "@/components/ui/cut-icons/pause";
+
+import { ThemedIcon } from '@/components/app/war/WarHudIcon';
+import { usePiP } from '@/contexts/PiPContext';
+import { cn } from '@/lib/utils';
+// Type-only: the hls.js runtime (~540 kB raw) loads dynamically when the user
+// starts playback, so it stays out of the eager entry bundle.
+import type Hls from 'hls.js';
+import type { TVChannel } from '@/lib/api/live-tv';
+import { getCountryFlag } from '@/lib/api/live-tv';
+import { videoPlaybackManager } from '@/lib/video-playback-manager';
+import {
+  claimMediaSession,
+  releaseMediaSession,
+  setMediaSessionPlaying,
+} from '@/lib/media-session';
+import { createLogger } from '@/lib/logger';
+
+const logger = createLogger('TVPreviewCard');
+
+interface TVPreviewCardProps {
+  channel: TVChannel;
+}
+
+export function TVPreviewCard({ channel }: TVPreviewCardProps) {
+  const { t } = useTranslation();
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const hlsRef = useRef<Hls | null>(null);
+  const cardId = `tv-preview-${channel.id}`;
+  const { addPiP, removePiP, isPiP } = usePiP();
+
+  const [showVideo, setShowVideo] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const isInPiP = usePictureInPicture(videoRef);
+  const isMutedRef = useRef(isMuted);
+  isMutedRef.current = isMuted;
+
+  const countryFlag = getCountryFlag(channel.country);
+
+  const destroyHls = useCallback(() => {
+    if (hlsRef.current) {
+      hlsRef.current.destroy();
+      hlsRef.current = null;
+    }
+  }, []);
+
+  // This card renders on BOTH the TV page and the home feed's Live tab, and
+  // both live in PersistentPageCache (never unmount) — stop the preview
+  // stream when navigating away from EITHER host route, unless promoted to
+  // PiP. Trailing slashes normalized so '/app/tv/' doesn't read as "left".
+  const { pathname } = useLocation();
+  const normalizedPath = pathname.length > 1 ? pathname.replace(/\/+$/, '') : pathname;
+  const isHostRouteActive =
+    normalizedPath === '/tv' || normalizedPath === '/app/tv' ||
+    normalizedPath === '/' || normalizedPath === '/app' ||
+    normalizedPath === '/videos' || normalizedPath === '/shorts';
+  useEffect(() => {
+    if (isHostRouteActive || !isPlaying || isInPiP) return;
+    setIsPlaying(false);
+    setShowVideo(false);
+    if (videoRef.current) videoRef.current.pause();
+    destroyHls();
+  }, [isHostRouteActive, isPlaying, isInPiP, destroyHls]);
+
+  // Register with playback manager so other videos can stop this one
+  useEffect(() => {
+    const video = videoRef.current;
+    videoPlaybackManager.register(cardId, () => {
+      if (videoRef.current) {
+        videoRef.current.pause();
+        videoRef.current.muted = true;
+        setIsMuted(true);
+        setIsPlaying(false);
+      }
+    }, undefined, undefined, () => videoRef.current);
+    return () => {
+      videoPlaybackManager.unregister(cardId);
+      const hls = hlsRef.current;
+      if (video) releaseAfterPictureInPicture(video, () => hls?.destroy());
+      else hls?.destroy();
+    };
+  }, [cardId, destroyHls]);
+
+  // Track playback state from native video events
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const onPlaying = () => {
+      setShowVideo(true);
+      setIsPlaying(true);
+    };
+    const onPause = () => setIsPlaying(false);
+
+    video.addEventListener('playing', onPlaying);
+    video.addEventListener('pause', onPause);
+
+    return () => {
+      video.removeEventListener('playing', onPlaying);
+      video.removeEventListener('pause', onPause);
+    };
+  }, []);
+
+  // Lazily initialize HLS only when user starts playback (prevents many continuous segment requests)
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    if (!isPlaying) return;
+
+    // Prefer native HLS wherever the browser provides it (Safari + every iOS
+    // browser): the hardware pipeline runs far cooler than hls.js's software
+    // MSE, and it skips the ~540 kB hls.js download. iOS 17+ added MediaSource,
+    // so the old `!('MediaSource' in window)` guard wrongly routed modern
+    // iPhones onto hls.js. Chrome/Firefox/Android return "" and fall through.
+    if (video.canPlayType('application/vnd.apple.mpegurl')) {
+      video.src = channel.streamUrl;
+      video.play().catch(() => {});
+      return () => {
+        if (!isVideoInPictureInPicture(video)) {
+          video.pause();
+        }
+      };
+    }
+
+    // hls.js loads dynamically at play time so the runtime stays out of the
+    // eager entry bundle. The disposed guard bails if the user stopped or the
+    // card unmounted while the chunk was in flight.
+    let disposed = false;
+    (async () => {
+      const { default: Hls } = await import('hls.js');
+      if (disposed) return;
+
+      if (Hls.isSupported()) {
+        const hls = new Hls({
+          enableWorker: false,
+          lowLatencyMode: true,
+          maxBufferLength: 5,
+          maxMaxBufferLength: 10,
+          fragLoadingTimeOut: 8000,
+          manifestLoadingTimeOut: 8000,
+        });
+
+        logger.info('Initializing thumbnail player', { channel: channel.name, url: channel.streamUrl });
+        hls.loadSource(channel.streamUrl);
+        hls.attachMedia(video);
+
+        hls.on(Hls.Events.MANIFEST_PARSED, () => {
+          video.play().catch(() => {
+            // Normal for thumbnail to be blocked if not interaction
+          });
+        });
+
+        hls.on(Hls.Events.ERROR, (_, data) => {
+          if (data.fatal) {
+            logger.error('TV Preview Fatal Error', { channel: channel.name, type: data.type, details: data.details });
+            setIsPlaying(false);
+            destroyHls();
+          }
+        });
+
+        hlsRef.current = hls;
+      } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        video.src = channel.streamUrl;
+        video.play().catch(() => {});
+      }
+    })().catch(() => {
+      // hls.js chunk failed to load (flaky network / deploy skew)
+      setIsPlaying(false);
+    });
+
+    return () => {
+      // Only mark the in-flight hls import stale when we're actually tearing
+      // down — during a PiP handoff the pending attach must still complete,
+      // otherwise the PiP window gets a dead video.
+      if (!isVideoInPictureInPicture(video)) {
+        disposed = true;
+        video.pause();
+        destroyHls();
+      }
+    };
+  }, [isPlaying, channel.name, channel.streamUrl, destroyHls]);
+
+  // Fullscreen tracking
+  useEffect(() => {
+    const onChange = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener('fullscreenchange', onChange);
+    document.addEventListener('webkitfullscreenchange', onChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', onChange);
+      document.removeEventListener('webkitfullscreenchange', onChange);
+    };
+  }, []);
+
+  const handlePlayPause = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const video = videoRef.current;
+    if (!video) return;
+
+    if (isPlaying) {
+      setIsPlaying(false);
+      video.pause();
+      setShowVideo(false);
+      destroyHls();
+      videoPlaybackManager.stop(cardId);
+    } else {
+      videoPlaybackManager.play(cardId);
+      setIsPlaying(true);
+    }
+  };
+
+  const handleMuteToggle = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (videoRef.current) {
+      videoRef.current.muted = !videoRef.current.muted;
+      setIsMuted(!isMuted);
+      if (!isMuted === false) {
+        // Unmuting — claim playback
+        videoPlaybackManager.play(cardId);
+      }
+    }
+  };
+
+  // Toggle mute programmatically (used by PiP media session)
+  const toggleMuteProgrammatic = useCallback(() => {
+    if (videoRef.current) {
+      const newMuted = !videoRef.current.muted;
+      videoRef.current.muted = newMuted;
+      setIsMuted(newMuted);
+    }
+  }, []);
+
+  // PiP: set up MediaSession mute/unmute via next/previous track buttons
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    // Same arbitration as TVChannelCard: claim on the way into PiP, hand it
+    // back on the way out, and never clear a session another player has since
+    // taken over. Mute rides next/previous track because a live stream has no
+    // tracks to skip and those are the only spare buttons PiP offers.
+    const claimForPiP = (handler: () => void) => {
+      claimMediaSession(
+        cardId,
+        {
+          title: `${channel.name} ${isMutedRef.current ? '🔇' : '🔊'}`,
+          artist: 'Riftn TV',
+          artwork: channel.logo || null,
+        },
+        { nexttrack: handler, previoustrack: handler },
+      );
+      setMediaSessionPlaying(cardId, true);
+    };
+
+    const muteHandler = () => {
+      toggleMuteProgrammatic();
+      claimForPiP(muteHandler);
+    };
+
+    const onEnterPiP = () => {
+      claimForPiP(muteHandler);
+    };
+
+    const onLeavePiP = () => {
+      releaseMediaSession(cardId);
+    };
+
+    video.addEventListener('enterpictureinpicture', onEnterPiP);
+    video.addEventListener('leavepictureinpicture', onLeavePiP);
+    return () => {
+      video.removeEventListener('enterpictureinpicture', onEnterPiP);
+      video.removeEventListener('leavepictureinpicture', onLeavePiP);
+      // Unmounting straight out of PiP never fires leavepictureinpicture.
+      releaseMediaSession(cardId);
+    };
+  }, [channel.name, channel.logo, cardId, toggleMuteProgrammatic]);
+
+  const handleFullscreen = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const container = containerRef.current;
+    if (!container) return;
+
+    // Exit simulated fullscreen (SafePal/WebView)
+    if (isFullscreen && !document.fullscreenElement && !(document as any).webkitFullscreenElement) {
+      setIsFullscreen(false);
+      return;
+    }
+
+    if (document.fullscreenElement || (document as any).webkitFullscreenElement) {
+      document.exitFullscreen?.().catch(() => {});
+      (document as any).webkitExitFullscreen?.();
+    } else {
+      const el = container as HTMLElement & { webkitRequestFullscreen?: () => void };
+      if (el.requestFullscreen) {
+        el.requestFullscreen().catch(() => setIsFullscreen(true));
+      } else if (el.webkitRequestFullscreen) {
+        try { el.webkitRequestFullscreen(); } catch { setIsFullscreen(true); }
+      } else {
+        setIsFullscreen(true);
+      }
+    }
+  };
+
+  return (
+    <div
+      data-glass-media-card
+      className={cn(
+        'w-full bg-black/40 backdrop-blur-[24px] backdrop-saturate-[180%] border border-white/10',
+        'rounded-2xl overflow-hidden',
+        'hover:bg-white/5 transition-all duration-200'
+      )}
+    >
+      {/* Video Area */}
+      <div
+        ref={containerRef}
+        className={cn(
+          'relative aspect-video bg-zinc-900 cursor-pointer group',
+          isFullscreen && 'fixed inset-0 z-[9999] !aspect-auto w-screen h-screen bg-black'
+        )}
+        onClick={handlePlayPause}
+      >
+        <video
+          ref={videoRef}
+          muted={isMuted}
+          playsInline
+          {...{"webkit-playsinline": ""}}
+          className={cn(
+            'absolute inset-0 w-full h-full',
+            isFullscreen ? 'object-contain' : 'object-cover',
+            showVideo ? 'opacity-100' : 'opacity-0'
+          )}
+        />
+
+        {/* Fallback logo */}
+        {!showVideo && (
+          <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-zinc-800 to-zinc-900">
+            {channel.logo ? (
+              <img
+                src={channel.logo}
+                alt={channel.name}
+                className="w-16 h-16 object-contain"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).style.display = 'none';
+                }}
+              />
+            ) : (
+              <ThemedIcon icon="tv" alt="" className="w-14 h-14 object-contain opacity-70" />
+            )}
+          </div>
+        )}
+
+        {/* LIVE badge */}
+        <div className="absolute top-2 left-2 flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-black/80 text-white text-[10px] font-semibold">
+          <LiveDot />
+          {t('tv.live')}
+        </div>
+
+        {/* Play/Pause center overlay on hover */}
+        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+          <div className="w-12 h-12 rounded-xl bg-black/40 backdrop-blur-[24px] backdrop-saturate-[180%] flex items-center justify-center border border-white/10">
+            {isPlaying ? (
+              <Pause className="w-6 h-6 text-white fill-white" />
+            ) : (
+              <Play className="w-6 h-6 text-white fill-white ml-0.5" />
+            )}
+          </div>
+        </div>
+
+        {/* Bottom controls */}
+        {showVideo && (
+          <div className="absolute bottom-2 right-2 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+            <button
+              onClick={handleMuteToggle}
+              className="w-8 h-8 rounded-xl bg-black/40 backdrop-blur-[24px] backdrop-saturate-[180%] border border-white/10 flex items-center justify-center hover:bg-black/60 transition-colors"
+            >
+              {isMuted ? (
+                <VolumeX className="w-4 h-4 text-white" />
+              ) : (
+                <Volume2 className="w-4 h-4 text-white" />
+              )}
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                if (isPiP(channel.id)) {
+                  removePiP(channel.id);
+                } else {
+                  addPiP({
+                    id: channel.id,
+                    name: channel.name,
+                    streamUrl: channel.streamUrl,
+                    logo: channel.logo,
+                    country: channel.country,
+                  });
+                }
+              }}
+              className={cn(
+                "w-8 h-8 rounded-xl backdrop-blur-[24px] backdrop-saturate-[180%] border border-white/10 flex items-center justify-center hover:bg-black/60 transition-colors",
+                isPiP(channel.id) ? "bg-white/20" : "bg-black/40"
+              )}
+            >
+              <PictureInPicture2 className="w-4 h-4 text-white" />
+            </button>
+            <button
+              onClick={handleFullscreen}
+              className="w-8 h-8 rounded-xl bg-black/40 backdrop-blur-[24px] backdrop-saturate-[180%] border border-white/10 flex items-center justify-center hover:bg-black/60 transition-colors"
+            >
+              {isFullscreen ? (
+                <Minimize className="w-4 h-4 text-white" />
+              ) : (
+                <Maximize className="w-4 h-4 text-white" />
+              )}
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Channel Info */}
+      <div className="p-2.5 flex items-center gap-2.5">
+        <div className="w-8 h-8 rounded-lg overflow-hidden flex-shrink-0 bg-zinc-800 flex items-center justify-center">
+          {channel.logo ? (
+            <img
+              src={channel.logo}
+              alt={channel.name}
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                (e.target as HTMLImageElement).style.display = 'none';
+              }}
+            />
+          ) : (
+            <ThemedIcon icon="tv" alt="" className="w-6 h-6 object-contain opacity-70" />
+          )}
+        </div>
+        <div className="flex-1 min-w-0">
+          <h3 className="font-semibold text-white truncate text-xs">{channel.name}</h3>
+          <div className="flex items-center gap-1 mt-0.5">
+            <span className="text-xs">{countryFlag}</span>
+            <span className="text-zinc-400 text-[10px]">{channel.country}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

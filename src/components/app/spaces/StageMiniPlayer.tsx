@@ -1,0 +1,189 @@
+import { useTranslation as _useCopy } from 'react-i18next';
+/**
+ * StageMiniPlayer - Floating mini player for active Stages
+ * =========================================================
+ * Shows when user is in a live stage so they can browse the app.
+ * Draggable, similar to RadioMiniPlayer.
+ */
+
+import { BrandIcon } from '@/components/app/war/WarHudIcon';
+import { Maximize2, ScreenShare } from "lucide-react";
+import MicOff from "@/components/ui/cut-icons/mic-off";
+import Users from "@/components/ui/cut-icons/communities";
+import Volume2 from "@/components/ui/cut-icons/volume";
+import Radio from "@/components/ui/cut-icons/live";
+
+import Mic from "@/components/ui/cut-icons/mic";
+import X from "@/components/ui/cut-icons/close";
+
+import { motion, useDragControls } from 'framer-motion';
+import { cn } from '@/lib/utils';
+import { useTranslation } from 'react-i18next';
+import { useStage } from '@/contexts/StageContext';
+import stagesMicIcon from '@/assets/icons/stages-mic-icon.webp';
+
+import { formatCount } from '@/lib/format-count';
+export function StageMiniPlayer() {
+  const { t: _copy } = _useCopy();
+  const { t } = useTranslation();
+  const {
+    currentSpace,
+    myRole,
+    isMuted,
+    participants,
+    toggleMute,
+    leaveSpace,
+    endSpace,
+    openModal,
+    screenShare,
+    radioStation,
+  } = useStage();
+
+  const dragControls = useDragControls();
+
+  if (!currentSpace) return null;
+
+  const speakers = participants.filter(p => p.role === 'host' || p.role === 'speaker');
+  const totalCount = participants.length;
+
+  const handleLeaveOrEnd = () => {
+    if (myRole === 'host') {
+      // One tap here took the room off the air for every listener; the full
+      // stage view already asks first.
+      if (window.confirm(t('stages.endForEveryone'))) endSpace();
+    } else {
+      leaveSpace();
+    }
+  };
+
+  return (
+    <motion.div
+      drag
+      dragControls={dragControls}
+      dragListener={false}
+      dragMomentum={false}
+      dragElastic={0}
+      dragConstraints={{
+        left: -window.innerWidth + 220,
+        right: 0,
+        top: -window.innerHeight + 160,
+        bottom: 0,
+      }}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 20 }}
+      className="hidden lg:block fixed bottom-4 right-4 z-50 select-none"
+      style={{ touchAction: 'none' }}
+    >
+      <div className="bg-black/40 backdrop-blur-[24px] border border-white/10 rounded-2xl shadow-2xl overflow-hidden min-w-[200px]">
+        {/* Drag handle + title */}
+        <div
+          className="flex items-center gap-2 px-3 pt-2.5 pb-1 cursor-grab active:cursor-grabbing"
+          onPointerDown={(e) => dragControls.start(e)}
+        >
+          {/* Live pulse */}
+          <span className="relative flex h-2 w-2 shrink-0">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
+          </span>
+
+          <BrandIcon src={stagesMicIcon} alt="" className="w-4 h-4 object-contain shrink-0" />
+
+          <span className="text-white text-xs font-medium truncate max-w-[120px]">
+            {currentSpace.title}
+          </span>
+
+          {/* Role label - top right */}
+          {myRole && (
+            <span className={cn(
+              "ml-auto text-[9px] font-medium",
+              myRole === 'host' ? "text-yellow-400" :
+              myRole === 'speaker' ? "text-blue-400" :
+              "text-white/50"
+            )}>
+              {myRole === 'host'
+                ? _copy("copy.4740ae6347b0", { defaultValue: "host" })
+                : myRole === 'speaker'
+                  ? _copy("copy.291ea5ef94df", { defaultValue: "speaker" })
+                  : _copy("copy.c4c05d40a8c3", { defaultValue: "listener" })}
+            </span>
+          )}
+        </div>
+
+        {/* Stats row */}
+        <div className="flex items-center gap-3 px-3 py-1 text-white/50 text-[10px]">
+          <span className="flex items-center gap-1">
+            <Volume2 className="w-3 h-3" />
+            {speakers.length}
+          </span>
+          <span className="flex items-center gap-1">
+            <Users className="w-3 h-3" />
+            {formatCount(totalCount)}
+          </span>
+          {/* The screen only exists in the full room, so the minimised player
+              says one is up rather than reading as an audio-only stage. */}
+          {screenShare && (
+            <span
+              className="flex items-center gap-1 text-white/70"
+              title={
+                screenShare.isLocal
+                  ? _copy("copy.f1513000c91e", { defaultValue: "You're sharing your screen" })
+                  : _copy("copy.3e7ecd406fb4", { defaultValue: "A screen is being shared — expand to watch" })
+              }
+            >
+              <ScreenShare className="w-3 h-3" />
+            </span>
+          )}
+          {/* A host who minimised the room is still putting a station out to
+              everyone, with no control left on screen to stop it. Name it. */}
+          {radioStation && (
+            <span
+              className="flex items-center gap-1 text-white/70 min-w-0"
+              title={_copy("copy.0f7562ea4ecc", { defaultValue: "On air: {{value1}}", value1: radioStation.name })}
+            >
+              <Radio className="w-3 h-3 shrink-0" />
+              <span className="truncate max-w-[70px]">{radioStation.name}</span>
+            </span>
+          )}
+        </div>
+
+        {/* Controls */}
+        <div className="relative flex items-center justify-center gap-2 px-3 pb-2.5 pt-1">
+          {/* Mute (speakers only) */}
+          {(myRole === 'host' || myRole === 'speaker') && (
+            <button
+              onClick={toggleMute}
+              className={cn(
+                "w-8 h-8 rounded-xl flex items-center justify-center transition-all",
+                isMuted
+                  ? "bg-white/10 hover:bg-white/20 text-white/60"
+                  : "bg-white/20 hover:bg-white/30 text-white ring-2 ring-white/30"
+              )}
+              title={isMuted ? t('stages.unmute') : t('stages.mute')}
+            >
+              {isMuted ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+            </button>
+          )}
+
+          {/* Leave / End */}
+          <button
+            onClick={handleLeaveOrEnd}
+            className="w-8 h-8 rounded-xl bg-red-500/80 hover:bg-red-500 flex items-center justify-center text-white transition-all"
+            title={myRole === 'host' ? t('stages.endStage') : t('stages.leaveStage')}
+          >
+            <X className="w-4 h-4" />
+          </button>
+
+          {/* Maximize - bottom right */}
+          <button
+            onClick={() => openModal('live')}
+            className="absolute right-3 text-white/50 hover:text-white transition-colors"
+            title={t('stages.expandStage')}
+          >
+            <Maximize2 className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      </div>
+    </motion.div>
+  );
+}

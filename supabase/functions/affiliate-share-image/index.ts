@@ -1,0 +1,416 @@
+// Dynamic per-affiliate Riftn share image.
+// Default: PNG (Facebook/Telegram/WhatsApp/LinkedIn/Discord reject SVG OG images).
+// Use ?format=svg for in-app lightweight preview.
+
+import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import QRCode from "https://esm.sh/qrcode@1.5.4";
+import { encode as encodeB64 } from "https://deno.land/std@0.190.0/encoding/base64.ts";
+import { Resvg, initWasm } from "https://esm.sh/@resvg/resvg-wasm@2.6.2";
+import { buildInviteSvg } from "./render.ts";
+import { badgeTier } from "../_shared/badge-weight.ts";
+import { BADGE_DATA_URIS } from "./badges.ts";
+
+// Staking badge tiers — mirror of src/lib/staking-badges.ts.
+function resolveBadge(badgeBalance: number | null, username: string | null): { name: string; dataUri: string } | null {
+  const tier = badgeTier(badgeBalance, username);
+  return tier && BADGE_DATA_URIS[tier] ? { name: tier, dataUri: BADGE_DATA_URIS[tier] } : null;
+}
+let resvgReady: Promise<void> | null = null;
+function ensureResvg(): Promise<void> {
+  if (!resvgReady) {
+    resvgReady = initWasm(fetch("https://esm.sh/@resvg/resvg-wasm@2.6.2/index_bg.wasm"));
+  }
+  return resvgReady;
+}
+
+// Fonts: resvg-wasm has no system fonts — text is invisible without explicit buffers.
+// Manrope, the site font, from the brand kit (full character set), with the
+// Fontsource Latin subset as a fallback if the site cannot be reached.
+let fontBuffers: Uint8Array[] | null = null;
+async function loadFonts(): Promise<Uint8Array[]> {
+  if (fontBuffers) return fontBuffers;
+  const ttfs = [
+    "https://riftn.com/brand-kit/font/manrope-700.ttf",
+    "https://riftn.com/brand-kit/font/manrope-500.ttf",
+    "https://cdn.jsdelivr.net/fontsource/fonts/manrope@latest/latin-700-normal.ttf",
+    "https://cdn.jsdelivr.net/fontsource/fonts/manrope@latest/latin-400-normal.ttf",
+  ];
+  const out: Uint8Array[] = [];
+  for (const u of ttfs) {
+    try {
+      const r = await fetch(u, { redirect: "follow" });
+      if (r.ok) {
+        const buf = new Uint8Array(await r.arrayBuffer());
+        if (buf.byteLength > 1000) out.push(buf);
+      }
+    } catch { /* ignore */ }
+  }
+  fontBuffers = out;
+  return out;
+}
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-wallet-address, x-dehub-token, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version, x-request-id, prefer",
+};
+
+const SITE = "https://riftn.com";
+const CDN = "https://dehubcdn.ams3.cdn.digitaloceanspaces.com/";
+const API = "https://api.dehub.io";
+const VALID_CODE = /^[A-Z0-9_-]{3,40}$/;
+
+const DEFAULT_BANNERS = [
+  "https://riftn.com/__l5e/assets-v1/cd209550-77ef-4c95-b16a-d83ad3adc7ea/default-banner-1.png",
+  "https://riftn.com/__l5e/assets-v1/4be06f0a-849c-44c4-bdc2-7c5f0a261b6c/default-banner-2.png",
+  "https://riftn.com/__l5e/assets-v1/fa63c89b-9a94-4f94-98f3-8eb5e8289350/default-banner-3.png",
+  "https://riftn.com/__l5e/assets-v1/2362a631-0fc5-4a89-8e6b-bf6be734f67b/default-banner-4.png",
+  "https://riftn.com/__l5e/assets-v1/bd3416e0-f49a-4bc6-a758-7443d9dbcd87/default-banner-5.png",
+  "https://riftn.com/__l5e/assets-v1/d3b70189-d07f-43f5-b901-ef4f9aeb24c6/default-banner-6.png",
+  "https://riftn.com/__l5e/assets-v1/fcfba189-8e23-45a0-a96f-bd865f11eb88/default-banner-7.png",
+  "https://riftn.com/__l5e/assets-v1/11cfc96b-88ac-4745-adc1-4ba16c47c0a9/default-banner-8.png",
+  "https://riftn.com/__l5e/assets-v1/fb0303c4-fe1a-4742-93a7-5c612166d7b2/default-banner-9.png",
+];
+
+function pickDefaultBanner(address: string | null): string {
+  if (!address) return DEFAULT_BANNERS[0];
+  let h = 0;
+  for (let i = 0; i < address.length; i++) h = (h * 31 + address.charCodeAt(i)) >>> 0;
+  return DEFAULT_BANNERS[h % DEFAULT_BANNERS.length];
+}
+
+async function fetchWithTimeout(url: string, ms = 3500): Promise<Response | null> {
+  try {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), ms);
+    const r = await fetch(url, { signal: ctrl.signal, redirect: "follow" });
+    clearTimeout(t);
+    return r;
+  } catch {
+    return null;
+  }
+}
+
+async function fetchAsDataUri(url: string): Promise<string | null> {
+  const r = await fetchWithTimeout(url);
+  if (!r || !r.ok) return null;
+  const ct = r.headers.get("content-type") || "image/png";
+  if (!ct.startsWith("image/")) return null;
+  try {
+    const buf = new Uint8Array(await r.arrayBuffer());
+    if (buf.byteLength < 200) return null;
+    return `data:${ct};base64,${encodeB64(buf as unknown as ArrayBuffer)}`;
+  } catch {
+    return null;
+  }
+}
+
+async function fetchCoverDataUri(address: string | null, apiCoverPath: string | null): Promise<string | null> {
+  const candidates: string[] = [];
+  if (apiCoverPath) {
+    if (apiCoverPath.startsWith("http")) candidates.push(apiCoverPath);
+    else candidates.push(`${CDN}${apiCoverPath.replace(/^\/+/, "").replace(/^statics\//, "")}`);
+  }
+  if (address) {
+    for (const ext of ["jpg", "png", "jpeg", "webp"]) {
+      candidates.push(`${CDN}covers/${address.toLowerCase()}.${ext}`);
+    }
+  }
+  for (const url of candidates) {
+    const data = await fetchAsDataUri(url);
+    if (data) return data;
+  }
+  return null;
+}
+
+function cleanName(raw: string | null | undefined): string {
+  const cleaned = (raw || "").trim().replace(/^@+/, "");
+  if (!cleaned) return "a creator";
+  return Array.from(cleaned).slice(0, 120).join("");
+}
+
+async function fetchAvatarDataUri(address: string | null, apiAvatarPath: string | null): Promise<string | null> {
+  const candidates: string[] = [];
+  if (apiAvatarPath) {
+    if (apiAvatarPath.startsWith("http")) candidates.push(apiAvatarPath);
+    else candidates.push(`${CDN}${apiAvatarPath.replace(/^\/+/, "").replace(/^statics\//, "")}`);
+  }
+  if (address) {
+    for (const ext of ["jpg", "png", "jpeg", "webp", "gif"]) {
+      candidates.push(`${CDN}avatars/${address.toLowerCase()}.${ext}`);
+    }
+  }
+  for (const url of candidates) {
+    const r = await fetchWithTimeout(url);
+    if (!r || !r.ok) continue;
+    const ct = r.headers.get("content-type") || "image/jpeg";
+    if (!ct.startsWith("image/")) continue;
+    try {
+      const buf = new Uint8Array(await r.arrayBuffer());
+      if (buf.byteLength < 200) continue;
+      return `data:${ct};base64,${encodeB64(buf as unknown as ArrayBuffer)}`;
+    } catch { /* try next */ }
+  }
+  return null;
+}
+
+async function fetchProfile(code: string) {
+  const supabaseUrl = Deno.env.get("SUPABASE_URL");
+  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  let address: string | null = null;
+  let shareName: string | null = null;
+  if (supabaseUrl && serviceKey) {
+    const admin = createClient(supabaseUrl, serviceKey);
+    const { data } = await admin
+      .from("affiliate_codes")
+      .select("share_name,owner_address,active")
+      .eq("code", code)
+      .maybeSingle();
+    if (data?.active !== false) {
+      address = (data?.owner_address as string | null) ?? null;
+      shareName = (data?.share_name as string | null) ?? null;
+    }
+  }
+  let avatarPath: string | null = null;
+  let coverPath: string | null = null;
+  let displayName: string | null = null;
+  let username: string | null = null;
+  let badgeBalance: number | null = null;
+  if (address) {
+    try {
+      const r = await fetch(`${API}/api/account_info/${address}`);
+      if (r.ok) {
+        const j = await r.json();
+        const u = j?.result || j;
+        avatarPath = u?.avatarImageUrl || u?.avatarUrl || null;
+        coverPath = u?.coverImageUrl || u?.coverUrl || null;
+        const apiDisplay = (u?.displayName || "").trim() || null;
+        const apiUser = (u?.username || "").trim() || null;
+        username = apiUser;
+        const bb = Number(u?.badgeBalance);
+        badgeBalance = Number.isFinite(bb) ? bb : null;
+        // Prefer API displayName. Fall back to shareName only if it differs from username.
+        const sn = (shareName || "").trim() || null;
+        displayName = apiDisplay || (sn && sn.toLowerCase() !== (apiUser || "").toLowerCase() ? sn : null) || apiUser;
+      } else {
+        displayName = shareName;
+      }
+    } catch {
+      displayName = shareName;
+    }
+  } else {
+    displayName = shareName;
+  }
+
+  return { address, displayName, username, avatarPath, coverPath, badgeBalance };
+}
+
+async function buildQrSvgInner(text: string): Promise<{ path: string; count: number }> {
+  const qr = QRCode.create(text, { errorCorrectionLevel: "M" });
+  const modules = qr.modules;
+  const count = modules.size;
+  let path = "";
+  for (let y = 0; y < count; y++) {
+    for (let x = 0; x < count; x++) {
+      if (modules.get(x, y)) path += `M${x},${y}h1v1h-1z`;
+    }
+  }
+  return { path, count };
+}
+
+// In-memory PNG + SVG cache + in-flight dedup (per worker). Survives between requests.
+const PNG_CACHE = new Map<string, Uint8Array>();
+const PNG_INFLIGHT = new Map<string, Promise<Uint8Array>>();
+const SVG_CACHE = new Map<string, string>();
+const SVG_INFLIGHT = new Map<string, Promise<string>>();
+const PNG_CACHE_MAX = 200;
+const SVG_CACHE_MAX = 400;
+
+function cachePng(key: string, png: Uint8Array) {
+  if (PNG_CACHE.size >= PNG_CACHE_MAX) {
+    const firstKey = PNG_CACHE.keys().next().value;
+    if (firstKey) PNG_CACHE.delete(firstKey);
+  }
+  PNG_CACHE.set(key, png);
+}
+
+function cacheSvg(key: string, svg: string) {
+  if (SVG_CACHE.size >= SVG_CACHE_MAX) {
+    const firstKey = SVG_CACHE.keys().next().value;
+    if (firstKey) SVG_CACHE.delete(firstKey);
+  }
+  SVG_CACHE.set(key, svg);
+}
+
+async function buildSvgFor(rawCode: string, width: number, height: number): Promise<string> {
+  let address: string | null = null;
+  let displayName: string | null = null;
+  let username: string | null = null;
+  let avatarPath: string | null = null;
+  let coverPath: string | null = null;
+  let badgeBalance: number | null = null;
+  if (rawCode) {
+    const p = await fetchProfile(rawCode);
+    address = p.address;
+    displayName = p.displayName;
+    username = p.username;
+    avatarPath = p.avatarPath;
+    coverPath = p.coverPath;
+    badgeBalance = p.badgeBalance;
+  }
+
+  const [avatarDataUri, coverDataUri] = await Promise.all([
+    fetchAvatarDataUri(address, avatarPath),
+    fetchCoverDataUri(address, coverPath),
+  ]);
+  const bannerDataUri = coverDataUri || (await fetchAsDataUri(pickDefaultBanner(address)));
+  const shareUrl = rawCode ? `${SITE}/r/${rawCode}` : SITE;
+  const { path: qrPath, count: qrCount } = await buildQrSvgInner(shareUrl);
+  const badge = resolveBadge(badgeBalance, username);
+
+  const svg = buildInviteSvg({
+    code: rawCode,
+    name: rawCode ? cleanName(displayName || username) : "Riftn",
+    username,
+    avatarDataUri,
+    bannerDataUri,
+    badgeDataUri: badge?.dataUri ?? null,
+    badgeName: badge?.name ?? null,
+    qrPath,
+    qrCount,
+    width,
+    height,
+  });
+
+  return svg;
+}
+
+
+async function buildPngFor(rawCode: string, width: number, height: number): Promise<{ png: Uint8Array | null; svg: string }> {
+  const svg = await buildSvgFor(rawCode, width, height);
+
+  try {
+    await ensureResvg();
+    const fonts = await loadFonts();
+    const resvg = new Resvg(svg, {
+      fitTo: { mode: "width", value: width },
+      font: { fontBuffers: fonts, loadSystemFonts: false, defaultFontFamily: "Manrope" },
+    });
+    const png = resvg.render().asPng();
+    return { png, svg };
+  } catch (e) {
+    console.error("[affiliate-share-image] rasterize failed", e);
+    return { png: null, svg };
+  }
+}
+
+serve(async (req) => {
+  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+  try {
+    const url = new URL(req.url);
+    const rawCode = (url.searchParams.get("code") || "").trim().toUpperCase();
+    const width = Math.min(1920, Math.max(600, Number(url.searchParams.get("width")) || 1200));
+    const height = Math.min(1080, Math.max(315, Number(url.searchParams.get("height")) || 630));
+    const format = (url.searchParams.get("format") || "png").toLowerCase() === "svg" ? "svg" : "png";
+    const noCache = url.searchParams.has("v") || url.searchParams.has("nocache");
+    if (rawCode && !VALID_CODE.test(rawCode)) {
+      return new Response("invalid code", { status: 400, headers: corsHeaders });
+    }
+
+    const cacheKey = `${format}:${rawCode}:${width}x${height}`;
+
+    if (format === "png" && !noCache) {
+      const cached = PNG_CACHE.get(cacheKey);
+      if (cached) {
+        return new Response(cached as Uint8Array<ArrayBuffer>, {
+          status: 200,
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "image/png",
+            "Cache-Control": "public, s-maxage=86400, stale-while-revalidate=604800",
+            "X-Cache": "HIT",
+          },
+        });
+      }
+    }
+
+    if (format === "png") {
+      let inflight = PNG_INFLIGHT.get(cacheKey);
+      if (!inflight) {
+        inflight = (async () => {
+          const { png, svg } = await buildPngFor(rawCode, width, height);
+          if (png) cachePng(cacheKey, png);
+          // If raster failed, throw a tagged error carrying svg so caller can fallback.
+          if (!png) throw Object.assign(new Error("raster_failed"), { svg });
+          return png;
+        })();
+        PNG_INFLIGHT.set(cacheKey, inflight);
+        inflight.finally(() => PNG_INFLIGHT.delete(cacheKey));
+      }
+      try {
+        const png = await inflight;
+        return new Response(png as unknown as BodyInit, {
+          status: 200,
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "image/png",
+            "Cache-Control": "public, s-maxage=86400, stale-while-revalidate=604800",
+            "X-Cache": "MISS",
+          },
+        });
+      } catch (e) {
+        const svg = (e as { svg?: string }).svg;
+        if (svg) {
+          return new Response(svg, {
+            status: 200,
+            headers: {
+              ...corsHeaders,
+              "Content-Type": "image/svg+xml; charset=utf-8",
+              "Cache-Control": "public, s-maxage=3600",
+              "X-Fallback": "svg",
+            },
+          });
+        }
+        throw e;
+      }
+    }
+
+    // SVG path — cache + in-flight dedup so repeat visits are instant.
+    if (!noCache) {
+      const cachedSvg = SVG_CACHE.get(cacheKey);
+      if (cachedSvg) {
+        return new Response(cachedSvg, {
+          status: 200,
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "image/svg+xml; charset=utf-8",
+            "Cache-Control": "public, max-age=86400, s-maxage=86400, stale-while-revalidate=604800, immutable",
+            "X-Cache": "HIT",
+          },
+        });
+      }
+    }
+    let svgInflight = SVG_INFLIGHT.get(cacheKey);
+    if (!svgInflight) {
+      svgInflight = (async () => {
+        const svg = await buildSvgFor(rawCode, width, height);
+        cacheSvg(cacheKey, svg);
+        return svg;
+      })();
+      SVG_INFLIGHT.set(cacheKey, svgInflight);
+      svgInflight.finally(() => SVG_INFLIGHT.delete(cacheKey));
+    }
+    const svg = await svgInflight;
+    return new Response(svg, {
+      status: 200,
+      headers: {
+        ...corsHeaders,
+        "Content-Type": "image/svg+xml; charset=utf-8",
+        "Cache-Control": "public, max-age=86400, s-maxage=86400, stale-while-revalidate=604800, immutable",
+        "X-Cache": "MISS",
+      },
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    return new Response(`error: ${message}`, { status: 500, headers: corsHeaders });
+  }
+});

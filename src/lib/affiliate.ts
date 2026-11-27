@@ -1,0 +1,347 @@
+import { normalizeSubReferral } from './affiliate-subref';
+import { supabase } from "@/integrations/supabase/client";
+import { getEligibleAffiliateRef, getAffiliateSubRef } from "@/lib/affiliateRef";
+import { withWalletHeader } from "@/lib/supabase-wallet-client";
+import { ensureWalletSession } from '@/lib/wallet-session';
+import { translateCopy as _translateCopy } from '@/i18n/copy';
+
+export const AFFILIATE_COMMISSION_PCT = 20;
+export const AFFILIATE_L1_COMMISSION_PCT = 20;
+export const AFFILIATE_L2_COMMISSION_PCT = 5;
+
+export type AffiliateLandingCustomization = {
+  headline: string;
+  message: string;
+  ctaLabel: string;
+  destination: string;
+  /** Extra destinations shown next to the primary button (0 to 5). */
+  ctas: AffiliateLandingCta[];
+};
+
+export type AffiliateLandingCta = { label: string; destination: string };
+
+export const MAX_AFFILIATE_LANDING_CTAS = 5;
+
+/** Ready-made Riftn destinations an affiliate can add in one tap. */
+export const AFFILIATE_CTA_PRESETS: Array<AffiliateLandingCta & { key: string }> = [
+  { key: "edit", label: "Edit", destination: "/editor" },
+  { key: "create", label: "Create", destination: "/creator" },
+  { key: "build", label: "Build", destination: "/builder" },
+  { key: "import", label: "Import", destination: "/converter" },
+  { key: "explore", label: "Explore", destination: "/app" },
+];
+
+export const isSafeLandingDestination = (d: string) =>
+  d.startsWith("/") && !d.startsWith("//") && !d.includes("\\") && !/^\/r\//i.test(d);
+
+/** Normalise whatever is stored in `landing_ctas` into a clean, capped list. */
+export function parseLandingCtas(raw: unknown): AffiliateLandingCta[] {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .map((c) => ({
+      label: String((c as AffiliateLandingCta)?.label ?? "").trim().slice(0, 32),
+      destination: String((c as AffiliateLandingCta)?.destination ?? "").trim().slice(0, 200),
+    }))
+    .filter((c) => c.label && isSafeLandingDestination(c.destination))
+    .slice(0, MAX_AFFILIATE_LANDING_CTAS);
+}
+
+/** Keep the referral code on the destination so attribution survives a cleared cookie. */
+export function withAffiliateRef(destination: string, code: string, subId?: string | null): string {
+  const url = new URL(destination, 'https://riftn.com');
+  const existingCode = url.searchParams.get('ref');
+  if (existingCode && existingCode.toUpperCase() !== code.toUpperCase()) return destination;
+  url.searchParams.set('ref', code);
+  const sub = normalizeSubReferral(subId);
+  if (sub) url.searchParams.set('sub', sub);
+  return url.pathname + url.search + url.hash;
+}
+export const DEFAULT_AFFILIATE_LANDING: AffiliateLandingCustomization = {
+  get headline() { return _translateCopy("copy.71e29772de4b", { defaultValue: "Join me on Riftn" }); },
+  get message() { return _translateCopy("copy.d0c629a3ffe4", { defaultValue: "Create, share and earn on a platform built for creators and their communities." }); },
+  get ctaLabel() { return _translateCopy("copy.71e29772de4b", { defaultValue: "Join me on Riftn" }); },
+  destination: "/app",
+  ctas: [],
+};
+
+// Stock lines people published without changing them, including the ones from
+// before the rename. They read as "not set", so the invite page follows the
+// current default in the visitor's language.
+const STOCK_LANDING_TITLES = ["join me on dehub", "join me on riftn"];
+const STOCK_LANDING_MESSAGES = ["create, share and earn on a platform built for creators and their communities"];
+const landingKey = (v: string) => v.trim().replace(/[.!\s]+$/, "").toLowerCase();
+
+function ownLandingText(raw: string | null | undefined, stock: string[], current: string): string | null {
+  const value = String(raw ?? "").trim();
+  if (!value) return null;
+  const key = landingKey(value);
+  return key === landingKey(current) || stock.includes(key) ? null : value;
+}
+
+/** The inviter's own headline, or null when it is blank or just the stock line. */
+export const ownLandingHeadline = (raw: string | null | undefined) =>
+  ownLandingText(raw, STOCK_LANDING_TITLES, DEFAULT_AFFILIATE_LANDING.headline);
+export const ownLandingMessage = (raw: string | null | undefined) =>
+  ownLandingText(raw, STOCK_LANDING_MESSAGES, DEFAULT_AFFILIATE_LANDING.message);
+export const ownLandingCtaLabel = (raw: string | null | undefined) =>
+  ownLandingText(raw, STOCK_LANDING_TITLES, DEFAULT_AFFILIATE_LANDING.ctaLabel);
+
+export type AffiliateCtaClickStat = { destination: string; clicks: number; uniqueVisitors: number };
+
+const randomCode = (len = 8) => {
+  const alphabet = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
+  let out = "";
+  for (let i = 0; i < len; i++) out += alphabet[Math.floor(Math.random() * alphabet.length)];
+  return out;
+};
+
+/** The wallet's active affiliate code, without creating one. */
+export async function findAffiliateCode(
+  ownerAddress: string,
+): Promise<{ code: string; share_name: string | null } | null> {
+  // @ts-ignore - new table may not yet be in generated Database types
+  const { data } = await supabase
+    .from("affiliate_codes" as never)
+    .select("code,share_name")
+    .ilike("owner_address", ownerAddress.toLowerCase())
+    .eq("active", true)
+    .order("created_at", { ascending: true })
+    .limit(1) as unknown as { data: Array<{ code: string; share_name: string | null }> | null };
+  return data?.[0] ?? null;
+}
+
+export async function getOrCreateAffiliateCode(
+  ownerAddress: string,
+  shareName?: string | null,
+): Promise<{ code: string; share_name: string | null } | null> {
+  const addr = ownerAddress.toLowerCase();
+  const cleanShareName = shareName?.trim().replace(/^@+/, "").slice(0, 32) || null;
+  const current = await findAffiliateCode(addr);
+
+  if (current) {
+    if (cleanShareName && current.share_name !== cleanShareName) {
+      const { data } = await withWalletHeader(
+        // @ts-ignore
+        supabase
+          .from("affiliate_codes" as never)
+          .update({ share_name: cleanShareName } as never)
+          .ilike("owner_address", addr)
+          .eq("code", current.code)
+          .select("code,share_name")
+          .maybeSingle(),
+        addr,
+      ) as unknown as { data: { code: string; share_name: string | null } | null };
+      if (data) return data;
+    }
+    return current;
+  }
+
+  for (let attempt = 0; attempt < 5; attempt++) {
+    const code = randomCode(8);
+    const { data, error } = await withWalletHeader(
+      // @ts-ignore
+      supabase
+        .from("affiliate_codes" as never)
+        .insert({
+          code,
+          owner_address: addr,
+          share_name: cleanShareName,
+          commission_pct: AFFILIATE_COMMISSION_PCT,
+        } as never)
+        .select("code,share_name")
+        .maybeSingle(),
+      addr,
+    ) as unknown as { data: { code: string; share_name: string | null } | null; error: { message?: string } | null };
+    if (!error && data) return data;
+  }
+  return null;
+}
+
+/**
+ * Self-attribute the currently signed-in wallet to a cookie-stored referral code.
+ * First-touch wins via UNIQUE(referred_address). Safe to call multiple times.
+ */
+export async function attributeReferralIfPending(referredAddress: string, accountCreatedAt?: string | null) {
+  const code = getEligibleAffiliateRef(accountCreatedAt);
+  if (!code) return;
+  if (!await ensureWalletSession(referredAddress)) throw new Error('Sign in to attribute a referral');
+  const { error } = await withWalletHeader(
+    supabase.rpc('attribute_affiliate_referral' as never, { p_code: code, p_sub_id: getAffiliateSubRef() } as never),
+    referredAddress.toLowerCase(),
+  );
+  if (error) throw error;
+}
+/** A single account you referred — the "who", not just the count. */
+export type AffiliateReferralEntry = {
+  subId?: string | null;
+  address: string;         // referred wallet address
+  createdAt: string | null; // when they were attributed to you
+  code: string | null;     // the invite code they came through
+};
+
+export type AffiliateStats = {
+  code: string | null;
+  shareName: string | null;
+  referrals: number;        // L1 — directly invited
+  l2Referrals: number;      // L2 — invited by your L1s
+  l1List: AffiliateReferralEntry[]; // the accounts behind the L1 count
+  l2List: AffiliateReferralEntry[]; // the accounts behind the L2 count
+  totalEarnedCents: number;
+  l1EarnedCents: number;
+  l2EarnedCents: number;
+  currency: string;
+  totalViews: number;
+  uniqueVisitors: number;
+  views30d: number;
+  ctaClicks: AffiliateCtaClickStat[];
+  landing: AffiliateLandingCustomization;
+};
+
+// Most-recent referrals returned for the "who" list. The exact total still
+// comes from the query's count, so the counter stays accurate past this cap.
+const REFERRAL_LIST_CAP = 500;
+
+type ReferralRow = { referred_address: string | null; created_at: string | null; code: string | null };
+
+function mapReferralRows(rows: ReferralRow[] | null): AffiliateReferralEntry[] {
+  return (rows ?? [])
+    .filter((r): r is ReferralRow & { referred_address: string } => !!r.referred_address)
+    .map(r => ({
+      address: r.referred_address.toLowerCase(),
+      createdAt: r.created_at ?? null,
+      code: r.code ?? null,
+    }));
+}
+
+export async function loadAffiliateStats(ownerAddress: string, shareName?: string | null): Promise<AffiliateStats> {
+  const addr = ownerAddress.toLowerCase();
+
+  // All four queries only depend on the address — run them in parallel
+  // (this used to be four serial round-trips and made the page feel slow).
+  // The referral queries now select the actual rows with an exact count, so a
+  // single round-trip yields both the "who" list and the counter total.
+  const [codeRes, refRes, l2RefRes, earnRes, viewRes, ctaRes, subRes] = await Promise.all([
+    getOrCreateAffiliateCode(addr, shareName),
+    // @ts-ignore
+    supabase
+      .from("affiliate_referrals" as never)
+      .select("referred_address,created_at,code", { count: "exact" })
+      .ilike("owner_address", addr)
+      .order("created_at", { ascending: false })
+      .limit(REFERRAL_LIST_CAP) as unknown as Promise<{ data: ReferralRow[] | null; count: number | null }>,
+    // @ts-ignore
+    supabase
+      .from("affiliate_referrals" as never)
+      .select("referred_address,created_at,code", { count: "exact" })
+      .ilike("l2_owner_address", addr)
+      .order("created_at", { ascending: false })
+      .limit(REFERRAL_LIST_CAP) as unknown as Promise<{ data: ReferralRow[] | null; count: number | null }>,
+    withWalletHeader(
+      // @ts-ignore
+      supabase
+        .from("affiliate_earnings" as never)
+        .select("commission_cents,currency,tier"),
+      addr,
+    ) as unknown as Promise<{ data: Array<{ commission_cents: number; currency: string; tier: number }> | null }>,
+    withWalletHeader(
+      // @ts-ignore - RPC is introduced by the affiliate customization migration
+      supabase.rpc("get_affiliate_page_stats" as never),
+      addr,
+    ) as unknown as Promise<{ data: Array<{ total_views: number; unique_visitors: number; views_30d: number }> | null }>,
+    withWalletHeader(
+      // @ts-ignore - RPC introduced with multi-destination landing pages
+      supabase.rpc("get_affiliate_cta_stats" as never),
+      addr,
+    ) as unknown as Promise<{ data: Array<{ destination: string; clicks: number; unique_visitors: number }> | null }>,
+    (async () => {
+      if (!await ensureWalletSession(addr)) return { data: null };
+      return withWalletHeader(supabase.rpc('get_affiliate_sub_referrals' as never), addr) as unknown as Promise<{
+        data: Array<{ referred_address: string; sub_id: string }> | null;
+      }>;
+    })(),
+  ]);
+  // Supabase reports a failed read as { error } instead of throwing, so an
+  // outage used to come back as a real-looking result: no code and every
+  // count at zero. With no code and the reads failing, throw so the caller
+  // keeps the last good stats instead of saving zeros over them.
+  const failed = (res: unknown) => !!(res as { error?: unknown } | null)?.error;
+  if (!codeRes && [refRes, l2RefRes, earnRes, viewRes].some(failed)) {
+    throw new Error("Affiliate stats are unavailable");
+  }
+  const code = codeRes?.code ?? null;
+
+  const subByAddress = new Map((subRes.data ?? []).map(row => [row.referred_address.toLowerCase(), row.sub_id]));
+  const l1List = mapReferralRows(refRes.data).map(row => ({ ...row, subId: subByAddress.get(row.address) ?? null }));
+  const l2List = mapReferralRows(l2RefRes.data);
+
+  const rows = earnRes.data ?? [];
+  const l1EarnedCents = rows.filter(r => r.tier !== 2).reduce((s, r) => s + (r.commission_cents ?? 0), 0);
+  const l2EarnedCents = rows.filter(r => r.tier === 2).reduce((s, r) => s + (r.commission_cents ?? 0), 0);
+  const totalEarnedCents = l1EarnedCents + l2EarnedCents;
+  const currency = (rows[0]?.currency || "usd").toUpperCase();
+  // @ts-ignore - customization columns are introduced by the migration above
+  const { data: landingRow } = code ? await supabase
+    .from("affiliate_codes" as never)
+    .select("landing_headline,landing_message,landing_cta_label,landing_destination,landing_ctas")
+    .eq("code", code)
+    .maybeSingle() as unknown as { data: { landing_headline: string | null; landing_message: string | null; landing_cta_label: string | null; landing_destination: string | null; landing_ctas: unknown } | null } : { data: null };
+  const view = viewRes.data?.[0];
+
+  return {
+    code,
+    shareName: codeRes?.share_name ?? null,
+    // Prefer the exact server count; fall back to the fetched rows so a missing
+    // count header never silently collapses the counter to zero.
+    referrals: refRes.count ?? l1List.length,
+    l2Referrals: l2RefRes.count ?? l2List.length,
+    l1List,
+    l2List,
+    totalEarnedCents,
+    l1EarnedCents,
+    l2EarnedCents,
+    currency,
+    totalViews: Number(view?.total_views ?? 0),
+    uniqueVisitors: Number(view?.unique_visitors ?? 0),
+    views30d: Number(view?.views_30d ?? 0),
+    ctaClicks: (ctaRes?.data ?? []).map((r) => ({
+      destination: r.destination,
+      clicks: Number(r.clicks ?? 0),
+      uniqueVisitors: Number(r.unique_visitors ?? 0),
+    })),
+    landing: {
+      headline: ownLandingHeadline(landingRow?.landing_headline) || DEFAULT_AFFILIATE_LANDING.headline,
+      message: ownLandingMessage(landingRow?.landing_message) || DEFAULT_AFFILIATE_LANDING.message,
+      ctaLabel: ownLandingCtaLabel(landingRow?.landing_cta_label) || DEFAULT_AFFILIATE_LANDING.ctaLabel,
+      destination: landingRow?.landing_destination || DEFAULT_AFFILIATE_LANDING.destination,
+      ctas: parseLandingCtas(landingRow?.landing_ctas),
+    },
+  };
+}
+
+export async function saveAffiliateLanding(
+  ownerAddress: string,
+  code: string,
+  value: AffiliateLandingCustomization,
+): Promise<void> {
+  const addr = ownerAddress.toLowerCase();
+  const destination = value.destination.trim();
+  if (!isSafeLandingDestination(destination)) {
+    throw new Error(_translateCopy("copy.ae5a88fbe8b8", { defaultValue: "Choose a Riftn destination beginning with /" }));
+  }
+  const ctas = value.ctas.map((c) => ({ label: c.label.trim(), destination: c.destination.trim() }));
+  if (ctas.some((c) => !c.label || !isSafeLandingDestination(c.destination))) {
+    throw new Error(_translateCopy("copy.e602fff0b674", { defaultValue: "Every extra button needs text and a Riftn destination beginning with /" }));
+  }
+  const { error } = await withWalletHeader(
+    // @ts-ignore - customization columns are introduced by the migration
+    supabase.from("affiliate_codes" as never).update({
+      landing_headline: ownLandingHeadline(value.headline)?.slice(0, 80) || null,
+      landing_message: ownLandingMessage(value.message)?.slice(0, 280) || null,
+      landing_cta_label: ownLandingCtaLabel(value.ctaLabel)?.slice(0, 32) || null,
+      landing_destination: destination.slice(0, 200),
+      landing_ctas: parseLandingCtas(ctas),
+    } as never).eq("code", code).ilike("owner_address", addr),
+    addr,
+  ) as unknown as { error: { message?: string } | null };
+  if (error) throw new Error(error.message || _translateCopy("copy.375b0bb85e71", { defaultValue: "Could not save invite page" }));
+}

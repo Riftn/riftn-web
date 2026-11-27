@@ -1,0 +1,48 @@
+name: Agent tasks
+on:
+  pull_request:
+    paths:
+      - 'supabase/functions/dehub-mcp/**'
+      - 'supabase/functions/anon-views/**'
+      - 'supabase/migrations/20261011210000_private_agent_tasks.sql'
+      - 'supabase/migrations/20261013010000_badge_agent_capacity.sql'
+      - 'supabase/migrations/20261020230000_agent_swarm_controls.sql'
+      - 'supabase/migrations/20261022050000_agent_lives.sql'
+      - 'supabase/migrations/20261023120000_agent_workspace.sql'
+      - 'supabase/migrations/20261025020000_paced_agent_swarms.sql'
+      - 'supabase/migrations/20261111040000_agents_open_to_all.sql'
+      - 'tests/sql/agent-tasks.sql'
+      - '.github/workflows/agent-tasks.yml'
+jobs:
+  edge:
+    name: Agent task validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - run: deno check --config supabase/functions/dehub-mcp/deno.json supabase/functions/dehub-mcp/index.ts supabase/functions/anon-views/index.ts
+      - run: deno test --allow-env --config supabase/functions/dehub-mcp/deno.json supabase/functions/dehub-mcp/task-plan.test.ts supabase/functions/dehub-mcp/tasks.test.ts supabase/functions/dehub-mcp/post-views.test.ts supabase/functions/dehub-mcp/agent-cap.test.ts supabase/functions/dehub-mcp/life.test.ts supabase/functions/dehub-mcp/workspace.test.ts
+  database:
+    name: Agent task permissions and claims
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: agent-test
+          POSTGRES_DB: agent_test
+        ports: ['5432:5432']
+        options: --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      PGHOST: localhost
+      PGUSER: postgres
+      PGPASSWORD: agent-test
+      PGDATABASE: agent_test
+    steps:
+      - uses: actions/checkout@v4
+      - run: psql -v ON_ERROR_STOP=1 -f tests/sql/agent-tasks.sql
+      - run: psql -v ON_ERROR_STOP=1 -f tests/sql/agent-workspace.sql

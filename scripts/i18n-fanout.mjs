@@ -1,0 +1,711 @@
+#!/usr/bin/env node
+/**
+ * Fills the keys a locale is missing from en.json, using the deployed
+ * translate-text edge function.
+ *
+ *   node scripts/i18n-fanout.mjs --check                 # report only, no writes, no network
+ *   node scripts/i18n-fanout.mjs --locale de             # fill one locale
+ *   node scripts/i18n-fanout.mjs --locales de,fr,pt      # fill several
+ *   node scripts/i18n-fanout.mjs --all --limit 8         # the 8 furthest-behind locales
+ *   node scripts/i18n-fanout.mjs --locale de --keys 200  # cap the work in one run
+ *   node scripts/i18n-fanout.mjs --locales de,fr --only a.b,c.d  # exactly these keys
+ *   node scripts/i18n-fanout.mjs --prune --garbled       # delete what the answer guards reject
+ *
+ * Why this exists: extracting a page into `t()` calls makes it translatable, it
+ * does not make it translated. A key that reaches only en.json renders English
+ * in the other 109 languages, and scripts/i18n-coverage.mjs cannot fail the
+ * build for it as long as one locale carries the key. This script closes that
+ * gap in bulk.
+ *
+ * Three rules it will not break:
+ *
+ *   1. An existing translation is never overwritten. Only missing keys are sent.
+ *   2. A string whose placeholders do not survive the round trip is DROPPED, not
+ *      written. Machine translation reorders and mangles `{{count}}`, `{amount}`
+ *      and `<b>` — observed live, e.g. "{{count}} day" coming back as
+ *      "{\n{count}} Tag". A missing key falls back to English and looks fine; a
+ *      corrupted placeholder renders literal braces at the user, or breaks
+ *      <Trans>. English is the better failure.
+ *   3. The file is rewritten from a parsed object, so a malformed response can
+ *      never produce malformed JSON.
+ *
+ * Placeholders are swapped for @@n@@ sentinels before sending, because the
+ * translator handles those far better than raw braces or tags — but sentinels
+ * are corrupted too sometimes ("@ @ 0 @ @"), which is what rule 2 catches.
+ */
+import fs from 'node:fs';
+import { requestTranslationBatch } from './translation-request.mjs';
+import path from 'node:path';
+import { garbled, outOfOrder, answersAnotherLine, MIN_BATCH_LINES } from './i18n-guards.mjs';
+
+// Overridable so scripts/docs-i18n-fill.mjs can run the same guarded fill over
+// the docs bundles, exported to JSON in a scratch directory.
+const LOCALES_DIR = process.env.I18N_LOCALES_DIR || 'src/i18n/locales';
+const FN_URL = 'https://aigxuutjaqsywioxjefr.supabase.co/functions/v1/translate-text';
+
+/** Batching. Larger batches are cheaper but lose more work when one line drifts. */
+const BATCH_LINES = 30;
+const PAUSE_MS = 350;
+
+
+/** Anything i18next or <Trans> reads back out of the string. */
+const PLACEHOLDER = /\{\{[^}]+\}\}|\{[a-zA-Z0-9_]+\}|<\/?[a-zA-Z][a-zA-Z0-9]*>/g;
+
+const args = process.argv.slice(2);
+const flag = (name) => args.includes(`--${name}`);
+const value = (name) => {
+  const i = args.indexOf(`--${name}`);
+  return i === -1 ? null : args[i + 1];
+};
+
+const CHECK_ONLY = flag('check');
+const KEY_BUDGET = Number(value('keys') || 200);
+if (!Number.isSafeInteger(KEY_BUDGET) || KEY_BUDGET < 1) throw new Error('--keys must be a positive integer');
+/**
+ * `--prefix creatorFlow.` restricts the run to keys under one namespace, so a
+ * feature branch can fill its own strings in every locale without touching
+ * the wider backlog (and without a 2,000-key run per locale to get there).
+ */
+const KEY_PREFIX = value('prefix') || '';
+/**
+ * `--only a.b,c.d` restricts the run to exactly these keys: refilling values
+ * that were deleted as bad, say, without also taking on the locale's backlog.
+ * --prune honours it too, so it only ever touches the keys named.
+ */
+const ONLY_KEYS = value('only') ? new Set(value('only').split(',').map((k) => k.trim()).filter(Boolean)) : null;
+
+/** The publishable key the browser bundle already ships — not a secret. */
+function anonKey() {
+  if (process.env.SUPABASE_PUBLISHABLE_KEY) return process.env.SUPABASE_PUBLISHABLE_KEY;
+  const client = fs.readFileSync('src/integrations/supabase/client.ts', 'utf8');
+  const found = client.match(/"(ey[A-Za-z0-9._-]{40,})"/);
+  if (!found) throw new Error('No publishable key found in src/integrations/supabase/client.ts');
+  return found[1];
+}
+
+/* ---------- flatten / rebuild ---------- */
+
+function flatten(node, prefix = '', out = new Map()) {
+  for (const [k, v] of Object.entries(node)) {
+    const key = prefix ? `${prefix}.${k}` : k;
+    if (v && typeof v === 'object' && !Array.isArray(v)) flatten(v, key, out);
+    else out.set(key, v);
+  }
+  return out;
+}
+
+function setDeep(root, dottedKey, val) {
+  const parts = dottedKey.split('.');
+  let node = root;
+  for (const part of parts.slice(0, -1)) {
+    if (!node[part] || typeof node[part] !== 'object') node[part] = {};
+    node = node[part];
+  }
+  node[parts.at(-1)] = val;
+}
+
+/**
+ * Rebuild the locale in en.json's key order, so a filled file diffs against
+ * English cleanly instead of listing new keys wherever they happened to land.
+ */
+function reorderLike(template, filled) {
+  if (Array.isArray(template) || typeof template !== 'object' || template === null) return filled;
+  // The locale holds a plain value where English now has a group of keys — an
+  // old string English has since split into a namespace (`chat` is "Чат" in
+  // bg, a dozen keys in en). Keep what the locale has: there is nothing to
+  // reorder inside a string, and walking into one threw for every such file.
+  if (!filled || typeof filled !== 'object' || Array.isArray(filled)) return filled;
+  const out = {};
+  for (const k of Object.keys(template)) {
+    if (!(k in filled)) continue;
+    out[k] = reorderLike(template[k], filled[k]);
+  }
+  for (const k of Object.keys(filled)) if (!(k in out)) out[k] = filled[k];
+  return out;
+}
+
+/* ---------- placeholder protection ---------- */
+
+function protect(text) {
+  const found = [];
+  const masked = text.replace(PLACEHOLDER, (m) => {
+    found.push(m);
+    return `@@${found.length - 1}@@`;
+  });
+  return { masked, found };
+}
+
+/**
+ * One space is the only whitespace the translator inserts inside a sentinel,
+ * and never a newline — batches are split on those before we get here.
+ */
+const GAP = '[ \t\u00a0]?';
+
+/** How many @ signs a mangled sentinel is allowed on each side. */
+function sentinelPattern(index, run) {
+  return `(?:@${GAP}){1,${run}}${index}(?:${GAP}@){1,${run}}`;
+}
+
+/**
+ * Put the placeholders back.
+ *
+ * The translator does not hand the sentinels back intact. Measured against the
+ * live edge function, `@@0@@ joined "@@1@@"` comes back as `@0@ ... "@1@@"` (bn),
+ * `@0@@ ... "@1@@"` (tg) and `@ @ 1 @ @` (sr): it inserts spaces AND drops one of
+ * the four @ signs, the second being much the more common and the one the old
+ * pattern did not cover. A dropped @ left the sentinel in the string, so
+ * placeholdersMatch failed and the key stayed English in every locale whose
+ * translator did that — two-placeholder strings almost never survived.
+ *
+ * So try the sentinel forms in order of how much they assume, and take the
+ * first result that lands back on the @ count the English had:
+ *
+ *   1. intact `@@n@@` first, then a run of at most two @ per side. Matching the
+ *      intact form first stops a looser pattern eating a good sentinel, which
+ *      matters for strings like "@{{name}} is sharing" (masked `@@@0@@`).
+ *   2. the same with a run of three, for `@1 @ @@`.
+ *   3. runs of three then four WITHOUT the intact form, so a stray @ sitting
+ *      against a good sentinel (`@ @@1@@`) is absorbed rather than left behind.
+ *
+ * The @ count is what keeps step 3 honest: it can swallow an @ that belongs to
+ * the text, and a variant that does is rejected in favour of the tightest pass.
+ * Anything still unresolved falls through to looksUnfinished/placeholdersMatch
+ * and is dropped, exactly as before — English beats literal braces.
+ */
+function restoreAt(masked, found, run, exactFirst) {
+  let out = masked;
+  for (let i = 0; i < found.length; i++) {
+    const forms = exactFirst ? [`@@${i}@@`, sentinelPattern(i, run)] : [sentinelPattern(i, run)];
+    for (const pattern of forms) {
+      const next = out.replace(new RegExp(pattern, 'g'), () => found[i]);
+      if (next !== out) {
+        out = next;
+        break;
+      }
+    }
+  }
+  return out;
+}
+
+/** Every @ in the string. A correct restore lands back on the English count. */
+const atCount = (text) => (text.match(/@/g) || []).length;
+
+function restore(masked, found, source) {
+  const target = atCount(source);
+  let tightest = null;
+  for (const [run, exactFirst] of [[2, true], [3, true], [3, false], [4, false]]) {
+    const out = restoreAt(masked, found, run, exactFirst);
+    if (tightest === null) tightest = out;
+    if (atCount(out) === target) return out;
+  }
+  return tightest;
+}
+
+/** The check rule 2 turns on: same placeholders, same number of them. */
+function placeholdersMatch(source, candidate) {
+  const a = (source.match(PLACEHOLDER) || []).slice().sort();
+  const b = (candidate.match(PLACEHOLDER) || []).slice().sort();
+  if (a.length !== b.length) return false;
+  return a.every((x, i) => x === b[i]);
+}
+
+function looksUnfinished(candidate, source) {
+  if (candidate.trim() === '' || candidate.includes('@@') || /@\s@/.test(candidate)) return true;
+  // A leftover @ the English never had is sentinel debris the restore could
+  // not place — the string reads as corrupted whatever else survived.
+  return atCount(candidate) > atCount(source);
+}
+
+/**
+ * A sentence of English function words. Used to tell "the translator handed the
+ * source straight back" from "this string is the same in both languages" —
+ * "Visa, Mastercard, Apple Pay" and "$42,000 market cap" are legitimately
+ * unchanged, "Introducing DeHub Premium" is a silent failure.
+ *
+ * Writing the English back into a locale file is worse than leaving the key
+ * out: the value renders identically either way, but a written key counts as
+ * translated in the coverage report, so nobody ever finds it again. dehub-mobile
+ * is full of exactly this — 187 English sentences sitting in de.json.
+ */
+const ENGLISH_FUNCTION_WORDS =
+  /\b(the|a|an|is|are|was|be|to|for|your|you|and|or|not|no|with|of|in|on|at|can|will|please|cannot|this|that|from|have|has|it|we|our|out|up|off|back|when|what|how|all|more|new|now)\b/i;
+
+/**
+ * Locales written in a script other than Latin. For these there is a far
+ * stronger test than word-counting: a Russian string containing no Cyrillic at
+ * all was not translated, whatever it says. Word heuristics miss short ones
+ * like "Introducing DeHub Premium" and "Comment cannot be empty"; this does not.
+ */
+const SCRIPT_OF = {
+  ru: /[Ѐ-ӿ]/, uk: /[Ѐ-ӿ]/, be: /[Ѐ-ӿ]/, bg: /[Ѐ-ӿ]/,
+  sr: /[Ѐ-ӿ]/, mk: /[Ѐ-ӿ]/, kk: /[Ѐ-ӿ]/, mn: /[Ѐ-ӿ]/,
+  ja: /[぀-ヿ一-鿿]/, zh: /[一-鿿]/, zh_tw: /[一-鿿]/,
+  yue: /[一-鿿]/, wuu: /[一-鿿]/, cjy: /[一-鿿]/, mnp: /[一-鿿]/,
+  ko: /[가-힯]/, th: /[฀-๿]/, lo: /[຀-໿]/, my: /[က-႟]/,
+  km: /[ក-៿]/, si: /[඀-෿]/, ka: /[Ⴀ-ჿ]/, am: /[ሀ-፿]/,
+  ti: /[ሀ-፿]/, he: /[֐-׿]/, el: /[Ͱ-Ͽ]/, bo: /[ༀ-࿿]/,
+  hi: /[ऀ-ॿ]/, mr: /[ऀ-ॿ]/, ne: /[ऀ-ॿ]/, bho: /[ऀ-ॿ]/,
+  hne: /[ऀ-ॿ]/, mag: /[ऀ-ॿ]/, dcc: /[؀-ۿऀ-ॿ]/,
+  bn: /[ঀ-৿]/, ctg: /[ঀ-৿]/, syl: /[ঀ-৿]/, rkt: /[ঀ-৿]/,
+  as: /[ঀ-৿]/, pa: /[਀-੿]/, gu: /[઀-૿]/, ta: /[஀-௿]/,
+  te: /[ఀ-౿]/, kn: /[ಀ-೿]/, ml: /[ഀ-ൿ]/,
+  ar: /[؀-ۿ]/, fa: /[؀-ۿ]/, ur: /[؀-ۿ]/, ps: /[؀-ۿ]/,
+  // ku is Kurmanji, written in Latin, so it has no entry here.
+  skr: /[؀-ۿ]/, pbt: /[؀-ۿ]/, sd: /[؀-ۿ]/,
+  acm: /[؀-ۿ]/, acw: /[؀-ۿ]/, aec: /[؀-ۿ]/, ajp: /[؀-ۿ]/,
+  ayn: /[؀-ۿ]/, apd: /[؀-ۿ]/, arz: /[؀-ۿ]/, ary: /[؀-ۿ]/,
+};
+
+/**
+ * Numbers, punctuation and brand names are the same in every language, so a
+ * string with no letters of its own to translate is not evidence of anything.
+ */
+function hasTranslatableWords(source) {
+  return source.trim().split(/\s+/).filter((w) => /[a-zA-Z]{3}/.test(w)).length >= 3;
+}
+
+/**
+ * The part of a string a translator is actually asked to change. Placeholders
+ * come back unchanged in every language, so they are noise in this comparison
+ * — and on a string that is mostly placeholders they are most of the bytes.
+ */
+function proseOf(text) {
+  return text.replace(PLACEHOLDER, ' ').replace(/\s+/g, ' ').trim();
+}
+
+/**
+ * Unicode blocks, for the wrong-script guard below.
+ *
+ * Only the blocks that actually appear among the bundled locales, plus the
+ * ones the translator reaches for when it goes wrong (CJK, Kana, Hangul).
+ */
+const SCRIPT_BLOCKS = [
+  ['Latin', /[A-Za-z]/], ['Cyrillic', /[Ѐ-ӿ]/], ['Greek', /[Ͱ-Ͽ]/],
+  ['Armenian', /[԰-֏]/], ['Hebrew', /[֐-׿]/],
+  ['Arabic', /[؀-ۿݐ-ݿ]/], ['Ethiopic', /[ሀ-፿]/],
+  ['Devanagari', /[ऀ-ॿ]/], ['Bengali', /[ঀ-৿]/],
+  ['Gurmukhi', /[਀-੿]/], ['Gujarati', /[઀-૿]/],
+  ['Oriya', /[଀-୿]/], ['Tamil', /[஀-௿]/],
+  ['Telugu', /[ఀ-౿]/], ['Kannada', /[ಀ-೿]/],
+  ['Malayalam', /[ഀ-ൿ]/], ['Sinhala', /[඀-෿]/],
+  ['Thai', /[฀-๿]/], ['Lao', /[຀-໿]/], ['Tibetan', /[ༀ-࿿]/],
+  ['Myanmar', /[က-႟]/], ['Khmer', /[ក-៿]/], ['Georgian', /[Ⴀ-ჿ]/],
+  ['Hangul', /[가-힯ᄀ-ᇿ]/], ['CJK', /[一-鿿㐀-䶿]/],
+  ['Kana', /[぀-ヿ]/],
+];
+
+const scriptsIn = text => new Set(SCRIPT_BLOCKS.filter(([, re]) => re.test(text)).map(([n]) => n));
+
+/**
+ * Which scripts this locale legitimately writes in, learnt from the 2000+
+ * values it already carries rather than from a hand-kept table.
+ *
+ * A block present in under 1% of existing values is a stray brand name, not
+ * part of the language — `DeHub` and `DHB` put Latin in every bundle, and
+ * counting that as native would make the guard useless for the Latin case.
+ * Cached because it walks the whole locale.
+ */
+const nativeScriptCache = new Map();
+function nativeScripts(locale, raw) {
+  if (nativeScriptCache.has(locale)) return nativeScriptCache.get(locale);
+  const values = [...flatten(raw).values()].filter(v => typeof v === 'string');
+  const counts = new Map();
+  for (const v of values) for (const b of scriptsIn(v)) counts.set(b, (counts.get(b) || 0) + 1);
+  // Too small a corpus to learn from — fall back to allowing everything
+  // rather than dropping every value in a nearly-empty bundle.
+  const native = values.length < 200
+    ? null
+    : new Set([...counts].filter(([, n]) => n / values.length >= 0.01).map(([b]) => b));
+  nativeScriptCache.set(locale, native);
+  return native;
+}
+
+/**
+ * True when the translation came back written in an alphabet this locale does
+ * not use.
+ *
+ * The placeholder and English-verbatim guards do not look at the script, and
+ * the translator gets it wrong often enough to matter: measured on one 41-key
+ * batch across 110 locales, 8.5% of values in the affected bundles came back
+ * contaminated against a 0.15% baseline in the same files. Two shapes, both
+ * of which render as visible nonsense:
+ *
+ *   - the whole value in another language's script — `Փոխակերպիչ` (Armenian)
+ *     returned for `am` (Amharic), which is a plain locale-code mix-up;
+ *   - a correct sentence with a foreign fragment spliced in — `ቪዲዮ 导入`,
+ *     `Վիդեո导入ել`, `ວາງリンク໋`, `Fi 링크 lati YouTube`.
+ *
+ * Dropping these leaves the key in English, which is the same trade the other
+ * guards make and is unambiguously better than shipping the above.
+ */
+function wrongScript(candidate, locale, raw) {
+  const native = nativeScripts(locale, raw);
+  if (!native) return false;
+  return [...scriptsIn(candidate)].some(block => !native.has(block));
+}
+
+function isUntranslatedProse(source, candidate, locale) {
+  const script = SCRIPT_OF[locale];
+  // A script check needs no word threshold: two Latin words in a Cyrillic
+  // locale are as untranslated as ten. Only the word rule below needs the
+  // cushion, because there "unchanged" is weak evidence on its own.
+  if (script) return /[a-zA-Z]{3}/.test(source) && !script.test(candidate);
+  // Compare the prose rather than the whole string, and ignore case. The
+  // translator hands "{{names}} and {{count}} other" back as "... Other" often
+  // enough that a strict === let the English straight into the file.
+  if (proseOf(candidate).toLowerCase() !== proseOf(source).toLowerCase()) return false;
+  return hasTranslatableWords(source) && ENGLISH_FUNCTION_WORDS.test(source);
+}
+
+/**
+ * Serbian ships in Cyrillic, but the provider answers `sr` in Latin script
+ * ("Sačuvaj promene"). wrongScript rightly rejects that, which left every new
+ * Serbian key in English. The two alphabets map letter for letter, so convert
+ * rather than drop. Anything that is not Serbian Latin (brand names, URLs,
+ * placeholders already restored) is left alone only when it has no Serbian
+ * diacritics and reads as a token rather than prose — in practice brand names
+ * like "DeHub" come through the same way the existing Cyrillic values have them.
+ */
+const SR_DIGRAPHS = [['Lj', 'Љ'], ['LJ', 'Љ'], ['lj', 'љ'], ['Nj', 'Њ'], ['NJ', 'Њ'], ['nj', 'њ'], ['Dž', 'Џ'], ['DŽ', 'Џ'], ['dž', 'џ']];
+const SR_LETTERS = {
+  A: 'А', B: 'Б', C: 'Ц', Č: 'Ч', Ć: 'Ћ', D: 'Д', Đ: 'Ђ', E: 'Е', F: 'Ф', G: 'Г', H: 'Х', I: 'И', J: 'Ј', K: 'К',
+  L: 'Л', M: 'М', N: 'Н', O: 'О', P: 'П', R: 'Р', S: 'С', Š: 'Ш', T: 'Т', U: 'У', V: 'В', Z: 'З', Ž: 'Ж',
+  a: 'а', b: 'б', c: 'ц', č: 'ч', ć: 'ћ', d: 'д', đ: 'ђ', e: 'е', f: 'ф', g: 'г', h: 'х', i: 'и', j: 'ј', k: 'к',
+  l: 'л', m: 'м', n: 'н', o: 'о', p: 'п', r: 'р', s: 'с', š: 'ш', t: 'т', u: 'у', v: 'в', z: 'з', ž: 'ж',
+};
+/** Tokens that must survive as written: placeholders, tags, URLs, @/#/$ tags, and Riftn/crypto names. */
+const SR_KEEP = /\{\{[^}]+\}\}|\{[a-zA-Z0-9_]+\}|<\/?[a-zA-Z][a-zA-Z0-9]*>|https?:\/\/\S+|[@#$][\w.-]+|\b(?:Riftn|DeHub|DHB|BNB|BSC|ETH|USDT|USDC|NFTs?|DEX|APY|API|URL|ID|PIN|QR|OTP|AI|RPC|TikTok|YouTube|Google|Apple|Android|iOS|Telegram|Discord|X|MetaMask|WalletConnect|Web3|OK)\b/g;
+function toLocaleScript(text, locale) {
+  if (text == null) return text;
+  // Georgian has no case, but the provider capitalises the first letter of a
+  // line into Mtavruli (U+1C90…), which reads as a stray display capital —
+  // "Საყოველთაო". Every letter there has a Mkhedruli lowercase form.
+  if (locale === 'ka') return text.replace(/[Ა-Ჿ]/g, (ch) => ch.toLowerCase());
+  // French puts a no-break space before » : ; ! ?. The regular one (U+00A0)
+  // after é reads to scripts/mojibake-check.mjs as a mis-decoded CJK character
+  // and fails CI; the narrow one (U+202F) is the preferred French spacing and
+  // does not.
+  if (locale === 'fr') return text.replace(/ (?=[»:;!?])/g, ' ');
+  if (locale !== 'sr') return text;
+  let out = '';
+  let last = 0;
+  const convert = (chunk) => {
+    for (const [lat, cyr] of SR_DIGRAPHS) chunk = chunk.split(lat).join(cyr);
+    return chunk.replace(/[A-Za-zČčĆćĐđŠšŽž]/g, (ch) => SR_LETTERS[ch] ?? ch);
+  };
+  for (const m of text.matchAll(SR_KEEP)) {
+    out += convert(text.slice(last, m.index)) + m[0];
+    last = m.index + m[0].length;
+  }
+  return out + convert(text.slice(last));
+}
+
+/**
+ * The AI tier answers the smaller locales (pcm above all) as if replying to a
+ * chat message: the whole line wrapped in quotes, sometimes with a flourish of
+ * its own — "Allow AI scraping of my content" came back as
+ * "\"Let AI bot scrape my content for me, no problem 👍\"". Quotes the source
+ * did not have are stripped; an emoji the source did not have means the line
+ * was embellished rather than translated, so it is dropped.
+ */
+const QUOTE_PAIRS = [['"', '"'], ['“', '”'], ['„', '“'], ['«', '»'], ['「', '」'], ["'", "'"]];
+function unwrapQuotes(text, source) {
+  if (text == null) return text;
+  for (const [open, close] of QUOTE_PAIRS) {
+    if (text.length > 2 && text.startsWith(open) && text.endsWith(close) && !source.trim().startsWith(open)) {
+      return text.slice(open.length, -close.length).trim();
+    }
+  }
+  return text;
+}
+const EMOJI = /\p{Extended_Pictographic}/gu;
+function addsEmoji(candidate, source) {
+  const had = new Set(source.match(EMOJI) ?? []);
+  return (candidate.match(EMOJI) ?? []).some((e) => !had.has(e));
+}
+
+/**
+ * The free model tiers sometimes lose their place in a smaller locale and
+ * repeat one phrase until they run out of tokens — jv's dapp intro shipped as
+ * "ngagumi aja" twenty-odd times over, and none of the guards above look at
+ * repetition. Judged against the English, never alone: a source that repeats
+ * on purpose ("every member, every message, every event and every invite") is
+ * allowed a translation that repeats with it. A line is dropped when a word of
+ * 4+ letters appears 4+ times in 8 tokens and the English has nothing like it,
+ * or when it runs to more than three times the English's length.
+ *
+ * The same rule as looksLikeLoop in supabase/functions/translate-text; keep
+ * the two in step.
+ */
+const REPEAT_WINDOW = 8;
+const REPEAT_MIN_LETTERS = 4;
+/** Scripts with no spaces between words, where a token count says nothing about length. */
+const UNSPACED_SCRIPT =
+  /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Thai}\p{Script=Lao}\p{Script=Khmer}\p{Script=Myanmar}\p{Script=Tibetan}]/u;
+const repetitionTokens = (text) => text.toLowerCase().match(/[\p{L}\p{M}\p{N}]+/gu) ?? [];
+const letterCount = (token) => (token.match(/\p{L}/gu) ?? []).length;
+
+/** Most times one token of at least `minLetters` letters appears in any 8-token window. */
+function maxRepeat(tokens, minLetters) {
+  const counts = new Map();
+  let max = 0;
+  for (let i = 0; i < tokens.length; i++) {
+    if (i >= REPEAT_WINDOW) {
+      const leaving = tokens[i - REPEAT_WINDOW];
+      if (letterCount(leaving) >= minLetters) counts.set(leaving, (counts.get(leaving) ?? 1) - 1);
+    }
+    const token = tokens[i];
+    if (letterCount(token) < minLetters) continue;
+    const n = (counts.get(token) ?? 0) + 1;
+    counts.set(token, n);
+    if (n > max) max = n;
+  }
+  return max;
+}
+
+function looksLikeLoop(source, candidate) {
+  const src = repetitionTokens(source);
+  const out = repetitionTokens(candidate);
+  // The English side counts words of any length: "our" repeated can come back
+  // as "kita" repeated. The length rule needs characters to triple as well as
+  // words, so a target that spaces every syllable is not mistaken for a loop.
+  if (maxRepeat(out, REPEAT_MIN_LETTERS) >= 4 && maxRepeat(src, 0) < 3) return true;
+  if (UNSPACED_SCRIPT.test(source) || UNSPACED_SCRIPT.test(candidate)) return false;
+  return src.length >= 5
+    && out.length > src.length * 3
+    && out.join('').length > src.join('').length * 3
+    && maxRepeat(out, REPEAT_MIN_LETTERS) >= 3;
+}
+
+/* ---------- network ---------- */
+
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+/**
+ * Some target languages come back HTML-escaped: `fe&#39;uu` for om and uz, and
+ * the batch separator as `&#10; ` for ku, which made every ku batch misalign
+ * and fall back to one request per line. Unescaped, the apostrophes render as
+ * written and the batch splits on its newlines again.
+ */
+function decodeEntities(text) {
+  return text
+    .replace(/&#10; ?/g, '\n')
+    .replace(/&#39;/g, "'")
+    .replace(/&quot;/g, '"')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&amp;/g, '&');
+}
+
+async function translateBatch(lines, targetLang, key) {
+  const json = await requestTranslationBatch(FN_URL, key, lines, targetLang);
+  if (typeof json?.translatedText !== 'string') return null;
+  const text = decodeEntities(json.translatedText);
+  const out = text.split('\n');
+  return out.length === lines.length ? out : null;
+}
+
+/* ---------- main ---------- */
+
+const en = JSON.parse(fs.readFileSync(path.join(LOCALES_DIR, 'en.json'), 'utf8'));
+const enFlat = flatten(en);
+
+const allLocales = fs
+  .readdirSync(LOCALES_DIR)
+  .filter((f) => f.endsWith('.json') && f !== 'en.json')
+  .map((f) => f.replace(/\.json$/, ''));
+
+function missingFor(locale) {
+  const raw = JSON.parse(fs.readFileSync(path.join(LOCALES_DIR, `${locale}.json`), 'utf8'));
+  const flat = flatten(raw);
+  const missing = [];
+  for (const [k, v] of enFlat) {
+    if (typeof v !== 'string') continue;
+    if (KEY_PREFIX && !k.startsWith(KEY_PREFIX)) continue;
+    if (ONLY_KEYS && !ONLY_KEYS.has(k)) continue;
+    const have = flat.get(k);
+    if (typeof have !== 'string' || have.trim() === '') missing.push(k);
+  }
+  return { raw, missing };
+}
+
+let targets;
+if (value('locale')) targets = [value('locale')];
+else if (value('locales')) targets = value('locales').split(',').map((s) => s.trim()).filter(Boolean);
+else targets = allLocales;
+
+if (flag('all') || CHECK_ONLY) {
+  targets = targets
+    .map((l) => ({ l, n: missingFor(l).missing.length }))
+    .sort((a, b) => b.n - a.n)
+    .map((x) => x.l);
+}
+const limit = Number(value('limit') || 0);
+if (limit > 0) targets = targets.slice(0, limit);
+
+const translatableTotal = [...enFlat.values()].filter((v) => typeof v === 'string').length;
+
+if (CHECK_ONLY) {
+  console.log(`en.json translatable strings: ${translatableTotal}\n`);
+  let worst = 0;
+  for (const locale of targets) {
+    const { missing } = missingFor(locale);
+    const pct = (((translatableTotal - missing.length) / translatableTotal) * 100).toFixed(1);
+    if (missing.length > worst) worst = missing.length;
+    console.log(`${locale.padEnd(7)} ${String(translatableTotal - missing.length).padStart(5)}/${translatableTotal}  ${pct.padStart(5)}%  missing ${missing.length}`);
+  }
+  console.log(`\nlargest gap: ${worst} keys`);
+  process.exit(0);
+}
+
+/**
+ * Rewrite the list the runtime widget fallback reads. A locale drops off it the
+ * moment its file is genuinely translated, so the widget is never loaded for a
+ * language that no longer needs it.
+ */
+if (flag('emit-fallback-list')) {
+  const THRESHOLD = 0.9;
+  const behind = allLocales
+    .filter((l) => (translatableTotal - missingFor(l).missing.length) / translatableTotal < THRESHOLD)
+    .sort();
+  const rows = [];
+  for (let i = 0; i < behind.length; i += 10) {
+    rows.push('  ' + behind.slice(i, i + 10).map((l) => `'${l}'`).join(', ') + ',');
+  }
+  const header = fs
+    .readFileSync('src/i18n/widget-fallback-locales.ts', 'utf8')
+    .split('export const')[0];
+  fs.writeFileSync(
+    'src/i18n/widget-fallback-locales.ts',
+    `${header}export const WIDGET_FALLBACK_LOCALES: readonly string[] = [\n${rows.join('\n')}\n];\n`,
+  );
+  console.log(`fallback list: ${behind.length} locale(s) below ${THRESHOLD * 100}%`);
+  process.exit(0);
+}
+
+/**
+ * Strip keys whose value is the English source verbatim. Rendering does not
+ * change — the key falls back to en.json either way — but the coverage report
+ * stops counting them as translated, which is the whole point.
+ *
+ * `--prune --garbled` strips what the fill's answer guards now reject instead
+ * (scripts/i18n-guards.mjs: loops, a sentence for a label, markdown the English
+ * lacks), printing each key and why, so `--only` can refill exactly those.
+ * `--dry-run` prints without writing. A value the guards flag that is right as
+ * it stands — "FAQ" spelled out, Albanian "të të" — is listed by locale in
+ * scripts/i18n-garbled-keep.json and left alone.
+ */
+if (flag('prune')) {
+  const GARBLED = flag('garbled');
+  const keepFile = 'scripts/i18n-garbled-keep.json';
+  const keep = GARBLED && fs.existsSync(keepFile) ? JSON.parse(fs.readFileSync(keepFile, 'utf8')) : {};
+  const clip = (v) => JSON.stringify([...v].length > 80 ? `${[...v].slice(0, 80).join('')}…` : v);
+  for (const locale of targets) {
+    const raw = JSON.parse(fs.readFileSync(path.join(LOCALES_DIR, `${locale}.json`), 'utf8'));
+    const flat = flatten(raw);
+    const kept = new Set(keep[locale] ?? []);
+    const pruned = [];
+    for (const [k, v] of flat) {
+      if (typeof v !== 'string') continue;
+      if (ONLY_KEYS && !ONLY_KEYS.has(k)) continue;
+      const source = enFlat.get(k);
+      if (typeof source !== 'string') continue;
+      const why = GARBLED ? !kept.has(k) && garbled(source, v) : isUntranslatedProse(source, v, locale);
+      if (!why) continue;
+      const parts = k.split('.');
+      let node = raw;
+      for (const p of parts.slice(0, -1)) node = node?.[p];
+      if (node) { delete node[parts.at(-1)]; pruned.push(`  ${k} (${why}) ${clip(v)}`); }
+    }
+    if (pruned.length && !flag('dry-run')) {
+      fs.writeFileSync(path.join(LOCALES_DIR, `${locale}.json`), JSON.stringify(reorderLike(en, raw), null, 2) + '\n');
+    }
+    console.log(`${locale}: pruned ${pruned.length} ${GARBLED ? 'garbled' : 'English-verbatim'} value(s)`);
+    if (GARBLED) pruned.forEach((line) => console.log(line));
+  }
+  process.exit(0);
+}
+
+const key = anonKey();
+
+for (const locale of targets) {
+  const { raw, missing } = missingFor(locale);
+  if (missing.length === 0) { console.log(`${locale}: already complete`); continue; }
+
+  const todo = missing.slice(0, KEY_BUDGET);
+  console.log(`${locale}: ${missing.length} missing, translating ${todo.length}`);
+
+  let written = 0;
+  let dropped = 0;
+  let outOfStep = 0;
+
+  for (let i = 0; i < todo.length; i += BATCH_LINES) {
+    const keys = todo.slice(i, i + BATCH_LINES);
+    const sources = keys.map((k) => enFlat.get(k));
+    const prepared = sources.map(protect);
+    const masked = prepared.map((p) => p.masked);
+
+    const accept = (j, line) => {
+      if (line == null) return null;
+      const candidate = toLocaleScript(unwrapQuotes(restore(line.trim(), prepared[j].found, sources[j]), sources[j]), locale);
+      if (
+        candidate == null ||
+        addsEmoji(candidate, sources[j]) ||
+        looksLikeLoop(sources[j], candidate) ||
+        garbled(sources[j], candidate) ||
+        looksUnfinished(candidate, sources[j]) ||
+        isUntranslatedProse(sources[j], candidate, locale) ||
+        !placeholdersMatch(sources[j], candidate) ||
+        wrongScript(candidate, locale, raw)
+      ) return null;
+      return candidate;
+    };
+
+    /** Each line translated on its own, requested at most once per batch. */
+    const alone = new Map();
+    const single = async (j) => {
+      if (!alone.has(j)) {
+        const res = await translateBatch([masked[j]], locale, key);
+        alone.set(j, res ? res[0] : null);
+        await sleep(PAUSE_MS);
+      }
+      return alone.get(j);
+    };
+
+    // A batch that came back a different shape, or with its answers out of
+    // step with its lines, is unusable as a whole; one this small is not worth
+    // the risk. Those go line by line, so one bad string cannot cost 29 good ones.
+    let out = keys.length >= MIN_BATCH_LINES ? await translateBatch(masked, locale, key) : null;
+    if (out && outOfOrder(masked, out)) { out = null; outOfStep++; }
+
+    let chosen = [];
+    if (out) {
+      // Inside a batch the provider often hands a whole block back in English
+      // for the smaller locales (rkt, dcc, skr…) while translating the same line
+      // correctly on its own. A lone retry is a different cache key, so it is
+      // not just served the same English again.
+      for (let j = 0; j < keys.length; j++) chosen.push(accept(j, out[j]) ?? accept(j, await single(j)));
+      // A lone retry that matches a different line's batch answer shows the
+      // batch was out of step after all, so none of it is kept.
+      if ([...alone].some(([j, line]) => answersAnotherLine(j, line, masked, out))) { out = null; outOfStep++; }
+    }
+    if (!out) {
+      chosen = [];
+      for (let j = 0; j < keys.length; j++) chosen.push(accept(j, await single(j)));
+    }
+
+    chosen.forEach((candidate, j) => {
+      if (candidate == null) { dropped++; return; }
+      setDeep(raw, keys[j], candidate);
+      written++;
+    });
+
+    await sleep(PAUSE_MS);
+    process.stdout.write(`  ${Math.min(i + BATCH_LINES, todo.length)}/${todo.length}\r`);
+  }
+
+  const ordered = reorderLike(en, raw);
+  fs.writeFileSync(path.join(LOCALES_DIR, `${locale}.json`), JSON.stringify(ordered, null, 2) + '\n');
+  const redone = outOfStep ? `; ${outOfStep} batch(es) came back out of step and were redone line by line` : '';
+  console.log(`\n${locale}: wrote ${written}, dropped ${dropped} (left in English on purpose)${redone}`);
+}

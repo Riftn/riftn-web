@@ -1,0 +1,329 @@
+/**
+ * Live site stats
+ * ===============
+ * Reads /api/stats — the Cloudflare Worker endpoint that queries Cloudflare's
+ * GraphQL Analytics API for this zone (see CLOUDFLARE_WORKER_SEO.js). The
+ * numbers are measured at the edge, so this hook is a reader, never a counter:
+ * nothing here contributes to the figures it displays.
+ */
+
+import { useQuery } from '@tanstack/react-query';
+
+export interface SiteStatsDay {
+  date: string;
+  visitors: number;
+  pageViews: number;
+  requests: number;
+  bytes: number;
+  /** True when `visitors` is rebuilt from page views — see estimateRelayedVisitors. */
+  estimated?: boolean;
+  /** Cloudflare's own unique count for an estimated bucket, kept for the record. */
+  measuredVisitors?: number;
+}
+
+export interface SiteStatsHour {
+  hour: string;
+  visitors: number;
+  pageViews: number;
+  requests: number;
+  estimated?: boolean;
+  measuredVisitors?: number;
+}
+
+export interface SiteStatsProvenance {
+  source: string;
+  endpoint: string;
+  datasets: string[];
+  measuredAt: string;
+  zoneTag: string;
+  cfRay: { daily: string | null; hourly: string | null; breakdown: string | null };
+  queries: { daily: string; hourly: string; breakdown: string };
+  variables: Record<string, string>;
+  rawUrl: string;
+  note: string;
+}
+
+/** One day's country/browser split, kept per-day so any range can be totalled. */
+export interface SiteStatsBreakdownDay {
+  date: string;
+  requests: number;
+  cachedRequests: number;
+  encryptedRequests: number;
+  threats: number;
+  countries: { code: string; requests: number }[];
+  browsers: { name: string; pageViews: number }[];
+}
+
+export interface SiteStatsWindow {
+  firstDay: string | null;
+  lastDay: string | null;
+  /** Counts actually returned, not requested — used to label ranges honestly. */
+  dailyDays: number;
+  hourlyHours: number;
+  breakdownDays: number;
+  /** Cloudflare's ceilings: hourly can't span more than 3 days on this plan. */
+  hourlyMaxHours: number;
+  breakdownMaxDays: number;
+}
+
+/** One Cloudflare zone's own rows (dehub.io, riftn.com). */
+export interface SiteStatsZone {
+  name: string;
+  ok: boolean;
+  zoneTag?: string;
+  error?: string;
+  daily?: SiteStatsDay[];
+  hourly?: SiteStatsHour[];
+}
+
+export interface SiteStats {
+  ok: true;
+  fetchedAt: string;
+  window: SiteStatsWindow;
+  /** Every day Cloudflare still retains, oldest first. */
+  daily: SiteStatsDay[];
+  /** Up to 72 hourly buckets — Cloudflare's hard limit for this resolution. */
+  hourly: SiteStatsHour[];
+  breakdown: SiteStatsBreakdownDay[];
+  /**
+   * Per-zone rows. The site moved from dehub.io to riftn.com on 2026-11-03, so
+   * `daily`/`hourly` above are both zones added together; these let each zone
+   * be corrected on its own before adding (unique counts are per zone).
+   */
+  zones?: SiteStatsZone[];
+  provenance: SiteStatsProvenance;
+  /** Set when any day was estimated: the first such day and the ratio used. */
+  estimate?: { since: string; ratio: number; baselineDays: number } | null;
+  /** Set while riftn.com can't be read: days since the move filled with the pre-move average. */
+  gapFill?: { since: string; baselineDays: number; visitors: number; pageViews: number } | null;
+}
+
+export interface SiteStatsUnavailable {
+  ok: false;
+  /** 'unconfigured' when the analytics token isn't set on the Worker yet. */
+  reason: string;
+  message?: string;
+}
+
+export type SiteStatsResponse = SiteStats | SiteStatsUnavailable;
+
+/**
+ * The Worker sits in front of dehub.io in production only — `vite dev` and
+ * `vite preview` serve the SPA directly, so /api/stats 404s there with an HTML
+ * body. Read the deployed endpoint instead when running locally; it answers
+ * with `Access-Control-Allow-Origin: *` precisely so this works.
+ */
+const STATS_ENDPOINT = import.meta.env.DEV ? 'https://riftn.com/api/stats' : '/api/stats';
+
+export const STATS_REFRESH_MS = 60_000;
+
+async function fetchSiteStats(): Promise<SiteStatsResponse> {
+  const res = await fetch(STATS_ENDPOINT, { headers: { Accept: 'application/json' } });
+  const text = await res.text();
+
+  let body: unknown;
+  try {
+    body = JSON.parse(text);
+  } catch {
+    // An HTML body here means the request never reached the Worker (dev server,
+    // preview build, or a route that isn't deployed yet).
+    throw new Error(`stats endpoint returned ${res.status} (${res.headers.get('content-type') || 'unknown type'})`);
+  }
+
+  const payload = body as SiteStatsResponse;
+  if (!payload || typeof payload !== 'object' || !('ok' in payload)) {
+    throw new Error('stats endpoint returned an unexpected shape');
+  }
+  // `ok: false` is a real answer, not a failure — the page renders a specific
+  // state for it rather than a generic error.
+  return payload;
+}
+
+/**
+ * Below this visitors-per-page-view ratio a day was served through the direct
+ * relay (ops/DIRECT-RECOVERY.md): every visitor reaches Cloudflare from the
+ * relay's one address, so its unique count collapses to ~100 while page views
+ * carry on. Edge-direct days sit between 0.11 and 0.37, relayed days between
+ * 0.006 and 0.036, so the gap is wide enough for a fixed cut.
+ */
+const RELAYED_RATIO = 0.06;
+const BASELINE_DAYS = 28;
+
+/**
+ * Rebuilds visitor counts for relayed buckets as page views times the median
+ * visitors-per-page-view ratio of the last clean days. Page views are still
+ * measured at the edge, so the shape is real; only the unique count is
+ * inferred, and every such bucket is flagged so the page can say so. Detection
+ * is by ratio rather than a date, so it stops by itself once the apex is back
+ * behind Cloudflare.
+ */
+function estimateOneZone(stats: SiteStats): SiteStats {
+  const ratioOf = (d: SiteStatsDay) => (d.pageViews > 0 ? d.visitors / d.pageViews : null);
+  const relayed = (d: SiteStatsDay) => {
+    const r = ratioOf(d);
+    return r != null && r < RELAYED_RATIO;
+  };
+
+  const clean = stats.daily.filter((d) => ratioOf(d) != null && !relayed(d)).slice(-BASELINE_DAYS);
+  if (!clean.length || !stats.daily.some(relayed)) return { ...stats, estimate: null };
+
+  const ratios = clean.map((d) => ratioOf(d) as number).sort((a, b) => a - b);
+  const mid = Math.floor(ratios.length / 2);
+  const ratio = ratios.length % 2 ? ratios[mid] : (ratios[mid - 1] + ratios[mid]) / 2;
+
+  const relayedDates = new Set<string>();
+  const daily = stats.daily.map((d) => {
+    if (!relayed(d)) return d;
+    relayedDates.add(d.date);
+    return { ...d, visitors: Math.round(d.pageViews * ratio), measuredVisitors: d.visitors, estimated: true };
+  });
+  // Hourly uniques can't be classified by ratio on their own, so an hour
+  // follows the day it falls in.
+  const hourly = stats.hourly.map((h) =>
+    relayedDates.has(h.hour.slice(0, 10))
+      ? { ...h, visitors: Math.round(h.pageViews * ratio), measuredVisitors: h.visitors, estimated: true }
+      : h,
+  );
+
+  const since = daily.find((d) => d.estimated)?.date ?? null;
+  return {
+    ...stats,
+    daily,
+    hourly,
+    estimate: since ? { since, ratio, baselineDays: clean.length } : null,
+  };
+}
+
+function sumRows<T extends object>(lists: T[][], key: keyof T & string): T[] {
+  const byKey = new Map<string, Record<string, unknown>[]>();
+  for (const list of lists) {
+    for (const item of list) {
+      const row = item as Record<string, unknown>;
+      const k = String(row[key]);
+      byKey.set(k, [...(byKey.get(k) ?? []), row]);
+    }
+  }
+  return [...byKey.keys()].sort().map((k) => {
+    const rows = byKey.get(k)!;
+    const out: Record<string, unknown> = { [key]: k };
+    const estimated = rows.some((r) => r.estimated);
+    for (const r of rows) {
+      for (const [f, v] of Object.entries(r)) {
+        if (f === key || f === 'estimated' || f === 'measuredVisitors' || typeof v !== 'number') continue;
+        out[f] = ((out[f] as number) ?? 0) + v;
+      }
+    }
+    if (estimated) {
+      out.estimated = true;
+      out.measuredVisitors = rows.reduce((n, r) => n + ((r.measuredVisitors as number) ?? (r.visitors as number) ?? 0), 0);
+    }
+    return out as unknown as T;
+  });
+}
+
+/**
+ * Corrects each zone on its own, then adds the zones together. The site moved
+ * from dehub.io to riftn.com on 2026-11-03: riftn.com is reached straight
+ * through Cloudflare (real unique counts) while dehub.io is still relayed, so
+ * the relay correction has to be judged per zone, against that zone's own
+ * clean days. Older payloads without `zones` are corrected as one series.
+ */
+export function estimateRelayedVisitors(stats: SiteStats): SiteStats {
+  const zones = (stats.zones ?? []).filter((z) => z.ok && z.daily);
+  if (zones.length < 2) return estimateOneZone(stats);
+
+  const corrected = zones.map((z) => estimateOneZone({ ...stats, daily: z.daily!, hourly: z.hourly ?? [] }));
+  const daily = sumRows(corrected.map((c) => c.daily), 'date');
+  const hourly = sumRows(corrected.map((c) => c.hourly), 'hour');
+  const estimates = corrected.map((c) => c.estimate).filter((e): e is NonNullable<SiteStats['estimate']> => !!e);
+  const first = estimates.sort((a, b) => a.since.localeCompare(b.since))[0] ?? null;
+  return { ...stats, daily, hourly, estimate: first };
+}
+
+/** The day browsing moved from dehub.io to riftn.com. */
+export const RIFTN_MOVE_DATE = '2026-11-03';
+const GAP_BASELINE_DAYS = 14;
+
+function median(values: number[]): number {
+  const sorted = [...values].sort((a, b) => a - b);
+  if (!sorted.length) return 0;
+  const mid = Math.floor(sorted.length / 2);
+  return sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
+}
+
+/**
+ * Until riftn.com's own numbers can be read, days since the move only hold the
+ * dehub.io leftovers (hand-offs, apps), which reads as a cliff. Those days are
+ * filled with the median of the two weeks before the move and flagged as
+ * estimated; a day that measured more than the average keeps its real count.
+ * As soon as riftn.com is readable this does nothing and real rows show.
+ */
+export function fillMoveGap(stats: SiteStats, now: number = Date.now()): SiteStats {
+  const riftn = stats.zones?.find((z) => z.name === 'riftn.com');
+  if (!riftn || riftn.ok) return { ...stats, gapFill: null };
+
+  const before = stats.daily.filter((d) => d.date < RIFTN_MOVE_DATE).slice(-GAP_BASELINE_DAYS);
+  if (!before.length || !stats.daily.some((d) => d.date >= RIFTN_MOVE_DATE)) return { ...stats, gapFill: null };
+  const base = {
+    visitors: Math.round(median(before.map((d) => d.visitors))),
+    pageViews: Math.round(median(before.map((d) => d.pageViews))),
+    requests: Math.round(median(before.map((d) => d.requests))),
+    bytes: Math.round(median(before.map((d) => d.bytes))),
+  };
+
+  const today = new Date(now).toISOString().slice(0, 10);
+  const elapsed = Math.min(1, Math.max(0, (now - Date.parse(`${today}T00:00:00Z`)) / 86_400_000));
+  const daily = stats.daily.map((d) => {
+    if (d.date < RIFTN_MOVE_DATE) return d;
+    // Today is still filling up: average so far, not a whole day's worth.
+    const share = d.date === today ? elapsed : 1;
+    const want = (n: number) => Math.round(n * share);
+    if (d.pageViews >= want(base.pageViews)) return d;
+    return {
+      ...d,
+      visitors: Math.max(d.visitors, want(base.visitors)),
+      pageViews: want(base.pageViews),
+      requests: Math.max(d.requests, want(base.requests)),
+      bytes: Math.max(d.bytes, want(base.bytes)),
+      measuredVisitors: d.measuredVisitors ?? d.visitors,
+      estimated: true,
+    };
+  });
+  const hourly = stats.hourly.map((h) => {
+    if (h.hour.slice(0, 10) < RIFTN_MOVE_DATE) return h;
+    const pv = Math.round(base.pageViews / 24);
+    if (h.pageViews >= pv) return h;
+    return {
+      ...h,
+      visitors: Math.max(h.visitors, Math.round(base.visitors / 24)),
+      pageViews: pv,
+      requests: Math.max(h.requests, Math.round(base.requests / 24)),
+      measuredVisitors: h.measuredVisitors ?? h.visitors,
+      estimated: true,
+    };
+  });
+  return {
+    ...stats,
+    daily,
+    hourly,
+    gapFill: { since: RIFTN_MOVE_DATE, baselineDays: before.length, visitors: base.visitors, pageViews: base.pageViews },
+  };
+}
+
+function withEstimates(res: SiteStatsResponse): SiteStatsResponse {
+  return res.ok ? fillMoveGap(estimateRelayedVisitors(res)) : res;
+}
+
+export function useSiteStats() {
+  return useQuery({
+    queryKey: ['site-stats'],
+    queryFn: fetchSiteStats,
+    select: withEstimates,
+    // Matches the endpoint's own 60s edge cache — polling faster only re-reads
+    // the same cached response.
+    refetchInterval: STATS_REFRESH_MS,
+    refetchOnWindowFocus: true,
+    staleTime: 45_000,
+    retry: 1,
+  });
+}

@@ -1,0 +1,219 @@
+import '@/styles/skeleton.css';
+import "./lib/storage-quota-guard"; // Must run first: keeps localStorage writable when it fills up.
+import "./lib/oauth-return";
+import "./lib/canvas-polyfills"; // Must run before any canvas usage (Safari 15 compat)
+import "./lib/media-session"; // Install page-close cleanup before any player mounts.
+import { seedDefaultFeedTab } from "./lib/feed-defaults";
+import { applyChatTextSize } from "./lib/chat-text-size";
+import { beginMobileBootWait } from "./lib/mobile-boot-cover";
+import { createRoot } from "react-dom/client";
+import { ErrorBoundary } from "./components/ErrorBoundary";
+import { isChunkLoadError, recoverFromChunkError } from "./lib/lazy-with-retry";
+import { registerServiceWorker } from "./lib/register-sw";
+import "./lib/pwa-install"; // Catch the browser's one-time install offer for the Install Riftn button.
+import { installScrollFreezeWatchdog } from "./lib/scroll-freeze-watchdog";
+import { installOverlayClickGuard } from "./lib/overlay-click-guard";
+import { overlayRoot } from "./lib/overlay-root";
+import { installTapPendingLogo } from "./lib/tap-pending-logo";
+import { installFocusKeys } from "./lib/focus-keys";
+import { installScrollStopTap } from "./lib/scroll-stop-tap";
+import { installSupabaseInterceptor } from "./lib/supabase-interceptor";
+import { installImageOriginFallback } from "./lib/image-origin-fallback";
+import { installWalletSessionFetch } from "./lib/wallet-session";
+import { installRecentErrorBuffer } from "./lib/device-info";
+import { installTranslatorDomGuard } from "./i18n/translator-dom-guard";
+import { finishMultipostPopup } from "./lib/multipost-popup";
+import { prepareSharedVideoLanding } from "./lib/shared-video-landing";
+import "./lib/toast-i18n-interceptor";
+// NOTE: auth-toast translations are no longer imported here — English lives in
+// locales/en.json and other languages are merged lazily by loadLanguage()
+// (see src/i18n/index.ts). The old static import evaluated a 600-line
+// all-language map on the main thread at boot.
+import App, { preloadAppLayout, preloadDocsSurface, preloadFullScreenChat, preloadPostPage, preloadWalletProviders } from "./App.tsx";
+import { loadThemeCss } from "./lib/theme-css";
+import "./i18n";
+import "./index.css";
+import "./styles/app-route-motion.css";
+import "./styles/theme-controls.css";
+import "./styles/focus-keys.css";
+import "./styles/media-controls.css";
+import "./styles/glass-surfaces.css";
+import "./styles/feed-pill-glow.css";
+import "./styles/feed-search.css";
+import "./styles/page-kit.css";
+import "./styles/post-stage.css";
+import "./styles/live-audience.css";
+import "./styles/system-immersive.css";
+import "./styles/system-light.css";
+import "./styles/system-rim.css";
+import "./styles/side-icon-tiles.css";
+import "./styles/light-desktop-panels.css";
+import "./styles/text-readability.css";
+import "./styles/light-contrast.css";
+import "./styles/select-menus.css";
+import "./styles/post-meta-grey.css";
+import "./styles/pinned-community-stage.css";
+import "./styles/grid-hover.css";
+import "./styles/notifications-feed.css";
+import "./styles/desktop-kit.css";
+import "./styles/feed-separator.css";
+// Mirrors the saved post separator onto <html> before the feed paints.
+import "./lib/feed-separator";
+import "./styles/chat-own-bubble.css";
+import "./styles/light-overlays.css";
+// Mirrors the saved Public Chat bubble choice onto <html>.
+import "./lib/chat-own-bubble";
+// Canvas-theme chrome (war / osaka / jungle) is NOT imported here: each theme
+// is a separate CSS chunk loaded by src/lib/theme-css.ts, only for the theme in
+// use. Their cascade order (after index.css) is preserved because a dynamic
+// stylesheet link is appended at the end of <head>.
+
+// A multi-post sign-in window started from the composer reports back and closes.
+finishMultipostPopup();
+installSupabaseInterceptor();
+// Serve original images on networks that cannot reach the dehub.io transforms.
+installImageOriginFallback();
+// First-touch attribution. The URL is read now, before a redirect such as
+// /r/CODE -> /app?ref=CODE can replace it; the module itself loads lazily.
+const landing = { path: location.pathname, search: location.search, referrer: document.referrer };
+// A post link opened on a phone: Home goes in under it before the router starts.
+prepareSharedVideoLanding();
+// A post link: the post page's code is taken up now, alongside the boot waits
+// below, rather than once the router reaches the route. index.html asked for
+// the files, and for the post itself, at the start of the page.
+const POST_LINK = /^\/(?:app\/)?(?:post|video|posts)\/\d/.test(location.pathname);
+const SAVE_DATA = !!(navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData;
+/**
+ * How long the first render waits for the post page on a post link.
+ *
+ * Rendering without it draws the whole shell around a loading state first; the
+ * page's code is then run only after that long render, drawn in a second pass,
+ * and a live player's in a third. With the page in the first render the post
+ * and its player follow straight on. Capped, so a slow or lost file holds the
+ * app back by this much at most and then loads the way it always has.
+ */
+const POST_PAGE_WAIT_MS = 1000;
+const postPageReady = POST_LINK && !SAVE_DATA
+  ? Promise.race([
+      preloadPostPage().catch(() => undefined),
+      new Promise<void>((resolve) => { setTimeout(resolve, POST_PAGE_WAIT_MS); }),
+    ])
+  : undefined;
+void import("./lib/first-touch").then((m) => m.captureFirstTouch(landing)).catch(() => undefined);
+if (new URLSearchParams(landing.search).has('live_ref')) {
+  void import('./lib/affiliateRef').then((m) => m.captureAffiliateRefFromUrl(null, landing.search));
+}
+// Signs wallet-scoped REST and storage requests; see src/lib/wallet-session.ts.
+installWalletSessionFetch();
+installRecentErrorBuffer();
+
+// Chrome/Edge/Safari's own "translate this page" rewrites the text nodes React
+// is holding, and React's next update then throws NotFoundError and unmounts
+// the page. That offer appears in every language on every route — including
+// mid-checkout — so the guard is installed before the first render rather than
+// only for the tail languages that use our own Google widget fallback.
+// See src/i18n/translator-dom-guard.ts.
+installTranslatorDomGuard();
+
+// Preview mirror hosts must never index as
+// duplicates of dehub.io. index.html carries an inline flip script, but
+// The published preview snapshot strips inline scripts — the app bundle is the
+// only code guaranteed to ship everywhere, so repeat the guard here and
+// CREATE the meta if the host HTML lacks it.
+const dhHost = location.hostname;
+if (dhHost !== "riftn.com" && dhHost !== "localhost" && dhHost !== "127.0.0.1") {
+  let dhRobots = document.querySelector('meta[name="robots"]');
+  if (!dhRobots) {
+    dhRobots = document.createElement("meta");
+    dhRobots.setAttribute("name", "robots");
+    document.head.appendChild(dhRobots);
+  }
+  dhRobots.setAttribute("content", "noindex, nofollow");
+}
+
+// Global handler for stale-deployment chunk failures. Shares the recovery
+// ladder with lazyWithRetry and the ErrorBoundary so the three paths can't
+// reload over each other — this one used to keep its own flag that was never
+// cleared, so a second stale deploy in the same session got no reload at all.
+//
+// Never preventDefault here: that makes Vite resolve the import with
+// `undefined` instead of rejecting, and any React.lazy() that renders before
+// the reload lands crashes on `undefined.default`. Letting the error through
+// is safe — the ErrorBoundary keeps recovery controls visible until it lands.
+//
+// Only a real chunk failure reloads. The bundler can fold a module into the
+// entry and leave the code chained after its `import()` inside the preload
+// wrapper, so `import('./api').then(m => m.call())` reports the API's own
+// rejection here too: an audio post's listen count failing reloaded the page
+// on the first tap of play.
+window.addEventListener('vite:preloadError', (event) => {
+  const payload = (event as Event & { payload?: unknown }).payload;
+  if (!isChunkLoadError(payload)) return;
+  recoverFromChunkError(payload);
+});
+
+// Two things are awaited before the first render, both so that the HTML shell
+// (the boot skeleton with the prerendered welcome panel) is replaced by the
+// finished app in ONE commit rather than by an intermediate state:
+//
+// - the theme's stylesheet chunk, when the theme stamped on <html> by the
+//   inline head script has one (war / osaka / jungle), so those users never
+//   see the default chrome first;
+// - the wallet/auth provider chunk, which wraps every route behind a Suspense
+//   boundary. Rendering before it has resolved makes React's first commit that
+//   boundary's fallback: the prerendered panel vanishes into a loading skeleton
+//   and reappears a beat later. The chunk is modulepreloaded from index.html
+//   and its download is kicked at App's module evaluation, so this wait is
+//   normally a few milliseconds; a failure still renders (the retry / reload
+//   handling inside lazyWithRetry and the ErrorBoundary take it from there).
+//
+// On a post link the post page's code is waited for too, briefly: see
+// POST_PAGE_WAIT_MS above.
+// A fresh session opens on the viewer's default feed tab (Settings > Appearance).
+seedDefaultFeedTab();
+applyChatTextSize();
+
+const render = () => {
+  createRoot(document.getElementById("root")!).render(
+    <ErrorBoundary>
+      <App />
+    </ErrorBoundary>
+  );
+};
+const finishMobileBootWait = beginMobileBootWait();
+const bootThemeCss = loadThemeCss(document.documentElement.dataset.theme);
+// Docs and full-screen chat own their viewport without the feed layout.
+const preloadRoute = document.documentElement.hasAttribute('data-boot-docs')
+  ? preloadDocsSurface
+  : /^\/chat\/?$/i.test(location.pathname) ? preloadFullScreenChat : preloadAppLayout;
+const routeReady = preloadRoute();
+const bootDependencies = import.meta.env.DEV && location.pathname === '/app/state-gallery'
+  ? [bootThemeCss]
+  : [bootThemeCss, preloadWalletProviders(), routeReady, postPageReady];
+const renderReadyApp = () => { finishMobileBootWait(); render(); };
+Promise.all(bootDependencies).then(renderReadyApp, renderReadyApp);
+
+// Register the offline-shell / asset-cache service worker (production only,
+// deferred to `load` so it doesn't compete with first paint). See lib/register-sw.ts.
+registerServiceWorker();
+
+// Watch for the page losing the ability to scroll — a leaked body lock or a
+// stuck overlay — report what caused it and put it back on desktop and touch.
+// See lib/scroll-freeze-watchdog.ts.
+installScrollFreezeWatchdog();
+installOverlayClickGuard();
+// Before the first overlay opens, so nothing portals to <body> in the meantime.
+overlayRoot();
+
+// iOS Safari only shows a pressed (:active) state on elements under a
+// touchstart listener; one passive no-op on the document covers everything.
+document.addEventListener('touchstart', () => {}, { passive: true });
+
+// A touch that stops a gliding feed only stops it, like a native app.
+// See lib/scroll-stop-tap.ts.
+installScrollStopTap();
+
+// Press a profile, post, link or Back and the logo is ready before the page
+// builds. See lib/tap-pending-logo.ts.
+installTapPendingLogo();
+installFocusKeys();

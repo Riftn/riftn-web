@@ -1,0 +1,94 @@
+import { useTranslation as _useCopy } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
+import { MobileStatusBar } from '../MobileStatusBar';
+import { MobileTopBar } from '../MobileTopBar';
+import { MobileBottomBar } from '../MobileBottomBar';
+import { TrendingUp, DollarSign, Activity, ArrowUpRight } from 'lucide-react';
+
+export function CommandCentreScreen() {
+  const { t: _copy } = _useCopy();
+  const { t } = useTranslation();
+  return (
+    <div className="min-h-full bg-black flex flex-col">
+      <MobileStatusBar />
+      <MobileTopBar title={_copy("copy.a929b8776094", { defaultValue: "Command Centre" })} showAvatar={false} />
+
+      {/* Balance */}
+      <div className="mx-4 my-3 p-4 rounded-2xl border border-white/[0.1] bg-white/[0.03]">
+        <p className="text-zinc-500 text-xs mb-1">{_copy("copy.cadeb8a37b8c", { defaultValue: "Portfolio Value" })}</p>
+        <h2 className="text-white text-2xl font-bold">$3,445.00</h2>
+        <div className="flex items-center gap-1 mt-1">
+          <TrendingUp className="w-3 h-3 text-white" />
+          <span className="text-xs text-zinc-300">{_copy("copy.0baef5c3729b", { defaultValue: "+5.2% today" })}</span>
+        </div>
+      </div>
+
+      {/* Quick stats grid */}
+      <div className="grid grid-cols-2 gap-2 mx-4 mb-4">
+        {[
+          { label: _copy("copy.6f711c190b19", { defaultValue: "Income (30d)" }), value: '$842', icon: DollarSign, trend: '+12%' },
+          { label: _copy("copy.b9c1fb1d8de8", { defaultValue: "Tips Received" }), value: t('mobilePreview.tokenAmount', { amount: '1,240' }), icon: ArrowUpRight, trend: '+8%' },
+          { label: _copy("copy.a344c89d660e", { defaultValue: "Subscribers" }), value: '2,431', icon: Activity, trend: '+15%' },
+          { label: _copy("copy.a1040fcb6f74", { defaultValue: "Content Views" }), value: '45.2K', icon: TrendingUp, trend: '+22%' },
+        ].map((stat) => (
+          <div key={stat.label} className="p-3 rounded-xl border border-white/[0.08] bg-white/[0.02]">
+            <div className="flex items-center justify-between mb-2">
+              <stat.icon className="w-4 h-4 text-zinc-400" />
+              <span className="text-[10px] text-zinc-400">{stat.trend}</span>
+            </div>
+            <p className="text-white text-base font-bold">{stat.value}</p>
+            <p className="text-zinc-600 text-[10px]">{stat.label}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Mini chart placeholder */}
+      <div className="mx-4 mb-4 p-4 rounded-xl border border-white/[0.08] bg-white/[0.02]">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-white text-sm font-semibold">{_copy("copy.d84ecb62fe71", { defaultValue: "Income Chart" })}</h3>
+          <span className="text-zinc-500 text-xs">{_copy("copy.ffd7280513ce", { defaultValue: "30 days" })}</span>
+        </div>
+        <div className="h-32 flex items-end gap-1">
+          {[40, 55, 35, 65, 50, 80, 60, 90, 70, 85, 95, 75].map((h, i) => (
+            <div
+              key={i}
+              className="flex-1 bg-white/[0.08] rounded-t"
+              style={{ height: `${h}%` }}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* Recent transactions */}
+      <div className="px-4 flex-1">
+        <h3 className="text-white text-sm font-semibold mb-3">{_copy("copy.d8d9b7dd3c9e", { defaultValue: "Recent Transactions" })}</h3>
+        <div className="space-y-2">
+          {[
+            { type: _copy("copy.3394014a3379", { defaultValue: "Tip received" }), amount: t('mobilePreview.tokenAmount', { amount: '+50' }), from: 'bob_dev', time: t("copy.51452941c07c", { defaultValue: "{{value1}}h ago", value1: 2 }) },
+            { type: _copy("copy.4999c6c6c7ba", { defaultValue: "Subscription" }), amount: t('mobilePreview.tokenAmount', { amount: '+100' }), from: 'crypto_sarah', time: t("copy.51452941c07c", { defaultValue: "{{value1}}h ago", value1: 5 }) },
+            { type: _copy("copy.d2987dcd1e4e", { defaultValue: "Withdrawal" }), amount: t('mobilePreview.tokenAmount', { amount: '-500' }), from: _copy("copy.01152367b49d", { defaultValue: "To wallet" }), time: t("copy.0dc906eaa41d", { defaultValue: "{{value1}}d ago", value1: 1 }) },
+          ].map((tx, i) => (
+            <div key={i} className="flex items-center gap-3 py-2 rounded-lg">
+              <div className="w-8 h-8 rounded-full bg-white/[0.06] flex items-center justify-center">
+                {tx.amount.startsWith('+') ? (
+                  <ArrowUpRight className="w-4 h-4 text-white rotate-180" />
+                ) : (
+                  <ArrowUpRight className="w-4 h-4 text-zinc-500" />
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <span className="text-white text-sm block">{tx.type}</span>
+                <span className="text-zinc-600 text-[11px]">{tx.from} • {tx.time}</span>
+              </div>
+              <span className={`text-sm font-medium ${tx.amount.startsWith('+') ? 'text-white' : 'text-zinc-400'}`}>
+                {tx.amount}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <MobileBottomBar />
+    </div>
+  );
+}

@@ -1,0 +1,7 @@
+{
+  "name": "{{APP_NAME}}",
+  "private": true,
+  "type": "module",
+  "scripts": { "dev": "node --watch src/server.js", "start": "node src/server.js" },
+  "dependencies": { "dehub-sdk": "https://riftn.com/sdk/dehub-sdk-1.0.1.tgz", "express": "^4.21.2", "jose": "^5.9.6" }
+}

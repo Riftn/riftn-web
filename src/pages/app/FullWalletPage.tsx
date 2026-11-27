@@ -1,0 +1,1321 @@
+import { useTranslation as _useCopy } from 'react-i18next';
+import { useSurfaceDraft } from '@/hooks/use-surface-draft';
+import { tokenLabel } from '@/lib/token-label';
+import { useState, useMemo, useCallback } from 'react';
+import { DhbCoin } from '@/components/app/DhbAmount';
+import qrcode from 'qrcode-generator';
+import { useQuery } from '@tanstack/react-query';
+import { CrossChainDepositDrawer } from '@/components/app/command-centre/CrossChainDepositDrawer';
+import { useSidebarCollapse } from '@/contexts/SidebarCollapseContext';
+import { cn } from '@/lib/utils';
+import { QrCode, ArrowDownToLine, Loader2, ShoppingCart, ChartNoAxesColumn, CreditCard, Globe, ArrowDownUp } from "lucide-react";
+import Copy from "@/components/ui/cut-icons/copy";
+import Check from "@/components/ui/cut-icons/check";
+import Lock from "@/components/ui/cut-icons/privacy";
+import Wallet from "@/components/ui/cut-icons/wallet";
+import Info from "@/components/ui/cut-icons/information";
+
+import Send from "@/components/ui/cut-icons/send";
+import Plus from "@/components/ui/cut-icons/add";
+import Search from "@/components/ui/cut-icons/search";
+import User from "@/components/ui/cut-icons/profile";
+
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { motion } from 'framer-motion';
+import { useAuth } from '@/contexts/AuthContext';
+import { BackupReminderBanner } from '@/components/app/wallet/BackupReminderBanner';
+import { AuthGate } from '@/components/app/AuthGate';
+import { PageBody, PageIsland } from '@/components/app/page-kit/PageKit';
+import { Button } from '@/components/ui/button';
+import { AppState } from '@/components/app/AppState';
+import { LiquidGlassBubble2 } from '@/components/ui/liquid-glass-bubble-2';
+import { Input } from '@/components/ui/input';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
+import { useAllChainsTokens } from '@/hooks/use-wallet-tokens';
+import { useDhbHoldings } from '@/hooks/use-dhb-holdings';
+import { tokenAmount, sumTokenAmounts } from '@/lib/wallet/token-amount';
+import { useTokenPrices } from '@/hooks/use-token-prices';
+import { sendNativeToken, sendERC20Token } from '@/lib/wallet/send';
+import { showWeb3AuthCheckout, isWeb3AuthConnected } from '@/lib/web3auth';
+import { getDexBuyLink } from '@/lib/wallet/buy-links';
+import { getERC20Metadata, saveCustomToken, type WalletChainId, type WalletToken } from '@/lib/wallet/tokens';
+import { BASE_CHAIN_ID, BNB_CHAIN_ID, ETH_CHAIN_ID, CHAIN_CONFIGS } from '@/lib/contracts/dhb-token';
+import { getDefaultChainId } from '@/lib/chains/default-chain';
+import { SOLANA_MAINNET_CHAIN_ID, isSolanaChainId } from '@/lib/chains/solana';
+import { ROBINHOOD_CHAIN_ID } from '@/lib/chains/robinhood';
+import { ARC_CHAIN_ID } from '@/lib/chains/arc';
+import { switchChain, isWalletLockedError } from '@/lib/contracts/aa-utils';
+import type { ChainId } from '@/components/app/ChainSelector';
+import { toast } from 'sonner';
+import dehubCoin from '@/assets/dehub-coin.png';
+import bnbLogo from '@/assets/bnb-logo.png';
+import { SEOHead } from '@/components/SEOHead';
+
+import { getGiveawayPrizeFor } from '@/lib/worldCupGiveaway';
+import ethLogo from '@/assets/eth-logo.png';
+import usdtLogo from '@/assets/usdt-logo.png';
+import usdcLogo from '@/assets/usdc-logo.png';
+import btcLogo from '@/assets/btc-logo.png';
+import baseLogo from '@/assets/icons/base-logo.png';
+import solLogo from '@/assets/icons/solana-logo.png';
+import robinhoodLogo from '@/assets/icons/robinhood-chain-logo.svg';
+import arcLogo from '@/assets/icons/arc-logo.png';
+import { useWalletAddresses } from '@/hooks/use-wallet-addresses';
+import { CopyAddressRows } from '@/components/app/wallet/CopyAddressRows';
+import { TradeSheet } from '@/components/app/wallet/TradeSheet';
+import { SubscriptionTokensRow } from '@/components/app/wallet/SubscriptionTokensRow';
+import { AppTokensRow, AppTokenSendDialog } from '@/components/app/wallet/AppTokens';
+import { AppTokenPreview } from '@/components/app/wallet/AppTokenPreview';
+import { useAppTokens, useAppTokensEnabled } from '@/hooks/use-app-tokens';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+
+const CHAIN_OPTIONS: { id: WalletChainId; name: string; icon: string }[] = [
+  { id: BASE_CHAIN_ID, name: 'Base', icon: baseLogo },
+  { id: BNB_CHAIN_ID, name: 'BNB Chain', icon: bnbLogo },
+  { id: ETH_CHAIN_ID, name: 'Ethereum', icon: ethLogo },
+  { id: ROBINHOOD_CHAIN_ID, name: 'Robinhood', icon: robinhoodLogo },
+  { id: ARC_CHAIN_ID, name: 'Arc', icon: arcLogo },
+  { id: SOLANA_MAINNET_CHAIN_ID, name: 'Solana', icon: solLogo },
+];
+
+const TOKEN_ICONS: Record<string, string> = {
+  DHB: dehubCoin,
+  ETH: ethLogo,
+  BNB: bnbLogo,
+  USDT: usdtLogo,
+  USDC: usdcLogo,
+  BTC: btcLogo,
+  WETH: ethLogo,
+  WBNB: bnbLogo,
+};
+
+const fmtBal = (v: string) => {
+  if (v === '<0.01') return '<0.01';
+  const n = parseFloat(v);
+  if (isNaN(n) || n === 0) return '0';
+  if (n < 0.01) return '<0.01';
+  return n.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+};
+
+// Grouped token: combines balances across chains
+interface GroupedToken {
+  symbol: string;
+  name: string;
+  totalBalance: bigint;
+  totalFormattedBalance: string;
+  decimals: number;
+  logo?: string;
+  isCustom?: boolean;
+  chains: WalletToken[]; // individual per-chain entries
+}
+
+export default function FullWalletPage() {
+  const { t: _copy } = _useCopy();
+  const { isAuthenticated, walletAddress } = useAuth();
+  const { isCollapsed } = useSidebarCollapse();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { t } = useTranslation();
+  const [sendDialogOpen, setSendDialogOpen] = useState(false);
+  const [receiveDialogOpen, setReceiveDialogOpen] = useState(false);
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
+  const [crossChainBuyOpen, setCrossChainBuyOpen] = useState(false);
+  const [crossChainDestSymbol, setCrossChainDestSymbol] = useState<string>('ETH');
+  const [importChainId, setImportChainId] = useState<WalletChainId>(() => getDefaultChainId());
+  const [selectedToken, setSelectedToken] = useState<WalletToken | null>(null);
+  const [searchQuery, setSearchQuery] = useSurfaceDraft("pages/app/FullWalletPage.tsx:searchQuery", '');
+  const [actionGrouped, setActionGrouped] = useState<GroupedToken | null>(null);
+  const [sendChainPickerGrouped, setSendChainPickerGrouped] = useState<GroupedToken | null>(null);
+  const [showBalanceBreakdown, setShowBalanceBreakdown] = useState(false);
+  const [tradeOpen, setTradeOpen] = useState(false);
+
+  const { allTokens, isLoading, failedChains, refetch } = useAllChainsTokens();
+
+  // Wallet + staked + giveaway, defined once in the hook so this page, the
+  // Settings row and the badge ladder cannot drift apart again.
+  const holdings = useDhbHoldings();
+
+  // App tokens: when the server switches them on, DHB is the in-app balance
+  // (opened from what was held and staked at launch) and Send moves app
+  // tokens only. Onchain DHB stays in the wallet but is not shown or sent here.
+  const appTokensOn = useAppTokensEnabled();
+  const { data: appTokens } = useAppTokens(appTokensOn);
+  const appDhb = Number(appTokens?.balance ?? 0) + Number(appTokens?.staked ?? 0);
+  const assetSearch = searchQuery.trim().toLowerCase();
+  const showAppTokens = appTokensOn && `dhb dehub $rift riftn tokens ${tokenLabel()}`.toLowerCase().includes(assetSearch);
+  const [appSendOpen, setAppSendOpen] = useState(false);
+
+  // Twitter World Cup giveaway credit — folded into the DHB balance for winners
+  // (shown like staked DHB: part of the total, itemised as a locked line in the
+  // breakdown). Held custodially; transfers once the DHB contract goes live.
+  const giveaway = getGiveawayPrizeFor(walletAddress);
+
+  // Collect auto-detected tokens (not in TOKEN_ICONS) for dynamic price lookups
+  const extraTokensForPricing = useMemo(() => {
+    const known = new Set(Object.keys(TOKEN_ICONS));
+    const seen = new Set<string>();
+    const extras: { address: string; symbol: string }[] = [];
+    for (const tk of allTokens) {
+      // Solana mints are skipped: this list feeds an EVM contract-address
+      // price lookup, and a base58 mint sent to it is a guaranteed miss that
+      // costs a request per unknown SPL token an owner happens to hold.
+      if (isSolanaChainId(tk.chainId)) continue;
+      if (!known.has(tk.symbol) && tk.address !== '0x0' && !seen.has(tk.address.toLowerCase())) {
+        seen.add(tk.address.toLowerCase());
+        extras.push({ address: tk.address, symbol: tk.symbol });
+      }
+    }
+    return extras;
+  }, [allTokens]);
+
+  const { data: prices = {} } = useTokenPrices(extraTokensForPricing.length > 0 ? extraTokensForPricing : undefined);
+
+  // Compute total USD across all chains.
+  //
+  // Staked and giveaway DHB are part of the holding, not separate from it: the
+  // DHB figure above this line already reads wallet + staked + giveaway, so a
+  // total that counted only liquid wallet tokens read lower than the balance it
+  // sat under. Both are DHB, so both price off the DHB quote.
+  const totalUsd = useMemo(() => {
+    const walletUsd = allTokens.reduce((sum, token) => {
+      if (appTokensOn && token.symbol === 'DHB') return sum;
+      const price = prices[token.symbol] ?? 0;
+      const value = tokenAmount(token) * price;
+      return sum + (isNaN(value) ? 0 : value);
+    }, 0);
+    const dhbPrice = prices.DHB ?? 0;
+    // `walletUsd` already priced the DHB sitting in the wallet, so only the
+    // off-wallet halves are added here.
+    const offWalletDhb = appTokensOn ? appDhb : holdings.staked + holdings.giveaway;
+    const offWalletUsd = offWalletDhb * dhbPrice;
+    return walletUsd + (isNaN(offWalletUsd) ? 0 : offWalletUsd);
+  }, [allTokens, prices, holdings.staked, holdings.giveaway, appTokensOn, appDhb]);
+
+  // Group tokens by symbol across chains
+  // Tokens may have different decimals across chains (e.g. USDT: 6 on Base, 18 on BNB)
+  // so we sum human-readable values instead of raw bigints
+  const groupedTokens = useMemo(() => {
+    const map = new Map<string, GroupedToken>();
+    for (const token of allTokens) {
+      const existing = map.get(token.symbol);
+      if (existing) {
+        // Sum human-readable balances to avoid decimal mismatch
+        const total = sumTokenAmounts([...existing.chains, token]);
+        existing.totalFormattedBalance = String(total);
+        existing.totalBalance = existing.totalBalance + token.balance; // keep for reference but not used for display
+        existing.chains.push(token);
+        if (token.isCustom) existing.isCustom = true;
+      } else {
+        map.set(token.symbol, {
+          symbol: token.symbol,
+          name: token.name,
+          totalBalance: token.balance,
+          totalFormattedBalance: String(tokenAmount(token)),
+          decimals: token.decimals,
+          logo: token.logo,
+          isCustom: token.isCustom,
+          chains: [token],
+        });
+      }
+    }
+    const ORDER: Record<string, number> = { DHB: 0, ETH: 1, BNB: 2, BTC: 3, USDT: 4, USDC: 5 };
+    return Array.from(map.values()).sort((a, b) => (ORDER[a.symbol] ?? 99) - (ORDER[b.symbol] ?? 99));
+  }, [allTokens]);
+
+  const filteredGrouped = useMemo(() => {
+    if (!searchQuery.trim()) return groupedTokens;
+    const q = searchQuery.trim().toLowerCase();
+    return groupedTokens.filter(g => `${g.symbol} ${g.name} ${tokenLabel(g.symbol)}`.toLowerCase().includes(q));
+  }, [groupedTokens, searchQuery]);
+
+  // Use raw balances so even holdings below the display precision remain visible.
+  const withBalance = useMemo(
+    () => filteredGrouped.filter(g => g.totalBalance > BigInt(0) && !(appTokensOn && g.symbol === 'DHB')),
+    [filteredGrouped, appTokensOn],
+  );
+
+  const [copied, setCopied] = useState(false);
+
+  /**
+   * Which address the Receive dialog is showing.
+   *
+   * Not cosmetic. SOL and SPL tokens sent to an `0x…` address are gone — the
+   * two chains do not share an address space — so a dialog that shows only the
+   * EVM address beside a list of Solana balances is an invitation to lose
+   * money. The toggle only appears when there is a Solana address to switch to
+   * — Riftn's own derived one for a built-in wallet, a linked Phantom for the
+   * rest (see hooks/use-wallet-addresses).
+   */
+  const [receiveNetwork, setReceiveNetwork] = useState<'evm' | 'solana'>('evm');
+  const [copyMenuOpen, setCopyMenuOpen] = useState(false);
+  const { solana: solanaAddress, hasChoice: hasAddressChoice } = useWalletAddresses();
+  const receiveAddress =
+    receiveNetwork === 'solana' && solanaAddress ? solanaAddress : walletAddress;
+
+  // All tokens with balance across all chains (for send dialog)
+  const allWithBalance = useMemo(() => allTokens.filter(tk => tk.balance > BigInt(0)), [allTokens]);
+
+  if (!isAuthenticated) {
+    return <AuthGate description={t('wallet.loginRequired')} />;
+  }
+
+  // Takes the address explicitly: the header button always copies the EVM
+  // address, while the Receive dialog copies whichever network is selected.
+  const handleCopy = (address?: string | null) => {
+    const target = address ?? walletAddress;
+    if (!target) return;
+    navigator.clipboard.writeText(target)
+      .then(() => {
+        setCopied(true);
+        toast.success(t('wallet.addressCopied'));
+        setTimeout(() => setCopied(false), 2000);
+      })
+      .catch(() => toast.error(_copy("copy.90d6f4c823a9", { defaultValue: "Could not copy address" })));
+  };
+
+  /**
+   * Sending is EVM-only for now.
+   *
+   * SendDialog switches chain through wagmi and moves value with
+   * `sendNativeToken` / `sendERC20Token`. None of that reaches Solana, and a
+   * Solana token arriving here would fail somewhere inside the EVM stack and
+   * read as a broken wallet. Balances are shown; moving them is not offered
+   * until there is an SPL transfer path that has actually been exercised
+   * on-chain — hand-rolled instruction encoding is not something to ship
+   * untested when it moves money.
+   */
+  const isSolanaToken = (token: WalletToken) => isSolanaChainId(token.chainId);
+
+  const handleSend = (token: WalletToken) => {
+    if (isSolanaToken(token)) {
+      toast.info(t('wallet.solanaSendUnavailable', 'Sending on Solana is not available yet'), {
+        description: t(
+          'wallet.solanaSendUnavailableHint',
+          'Use Phantom directly to move this balance.',
+        ),
+      });
+      return;
+    }
+    setSelectedToken(token);
+    setSendDialogOpen(true);
+  };
+
+  // Always open action drawer directly
+  const handleGroupedTokenClick = (grouped: GroupedToken) => {
+    setActionGrouped(grouped);
+  };
+
+  // Smart send: if multiple chains have balance, show chain picker. Otherwise send directly.
+  const handleSmartSend = (grouped: GroupedToken) => {
+    // Solana is filtered out before the count, not after: a DHB balance split
+    // across Base and Solana would otherwise offer a two-chain picker whose
+    // second row cannot be sent, and a Solana-only balance would open the
+    // picker for a single unusable option.
+    const chainsWithBalance = grouped.chains.filter(
+      tk => tk.balance > BigInt(0) && !isSolanaToken(tk),
+    );
+    if (chainsWithBalance.length === 0) {
+      // Everything this token holds is on Solana. Route it through handleSend
+      // anyway so the person gets the explanation rather than a dead button.
+      const solanaHolding = grouped.chains.find(tk => tk.balance > BigInt(0));
+      if (solanaHolding) handleSend(solanaHolding);
+      return;
+    }
+    if (chainsWithBalance.length === 1) {
+      handleSend(chainsWithBalance[0]);
+    } else {
+      setSendChainPickerGrouped(grouped);
+    }
+  };
+
+  return (
+    // data-wallet-page scopes the light-mode remaps in index.css; the
+    // portaled Send/Receive/Buy/Import dialogs and drawers carry the same
+    // attribute (portals escape this subtree).
+    <div data-wallet-page className="min-h-screen">
+      <SEOHead title={_copy("copy.b98adf20f5f3", { defaultValue: "Wallet: Manage Your Crypto Assets" })} description={_copy("copy.00787feeb046", { defaultValue: "View balances, send and receive tokens, and manage your crypto assets across multiple chains on Riftn." })} url="https://riftn.com/app/wallet" />
+      <h1 className="sr-only">{_copy("copy.112e22b0fd15", { defaultValue: "Riftn Wallet — Decentralised Social Media, Censorship Resistant & Freedom of Speech" })}</h1>
+      {/* Back square only when navigated from command centre */}
+      <PageIsland
+        icon="wallet"
+        title={t('wallet.title')}
+        back={location.state?.from === 'command-centre'}
+        onBack={() => navigate('/app/command-centre')}
+      />
+
+      <PageBody>
+      <BackupReminderBanner />
+
+      {/* Wallet balance bar */}
+      <div data-page-bento data-kit-section className="bg-zinc-900 p-4 border border-zinc-800">
+        <div className="flex items-center justify-between">
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <img src={dehubCoin} alt={tokenLabel()} className="w-7 h-7" />
+              <p className="text-white text-2xl font-bold">
+                {appTokensOn
+                  ? Math.floor(appDhb).toLocaleString('en-US')
+                  : isNaN(holdings.total) ? '0' : Math.floor(holdings.total).toLocaleString('en-US')}
+              </p>
+              <button
+                onClick={() => setShowBalanceBreakdown(!showBalanceBreakdown)}
+                className="text-zinc-500 hover:text-white transition-colors ml-1"
+              >
+                <Info className="w-4 h-4" />
+              </button>
+            </div>
+            <p className="text-zinc-500 text-xs mt-1">
+              {t('wallet.totalWalletValue')}: {isLoading || !Object.keys(prices).length || (failedChains.length > 0 && totalUsd === 0)
+                ? '—'
+                : `${failedChains.length ? '≈ ' : ''}$${totalUsd.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+            </p>
+          </div>
+          {hasAddressChoice ? (
+            <Popover open={copyMenuOpen} onOpenChange={setCopyMenuOpen}>
+              <PopoverTrigger asChild>
+                <Button variant="ghost" size="icon" className="shrink-0 text-zinc-400 hover:text-white" title={t('wallet.chooseAddressNetwork')}>
+                  {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent align="end" className="w-72 bg-black/60 backdrop-blur-[24px] border border-white/10 p-2">
+                <CopyAddressRows onCopied={() => setCopyMenuOpen(false)} />
+              </PopoverContent>
+            </Popover>
+          ) : (
+            <Button variant="ghost" size="icon" className="shrink-0 text-zinc-400 hover:text-white" onClick={() => handleCopy()} title={walletAddress || ''}>
+              {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+            </Button>
+          )}
+        </div>
+        {showBalanceBreakdown && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            className="mt-3 pt-3 border-t border-zinc-800 space-y-1.5"
+          >
+            {appTokensOn ? (
+              <p className="text-xs leading-relaxed text-zinc-500">{t('appTokens.explainer')}</p>
+            ) : (() => {
+              const dhb = groupedTokens.find(t => t.symbol === 'DHB');
+              const baseBal = dhb?.chains.find(c => c.chainId === BASE_CHAIN_ID);
+              const bnbBal = dhb?.chains.find(c => c.chainId === BNB_CHAIN_ID);
+              const baseVal = baseBal ? tokenAmount(baseBal) : 0;
+              const bnbVal = bnbBal ? tokenAmount(bnbBal) : 0;
+              const stakedVal = holdings.staked;
+              return (
+                <>
+                  <div className="flex justify-between text-xs">
+                    <span className="text-zinc-500">Base</span>
+                    <span className="text-white font-medium">{Math.floor(baseVal).toLocaleString('en-US')} <DhbCoin /></span>
+                  </div>
+                  <div className="flex justify-between text-xs">
+                    <span className="text-zinc-500">{_copy("copy.5dc85dbc155e", { defaultValue: "BNB Chain" })}</span>
+                    <span className="text-white font-medium">{Math.floor(bnbVal).toLocaleString('en-US')} <DhbCoin /></span>
+                  </div>
+                  <div className="flex justify-between text-xs">
+                    <span className="text-zinc-500">{_copy("copy.6b8a9141538a", { defaultValue: "Staked" })}</span>
+                    <span className="text-white font-medium">{Math.floor(stakedVal).toLocaleString('en-US')} <DhbCoin /></span>
+                  </div>
+                  {giveaway && (
+                    <div className="flex justify-between text-xs">
+                      <span className="text-zinc-500">{_copy("copy.228fc4afbce4", { defaultValue: "Giveaway (locked)" })}</span>
+                      <span className="text-white font-medium">{Math.floor(giveaway.amount).toLocaleString('en-US')} <DhbCoin /></span>
+                    </div>
+                  )}
+                </>
+              );
+            })()}
+          </motion.div>
+        )}
+      </div>
+
+
+      <div className="!mt-0 space-y-4 pt-4">
+      {/* Wallet controls share one inset, with space between each section. */}
+      <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
+        <Button variant="glass" className="flex-col h-auto px-2 py-3 gap-1.5 rounded-xl min-w-0" onClick={() => setReceiveDialogOpen(true)}>
+          <ArrowDownToLine className="w-5 h-5" />
+          <span className="max-w-full truncate text-xs">{t('wallet.receive')}</span>
+        </Button>
+        <Button variant="glass" className="flex-col h-auto px-2 py-3 gap-1.5 rounded-xl min-w-0" onClick={() => {
+          if (appTokensOn) setAppSendOpen(true);
+          else if (allWithBalance.length > 0) handleSend(allWithBalance[0]);
+          else toast.info(t('wallet.noTokensToSend'));
+        }}>
+          <Send className="w-5 h-5" />
+          <span className="max-w-full truncate text-xs">{t('wallet.send')}</span>
+        </Button>
+        <Button variant="glass" className="flex-col h-auto px-2 py-3 gap-1.5 rounded-xl min-w-0" onClick={() => navigate('/app/buy')}>
+          <ShoppingCart className="w-5 h-5" />
+          <span className="max-w-full truncate text-xs">{t('wallet.buy')}</span>
+        </Button>
+        <Button variant="glass" className="flex-col h-auto px-2 py-3 gap-1.5 rounded-xl min-w-0" onClick={() => navigate('/app/stake')}>
+          <Lock className="w-5 h-5" />
+          <span className="max-w-full truncate text-xs">{t('wallet.stake')}</span>
+        </Button>
+        <Button variant="glass" className="flex-col h-auto px-2 py-3 gap-1.5 rounded-xl min-w-0" onClick={() => navigate('/app/bridge')}>
+          <ArrowDownUp className="w-5 h-5" />
+          <span className="max-w-full truncate text-xs">{_copy("copy.3892e10346fd", { defaultValue: "Bridge" })}</span>
+        </Button>
+        <Button variant="glass" className="flex-col h-auto px-2 py-3 gap-1.5 rounded-xl min-w-0" onClick={() => setTradeOpen(true)}>
+          <ChartNoAxesColumn className="w-5 h-5" />
+          <span className="max-w-full truncate text-xs">{t('wallet.trade')}</span>
+        </Button>
+      </div>
+
+      {appTokensOn && <AppTokenPreview key={walletAddress} />}
+
+      {/* Search */}
+      <div className="relative">
+        <Search aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+        <Input
+          aria-label={t('wallet.searchTokens')}
+          placeholder={t('wallet.searchTokens')}
+          value={searchQuery}
+          onChange={e => setSearchQuery(e.target.value)}
+          className="pl-10 bg-zinc-900 border-zinc-800 text-white rounded-xl h-11"
+        />
+      </div>
+
+      {/* Token list */}
+      <div className="space-y-1">
+        {failedChains.length > 0 && (
+          <div role="status" className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-white/10 p-3 text-sm text-zinc-400">
+            <span>{t('common.failedToLoad', 'Failed to load')}: {failedChains.join(', ')}</span>
+            <Button variant="glass" size="sm" onClick={() => { void refetch(); }}>{t('common.retry', 'Retry')}</Button>
+          </div>
+        )}
+        {isLoading && allTokens.length === 0 ? (
+          <div className="flex items-center justify-center py-16">
+            <Loader2 className="w-6 h-6 animate-spin text-zinc-500" />
+          </div>
+        ) : (
+          <>
+            {showAppTokens && <AppTokensRow onSend={() => setAppSendOpen(true)} />}
+            {withBalance.map(grouped => (
+              <GroupedTokenRow key={grouped.symbol} grouped={grouped} onClick={() => handleGroupedTokenClick(grouped)} price={prices[grouped.symbol]} />
+            ))}
+            {!isLoading && !withBalance.length && !failedChains.length && !showAppTokens && (
+              <p className="py-8 text-center text-sm text-zinc-400">{t(searchQuery.trim() ? 'common.noResults' : 'wallet.zeroBalance')}</p>
+            )}
+            <SubscriptionTokensRow />
+          </>
+        )}
+      </div>
+
+      {/* Import Token button */}
+      <button
+        aria-label={t('wallet.importCustomToken')}
+        onClick={() => setImportDialogOpen(true)}
+        className="w-full h-11 rounded-xl border border-white/10 bg-white/[0.04] hover:bg-white/[0.08] backdrop-blur-sm text-zinc-400 hover:text-zinc-200 transition-colors flex items-center justify-center"
+      >
+        <Plus className="w-4 h-4" />
+      </button>
+      </div>
+      </PageBody>
+
+      {/* Token Action Drawer - shows actions for grouped token */}
+      <GroupedActionDrawer
+        open={!!actionGrouped}
+        onOpenChange={v => { if (!v) setActionGrouped(null); }}
+        grouped={actionGrouped}
+        onSend={() => {
+          const g = actionGrouped;
+          setActionGrouped(null);
+          if (g) handleSmartSend(g);
+        }}
+        onReceive={() => { setActionGrouped(null); setReceiveDialogOpen(true); }}
+        onBuyCrypto={(symbol) => {
+          setActionGrouped(null);
+          setCrossChainDestSymbol(symbol);
+          setTimeout(() => setCrossChainBuyOpen(true), 200);
+        }}
+        walletAddress={walletAddress}
+      />
+
+      {appTokensOn && <AppTokenSendDialog open={appSendOpen} onOpenChange={setAppSendOpen} />}
+
+      <TradeSheet open={tradeOpen} onOpenChange={setTradeOpen} tokens={allTokens} />
+
+      {/* Send Chain Picker - only shown when sending and multiple chains have balance */}
+      <Drawer open={!!sendChainPickerGrouped} onOpenChange={v => { if (!v) setSendChainPickerGrouped(null); }}>
+        <DrawerContent column glass data-wallet-page>
+          <DrawerHeader>
+            <DrawerTitle className="text-white">
+              {t('wallet.selectChain', { symbol: tokenLabel(sendChainPickerGrouped?.symbol) })}
+            </DrawerTitle>
+          </DrawerHeader>
+          <div className="px-4 pb-6 space-y-2">
+            {sendChainPickerGrouped?.chains
+              .filter(tk => tk.balance > BigInt(0))
+              .map(token => {
+                const chainInfo = CHAIN_OPTIONS.find(c => c.id === token.chainId);
+                return (
+                  <button
+                    key={token.chainId}
+                    onClick={() => {
+                      setSendChainPickerGrouped(null);
+                      setTimeout(() => handleSend(token), 200);
+                    }}
+                    className="w-full flex items-center gap-3 p-3.5 rounded-xl bg-white/[0.06] hover:bg-white/[0.10] backdrop-blur-sm border border-white/10 transition-colors"
+                  >
+                    {chainInfo && <img src={chainInfo.icon} alt={chainInfo.name} className="w-6 h-6 rounded-md" />}
+                    <div className="text-left flex-1 min-w-0">
+                      <span className="text-sm font-medium text-white">{chainInfo?.name || _copy("copy.f68ce866a5b4", { defaultValue: "Chain {{value1}}", value1: token.chainId })}</span>
+                      <p className="text-xs text-zinc-400">{fmtBal(token.formattedBalance)} {tokenLabel(token.symbol)}</p>
+                    </div>
+                  </button>
+                );
+              })}
+          </div>
+        </DrawerContent>
+      </Drawer>
+
+      {/* Send Dialog. handleSend refuses Solana tokens, so the chainId
+          narrowing below restates at the type level a guard that already
+          holds at runtime. */}
+      <SendDialog
+        open={sendDialogOpen}
+        onOpenChange={setSendDialogOpen}
+        token={selectedToken}
+        chainId={
+          selectedToken && selectedToken.chainId !== SOLANA_MAINNET_CHAIN_ID
+            ? selectedToken.chainId
+            : BASE_CHAIN_ID
+        }
+        onSuccess={() => { setSendDialogOpen(false); }}
+        allTokens={allWithBalance}
+        onTokenChange={setSelectedToken}
+      />
+
+      {/* Receive Dialog */}
+      <Dialog open={receiveDialogOpen} onOpenChange={setReceiveDialogOpen}>
+        <DialogContent data-wallet-page className="bg-black/60 backdrop-blur-[24px] border border-white/10 shadow-2xl sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="text-white">{t('wallet.receiveTokens')}</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col items-center gap-4 py-4">
+            {solanaAddress && (
+              <div className="flex w-full rounded-xl bg-white/5 border border-white/10 p-1 gap-1">
+                {([
+                  { key: 'evm' as const, label: t('wallet.receiveEvm') },
+                  { key: 'solana' as const, label: t('wallet.solanaAddressLabel') },
+                ]).map(option => (
+                  <button
+                    key={option.key}
+                    type="button"
+                    onClick={() => setReceiveNetwork(option.key)}
+                    className={`flex-1 rounded-lg px-3 py-1.5 text-xs transition-colors ${
+                      receiveNetwork === option.key
+                        ? 'bg-white/15 text-white'
+                        : 'text-white/50 hover:text-white/80'
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            )}
+            <div data-keep-white className="bg-white rounded-2xl p-4">
+              <div className="w-48 h-48 flex items-center justify-center">
+                {receiveAddress ? (
+                  <AddressQr address={receiveAddress} />
+                ) : (
+                  <QrCode className="w-32 h-32 text-zinc-900" />
+                )}
+              </div>
+            </div>
+            <p className="text-xs text-white/40 text-center">
+              {receiveNetwork === 'solana'
+                ? t('wallet.receiveSolanaDescription')
+                : t('wallet.receiveDescription')}
+            </p>
+            <div className="w-full bg-white/5 border border-white/10 rounded-xl p-3">
+              <p className="text-xs text-white/60 font-mono break-all text-center">{receiveAddress}</p>
+            </div>
+            <Button variant="glass" className="w-full rounded-xl" onClick={() => handleCopy(receiveAddress)}>
+              {copied ? <Check className="w-4 h-4 mr-2 text-emerald-400" /> : <Copy className="w-4 h-4 mr-2" />}
+              {t('wallet.copyAddress')}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Import Token Dialog */}
+      <ImportTokenDialog
+        open={importDialogOpen}
+        onOpenChange={setImportDialogOpen}
+        chainId={importChainId}
+        onImported={() => { setImportDialogOpen(false); }}
+      />
+
+      <CrossChainDepositDrawer open={crossChainBuyOpen} onOpenChange={setCrossChainBuyOpen} destinationSymbol={crossChainDestSymbol} />
+    </div>
+  );
+}
+
+/* ─── Grouped Token Row ─── */
+function GroupedTokenRow({ grouped, onClick, price }: { grouped: GroupedToken; onClick: () => void; price?: number }) {
+  const { t } = useTranslation();
+  const icon = TOKEN_ICONS[grouped.symbol] || grouped.logo;
+  const hasBalance = grouped.totalBalance > BigInt(0);
+
+  const fmtPrice = (p?: number) => {
+    if (!p || p === 0) return '';
+    if (p >= 1000) return `$${p.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    if (p >= 1) return `$${p.toFixed(2)}`;
+    if (p >= 0.01) return `$${p.toFixed(4)}`;
+    return `$${p.toFixed(6)}`;
+  };
+
+  const usdValue = price && price > 0 ? parseFloat(grouped.totalFormattedBalance) * price : 0;
+  const fmtUsd = (v: number) => {
+    if (!v || isNaN(v) || v === 0) return '';
+    if (v < 0.01) return '<$0.01';
+    return `$${v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  };
+
+  return (
+    <motion.div
+      layout
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -8 }}
+      className="flex items-center justify-between p-3 rounded-xl hover:bg-zinc-900/60 transition-colors group cursor-pointer"
+      onClick={onClick}
+    >
+      <div className="flex items-center gap-3 min-w-0">
+        {icon ? (
+          <img src={icon} alt={tokenLabel(grouped.symbol)} className="w-9 h-9 rounded-full shrink-0" />
+        ) : (
+          <div className="w-9 h-9 rounded-full bg-zinc-800 flex items-center justify-center shrink-0">
+            <span className="text-xs font-bold text-zinc-400">{grouped.symbol.slice(0, 2)}</span>
+          </div>
+        )}
+        <div className="min-w-0">
+          <div className="flex items-center gap-1.5">
+            <span className="text-sm font-medium text-white">{tokenLabel(grouped.symbol)}</span>
+            {grouped.isCustom && <span className="text-[10px] bg-violet-500/20 text-violet-400 px-1.5 py-0.5 rounded">{t('wallet.custom')}</span>}
+          </div>
+          <span className="text-xs text-zinc-500 truncate block">{fmtPrice(price) || grouped.name}</span>
+        </div>
+      </div>
+      <div className="text-right">
+        <span className={`text-sm font-medium ${hasBalance ? 'text-white' : 'text-zinc-500'}`}>{fmtBal(grouped.totalFormattedBalance)}</span>
+        {usdValue > 0 && (
+          <span className="text-xs text-zinc-500 block">{fmtUsd(usdValue)}</span>
+        )}
+      </div>
+    </motion.div>
+  );
+}
+
+/* ─── Grouped Action Drawer ─── */
+/**
+ * Real, scannable QR of the wallet address. The Receive dialog previously
+ * rendered a decorative lucide QrCode icon — scanning it yielded nothing.
+ */
+function AddressQr({ address }: { address: string }) {
+  const { t: _copy } = _useCopy();
+  const svg = useMemo(() => {
+    const qr = qrcode(0, 'M');
+    qr.addData(address);
+    qr.make();
+    return qr.createSvgTag({ cellSize: 4, margin: 0, scalable: true });
+  }, [address]);
+  return (
+    <div
+      aria-label={_copy("copy.1132ea896089", { defaultValue: "QR code for wallet address {{value1}}", value1: address })}
+      className="w-full h-full [&>svg]:w-full [&>svg]:h-full"
+      dangerouslySetInnerHTML={{ __html: svg }}
+    />
+  );
+}
+
+function GroupedActionDrawer({ open, onOpenChange, grouped, onSend, onReceive, onBuyCrypto, walletAddress }: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  grouped: GroupedToken | null;
+  onSend: () => void;
+  onReceive: () => void;
+  onBuyCrypto: (symbol: string) => void;
+  walletAddress?: string;
+}) {
+  const { t: _copy } = _useCopy();
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const [buyMethodOpen, setBuyMethodOpen] = useState(false);
+  if (!grouped) return null;
+  const icon = TOKEN_ICONS[grouped.symbol] || grouped.logo;
+  const hasBalance = grouped.totalBalance > BigInt(0);
+  return (
+    <>
+    <Drawer open={open} onOpenChange={onOpenChange}>
+      <DrawerContent column glass data-wallet-page>
+        <DrawerHeader>
+          <DrawerTitle className="flex items-center gap-3 text-white">
+            {icon ? (
+              <img src={icon} alt={tokenLabel(grouped.symbol)} className="w-8 h-8 rounded-full" />
+            ) : (
+              <div className="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center">
+                <span className="text-xs font-bold text-zinc-400">{grouped.symbol.slice(0, 2)}</span>
+              </div>
+            )}
+            <div>
+              <span className="block">{tokenLabel(grouped.symbol)}</span>
+              <span className="text-xs text-zinc-500 font-normal">
+                {fmtBal(grouped.totalFormattedBalance)} {tokenLabel(grouped.symbol)}
+              </span>
+            </div>
+          </DrawerTitle>
+        </DrawerHeader>
+        <div className="grid grid-cols-3 gap-2 px-4 pb-6">
+          <Button
+            variant="glass"
+            className="flex-col h-auto py-4 gap-2 rounded-xl"
+            onClick={onSend}
+            disabled={!hasBalance}
+          >
+            <Send className="w-5 h-5" />
+            <span className="text-xs">{t('wallet.send')}</span>
+          </Button>
+          <Button
+            variant="glass"
+            className="flex-col h-auto py-4 gap-2 rounded-xl"
+            onClick={onReceive}
+          >
+            <ArrowDownToLine className="w-5 h-5" />
+            <span className="text-xs">{t('wallet.receive')}</span>
+          </Button>
+          <Button
+            variant="glass"
+            className="flex-col h-auto py-4 gap-2 rounded-xl"
+            onClick={() => {
+              if (grouped.symbol === 'DHB') {
+                onOpenChange(false);
+                navigate('/app/buy');
+              } else {
+                setBuyMethodOpen(true);
+              }
+            }}
+          >
+            <ShoppingCart className="w-5 h-5" />
+            <span className="text-xs">{t('wallet.buy')}</span>
+          </Button>
+        </div>
+      </DrawerContent>
+    </Drawer>
+
+      {/* Buy Method Sub-Drawer */}
+      <Drawer open={buyMethodOpen} onOpenChange={setBuyMethodOpen}>
+        <DrawerContent column glass hideHandle={false} data-wallet-page>
+          <div className="p-5 pb-8 space-y-2">
+            <h3 className="text-white font-semibold text-base mb-4">{_copy("copy.e8c84f1c82bf", { defaultValue: "Buy " })}{tokenLabel(grouped?.symbol)}</h3>
+            {grouped?.symbol !== 'DHB' && (
+              <>
+                {(['ETH', 'USDT', 'USDC'].includes(grouped?.symbol || '')) && walletAddress ? (
+                  <button
+                    onClick={() => {
+                      const url = `https://pay.coinbase.com/buy/select-asset?appId=default&addresses=${encodeURIComponent(JSON.stringify({ [walletAddress]: ['base'] }))}&assets=${encodeURIComponent(JSON.stringify([grouped!.symbol]))}`;
+                      window.open(url, '_blank');
+                      setBuyMethodOpen(false);
+                      onOpenChange(false);
+                    }}
+                    className="w-full flex items-center gap-3 p-3.5 rounded-xl bg-white/[0.06] hover:bg-white/[0.10] backdrop-blur-sm border border-white/10 transition-colors"
+                  >
+                    <CreditCard className="w-5 h-5 text-white/70" />
+                    <div className="text-left">
+                      <span className="text-sm font-medium text-white">{_copy("copy.a0027ccd58bf", { defaultValue: "Buy with Card" })}</span>
+                      <p className="text-xs text-white/40">{_copy("copy.911c67ed8f19", { defaultValue: "Purchase via Coinbase — Visa, Mastercard, Apple Pay" })}</p>
+                    </div>
+                  </button>
+                ) : (
+                  <button
+                    disabled
+                    className="w-full flex items-center gap-3 p-3.5 rounded-xl bg-white/[0.06] border border-white/10 opacity-50 cursor-not-allowed"
+                  >
+                    <CreditCard className="w-5 h-5 text-white/70" />
+                    <div className="text-left flex-1">
+                      <span className="text-sm font-medium text-white">{_copy("copy.a0027ccd58bf", { defaultValue: "Buy with Card" })}</span>
+                      <p className="text-xs text-white/40">{_copy("copy.20cc4ce111fa", { defaultValue: "Purchase using Visa, Mastercard, Apple Pay" })}</p>
+                    </div>
+                    <span className="text-[10px] text-white/30 font-medium bg-white/[0.06] px-2 py-0.5 rounded">{_copy("copy.4f7d64017689", { defaultValue: "Coming soon" })}</span>
+                  </button>
+                )}
+                <button
+                  onClick={() => {
+                    setBuyMethodOpen(false);
+                    onOpenChange(false);
+                    if (grouped) {
+                      onBuyCrypto(grouped.symbol);
+                    }
+                  }}
+                  className="w-full flex items-center gap-3 p-3.5 rounded-xl bg-white/[0.06] hover:bg-white/[0.10] backdrop-blur-sm border border-white/10 transition-colors"
+                >
+                  <Wallet className="w-5 h-5 text-white/70" />
+                  <div className="text-left">
+                    <span className="text-sm font-medium text-white">{_copy("copy.69cda82c3af5", { defaultValue: "Buy with Crypto" })}</span>
+                    <p className="text-xs text-white/40">{_copy("copy.4be8f5f56303", { defaultValue: "BTC, SOL, ETH, USDC & more from any chain" })}</p>
+                  </div>
+                </button>
+              </>
+            )}
+          </div>
+        </DrawerContent>
+      </Drawer>
+    </>
+  );
+}
+
+/* ─── Send Dialog ─── */
+function SendDialog({ open, onOpenChange, token, chainId, onSuccess, allTokens, onTokenChange }: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  token: WalletToken | null;
+  chainId: ChainId;
+  onSuccess: () => void;
+  allTokens: WalletToken[];
+  onTokenChange: (t: WalletToken) => void;
+}) {
+  const { t: _copy } = _useCopy();
+  const { t } = useTranslation();
+  const [toAddress, setToAddress] = useState('');
+  const [amount, setAmount] = useSurfaceDraft("pages/app/FullWalletPage.tsx:amount", '');
+  const [sending, setSending] = useState(false);
+  const [usernameQuery, setUsernameQuery] = useSurfaceDraft("src/pages/app/FullWalletPage.tsx:usernameQuery", '');
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [searching, setSearching] = useState(false);
+  const [resolvedUser, setResolvedUser] = useState<{ username: string; avatar?: string; address: string } | null>(null);
+
+  const handleUsernameSearch = useCallback(async (query: string) => {
+    setUsernameQuery(query);
+    setResolvedUser(null);
+    if (query.length < 2) {
+      setSearchResults([]);
+      return;
+    }
+    setSearching(true);
+    try {
+      const { searchUsers } = await import('@/lib/api/dehub/users');
+      const res = await searchUsers({ q: query, limit: 5 });
+      const items = res?.data || (Array.isArray(res) ? res : []);
+      setSearchResults(items.filter((u: any) => u.address || u.wallet_address));
+    } catch {
+      setSearchResults([]);
+    } finally {
+      setSearching(false);
+    }
+  }, [setUsernameQuery]);
+
+  const selectUser = (user: any) => {
+    const addr = user.address || user.wallet_address || '';
+    const name = user.username || user.displayName || user.display_name || '';
+    const avatar = user.avatarImageUrl || user.avatarUrl || user.avatar_url || '';
+    setToAddress(addr);
+    setResolvedUser({ username: name, avatar, address: addr });
+    setUsernameQuery.complete(usernameQuery, '');
+    setSearchResults([]);
+  };
+
+  const clearResolvedUser = () => {
+    setResolvedUser(null);
+    setToAddress('');
+  };
+
+  const handleSend = async () => {
+    if (!token || !toAddress.trim() || !amount.trim()) return;
+    const trimmedTo = toAddress.trim();
+    if (!/^0x[a-fA-F0-9]{40}$/.test(trimmedTo)) {
+      toast.error(t('wallet.invalidAddress'));
+      return;
+    }
+    const numAmount = parseFloat(amount);
+    if (isNaN(numAmount) || numAmount <= 0) {
+      toast.error(t('wallet.invalidAmount'));
+      return;
+    }
+    const maxBal = tokenAmount(token);
+    if (numAmount > maxBal) {
+      toast.error(t('wallet.insufficientBalance', { symbol: tokenLabel(token.symbol) }));
+      return;
+    }
+
+    setSending(true);
+    try {
+      await switchChain(chainId);
+      
+      let result;
+      if (token.isNative) {
+        result = await sendNativeToken(trimmedTo, amount, token.decimals, chainId);
+      } else {
+        result = await sendERC20Token(token.address, trimmedTo, amount, token.decimals, chainId);
+      }
+
+      toast.success(t('wallet.sent', { amount, symbol: tokenLabel(token.symbol) }), {
+        description: `TX: ${result.hash.slice(0, 10)}...`,
+        action: {
+          label: t('wallet.view'),
+          onClick: () => {
+            const explorer = CHAIN_CONFIGS[chainId]?.explorerUrl;
+            if (explorer) window.open(`${explorer}/tx/${result.hash}`, '_blank');
+          },
+        },
+      });
+      setToAddress('');
+      setAmount.complete(amount, '');
+      setResolvedUser(null);
+      onSuccess();
+    } catch (err: any) {
+      // A locked wallet stops the send before it starts, and AuthProvider is
+      // already showing the unlock sheet plus its own toast. "Transaction
+      // failed" underneath that sheet is simply untrue.
+      if (!isWalletLockedError(err)) {
+        toast.error(err.message || t('wallet.transactionFailed'));
+      }
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const handleMax = async () => {
+    if (!token) return;
+    const { formatUnits } = await import('ethers');
+    setAmount(formatUnits(token.balance, token.decimals));
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={v => { if (!sending) onOpenChange(v); }}>
+      <DialogContent data-wallet-page className="bg-black/60 backdrop-blur-[24px] backdrop-saturate-[180%] border-white/10 sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle className="text-white">{t('wallet.sendToken', { symbol: token?.symbol ? tokenLabel(token.symbol) : 'Token' })}</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4 pt-2">
+          {/* Token selector */}
+          {allTokens.length > 1 && (
+            <div className="flex gap-2 overflow-x-auto pb-1">
+              {allTokens.map(tk => {
+                const icon = TOKEN_ICONS[tk.symbol] || tk.logo;
+                return (
+                  <button
+                    key={tk.address}
+                    onClick={() => onTokenChange(tk)}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all shrink-0 ${
+                      token?.address === tk.address ? 'bg-white/15 text-white' : 'bg-white/5 text-zinc-400 hover:text-white'
+                    }`}
+                  >
+                    {icon ? <img src={icon} alt={tokenLabel(tk.symbol)} className="w-4 h-4 rounded-full" /> : null}
+                    {tokenLabel(tk.symbol)}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Recipient: username search OR direct address */}
+          <div className="space-y-2">
+            <label className="text-sm text-zinc-400">{t('wallet.recipientAddress')}</label>
+            
+            {resolvedUser ? (
+              <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-lg px-3 py-2">
+                {resolvedUser.avatar ? (
+                  <img src={resolvedUser.avatar} alt="" className="w-6 h-6 rounded" />
+                ) : (
+                  <div className="w-6 h-6 rounded bg-white/10 flex items-center justify-center">
+                    <User className="w-3 h-3 text-zinc-400" />
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <p className="text-white text-sm font-medium truncate">@{resolvedUser.username}</p>
+                  <p className="text-zinc-500 text-xs font-mono truncate">{resolvedUser.address.slice(0, 10)}...{resolvedUser.address.slice(-6)}</p>
+                </div>
+                <button onClick={clearResolvedUser} className="text-zinc-500 hover:text-white text-xs">✕</button>
+              </div>
+            ) : (
+              <div className="relative">
+                <Input
+                  placeholder={_copy("copy.a686767dcb39", { defaultValue: "@username or 0x..." })}
+                  value={usernameQuery || toAddress}
+                  onChange={e => {
+                    const val = e.target.value;
+                    if (val.startsWith('0x')) {
+                      setToAddress(val);
+                      setUsernameQuery.complete(usernameQuery, '');
+                      setSearchResults([]);
+                    } else {
+                      setToAddress('');
+                      handleUsernameSearch(val);
+                    }
+                  }}
+                  className="bg-white/5 border-white/10 text-white font-mono text-sm"
+                />
+                {searching && (
+                  <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 animate-spin text-zinc-500" />
+                )}
+                {searchResults.length > 0 && (
+                  <div data-glass-menu className="absolute z-50 top-full mt-1 left-0 right-0 bg-zinc-900 border border-white/10 rounded-lg overflow-hidden shadow-xl">
+                    {searchResults.map((user: any, i: number) => {
+                      const avatar = user.avatarImageUrl || user.avatarUrl || user.avatar_url;
+                      const name = user.username || user.displayName || user.display_name;
+                      const addr = user.address || user.wallet_address || '';
+                      return (
+                        <button
+                          key={addr || i}
+                          onClick={() => selectUser(user)}
+                          className="w-full flex items-center gap-2 px-3 py-2 hover:bg-white/10 transition-colors text-left"
+                        >
+                          {avatar ? (
+                            <img src={avatar} alt="" className="w-7 h-7 rounded-md" />
+                          ) : (
+                            <div className="w-7 h-7 rounded-md bg-white/10 flex items-center justify-center">
+                              <User className="w-3.5 h-3.5 text-zinc-400" />
+                            </div>
+                          )}
+                          <div className="min-w-0 flex-1">
+                            <p className="text-white text-sm truncate">@{name}</p>
+                            <p className="text-zinc-500 text-xs font-mono truncate">{addr.slice(0, 8)}...{addr.slice(-4)}</p>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <label className="text-sm text-zinc-400">{t('wallet.amount')}</label>
+              {token && (
+                <button onClick={handleMax} className="text-xs text-white/60 hover:text-white transition-colors">{_copy("copy.2b3653ddece2", { defaultValue: "Max: " })}{fmtBal(token.formattedBalance)}
+                </button>
+              )}
+            </div>
+            <Input
+              type="number"
+              placeholder="0.00"
+              value={amount}
+              onChange={e => setAmount(e.target.value)}
+              className="bg-white/5 border-white/10 text-white"
+              step="any"
+            />
+          </div>
+
+          <Button
+            variant="glass"
+            className="w-full rounded-xl"
+            disabled={!toAddress.trim() || !amount.trim() || sending}
+            onClick={handleSend}
+          >
+            {sending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Send className="w-4 h-4 mr-2" />}
+            {sending ? t('wallet.sending') : t('wallet.sendToken', { symbol: tokenLabel(token?.symbol) })}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+/* ─── Import Token Drawer ─── */
+function ImportTokenDialog({ open, onOpenChange, chainId: initialChainId, onImported }: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  chainId: WalletChainId;
+  onImported: () => void;
+}) {
+  const { t: _copy } = _useCopy();
+  const { t } = useTranslation();
+  const { walletAddress } = useAuth();
+  const { solana: solanaAddress } = useWalletAddresses();
+  const [chainId, setChainId] = useState<WalletChainId>(initialChainId);
+  const [address, setAddress] = useSurfaceDraft("pages/app/FullWalletPage.tsx:address", '');
+  const [loading, setLoading] = useState(false);
+  const [tokenInfo, setTokenInfo] = useState<{ name: string; symbol: string; decimals: number } | null>(null);
+
+  // Discover all wallet tokens via Alchemy
+  const selectedAddress = chainId === SOLANA_MAINNET_CHAIN_ID ? solanaAddress : walletAddress;
+  const selectedChain = CHAIN_OPTIONS.find((chain) => chain.id === chainId);
+  const isSolana = chainId === SOLANA_MAINNET_CHAIN_ID;
+
+  const { data: discoveredTokens = [], isLoading: discovering } = useQuery({
+    queryKey: ['wallet-discover', selectedAddress?.toLowerCase(), chainId],
+    queryFn: async () => {
+      if (isSolana) {
+        const { getSolanaTokenBalances } = await import('@/lib/wallet/solana-tokens');
+        return getSolanaTokenBalances(selectedAddress, chainId);
+      }
+      const { discoverAlchemyTokens } = await import('@/lib/wallet/alchemy-tokens');
+      // Get ALL tokens (including defaults) for display
+      const { getAllTokenBalances } = await import('@/lib/wallet/tokens');
+      // Independent lookups — run in parallel
+      const [allKnown, discovered] = await Promise.all([
+        getAllTokenBalances(selectedAddress!, chainId),
+        discoverAlchemyTokens(selectedAddress!, chainId),
+      ]);
+      // Merge: known tokens first, then discovered (no duplicates)
+      const knownAddrs = new Set(allKnown.map(t => t.address.toLowerCase()));
+      const extra = discovered.filter(t => !knownAddrs.has(t.address.toLowerCase()));
+      return [...allKnown.filter(t => !t.isNative && t.balance > BigInt(0)), ...extra];
+    },
+    enabled: !!selectedAddress && open,
+    staleTime: 5 * 60_000,
+  });
+
+  const handleLookup = async () => {
+    const trimmed = address.trim();
+    const valid = isSolana
+      ? /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(trimmed)
+      : /^0x[a-fA-F0-9]{40}$/.test(trimmed);
+    if (!valid) {
+      toast.error(isSolana ? _copy("copy.c2291a9f191a", { defaultValue: "Enter a valid Solana mint address" }) : t('wallet.invalidContractAddress'));
+      return;
+    }
+    setLoading(true);
+    try {
+      const info = isSolana
+        ? await (await import('@/lib/wallet/solana-tokens')).getSolanaTokenMetadata(trimmed, chainId)
+        : await getERC20Metadata(trimmed, chainId);
+      setTokenInfo(info);
+    } catch {
+      toast.error(t('wallet.cannotReadContract'));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleImport = () => {
+    if (!tokenInfo) return;
+    saveCustomToken(chainId, { address: address.trim(), ...tokenInfo });
+    toast.success(t('wallet.imported', { symbol: tokenLabel(tokenInfo.symbol) }));
+    setAddress.complete(address, '');
+    setTokenInfo(null);
+    onImported();
+  };
+
+  const handleQuickImport = (token: WalletToken) => {
+    saveCustomToken(chainId, {
+      address: token.address,
+      symbol: token.symbol,
+      name: token.name,
+      decimals: token.decimals,
+    });
+    toast.success(t('wallet.imported', { symbol: tokenLabel(token.symbol) }));
+    onImported();
+  };
+
+  return (
+    <Drawer open={open} onOpenChange={v => { onOpenChange(v); if (!v) { setTokenInfo(null); } }}>
+      <DrawerContent column glass hideHandle={false} data-wallet-page>
+        <div className="p-5 pb-8 max-h-[85vh] overflow-y-auto">
+          <DrawerHeader className="p-0 mb-4">
+            <DrawerTitle className="text-white">{t('wallet.importCustomToken')}</DrawerTitle>
+          </DrawerHeader>
+          <div className="space-y-4">
+            {/* Chain selector for import */}
+            <div className="flex gap-1.5">
+              {CHAIN_OPTIONS.map(chain => (
+                <button
+                  key={chain.id}
+                  onClick={() => { setChainId(chain.id); setTokenInfo(null); }}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                    chainId === chain.id ? 'bg-white/15 text-white border border-white/20' : 'bg-white/5 text-zinc-400 hover:text-zinc-200 hover:bg-white/10 border border-white/5'
+                  }`}
+                >
+                  <img src={chain.icon} alt={chain.name} className="w-4 h-4 rounded-sm" />
+                  {chain.name}
+                </button>
+              ))}
+            </div>
+
+            <p className="text-xs text-zinc-400">{t('wallet.importDescription', { network: selectedChain?.name || CHAIN_CONFIGS[chainId as ChainId]?.name || 'this network' })}</p>
+            <div className="space-y-2">
+              <label className="text-sm text-zinc-400">{isSolana ? _copy("copy.15e17712534d", { defaultValue: "Token mint address" }) : t('wallet.tokenContractAddress')}</label>
+              <Input
+                placeholder={isSolana ? _copy("copy.0aeda7534815", { defaultValue: "Solana mint address" }) : '0x...'}
+                value={address}
+                onChange={e => { setAddress(e.target.value); setTokenInfo(null); }}
+                className="bg-white/5 border-white/10 text-white font-mono text-sm placeholder:text-zinc-500"
+              />
+            </div>
+
+            {!tokenInfo ? (
+              <Button variant="glass" className="w-full rounded-xl" onClick={handleLookup} disabled={loading || !address.trim()}>
+                {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Search className="w-4 h-4 mr-2" />}
+                {loading ? t('wallet.lookingUp') : t('wallet.lookUpToken')}
+              </Button>
+            ) : (
+              <>
+                <div className="bg-white/5 border border-white/10 rounded-xl p-4 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-zinc-400">{t('wallet.name')}</span>
+                    <span className="text-sm text-white font-medium">{tokenInfo.name}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-zinc-400">{t('wallet.symbol')}</span>
+                    <span className="text-sm text-white font-medium">{tokenLabel(tokenInfo.symbol)}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-zinc-400">{t('wallet.decimals')}</span>
+                    <span className="text-sm text-white font-medium">{tokenInfo.decimals}</span>
+                  </div>
+                </div>
+                <Button variant="glass" className="w-full rounded-xl" onClick={handleImport}>
+                  <Plus className="w-4 h-4 mr-2" />
+                  {t('wallet.importToken', { symbol: tokenLabel(tokenInfo.symbol) })}
+                </Button>
+              </>
+            )}
+
+            {/* Discovered wallet tokens */}
+            <div className="pt-2 border-t border-white/10">
+              <p className="text-xs text-zinc-400 mb-3">{_copy("copy.0730ee08cd26", { defaultValue: "Your tokens on " })}{selectedChain?.name || CHAIN_CONFIGS[chainId as ChainId]?.name || _copy("copy.b4c1cebc35f6", { defaultValue: "this network" })}</p>
+              {discovering ? (
+                <div className="flex items-center justify-center py-6">
+                  <Loader2 className="w-5 h-5 animate-spin text-zinc-500" />
+                </div>
+              ) : discoveredTokens.length > 0 ? (
+                <div className="space-y-1 max-h-[280px] overflow-y-auto">
+                  {discoveredTokens.map(token => (
+                    <div
+                      key={token.address}
+                      className="flex items-center justify-between px-3 py-2.5 rounded-xl hover:bg-white/5 transition-colors group"
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        {token.logo ? (
+                          <img src={token.logo} alt={tokenLabel(token.symbol)} className="w-7 h-7 rounded-full" />
+                        ) : (
+                          <div className="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center text-[10px] text-zinc-400 font-bold">
+                            {token.symbol.slice(0, 2)}
+                          </div>
+                        )}
+                        <div className="min-w-0">
+                          <p className="text-sm text-white font-medium truncate">{tokenLabel(token.symbol)}</p>
+                          <p className="text-[11px] text-zinc-500 truncate">{token.name}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-zinc-400">{token.formattedBalance}</span>
+                        {!token.isCustom && (
+                          <button
+                            onClick={() => handleQuickImport(token)}
+                            className="opacity-0 group-hover:opacity-100 text-xs text-emerald-400 hover:text-emerald-300 transition-all"
+                          >
+                            <Plus className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <AppState icon="search" title={_copy("copy.6cd980a3f9e2", { defaultValue: "No tokens found" })} kind="search-empty" size="compact" />
+              )}
+            </div>
+          </div>
+        </div>
+      </DrawerContent>
+    </Drawer>
+  );
+}

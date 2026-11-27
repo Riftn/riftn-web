@@ -1,0 +1,2343 @@
+import { BoostedPostContext } from '@/components/app/cards/boosted-post';
+import { renamedCategory } from '@/lib/category-names';
+import { WindowedFeedItem } from '@/components/app/feeds/WindowedFeedItem';
+import { RetainedPostSurface } from '@/components/app/feeds/RetainedPostSurface';
+import { useTranslation as _useCopy } from 'react-i18next';
+import { translateCopy as _translateCopy } from '@/i18n/copy';
+import { useSurfaceDraft } from '@/hooks/use-surface-draft';
+import { useFirstInteraction } from '@/hooks/use-boot-settled';
+import { useIsDesktopViewport } from '@/hooks/use-is-desktop';
+import { isFirstVisibleFeedCard } from '@/lib/feed-first-card';
+import { visibleFeedTokenIds } from '@/lib/feed-visible-counts';
+import { isShortsPhoto, shortsPhotoMedia } from '@/lib/shorts-photos';
+/**
+ * Home Feed Component
+ * ===================
+ * Mixed content feed with custom content ordering pattern.
+ * Fetches videos, images, and text posts separately then interleaves
+ * according to a 50-item repeating pattern.
+ * 
+ * @module components/app/feeds/HomeFeed
+ */
+
+import { lazy, Suspense, useEffect, useLayoutEffect, useRef, useMemo, useCallback, useState, useDeferredValue, startTransition, type ReactNode, type ReactElement } from 'react';
+import { createPortal } from 'react-dom';
+import { getDeletedPostIds } from '@/lib/deleted-posts-store';
+import { useTranslation as useI18n } from 'react-i18next';
+import { useAutoRetryFeed } from '@/hooks/use-auto-retry-feed';
+import { useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { flattenFeedPages } from '@/lib/feed-pages';
+import { usePrefetchLinkPreviews } from '@/hooks/use-prefetch-link-previews';
+import { isHomeFeedRoute } from '@/lib/home-routes';
+import { shortsBatchCount } from '@/lib/shorts-rotation';
+import { homeReelBatchIndex, homeSuggestedAfter } from '@/lib/feed-carousel-layout';
+import { useShortsRotation, type ShortsHistoryStore } from '@/hooks/use-shorts-rotation';
+
+const shortsHistoryStore: ShortsHistoryStore = {
+  read: async key => localStorage.getItem(key),
+  write: async (key, value) => { localStorage.setItem(key, value); },
+};
+import RefreshCw from "@/components/ui/cut-icons/refresh";
+import Radio from "@/components/ui/cut-icons/live";
+
+import ChevronRight from "@/components/ui/cut-icons/next";
+import { ThemedIcon } from '@/components/app/war/WarHudIcon';
+import { AppState } from '@/components/app/AppState';
+import { FeedBodySkeleton } from '@/components/app/PageSkeletons';
+import { FeedCardSkeletonList } from '@/components/app/cards/FeedCardSkeleton';
+import { FeedFilterLoader } from '@/components/app/feeds/FeedFilterLoader';
+import { useFeedFilterTransition } from '@/hooks/use-feed-filter-transition';
+import { useFeedIslandPortal } from '@/lib/feed-island-portal';
+import { useAppTheme } from '@/contexts/ThemeContext';
+import { NewPostsBead, FEED_DRAWER_HEIGHT, type FeedDrawerFilters } from '@/components/app/navigation/NewPostsBead';
+import { feedDrawerClosed, feedDrawerOpen, feedDrawerExit, feedDrawerTransition } from '@/components/app/navigation/feed-drawer-motion';
+import { useMediaQuery } from '@/hooks/use-media-query';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import { cn } from '@/lib/utils';
+import { useSidebarCollapse } from '@/contexts/SidebarCollapseContext';
+import { useShortsEnabled } from '@/contexts/ShortsEnabledContext';
+import { GlassFilterRow } from '@/components/app/feeds/GlassFilterRow';
+import { toast } from 'sonner';
+import { 
+  SORT_OPTIONS, 
+  DATE_FILTER_OPTIONS, 
+  CONTENT_TYPE_FILTERS, 
+  POST_TYPE_FILTERS, 
+  formatCount, 
+  formatViews, 
+  formatDuration, 
+  formatTimeAgo, 
+  CONTENT_PATTERN,
+  interleaveByPattern,
+  
+  type SortOption, 
+  type DateFilterOption, 
+  type ContentTypeFilters, 
+  type PostTypeFilterValue,
+  type HomePostTypeValue,
+  namedFeedFor,
+  homeApiPostType,
+  toHomePostType,
+  } from '@/lib/feed-utils';
+import { NamedFeedsRow } from './NamedFeedsRow';
+  import { getPostAllowanceForBadge } from '@/lib/post-quota';
+import { resolveViewCount } from '@/lib/engagement';
+
+// Card components
+import { PostCard } from '@/components/app/cards/PostCard';
+import { VideoCard } from '@/components/app/cards/VideoCard';
+import { ImageCard } from '@/components/app/cards/ImageCard';
+import { ShortsReel } from '@/components/app/cards/ShortsReel';
+import { LiveCard } from '@/components/app/cards/LiveCard';
+import { MasonrySegment } from '@/components/app/feeds/MasonrySegment';
+
+
+import { 
+  HOME_FEED_PAGE_SIZE,
+  useUnifiedFeed, 
+  useNewPostsSignal,
+  mapToVideoItem, 
+  mapToImagePost, 
+  mapToTextPost,
+  type UnifiedFeedItem,
+} from '@/hooks/use-unified-feed';
+import { useDeHubLive, DEFAULT_DEHUB_LIVE_QUERY_OPTIONS, mapApiLiveStreamToLocal } from '@/hooks/use-dehub-feed';
+import { scrollDocumentTo } from '@/lib/document-scroll';
+import { holdPostLanding, isPostLandingWaiting, onPostLandingBegin, releasePostLanding, runPostLanding, takePostLanding } from '@/lib/post-landing';
+import { usePersistedFeedFilter, usePersistedContentFilters, clearPersistedFeedFilters } from '@/hooks/use-persisted-feed-filter';
+import { getMediaUrl, getNFTInfo, getCategories } from '@/lib/api/dehub';
+import { useBoostQueue } from '@/hooks/use-superpowers';
+import type { DeHubCategory } from '@/lib/api/dehub';
+import { getCuratedCarouselStations, type RadioStation } from '@/lib/api/radio-browser';
+import { buildAvatarUrl, buildImageUrl, buildVideoUrl, buildHlsUrl, buildFeedImageUrls } from '@/lib/media-url';
+import { useAuth } from '@/contexts/AuthContext';
+import { useKidsModeLock } from '@/hooks/use-kids-mode';
+import { useHideWatched, useWatchedVideoIds } from '@/hooks/use-watched-videos';
+import { useFollowGroupList } from '@/lib/follow-groups';
+import { AD_INTERVALS, useAdLoad } from '@/lib/ad-load';
+import { useOptimisticPosts } from '@/hooks/use-optimistic-posts';
+import { SwipeableCarousel } from '@/components/app/SwipeableCarousel';
+import { HomeShortcuts } from '../navigation/HomeShortcuts';
+import { StoryShelf } from '@/components/app/stories/StoryShelf';
+import { PromptFlowModalLazy as PromptFlowModal } from '@/components/app/feeds/PromptFlowModalLazy';
+
+import type { VideoItem, ImagePost, TextPost, ShortVideo } from '@/types/feed.types';
+import type { ServedAd } from '@/lib/ads/povr';
+import { useServedAds } from '@/hooks/use-ad-serving';
+import { SponsoredAdCard } from '@/components/app/cards/SponsoredAdCard';
+import { toStoryboard } from '@/lib/storyboard';
+import { storedVideoAspect } from '@/lib/video-aspect';
+import { useFollowTag } from './FollowTagBar';
+import type { FeedFilterLineItem } from './FeedFilterLine';
+// Inside the filter panel: kept off the boot path.
+const FeedPresetsRow = lazy(() => import('./FeedFilterLine').then((m) => ({ default: m.FeedPresetsRow })));
+const RadioStationCard = lazy(() => import('@/components/app/radio/RadioStationCard').then((m) => ({ default: m.RadioStationCard })));
+const MobileWhoToFollowCarousel = lazy(() => import('@/components/app/mobile/MobileWhoToFollowCarousel').then((m) => ({ default: m.MobileWhoToFollowCarousel })));
+const NewMembersCarousel = lazy(() => import('@/components/app/NewMembersCarousel').then((m) => ({ default: m.NewMembersCarousel })));
+const LeaderboardCarousel = lazy(() => import('@/components/app/feeds/LeaderboardCarousel'));
+import {
+  FEED_PRESETS_CHANGED_EVENT,
+  deleteFeedPreset,
+  presetMatches,
+  readFeedPresets,
+  saveFeedPreset,
+  type FeedFilterPreset,
+  type PresetAccess,
+} from '@/lib/feed-presets';
+import { orderByInterests, useFeedInterests } from '@/lib/feed-interests';
+
+// ============================================================================
+// TYPES & CONSTANTS
+// ============================================================================
+
+type FeedItemType =
+  | { type: 'post'; data: TextPost }
+  | { type: 'video'; data: VideoItem }
+  | { type: 'image'; data: ImagePost }
+  | { type: 'shorts'; data: ShortVideo[] }
+  | { type: 'ad'; data: ServedAd };
+
+// Start the next page about three cards before the end. At 600px a fast
+// wheel/trackpad gesture could reach the document bottom before the request
+// completed, so later wheel deltas had nowhere to go; 2400px with 20-post pages
+// pulled the next page in almost as soon as the first had painted.
+const INFINITE_SCROLL_PREFETCH_MARGIN = '1500px 0px';
+
+const SCROLL_REEL_FETCH_LIMIT = 50;
+/** First-render height of a carousel before it has been measured. */
+function insertEstimate(key: string): number {
+  if (key.startsWith('shorts-')) return 300;
+  if (key === 'live-now') return 260;
+  return 220;
+}
+const RADIO_INSERT_AFTER = 8;
+const LEADERBOARD_INSERT_AFTER_LIVE_OFFSET = 10;
+
+/** Default home sort is chronological latest; "For You" remains available as a filter option. */
+const DEFAULT_HOME_SORT = SORT_OPTIONS.find(o => o.value === 'latest') || SORT_OPTIONS[0];
+
+/** Insert an all-time most-liked post every N items in trending feed */
+const CLASSIC_INSERT_INTERVAL = 6;
+
+interface HomeFeedProps {
+  active?: boolean;
+  shuffleKey: number;
+  isRefreshing: boolean;
+  showFilters?: boolean;
+  /** Optional post ID to pin at the top of the feed */
+  pinnedPostId?: string;
+  /** DOM node or ref to render the filter panel into; when omitted, the panel renders in-flow */
+  filtersPortalRef?: React.RefObject<HTMLElement | null> | HTMLElement | null;
+  /**
+   * Where the active-filter chips go. Separate from `filtersPortalRef` because
+   * the two want different places: the filter panel drops out of the bottom of
+   * the nav pill, the chips sit underneath the pill entirely. Falls back to the
+   * filter target when omitted.
+   */
+  chipsPortalRef?: React.RefObject<HTMLElement | null> | HTMLElement | null;
+}
+
+// ============================================================================
+// HELPERS
+// ============================================================================
+
+/** Resolve a portal target prop that may be a ref object or a DOM node. */
+function resolvePortalTarget(target?: React.RefObject<HTMLElement | null> | HTMLElement | null): HTMLElement | null {
+  if (!target) return null;
+  if (typeof target === 'object' && 'current' in target) return target.current;
+  return target;
+}
+
+// ============================================================================
+// HELPERS
+// ============================================================================
+
+
+/**
+ * Map date filter to API range parameter
+ */
+function getDateRange(dateValue: string): 'day' | 'week' | 'month' | 'year' | undefined {
+  switch (dateValue) {
+    case 'today':
+      return 'day';
+    case 'week':
+      return 'week';
+    case 'month':
+      return 'month';
+    case 'year':
+      return 'year';
+    default:
+      return undefined; // all time
+  }
+}
+
+// ============================================================================
+// FILTER SECTION COMPONENT
+// ============================================================================
+
+interface FilterSectionProps {
+  selectedSort: SortOption;
+  onSortSelect: (o: SortOption) => void;
+  selectedCategories: string[];
+  onCategoryToggle: (category: string) => void;
+  onCategoryClear: () => void;
+  categories: DeHubCategory[];
+  selectedDate: DateFilterOption;
+  onDateSelect: (o: DateFilterOption) => void;
+  selectedPostType: HomePostTypeValue;
+  onPostTypeSelect: (v: HomePostTypeValue) => void;
+  contentFilters: ContentTypeFilters;
+  onContentFilterToggle: (filter: keyof ContentTypeFilters) => void;
+  onReset: () => void;
+  /** Phone only: the "My presets" row on top of the options. */
+  presetsRow?: ReactNode;
+}
+
+function SortFilterSection({ 
+  selectedSort, 
+  onSortSelect,
+  selectedCategories,
+  onCategoryToggle,
+  onCategoryClear,
+  categories,
+  selectedDate, 
+  onDateSelect,
+  selectedPostType,
+  onPostTypeSelect,
+  contentFilters,
+  onContentFilterToggle,
+  onReset,
+  presetsRow,
+}: FilterSectionProps) {
+  const { t } = useI18n();
+  const [categorySearch, setCategorySearch] = useSurfaceDraft("components/app/feeds/HomeFeed.tsx:categorySearch", '');
+
+  const filteredCategories = useMemo(() => {
+    let filtered = categories;
+    if (categorySearch.trim()) {
+      const q = categorySearch.toLowerCase();
+      filtered = categories.filter(cat => cat.name.toLowerCase().includes(q));
+    }
+    return filtered;
+  }, [categories, categorySearch]);
+
+  return (
+    <div className="relative flex flex-col gap-4">
+      <NamedFeedsRow value={selectedPostType} onSelect={onPostTypeSelect} />
+      {presetsRow}
+      {/* Sort Options */}
+      <div className="flex flex-col gap-2">
+        <span className="text-xs text-zinc-500 uppercase tracking-wider">{t('filters.sort')}</span>
+        <div className="relative">
+          <GlassFilterRow
+            items={SORT_OPTIONS.map((o) => ({ key: o.label, label: t(o.labelKey, o.label) }))}
+            activeKey={selectedSort.label}
+            onSelect={(key) => { const o = SORT_OPTIONS.find(x => x.label === key); if (o) onSortSelect(o); }}
+            borderRadius="0.75rem"
+            buttonClassName="px-3 py-2 rounded-xl text-sm"
+          />
+        </div>
+      </div>
+
+      {/* Category Filter */}
+      <div className="flex flex-col gap-2">
+        <span className="text-xs text-zinc-500 uppercase tracking-wider">{t('filters.category')}</span>
+        <input
+          type="search"
+          data-home-category-search
+          value={categorySearch}
+          onChange={e => setCategorySearch(e.target.value)}
+          placeholder={t('filters.searchCategories')}
+          className="w-full px-3 py-1.5 rounded-lg text-xs bg-zinc-800 text-zinc-200 placeholder-zinc-500 border border-zinc-700 focus:border-zinc-500 focus:outline-none transition-colors mb-1"
+        />
+        <div className="relative">
+          <GlassFilterRow
+            items={[
+              { key: 'all', label: t('filters.all') },
+              ...filteredCategories.map((cat) => ({ key: cat.id, label: cat.name })),
+            ]}
+            activeKeys={selectedCategories.length === 0 ? ['all'] : selectedCategories}
+            onSelect={(key) => {
+              if (key === 'all') {
+                onCategoryClear();
+              } else {
+                onCategoryToggle(key);
+              }
+              setCategorySearch.complete(categorySearch, '');
+            }}
+            borderRadius="0.75rem"
+            buttonClassName="px-3 py-2 rounded-xl text-sm"
+          />
+          {filteredCategories.length === 0 && categorySearch.trim() && (
+            <span className="text-xs text-zinc-500 py-1.5">{t('filters.noMatches')}</span>
+          )}
+        </div>
+      </div>
+      
+      {/* Date Filter Options */}
+      <div className="flex flex-col gap-2">
+        <span className="text-xs text-zinc-500 uppercase tracking-wider">{t('filters.uploadDate')}</span>
+        <div className="relative">
+          <GlassFilterRow
+            items={DATE_FILTER_OPTIONS.map((o) => ({ key: o.value, label: o.label }))}
+            activeKey={selectedDate.value}
+            onSelect={(key) => { const o = DATE_FILTER_OPTIONS.find(x => x.value === key); if (o) onDateSelect(o); }}
+            borderRadius="0.75rem"
+            buttonClassName="px-3 py-2 rounded-xl text-sm"
+          />
+        </div>
+      </div>
+
+      {/* Post Type Filter */}
+      <div className="flex flex-col gap-2">
+        <span className="text-xs text-zinc-500 uppercase tracking-wider">{t('filters.postType')}</span>
+        <div className="relative">
+          <GlassFilterRow
+            items={POST_TYPE_FILTERS.map((o) => ({ key: o.value, label: o.value === 'article' ? t('articles.label') : t(`filters.${o.value === 'all' ? 'all' : o.value === 'video' ? 'videos' : o.value === 'feed-images' ? 'images' : o.value === 'feed-audio' ? 'audio' : 'text'}`, o.label) }))}
+            activeKey={namedFeedFor(selectedPostType) ? undefined : (selectedPostType as PostTypeFilterValue)}
+            onSelect={(key) => onPostTypeSelect(key as PostTypeFilterValue)}
+            borderRadius="0.75rem"
+            buttonClassName="px-3 py-2 rounded-xl text-sm"
+          />
+        </div>
+      </div>
+
+      {/* Content Type Filters */}
+      <div className="flex flex-col gap-2">
+        <span className="text-xs text-zinc-500 uppercase tracking-wider">{t('filters.contentAccess')}</span>
+        <div className="relative">
+          <GlassFilterRow
+            items={CONTENT_TYPE_FILTERS.map((filter) => ({ key: filter.value, label: t(`filters.${filter.value === 'w2e' ? 'bounty' : filter.value}`, filter.label) }))}
+            activeKeys={CONTENT_TYPE_FILTERS.filter((filter) => contentFilters[filter.value]).map((filter) => filter.value)}
+            onSelect={(key) => onContentFilterToggle(key as keyof ContentTypeFilters)}
+            borderRadius="0.75rem"
+            buttonClassName="px-3 py-2 rounded-xl text-sm"
+          />
+        </div>
+      </div>
+
+      {/* Reset filters - bottom right. z-50 keeps it above the scroll rows
+          (z-40), which overlap it and otherwise swallow the tap. */}
+      <button
+        onClick={() => { setCategorySearch.complete(categorySearch, ''); onReset(); }}
+        className="absolute z-50 bottom-0 right-0 p-1.5 rounded-lg text-zinc-500 hover:text-white hover:bg-zinc-800 transition-colors"
+        aria-label={t('filters.resetFilters')}
+      >
+        <RefreshCw className="w-3.5 h-3.5" />
+      </button>
+    </div>
+  );
+}
+
+// Module-level so a feed re-render does not hand React a new component type and
+// remount the carousel (and everything inside it) on every update.
+function RadioCarouselSection({ stations }: { stations: RadioStation[] }) {
+  const navigate = useNavigate();
+  const { t } = useI18n();
+  if (stations.length === 0) return null;
+
+  return (
+    <div data-glass-stack className="bg-black/50 backdrop-blur-[24px] backdrop-saturate-[180%] border border-white/[0.12] rounded-xl p-3">
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="font-bold text-white flex items-center gap-2">
+          <Radio className="w-5 h-5" />
+          {t('feed.radioStations')}
+          <span className="text-zinc-500 font-normal text-sm">(50K)</span>
+        </h3>
+        <button
+          onClick={() => navigate('/app/music?tab=radio')}
+          className="text-zinc-400 text-sm hover:text-white flex items-center gap-1"
+        >
+          {t('feed.seeAll')} <ChevronRight className="w-4 h-4" />
+        </button>
+      </div>
+      <SwipeableCarousel className="flex gap-3 overflow-x-auto scrollbar-hide pr-8">
+        {stations.slice(0, 10).map((station) => (
+          <div key={station.stationuuid} className="flex-shrink-0 w-[280px]">
+            <RadioStationCard station={station} />
+          </div>
+        ))}
+      </SwipeableCarousel>
+    </div>
+  );
+}
+
+function EmptyState({ isFollowing, failed, onRetry }: { isFollowing: boolean; failed: boolean; onRetry: () => void }) {
+  const { t } = useI18n();
+  let title = t('feed.emptyTitle');
+  let description = failed ? t('feed.loadFailed') : t('feed.emptyDescription');
+
+  // Custom message for Following feed
+  if (isFollowing) {
+    title = t('feed.followingEmptyTitle');
+    description = t('feed.followingEmptyDescription');
+  }
+
+  return (
+    <AppState
+      icon={failed ? 'notifications' : 'home'}
+      title={title}
+      description={description}
+      kind={failed ? 'error' : 'empty'}
+      size="page"
+      primaryAction={failed ? { label: t('common.tryAgain'), onClick: onRetry } : undefined}
+    />
+  );
+}
+
+// ============================================================================
+// MAIN COMPONENT
+// ============================================================================
+
+function nftToFeedItem(pinnedPost: any): FeedItemType {
+    
+    const id = String(pinnedPost.tokenId);
+    const views = resolveViewCount(pinnedPost);
+    const timeAgo = pinnedPost.createdAt ? formatTimeAgo(pinnedPost.createdAt) : _translateCopy("copy.66f53417d3b7", { defaultValue: "Just now" });
+    
+    const nftPostType = pinnedPost.postType || 'video';
+
+  // An audio post has an audioUrl and no videoUrl, so it fell through to the
+  // text branch below and showed only its caption. The feed's own mapper
+  // already builds the playable audio card.
+  if (nftPostType === 'audio' || nftPostType === 'feed-audio') {
+    return { type: 'video', data: mapToVideoItem(pinnedPost, 0) };
+  }
+    
+    if (nftPostType === 'image' || (pinnedPost.imageUrls && pinnedPost.imageUrls.length > 0 && !pinnedPost.videoUrl)) {
+      const imageUrls = buildFeedImageUrls(pinnedPost.imageUrls, undefined, (pinnedPost as { imageSizes?: unknown }).imageSizes);
+      const image = imageUrls?.[0] || buildImageUrl(pinnedPost.tokenId, pinnedPost.imageUrl);
+      const avatar = pinnedPost.minterAvatarUrl 
+        ? buildAvatarUrl(pinnedPost.minter, pinnedPost.minterAvatarUrl) || 'user'
+        : 'user';
+      
+      const imagePost: ImagePost = {
+        id,
+        type: 'image',
+        // Load-bearing, not housekeeping. `ImageCard` gates an adult image
+        // behind `useMatureGate(post.contentRating)`, and an undefined rating
+        // reads as safe — so dropping it here paints a mature image unblurred
+        // at the top of the feed for a viewer who never opted in. The video
+        // and text branches below carry it; this one did not.
+        contentRating: pinnedPost.contentRating,
+        mediaDescriptions: pinnedPost.mediaDescriptions,
+        layout: pinnedPost.layout,
+        mediaCaptions: pinnedPost.mediaCaptions,
+        comicBorder: pinnedPost.comicBorder,
+        hideAssetCards: pinnedPost.hideAssetCards,
+        hiddenLinkPreviews: pinnedPost.hiddenLinkPreviews,
+        imageTags: pinnedPost.imageTags,
+        hasQuiz: pinnedPost.hasQuiz,
+        spoilerText: pinnedPost.spoilerText,
+        quotePolicy: pinnedPost.quotePolicy,
+        visibility: pinnedPost.visibility,
+        quoteRevoked: pinnedPost.quoteRevoked,
+        replyPolicy: pinnedPost.replyPolicy,
+        username: pinnedPost.minterDisplayName || pinnedPost.mintername || 'unknown',
+        verified: false,
+        avatar,
+        image,
+        imageUrls,
+        title: pinnedPost.name,
+        description: pinnedPost.description,
+        likes: pinnedPost.totalVotes?.for || pinnedPost.like_count || 0,
+        dislikes: pinnedPost.totalVotes?.against || pinnedPost.dislike_count || 0,
+        caption: pinnedPost.description || pinnedPost.name || '',
+        comments: pinnedPost.commentCount || pinnedPost.comment_count || 0,
+        views: formatViews(views),
+        timeAgo,
+        creatorId: pinnedPost.minter,
+        creatorUsername: pinnedPost.mintername,
+        creatorBadgeBalance: (pinnedPost as any).minterUser?.hideBadgeAndBalance ? 0 : (pinnedPost as any).minterUser?.badgeBalance,
+        creatorPaymentsDisabled: (pinnedPost as any).minterUser?.hideBadgeAndBalance === true,
+        isLiked: pinnedPost.isLiked ?? false,
+      };
+      return { type: 'image', data: imagePost };
+    } else if (pinnedPost.videoUrl || pinnedPost.media_url) {
+      const thumbnail = buildImageUrl(pinnedPost.tokenId, pinnedPost.imageUrl);
+      const videoUrl = buildVideoUrl(pinnedPost.tokenId);
+      const channelAvatar = pinnedPost.minterAvatarUrl 
+        ? buildAvatarUrl(pinnedPost.minter, pinnedPost.minterAvatarUrl) || 'user'
+        : 'user';
+      
+      const videoItem: VideoItem = {
+        id,
+        type: 'video',
+        contentRating: pinnedPost.contentRating,
+        mediaDescriptions: pinnedPost.mediaDescriptions,
+        layout: pinnedPost.layout,
+        mediaCaptions: pinnedPost.mediaCaptions,
+        comicBorder: pinnedPost.comicBorder,
+        hideAssetCards: pinnedPost.hideAssetCards,
+        hiddenLinkPreviews: pinnedPost.hiddenLinkPreviews,
+        imageTags: pinnedPost.imageTags,
+        hasQuiz: pinnedPost.hasQuiz,
+        spoilerText: pinnedPost.spoilerText,
+        quotePolicy: pinnedPost.quotePolicy,
+        visibility: pinnedPost.visibility,
+        quoteRevoked: pinnedPost.quoteRevoked,
+        replyPolicy: pinnedPost.replyPolicy,
+        thumbnail,
+        videoUrl,
+        hlsUrl: buildHlsUrl(pinnedPost.hlsUrl),
+        duration: formatDuration(pinnedPost.videoDuration || pinnedPost.duration || 0),
+        title: pinnedPost.name || pinnedPost.description?.split('\n')[0] || '',
+        channel: pinnedPost.minterDisplayName || pinnedPost.mintername || _translateCopy("copy.056823642989", { defaultValue: "Unknown Creator" }),
+        channelAvatar,
+        verified: false,
+        views: formatViews(views),
+        uploadedAgo: timeAgo,
+        creatorId: pinnedPost.minter,
+        creatorUsername: pinnedPost.mintername,
+        creatorBadgeBalance: (pinnedPost as any).minterUser?.hideBadgeAndBalance ? 0 : (pinnedPost as any).minterUser?.badgeBalance,
+        creatorPaymentsDisabled: (pinnedPost as any).minterUser?.hideBadgeAndBalance === true,
+        isLiked: pinnedPost.isLiked ?? false,
+        likeCount: pinnedPost.totalVotes?.for || pinnedPost.like_count || 0,
+        dislikeCount: pinnedPost.totalVotes?.against || pinnedPost.dislike_count || 0,
+        commentCount: pinnedPost.commentCount || pinnedPost.comment_count || 0,
+        isPPV: pinnedPost.is_ppv ?? false,
+        isW2E: pinnedPost.is_w2e ?? false,
+        isLocked: pinnedPost.is_locked ?? (pinnedPost as any).streamInfo?.isLockContent ?? false,
+        lockedPrice: (pinnedPost as any).locked_price ?? (pinnedPost as any).streamInfo?.lockContentAmount,
+        lockedCurrency: (pinnedPost as any).locked_currency ?? (pinnedPost as any).streamInfo?.lockContentTokenSymbol ?? 'DHB',
+        lockedTokenAddress: (pinnedPost as any).streamInfo?.lockContentContractAddress,
+        lockedChainId: (pinnedPost as any).streamInfo?.lockContentChainIds?.[0],
+      };
+      return { type: 'video', data: videoItem };
+    } else {
+      const avatarUrl = pinnedPost.minterAvatarUrl 
+        ? buildAvatarUrl(pinnedPost.minter, pinnedPost.minterAvatarUrl) || pinnedPost.minter
+        : pinnedPost.minter;
+      
+      const textPost: TextPost = {
+        id,
+        type: 'post',
+        contentRating: pinnedPost.contentRating,
+        mediaDescriptions: pinnedPost.mediaDescriptions,
+        layout: pinnedPost.layout,
+        mediaCaptions: pinnedPost.mediaCaptions,
+        comicBorder: pinnedPost.comicBorder,
+        hideAssetCards: pinnedPost.hideAssetCards,
+        hiddenLinkPreviews: pinnedPost.hiddenLinkPreviews,
+        imageTags: pinnedPost.imageTags,
+        hasQuiz: pinnedPost.hasQuiz,
+        spoilerText: pinnedPost.spoilerText,
+        quotePolicy: pinnedPost.quotePolicy,
+        visibility: pinnedPost.visibility,
+        quoteRevoked: pinnedPost.quoteRevoked,
+        replyPolicy: pinnedPost.replyPolicy,
+        author: {
+          id: pinnedPost.minter,
+          name: pinnedPost.minterDisplayName || pinnedPost.mintername || _translateCopy("copy.b764cdc0eab7", { defaultValue: "Unknown" }),
+          handle: pinnedPost.mintername || pinnedPost.minter,
+          avatarSeed: avatarUrl,
+          verified: false,
+          badgeBalance: (pinnedPost as any).minterUser?.hideBadgeAndBalance ? 0 : (pinnedPost as any).minterUser?.badgeBalance,
+          paymentsDisabled: (pinnedPost as any).minterUser?.hideBadgeAndBalance === true,
+        },
+        content: pinnedPost.articleBody
+          ? (pinnedPost.description || '').trim()
+          : pinnedPost.description || pinnedPost.name || '',
+        // A boosted or pinned article is still an article: without these it
+        // drew as a plain text post with no title, cover or Read button.
+        title: pinnedPost.articleBody ? (pinnedPost.name || '').trim() || undefined : undefined,
+        articleBody: pinnedPost.articleBody || undefined,
+        articleSlug: pinnedPost.articleSlug,
+        articleImageUrl: pinnedPost.articleImageUrl ? buildFeedImageUrls([pinnedPost.articleImageUrl])?.[0] : undefined,
+        createdAt: timeAgo,
+        views: formatViews(views),
+        stats: {
+          comments: pinnedPost.commentCount || pinnedPost.comment_count || 0,
+          reposts: (pinnedPost.totalReposts || pinnedPost.reposts || 0) + (pinnedPost.quotes || 0),
+          likes: pinnedPost.totalVotes?.for || pinnedPost.like_count || 0,
+          dislikes: pinnedPost.totalVotes?.against || pinnedPost.dislike_count || 0,
+        },
+      };
+      return { type: 'post', data: textPost };
+    }
+}
+
+/** Time away from the tab after which the feed at the top is fetched again on return. */
+const FEED_RESUME_REFRESH_MS = 5 * 60_000;
+
+export function HomeFeed({ active = true, shuffleKey, isRefreshing, showFilters = false, pinnedPostId, filtersPortalRef, chipsPortalRef }: HomeFeedProps) {
+  const { t: _copy } = _useCopy();
+  const navigate = useNavigate();
+  const { t } = useI18n();
+  const loaderRef = useRef<HTMLDivElement>(null);
+  const bentoRef = useRef<HTMLDivElement>(null);
+  const portalTarget = resolvePortalTarget(filtersPortalRef);
+  // The header's portal refs attach in the same commit as the feed, so the
+  // first render cannot see them yet. Until it can, nothing that will move
+  // into the header is drawn in the feed itself (it pushed the page down 60px
+  // for one frame, then jumped back up).
+  const [portalsReady, setPortalsReady] = useState(!filtersPortalRef);
+  useEffect(() => setPortalsReady(true), []);
+  const { theme } = useAppTheme();
+  const behindNav = theme === 'system' && !!portalTarget;
+  const islandPortal = useFeedIslandPortal();
+  const isIslandViewport = useMediaQuery('(max-width: 1023px)');
+  const newPostsTarget = isIslandViewport ? islandPortal : null;
+  // The tab bar the drawer hangs from (phones and desktop). System puts the filters portal
+  // beside the bar rather than inside it, so look among its siblings too.
+  const navTarget = !newPostsTarget
+    ? portalTarget?.closest<HTMLElement>('[data-feed-nav]')
+      ?? portalTarget?.parentElement?.querySelector<HTMLElement>(':scope > [data-feed-nav]')
+    : null;
+  const reduceMotion = useReducedMotion();
+  const chipsTarget = resolvePortalTarget(chipsPortalRef) ?? portalTarget;
+  const { isCollapsed } = useSidebarCollapse();
+  const { shortsEnabled } = useShortsEnabled();
+  const queryClient = useQueryClient();
+  // PersistentPageCache never unmounts this component once home has been
+  // visited, so anything on a timer here has to ask whether home is on screen.
+  const { pathname } = useLocation();
+  const isHomeActive = active && isHomeFeedRoute(pathname);
+  const [shortsVisit, setShortsVisit] = useState(0);
+  const previousHome = useRef({ active: isHomeActive, pathname });
+  useEffect(() => {
+    const previous = previousHome.current;
+    if (isHomeActive && !previous.active && !/^\/(app\/)?(post|newpost)\//.test(previous.pathname)) {
+      setShortsVisit(value => value + 1);
+    }
+    previousHome.current = { active: isHomeActive, pathname };
+  }, [isHomeActive, pathname]);
+
+  // Clear persisted filters on fresh page load (not in-app navigation)
+  useEffect(() => {
+    const isNewPageLoad = !sessionStorage.getItem('feed-session-active');
+    if (isNewPageLoad) {
+      clearPersistedFeedFilters();
+      sessionStorage.setItem('feed-session-active', 'true');
+    }
+  }, []);
+
+  // Native touch event listeners on bento wrapper to reliably block propagation
+  useEffect(() => {
+    const el = bentoRef.current;
+    if (!el) return;
+
+    const stop = (e: TouchEvent) => {
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+    };
+
+    el.addEventListener('touchstart', stop, { passive: true });
+    el.addEventListener('touchmove', stop, { passive: true });
+    el.addEventListener('touchend', stop, { passive: true });
+
+    return () => {
+      el.removeEventListener('touchstart', stop);
+      el.removeEventListener('touchmove', stop);
+      el.removeEventListener('touchend', stop);
+    };
+  }, [showFilters]);
+  const isFetchingRef = useRef(false);
+  
+  // Default to Latest (chronological) — persisted to sessionStorage. "For You" remains a filter option.
+  const [selectedSort, setSelectedSortRaw] = usePersistedFeedFilter<SortOption>('home', 'sort', DEFAULT_HOME_SORT, SORT_OPTIONS);
+  const [selectedDate, setSelectedDateRaw] = usePersistedFeedFilter<DateFilterOption>('home', 'date', DATE_FILTER_OPTIONS[0], DATE_FILTER_OPTIONS);
+  const [selectedPostType, setSelectedPostTypeRaw] = usePersistedFeedFilter<HomePostTypeValue>('home', 'postType', 'all');
+  const [contentFilters, toggleContentFilterRaw, resetContentFiltersRaw] = usePersistedContentFilters('home');
+  const [selectedCategories, setSelectedCategoriesRaw] = usePersistedFeedFilter<string[]>('home', 'categories', []);
+
+  // Optimistic mirror state — chips flip active instantly on tap while heavy
+  // downstream re-render (feed refetch, list re-render) runs at lower priority
+  // via startTransition. Prevents 1-2s lag on slow devices/networks where the
+  // synchronous re-render used to block paint of the active state.
+  const [optimisticSort, setOptimisticSort] = useState(selectedSort);
+  const [optimisticDate, setOptimisticDate] = useState(selectedDate);
+  const [optimisticPostType, setOptimisticPostType] = useState(selectedPostType);
+  const [optimisticCategories, setOptimisticCategories] = useState(selectedCategories);
+  const [optimisticContentFilters, setOptimisticContentFilters] = useState(contentFilters);
+  useEffect(() => { setOptimisticSort(selectedSort); }, [selectedSort]);
+  useEffect(() => { setOptimisticDate(selectedDate); }, [selectedDate]);
+  useEffect(() => { setOptimisticPostType(selectedPostType); }, [selectedPostType]);
+  useEffect(() => { setOptimisticCategories(selectedCategories); }, [selectedCategories]);
+  useEffect(() => { setOptimisticContentFilters(contentFilters); }, [contentFilters]);
+
+  // Arming the filter loader needs `isFetching`, which is only computed further
+  // down this component, while every chip handler is declared up here. A ref
+  // bridges the two — a click can never land before the effect that fills it.
+  const beginFilterTransitionRef = useRef<() => void>(() => {});
+  const beginFilterTransition = useCallback(() => {
+    beginFilterTransitionRef.current();
+  }, []);
+
+  const setSelectedSort = useCallback((value: SortOption | ((prev: SortOption) => SortOption)) => {
+    beginFilterTransition();
+    setOptimisticSort(prev => (typeof value === 'function' ? (value as (p: SortOption) => SortOption)(prev) : value));
+    startTransition(() => setSelectedSortRaw(value));
+  }, [setSelectedSortRaw, beginFilterTransition]);
+  const setSelectedDate = useCallback((value: DateFilterOption | ((prev: DateFilterOption) => DateFilterOption)) => {
+    beginFilterTransition();
+    setOptimisticDate(prev => (typeof value === 'function' ? (value as (p: DateFilterOption) => DateFilterOption)(prev) : value));
+    startTransition(() => setSelectedDateRaw(value));
+  }, [setSelectedDateRaw, beginFilterTransition]);
+  const setSelectedPostType = useCallback((value: HomePostTypeValue | ((prev: HomePostTypeValue) => HomePostTypeValue)) => {
+    beginFilterTransition();
+    setOptimisticPostType(prev => (typeof value === 'function' ? (value as (p: HomePostTypeValue) => HomePostTypeValue)(prev) : value));
+    startTransition(() => setSelectedPostTypeRaw(value));
+  }, [setSelectedPostTypeRaw, beginFilterTransition]);
+  const setSelectedCategories = useCallback((value: string[] | ((prev: string[]) => string[])) => {
+    beginFilterTransition();
+    setOptimisticCategories(prev => (typeof value === 'function' ? (value as (p: string[]) => string[])(prev) : value));
+    startTransition(() => setSelectedCategoriesRaw(value));
+  }, [setSelectedCategoriesRaw, beginFilterTransition]);
+  const toggleContentFilter = useCallback((filter: 'ppv' | 'w2e' | 'locked') => {
+    beginFilterTransition();
+    setOptimisticContentFilters(prev => ({ ...prev, [filter]: !prev[filter] }));
+    startTransition(() => toggleContentFilterRaw(filter));
+  }, [toggleContentFilterRaw, beginFilterTransition]);
+  const resetContentFilters = useCallback(() => {
+    beginFilterTransition();
+    setOptimisticContentFilters({ ppv: false, w2e: false, locked: false });
+    startTransition(() => resetContentFiltersRaw());
+  }, [resetContentFiltersRaw, beginFilterTransition]);
+
+  // Every active filter shows as words in the drawer under the nav pill, and
+  // the filter panel keeps saved presets (FeedPresetsRow).
+  const [feedPresets, setFeedPresets] = useState<FeedFilterPreset[]>(readFeedPresets);
+  useEffect(() => {
+    const reload = () => setFeedPresets(readFeedPresets());
+    window.addEventListener(FEED_PRESETS_CHANGED_EVENT, reload);
+    return () => window.removeEventListener(FEED_PRESETS_CHANGED_EVENT, reload);
+  }, []);
+  const currentPresetShape = useMemo<Omit<FeedFilterPreset, 'name'>>(() => {
+    const access = (['ppv', 'w2e', 'locked'] as const).filter((k) => optimisticContentFilters[k]);
+    return {
+      sort: optimisticSort.value !== DEFAULT_HOME_SORT.value ? optimisticSort.value : undefined,
+      date: optimisticDate.value !== 'all' ? optimisticDate.value : undefined,
+      postType: optimisticPostType !== 'all' ? optimisticPostType : undefined,
+      categories: optimisticCategories.length ? optimisticCategories : undefined,
+      access: access.length ? [...access] : undefined,
+    };
+  }, [optimisticSort, optimisticDate, optimisticPostType, optimisticCategories, optimisticContentFilters]);
+  const activePresetName = useMemo(
+    () => feedPresets.find((p) => presetMatches(p, { name: '', ...currentPresetShape }))?.name ?? null,
+    [feedPresets, currentPresetShape],
+  );
+  const applyPreset = useCallback((name: string) => {
+    const preset = feedPresets.find((p) => p.name === name);
+    if (!preset) return;
+    setSelectedSort(SORT_OPTIONS.find((o) => o.value === preset.sort) ?? DEFAULT_HOME_SORT);
+    setSelectedDate(DATE_FILTER_OPTIONS.find((o) => o.value === preset.date) ?? DATE_FILTER_OPTIONS[0]);
+    setSelectedPostType(toHomePostType(preset.postType));
+    setSelectedCategories(preset.categories ?? []);
+    const want = new Set<PresetAccess>(preset.access ?? []);
+    (['ppv', 'w2e', 'locked'] as const).forEach((k) => {
+      if (optimisticContentFilters[k] !== want.has(k)) toggleContentFilter(k);
+    });
+  }, [feedPresets, optimisticContentFilters, setSelectedSort, setSelectedDate, setSelectedPostType, setSelectedCategories, toggleContentFilter]);
+  const clearAllFilters = useCallback(() => {
+    setSelectedSort(DEFAULT_HOME_SORT);
+    setSelectedDate(DATE_FILTER_OPTIONS[0]);
+    setSelectedPostType('all');
+    setSelectedCategories([]);
+    resetContentFilters();
+  }, [setSelectedSort, setSelectedDate, setSelectedPostType, setSelectedCategories, resetContentFilters]);
+  const filterLineItems = useMemo<FeedFilterLineItem[]>(() => {
+    const items: FeedFilterLineItem[] = [];
+    const named = namedFeedFor(optimisticPostType);
+    if (named) {
+      // A named filter reads as its name and purpose: "Motion · Watch".
+      items.push({
+        key: 'type',
+        group: t('feedFilters.groupType', 'Type'),
+        label: `${named.name} · ${t(named.purposeKey, named.purpose)}`,
+        onRemove: () => setSelectedPostType('all'),
+      });
+    } else if (optimisticPostType !== 'all') {
+      const o = POST_TYPE_FILTERS.find((x) => x.value === optimisticPostType);
+      items.push({
+        key: 'type',
+        group: t('feedFilters.groupType', 'Type'),
+        label: optimisticPostType === 'article' ? t('articles.label', 'Articles') : optimisticPostType === 'feed-audio' ? t('filters.audio', 'Audio') : optimisticPostType === 'feed-simple' ? t('filters.text', 'Text') : (o?.label ?? optimisticPostType),
+        onRemove: () => setSelectedPostType('all'),
+      });
+    }
+    optimisticCategories.forEach((c) => items.push({
+      key: `tag:${c}`,
+      group: t('feedFilters.groupTag', 'Tag'),
+      label: `#${c.replace(/^#+/, '')}`,
+      onRemove: () => setSelectedCategories((prev) => prev.filter((x) => x !== c)),
+    }));
+    if (optimisticDate.value !== 'all') items.push({
+      key: 'date',
+      group: t('feedFilters.groupDate', 'Date'),
+      label: optimisticDate.label,
+      onRemove: () => setSelectedDate(DATE_FILTER_OPTIONS[0]),
+    });
+    if (optimisticSort.value !== DEFAULT_HOME_SORT.value) items.push({
+      key: 'sort',
+      group: t('feedFilters.groupSort', 'Sort'),
+      label: t(optimisticSort.labelKey, optimisticSort.label),
+      onRemove: () => setSelectedSort(DEFAULT_HOME_SORT),
+    });
+    CONTENT_TYPE_FILTERS.forEach((f) => {
+      if (!optimisticContentFilters[f.value]) return;
+      items.push({
+        key: `access:${f.value}`,
+        group: t('feedFilters.groupAccess', 'Access'),
+        label: t(`filters.${f.value === 'w2e' ? 'bounty' : f.value}`, f.label),
+        onRemove: () => toggleContentFilter(f.value),
+      });
+    });
+    return items;
+  }, [t, optimisticPostType, optimisticCategories, optimisticDate, optimisticSort, optimisticContentFilters, setSelectedPostType, setSelectedCategories, setSelectedDate, setSelectedSort, toggleContentFilter]);
+  // One hashtag and nothing else keeps the hashtag bar with its Follow button.
+  const onlyTag = filterLineItems.length === 1 && optimisticCategories.length === 1 ? optimisticCategories[0] : '';
+  const tagFollow = useFollowTag(onlyTag);
+  const showFilterDrawer = filterLineItems.length > 0;
+  const drawerFilters = useMemo<FeedDrawerFilters>(() => ({
+    labels: filterLineItems.map((item) => item.label),
+    presetName: activePresetName,
+    onOpen: () => window.dispatchEvent(new CustomEvent('home-tab-reclick', { detail: 'home' })),
+    onClearAll: clearAllFilters,
+    follow: onlyTag && tagFollow.isAuthenticated
+      ? { following: tagFollow.following, pending: tagFollow.pending, onToggle: tagFollow.toggle }
+      : null,
+  }), [filterLineItems, activePresetName, clearAllFilters, onlyTag, tagFollow.isAuthenticated, tagFollow.following, tagFollow.pending, tagFollow.toggle]);
+
+  // Listen for external category changes (e.g. from Talk of the Town sidebar).
+  // setSelectedCategories arms the filter loader itself, so this path gets the
+  // same feedback as a chip tap without a second flag to keep in sync.
+  useEffect(() => {
+    const getCategoryId = (detail: unknown): string | null => {
+      if (typeof detail === 'string') return renamedCategory(detail);
+      if (detail && typeof detail === 'object' && 'categoryId' in detail) {
+        const value = (detail as { categoryId?: unknown }).categoryId;
+        return typeof value === 'string' ? renamedCategory(value) : null;
+      }
+      return null;
+    };
+
+    // A tapped hashtag asks to be the filter, not to join one. Only a single
+    // selected category is filtered by the API; a second falls back to sifting
+    // one page of twenty unfiltered posts on the client, which is how tapping
+    // a tag while another was still active came back all but empty.
+    const wantsReplace = (detail: unknown): boolean =>
+      !!detail && typeof detail === 'object' && (detail as { replace?: unknown }).replace === true;
+
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      const categoryId = getCategoryId(detail);
+      if (!categoryId) return;
+
+      // Invalidate instead of removing — keeps existing data visible during refetch
+      queryClient.invalidateQueries({ queryKey: ['unified-feed'] });
+      // Add category to selection (toggle if already present)
+      setSelectedCategories(prev => (
+        wantsReplace(detail)
+          ? (prev.length === 1 && prev[0] === categoryId ? prev : [categoryId])
+          : prev.includes(categoryId) ? prev : [...prev, categoryId]
+      ));
+      scrollDocumentTo(0);
+    };
+
+    window.addEventListener('category-filter-changed', handler);
+    return () => window.removeEventListener('category-filter-changed', handler);
+  }, [setSelectedCategories, queryClient]);
+
+  // `/app?category=tag` is the real href behind every hashtag, so it has to
+  // mean something on its own: opened in a new tab, pasted to somebody, or
+  // followed by a crawler, none of which get the click handler's event. Read
+  // once and drop the param, otherwise a pull-to-refresh remount (this feed is
+  // keyed on refreshKey) would reinstate a filter the reader had cleared.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const fromUrl = params.get('category');
+    if (!fromUrl) return;
+    setSelectedCategories([renamedCategory(fromUrl)]);
+    params.delete('category');
+    const query = params.toString();
+    window.history.replaceState(
+      window.history.state,
+      '',
+      `${window.location.pathname}${query ? `?${query}` : ''}${window.location.hash}`,
+    );
+  }, [setSelectedCategories]);
+
+  // Safety: normalize any legacy/corrupted persisted category entries (e.g. { categoryId: 'music' })
+  useEffect(() => {
+    const normalized = Array.from(new Set(
+      (selectedCategories as unknown[])
+        .map((cat) => {
+          if (typeof cat === 'string') return renamedCategory(cat);
+          if (cat && typeof cat === 'object' && 'categoryId' in cat) {
+            const value = (cat as { categoryId?: unknown }).categoryId;
+            return typeof value === 'string' ? renamedCategory(value) : null;
+          }
+          return null;
+        })
+        .filter((cat): cat is string => Boolean(cat))
+    ));
+
+    const isSame =
+      normalized.length === selectedCategories.length &&
+      normalized.every((cat, index) => cat === selectedCategories[index]);
+
+    if (!isSame) {
+      // Raw setter on purpose: repairing corrupted storage is not a filter
+      // change the user made, so it must not arm the filter loader.
+      setOptimisticCategories(normalized);
+      setSelectedCategoriesRaw(normalized);
+    }
+  }, [selectedCategories, setSelectedCategoriesRaw]);
+
+  // Non-critical rail queries (categories, live carousel, shorts strip) are held
+  // back until the primary feed's first page settles, so the content request wins
+  // the boot network race instead of losing it to sidebar chrome (LCP audit 7/14).
+  // A safety-net timer flips the gate regardless so a stalled feed can't blank the rails.
+  const [railsEnabled, setRailsEnabled] = useState(false);
+
+  // Topics picked while signing up go first in every category bar.
+  const feedInterests = useFeedInterests();
+  const putInterestsFirst = useCallback((list: DeHubCategory[]) => orderByInterests(list, feedInterests), [feedInterests]);
+  // Fetch categories
+  const { data: categories = [] } = useQuery({
+    queryKey: ['dehub-categories'],
+    queryFn: getCategories,
+    select: putInterestsFirst,
+    staleTime: 5 * 60 * 1000,
+    enabled: railsEnabled,
+  });
+
+  const { walletAddress, isAuthenticated, openLoginModal } = useAuth();
+  // Set in Settings → Content, read here. A standing viewing preference, not a
+  // per-visit filter, so it lives in localStorage and not the filter store.
+  const [hideWatched] = useHideWatched();
+  const { watchedIds } = useWatchedVideoIds(hideWatched);
+  const { optimisticPosts, clearOptimisticPosts, removeOptimisticPost } = useOptimisticPosts();
+
+  // Everything on the home page that is not a post from the feed itself is
+  // unrated by definition — ads, radio stations, live cards, the follow and
+  // leaderboard rails. None of it can be filtered on
+  // `forKids`, so in Kids Mode none of it renders.
+  const isKidsMode = useKidsModeLock();
+
+  // Same query key as Live tab + prefetch (DEFAULT_DEHUB_LIVE_QUERY_OPTIONS); slice below for carousel width.
+  // enabled is stripped from the key inside useDeHubLive, so the shared cache entry is preserved.
+  const { data: liveData } = useDeHubLive({ ...DEFAULT_DEHUB_LIVE_QUERY_OPTIONS, enabled: railsEnabled });
+  const liveNowStreams = useMemo(() => {
+    if (!liveData?.pages) return [];
+    const allStreams = liveData.pages.flatMap(page => page.data || []);
+    return allStreams.slice(0, 10).map((stream, index) => mapApiLiveStreamToLocal(stream, index));
+  }, [liveData]);
+
+  // "Following" mode is handled server-side via followingOnly=true API param
+  const isFollowingMode = selectedSort.value === 'following';
+
+  // Follow groups narrow that further. The feed API takes one `minter` or the
+  // whole follow list and nothing in between, so the group filter is applied
+  // to what comes back; the infinite-scroll loader stays on screen while a
+  // narrow group thins the page, which is what keeps pulling more.
+  const followGroups = useFollowGroupList();
+  const adInterval = AD_INTERVALS[useAdLoad()];
+  const [activeFollowGroupId, setActiveFollowGroupId] = usePersistedFeedFilter<string | null>('home', 'followGroup', null);
+  const followGroupMembers = useMemo(() => {
+    const group = followGroups.find(g => g.id === activeFollowGroupId);
+    return new Set(group?.members ?? []);
+  }, [followGroups, activeFollowGroupId]);
+  const isGroupFiltered = isFollowingMode && !!activeFollowGroupId && followGroupMembers.size > 0;
+
+
+  // Prompt flow modal state
+  const [promptModalOpen, setPromptModalOpen] = useState(false);
+  const [initialPromptText, setInitialPromptText] = useState('');
+
+  // Auto-open from /prompt landing redirect (?prompt=…)
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    const p = params.get('prompt');
+    if (p) {
+      setInitialPromptText(p);
+      setPromptModalOpen(true);
+      // clean URL
+      const url = new URL(window.location.href);
+      url.searchParams.delete('prompt');
+      window.history.replaceState({}, '', url.toString());
+    }
+  }, []);
+
+  // Handle sort selection
+  const handleSortSelect = useCallback((option: SortOption) => {
+    if (option.value === 'following' && !isAuthenticated) {
+      openLoginModal();
+      return;
+    }
+    if (option.value === 'prompt') {
+      setInitialPromptText('');
+      setPromptModalOpen(true);
+      return;
+    }
+    // Re-tapping the active chip changes nothing, so it must not flash a loader.
+    if (option.value === optimisticSort.value) return;
+    setSelectedSort(option);
+  }, [isAuthenticated, openLoginModal, optimisticSort.value, setSelectedSort, _copy]);
+
+  // Defer heavy filter-derived values so chip clicks paint instantly.
+  // The chip buttons read `selectedSort`/`selectedCategories`/etc. directly (urgent),
+  // while query params derive from the deferred copies (non-urgent commit).
+  const deferredSort = useDeferredValue(selectedSort);
+  const deferredDate = useDeferredValue(selectedDate);
+  const deferredPostType = useDeferredValue(selectedPostType);
+  const deferredCategories = useDeferredValue(selectedCategories);
+  const deferredContentFilters = useDeferredValue(contentFilters);
+
+  // Build API params from filters
+  // For trending, we fetch by recency (last month) then sort client-side
+  const sortBy = useMemo(() => {
+    switch (deferredSort.value) {
+      case 'for-you':
+      case 'prompt':
+      case 'discovery':
+        return 'score' as const;
+      case 'following': // Following uses latest sort, filtered client-side
+        return 'createdAt' as const;
+      case 'most-liked':
+        return 'likes' as const;
+      case 'most-viewed':
+        return 'views' as const;
+      case 'most-comments':
+        return 'comments' as const;
+      case 'most-tipped':
+        return 'tips' as const;
+      case 'random':
+        return 'random' as const;
+      case 'latest':
+      default:
+        return 'createdAt' as const;
+    }
+  }, [deferredSort.value]);
+
+  const sortOrder: 'asc' | 'desc' = 'desc'; // Always sort descending (highest first)
+  
+  // For following and random, don't limit range
+  const range = useMemo(() => {
+    if (
+      deferredSort.value === 'for-you' ||
+      deferredSort.value === 'prompt' ||
+      deferredSort.value === 'discovery' ||
+      deferredSort.value === 'following' ||
+      deferredSort.value === 'random'
+    ) {
+      return undefined; // Algorithm + following/random use full catalog
+    }
+    return getDateRange(deferredDate.value);
+  }, [deferredSort.value, deferredDate.value]);
+
+  // Common API params for all three feeds
+  const commonParams = useMemo(() => ({
+    limit: HOME_FEED_PAGE_SIZE,
+    sortBy,
+    sortOrder,
+    range,
+    status: 'all' as const,
+    // Single category → pass to API; multiple → fetch all, filter client-side
+    category: deferredCategories.length === 1 ? deferredCategories[0] : undefined,
+    isPPV: deferredContentFilters.ppv ? true : undefined,
+    hasBounty: deferredContentFilters.w2e ? true : undefined,
+    isLocked: deferredContentFilters.locked ? true : undefined,
+    followingOnly: deferredSort.value === 'following' ? true : undefined,
+  }), [sortBy, sortOrder, range, deferredCategories, deferredContentFilters, deferredSort.value]);
+
+  // ============================================================================
+  // THREE SEPARATE FEED QUERIES
+  // ============================================================================
+
+  // For "Most Liked", "Trending", "Following", "Random", or default "Latest" sorting, we need global ranking across all types
+  // So we use a single unified feed instead of three separate type feeds
+  // "Latest" must also use a single feed to maintain true chronological order across all post types
+  const useSingleFeedForGlobalSort =
+    deferredSort.value === 'for-you' ||
+    deferredSort.value === 'prompt' ||
+    deferredSort.value === 'discovery' ||
+    deferredSort.value === 'latest' ||
+    deferredSort.value === 'most-liked' ||
+    deferredSort.value === 'most-viewed' ||
+    deferredSort.value === 'most-comments' ||
+    deferredSort.value === 'most-tipped' ||
+    deferredSort.value === 'following' ||
+    deferredSort.value === 'random';
+  const hasContentFilter = deferredContentFilters.ppv || deferredContentFilters.w2e || deferredContentFilters.locked;
+  const useInterleavedFeed = deferredPostType === 'all' && !useSingleFeedForGlobalSort && !hasContentFilter;
+
+  // Fetch videos
+  const videosFeed = useUnifiedFeed({
+    ...commonParams,
+    postType: 'video',
+    enabled: useInterleavedFeed,
+  });
+
+  // Fetch images
+  const imagesFeed = useUnifiedFeed({
+    ...commonParams,
+    postType: 'feed-images',
+    enabled: useInterleavedFeed,
+  });
+
+  // Fetch text posts
+  const textsFeed = useUnifiedFeed({
+    ...commonParams,
+    postType: 'feed-simple',
+    enabled: useInterleavedFeed,
+  });
+
+  // Fallback: single unified feed when post type filter is active OR using global sort
+  const singleFeed = useUnifiedFeed({
+    ...commonParams,
+    postType: homeApiPostType(deferredPostType),
+    enabled: !useInterleavedFeed,
+  });
+
+
+  // "N new posts" pill — only for the chronological feed, where "newer than
+  // what you're reading" is a meaningful thing to say. Under For You, Random
+  // or any of the ranked sorts, position isn't time, so the pill would be
+  // claiming something the list can't honour.
+  const newestRenderedCreatedAt = useMemo(() => {
+    const firstPage = singleFeed.data?.pages?.[0];
+    const first = firstPage?.items?.[0] as { createdAt?: string } | undefined;
+    return first?.createdAt || undefined;
+  }, [singleFeed.data]);
+
+  // The same poll now also refreshes the counts on the cards already rendered,
+  // so it runs under every sort and on the interleaved feed too. Gated on the
+  // ROUTE rather than the sort, because PersistentPageCache keeps this
+  // component mounted for the rest of the session once home is visited — and
+  // held behind railsEnabled so it never competes with the first page.
+  const { newPostCount: polledNewPostCount, atCap: newPostsAtCap, newPostAuthors, latestNewAt } = useNewPostsSignal({
+    ...commonParams,
+    postType: homeApiPostType(deferredPostType),
+    enabled: isHomeActive && railsEnabled,
+    chronological: !useInterleavedFeed && deferredSort.value === 'latest',
+    newestCreatedAt: newestRenderedCreatedAt,
+    getVisibleTokenIds: visibleFeedTokenIds,
+  });
+
+  // A tapped chip goes away at once and stays away until a post newer than
+  // the ones it offered turns up, even when the refreshed list still renders
+  // an older head (a filter or the ranking keeps those posts off the top).
+  const [newPostsTappedAt, setNewPostsTappedAt] = useState(0);
+  const newPostCount = latestNewAt > newPostsTappedAt ? polledNewPostCount : 0;
+  // A pull or logo refresh loads the same posts, so it clears the chip too.
+  const latestNewAtRef = useRef(latestNewAt);
+  latestNewAtRef.current = latestNewAt;
+  useEffect(() => {
+    if (isRefreshing) setNewPostsTappedAt(latestNewAtRef.current);
+  }, [isRefreshing]);
+  const showNewPosts = useCallback(() => {
+    setNewPostsTappedAt(latestNewAt);
+    setShortsVisit(value => value + 1);
+    // Drop every page but the first before refetching, so the reader lands on
+    // a fresh top of feed rather than waiting for ten loaded pages to re-fetch
+    // in place. The list scrolls to the top either way.
+    queryClient.setQueriesData({ queryKey: ['unified-feed'] }, (old: any) =>
+      old?.pages?.length > 1
+        ? { ...old, pages: old.pages.slice(0, 1), pageParams: old.pageParams.slice(0, 1) }
+        : old
+    );
+    void singleFeed.refetch();
+    // window.scrollTo is a no-op here — body is the scrolling element.
+    scrollDocumentTo(0);
+  }, [queryClient, singleFeed, latestNewAt]);
+
+  // Back on the tab after a while away: the list still held what it fetched
+  // before the phone was put down, and nothing asked again (refetchOnWindowFocus
+  // is off), so a tab left open overnight came back to last night's feed at the
+  // top. A reader at the top gets the current feed; one who had scrolled down
+  // keeps their place and gets the new-posts chip from the head poll.
+  const resumeRef = useRef({ isHomeActive, refetch: () => { void singleFeed.refetch(); } });
+  resumeRef.current.isHomeActive = isHomeActive;
+  resumeRef.current.refetch = () => { void singleFeed.refetch(); };
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    let hiddenAt = document.visibilityState === 'hidden' ? Date.now() : 0;
+    const onVisibility = () => {
+      if (document.visibilityState === 'hidden') {
+        if (!hiddenAt) hiddenAt = Date.now();
+        return;
+      }
+      if (!hiddenAt) return;
+      const away = Date.now() - hiddenAt;
+      hiddenAt = 0;
+      if (away < FEED_RESUME_REFRESH_MS || !resumeRef.current.isHomeActive) return;
+      const top = Math.max(window.scrollY || 0, document.body?.scrollTop || 0, document.documentElement?.scrollTop || 0);
+      if (top > 100) return;
+      queryClient.setQueriesData({ queryKey: ['unified-feed'] }, (old: any) =>
+        old?.pages?.length > 1
+          ? { ...old, pages: old.pages.slice(0, 1), pageParams: old.pageParams.slice(0, 1) }
+          : old
+      );
+      resumeRef.current.refetch();
+    };
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => document.removeEventListener('visibilitychange', onVisibility);
+  }, [queryClient]);
+
+  // Classics feed no longer needed (trending removed)
+  const classicsFeed = { data: undefined } as any;
+
+  // Feed the carousel this month's most-viewed long-form videos. All-time
+  // ranking pinned the same old clips on top forever; the newest-first order
+  // before that filled it with seconds-long clips nobody had watched yet.
+  // Gated: this is a SECOND /api/feed that used to race the primary feed at boot
+  // (LCP audit 7/14), and it's dead weight entirely when shorts are disabled.
+  const scrollFeed = useUnifiedFeed({
+    limit: SCROLL_REEL_FETCH_LIMIT,
+    postType: 'video',
+    sortBy: 'views',
+    sortOrder: 'desc',
+    range: 'month',
+    status: 'all',
+    enabled: shortsEnabled && railsEnabled && isHomeActive && !isKidsMode,
+  });
+
+  const scrollPhotosFeed = useUnifiedFeed({
+    limit: 20, postType: 'feed-images', search: 'soundtrack',
+    sortBy: 'views', sortOrder: 'desc', range: 'month', status: 'all', enabled: shortsEnabled && railsEnabled && isHomeActive && !isKidsMode,
+  });
+
+  // Flip the rails gate once the primary feed's first page settles (data or error).
+  const primaryFeedSettled = useInterleavedFeed
+    ? (!!videosFeed.data || videosFeed.isError)
+    : (!!singleFeed.data || singleFeed.isError);
+  useEffect(() => {
+    if (!primaryFeedSettled) return;
+    // Let the first cards paint before enabling the supplementary queries.
+    let afterPaint = 0;
+    const beforePaint = requestAnimationFrame(() => {
+      afterPaint = requestAnimationFrame(() => setRailsEnabled(true));
+    });
+    return () => {
+      cancelAnimationFrame(beforePaint);
+      cancelAnimationFrame(afterPaint);
+    };
+  }, [primaryFeedSettled]);
+  // Safety net: a stalled/offline feed must never keep the rails blank forever.
+  useEffect(() => {
+    const t = setTimeout(() => setRailsEnabled(true), 4000);
+    return () => clearTimeout(t);
+  }, []);
+
+  const shortsCandidates = useMemo(() => {
+    if (!shortsEnabled || isKidsMode) return [];
+    const videos = flattenFeedPages(scrollFeed.data?.pages || [])
+      .filter(item => !item.streamInfo?.isPayPerView);
+    const photos = flattenFeedPages(scrollPhotosFeed.data?.pages || []).filter(isShortsPhoto);
+    return [...videos, ...photos];
+  }, [scrollFeed.data, scrollPhotosFeed.data, shortsEnabled, isKidsMode]);
+
+  const mapCarouselItem = useCallback((item: UnifiedFeedItem): ShortVideo => {
+      const id = String(item.tokenId);
+      const minterAddress = item.minter || '';
+      const voteType = (item as any).voteType ?? (item as any).userVote ?? (item as any).myVote ?? null;
+      const avatarUrl = item.minterAvatarUrl
+        ? (item.minterAvatarUrl.startsWith('http') ? item.minterAvatarUrl : buildAvatarUrl(minterAddress, item.minterAvatarUrl))
+        : undefined;
+
+      return {
+        id,
+        type: 'short' as const,
+        articleSlug: (item as any).articleSlug,
+        username: item.minterDisplayName || item.minterUsername || 'user',
+        verified: (item as any).minterUser?.isVerified || false,
+        avatar: avatarUrl || undefined,
+        likes: String(item.totalVotes?.for || 0),
+        dislikes: item.totalVotes?.against || 0,
+        thumbnail: getMediaUrl(item.imageUrl) || '',
+        videoUrl: item.videoUrl
+          ? getMediaUrl(item.videoUrl)!
+          : `https://dehubcdn.ams3.cdn.digitaloceanspaces.com/videos/${id}.mp4`,
+        hlsUrl: buildHlsUrl(item.hlsUrl),
+        transcodingStatus: item.transcodingStatus,
+        storyboard: toStoryboard(item.storyboard),
+        storedAspect: storedVideoAspect(item.videoInfo),
+        // Both, not one: the caption usually lives in the title, and a short
+        // that carried a title AND a description only ever showed the second.
+        title: item.name || '',
+        description: item.description || '',
+        sound: _copy("copy.9ef6cdcd044c", { defaultValue: "Original Sound" }),
+        ...shortsPhotoMedia(item),
+        comments: formatCount(item.commentCount || 0),
+        shares: '0',
+        repostCount: ((item as any).totalReposts || (item as any).reposts || 0) + ((item as any).quotes || 0),
+        views: formatCount(resolveViewCount(item)),
+        creatorUsername: item.minterUsername || 'user',
+        creatorId: minterAddress,
+        displayName: item.minterDisplayName || undefined,
+        isLiked: (item as any).isLiked ?? voteType === 'for',
+        isDisliked: (item as any).isDisliked ?? voteType === 'against',
+      };
+  }, [_copy]);
+
+  // Fetch curated radio stations for carousel. The carousel sits several posts
+  // down, so nobody sees it before scrolling; fetching at mount put a
+  // third-party request (radio-browser.info) into every first load. Wait for
+  // the first scroll anywhere — capture, because an inner scroller's scroll
+  // event does not bubble.
+  const [radioWanted, setRadioWanted] = useState(() => typeof window !== 'undefined' && window.scrollY > 0);
+  useEffect(() => {
+    if (radioWanted) return;
+    const want = () => setRadioWanted(true);
+    document.addEventListener('scroll', want, { capture: true, passive: true, once: true });
+    return () => document.removeEventListener('scroll', want, { capture: true });
+  }, [radioWanted]);
+  const { data: radioStations = [] } = useQuery({
+    queryKey: ['radio-stations-curated'],
+    queryFn: () => getCuratedCarouselStations(),
+    enabled: radioWanted,
+    // A fixed list of stations; there is nothing to refresh within a visit.
+    staleTime: 60 * 60 * 1000,
+  });
+
+  // The boost slot. A badge holder spends an allowance to put one of their
+  // posts here for a window; when several are running the server deals one
+  // weighted by tier, so what arrives is this viewer's draw rather than "the"
+  // boosted post. It renders through the pinned-post machinery below because
+  // that is the same job — one post, above the feed, filtered out of the run.
+  // The boost slot belongs on the unfiltered home feed only.
+  //
+  // It renders in its own block above the list, so it is untouched by the
+  // sort, the category filter, the post-type filter and hide-watched. On
+  // "Following" that means the first thing in a feed the viewer narrowed to
+  // people they follow is a paid post from somebody they do not — which reads
+  // as the filter being broken rather than as a boost. Mobile gates it the
+  // same way, to the main mixed feed.
+  const isDefaultHomeView =
+    selectedSort.value === DEFAULT_HOME_SORT.value &&
+    selectedPostType === 'all' &&
+    selectedCategories.length === 0;
+
+  // Boosts queue in the order they were booked: the oldest holds the top
+  // slot, each later one sits three posts below the one before, and when the
+  // oldest ends everything moves up. A newer boost never pushes an older one out.
+  const { data: boostQueue = [] } = useBoostQueue(isDefaultHomeView);
+  const liveBoosts = useMemo(() => (isDefaultHomeView ? boostQueue : []), [isDefaultHomeView, boostQueue]);
+  const boostSlot = liveBoosts[0];
+
+  // An explicit ?post= link always wins. Somebody following a shared link came
+  // for that post, and quietly showing them an advert instead would be the
+  // worst possible read of the intent.
+  // A disabled React Query observer may still expose data already cached by
+  // the default feed. Gate the read as well as the request so switching to a
+  // filtered feed cannot carry that cached paid slot across the boundary.
+  const boostedPostId = isDefaultHomeView && boostSlot ? String(boostSlot.tokenId) : undefined;
+  const featuredPostId = pinnedPostId ?? boostedPostId;
+  const isBoosted = !pinnedPostId && !!boostedPostId;
+
+  // Fetch the featured post — pinned by link, or dealt from the boost slot
+  const { data: pinnedPost, isLoading: isPinnedLoading } = useQuery({
+    queryKey: ['pinned-post', featuredPostId],
+    queryFn: () => getNFTInfo(featuredPostId!),
+    enabled: !!featuredPostId,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  // Convert pinned post (DeHubNFT) to feed item format
+  const pinnedItem = useMemo(
+    (): FeedItemType | null => (pinnedPost ? nftToFeedItem(pinnedPost) : null),
+    [pinnedPost],
+  );
+
+  // The rest of the queue, placed down the feed three posts apart.
+  const queuedBoostIds = useMemo(
+    () => liveBoosts.slice(1).map(b => String(b.tokenId)).filter(id => id !== String(pinnedPostId ?? '')),
+    [liveBoosts, pinnedPostId],
+  );
+  const queuedBoostPosts = useQueries({
+    queries: queuedBoostIds.map(id => ({
+      queryKey: ['pinned-post', id],
+      queryFn: () => getNFTInfo(id),
+      staleTime: 5 * 60 * 1000,
+    })),
+  });
+  const queuedBoostSignature = queuedBoostPosts.map(q => q.dataUpdatedAt).join(',');
+  const queuedBoostItems = useMemo(
+    () => queuedBoostPosts.map(q => (q.data ? nftToFeedItem(q.data) : null)).filter(Boolean) as FeedItemType[],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [queuedBoostSignature],
+  );
+  const boostedIds = useMemo(() => {
+    const ids = new Set(queuedBoostIds);
+    if (isBoosted && boostedPostId) ids.add(boostedPostId);
+    return ids;
+  }, [queuedBoostIds, isBoosted, boostedPostId]);
+
+  // ============================================================================
+  // INTERLEAVED ITEMS (from three separate feeds)
+  // ============================================================================
+
+  // Warm previews for nearby cards after the first feed paint.
+  const linkPreviewRows = useMemo(() => [
+    ...flattenFeedPages(textsFeed.data?.pages),
+    ...flattenFeedPages(imagesFeed.data?.pages),
+    ...flattenFeedPages(singleFeed.data?.pages),
+  ], [textsFeed.data, imagesFeed.data, singleFeed.data]);
+  usePrefetchLinkPreviews(linkPreviewRows, railsEnabled && isHomeActive);
+
+  const interleavedItems = useMemo((): FeedItemType[] => {
+    if (!useInterleavedFeed) return [];
+    
+    // Extract all items from each feed
+    // Deduped: each of these three pages independently, and offset paging
+    // repeats rows across a page boundary. See lib/feed-pages.
+    const allVideos = flattenFeedPages(videosFeed.data?.pages);
+    const allImages = flattenFeedPages(imagesFeed.data?.pages);
+    const allTexts = flattenFeedPages(textsFeed.data?.pages);
+    
+    // Filter out pinned post from all feeds
+    const filterPinned = (items: any[]) => 
+      featuredPostId ? items.filter(item => String(item.tokenId) !== String(featuredPostId)) : items;
+    
+    const filteredVideos = filterPinned(allVideos);
+    const filteredImages = filterPinned(allImages);
+    const filteredTexts = filterPinned(allTexts);
+    
+    // Map to component types
+    const mappedVideos = filteredVideos.map((item, i) => mapToVideoItem(item, i));
+    const mappedImages = filteredImages.map((item, i) => mapToImagePost(item, i));
+    const mappedTexts = filteredTexts.map((item, i) => mapToTextPost(item, i));
+    
+    // Interleave according to pattern
+    const interleaved = interleaveByPattern(mappedVideos, mappedImages, mappedTexts, CONTENT_PATTERN);
+    
+    // Convert to FeedItemType
+    return interleaved.map(item => {
+      switch (item.type) {
+        case 'video':
+          return { type: 'video' as const, data: item.data };
+        case 'image':
+          return { type: 'image' as const, data: item.data };
+        case 'text':
+          return { type: 'post' as const, data: item.data };
+      }
+    });
+  }, [useInterleavedFeed, videosFeed.data, imagesFeed.data, textsFeed.data, featuredPostId]);
+
+  // ============================================================================
+  // SINGLE FEED ITEMS (when post type filter is active OR global sort mode)
+  // ============================================================================
+
+  const singleFeedItems = useMemo((): FeedItemType[] => {
+    if (useInterleavedFeed || !singleFeed.data?.pages) return [];
+    
+    let allItems = flattenFeedPages(singleFeed.data.pages);
+    
+    // Filter out pinned post
+    const filteredItems = featuredPostId 
+      ? allItems.filter(item => String(item.tokenId) !== String(featuredPostId))
+      : allItems;
+    
+    // Map to feed item types
+    const mapItem = (item: any, index: number): FeedItemType => {
+      const inferredType = item.postType || (
+        item.videoUrl ? 'video' :
+        (item.imageUrls && item.imageUrls.length > 0) ? 'feed-images' :
+        'feed-simple'
+      );
+      
+      switch (inferredType) {
+        case 'feed-images':
+          return { type: 'image', data: mapToImagePost(item, index) };
+        case 'feed-simple':
+          return { type: 'post', data: mapToTextPost(item, index) };
+        case 'live':
+        case 'video':
+        default:
+          return { type: 'video', data: mapToVideoItem(item, index) };
+      }
+    };
+    
+    return filteredItems.map(mapItem);
+  }, [useInterleavedFeed, singleFeed.data, featuredPostId, selectedSort.value]);
+
+  // Final organic items before filtering
+  const rawItems = useInterleavedFeed ? interleavedItems : singleFeedItems;
+
+  // Tiered home-feed visibility. Posting is unlimited, profiles show
+  // everything, and followers keep seeing all of it — but the general home
+  // feed carries only each author's first `postsPerDay` posts per UTC day,
+  // where the allowance comes from the AUTHOR's own badge tier (1 with no
+  // badge, +1 per tier; see lib/post-quota.ts). Under Latest sort the kept
+  // items are the day's newest; under ranked sorts they are the day's
+  // top-ranked. Items with no identifiable author pass through untouched.
+  const tierCappedItems = useMemo(() => {
+    if (deferredSort.value === 'following') return rawItems;
+    const seen = new Map<string, number>();
+    return rawItems.filter(item => {
+      const d = item.data as any;
+      const isText = item.type === 'post';
+      const raw = isText ? d?.author?.id : d?.creatorId;
+      if (raw == null) return true;
+      const authorId = String(raw).trim().toLowerCase();
+      if (!authorId) return true;
+      const allowance = getPostAllowanceForBadge(
+        isText ? d?.author?.badgeBalance : d?.creatorBadgeBalance,
+        isText ? d?.author?.handle : d?.creatorUsername,
+      ).postsPerDay;
+      const created = new Date(d?.createdAt ?? '');
+      // Bucket by UTC day so yesterday's slots are never spent on today's posts.
+      const day = Number.isFinite(created.getTime()) ? created.toISOString().slice(0, 10) : 'unknown';
+      const key = `${authorId}|${day}`;
+      const count = seen.get(key) ?? 0;
+      if (count >= allowance) return false;
+      seen.set(key, count + 1);
+      return true;
+    });
+  }, [rawItems, deferredSort.value]);
+
+  // Client-side multi-category filtering (when >1 category selected, API returns all)
+  const organicItems = useMemo(() => {
+    const deletedIds = getDeletedPostIds();
+    let filtered = deletedIds.size > 0
+      ? tierCappedItems.filter(item => !deletedIds.has(String((item.data as any)?.id)))
+      : tierCappedItems;
+    // Videos this account has already played. Only video items are dropped —
+    // the watch record on an image or a text post means "was on screen", not
+    // "was watched".
+    if (hideWatched && watchedIds.size > 0) {
+      filtered = filtered.filter(item =>
+        item.type !== 'video' || !watchedIds.has(String((item.data as any)?.id))
+      );
+    }
+    // One follow group instead of everyone you follow.
+    if (isGroupFiltered) {
+      filtered = filtered.filter(item => {
+        const d = item.data as any;
+        const raw = item.type === 'post' ? d?.author?.id : d?.creatorId;
+        return !!raw && followGroupMembers.has(String(raw).toLowerCase());
+      });
+    }
+    if (selectedCategories.length <= 1) return filtered; // 0 = all, 1 = API-filtered
+    const catSet = new Set(selectedCategories.map(c => c.toLowerCase()));
+    return filtered.filter(item => {
+      const itemCats: string[] = (item.data as any)?.category || (item.data as any)?.categories || [];
+      if (!itemCats.length) return false;
+      return itemCats.some(c => catSet.has(String(c).toLowerCase()));
+    });
+  }, [tierCappedItems, selectedCategories, hideWatched, watchedIds, isGroupFiltered, followGroupMembers]);
+
+  // Served POVR ads spliced in after every `adInterval` organic items — eight
+  // by default, sixteen for a reader who asked for fewer (Settings → Content).
+  // Ad serving failures return [] so the feed is never blocked by ads.
+  const { data: servedAds = [] } = useServedAds('home', {
+    count: 4,
+    categories: selectedCategories,
+    // No ads to children — separately from safety, and before the request is
+    // made rather than after: an ad fetched and then not rendered is still an
+    // impression somebody is billed for.
+    enabled: organicItems.length > 0 && !isKidsMode,
+  });
+  const itemsWithAds = useMemo((): FeedItemType[] => {
+    if (servedAds.length === 0 || organicItems.length < adInterval) return organicItems;
+    const withAds: FeedItemType[] = [];
+    let adIdx = 0;
+    organicItems.forEach((item, i) => {
+      withAds.push(item);
+      if ((i + 1) % adInterval === 0 && adIdx < servedAds.length) {
+        withAds.push({ type: 'ad', data: servedAds[adIdx] });
+        adIdx++;
+      }
+    });
+    return withAds;
+  }, [organicItems, servedAds, adInterval]);
+
+  // Boost N (after the top one) goes after N×3 posts.
+  const BOOST_SPACING = 3;
+  const items = useMemo((): FeedItemType[] => {
+    const organic = boostedIds.size
+      ? itemsWithAds.filter(item => !boostedIds.has(String((item.data as any)?.id)))
+      : itemsWithAds;
+    if (!queuedBoostItems.length) return organic;
+    const out: FeedItemType[] = [];
+    let next = 0;
+    organic.forEach((item, i) => {
+      out.push(item);
+      if ((i + 1) % BOOST_SPACING === 0 && next < queuedBoostItems.length) out.push(queuedBoostItems[next++]);
+    });
+    while (next < queuedBoostItems.length) out.push(queuedBoostItems[next++]);
+    return out;
+  }, [itemsWithAds, boostedIds, queuedBoostItems]);
+
+  const shortsCount = shortsEnabled && !isKidsMode
+    ? shortsBatchCount(items.filter(item => item.type !== 'ad').length) : 0;
+  const shortsRotation = useShortsRotation(
+    shortsCandidates, shortsCount, `${walletAddress ?? 'guest'}:${shuffleKey}:${shortsVisit}`,
+    `home-shorts-recent:${walletAddress ?? 'guest'}`, shortsHistoryStore,
+    isHomeActive && (!!scrollFeed.data || scrollFeed.isError) && (!!scrollPhotosFeed.data || scrollPhotosFeed.isError),
+    (!scrollFeed.hasNextPage || scrollFeed.isError) && (!scrollPhotosFeed.hasNextPage || scrollPhotosFeed.isError),
+  );
+  const shortsBatches = useMemo(() => shortsRotation.batches.map(batch => batch.map(mapCarouselItem)),
+    [shortsRotation.batches, mapCarouselItem]);
+  // What a row's viewer carries on into after the row's own shorts, and the
+  // pages behind it: a row used to stop dead on its tenth short.
+  const shortsPool = useMemo(() => shortsCandidates.map(mapCarouselItem), [shortsCandidates, mapCarouselItem]);
+  const shortsHasMore = !!(scrollFeed.hasNextPage || scrollPhotosFeed.hasNextPage);
+  const shortsLoadingMore = scrollFeed.isFetchingNextPage || scrollPhotosFeed.isFetchingNextPage;
+  const loadMoreShorts = useCallback(() => {
+    if (scrollFeed.hasNextPage && !scrollFeed.isFetching) void scrollFeed.fetchNextPage();
+    if (scrollPhotosFeed.hasNextPage && !scrollPhotosFeed.isFetching) void scrollPhotosFeed.fetchNextPage();
+  }, [scrollFeed.hasNextPage, scrollFeed.isFetching, scrollFeed.fetchNextPage,
+    scrollPhotosFeed.hasNextPage, scrollPhotosFeed.isFetching, scrollPhotosFeed.fetchNextPage]);
+  // Rows further down the feed need more clips, but nobody sees them before
+  // scrolling: fetch the extra pages (50 videos each) after the first touch.
+  const interacted = useFirstInteraction();
+  useEffect(() => {
+    if (!isHomeActive || !interacted || !shortsCount || shortsRotation.batches.length >= shortsCount) return;
+    if (scrollFeed.hasNextPage && !scrollFeed.isFetching && !scrollFeed.isError) void scrollFeed.fetchNextPage();
+    if (scrollPhotosFeed.hasNextPage && !scrollPhotosFeed.isFetching && !scrollPhotosFeed.isError) void scrollPhotosFeed.fetchNextPage();
+  }, [isHomeActive, interacted, shortsCount, shortsRotation.batches.length, scrollFeed.hasNextPage, scrollFeed.isFetching,
+    scrollFeed.isError, scrollFeed.fetchNextPage, scrollPhotosFeed.hasNextPage, scrollPhotosFeed.isFetching,
+    scrollPhotosFeed.isError, scrollPhotosFeed.fetchNextPage]);
+
+  const feedItemId = (item: FeedItemType) => String((item.data as { id?: string | number } | undefined)?.id);
+  // Swap an optimistic post for its real counterpart once the feed has it.
+  //
+  // Except a video still transcoding: the server's copy has nothing to play
+  // yet, so swapping would turn the creator's own video, playing from the local
+  // file, back into "Processing". The local copy stays (and the server's is
+  // kept out of the list below) until the transcode is done or has failed — a
+  // copy restored from storage has lost its blob, so it goes straight away.
+  const heldOptimisticIds = useMemo(() => {
+    const held = new Set<string>();
+    if (optimisticPosts.length === 0 || items.length === 0) return held;
+    const feedById = new Map(items.map(item => [feedItemId(item), item]));
+    optimisticPosts.forEach(op => {
+      const server = feedById.get(op.id);
+      if (!server || op.type !== 'video' || op.mediaExpired || server.type !== 'video') return;
+      const status = queryClient.getQueryData<string>(['video-processing', op.id])
+        ?? (server.data as VideoItem).transcodingStatus;
+      if (status === 'pending' || status === 'on') held.add(op.id);
+    });
+    return held;
+  }, [items, optimisticPosts, queryClient]);
+  useEffect(() => {
+    if (optimisticPosts.length === 0 || items.length === 0) return;
+    const feedIds = new Set(items.map(item => feedItemId(item)));
+    optimisticPosts.forEach(op => {
+      if (feedIds.has(op.id) && !heldOptimisticIds.has(op.id)) {
+        removeOptimisticPost(op.id);
+      }
+    });
+  }, [items, optimisticPosts, removeOptimisticPost, heldOptimisticIds]);
+  // Every post still shown as its optimistic card is kept out, not only the
+  // held ones, so the two copies never show at once for the frame between the
+  // server's copy arriving and the card being removed.
+  const listedItems = useMemo(() => {
+    if (optimisticPosts.length === 0) return items;
+    const shown = new Set(optimisticPosts.map(op => op.id));
+    return items.filter(item => !shown.has(feedItemId(item)));
+  }, [items, optimisticPosts]);
+
+  // ============================================================================
+  // INFINITE SCROLL
+  // ============================================================================
+
+  // Determine if any feed has more content
+  const hasNextPage = useInterleavedFeed 
+    ? (videosFeed.hasNextPage || imagesFeed.hasNextPage || textsFeed.hasNextPage)
+    : singleFeed.hasNextPage;
+
+  const isFetchingNextPage = useInterleavedFeed
+    ? (videosFeed.isFetchingNextPage || imagesFeed.isFetchingNextPage || textsFeed.isFetchingNextPage)
+    : singleFeed.isFetchingNextPage;
+
+  const isLoading = useInterleavedFeed
+    ? (videosFeed.isLoading || imagesFeed.isLoading || textsFeed.isLoading)
+    : singleFeed.isLoading;
+
+  // Background fetching (filter switches with cached/previous data) — used to show a
+  // non-blocking progress shimmer so the UI never feels frozen while requests run.
+  const isFetching = useInterleavedFeed
+    ? (videosFeed.isFetching || imagesFeed.isFetching || textsFeed.isFetching)
+    : singleFeed.isFetching;
+
+  // ---- Filter loader ---------------------------------------------------------
+  // A chip tap is only "done" once BOTH halves have caught up: the deferred
+  // params have committed (they lag the tap by design, see useDeferredValue
+  // above) and the resulting request has settled. Comparing by value rather
+  // than by reference because every optimistic setter allocates a fresh array
+  // or object, so the identities never converge.
+  const filterSignature = useCallback(
+    (
+      sort: SortOption,
+      date: DateFilterOption,
+      postType: HomePostTypeValue,
+      cats: string[],
+      content: ContentTypeFilters,
+    ) =>
+      [
+        sort.value,
+        date.value,
+        postType,
+        [...cats].sort().join(','),
+        `${content.ppv ? 1 : 0}${content.w2e ? 1 : 0}${content.locked ? 1 : 0}`,
+      ].join('|'),
+    [],
+  );
+
+  const requestedFilters = filterSignature(
+    optimisticSort, optimisticDate, optimisticPostType, optimisticCategories, optimisticContentFilters,
+  );
+  const appliedFilters = filterSignature(
+    deferredSort, deferredDate, deferredPostType, deferredCategories, deferredContentFilters,
+  );
+
+  const filterTransition = useFeedFilterTransition(
+    isFetching || requestedFilters !== appliedFilters,
+  );
+  useEffect(() => {
+    beginFilterTransitionRef.current = filterTransition.begin;
+  }, [filterTransition.begin]);
+
+  const isError = useInterleavedFeed
+    ? (videosFeed.isError || imagesFeed.isError || textsFeed.isError)
+    : singleFeed.isError;
+
+  const refetch = useCallback(() => {
+    if (useInterleavedFeed) {
+      videosFeed.refetch();
+      imagesFeed.refetch();
+      textsFeed.refetch();
+    } else {
+      singleFeed.refetch();
+    }
+  }, [useInterleavedFeed, videosFeed, imagesFeed, textsFeed, singleFeed]);
+
+  // Fetch next page from all feeds that have more content
+  const fetchNextPage = useCallback(() => {
+    const promises: Promise<any>[] = [];
+    
+    if (useInterleavedFeed) {
+      if (videosFeed.hasNextPage && !videosFeed.isFetchingNextPage) {
+        promises.push(videosFeed.fetchNextPage());
+      }
+      if (imagesFeed.hasNextPage && !imagesFeed.isFetchingNextPage) {
+        promises.push(imagesFeed.fetchNextPage());
+      }
+      if (textsFeed.hasNextPage && !textsFeed.isFetchingNextPage) {
+        promises.push(textsFeed.fetchNextPage());
+      }
+    } else {
+      if (singleFeed.hasNextPage && !singleFeed.isFetchingNextPage) {
+        promises.push(singleFeed.fetchNextPage());
+      }
+    }
+    
+    return Promise.all(promises);
+  }, [useInterleavedFeed, videosFeed, imagesFeed, textsFeed, singleFeed]);
+
+  // Infinite scroll observer
+  useEffect(() => {
+    if (!loaderRef.current || !hasNextPage) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingRef.current) {
+          isFetchingRef.current = true;
+          fetchNextPage().finally(() => {
+            isFetchingRef.current = false;
+          });
+        }
+      },
+      { threshold: 0, rootMargin: INFINITE_SCROLL_PREFETCH_MARGIN }
+    );
+
+    observer.observe(loaderRef.current);
+    return () => observer.disconnect();
+  }, [hasNextPage, fetchNextPage]);
+
+  // ============================================================================
+  // RENDER HELPERS
+  // ============================================================================
+
+  const visibleOptimisticPosts = optimisticPosts.filter(op => !getDeletedPostIds().has(op.id));
+
+  // A post of the viewer's own lands in the slot above the feed in their
+  // chosen style (lib/post-landing). Its card waits out of sight while the
+  // composer is still open, and comes in once it closes and Home is showing.
+  const optimisticSlotRef = useRef<HTMLDivElement>(null);
+  const optimisticIdsKey = visibleOptimisticPosts.map(op => op.id).join(',');
+  const landPending = useCallback(() => {
+    const slot = optimisticSlotRef.current;
+    if (!slot || !optimisticIdsKey) return true;
+    const ids = optimisticIdsKey.split(',');
+    const lone = ids.length === 1 ? slot : null;
+    let found = true;
+    for (const id of ids) {
+      const card = slot.querySelector<HTMLElement>(`[data-feed-token-id="${CSS.escape(id)}"]`);
+      if (!card) {
+        found = false;
+        continue;
+      }
+      if (isPostLandingWaiting(id)) {
+        holdPostLanding(card, lone);
+        continue;
+      }
+      if (!isHomeActive) continue;
+      const landing = takePostLanding(id);
+      if (!landing) {
+        releasePostLanding(card, lone);
+        continue;
+      }
+      scrollDocumentTo(0);
+      runPostLanding(landing, card, lone);
+    }
+    return found;
+  }, [isHomeActive, optimisticIdsKey]);
+  useLayoutEffect(() => {
+    // A card that moves into its page surface does so a frame later.
+    const frame = landPending() ? 0 : requestAnimationFrame(() => { landPending(); });
+    // A composer that never closed on it lets a waiting card go.
+    const late = optimisticIdsKey ? window.setTimeout(landPending, 10_500) : 0;
+    return () => {
+      cancelAnimationFrame(frame);
+      window.clearTimeout(late);
+    };
+  }, [landPending, optimisticIdsKey]);
+  useEffect(() => onPostLandingBegin(() => { landPending(); }), [landPending]);
+
+  // Desktop can show a row of cards. On narrow screens let viewport
+  // observation mount the next cards after the first one commits.
+  const eagerCardCount = useIsDesktopViewport() ? 3 : 1;
+  const renderFeedItem = (item: FeedItemType, index: number, section: 'optimistic' | 'pinned' | 'feed' = 'feed', beforeShorts = false, afterShorts = false) => {
+    const firstFeedPost = isFirstVisibleFeedCard(section, index, visibleOptimisticPosts.length, !!pinnedItem);
+    const card = (() => {
+      switch (item.type) {
+        case 'post':
+          return <PostCard key={`post-${item.data.id}`} post={item.data} />;
+        case 'video':
+          return <VideoCard key={`video-${item.data.id}`} video={item.data} aboveFold={index < 3} deferMediaOnBoot firstFeedPost={firstFeedPost} />;
+        case 'image':
+          return <ImageCard key={`image-${item.data.id}`} post={item.data} aboveFold={index < 3} />;
+        case 'shorts':
+          return <ShortsReel key={`shorts-${index}`} shorts={item.data} pool={shortsPool} onLoadMore={loadMoreShorts}
+            hasMore={shortsHasMore} isLoadingMore={shortsLoadingMore} />;
+        case 'ad':
+          return <SponsoredAdCard key={`ad-${item.data.serveId}`} ad={item.data} />;
+        default:
+          return null;
+      }
+    })();
+
+    // Wrap non-shorts items in a bento container
+    if (item.type === 'shorts' || !card) return card;
+
+    const key = item.type === 'post' ? `bento-post-${item.data.id}`
+              : item.type === 'video' ? `bento-video-${(item.data as VideoItem).id}`
+              : item.type === 'ad' ? `bento-ad-${(item.data as ServedAd).serveId}`
+              : `bento-image-${(item.data as ImagePost).id}`;
+
+    // `auto <length>` fallback only applies before a card's first render; once
+    // rendered, the browser remembers the card's real size and reuses it as the
+    // skipped-state placeholder, so scrolling a card off and back never snaps it
+    // to a wrong fixed height and shifts everything below it.
+    const intrinsicH = item.type === 'video' ? '520px' : item.type === 'image' ? '640px' : item.type === 'ad' ? '420px' : '320px';
+    // Text, image and audio posts open on their own page by moving this very
+    // card there (no reload); video keeps its own viewer.
+    const retained = item.type === 'post' || item.type === 'image' || (item.type === 'video' && !!(item.data as VideoItem).isAudio);
+    const frameProps = {
+      'data-feed-item': true,
+      'data-feed-token-id': item.type === 'ad' ? undefined : (item.data as any)?.id,
+      'data-feed-before-shorts': beforeShorts ? '' : undefined,
+      'data-feed-after-shorts': afterShorts ? '' : undefined,
+      'data-cinematic': item.type,
+      'data-cinematic-first': firstFeedPost ? '' : undefined,
+      className: 'rounded-2xl border border-white/[0.12] bg-white/[0.03] p-3',
+    };
+    // A boosted card marks itself (lit corner bolt, "Boosted" in the time row).
+    const boosted = (section === 'pinned' && isBoosted)
+      || (index >= 0 && queuedBoostIds.includes(String((item.data as any)?.id)));
+    return (
+      <WindowedFeedItem
+        key={key}
+        {...(retained ? {} : frameProps)}
+        eager={index < eagerCardCount} estimatedHeight={parseInt(intrinsicH, 10)}
+        // A card arriving with a new page eases in once (the slot outlives
+        // windowing, so scrolling back never replays it). Single column only:
+        // masonry re-packs columns and would replay it.
+        data-feed-arrive={index >= 3 && colCount <= 1 ? '' : undefined}
+        vanishOnDislike={item.type === 'ad' ? undefined : (item.data as any)?.id}
+      >
+        <BoostedPostContext.Provider value={boosted}>
+          {retained
+            ? <RetainedPostSurface id={String(item.data.id)} frameProps={frameProps}>{card}</RetainedPostSurface>
+            : card}
+        </BoostedPostContext.Provider>
+      </WindowedFeedItem>
+    );
+  };
+
+  // Live carousel insert position: 4 posts after the radio carousel
+  const LIVE_INSERT_AFTER = RADIO_INSERT_AFTER + 4;
+  // New members sit three posts before the second Shorts carousel.
+  const NEW_MEMBERS_INSERT_AFTER = LIVE_INSERT_AFTER + 3;
+  // Leaderboard carousel: 10 posts after the live streams carousel
+  const LEADERBOARD_INSERT_AFTER = LIVE_INSERT_AFTER + LEADERBOARD_INSERT_AFTER_LIVE_OFFSET;
+
+  // Detect number of masonry columns based on viewport + sidebar state
+  // Multi-column masonry only when sidebar is collapsed; standard mode is always 1 column
+  const [colCount, setColCount] = useState(1);
+  const colChangeTimer = useRef<ReturnType<typeof setTimeout>>();
+  useEffect(() => {
+    // Clear any pending deferred update
+    if (colChangeTimer.current) clearTimeout(colChangeTimer.current);
+
+    const computeCols = () => {
+      if (!isCollapsed) return 1;
+      // Always 3 columns in collapsed desktop mode — content scales down at narrower widths
+      return 3;
+    };
+
+    // Defer column change by 500ms so masonry doesn't re-layout during the width animation
+    colChangeTimer.current = setTimeout(() => {
+      setColCount(computeCols());
+    }, 500);
+
+    const onResize = () => setColCount(computeCols());
+    window.addEventListener('resize', onResize);
+    return () => {
+      if (colChangeTimer.current) clearTimeout(colChangeTimer.current);
+      window.removeEventListener('resize', onResize);
+    };
+  }, [isCollapsed]);
+
+  const renderMasonryGrid = (nodes: ReactNode[], feedItems?: FeedItemType[], padEnd = false, beforeShorts = false, afterShorts = false) => {
+    if (colCount <= 1) {
+      return <div className="space-y-3" data-feed-before-shorts={beforeShorts ? '' : undefined} data-feed-after-shorts={afterShorts ? '' : undefined}>{nodes}</div>;
+    }
+    // Measured masonry: items are packed shortest-column-first by their real
+    // rendered heights, so bottoms stay as even as the content allows. Any
+    // residual hole before a following carousel (padEnd) is covered by ads
+    // sized to the exact gap; adjacent short columns share one wide ad.
+    const estimatePx = (item?: FeedItemType): number => {
+      switch (item?.type) {
+        case 'video': return 520;
+        case 'image': return 640;
+        case 'post': return 320;
+        case 'ad': return 420;
+        default: return 380;
+      }
+    };
+    return (
+      <MasonrySegment
+        items={nodes}
+        estimates={nodes.map((_, i) => estimatePx(feedItems?.[i]))}
+        colCount={colCount}
+        padEnd={padEnd}
+        beforeShorts={beforeShorts}
+        afterShorts={afterShorts}
+      />
+    );
+  };
+
+
+
+  // Keep the opening masonry row full before its first full-width carousel.
+  const renderFeedWithShorts = () => {
+    const organicCount = listedItems.filter(item => item.type !== 'ad').length;
+    type Segment = { items: FeedItemType[]; start: number; inserts: ReactElement[]; shorts: boolean };
+    const segments: Segment[] = [];
+    let posts = 0;
+    let start = 0;
+    listedItems.forEach((item, index) => {
+      if (item.type === 'ad') return;
+      posts++;
+      const inserts: ReactElement[] = [];
+      const batchIndex = homeReelBatchIndex(posts, colCount, organicCount);
+      const batch = batchIndex >= 0 ? shortsBatches[batchIndex] : undefined;
+      const hasShorts = !!batch?.length && !isKidsMode;
+      if (!isKidsMode) {
+        if (hasShorts) inserts.push(
+          <div key={`shorts-${shortsRotation.generation}-${batchIndex}`} data-shorts-after-post={posts}>
+            <ShortsReel shorts={batch!} pool={shortsPool} onLoadMore={loadMoreShorts}
+              hasMore={shortsHasMore} isLoadingMore={shortsLoadingMore} />
+          </div>,
+        );
+        // Keep other inserts at least two posts away from a Shorts boundary.
+        if (posts === homeSuggestedAfter(colCount) && isAuthenticated) inserts.push(<MobileWhoToFollowCarousel key="who-to-follow" />);
+        if (posts === RADIO_INSERT_AFTER && radioStations.length) inserts.push(
+          <RadioCarouselSection key="radio" stations={radioStations} />,
+        );
+        if (posts === LIVE_INSERT_AFTER && liveNowStreams.length) inserts.push(
+          <div key="live-now" className="space-y-2">
+            <div className="flex items-center gap-2 px-1">
+              {liveNowStreams.some(stream => stream.isLive) && <span data-live-pulse className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />}
+              <h3 className="text-white font-semibold text-sm">{_copy("copy.e4629246c285", { defaultValue: "Livestreams" })}</h3>
+            </div>
+            <SwipeableCarousel>
+              <div className="flex gap-3 overflow-x-auto scrollbar-hide pr-4">
+                {liveNowStreams.map(stream => <div key={stream.id} className="flex-shrink-0 w-72 sm:w-80"><LiveCard stream={stream} /></div>)}
+              </div>
+            </SwipeableCarousel>
+          </div>,
+        );
+        if (posts === NEW_MEMBERS_INSERT_AFTER) inserts.push(<NewMembersCarousel key="new-members" />);
+        if (posts === LEADERBOARD_INSERT_AFTER) inserts.push(<LeaderboardCarousel key="leaderboard" />);
+      }
+      if (inserts.length) {
+        segments.push({ items: listedItems.slice(start, index + 1), start, inserts, shorts: hasShorts });
+        start = index + 1;
+      }
+    });
+    if (start < listedItems.length) segments.push({ items: listedItems.slice(start), start, inserts: [], shorts: false });
+    const renderInsert = (node: ReactElement) => {
+      const height = insertEstimate(String(node.key));
+      return (
+        <WindowedFeedItem key={node.key} className="my-3" estimatedHeight={height}>
+          <Suspense fallback={<div aria-hidden="true" style={{ height }} />}>{node}</Suspense>
+        </WindowedFeedItem>
+      );
+    };
+    // One column: every card and insert is a sibling in one list, each under
+    // its own key. Grouping them into segments keyed by start index meant a
+    // row arriving late (a Shorts batch, the live row) re-keyed every segment
+    // after it, so React rebuilt those cards from scratch: an open comments
+    // sheet vanished with its card, and the windowed cards came back at their
+    // estimated heights, throwing the reader thousands of pixels up the feed.
+    if (colCount <= 1) {
+      return (
+        <div className="mb-3 space-y-3">
+          {segments.flatMap((segment, index) => [
+            ...segment.items.map((item, offset) => renderFeedItem(item, segment.start + offset, 'feed',
+              segment.shorts && offset === segment.items.length - 1,
+              offset === 0 && index > 0 && segments[index - 1].shorts)),
+            ...segment.inserts.map(renderInsert),
+          ])}
+        </div>
+      );
+    }
+    return <>{segments.flatMap((segment, index) => [
+      <div key={`feed-segment-${segment.start}`} className="mb-3">
+        {renderMasonryGrid(
+          segment.items.map((item, offset) => renderFeedItem(item, segment.start + offset, 'feed',
+            segment.shorts && offset === segment.items.length - 1)),
+          segment.items, segment.inserts.length > 0, segment.shorts, index > 0 && segments[index - 1].shorts,
+        )}
+      </div>,
+      // Carousel keys live beside the segments so an arriving radio/live row
+      // cannot remount a Shorts viewer or reset its horizontal scroll.
+      // Shorts rows and carousels hold the most media on the page; windowed like
+      // the cards so a row far above lets go of its videos and posters.
+      ...segment.inserts.map(renderInsert),
+    ])}</>;
+  };
+
+  // Determine loading state
+  const hasQueryData = useInterleavedFeed
+    ? (videosFeed.data?.pages?.length || imagesFeed.data?.pages?.length || textsFeed.data?.pages?.length)
+    : (singleFeed.data?.pages?.length);
+  const hasCachedData = hasQueryData && items.length > 0;
+  const isLoadingState = !hasQueryData && (isLoading || (pinnedPostId && isPinnedLoading));
+  /** A filter switch owns the column: cold boot still gets card skeletons. */
+  const showFilterLoader = filterTransition.active && !isLoadingState;
+
+  const { isAutoRetrying, retriesExhausted } = useAutoRetryFeed({
+    itemCount: items.length,
+    // An in-flight filter switch is not an empty feed — without this the retry
+    // loop fires against the results the user is already waiting for.
+    isLoading: isLoadingState || filterTransition.active,
+    isError,
+    refetch,
+  });
+
+  return (
+    <div data-feed-root className={cn("relative p-2 sm:p-3 pt-0 sm:pt-0 space-y-3", isCollapsed && "pt-2 sm:pt-2")}>
+      {/* Filters - ALWAYS accessible so users can change settings even when feed is empty/retrying.
+          When a portal target is provided, render the panel into the sticky tab bar so it stays
+          visible while scrolling; otherwise fall back to the in-flow panel. */}
+      {(() => {
+        const filterPanel = (
+          <motion.div
+            initial={behindNav ? feedDrawerClosed : { opacity: 0, height: 0 }}
+            animate={behindNav ? feedDrawerOpen : { opacity: 1, height: 'auto' }}
+            exit={behindNav ? feedDrawerExit : { opacity: 0, height: 0 }}
+            transition={behindNav ? feedDrawerTransition(reduceMotion) : { duration: 0.25, ease: 'easeOut' }}
+            data-home-filter-drawer={behindNav ? '' : undefined}
+            data-feed-island-surface={behindNav ? '' : undefined}
+            className={cn(behindNav ? "w-full overflow-hidden rounded-xl pt-9 pointer-events-auto" : "overflow-y-clip overflow-x-visible", !behindNav && portalTarget && "order-1 mt-2")}
+          >
+            <div
+              ref={bentoRef}
+              data-no-swipe
+              data-feed-filter-panel
+              data-home-filter-panel
+              className={cn(
+                "rounded-xl border border-white/[0.12] bg-white/[0.03] backdrop-blur-[24px] px-2 sm:px-3 py-3 space-y-4",
+                portalTarget && "max-h-[calc(100vh-12rem)] overflow-y-auto overflow-x-visible scrollbar-hide",
+                behindNav && "border-0 bg-transparent backdrop-blur-none"
+              )}
+            >
+              <SortFilterSection
+                selectedSort={optimisticSort}
+                onSortSelect={handleSortSelect}
+                selectedCategories={optimisticCategories}
+                onCategoryToggle={(cat) => {
+                  setSelectedCategories(prev =>
+                    prev.includes(cat) ? prev.filter(c => c !== cat) : [...prev, cat]
+                  );
+                }}
+                onCategoryClear={() => setSelectedCategories([])}
+                categories={categories}
+                selectedDate={optimisticDate}
+                onDateSelect={setSelectedDate}
+                selectedPostType={optimisticPostType}
+                onPostTypeSelect={(v) => {
+                  if (v === 'video') {
+                    window.dispatchEvent(new CustomEvent('switch-home-tab', { detail: 'videos' }));
+                  } else if (v === 'feed-images') {
+                    window.dispatchEvent(new CustomEvent('switch-home-tab', { detail: 'images' }));
+                  } else {
+                    setSelectedPostType(v);
+                  }
+                }}
+                contentFilters={optimisticContentFilters}
+                onContentFilterToggle={toggleContentFilter}
+                presetsRow={(
+                  <Suspense fallback={null}><FeedPresetsRow
+                    presets={feedPresets}
+                    activeName={activePresetName}
+                    onApply={applyPreset}
+                    onDelete={deleteFeedPreset}
+                    canSaveCurrent={filterLineItems.length > 0 && !activePresetName}
+                    onSaveCurrent={(name) => saveFeedPreset({ name, ...currentPresetShape })}
+                  /></Suspense>
+                )}
+                onReset={() => {
+                  setSelectedSort(DEFAULT_HOME_SORT);
+                  setSelectedCategories([]);
+                  setSelectedDate(DATE_FILTER_OPTIONS[0]);
+                  setSelectedPostType('all');
+                  resetContentFilters();
+                }}
+              />
+            </div>
+          </motion.div>
+        );
+
+        if (portalTarget) {
+          return behindNav || showFilters ? createPortal(
+            <AnimatePresence mode="wait">{showFilters && filterPanel}</AnimatePresence>,
+            portalTarget
+          ) : null;
+        }
+
+        return (
+          <AnimatePresence mode="wait">
+            {showFilters && filterPanel}
+          </AnimatePresence>
+        );
+      })()}
+
+      {/* Active filters ride the drawer under the pill (below). The feed
+          leaves it room so the first post starts 12px under the drawer, the
+          same gap it keeps from the bare pill. */}
+      {(() => {
+        if (!showFilterDrawer) return null;
+        const room = <div data-feed-drawer-room aria-hidden="true" style={{ height: FEED_DRAWER_HEIGHT }} />;
+        return chipsTarget ? createPortal(room, chipsTarget) : portalsReady ? room : null;
+      })()}
+
+      {/* One drawer pulls out from under the nav pill: the active filters as
+          words, or "N new posts" until tapped. Portaling keeps it riding the
+          collapsing header and above the feed's swallow clip; its slot clips
+          at the nav's bottom edge so it tucks behind the nav when that hides.
+          Only on the feed route, so it is gone while a post is open. */}
+      {(() => {
+        const drawer = (
+          <AnimatePresence initial={false}>
+            {isHomeActive && (newPostCount > 0 || showFilterDrawer) && (
+              <NewPostsBead
+                key="new-posts-bead"
+                count={newPostCount}
+                authors={newPostAuthors}
+                onShow={showNewPosts}
+                filters={showFilterDrawer ? drawerFilters : null}
+              />
+            )}
+          </AnimatePresence>
+        );
+        if (newPostsTarget) {
+          return createPortal(<div data-feed-new-posts-slot="island" className="pointer-events-none flex justify-center mt-11">{drawer}</div>, newPostsTarget);
+        }
+        if (navTarget) {
+          // System wraps the bar in an anchor exactly its size. Hang the chip
+          // from that, not from inside the bar: System Light's bar blurs
+          // itself, and a blur inside it only sees the bar, so the chip came
+          // out clear. Under the bar and the filter drawer, never over them.
+          const anchor = navTarget.parentElement?.closest<HTMLElement>('[data-home-filter-anchor]');
+          return createPortal(
+            <div data-feed-new-posts-anchor data-feed-new-posts-slot="bar" className={cn("pointer-events-none absolute inset-x-0 top-full flex justify-center", anchor ? "-z-10" : "z-20")}>{drawer}</div>,
+            anchor ?? navTarget,
+          );
+        }
+        if (portalTarget) {
+          return createPortal(
+            <div data-feed-new-posts-slot="desktop" className="pointer-events-none absolute inset-x-0 top-full z-20 flex justify-center">{drawer}</div>,
+            portalTarget,
+          );
+        }
+        if (!portalsReady) return null;
+        return <div data-feed-new-posts-slot="inline" className="pointer-events-none flex justify-center pt-3">{drawer}</div>;
+      })()}
+
+
+      <HomeShortcuts />
+      {!showFilterLoader && <StoryShelf />}
+      {showFilterLoader ? (
+        <FeedFilterLoader />
+      ) : (isLoadingState || isAutoRetrying) ? (
+        <FeedCardSkeletonList count={6} columns={colCount} />
+      ) : (
+        <>
+
+          {/* Follow groups. Only in Following mode, and only once there is a
+              group to pick — an empty row would be a permanent nudge to use a
+              feature most readers do not want. Filed from the Following list. */}
+          {isFollowingMode && followGroups.length > 0 && (
+            <div className="px-1 pb-2">
+              <GlassFilterRow
+                items={[
+                  { key: 'all', label: t('filters.everyone', 'Everyone') },
+                  ...followGroups.map(g => ({ key: g.id, label: g.name })),
+                ]}
+                activeKey={activeFollowGroupId ?? 'all'}
+                onSelect={(key) => setActiveFollowGroupId(key === 'all' ? null : key)}
+                borderRadius="0.75rem"
+                buttonClassName="px-3 py-1.5 rounded-xl text-xs"
+              />
+            </div>
+          )}
+
+          {/*
+            `pinnedItem` counts as content only when the viewer asked for it.
+            A boost does not: if every feed query has failed, showing the paid
+            post alone and nothing else turns an outage into a page that is
+            just an advert, with no sign anything went wrong and no retry.
+          */}
+          {items.length === 0 && !(pinnedItem && !isBoosted) && optimisticPosts.length === 0 && !hasQueryData ? (
+            <EmptyState isFollowing={selectedSort.value === 'following'} failed={isError || retriesExhausted} onRetry={refetch} />
+          ) : (
+            <div key={`${selectedSort.value}-${selectedDate.value}-${selectedPostType}`}>
+              {/* Render optimistic posts */}
+              {visibleOptimisticPosts.length > 0 && (
+                <div ref={optimisticSlotRef} className="mb-3">
+                  {renderMasonryGrid(visibleOptimisticPosts.map((op, index) => {
+                    const feedItem: FeedItemType = { type: op.type, data: op.data as any };
+                    return renderFeedItem(feedItem, index, 'optimistic');
+                  }), visibleOptimisticPosts.map((op) => ({ type: op.type, data: op.data as any })))}
+                </div>
+              )}
+              
+              {/* Render the featured post — pinned by link, or boosted */}
+              {pinnedItem && (
+                <div className="mb-3">
+                  {renderMasonryGrid([renderFeedItem(pinnedItem, 0, 'pinned')], [pinnedItem])}
+                </div>
+              )}
+              
+              {/* Rest of the feed */}
+              {renderFeedWithShorts()}
+              
+              {/* Infinite scroll loader */}
+              <div
+                ref={loaderRef}
+                className={cn(
+                  'py-4 flex flex-col items-center',
+                  // Preserve scroll runway while the request is in flight so
+                  // wheel momentum is not discarded at the old document end.
+                  isFetchingNextPage && 'min-h-[50vh]',
+                )}
+              >
+                {isFetchingNextPage && (
+                  // The next posts' own shape holds their place, so a fast
+                  // scroll meets cards being filled in, not an empty gap.
+                  <div className="w-full" data-feed-loading-more role="status" aria-label={t('common.loadingMore')}>
+                    <FeedCardSkeletonList count={colCount > 1 ? 3 : 2} columns={colCount} />
+                  </div>
+                )}
+                {!hasNextPage && items.length > 0 && (
+                  <p className="text-zinc-500 text-sm">{_copy("copy.4020afe05053", { defaultValue: "You've reached the end 🎉" })}</p>
+                )}
+              </div>
+            </div>
+          )}
+        </>
+      )}
+      <PromptFlowModal
+        open={promptModalOpen}
+        onOpenChange={setPromptModalOpen}
+        categories={categories}
+        initialPrompt={initialPromptText}
+        onSave={(catIds) => {
+          setSelectedCategories(catIds);
+          setSelectedSort(SORT_OPTIONS.find(o => o.value === 'prompt') || DEFAULT_HOME_SORT);
+        }}
+      />
+    </div>
+  );
+}

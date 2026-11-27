@@ -1,0 +1,131 @@
+import { act, renderHook, waitFor } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+const mocks = vi.hoisted(() => ({
+  sendTip: vi.fn(), switchChain: vi.fn(), readTip: vi.fn(), record: vi.fn(), remixLink: vi.fn(),
+  toast: { loading: vi.fn(), success: vi.fn(), warning: vi.fn(), error: vi.fn(), dismiss: vi.fn() },
+}));
+vi.mock('sonner', () => ({ toast: mocks.toast }));
+vi.mock('i18next', () => ({ default: { t: (key: string) => key } }));
+vi.mock('@/lib/dhb-toast', () => ({ dhbText: (value: string) => value }));
+vi.mock('@/contexts/AuthContext', () => ({ useAuth: () => ({ walletAddress: '0xsender' }) }));
+vi.mock('@/lib/contracts/dhb-token', () => ({ BASE_CHAIN_ID: 8453 }));
+vi.mock('@/lib/contracts/aa-utils', () => ({
+  switchChain: mocks.switchChain, isWalletLockedError: () => false,
+  parseTxError: (error: Error) => error.message,
+}));
+vi.mock('@/lib/contracts/stream-controller', () => ({ sendTip: mocks.sendTip }));
+vi.mock('@/lib/contracts/read-tip-transaction', () => ({ readConfirmedTipDetails: mocks.readTip }));
+vi.mock('@/integrations/supabase/client', () => ({ supabase: { functions: { invoke: mocks.record } } }));
+vi.mock('@/lib/remix-links', async (actual) => ({ ...(await actual<typeof import('@/lib/remix-links')>()), getRemixLink: mocks.remixLink }));
+
+import { useTipPayment } from '../use-tip-payment';
+
+function confirmation() {
+  let resolve!: (hash: string) => void;
+  let reject!: (error: unknown) => void;
+  const promise = new Promise<string>((yes, no) => { resolve = yes; reject = no; });
+  return { promise, resolve, reject };
+}
+
+beforeEach(() => {
+  vi.clearAllMocks();
+  mocks.switchChain.mockResolvedValue(undefined);
+  mocks.record.mockResolvedValue({ data: { recorded: true }, error: null });
+  mocks.remixLink.mockResolvedValue(null);
+  mocks.readTip.mockResolvedValue({ receiverAddress: '0xcreator', amount: 500, tokenId: '123' });
+});
+
+describe('tip payment reporting', () => {
+  it('waits for confirmation and persistence before showing success', async () => {
+    const confirmed = confirmation();
+    mocks.sendTip.mockResolvedValue({ hash: '0xtip', confirmed: confirmed.promise });
+    const onSubmitted = vi.fn();
+    const onConfirmed = vi.fn();
+    const { result } = renderHook(() => useTipPayment({ creatorAddress: '0xcreator', tokenId: '123', onSubmitted, onConfirmed }));
+    await act(async () => { await result.current.tip(500); });
+    expect(onSubmitted).toHaveBeenCalledWith('0xtip', 500);
+    expect(mocks.toast.success).not.toHaveBeenCalled();
+    expect(mocks.record).not.toHaveBeenCalled();
+    confirmed.resolve('0xtip');
+    await waitFor(() => expect(onConfirmed).toHaveBeenCalledOnce());
+    expect(mocks.record).toHaveBeenCalledWith('tip-record', { body: { txHash: '0xtip' } });
+    expect(mocks.toast.success).toHaveBeenCalledOnce();
+  });
+
+  it('shows an unresolved submission as pending with its hash', async () => {
+    const confirmed = confirmation();
+    mocks.sendTip.mockResolvedValue({ hash: '0xtip', confirmed: confirmed.promise });
+    const { result } = renderHook(() => useTipPayment({ creatorAddress: '0xcreator' }));
+    await act(async () => { await result.current.tip(500); });
+    confirmed.reject(Object.assign(new Error('receipt unavailable'), { code: 'TRANSACTION_CONFIRMATION_PENDING' }));
+    await waitFor(() => expect(mocks.toast.warning).toHaveBeenCalledWith('staking.pendingSubmitted', expect.objectContaining({ description: '0xtip' })));
+    expect(mocks.toast.success).not.toHaveBeenCalled();
+    expect(mocks.record).not.toHaveBeenCalled();
+    expect(mocks.sendTip).toHaveBeenCalledOnce();
+  });
+
+  it('does not save or report success for a reverted tip', async () => {
+    const confirmed = confirmation();
+    mocks.sendTip.mockResolvedValue({ hash: '0xtip', confirmed: confirmed.promise });
+    const { result } = renderHook(() => useTipPayment({ creatorAddress: '0xcreator' }));
+    await act(async () => { await result.current.tip(500); });
+    confirmed.reject(Object.assign(new Error('reverted'), { code: 'TRANSACTION_REVERTED' }));
+    await waitFor(() => expect(mocks.toast.error).toHaveBeenCalledWith('toasts.transaction_reverted', { id: 'tip-payment' }));
+    expect(mocks.toast.success).not.toHaveBeenCalled();
+    expect(mocks.record).not.toHaveBeenCalled();
+  });
+
+  it('prevents two clicks from submitting two payments', async () => {
+    const confirmed = confirmation();
+    mocks.sendTip.mockResolvedValue({ hash: '0xtip', confirmed: confirmed.promise });
+    const { result } = renderHook(() => useTipPayment({ creatorAddress: '0xcreator' }));
+    await act(async () => { await Promise.all([result.current.tip(500), result.current.tip(500)]); });
+    expect(mocks.sendTip).toHaveBeenCalledOnce();
+    confirmed.resolve('0xtip');
+    await waitFor(() => expect(mocks.toast.success).toHaveBeenCalledOnce());
+  });
+
+  it('keeps a pending approval out of the failed-tip path', async () => {
+    mocks.sendTip.mockRejectedValue(Object.assign(new Error('Approval submitted; check confirmation.'), { code: 'TRANSACTION_CONFIRMATION_PENDING' }));
+    const { result } = renderHook(() => useTipPayment({ creatorAddress: '0xcreator' }));
+    await act(async () => { await result.current.tip(500); });
+    expect(mocks.toast.warning).toHaveBeenCalledOnce();
+    expect(mocks.toast.error).not.toHaveBeenCalled();
+    expect(mocks.record).not.toHaveBeenCalled();
+  });
+
+  it('sends the original creator their share of a tip on a duet', async () => {
+    mocks.remixLink.mockResolvedValue({ splitBps: 1000, sourceTokenId: 77, sourceAddress: '0xoriginal', remixerAddress: '0xcreator' });
+    mocks.sendTip.mockImplementation(async ({ to }: { to: string }) => ({ hash: `0x${to.slice(2)}`, confirmed: Promise.resolve(`0x${to.slice(2)}`) }));
+    mocks.readTip.mockImplementation(async (hash: string) => (hash === '0xoriginal'
+      ? { receiverAddress: '0xoriginal', amount: 50, tokenId: '77' }
+      : { receiverAddress: '0xcreator', amount: 450, tokenId: '123' }));
+    const { result } = renderHook(() => useTipPayment({ creatorAddress: '0xcreator', tokenId: '123' }));
+    await act(async () => { await result.current.tip(500); });
+    await waitFor(() => expect(mocks.sendTip).toHaveBeenCalledTimes(2));
+    expect(mocks.sendTip).toHaveBeenNthCalledWith(1, expect.objectContaining({ to: '0xcreator', amount: 450, tokenId: '123' }));
+    expect(mocks.sendTip).toHaveBeenNthCalledWith(2, expect.objectContaining({ to: '0xoriginal', amount: 50, tokenId: 77 }));
+    await waitFor(() => expect(mocks.record).toHaveBeenCalledWith('tip-record', { body: { txHash: '0xoriginal' } }));
+  });
+
+  it('does not split a tip on a comment', async () => {
+    mocks.remixLink.mockResolvedValue({ splitBps: 1000, sourceTokenId: 77, sourceAddress: '0xoriginal', remixerAddress: '0xcreator' });
+    mocks.sendTip.mockResolvedValue({ hash: '0xtip', confirmed: Promise.resolve('0xtip') });
+    const { result } = renderHook(() => useTipPayment({ creatorAddress: '0xcreator', tokenId: '123', commentId: 'c1' }));
+    await act(async () => { await result.current.tip(500); });
+    await waitFor(() => expect(mocks.toast.success).toHaveBeenCalledOnce());
+    expect(mocks.sendTip).toHaveBeenCalledOnce();
+    expect(mocks.sendTip).toHaveBeenCalledWith(expect.objectContaining({ amount: 500 }));
+    expect(mocks.record).toHaveBeenCalledWith('tip-record', { body: { txHash: '0xtip', commentId: 'c1' } });
+  });
+
+  it('never writes the tip row from the browser', async () => {
+    mocks.sendTip.mockResolvedValue({ hash: '0xtip', confirmed: Promise.resolve('0xtip') });
+    const { result } = renderHook(() => useTipPayment({ creatorAddress: '0xcreator', tokenId: '123' }));
+    await act(async () => { await result.current.tip(500); });
+    await waitFor(() => expect(mocks.toast.success).toHaveBeenCalledOnce());
+    // Only the payment is named; amount, sender and receiver come from the server's own record.
+    expect(mocks.record.mock.calls).toEqual([['tip-record', { body: { txHash: '0xtip' } }]]);
+  });
+});

@@ -1,0 +1,508 @@
+/**
+ * Login sheet — the shell.
+ * ========================
+ * Fully branded login experience. Social logins via Web3Auth, wallet
+ * connections via standard Wagmi.
+ *
+ * This file is deliberately cheap and deliberately NOT lazy: the drawer, its
+ * backdrop, the header and the terms footer are all here, so tapping "Log in"
+ * puts the sheet on screen on the same frame as the click. Everything with a
+ * real cost — wagmi, the wallet-setup steps, RainbowKit's ~270 KB of connect
+ * UI — is below the Suspense boundary and arrives behind the open sheet.
+ *
+ * It used to be one lazy component. Clicking "Log in" then bought a chunk
+ * fetch, and the evaluation of that chunk's whole static graph, BEFORE vaul
+ * could mount and start the slide-up: the sheet waited for its own contents,
+ * which is exactly what "it feels slow" was describing. Nothing about the
+ * finished sheet has changed; only when each part of it is paid for.
+ *
+ * Keep this file's imports boring. Anything pulled in here lands in the entry
+ * bundle, which is ratcheted by scripts/check-entry-bundle.mjs — in particular
+ * `wagmi`, which must stay behind the WalletProviders lazy boundary.
+ */
+
+import { createPortal } from 'react-dom';
+import React, { Suspense, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
+import ChevronRight from "@/components/ui/cut-icons/next";
+
+import { DeHubPageLoader } from '@/components/app/DeHubLoader';
+import { LoginBodySkeleton } from '@/components/app/login/LoginBodySkeleton';
+// Not lazy: the lanes and headline are plain boxes and text, so the sheet's
+// first frame is already the sheet people see. Clips are built only once a
+// tile is on screen (see Clip), so this costs nothing in the tap.
+import { LoginShortsStack, warmLoginStack } from '@/components/app/login/LoginShortsStack';
+import { useTwoFactorPrompt } from '@/lib/two-factor-login';
+import { buildAvatarCdnFallbackUrl } from '@/lib/media-url';
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, warmDeferredSheets } from '@/components/ui/drawer';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
+import { useAuth, useLoginSheet } from '@/contexts/AuthContext';
+import { type LoginStep, resumingStep, isInlineLoginStep } from '@/components/app/login/steps';
+import dehubLogo from '@/assets/dehub-logo-white.png';
+import riftnWordmark from '@/assets/riftn-wordmark-flat-white.png';
+import { useKeyboardSafeSheet } from '@/hooks/use-keyboard-open';
+import { beginAuthTrace, readAuthTrace } from '@/lib/auth-trace';
+import { createLogger } from '@/lib/logger';
+import { setSignInSheetState } from '@/lib/sign-in-handoff';
+import '@/components/app/login/sign-in-handoff.css';
+import '@/styles/welcome-flow.css';
+
+// Only reached when a wallet is slow to answer, so it stays out of the entry.
+const WalletWaitHelp = React.lazy(() => import('@/components/app/login/WalletWaitHelp'));
+
+const flowLog = createLogger('LoginFlow');
+
+/**
+ * React.lazy suspends for a frame on first render even when the chunk is
+ * already downloaded, so a prefetched sheet still flashed its skeleton. This
+ * keeps the loaded component and renders it directly once it is there. The
+ * choice is made once per mount, so a live component is never swapped out.
+ */
+function preloadable<P extends object>(load: () => Promise<React.ComponentType<P>>) {
+  let loaded: React.ComponentType<P> | null = null;
+  let pending: Promise<React.ComponentType<P>> | null = null;
+  const preload = () => (pending ??= load().then((c) => (loaded = c)).catch((e) => { pending = null; throw e; }));
+  const Lazy = React.lazy(() => preload().then((c) => ({ default: c })));
+  function Preloadable(props: P) {
+    const [C] = useState<React.ComponentType<P>>(() => (loaded ?? Lazy) as React.ComponentType<P>);
+    return <C {...props} />;
+  }
+  return Object.assign(Preloadable, { preload });
+}
+
+const LoginModalBody = preloadable(() =>
+  import('@/components/app/login/LoginModalBody').then(m => m.LoginModalBody),
+);
+
+// The last step of signing up, and the only one an existing session can land on
+// cold. Its own chunk so it does not drag the wallet body in behind it.
+const LoginProfileStep = React.lazy(() =>
+  import('@/components/app/login/LoginProfileStep').then(m => ({ default: m.LoginProfileStep })),
+);
+
+// Only accounts with two-step sign-in ever see it, so it stays off first paint.
+const TwoFactorLoginStep = React.lazy(() =>
+  import('@/components/app/two-factor/TwoFactorLoginStep').then(m => ({ default: m.TwoFactorLoginStep })),
+);
+
+/**
+ * Warm the body chunk so the skeleton below is insurance rather than the norm.
+ * Called from App once the app has painted; safe to call repeatedly.
+ */
+export function prefetchLoginModal(): void {
+  void LoginModalBody.preload().catch(() => {});
+  void warmLoginStack();
+}
+
+/**
+ * Guests only: fetch the sheet's chunks once the page has finished loading and
+ * the main thread is idle, so the first tap on "Log in" or "+" opens straight
+ * onto the real options instead of the skeleton. Waits for `load` plus an idle
+ * slot so it never competes with the page itself, and stays off entirely on
+ * data-saver or 2G connections, where the tap-time warm-up is enough.
+ */
+let loginPrefetchScheduled = false;
+export function scheduleLoginPrefetch(): void {
+  if (loginPrefetchScheduled || typeof window === 'undefined') return;
+  loginPrefetchScheduled = true;
+  const conn = (navigator as { connection?: { saveData?: boolean; effectiveType?: string } }).connection;
+  if (conn?.saveData || /(^|-)2g$/.test(conn?.effectiveType ?? '')) return;
+  const ric = (window as { requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => void })
+    .requestIdleCallback;
+  const run = () => {
+    if (ric) ric(prefetchLoginModal, { timeout: 4000 });
+    else setTimeout(prefetchLoginModal, 1500);
+  };
+  if (document.readyState === 'complete') setTimeout(run, 1000);
+  else window.addEventListener('load', () => setTimeout(run, 1000), { once: true });
+}
+
+/**
+ * Call from a login entry point's hover / pointerdown — BEFORE the click. Two
+ * things get done in the gap where they cost nothing visible: this drawer's
+ * first-open mount dance (dormant→mounting→live) runs early, and the body
+ * chunk starts arriving if the idle prefetch was starved. Both are idempotent;
+ * once live the sheet behaves exactly as any reopened sheet does.
+ */
+export function warmLoginSheet(): void {
+  warmDeferredSheets();
+  prefetchLoginModal();
+  // The wallet connectors (RainbowKit, MetaMask SDK, WalletConnect) left the
+  // boot path — see lib/wagmi-wallets. On intent, not on idle: pulling them
+  // for every visitor at idle would put ~500 KB back on every visit.
+  void import('@/lib/wagmi-wallets').catch(() => {});
+  // Which rows the list has depends on two answers — passkey support and the
+  // Telegram bot config. Asked here, they land before the sheet opens, so the
+  // list arrives whole instead of growing a row at a time in front of them.
+  void import('@/lib/login-probes').then(m => m.warmLoginProbes()).catch(() => {});
+}
+
+/**
+ * Paints `fallback` on the sheet's first frame and builds `children` two
+ * frames later. It lives INSIDE the sheet, so its clock starts when the sheet
+ * itself mounts: a gate on LoginModal counted from the tap, and the drawer's
+ * own dormant -> mounting -> live hand-off used up those frames, so on a first
+ * open the options and every clip were built inside the frame that should
+ * only have slid the sheet up (~200 ms of tap delay on a mid phone).
+ */
+function AfterSheetFrame({ immediate, fallback, children }: { immediate?: boolean; fallback: React.ReactNode; children: React.ReactNode }) {
+  const [ready, setReady] = useState(!!immediate);
+  useEffect(() => {
+    if (ready) return;
+    let next = 0;
+    const first = requestAnimationFrame(() => { next = requestAnimationFrame(() => setReady(true)); });
+    return () => { cancelAnimationFrame(first); cancelAnimationFrame(next); };
+  }, [ready]);
+  return <>{ready ? children : fallback}</>;
+}
+
+// Holds html[data-login-sheet] (see index.css) while a login sheet is up. The
+// newest open owns it, so a quick close and reopen cannot drop it early.
+let loginSheetHold = 0;
+
+function holdLoginSheet(): () => void {
+  const root = document.documentElement;
+  const token = ++loginSheetHold;
+  root.dataset.loginSheet = '';
+  return () => {
+    // Radix lifts its `pointer-events: none` from <body> only after the exit
+    // animation. Letting go before that restyles the whole page, so wait.
+    let frames = 0;
+    const release = () => {
+      if (token !== loginSheetHold) return;
+      if (document.body.style.pointerEvents === 'none' && ++frames < 180) {
+        requestAnimationFrame(release);
+        return;
+      }
+      delete root.dataset.loginSheet;
+    };
+    requestAnimationFrame(release);
+  };
+}
+
+interface LoginModalProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+export function LoginModal({ open, onOpenChange }: LoginModalProps) {
+  const { style: keyboardStyle } = useKeyboardSafeSheet(open);
+  const { walletPhase, isProcessingRedirect, requiresUsername, isConnecting } = useAuth();
+  const { loginIntent } = useLoginSheet();
+  const { t } = useTranslation();
+
+  // Opening step. A login that is ALREADY in flight must never land on 'main':
+  // the redirect-return and mid-session unlock paths open the sheet with the
+  // phase already decided, so a plain 'main' default painted the whole
+  // "Continue with Google / email / phone" sheet before the mirror below could
+  // swap it — the flash that reads as "it failed, sign in again" at the exact
+  // moment the user is waiting to be let in.
+  const [baseStep, setStep] = useState<LoginStep>(
+    () => resumingStep(walletPhase, isProcessingRedirect) ?? 'main',
+  );
+  // A login the server paused for a two-step code shows the code step over
+  // whatever step it came from, and hands back to that step once it clears.
+  const twoFactor = useTwoFactorPrompt();
+  const step: LoginStep = twoFactor ? 'two-factor' : baseStep;
+  const wasOpen = useRef(open);
+  // A sheet that mounts already open (a sign-in resuming after a redirect) is
+  // filled straight away; every tap-opened sheet fills after its first frame.
+  const [mountedOpen] = useState(open);
+  // Before Radix's own effects lock <body>, so the hold is already in place.
+  useLayoutEffect(() => (open ? holdLoginSheet() : undefined), [open]);
+  useEffect(() => {
+    if (!open) return;
+    if (!readAuthTrace().auth_attempt_id) beginAuthTrace('undecided');
+  }, [open]);
+  useEffect(() => {
+    if (!open) return;
+    flowLog.trace?.('screen-view', { screen: step, surface: 'login-sheet', intent: loginIntent });
+  }, [open, step, loginIntent]);
+  const sheetWaiting = step === 'resuming' || step === 'wallet-signing';
+  const [sheetId] = useState(() => Symbol('login-sheet'));
+  useLayoutEffect(() => {
+    setSignInSheetState(sheetId, !open ? 'closed' : sheetWaiting ? 'waiting' : 'open');
+    return () => setSignInSheetState(sheetId, null);
+  }, [sheetId, open, sheetWaiting]);
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== 'undefined' && window.innerWidth < 768,
+  );
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
+
+  // Route to the wallet create/unlock step once the Supabase identity exists
+  // (after email OTP verification or an OAuth redirect return), and hold the
+  // preloader over the wait in between.
+  //
+  // useLayoutEffect, not useEffect: a passive effect runs AFTER the browser has
+  // painted, so on an already-mounted modal being reopened straight onto the
+  // unlock step the sign-in options got a frame on screen first. This runs
+  // before paint, so that frame never exists.
+  useLayoutEffect(() => {
+    const reopening = open && !wasOpen.current;
+    wasOpen.current = open;
+    if (!open) return;
+    const next = resumingStep(walletPhase, isProcessingRedirect);
+    if (next) {
+      setStep(next);
+      return;
+    }
+    // Checked after the wallet steps, not before: a brand-new account is
+    // flagged as needing a profile by the same auth response that may still
+    // owe it a wallet, and the wallet has to come first.
+    if (requiresUsername) {
+      setStep('profile');
+      return;
+    }
+    // Preserve the closing frame, then reset before a reopened sheet paints.
+    if (reopening) {
+      setStep('main');
+      return;
+    }
+    // The resume ended without producing a wallet step — it either failed or
+    // the session was already complete. Never strand the sheet on the loader,
+    // or on a profile step whose flag has since cleared. Any other step is left
+    // alone (React bails out on an unchanged value), so this can't yank someone
+    // out of the email or phone flow.
+    setStep((s) => (s === 'resuming' || s === 'profile' ? 'main' : s));
+  }, [open, walletPhase, isProcessingRedirect, requiresUsername]);
+
+  const handleClose = useCallback(() => {
+    // An account with no profile is not a usable account: there is nothing
+    // behind this sheet to go back to, so it does not close. Log out is the
+    // other way out, and it clears the flag itself.
+    if (requiresUsername) return;
+    flowLog.trace?.('flow-dismissed', { screen: step, surface: 'login-sheet' });
+    onOpenChange(false);
+  }, [onOpenChange, requiresUsername, step]);
+
+  // Opened from Settings → Profile → Add profile while already signed in.
+  // Retitled so the sheet reads as "adding another account" rather than
+  // implying the current one just got signed out — it didn't.
+  const titleText = step === 'main' ? (
+      loginIntent === 'add-profile'
+        ? t('loginModal.addProfileTitle', 'Add a profile')
+        : loginIntent === 'signup' ? t('creator.signUp') : t('loginModal.title')
+    )
+    : step === 'email' ? t('loginModal.continueEmail')
+    : step === 'email-waiting' ? t('loginModal.checkYourEmail', 'Check your email')
+    : step === 'phone' ? t('loginModal.continuePhone', 'Continue with phone')
+    : step === 'phone-code' ? t('loginModal.enterCode', 'Enter verification code')
+    : step === 'passkey' ? t('loginModal.continuePasskey', 'Continue with fingerprint')
+    : step === 'import-wallet' ? t('copy.a865110e919b')
+    // "Secure account", not "Create your wallet": this step is most people's
+    // first encounter with the wallet, and leading with crypto vocabulary puts
+    // off users who came for the app. What the step actually does — make the
+    // account only usable by them — is also the more accurate description.
+    : step === 'wallet-create' || step === 'wallet-secure' ? t('loginModal.secureAccount', 'Secure account')
+    : step === 'wallet-unlock' ? t('loginModal.unlockWallet', 'Unlock your wallet')
+    : step === 'wallet-restore' ? t('loginModal.walletMismatchTitle', 'Can’t open this profile here')
+    : step === 'profile' ? t('settings.profile')
+    : step === 'two-factor' ? t('twoFactor.loginTitle', 'Enter your sign-in code')
+    : step === 'resuming' || step === 'wallet-signing' ? t('loginModal.signingIn', 'Signing you in…')
+    : t('loginModal.connectWallet');
+
+  // A wallet password is a focused security interruption, not a page-wide
+  // task. On desktop it therefore lives as a compact panel centred inside the
+  // app's middle column. The mobile flow deliberately remains a bottom sheet,
+  // where that presentation is both expected and keyboard-safe.
+  const usesDesktopUnlockPanel = (step === 'wallet-unlock' || step === 'wallet-secure') && !isMobile;
+
+  // Share the email-first hero across screen sizes while retaining the
+  // desktop's existing middle-column drawer and the phone's full-screen sheet.
+  const stackSheet = isMobile && loginIntent !== 'add-profile';
+  // The sign-in code step lives on the same clip wall as the sign-in options:
+  // it is the last beat of signing in, not a separate screen.
+  // The wait for the session is not a screen of its own: the sheet keeps the
+  // layout it had and dims, and SignInHandoff carries the rest.
+  const waitingForSession = step === 'resuming' || step === 'wallet-signing';
+  const stackLayout = loginIntent !== 'add-profile' && (isInlineLoginStep(step) || step === 'two-factor' || waitingForSession);
+
+  // Only the sign-in options hold their space; it stays blank (the real list
+  // replaces it). Every other step is a wait or a form the user has already
+  // been told about, so it gets the site loader, the mark the resume uses.
+  const fallback = step === 'main'
+    ? <LoginBodySkeleton layout={stackLayout ? 'stack' : undefined} />
+    : waitingForSession
+    ? <div className={stackLayout ? 'h-[250px]' : 'h-[180px]'} aria-hidden />
+    : <DeHubPageLoader size={56} minHeight="180px" />;
+  const veil = <div className="signin-handoff-veil" data-on={open && waitingForSession ? '' : undefined} aria-hidden />
+  const walletWaiting = open && isConnecting && (step === 'wallet-signing' || step === 'wallets');
+
+
+  const termsNotice = (
+    <Trans
+      i18nKey="copy.5d486dd87845"
+      defaults="By continuing, you agree to our <terms>Terms</terms> and <privacy>Privacy Policy</privacy>"
+      components={{
+        terms: <a href="https://riftn.com/terms" target="_blank" rel="noopener noreferrer" className="underline hover:text-white/60 transition-colors" />,
+        privacy: <a href="https://riftn.com/privacy" target="_blank" rel="noopener noreferrer" className="underline hover:text-white/60 transition-colors" />,
+      }}
+    />
+  );
+
+  const stackFooter = (
+    <div className={stackSheet
+      ? "-mx-2.5 mt-2 shrink-0 px-6 pt-2 pb-[calc(1rem+env(safe-area-inset-bottom))]"
+      : "shrink-0 px-6 pt-6 border-t border-white/10 pb-[calc(1.5rem+env(safe-area-inset-bottom))]"}>
+      <p className="text-xs text-white/40 text-center">{termsNotice}</p>
+    </div>
+  );
+
+  const sheetBody = stackLayout ? (
+    <>
+      <DrawerHeader className="sr-only">
+        <DrawerTitle className="sr-only">{titleText}</DrawerTitle>
+      </DrawerHeader>
+
+      <div className={`login-stack-scroll flex flex-col flex-1 min-h-0 overflow-y-auto overflow-x-hidden overscroll-contain px-2.5 ${stackSheet ? '' : 'pb-4'}`}>
+        <LoginShortsStack
+          headline={step === 'two-factor' ? {
+            top: t('twoFactor.stackTop', 'One more step'),
+            accent: t('twoFactor.stackAccent', 'Enter your app code.'),
+          } : loginIntent === 'signup' && step === 'main' ? {
+            top: '',
+            accent: t('loginModal.passkeyCreate', 'Create a new account'),
+          } : undefined}
+        />
+        <div className="login-stack-form mt-5">
+          <AfterSheetFrame immediate={mountedOpen} fallback={fallback}>
+            <Suspense fallback={fallback}>
+              {step === 'two-factor' && twoFactor
+                ? <TwoFactorLoginStep
+                    account={{
+                      username: twoFactor.account.username,
+                      displayName: twoFactor.account.displayName,
+                      avatarUrl: twoFactor.account.address
+                        ? buildAvatarCdnFallbackUrl(twoFactor.account.address, twoFactor.account.avatarImageUrl, 96)
+                        : null,
+                    }}
+                    onSubmit={twoFactor.submit}
+                    onCancel={() => { twoFactor.cancel(); setStep('main'); }}
+                  />
+                : <LoginModalBody open={open} step={step} setStep={setStep} layout="stack" signingUp={loginIntent === 'signup'} />}
+            </Suspense>
+          </AfterSheetFrame>
+        </div>
+        {/* On phones, let the legal line scroll with the form when it no longer fits. */}
+        {stackSheet && stackFooter}
+      </div>
+      {!stackSheet && stackFooter}
+    </>
+  ) : (
+    <>
+      <DrawerHeader className={stackSheet ? "px-6 pt-[calc(1.5rem+env(safe-area-inset-top))] pb-4 shrink-0" : "px-6 pt-6 pb-4 shrink-0"}>
+        <div className="flex items-center justify-center relative">
+          {/* No way back from 'profile' either - the account is already
+              created by the time it shows. */}
+          {step !== 'main' && step !== 'resuming' && step !== 'profile' && !step.startsWith('wallet-') && (
+            <button
+              onClick={() => setStep('main')}
+              className="absolute left-0 p-2 rounded-xl hover:bg-white/10 transition-colors text-white/60 hover:text-white"
+            >
+              <ChevronRight className="w-5 h-5 rotate-180" />
+            </button>
+          )}
+          {/* Desktop shows the Riftn mark; phones keep their current header. */}
+          <img src={isMobile ? dehubLogo : riftnWordmark} alt="Riftn" className={isMobile ? "h-8" : "h-7"} />
+        </div>
+        {usesDesktopUnlockPanel ? (
+          <DialogTitle className={waitingForSession ? "sr-only" : "text-base font-medium text-white mt-4 text-center"}>
+            {titleText}
+          </DialogTitle>
+        ) : (
+          <DrawerTitle className={waitingForSession ? "sr-only" : "text-base font-medium text-white mt-4 text-center"}>
+            {titleText}
+          </DrawerTitle>
+        )}
+      </DrawerHeader>
+
+      <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-6 pb-6">
+        <AfterSheetFrame immediate={mountedOpen} fallback={fallback}><Suspense fallback={fallback}>
+          {/* Kept out of LoginModalBody deliberately: that chunk carries
+              wagmi, and the profile step is reached on a plain session
+              restore (an account saved without a username) where no wallet
+              UI is needed. */}
+          {step === 'profile'
+            ? <LoginProfileStep />
+            : <LoginModalBody open={open} step={step} setStep={setStep} signingUp={loginIntent === 'signup'} />}
+        </Suspense></AfterSheetFrame>
+      </div>
+
+      <div className="shrink-0 px-6 py-4 bg-black/20 border-t border-white/10 pb-[calc(1rem+env(safe-area-inset-bottom))]">
+        <p className="text-xs text-white/40 text-center">{termsNotice}</p>
+      </div>
+    </>
+  );
+
+  // A brand-new account finishes signing up in the welcome flow, which takes
+  // the whole screen (a live profile card beside one question at a time)
+  // instead of the sheet. Same rules as the sheet: it cannot be dismissed while
+  // the account has no profile.
+  if (open && step === 'profile') {
+    return createPortal(
+      <div data-welcome-flow role="dialog" aria-modal="true" aria-label={titleText} className="fixed inset-0 z-[2147483646] overflow-y-auto overscroll-contain">
+        <div className="mx-auto flex min-h-[100dvh] max-w-[1100px] flex-col pt-[env(safe-area-inset-top)]">
+          <Suspense fallback={<div className="grid flex-1 place-items-center"><DeHubPageLoader /></div>}>
+            <LoginProfileStep />
+          </Suspense>
+        </div>
+      </div>,
+      document.body,
+    );
+  }
+
+  if (usesDesktopUnlockPanel) {
+    return (
+      <Dialog open={open} onOpenChange={handleClose}>
+        <DialogContent
+          data-login-modal
+          style={keyboardStyle ?? undefined}
+          hideCloseButton
+          onEscapeKeyDown={(e) => { if (requiresUsername) e.preventDefault(); }}
+          className="bg-black/60 backdrop-blur-2xl backdrop-saturate-[180%] border border-white/10 p-0 gap-0 rounded-2xl overflow-clip z-[2147483646] flex flex-col max-h-[90dvh] sm:left-[calc(var(--app-main-left,0px)+var(--app-main-width,100vw)/2)] sm:w-[min(32rem,calc(var(--app-main-width,100vw)-2rem))] sm:max-w-none"
+          overlayClassName="z-[2147483645] login-modal-overlay bg-black/40 backdrop-blur-xl"
+        >
+          {sheetBody}
+          {veil}
+          {walletWaiting && <Suspense fallback={null}><WalletWaitHelp active /></Suspense>}
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
+  // `column`: on desktop the sheet clips to the middle panel's live bounds, the
+  // same as every other sheet in the app, so it opens in the gap between the
+  // sidebars instead of spanning the whole viewport. The backdrop stays full
+  // width deliberately — it blurs the sidebars too, so nothing outside the
+  // sign-in flow competes with it.
+  return (
+    <Drawer open={open} onOpenChange={handleClose} warmable walletPrompt animatedExit dismissible={!requiresUsername} repositionInputs={false}>
+      <DrawerContent
+        data-login-modal
+        column
+        style={keyboardStyle ?? undefined}
+        hideHandle
+        onEscapeKeyDown={(e) => { if (requiresUsername) e.preventDefault(); }}
+        data-login-stack-sheet={stackSheet ? '' : undefined}
+        className={stackSheet
+          ? "bg-black/80 backdrop-blur-2xl backdrop-saturate-[180%] border-0 p-0 gap-0 rounded-none overflow-clip z-[2147483646] flex flex-col mt-0 h-[100dvh] max-h-[100dvh]"
+          : stackLayout
+          ? "bg-black/60 backdrop-blur-2xl backdrop-saturate-[180%] border border-white/10 border-b-0 p-0 gap-0 rounded-t-2xl overflow-clip z-[2147483646] flex flex-col h-[90dvh] max-h-[90dvh]"
+          : "bg-black/60 backdrop-blur-2xl backdrop-saturate-[180%] border border-white/10 border-b-0 p-0 gap-0 rounded-t-2xl overflow-clip z-[2147483646] flex flex-col max-h-[90dvh]"}
+        overlayClassName="z-[2147483645] login-modal-overlay backdrop-blur-xl md:bg-black/40"
+      >
+        {sheetBody}
+          {veil}
+          {walletWaiting && <Suspense fallback={null}><WalletWaitHelp active /></Suspense>}
+      </DrawerContent>
+    </Drawer>
+  );
+}
+
+export default LoginModal;

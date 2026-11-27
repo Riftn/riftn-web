@@ -1,0 +1,279 @@
+import { useTranslation as _useCopy } from 'react-i18next';
+import { useSurfaceDraft } from '@/hooks/use-surface-draft';
+import { tokenLabel } from '@/lib/token-label';
+/**
+ * DmTipDialog Component
+ * =====================
+ * Drawer for sending a token tip inside a DM conversation.
+ * Matches the liquid glass aesthetic of TipModal.
+ */
+
+import { lazy, Suspense, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Loader2 } from "lucide-react";
+import Gem from "@/components/ui/cut-icons/diamond";
+
+import dehubCoin from '@/assets/dehub-coin.png';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { LiquidGlassBubble } from '@/components/ui/liquid-glass-bubble';
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+} from '@/components/ui/drawer';
+import { toast } from 'sonner';
+import { dhbText } from '@/lib/dhb-toast';
+import {
+  getWalletAddress,
+  switchChain,
+  checkDHBPaused,
+  looksLikePausedRevert,
+} from '@/lib/contracts/aa-utils';
+import { toastTxError } from '@/lib/tx-error-toast';
+import { BASE_CHAIN_ID } from '@/lib/contracts/dhb-token';
+import { sendTip } from '@/lib/contracts/stream-controller';
+import { apiCall } from '@/lib/api/dehub/core';
+import { getAccountInfo } from '@/lib/api/dehub';
+import { useAuth } from '@/contexts/AuthContext';
+import { fundTipFromSource } from '@/lib/tip-funding-run';
+import type { TipFundingSource } from '@/lib/tip-funding';
+import { DIRECT_QUICK_AMOUNTS, MIN_DIRECT_TIP } from '@/hooks/use-tip-payment';
+import usdcLogo from '@/assets/usdc-logo.png';
+import usdtLogo from '@/assets/usdt-logo.png';
+
+const TipPayWith = lazy(() => import('@/components/app/tips/TipPayWith'));
+
+const QUICK_AMOUNTS = [500, 1_000, 5_000, 10_000, 25_000, 50_000, 100_000, 1_000_000];
+
+interface DmTipDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  recipientAddress: string;
+  recipientName: string;
+  conversationId: string;
+  /** Smallest tip the recipient's DM plan accepts, in DHB. */
+  minAmount?: number;
+}
+
+export function DmTipDialog({
+  open,
+  onOpenChange,
+  recipientAddress,
+  recipientName,
+  conversationId,
+  minAmount = 0,
+}: DmTipDialogProps) {
+  const { t: _copy } = _useCopy();
+  const { t } = useTranslation();
+  const { walletAddress } = useAuth();
+  const [amount, setAmount] = useSurfaceDraft("components/app/chat/DmTipDialog.tsx:amount", '', recipientAddress);
+  const [isSending, setIsSending] = useState(false);
+  // Another token to pay with; it becomes DHB on Base before the tip.
+  const [payWith, setPayWith] = useState<TipFundingSource | null>(null);
+  const [recipientPrivate, setRecipientPrivate] = useState(false);
+  // Each open starts in DHB, so a saved DHB draft is never read as USDC.
+  useEffect(() => { if (open) setPayWith(null); }, [open]);
+  const [privacyChecking, setPrivacyChecking] = useState(false);
+
+  useEffect(() => {
+    if (!open || !recipientAddress) return;
+    let cancelled = false;
+    setPrivacyChecking(true);
+    getAccountInfo(recipientAddress)
+      .then((profile) => { if (!cancelled) setRecipientPrivate(profile?.hideBadgeAndBalance === true); })
+      .catch(() => { if (!cancelled) setRecipientPrivate(false); })
+      .finally(() => { if (!cancelled) setPrivacyChecking(false); });
+    return () => { cancelled = true; };
+  }, [open, recipientAddress]);
+
+  // USDC/USDT paid as is; not with a DM plan minimum, which is in DHB.
+  const directToken = minAmount > 0 ? null : payWith?.direct ?? null;
+  const directLogo = directToken?.symbol === 'USDT' ? usdtLogo : usdcLogo;
+  const coin = directToken ? directLogo : dehubCoin;
+  const changePayWith = (source: TipFundingSource | null) => {
+    if (source?.direct || directToken) setAmount('');
+    setPayWith(source);
+  };
+
+  const parsedAmount = parseFloat(amount);
+  const directBalance = directToken && payWith ? Number(payWith.balance) / 10 ** payWith.decimals : null;
+  const isValidAmount = !Number.isNaN(parsedAmount) && parsedAmount >= (directToken ? MIN_DIRECT_TIP : 1)
+    && (directBalance == null || parsedAmount <= directBalance);
+
+  const handleQuickAmount = (val: number) => {
+    setAmount(String(val));
+  };
+
+  const handleTip = async () => {
+    if (!isValidAmount) return;
+    if (minAmount > 0 && parsedAmount < minAmount) {
+      toast.warning(t('dm.planMinTip', { amount: minAmount.toLocaleString() }));
+      return;
+    }
+    try {
+      const profile = await getAccountInfo(recipientAddress);
+      if (profile?.hideBadgeAndBalance) {
+        setRecipientPrivate(true);
+        toast.error(t('tip.privateBalanceError'));
+        return;
+      }
+    } catch {
+      toast.error(t('tip.privacyCheckFailed'));
+      return;
+    }
+
+    setIsSending(true);
+    try {
+      const chainId = (directToken?.chainId ?? BASE_CHAIN_ID) as typeof BASE_CHAIN_ID;
+
+      if (payWith && walletAddress && !directToken) {
+        const ready = await fundTipFromSource(payWith, parsedAmount, walletAddress, t, 'dm-tip');
+        if (!ready) return;
+      }
+
+      await switchChain(chainId);
+      const signerAddress = await getWalletAddress();
+
+      toast.loading(t('tip.sending'), { id: 'dm-tip' });
+
+      const tipResult = await sendTip({
+        tokenId: 0,
+        amount: parsedAmount,
+        to: recipientAddress,
+        chainId,
+        signerAddress,
+        ...(directToken ? { tokenAddress: directToken.address, decimals: directToken.decimals } : {}),
+      });
+
+      // Show success immediately on tx submission
+      toast.success(dhbText(t('tip.dmSent', 'Sent {{amount}} tokens to {{name}}!', { amount: parsedAmount.toLocaleString(), name: recipientName })), { id: 'dm-tip' });
+      setAmount.complete(amount, '');
+      onOpenChange(false);
+
+      // Background: notify backend after confirmation
+      tipResult.confirmed.then((confirmedTxHash) => {
+        apiCall('/api/dm/tip-notify', {
+          method: 'POST',
+          body: {
+            txHash: confirmedTxHash,
+            conversationId,
+            senderAddress: signerAddress,
+          },
+          requiresAuth: true,
+        }).catch((notifyErr) => {
+          console.warn('[DmTip] tip-notify failed (non-fatal):', notifyErr);
+        });
+      }).catch((err) => {
+        console.warn('[DmTip] Background confirmation failed:', err);
+      });
+    } catch (error: unknown) {
+      console.error('[DmTip] Failed:', error);
+      const errStr = String((error as any)?.message || error).toLowerCase();
+      const isPausedErr = looksLikePausedRevert(errStr);
+      const isSTF = errStr.includes('stf') || errStr.includes('535446') || errStr.includes('safetransfer') || errStr.includes('token transfer failed');
+      if ((isPausedErr || isSTF) && await checkDHBPaused().catch(() => false)) {
+        toast.error(t('tokens.transactionsPaused'), {
+          id: 'dm-tip',
+          description: t('tokens.transactionsPausedDesc'),
+          duration: 8000,
+        });
+      } else {
+        toastTxError(error, _copy("copy.07d3d96b534a", { defaultValue: "Tip failed" }), { id: 'dm-tip' });
+      }
+    } finally {
+      setIsSending(false);
+    }
+  };
+
+  return (
+    <Drawer open={open} onOpenChange={onOpenChange}>
+      <DrawerContent scrollable column glass className="px-4 pb-6">
+        <DrawerHeader className="pb-3">
+          <DrawerTitle className="text-white text-lg flex items-center justify-center gap-2">
+            <Gem className="w-5 h-5 text-white" />{_copy("copy.f3b690653334", { defaultValue: "Send Tip" })}</DrawerTitle>
+          {recipientName && (
+            <p className="text-white/60 text-sm mt-1">{_copy("copy.ded08bf9c1f0", { defaultValue: "Tip {{value1}}", value1: recipientName })}
+            </p>
+          )}
+        </DrawerHeader>
+        <div className="flex flex-col gap-4">
+          {recipientPrivate ? (
+            <div className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-zinc-300">{_copy("copy.1e8349d4cb8e", { defaultValue: "This account has private balance mode on, so Riftn cannot send tokens or tips to it." })}</div>
+          ) : null}
+          {/* Quick amounts */}
+          <div>
+            <p className="text-white/60 text-xs mb-2">{_copy("copy.a5bcfef4d57a", { defaultValue: "Quick amounts" })}</p>
+            <div className="flex flex-wrap gap-2">
+              {(directToken ? DIRECT_QUICK_AMOUNTS : QUICK_AMOUNTS.filter((val) => val >= minAmount)).map((val) => (
+                <button
+                  key={val}
+                  type="button"
+                  onClick={() => handleQuickAmount(val)}
+                  className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
+                    amount === String(val)
+                      ? 'bg-amber-500/30 text-amber-400 border border-amber-500/50'
+                      : 'bg-white/5 text-white hover:bg-white/10 border border-white/10'
+                  }`}
+                >
+                  <span className="inline-flex items-center gap-1">{val.toLocaleString()} <img src={coin} alt={directToken?.symbol ?? tokenLabel()} className="w-4 h-4" style={{ marginTop: '-1px' }} /></span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Custom amount */}
+          <div>
+            <p className="text-white/60 text-xs mb-2">{_copy("copy.ddb09d30c5c6", { defaultValue: "Or enter amount" })}</p>
+            <div className="relative">
+              <img src={coin} alt={directToken?.symbol ?? tokenLabel()} className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5" />
+              <Input
+                type="number"
+                min={directToken ? MIN_DIRECT_TIP : Math.max(1, minAmount)}
+                step={0.1}
+                placeholder={_copy("copy.2d700ab23246", { defaultValue: "Enter amount" })}
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                className="pl-11 bg-white/5 border-white/10 text-white placeholder:text-white/40 h-12"
+              />
+            </div>
+          </div>
+
+          {open && walletAddress && !recipientPrivate ? (
+            <Suspense fallback={null}>
+              <TipPayWith amountDhb={isValidAmount && !directToken ? parsedAmount : 0} value={payWith} onChange={changePayWith} direct={minAmount <= 0} recipientName={recipientName} />
+            </Suspense>
+          ) : null}
+
+          <div className="flex gap-3 mt-2">
+            <LiquidGlassBubble
+              shimmer={false}
+              className="flex-1 cursor-pointer"
+              onClick={isSending ? undefined : () => onOpenChange(false)}
+            >
+              <span className="block text-center text-white text-sm font-medium">
+                {t('common.close')}
+              </span>
+            </LiquidGlassBubble>
+            <Button
+              variant="glass"
+              className="flex-1 bg-yellow-500/25 hover:bg-yellow-500/35 border-yellow-500/40 text-yellow-300"
+              onClick={handleTip}
+              disabled={isSending || privacyChecking || recipientPrivate || !isValidAmount}
+            >
+              {isSending ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  {t('tip.sending')}
+                </>
+              ) : (
+                <>{t('tip.send')}</>
+              )}
+            </Button>
+          </div>
+        </div>
+      </DrawerContent>
+    </Drawer>
+  );
+}

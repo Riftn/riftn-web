@@ -1,0 +1,216 @@
+import { useTranslation as _useCopy } from 'react-i18next';
+/**
+ * Reaction Info Drawer
+ * ====================
+ * Who reacted to a post, and with what — grouped by reaction. Opened from the
+ * ⓘ at the end of the reaction tray (hover on desktop, hold on touch).
+ *
+ * AUTHOR-ONLY, ON BOTH SIDES
+ * The ⓘ is only rendered on your own posts, but the gate that matters is the
+ * server's: /api/post-likers returns an empty list with `canViewLikers: false`
+ * to anyone who doesn't own the post. So an empty `data` is ambiguous on its
+ * own — always read `canViewLikers` before rendering "no reactions yet".
+ *
+ * NEGATIVE REACTIONS ARE ANONYMOUS
+ * The server never sends person rows for dislike/poo — not even to the author.
+ * Those groups are skipped here rather than rendered as bare count headers;
+ * their tallies still show on the post's own buttons.
+ *
+ * WHY A DRAWER CLIPPED TO THE MIDDLE COLUMN
+ * Same trick as LoginModal: `--app-main-left` / `--app-main-width` pin the
+ * sheet to the feed column on desktop so it reads as part of the post rather
+ * than a page-wide modal, while the backdrop still covers the full viewport.
+ * Below 768px it falls back to the normal full-width bottom sheet.
+ */
+
+import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useInfiniteQuery } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
+import { Loader2 } from 'lucide-react';
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { BadgeIcon } from '@/components/app/BadgeIcon';
+import { getPostLikers, type PostLiker } from '@/lib/api/dehub';
+import { NEGATIVE_REACTIONS, REACTION_LIST, type PostReaction } from '@/lib/reactions';
+import { buildAvatarUrl, extractAvatarPath } from '@/lib/media-url';
+import { engagementWeight, formatEngagementWeight, NO_BADGE_ENGAGEMENT_WEIGHT } from '@/lib/engagement-weight';
+import { AppState } from '@/components/app/AppState';
+
+import { formatCount } from '@/lib/format-count';
+import { profilePath } from '@/lib/profile-path';
+const PAGE_SIZE = 50;
+
+interface ReactionInfoDrawerProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  tokenId: string | number;
+}
+
+export function ReactionInfoDrawer({ open, onOpenChange, tokenId }: ReactionInfoDrawerProps) {
+  const { t: _copy } = _useCopy();
+  const navigate = useNavigate();
+  const { t } = useTranslation();
+
+  const {
+    data,
+    isLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
+    queryKey: ['post-reaction-info', String(tokenId)],
+    queryFn: async ({ pageParam = 0 }) => {
+      const response = await getPostLikers(tokenId, pageParam, PAGE_SIZE);
+      return { ...response, page: pageParam };
+    },
+    getNextPageParam: (lastPage) => (lastPage.pagination?.hasMore ? lastPage.page + 1 : undefined),
+    initialPageParam: 0,
+    // Only fetch once the sheet is actually open — the ⓘ sits in a tray that
+    // opens on hover, and prefetching on every hover would hammer the endpoint.
+    enabled: open,
+    staleTime: 1000 * 30,
+  });
+
+  const firstPage = data?.pages?.[0];
+  const canView = firstPage?.canViewLikers !== false;
+  const anonymousCount = firstPage?.anonymousBadgeHolderCount ?? 0;
+  const rows = useMemo(() => data?.pages.flatMap((page) => page.data ?? []) ?? [], [data]);
+  // The weighted total, not the row count: a badge holder's reaction counts for
+  // more than one, and the per-reaction group totals below are weighted too, so
+  // a header on the row count would not add up to the groups under it.
+  const totalCount = firstPage?.weightedTotalCount ?? firstPage?.pagination?.totalCount ?? 0;
+
+  /**
+   * Group into taxonomy order. The server already sorts rows this way, so the
+   * groups only ever gain members as later pages arrive — nothing reshuffles
+   * under a reader who is mid-scroll.
+   */
+  const groups = useMemo(() => {
+    const byReaction = new Map<PostReaction, PostLiker[]>();
+    rows.forEach((row) => {
+      const key = (row.reaction ?? 'like') as PostReaction;
+      const bucket = byReaction.get(key);
+      if (bucket) bucket.push(row);
+      else byReaction.set(key, [row]);
+    });
+    return REACTION_LIST
+      // Negative reactions are anonymous — the server never sends their
+      // person rows, so they could only render as a bare count header here.
+      // Their tallies still show on the post's own buttons.
+      .filter((meta) => !NEGATIVE_REACTIONS.includes(meta.key))
+      .map((meta) => ({
+        meta,
+        // The tally covers the whole post; `people` is only what has loaded.
+        total: firstPage?.reactionCounts?.[meta.key] ?? byReaction.get(meta.key)?.length ?? 0,
+        people: byReaction.get(meta.key) ?? [],
+      }))
+      .filter((group) => group.total > 0 || group.people.length > 0);
+  }, [rows, firstPage]);
+
+  const goToProfile = (person: PostLiker) => {
+    onOpenChange(false);
+    if (person.username) navigate(profilePath(person.username.replace('@', '')));
+    else if (person.address) navigate(`/app/profile?id=${person.address}`);
+  };
+
+  return (
+    <Drawer open={open} onOpenChange={onOpenChange}>
+      <DrawerContent
+        data-reaction-info-drawer
+        column
+        className="bg-black/60 backdrop-blur-2xl backdrop-saturate-[180%] border border-white/10 border-b-0 p-0 gap-0 rounded-t-2xl overflow-hidden z-[200] flex flex-col max-h-[80dvh]"
+      >
+        <DrawerHeader className="px-5 pt-4 pb-3 shrink-0">
+          <DrawerTitle className="text-base font-medium text-white text-center">
+            {t("reactionInfo.title")}
+            {totalCount > 0 && <span className="text-white/40 font-normal"> · {formatCount(totalCount)}</span>}
+          </DrawerTitle>
+        </DrawerHeader>
+
+        <div className="flex-1 min-h-0 overflow-y-auto px-4 pb-6">
+          {isLoading ? (
+            <div className="flex items-center justify-center py-10">
+              <Loader2 className="w-5 h-5 text-zinc-500 animate-spin" />
+            </div>
+          ) : !canView ? (
+            <AppState icon="lock" title={t("reactionInfo.privateTitle")} description={t("reactionInfo.privateDescription")} kind="restricted" size="drawer" />
+          ) : groups.length === 0 && anonymousCount === 0 ? (
+            <AppState icon="pinned" title={t("reactionInfo.empty")} description={t("reactionInfo.emptyDescription")} size="drawer" />
+          ) : (
+            <div className="space-y-5">
+              {anonymousCount > 0 ? (
+                <div className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-zinc-300">
+                  {t("reactionInfo.anonymous", { count: anonymousCount })}
+                </div>
+              ) : null}
+              {groups.map(({ meta, total, people }) => (
+                <section key={meta.key}>
+                  <h3 className="flex items-center gap-2 px-1 pb-2 text-sm text-white/70">
+                    <span aria-hidden="true" className="text-base leading-none">{meta.emoji}</span>
+                    <span className="font-medium text-white">{t(`reactionInfo.labels.${meta.key}`, meta.label)}</span>
+                    <span className="text-white/40">{total}</span>
+                  </h3>
+                  <div className="space-y-2">
+                    {people.map((person) => {
+                      const displayName =
+                        person.displayName || person.username || person.address?.slice(0, 8) || _copy("copy.b764cdc0eab7", { defaultValue: "Unknown" });
+                      const avatarUrl = buildAvatarUrl(person.address, extractAvatarPath(person));
+                      // A badge holder's reaction is worth more than one — see the
+                      // weightedTotalCount note above. Only draw the multiplier when
+                      // it actually differs from the badgeless default.
+                      const weight = engagementWeight(person.badgeBalance, person.username);
+                      const hasBadge = weight > NO_BADGE_ENGAGEMENT_WEIGHT;
+                      return (
+                        <button
+                          key={`${meta.key}-${person.address}`}
+                          onClick={() => goToProfile(person)}
+                          className="w-full flex items-center gap-3 p-3 rounded-xl bg-white/5 backdrop-blur-md border border-white/10 hover:bg-white/10 transition-colors text-left"
+                        >
+                          <Avatar className="w-10 h-10 rounded-lg">
+                            {avatarUrl ? <AvatarImage src={avatarUrl} alt={displayName} /> : null}
+                            <AvatarFallback className="bg-zinc-800 text-white rounded-lg text-sm">
+                              {displayName[0].toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1 min-w-0">
+                            <span className="font-semibold text-white text-sm truncate block">
+                              {displayName}
+                            </span>
+                            {person.username && (
+                              <span className="text-zinc-500 text-xs truncate block">
+                                @{person.username.replace('@', '')}
+                              </span>
+                            )}
+                          </div>
+                          {hasBadge && (
+                            <div className="flex items-center gap-1 shrink-0">
+                              <BadgeIcon badgeBalance={person.badgeBalance} username={person.username} className="w-[1em] h-[1em]" />
+                              <span className="font-mono text-xs text-white/60">{formatEngagementWeight(weight)}</span>
+                            </div>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </section>
+              ))}
+
+              {hasNextPage && (
+                <button
+                  onClick={() => fetchNextPage()}
+                  disabled={isFetchingNextPage}
+                  className="w-full py-3 rounded-xl bg-white/5 border border-white/10 text-sm text-white/70 hover:bg-white/10 hover:text-white transition-colors disabled:opacity-50"
+                >
+                  {isFetchingNextPage ? t("common.loading") : t("common.loadMore")}
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+      </DrawerContent>
+    </Drawer>
+  );
+}
+
+export default ReactionInfoDrawer;

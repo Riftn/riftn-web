@@ -1,0 +1,277 @@
+import type { PostVideoEdits } from './lib/video-edits';
+import type { ComicBorder } from '@/lib/comic-borders';
+import type { PostQuotaStatus } from '@/lib/api/dehub';
+import type { PostVisibility, QuotePolicy, ReplyPolicy } from '@/lib/api/dehub/types';
+import type { FilterSettings, CropSettings } from './types/filters';
+import type { StudioEdits } from './lib/studioPaint';
+
+export interface AudioFile {
+  blob: Blob;
+  url: string;
+  duration: number;
+  trimStart?: number;
+  trimEnd?: number;
+  originalDuration?: number;
+}
+
+export interface LinkPreviewData {
+  url: string;
+  title: string;
+  description: string;
+  image: string | null;
+  siteName: string;
+}
+
+export interface MediaFile {
+  file: File;
+  preview: string;
+  type: 'image' | 'video' | 'audio';
+  duration?: number;
+  audio?: AudioFile;
+  isMusicVideo?: boolean;
+  /** Display URL for thumbnail (blob URL or external) */
+  thumbnail?: string;
+  /** Blob for uploading thumbnail to backend */
+  thumbnailBlob?: Blob;
+  /** Whether the thumbnail was auto-generated (vs custom uploaded) */
+  isAutoThumbnail?: boolean;
+  filterSettings?: FilterSettings;
+  filterPresetId?: string;
+  cropSettings?: CropSettings;
+  trimStart?: number;
+  trimEnd?: number;
+  /** Video: mirror, quarter turn, look and adjust dials, baked by the server. */
+  videoEdits?: PostVideoEdits;
+  /** Video post: deletes itself this many seconds after it goes up. */
+  destructSeconds?: number | null;
+  /** Alt text: what the image or video shows, for people who cannot see it. */
+  description?: string;
+  /** Comic page caption, shown to everyone on the card. */
+  caption?: string;
+  /** The photo before any studio edit, so the edits stay changeable. */
+  studioOriginal?: File;
+  /** The studio settings `file` was baked from. */
+  studioEdits?: StudioEdits;
+}
+
+/**
+ * PPV / bounty pricing currency. USD and DHB are the EVM options; the SPL
+ * symbols are only selectable while the post's chain is Solana, where DHB
+ * does not exist.
+ */
+export type Currency = 'USD' | 'DHB' | 'SOL' | 'USDC' | 'USDT';
+
+export interface PollOption {
+  id: string;
+  text: string;
+}
+
+export interface PollData {
+  question: string;
+  options: PollOption[];
+  duration: number; // hours: 24, 72, 168
+  isMultipleChoice?: boolean;
+}
+
+export type LiveMode = 'video' | 'townhall' | null;
+
+export interface PostFormState {
+  text: string;
+  media: MediaFile[];
+  /** Gate this post behind the creator's own subscription plans. */
+  isSubscribersOnly: boolean;
+  isPPV: boolean;
+  ppvAmount: string;
+  ppvPreviewSeconds: string;
+  canConfigurePpvPreview: boolean;
+  ppvCurrency: Currency;
+  isWatch2Earn: boolean;
+  w2eViews: string;
+  w2eComments: string;
+  w2eTotal: string;
+  w2eCurrency: Currency;
+  isTokenGated: boolean;
+  tokenContract: string;
+  tokenSymbol: string;
+  tokenAmount: string;
+  liveMode: LiveMode;
+  poll: PollData | null;
+  /** Create Post > Quiz (riftn-backend src/quiz). */
+  quiz: import('@/lib/api/dehub').QuizDraft | null;
+  /** People tagged on the photos. */
+  photoTags: import('@/lib/api/dehub').PhotoTag[];
+  /** The content warning being written; null when the post has none. */
+  contentWarning: string | null;
+  /** The poster closed the market card, so the post carries none. */
+  hideAssetCards: boolean;
+  /** The links whose preview card the poster closed, so the post shows none for them. */
+  hiddenLinkPreviews: string[];
+  /** Who may quote the post. */
+  quotePolicy: import('@/lib/api/dehub/types').QuotePolicy;
+  /** Who may reply to the post. */
+  replyPolicy: import('@/lib/api/dehub/types').ReplyPolicy;
+  /** Who may stitch a video post; null follows the account setting. */
+  stitchPolicy: import('@/lib/remix-links').RemixPolicy | null;
+  /** Who may see the post. Fixed once it is posted. */
+  visibility: import('@/lib/api/dehub/types').PostVisibility;
+  isEnhancing: boolean;
+  /** Set while the draft is a translation from the AI menu, so it can be undone. */
+  translatedDraft: { original: string; translated: string; from: string | null } | null;
+  isPosting: boolean;
+  uploadProgress: number; // 0–100 stage-based progress
+  /** The mint is waiting on a wallet that has not answered yet. */
+  mintAwaitingWallet: boolean;
+  /** 'comic' posts the photos as collector cards. */
+  postLayout: 'comic' | null;
+  /** The comic's border preset; null is the theme's own foil. */
+  comicBorder: ComicBorder | null;
+}
+
+export interface PostFormActions {
+  setText: React.Dispatch<React.SetStateAction<string>>;
+  setMedia: React.Dispatch<React.SetStateAction<MediaFile[]>>;
+  setIsSubscribersOnly: (value: boolean) => void;
+  setIsPPV: (value: boolean) => void;
+  setPpvAmount: (value: string) => void;
+  setPpvPreviewSeconds: (value: string) => void;
+  setPpvCurrency: (value: Currency) => void;
+  setIsWatch2Earn: (value: boolean) => void;
+  setW2eViews: (value: string) => void;
+  setW2eComments: (value: string) => void;
+  setW2eTotal: (value: string) => void;
+  setW2eCurrency: (value: Currency) => void;
+  setIsTokenGated: (value: boolean) => void;
+  setTokenContract: (value: string) => void;
+  setTokenSymbol: (value: string) => void;
+  setTokenAmount: (value: string) => void;
+  setLiveMode: (value: LiveMode) => void;
+  setPoll: import('@/hooks/use-draft-state').DraftSetter<PollData | null>;
+  setQuiz: (quiz: import('@/lib/api/dehub').QuizDraft | null) => void;
+  setPhotoTags: (tags: import('@/lib/api/dehub').PhotoTag[]) => void;
+  setContentWarning: (value: string | null) => void;
+  setComicBorder: (border: ComicBorder | null) => void;
+  setHideAssetCards: (value: boolean) => void;
+  setHiddenLinkPreviews: (value: string[]) => void;
+  setQuotePolicy: (value: import('@/lib/api/dehub/types').QuotePolicy) => void;
+  setStitchPolicy: (value: import('@/lib/remix-links').RemixPolicy | null) => void;
+  setReplyPolicy: (value: import('@/lib/api/dehub/types').ReplyPolicy) => void;
+  setVisibility: (value: import('@/lib/api/dehub/types').PostVisibility) => void;
+  handleImageSelect: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  /** Add image files to the post (a painting from the Painting canvas, say). */
+  addImageFiles: (files: File[]) => void;
+  handleVideoSelect: (e: React.ChangeEvent<HTMLInputElement>) => Promise<void>;
+  handleAudioSelect: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleFileDrop: (files: FileList) => void;
+  removeMedia: (index: number) => void;
+  moveMedia: (from: number, to: number) => void;
+  addAudioToMedia: (index: number, audio: AudioFile) => void;
+  removeAudioFromMedia: (index: number) => void;
+  toggleMusicVideo: (index: number) => void;
+  addThumbnailToMedia: (index: number, thumbnailUrl: string) => Promise<void>;
+  removeThumbnailFromMedia: (index: number) => void;
+  applyFilterToMedia: (index: number, settings: FilterSettings, presetId?: string) => void;
+  clearFilterFromMedia: (index: number) => void;
+  applyCropToMedia: (index: number, settings: CropSettings) => void;
+  clearCropFromMedia: (index: number) => void;
+  applyTrimToMedia: (index: number, trimStart: number, trimEnd: number) => void;
+  replaceImageFile: (index: number, file: File, studio?: { original: File; edits: StudioEdits }) => void;
+  /** Swaps the attached video for another file. */
+  replaceVideoFile: (file: File) => Promise<void>;
+  /** Merges fields into one attached item (video edits, post timer). */
+  updateMediaItem: (index: number, patch: Partial<MediaFile>) => void;
+  /** Alt text for one attached image or video; blank clears it. */
+  setMediaDescription: (index: number, description: string) => void;
+  /** Comic page caption for one image; blank clears it. */
+  setMediaCaption: (index: number, caption: string) => void;
+  setPostLayout: (layout: 'comic' | null) => void;
+  /** Adds comic pages, shrinking big art first. */
+  addComicPages: (files: File[]) => Promise<void>;
+  handleEnhanceWithAI: (mode?: 'spellcheck' | 'grammar' | 'style', style?: string) => Promise<void>;
+  /** AI menu > Translate: turn the draft into another language. */
+  handleTranslateDraft: (lang: string) => Promise<void>;
+  undoTranslateDraft: () => void;
+  insertFormatting: (format: 'bold' | 'italic' | 'mention') => void;
+  handlePost: (extra?: { soundtrackTag?: string; articleBody?: string; articleImage?: File; socialImage?: File }) => void;
+  /** Give up on the wallet and publish the post off-chain. */
+  abandonMint: () => void;
+  resetForm: () => void;
+  markCategorySaved: () => void;
+}
+
+export interface PostFormComputed {
+  hasVideo: boolean;
+  hasImage: boolean;
+  hasAudio: boolean;
+  isShort: boolean;
+  destinations: string[];
+  canPost: boolean;
+  /** Composer has something to publish. */
+  hasContent: boolean;
+  /** e.g. "17 DHB" — null while unpriced, or when minting costs nothing. */
+  mintFeeLabel: string | null;
+  /** Bounty locks tokens through the mint, so minting cannot be turned off. */
+  mintRequired: boolean;
+  /** Today’s free posting allowance and what is left of it. Null when unread. */
+  postQuota: PostQuotaStatus | null;
+}
+
+/**
+ * The stream a live post's mint provisioned, on its way to the broadcaster.
+ *
+ * `mintPost` creates the stream alongside the post and returns these in the
+ * same response, so nothing has to be asked for twice or polled for. Shaped to
+ * match GoLiveModal's own streamData exactly — it is handed straight in.
+ */
+export interface LiveStreamHandoff {
+  tokenId: string;
+  streamKey: string;
+  ingestUrl: string;
+  playbackUrl: string;
+  streamId: string;
+  hlsUrl?: string;
+  playbackId?: string;
+  provider?: string;
+}
+
+/**
+ * Everything a saved draft carries besides its text and media flags.
+ *
+ * Before this existed a draft was text plus three booleans, so a poll, a
+ * schedule, a price or a category all survived until the moment the draft was
+ * reopened and then quietly weren't there. Every field is optional: drafts
+ * written before a setting existed (and drafts written by mobile) simply fall
+ * back to the composer's default for it.
+ */
+export interface DraftPayload {
+  titleText?: string;
+  showTitle?: boolean;
+  selectedCategory?: string;
+  isMature?: boolean;
+  isForKids?: boolean;
+  isSubscribersOnly?: boolean;
+  isPPV?: boolean;
+  ppvAmount?: string;
+  ppvPreviewSeconds?: string;
+  ppvCurrency?: Currency;
+  isWatch2Earn?: boolean;
+  w2eViews?: string;
+  w2eComments?: string;
+  w2eTotal?: string;
+  w2eCurrency?: Currency;
+  isTokenGated?: boolean;
+  tokenContract?: string;
+  tokenSymbol?: string;
+  tokenAmount?: string;
+  poll?: PollData | null;
+  /** ISO string — a Date does not survive JSON. */
+  scheduledDate?: string | null;
+  chainId?: number;
+  shopLinks?: unknown[];
+  shopListingIds?: string[];
+  // Who may see, quote and reply, and the content warning. A draft without
+  // them must not reopen as a public post.
+  visibility?: PostVisibility;
+  contentWarning?: string | null;
+  quotePolicy?: QuotePolicy;
+  replyPolicy?: ReplyPolicy;
+}

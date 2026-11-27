@@ -1,0 +1,858 @@
+import { isKidsModeLocked } from "@/lib/kids-mode-lock";
+import { MAX_ATTACHMENT_SIZE } from '@/lib/attachments';
+import { noteImageSizes } from '@/lib/image-size-hints';
+import { noteCoAuthors } from '@/lib/co-author-store';
+import { translateCopy as _translateCopy } from '@/i18n/copy';
+import { API_ORIGIN, backupRelayBase } from '@/lib/api/api-origin';
+
+// Riftn CDN base URL for media assets
+export const DEHUB_CDN_BASE = "https://dehubcdn.ams3.cdn.digitaloceanspaces.com/";
+
+// Riftn API base URL
+export const DEHUB_API_BASE = API_ORIGIN;
+
+// Keep API access independent of the website's DNS-selected edge address.
+// The relay remains a fallback for reads, never a replay path for mutations.
+export const DEHUB_API_REQUEST_BASE = DEHUB_API_BASE;
+
+function apiRelayBase(): string {
+  const backup = backupRelayBase();
+  if (backup) return backup;
+  return typeof window !== 'undefined' && window.location.hostname === 'staging.dehub.io'
+    ? 'https://staging.dehub.io/_api' : 'https://riftn.com/_api';
+}
+
+function apiRequestUrl(endpoint: string): string {
+  return `${DEHUB_API_REQUEST_BASE}/${endpoint.replace(/^\/+/, '')}`;
+}
+
+/**
+ * Wall-clock ceiling for ordinary API calls.
+ *
+ * Browsers do not time fetch out. If a deployment or mobile network change
+ * strands a socket, the promise otherwise stays pending and every loading
+ * state waiting on it can remain visible forever.
+ */
+const DEFAULT_API_TIMEOUT_MS = 20_000;
+
+/**
+ * Convert relative media paths to absolute CDN URLs
+ * The Riftn API returns relative paths like "images/xxx.jpg"
+ */
+export function getMediaUrl(relativePath?: string): string | undefined {
+  if (!relativePath) return undefined;
+  if (relativePath.startsWith("data:") || relativePath.startsWith("blob:")) {
+    return relativePath;
+  }
+  if (relativePath.startsWith("http://") || relativePath.startsWith("https://")) {
+    return relativePath;
+  }
+  // Old posts carry `videos/{tokenId}` with no extension, and the first 2023
+  // videos the old stream route `streams/video/{tokenId}`. Both files live at
+  // `videos/{tokenId}.mp4`; the other keys 403, and Safari retries them before
+  // falling back.
+  const path = relativePath
+    .replace(/^\/+/, '')
+    .replace(/^streams\/video\/(\d+)$/, 'videos/$1')
+    .replace(/^(videos\/\d+)$/, '$1.mp4');
+  return `${DEHUB_CDN_BASE}${path}`;
+}
+
+/**
+ * Custom error class for authentication failures.
+ */
+export class AuthenticationError extends Error {
+  constructor(message: string = 'Session expired. Please sign in again.') {
+    super(message);
+    this.name = 'AuthenticationError';
+  }
+}
+
+export class RequestTimeoutError extends Error {
+  readonly isTimeout = true;
+  readonly url: string;
+
+  constructor(url: string, ms: number) {
+    super(_translateCopy("copy.9c59f9638ba5", { defaultValue: "Request timed out after {{value1}}ms", value1: ms }));
+    this.name = 'RequestTimeoutError';
+    this.url = url;
+  }
+}
+
+/**
+ * The server refused because something has to be paid for first.
+ *
+ * Today that is only the daily posting allowance. Its own class so callers can
+ * show the server's sentence as-is instead of pattern-matching an HTTP status
+ * out of an error string.
+ */
+export class PaymentRequiredError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'PaymentRequiredError';
+  }
+}
+
+/**
+ * An upload the server answered with an error status. Carries the status and
+ * the body's `code` so a caller can tell "this feature is not on this server"
+ * (404/503) or "that draft is gone" (409 DRAFT_UNAVAILABLE) apart from a real
+ * failure — the message stays what it always was.
+ */
+export class UploadHttpError extends Error {
+  constructor(
+    message: string,
+    readonly status: number,
+    readonly code?: string,
+    readonly serverMessage?: string,
+  ) {
+    super(message);
+    this.name = 'UploadHttpError';
+  }
+}
+
+// ── Token Storage ──
+
+export const setAuthToken = (token: string | null) => {
+  if (token) {
+    localStorage.setItem("dehub_token", token);
+  } else {
+    localStorage.removeItem("dehub_token");
+  }
+};
+
+export const setRefreshToken = (token: string | null) => {
+  if (token) {
+    localStorage.setItem("dehub_refresh_token", token);
+  } else {
+    localStorage.removeItem("dehub_refresh_token");
+  }
+};
+
+export const getRefreshToken = (): string | null => {
+  return localStorage.getItem("dehub_refresh_token");
+};
+
+/**
+ * Store the absolute timestamp (ms) at which the access token expires.
+ * Called after login or token refresh with the server's `expiresIn` (seconds).
+ */
+export const setTokenExpiresAt = (expiresInSeconds: number) => {
+  const expiresAt = Date.now() + expiresInSeconds * 1000;
+  localStorage.setItem("dehub_token_expires_at", String(expiresAt));
+};
+
+/**
+ * Get the current auth token from localStorage.
+ * Always reads fresh from localStorage to avoid stale token issues.
+ */
+export const getAuthToken = (): string | null => {
+  return localStorage.getItem("dehub_token");
+};
+
+export const isTokenExpired = (): boolean => {
+  const expiresAt = localStorage.getItem("dehub_token_expires_at");
+  if (expiresAt) {
+    return Date.now() >= parseInt(expiresAt, 10);
+  }
+  // Legacy fallback: check old timestamp-based expiry (24h)
+  const timestamp = localStorage.getItem("dehub_token_timestamp");
+  if (!timestamp) return true;
+  const TOKEN_EXPIRY_MS = 24 * 60 * 60 * 1000;
+  return Date.now() - parseInt(timestamp, 10) >= TOKEN_EXPIRY_MS;
+};
+
+export const clearAuthSession = () => {
+  localStorage.removeItem("dehub_token");
+  localStorage.removeItem("dehub_token_timestamp");
+  localStorage.removeItem("dehub_token_expires_at");
+  localStorage.removeItem("dehub_refresh_token");
+  localStorage.removeItem("dehub_wallet");
+  localStorage.removeItem("dehub_supabase_uid");
+};
+
+// ── Shared Token Refresh (single-flight, shared across every caller) ──
+// Both apiCall's 401 handler below AND the standalone refreshAccessToken()
+// exported from auth.ts (called directly by AuthProvider on mount / proactive
+// refresh) must funnel through the SAME in-flight promise. Two independent
+// refresh calls firing concurrently would both submit the same soon-to-be-
+// rotated refresh token — servers that rotate refresh tokens and treat reuse
+// as theft can revoke the whole session family when that happens.
+
+export interface TokenRefreshResult {
+  accessToken: string;
+  refreshToken: string;
+  expiresIn: number;
+}
+
+/**
+ * Why a refresh attempt did not produce a new access token.
+ *
+ * The distinction is the whole point: only `revoked` proves the session is
+ * actually dead. Every other reason is a temporary condition — the radio is
+ * down, the server hiccuped, the request timed out — where the stored refresh
+ * token is still perfectly good. A caller that ends the session on anything
+ * but `revoked` logs the user out on a network blip, which is the single most
+ * common cause of "I keep getting randomly logged out".
+ */
+export type TokenRefreshFailure =
+  /** Server definitively rejected the refresh token (401). Session is dead. */
+  | 'revoked'
+  /** No refresh token stored — nothing to refresh with. */
+  | 'no-refresh-token'
+  /** Network error, timeout, offline, or 5xx/429. Session is probably fine. */
+  | 'transient'
+  /** 2xx response that carried no access token. Server bug, not a dead session. */
+  | 'malformed';
+
+/**
+ * The `?: never` fillers are load-bearing. This project compiles with
+ * `strictNullChecks: false`, and under that setting TypeScript does not narrow
+ * a union by a boolean discriminant — `if (outcome.ok)` leaves the type as the
+ * full union, so reading `.reason` in the else branch is a compile error.
+ * Declaring both keys on both members keeps the access legal while the literal
+ * `ok` types still document which fields are actually populated.
+ */
+export type TokenRefreshOutcome =
+  | { ok: true; tokens: TokenRefreshResult; reason?: never }
+  | { ok: false; reason: TokenRefreshFailure; tokens?: never };
+
+let refreshInFlight: Promise<TokenRefreshOutcome> | null = null;
+const REFRESH_LOCK_NAME = 'dehub-refresh-token';
+
+/**
+ * Pick up the pair another tab wrote while this one was waiting to refresh.
+ * localStorage is shared synchronously across same-origin tabs, so the changed
+ * refresh token is proof that the submitted token has already been rotated.
+ */
+function readSiblingRefresh(
+  submittedRefreshToken: string,
+): TokenRefreshOutcome | null {
+  const refreshToken = getRefreshToken();
+  const accessToken = getAuthToken();
+  if (!refreshToken || refreshToken === submittedRefreshToken || !accessToken) return null;
+
+  const expiresAt = Number(localStorage.getItem('dehub_token_expires_at'));
+  const expiresIn = Number.isFinite(expiresAt)
+    ? Math.max(0, Math.ceil((expiresAt - Date.now()) / 1000))
+    : 0;
+  return { ok: true, tokens: { accessToken, refreshToken, expiresIn } };
+}
+
+/**
+ * Who owns the live session keys right now. Deliberately local and cheap —
+ * consulted around every refresh, so it must not drag in the profiles module.
+ */
+function readSessionOwner(): { wallet: string; uid: string | null } | null {
+  try {
+    const wallet = localStorage.getItem('dehub_wallet');
+    if (!wallet) return null;
+    return { wallet, uid: localStorage.getItem('dehub_supabase_uid') };
+  } catch {
+    return null;
+  }
+}
+
+function sameSessionOwner(
+  owner: ReturnType<typeof readSessionOwner>,
+): boolean {
+  const now = readSessionOwner();
+  if (!owner || !now) return owner === now;
+  return now.wallet === owner.wallet && now.uid === owner.uid;
+}
+
+/**
+ * File a refresh response into the stored profile it belongs to, when the live
+ * keys have moved to someone else. Loaded lazily: importing profiles.ts here
+ * statically would put the whole supabase/smart-wallet graph inside the API
+ * core's init path for the sake of a branch that fires once in a blue moon.
+ */
+async function stashTokensForProfile(
+  owner: NonNullable<ReturnType<typeof readSessionOwner>>,
+  tokens: TokenRefreshResult,
+): Promise<void> {
+  try {
+    const { mergeTokensIntoStoredProfile } = await import('@/lib/profiles');
+    const patched: Record<string, string> = {
+      dehub_token: tokens.accessToken,
+      ...(tokens.refreshToken ? { dehub_refresh_token: tokens.refreshToken } : {}),
+      ...(tokens.expiresIn
+        ? { dehub_token_expires_at: String(Date.now() + tokens.expiresIn * 1000) }
+        : {}),
+    };
+    mergeTokensIntoStoredProfile(owner, patched);
+  } catch (e) {
+    // Nowhere to file them (profile never adopted, storage unavailable). The
+    // pair is dropped, never written over the new owner's keys — a dropped
+    // rotation just means that profile re-authenticates on next use.
+    console.warn('[Auth] Rotated tokens could not be filed to their profile:', e);
+  }
+}
+
+/**
+ * Build an abort signal that fires after `ms`.
+ *
+ * AbortSignal.timeout() is missing in Safari < 16, older Firefox, and jsdom.
+ * Calling it unguarded throws a TypeError *before* fetch is even attempted, so
+ * on those browsers every refresh failed instantly and the session could never
+ * be renewed — the user just got logged out and had no way to prevent it.
+ */
+function timeoutSignal(ms: number): { signal: AbortSignal; cancel: () => void } {
+  if (typeof AbortSignal !== 'undefined' && typeof AbortSignal.timeout === 'function') {
+    return { signal: AbortSignal.timeout(ms), cancel: () => { /* self-clearing */ } };
+  }
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), ms);
+  return { signal: controller.signal, cancel: () => clearTimeout(id) };
+}
+
+/** Waits before the second and third try of a refresh that got no answer. */
+// Off under the test runner, where a test that wants them turns them on.
+let refreshRetryDelaysMs: number[] = import.meta.env?.MODE === 'test' ? [] : [1500, 4000];
+/** No new try is started once this long has passed since the first. */
+const REFRESH_RETRY_BUDGET_MS = 20000;
+
+/** Test hook: shorten or turn off the waits above. */
+export function setRefreshRetryDelaysForTests(delays: number[]): void {
+  refreshRetryDelaysMs = delays;
+}
+
+/**
+ * Refresh the access token using the stored refresh token, reporting *why* it
+ * failed so callers can tell a revoked session apart from a flaky network.
+ * Concurrent callers (from this file or auth.ts) share the same in-flight
+ * request instead of each firing their own. Updates localStorage on success.
+ */
+export async function refreshTokenSharedDetailed(): Promise<TokenRefreshOutcome> {
+  if (refreshInFlight) return refreshInFlight;
+
+  const refreshToken = getRefreshToken();
+  if (!refreshToken) return { ok: false, reason: 'no-refresh-token' };
+
+  // Captured BEFORE the refresh: whether the old access token was already dead.
+  // Any API fetch made in that window went out effectively anonymous, so
+  // per-user flags (isLiked, isSaved, isUnlocked…) cached from it are wrong for
+  // this user. Listeners (AuthProvider) use this to refetch those caches.
+  const wasExpired = isTokenExpired() || !getAuthToken();
+
+  // Who owns the live keys while this refresh is in flight. The response lands
+  // an unknown time later — long enough for another tab to switch profiles, or
+  // for an add-profile flow to stage the incoming identity and wipe these very
+  // keys (stageIncomingIdentity). Writing the rotated pair blindly then would
+  // graft this account's tokens onto whoever owns disk by then: every later
+  // authed call sends account A's token under B's identity, fails, and the
+  // cleanup paths sign everybody out. The owner check below routes the pair to
+  // its rightful stash instead.
+  const ownerAtStart = readSessionOwner();
+
+  const performRefresh = async (): Promise<TokenRefreshOutcome> => {
+    // A refresh that got no answer about the token (timeout, offline, 5xx,
+    // 409) is tried again shortly. The server may have finished the rotation
+    // whose answer was lost — a slow deploy did exactly that — and it hands
+    // the same new pair back when the old token is sent again within a few
+    // minutes. Left alone, that old token was later refused as reuse and the
+    // person was signed out.
+    const firstTryAt = Date.now();
+    for (let attempt = 0; ; attempt++) {
+      const outcome = await performRefreshOnce();
+      if (outcome.ok || outcome.reason !== 'transient' || !sameSessionOwner(ownerAtStart)) return outcome;
+      const delay = refreshRetryDelaysMs[attempt];
+      if (delay === undefined || Date.now() - firstTryAt > REFRESH_RETRY_BUDGET_MS) return outcome;
+      if (delay > 0) await new Promise((resolve) => setTimeout(resolve, delay));
+    }
+  };
+
+  const performRefreshOnce = async (): Promise<TokenRefreshOutcome> => {
+    // A profile switch while waiting means these credentials no longer own the
+    // live keys. Do not mistake the new account's pair for a sibling refresh.
+    if (!sameSessionOwner(ownerAtStart)) return { ok: false, reason: 'transient' };
+
+    // A sibling tab may have completed the rotation while this tab waited for
+    // the origin-wide lock. Reuse its pair instead of submitting the spent
+    // token and tripping server-side reuse detection.
+    const siblingRefresh = readSiblingRefresh(refreshToken);
+    if (siblingRefresh) return siblingRefresh;
+
+    // Without a timeout, a stalled request never settles, and the
+    // single-flight promise above never resolves — every subsequent
+    // caller awaiting it (or gated behind isRefreshing) hangs forever,
+    // requiring a full page reload to recover.
+    const timeout = timeoutSignal(10000);
+    try {
+      const response = await fetch(apiRequestUrl('/api/auth/refresh'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refreshToken }),
+        signal: timeout.signal,
+      });
+
+      if (!response.ok) {
+        // Only a definitive 401 means the refresh token itself is invalid or
+        // revoked. Any other non-2xx (500/502/503/429, etc.) is a transient
+        // server or network problem, not proof the session is dead — treating
+        // it the same as a 401 would silently log the user out on a blip.
+        if (response.status === 401) {
+          // An older tab or build may not participate in the Web Lock. If it
+          // won the rotation while this request was in flight, its fresh pair
+          // is already in shared storage; adopt that result and never erase it.
+          const siblingRefresh = sameSessionOwner(ownerAtStart)
+            ? readSiblingRefresh(refreshToken)
+            : null;
+          if (siblingRefresh) return siblingRefresh;
+          console.warn('[Auth] Refresh token rejected (401), clearing session');
+          // Only wipe when these keys still belong to whoever started the
+          // refresh. A revoke landing after a profile switch must not take
+          // the incoming account's fresh keys down with it.
+          if (sameSessionOwner(ownerAtStart)) {
+            clearAuthSession();
+          }
+          return { ok: false, reason: 'revoked' };
+        }
+        console.warn('[Auth] Token refresh failed (non-401, treating as transient):', response.status);
+        return { ok: false, reason: 'transient' };
+      }
+
+      const data = await response.json();
+      if (!data.accessToken) {
+        console.warn('[Auth] Refresh returned 2xx with no access token');
+        return { ok: false, reason: 'malformed' };
+      }
+
+      const tokens: TokenRefreshResult = data;
+      const ownerStillLive = sameSessionOwner(ownerAtStart);
+      if (ownerStillLive) {
+        setAuthToken(data.accessToken);
+        if (data.refreshToken) setRefreshToken(data.refreshToken);
+        if (data.expiresIn) setTokenExpiresAt(data.expiresIn);
+      } else {
+        // The live keys moved on while this refresh was in flight (another
+        // tab switched profiles, or an add-profile flow staged the incoming
+        // identity). The rotated pair is still good — for the account it was
+        // minted to. File it into THAT account's stored profile so switching
+        // back restores a chain the server still honours; writing it to the
+        // live keys instead would blend two identities.
+        await stashTokensForProfile(ownerAtStart, tokens);
+      }
+
+      if (ownerStillLive) {
+        try {
+          window.dispatchEvent(new CustomEvent('dehub:token-refreshed', { detail: { wasExpired } }));
+        } catch { /* SSR / test env — no window */ }
+      }
+
+      return { ok: true, tokens };
+    } catch (e) {
+      // AbortError (the 10s timeout above), TypeError (offline, DNS, CORS) —
+      // none of these are evidence that the refresh token is invalid.
+      console.error('[Auth] Token refresh network error:', e);
+      return { ok: false, reason: 'transient' };
+    } finally {
+      timeout.cancel();
+    }
+  };
+
+  refreshInFlight = (async (): Promise<TokenRefreshOutcome> => {
+    // The module promise above covers components in this JS realm. Web Locks
+    // extends the same single-flight guarantee across every tab/window on the
+    // origin, which is where the remaining refresh-token replays came from.
+    if (typeof navigator !== 'undefined' && navigator.locks?.request) {
+      return navigator.locks.request(REFRESH_LOCK_NAME, performRefresh);
+    }
+    return performRefresh();
+  })().finally(() => {
+    refreshInFlight = null;
+  });
+
+  return refreshInFlight;
+}
+
+/**
+ * Back-compat wrapper returning tokens-or-null.
+ *
+ * Prefer refreshTokenSharedDetailed() anywhere the caller decides whether to
+ * end the session: this signature collapses "the server revoked you" and
+ * "your train went into a tunnel" into the same `null`, and cannot express
+ * "try again later".
+ */
+export async function refreshTokenShared(): Promise<TokenRefreshResult | null> {
+  const outcome = await refreshTokenSharedDetailed();
+  return outcome.ok ? outcome.tokens : null;
+}
+
+/**
+ * Ensure a usable access token exists before making an authenticated request.
+ *
+ * Throws AuthenticationError only when the session is genuinely unrecoverable.
+ * A transient failure throws a plain Error instead, so the UI shows a
+ * connection problem rather than falsely telling the user to sign in again.
+ */
+export async function ensureFreshToken(): Promise<string> {
+  const existing = getAuthToken();
+  if (existing && !isTokenExpired()) return existing;
+
+  const outcome = await refreshTokenSharedDetailed();
+  if (outcome.ok) return outcome.tokens.accessToken;
+
+  if (outcome.reason === 'transient' || outcome.reason === 'malformed') {
+    throw new Error(_translateCopy("copy.ee689043636f", { defaultValue: "Could not verify your session — please check your connection and try again." }));
+  }
+  throw new AuthenticationError('Session expired. Please sign in again.');
+}
+
+// Base API call function - calls Riftn API directly.
+//
+// `endpoint` resolves against the bare origin, so it must include the `/api`
+// prefix. Mobile's axios client sets a base URL ending in `/api` and therefore
+// writes paths without it; copying one of those strings across verbatim
+// produces a URL that 404s on every call, which surfaces as a generic "failed
+// to load" toast rather than anything pointing at the path.
+export async function apiCall<T>(
+  endpoint: string,
+  options: {
+    method?: "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
+    body?: Record<string, unknown>;
+    params?: Record<string, string | number | undefined>;
+    requiresAuth?: boolean;
+    _retry?: boolean;
+    /** Override the request ceiling. Defaults to 20 seconds. */
+    timeoutMs?: number;
+  } = {},
+): Promise<T> {
+  const {
+    method = "GET",
+    body,
+    params = {},
+    requiresAuth = false,
+    _retry = false,
+    timeoutMs = DEFAULT_API_TIMEOUT_MS,
+  } = options;
+
+  const url = new URL(apiRequestUrl(endpoint));
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== undefined) {
+      url.searchParams.set(key, String(value));
+    }
+  });
+
+  let token = getAuthToken();
+
+  // For an endpoint that requires auth, establish a valid session up front
+  // rather than spending a guaranteed-401 round trip on a token we already
+  // know is dead. Failing here throws AuthenticationError (not a plain
+  // Error), so callers can offer re-auth instead of showing a dead-end
+  // "Authentication required" toast that the user can only escape by
+  // manually signing out and back in.
+  if (requiresAuth && (!token || isTokenExpired())) {
+    token = await ensureFreshToken();
+  }
+
+  // Content-Type only when there is a body. On a GET it made every request a
+  // non-simple CORS request, so the browser sent an OPTIONS preflight first —
+  // for signed-out visitors that doubled every read on Home.
+  const headers: HeadersInit = {
+    "Accept": "application/json",
+  };
+  if (body) {
+    headers["Content-Type"] = "application/json";
+  }
+
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
+  // Kids Mode travels on every request, signed in or not.
+  //
+  // The server also reads the flag off the account, and that one is
+  // authoritative — but /api/feed answers an expired token with 200 and an
+  // anonymous item shape rather than a 401, so a lapsed session would be
+  // served the ordinary feed with nothing to say anything had changed. This
+  // header is what survives that, and it is the only source at all for a
+  // signed-out device.
+  if (isKidsModeLocked()) {
+    headers["X-Kids-Mode"] = "1";
+  }
+
+  const attempt = async (target: string): Promise<Response> => {
+    const controller = new AbortController();
+    let timedOut = false;
+    const timer = setTimeout(() => { timedOut = true; controller.abort(); }, timeoutMs);
+    try {
+      return await fetch(target, {
+      method,
+      headers,
+      body: body ? JSON.stringify(body) : undefined,
+      cache: 'no-store',
+      signal: controller.signal,
+      });
+    } catch (error) {
+      if (timedOut) throw new RequestTimeoutError(target, timeoutMs);
+      throw error;
+    } finally { clearTimeout(timer); }
+  };
+  let response: Response;
+  try { response = await attempt(url.toString()); }
+  catch (error) {
+    // HTTP responses, including 401/429/5xx, are handled below. Only a failed
+    // transport triggers this alternate read; POST/PUT/PATCH/DELETE never replay.
+    if (method !== 'GET') throw error;
+    response = await attempt(`${apiRelayBase()}${url.pathname}${url.search}`);
+  }
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    
+    const errorMessage = (errorData.message || errorData.error || '').toLowerCase();
+
+    // Attempt a refresh on ANY 401, not just ones whose body happens to say
+    // "access token expired".
+    //
+    // Matching that exact phrase made the entire recovery path depend on the
+    // server's error wording: a 401 saying "Unauthorized", a bodyless 401 from
+    // a CDN or proxy, or any rephrasing on the API side silently disabled
+    // refresh-and-retry, and the user got signed out for no reason. A refresh
+    // attempt on a non-expiry 401 costs one request and then fails closed
+    // below, so the broad trigger is the safe direction to err in.
+    const shouldTryRefresh = response.status === 401 && !!getRefreshToken();
+
+    // Skip if: already retried, or this IS the refresh endpoint.
+    if (shouldTryRefresh && !_retry && !endpoint.includes('/api/auth/refresh')) {
+      // refreshTokenShared() is single-flight — a concurrent call from here
+      // and one from auth.ts's refreshAccessToken() (or another apiCall 401)
+      // all await the same in-flight request instead of racing.
+      const outcome = await refreshTokenSharedDetailed();
+
+      if (outcome.ok) {
+        // Retry the original request with the new token and _retry flag
+        return apiCall<T>(endpoint, { ...options, _retry: true });
+      }
+
+      // A refresh that failed on a network blip must not masquerade as an
+      // expired session — that wording pushes the user to sign out and back
+      // in when simply retrying would have worked.
+      if (outcome.reason === 'transient' || outcome.reason === 'malformed') {
+        throw new Error(_translateCopy("copy.ee689043636f", { defaultValue: "Could not verify your session — please check your connection and try again." }));
+      }
+      throw new AuthenticationError('Session expired. Please sign in again.');
+    }
+
+    // Any 401 or auth-related 403 that isn't a refreshable expiry → throw AuthenticationError
+    const isAuthError = 
+      response.status === 401 || 
+      errorMessage.includes('unauthorized') ||
+      errorMessage.includes('invalid token') ||
+      errorMessage.includes('token expired') ||
+      errorMessage.includes('jwt');
+
+    if (response.status === 401 || (response.status === 403 && isAuthError)) {
+      throw new AuthenticationError('Session expired. Please sign in again.');
+    }
+
+
+    // Carry the HTTP status so callers that must branch on it (the account
+    // marketplace claim treats a 409 as "retry to resume", not as failure)
+    // can, without pattern-matching the message text.
+    const apiError = new Error(errorData.message || errorData.error || _translateCopy("copy.99061eb5c49c", { defaultValue: "API error: {{value1}}", value1: response.status })) as Error & {
+      httpStatus?: number;
+      errorCode?: string;
+    };
+    apiError.httpStatus = response.status;
+    // The server's own machine-readable reason, when it sends one.
+    // ACCOUNT_BANNED is the one callers branch on: a banned account reads
+    // everything and writes nothing, so a refused write is a state to explain
+    // rather than a failure to retry.
+    if (typeof errorData?.code === 'string') apiError.errorCode = errorData.code;
+    throw apiError;
+  }
+
+  const data = await response.json();
+  noteImageSizes(data);
+  noteCoAuthors(data);
+  return data;
+}
+
+// ── Authenticated multipart uploads ──
+// FormData bodies cannot go through apiCall() (which JSON-encodes), and
+// fetch() cannot report upload progress. Both facts pushed every upload path
+// onto a hand-rolled XMLHttpRequest that carried a snapshotted token and had
+// no 401 handling — so a post whose token expired during composition failed
+// with a bare "HTTP 401" while the rest of the app still looked signed in.
+// The helpers below give uploads the same session lifecycle as apiCall().
+
+export interface AuthedUploadOptions {
+  method?: "POST" | "PUT" | "PATCH";
+  onProgress?: (percent: number) => void;
+  timeoutMs?: number;
+  /** Unwrap `{ result: … }` envelopes returned by some endpoints. */
+  unwrapResult?: boolean;
+  /** Aborting rejects with a DOMException named "AbortError". */
+  signal?: AbortSignal;
+}
+
+interface XhrOutcome<T> {
+  ok: boolean;
+  status: number;
+  data?: T;
+  message?: string;
+  /** Machine-readable marker from the error body, e.g. "DAILY_POST_LIMIT". */
+  code?: string;
+}
+
+function sendAuthedXhr<T>(
+  url: string,
+  formData: FormData,
+  token: string,
+  opts: {
+    method: string;
+    timeoutMs: number;
+    unwrapResult: boolean;
+    onProgress?: (percent: number) => void;
+    signal?: AbortSignal;
+  },
+): Promise<XhrOutcome<T>> {
+  return new Promise((resolve, reject) => {
+    const abortError = () => new DOMException("Upload aborted", "AbortError");
+    if (opts.signal?.aborted) {
+      reject(abortError());
+      return;
+    }
+    const xhr = new XMLHttpRequest();
+    const onAbort = () => xhr.abort();
+    opts.signal?.addEventListener("abort", onAbort, { once: true });
+    xhr.onloadend = () => opts.signal?.removeEventListener("abort", onAbort);
+    xhr.onabort = () => reject(abortError());
+
+    // Track upload progress (bytes sent to server)
+    xhr.upload.onprogress = (event) => {
+      if (event.lengthComputable && opts.onProgress) {
+        opts.onProgress(Math.round((event.loaded / event.total) * 100));
+      }
+    };
+
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        try {
+          const parsed = JSON.parse(xhr.responseText);
+          resolve({
+            ok: true,
+            status: xhr.status,
+            data: (opts.unwrapResult ? parsed.result ?? parsed : parsed) as T,
+          });
+        } catch {
+          reject(new Error(_translateCopy("copy.19265efd1ad2", { defaultValue: "Invalid response from server" })));
+        }
+        return;
+      }
+
+      let errorData: Record<string, string> = {};
+      try { errorData = JSON.parse(xhr.responseText); } catch { /* ignore */ }
+      resolve({
+        ok: false,
+        status: xhr.status,
+        message: errorData.message || errorData.error || _translateCopy("copy.27c2ccd962c2", { defaultValue: "Unknown error" }),
+        code: errorData.code,
+      });
+    };
+
+    xhr.onerror = () => reject(new Error(_translateCopy("copy.580bfac1001b", { defaultValue: "Upload failed — please check your connection and try again" })));
+    xhr.ontimeout = () => reject(new Error(_translateCopy("copy.fdd793503950", { defaultValue: "Upload timed out — your file may be too large or your connection too slow" })));
+
+    xhr.timeout = opts.timeoutMs;
+    xhr.open(opts.method, url);
+    xhr.setRequestHeader("Authorization", `Bearer ${token}`);
+    xhr.send(formData);
+  });
+}
+
+/**
+ * Send FormData to an authenticated endpoint, with upload-progress reporting
+ * and the same auth lifecycle as apiCall(): refresh a dead token before
+ * sending, refresh-and-replay once on a 401, and surface AuthenticationError
+ * (not a raw HTTP string) when the session is genuinely unrecoverable.
+ */
+export async function authedUpload<T>(
+  endpoint: string,
+  formData: FormData,
+  options: AuthedUploadOptions = {},
+): Promise<T> {
+  const {
+    method = "POST",
+    onProgress,
+    timeoutMs = 8 * 60 * 1000,
+    unwrapResult = false,
+    signal,
+  } = options;
+
+  const dmUpload = endpoint === '/api/dm/upload' || endpoint === '/api/dm/upload-photos';
+  const totalLimit = dmUpload
+    ? MAX_ATTACHMENT_SIZE + (formData.get('encryptedKind') === 'file' ? 20 + 16 * Math.ceil(MAX_ATTACHMENT_SIZE / 65536) : 0)
+    : 100_000_000;
+  let bytes = 0;
+  formData.forEach(value => {
+    if (typeof value === "string") return;
+    bytes += value.size;
+    if (dmUpload && bytes > totalLimit) {
+      const message = _translateCopy("dm.attachTooLarge", {
+        defaultValue: '"{{name}}" is over the {{size}} MB limit.',
+        name: value.name, size: MAX_ATTACHMENT_SIZE / 1024 / 1024,
+      });
+      throw new UploadHttpError(message, 413, "UPLOAD_TOO_LARGE");
+    }
+    if ((value.type.startsWith("image/") && value.size > 42_069_000) || bytes > totalLimit) {
+      throw new UploadHttpError(
+        "Images must be 42.069 MB or smaller; this upload must total 100 MB or less. Larger videos require resumable upload. Please retry when it is available.",
+        413, "UPLOAD_TOO_LARGE",
+      );
+    }
+  });
+
+  const url = new URL(endpoint, DEHUB_API_BASE).toString();
+  const xhrOpts = { method, timeoutMs, unwrapResult, onProgress, signal };
+
+  // Refresh up front when the token is already dead, so a large upload is not
+  // pushed over the wire with a doomed token and then repeated in full.
+  const token = await ensureFreshToken();
+
+  let result = await sendAuthedXhr<T>(url, formData, token, xhrOpts);
+
+  // A 401 here means the token died mid-flight, or the server disagreed with
+  // us about its expiry. Refresh once and replay before giving up.
+  if (!result.ok && result.status === 401) {
+    const outcome = await refreshTokenSharedDetailed();
+    if (!outcome.ok) {
+      if (outcome.reason === "transient" || outcome.reason === "malformed") {
+        throw new Error(_translateCopy("copy.ee689043636f", { defaultValue: "Could not verify your session — please check your connection and try again." }));
+      }
+      throw new AuthenticationError("Session expired. Please sign in again.");
+    }
+    result = await sendAuthedXhr<T>(url, formData, outcome.tokens.accessToken, xhrOpts);
+  }
+
+  if (result.ok) return result.data as T;
+
+  const message = (result.message || "").toLowerCase();
+  const isAuthError =
+    result.status === 401 ||
+    message.includes("unauthorized") ||
+    message.includes("invalid token") ||
+    message.includes("token expired") ||
+    message.includes("jwt");
+
+  if (result.status === 401 || (result.status === 403 && isAuthError)) {
+    throw new AuthenticationError("Session expired. Please sign in again.");
+  }
+
+  // 402 is the daily posting allowance refusing an upload it cannot bill for.
+  // Its message is written for the creator ("This post needs 2,000 DHB and you
+  // hold 500"), so it is carried through intact rather than wrapped in an HTTP
+  // status the person reading it cannot act on.
+  if (result.status === 402) {
+    throw new PaymentRequiredError(result.message || _translateCopy("copy.e6b09ed01f70", { defaultValue: "This post needs tokens you do not have." }));
+  }
+
+  throw new UploadHttpError(
+    _translateCopy("copy.47107db53bda", { defaultValue: "Upload failed (HTTP {{value1}}): {{value2}}", value1: result.status, value2: result.message }),
+    result.status,
+    result.code,
+    result.message,
+  );
+}

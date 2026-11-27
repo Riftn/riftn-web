@@ -1,0 +1,406 @@
+import { useTranslation as _useCopy } from 'react-i18next';
+import { useTabLongPress } from '@/hooks/use-tab-long-press';
+/**
+ * Global Feed Navigation Bar
+ * ==========================
+ * Renders the feed tab bar (Home, Videos, Images, etc.) at the top of every page
+ * when in collapsed/fullscreen desktop mode. On the home page it controls the
+ * active feed tab; on other pages clicking a tab navigates to /app with that tab.
+ *
+ * Supports drag-to-swipe: users can grab the active indicator and drag it
+ * between tabs for a tactile, interactive experience.
+ */
+
+import { useRef, useCallback, useState, useEffect, useMemo, type ReactNode } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { isHomePath } from '@/lib/home-path';
+import Settings2 from "@/components/ui/cut-icons/settings";
+import ArrowLeft from "@/components/ui/cut-icons/back";
+
+import { FEED_TAB_ICON_SCALE, feedTabIconTransform, feedTabsFor } from '@/constants/app.constants';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { useShortsEnabled } from '@/contexts/ShortsEnabledContext';
+import { useGlobalFeedNav } from '@/contexts/GlobalFeedNavContext';
+import { useAppTheme } from '@/contexts/ThemeContext';
+import { FeedFilterAnchor } from '@/components/app/navigation/FeedFilterAnchor';
+import { cn } from '@/lib/utils';
+import { useTabIndicator } from '@/hooks/use-tab-indicator';
+import { GlassIndicator, glideOnTabClick } from '@/components/app/feeds/GlassIndicator';
+import { useScrollDirection } from '@/hooks/use-scroll-direction';
+import { useAnyOverlayOpen } from '@/lib/overlay-open';
+import { closeCommentsSplit } from '@/lib/comments-split';
+import { FeedSearchBar } from '@/components/app/navigation/FeedSearchBar';
+import { FeedSearchLens, useFeedSearchLens } from '@/components/app/navigation/FeedSearchLens';
+import { closeFeedSearch, getFeedSearchState, isFeedSearchTab, openFeedSearch, useFeedSearch } from '@/lib/feed-search';
+import { getDocumentScrollTop, scrollDocumentToSmooth, SCROLL_TOP_FIRST_PX } from '@/lib/document-scroll';
+import { useImagesFeedScrollView, requestImagesBackToCollage } from '@/lib/images-feed-mode';
+
+const HOME_STATE_STORAGE_KEY = 'home-feed-state';
+const HOME_TAB_SWITCH_EVENT = 'switch-home-tab';
+
+/** Read the currently persisted home tab from sessionStorage */
+function getPersistedTab(): string {
+  try {
+    const saved = sessionStorage.getItem(HOME_STATE_STORAGE_KEY);
+    if (saved) {
+      const { tab } = JSON.parse(saved);
+      if (tab) return tab;
+    }
+  } catch { /* ignore */ }
+  return 'home';
+}
+
+/**
+ * @param postPage When true, this nav is standing in as the top chrome for a
+ *   directly-loaded post/video page (no home feed mounted underneath). It then
+ *   mirrors the home tab bar exactly: mobile-header offset (top-11), the same
+ *   full-width insets (px-2 sm:px-3), and a back arrow in place of the home
+ *   settings button — so the pill shares its width with the full-width post +
+ *   related-feed bentos below it, identical to the home feed's nav/feed look.
+ * @param profilePage Keep that feed pill on desktop profiles, with Back in the
+ *   settings slot, so opening a profile preserves the home navigation shape.
+ */
+export function GlobalFeedNav({ postPage = false, profilePage = false, compactProfileContent }: { postPage?: boolean; profilePage?: boolean; compactProfileContent?: ReactNode } = {}) {
+  const { t: _copy } = _useCopy();
+  const { theme } = useAppTheme();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const navVisible = useScrollDirection();
+  // Overlays (share/options drawers, dialogs, story viewer, …) should own the
+  // screen on mobile — slide the nav pill away while one is open, matching the
+  // home tab bar. On desktop drop below z-50 so every overlay scrim (drawer
+  // z-100, dialog/sheet z-50) dims the pill with the rest of the page.
+  const anyOverlayOpen = useAnyOverlayOpen();
+  const isHomePage = isHomePath(location.pathname);
+  const feedSearch = useFeedSearch();
+
+  const handleBack = useCallback(() => {
+    // An open comments sheet on a phone post page closes first.
+    if (closeCommentsSplit()) return;
+    if (typeof window.history.state?.idx === 'number' && window.history.state.idx > 0) navigate(-1);
+    else navigate('/app', { replace: true });
+  }, [navigate]);
+
+  const [activeTab, setActiveTab] = useState(() => isHomePage || profilePage ? getPersistedTab() : '');
+  const searchOpen = feedSearch.open && isHomePage && isFeedSearchTab(activeTab);
+  const searchLens = useFeedSearchLens();
+  const meltOpen = searchOpen && !searchLens;
+  const [enableTransition, setEnableTransition] = useState(false);
+  const { shortsEnabled } = useShortsEnabled();
+  const isPhone = useIsMobile();
+  const feedTabs = useMemo(() => feedTabsFor(isPhone, shortsEnabled), [isPhone, shortsEnabled]);
+
+  const tabLongPress = useTabLongPress(activeTab, () => {
+    window.dispatchEvent(new CustomEvent('home-tab-long-press', { detail: activeTab }));
+  }, isHomePage);
+
+  // Keep a ref in sync so drag handlers avoid stale activeTab closures.
+  const activeTabRef = useRef(activeTab);
+  useEffect(() => {
+    activeTabRef.current = activeTab;
+  }, [activeTab]);
+
+  // Reset transition on page change
+  useEffect(() => {
+    setEnableTransition(false);
+  }, [isHomePage]);
+
+  // Listen for tab changes from HomePage swipes via custom event
+  useEffect(() => {
+    const handler = () => {
+      if (isHomePage) {
+        setActiveTab(getPersistedTab());
+      }
+    };
+    window.addEventListener('home-tab-changed', handler);
+    // Also sync on storage events (cross-tab)
+    const storageHandler = (e: StorageEvent) => {
+      if (e.key === HOME_STATE_STORAGE_KEY && isHomePage) {
+        setActiveTab(getPersistedTab());
+      }
+    };
+    window.addEventListener('storage', storageHandler);
+    return () => {
+      window.removeEventListener('home-tab-changed', handler);
+      window.removeEventListener('storage', storageHandler);
+    };
+  }, [isHomePage]);
+
+  // Sync when navigating back to home page — always keep last known tab
+  useEffect(() => {
+    if (isHomePage) {
+      setActiveTab(getPersistedTab());
+    }
+  }, [isHomePage]);
+
+  const { layerRef, setRef, rect } = useTabIndicator(activeTab, true, undefined, 5);
+
+
+  // ── Drag-to-swipe state ──────────────────────────────────────────────
+  const tabButtonPositions = useRef<Partial<Record<string, HTMLElement | null>>>({});
+  const dragState = useRef<{ startX: number; startRectX: number; startWidth: number; hasMoved: boolean } | null>(null);
+  const suppressClickRef = useRef(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragOffsetX, setDragOffsetX] = useState(0);
+
+  const findNearestTab = useCallback((indicatorCenterX: number) => {
+    const layer = layerRef.current;
+    if (!layer) return activeTabRef.current;
+    const layerRect = layer.getBoundingClientRect();
+    let nearest = activeTabRef.current;
+    let minDist = Infinity;
+    for (const tab of feedTabs) {
+      const el = tabButtonPositions.current[tab.value];
+      if (!el) continue;
+      const br = el.getBoundingClientRect();
+      const btnCenter = br.left - layerRect.left + br.width / 2;
+      const dist = Math.abs(indicatorCenterX - btnCenter);
+      if (dist < minDist) { minDist = dist; nearest = tab.value; }
+    }
+    return nearest;
+  }, [layerRef, feedTabs]);
+
+  const applyTab = useCallback((tabValue: string) => {
+    if (isHomePage) {
+      sessionStorage.setItem(HOME_STATE_STORAGE_KEY, JSON.stringify({ tab: tabValue }));
+      // Directly sync HomePage while dragging — avoids relying on synthetic storage events.
+      window.dispatchEvent(new CustomEvent(HOME_TAB_SWITCH_EVENT, { detail: tabValue }));
+      window.dispatchEvent(new CustomEvent('home-tab-changed'));
+    }
+    activeTabRef.current = tabValue;
+    setActiveTab(tabValue);
+  }, [isHomePage]);
+
+  const handleDragStart = useCallback((e: React.PointerEvent) => {
+    // Allow all touch drags, but only primary mouse button for mouse.
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    e.preventDefault();
+    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+    dragState.current = { startX: e.clientX, startRectX: rect.x, startWidth: rect.width, hasMoved: false };
+    setIsDragging(true);
+    setDragOffsetX(0);
+  }, [rect.x, rect.width]);
+
+  const handleDragMove = useCallback((e: React.PointerEvent) => {
+    if (!dragState.current) return;
+    const dx = e.clientX - dragState.current.startX;
+    if (Math.abs(dx) > 3) dragState.current.hasMoved = true;
+    setDragOffsetX(dx);
+    const currentCenterX = dragState.current.startRectX + dx + dragState.current.startWidth / 2;
+    const nearest = findNearestTab(currentCenterX);
+    if (nearest !== activeTabRef.current) {
+      applyTab(nearest);
+    }
+  }, [findNearestTab, applyTab]);
+
+  const handleDragEnd = useCallback(() => {
+    if (!dragState.current) return;
+
+    const wasDrag = dragState.current.hasMoved;
+    dragState.current = null;
+    setIsDragging(false);
+    setDragOffsetX(0);
+
+    if (wasDrag) {
+      suppressClickRef.current = true;
+      setEnableTransition(true);
+      setTimeout(() => setEnableTransition(false), 450);
+    }
+  }, []);
+
+  const dragDisplayRect = isDragging
+    ? { ...rect, x: (dragState.current?.startRectX ?? rect.x) + dragOffsetX, ready: true }
+    : rect;
+
+  const handleTabClick = useCallback((tabValue: string) => {
+    if (suppressClickRef.current) {
+      suppressClickRef.current = false;
+      return;
+    }
+    if (isDragging) return;
+
+    if (isHomePage) {
+      if (tabValue === activeTab) {
+        // Same tab clicked: a searchable feed turns the pill into its search,
+        // the others toggle their filters (the sliders button does both).
+        // Scrolled down, the first tap only glides the feed back to the top.
+        if (isFeedSearchTab(tabValue)) {
+          if (getFeedSearchState().open) closeFeedSearch();
+          else if (getDocumentScrollTop() > SCROLL_TOP_FIRST_PX) scrollDocumentToSmooth();
+          else openFeedSearch();
+        } else window.dispatchEvent(new CustomEvent('home-tab-reclick', { detail: tabValue }));
+      } else {
+        // Different tab — on phones slide the glass across (see glideOnTabClick)
+        if (glideOnTabClick()) {
+          setEnableTransition(true);
+          setTimeout(() => setEnableTransition(false), 450);
+        }
+        applyTab(tabValue);
+      }
+    } else {
+      // Navigate to home with the desired tab
+      sessionStorage.setItem(HOME_STATE_STORAGE_KEY, JSON.stringify({ tab: tabValue }));
+      navigate('/app');
+    }
+  }, [isHomePage, navigate, activeTab, isDragging, applyTab]);
+
+  const { setFiltersPortalElement, setChipsPortalElement } = useGlobalFeedNav() ?? {};
+
+  // The images tab's scroll view exits through this slot too — same back arrow
+  // as the post overlay, since the collapsed sidebar hides HomePage's own pill.
+  const imagesScrollView = useImagesFeedScrollView();
+
+  const handleSettingsClick = useCallback(() => {
+    if (!isHomePage) return;
+    if (imagesScrollView) {
+      requestImagesBackToCollage();
+      return;
+    }
+    window.dispatchEvent(new CustomEvent('home-tab-reclick', { detail: activeTab }));
+  }, [isHomePage, activeTab, imagesScrollView]);
+
+  return (
+    <div data-feed-nav-outer className={cn(
+      "sticky bg-black transition-transform duration-300 ease-in-out",
+      (postPage || profilePage)
+        // Standalone post page: mirror the home tab bar exactly — clear the
+        // mobile header (top-11), sit above the post content (z-90, which tops
+        // out at z-50), same insets — so the pill shares its width with the post
+        // + feed bentos below, identical to the home feed's nav/feed alignment.
+        // Kept below the drawer scrim (z-100) so bottom sheets dim/blur the nav
+        // along with the rest of the page instead of leaving it floating crisp.
+        ? "top-11 lg:top-0 z-[90] px-2 sm:px-3 lg:px-3 pt-1 pb-2 sm:pt-1 sm:pb-3 lg:pt-2"
+        : "top-0 z-50 p-2 sm:p-3 pb-2 sm:pb-2 [--feed-nav-gap:0.5rem] sm:[--feed-nav-gap:0.75rem]",
+      (!navVisible || anyOverlayOpen) && "-translate-y-full lg:translate-y-0",
+      anyOverlayOpen && "z-[40]"
+    )}>
+      <FeedFilterAnchor behindNav={theme === 'system'}>
+      <div data-feed-nav className="flex flex-col bg-zinc-900 rounded-xl" style={{ overflowX: 'clip', overflowClipMargin: '8px', ...(theme === 'system' ? { position: 'relative', zIndex: 10 } as const : {}) }}>
+        <span data-nav-glass-backdrop aria-hidden="true" />
+        {compactProfileContent ? (
+          <div data-profile-compact-nav className="relative z-20 flex h-9 min-w-0 items-center gap-2 px-1">
+            <button
+              data-profile-nav-back
+              data-swipe-back
+              onClick={handleBack}
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-zinc-400 hover:text-white hover:bg-white/5"
+              aria-label={_copy("copy.76900f1bfd16", { defaultValue: "Back" })}
+            >
+              <ArrowLeft className="h-4 w-4" />
+            </button>
+            {compactProfileContent}
+          </div>
+        ) : (
+        <div ref={layerRef} className="relative overflow-visible">
+          <div data-feed-search-tabs data-hidden={searchOpen ? '' : undefined} className="absolute inset-0 pointer-events-none">
+            <GlassIndicator rect={dragDisplayRect} borderRadius="0.75rem" layoutKey={`global-nav-${activeTab}`} enableTransition={!isDragging && enableTransition} fixedHeightPx={35} variant="nav" />
+          </div>
+          {/* Drag handle overlay */}
+          {dragDisplayRect.ready && !meltOpen && (
+            <div
+              className="absolute z-30 cursor-grab active:cursor-grabbing"
+              style={{
+                transform: `translate(${dragDisplayRect.x}px, ${dragDisplayRect.y}px)`,
+                width: dragDisplayRect.width,
+                height: dragDisplayRect.height,
+                touchAction: 'none',
+                userSelect: 'none',
+                transition: !isDragging && enableTransition
+                  ? 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), width 0.4s cubic-bezier(0.16, 1, 0.3, 1)'
+                  : 'none',
+              }}
+              data-no-quick-actions
+              onPointerDown={(event) => { tabLongPress.begin(event); handleDragStart(event); }}
+              onPointerMove={(event) => { tabLongPress.move(event); if (!tabLongPress.fired.current) handleDragMove(event); }}
+              onPointerUp={() => { tabLongPress.cancel(); handleDragEnd(); }}
+              onPointerCancel={() => { tabLongPress.cancel(); handleDragEnd(); }}
+              onLostPointerCapture={tabLongPress.cancel}
+              onContextMenu={(event) => event.preventDefault()}
+            />
+          )}
+          <div data-feed-search-tabs data-hidden={meltOpen ? '' : undefined} className="relative z-20 flex scrollbar-hide" style={{ touchAction: 'manipulation' }}>
+            {/* Back button on a directly-loaded post page (mirrors the from-feed
+                overlay, whose home pill turns its settings slot into a back
+                button). On the home feed this slot toggles the tab's filters. */}
+            {(postPage || profilePage) ? (
+              <button
+                data-post-nav-back={postPage ? '' : undefined}
+                data-profile-nav-back={profilePage ? '' : undefined}
+                data-swipe-back
+                onClick={handleBack}
+                className="relative flex items-center justify-center px-3 py-2.5 rounded-xl transition-colors text-zinc-400 [@media(hover:hover)]:hover:text-white [@media(hover:hover)]:hover:bg-white/5"
+                aria-label={_copy("copy.76900f1bfd16", { defaultValue: "Back" })}
+              >
+                <ArrowLeft className="relative z-10 w-4 h-4" />
+              </button>
+            ) : isHomePage && (
+              <button
+                onClick={handleSettingsClick}
+                data-swipe-back={imagesScrollView ? '' : undefined}
+                className="relative flex items-center justify-center px-3 py-2.5 rounded-xl transition-colors text-zinc-400 [@media(hover:hover)]:hover:text-white [@media(hover:hover)]:hover:bg-white/5"
+                aria-label={imagesScrollView ? _copy("copy.68f5b97c66d9", { defaultValue: "Back to grid" }) : _copy("copy.2ffafd1aa697", { defaultValue: "Feed settings" })}
+              >
+                {imagesScrollView
+                  ? <ArrowLeft className="relative z-10 w-4 h-4" />
+                  : <Settings2 className="relative z-10 w-4 h-4" style={{ transform: `scale(${FEED_TAB_ICON_SCALE.settings})` }} />}
+              </button>
+            )}
+            {feedTabs.map((tab) => {
+              const isActive = activeTab === tab.value;
+              return (
+                <button
+                  key={tab.value}
+                  data-feed-tab={tab.value}
+                  data-feed-tab-btn
+                  data-active={isActive ? 'true' : undefined}
+                  aria-label={tab.label}
+                  aria-current={isActive ? 'page' : undefined}
+                  title={tab.label}
+                  ref={(el) => {
+                    setRef(tab.value)(el);
+                    tabButtonPositions.current[tab.value] = el;
+                  }}
+                  onClick={() => handleTabClick(tab.value)}
+                  className={cn(
+                    'relative z-10 flex-1 flex items-center justify-center px-3 sm:px-4 py-2.5 rounded-xl',
+                    isActive ? 'text-white' : 'text-zinc-400 hover:text-white'
+                  )}
+                >
+                  <tab.icon data-home-nav-glyph={tab.value === 'home' || undefined} className="relative z-10 w-4 h-4 origin-center" style={{ transform: feedTabIconTransform(tab.value) }} />
+                </button>
+              );
+            })}
+          </div>
+          {searchOpen && isFeedSearchTab(activeTab) && searchLens && (
+            <FeedSearchLens
+              tab={activeTab}
+              hasActiveFilters={false}
+              filtersOpen={false}
+              onToggleFilters={() => window.dispatchEvent(new CustomEvent('home-tab-reclick', { detail: activeTab }))}
+              onPickFeed={(tab) => applyTab(tab)}
+            />
+          )}
+          {meltOpen && isFeedSearchTab(activeTab) && (
+            <FeedSearchBar
+              tab={activeTab}
+              hasActiveFilters={false}
+              filtersOpen={false}
+              onToggleFilters={() => window.dispatchEvent(new CustomEvent('home-tab-reclick', { detail: activeTab }))}
+              onPickFeed={(tab) => applyTab(tab)}
+            />
+          )}
+        </div>
+        )}
+        {/* Filter panel portal target — rendered here so the dropdown stays
+            visible below the global nav even when the home page tab bar is
+            hidden (collapsed desktop mode). */}
+        {theme !== 'system' && <div ref={setFiltersPortalElement} className="contents" data-global-feed-filters-portal />}
+      </div>
+      {theme === 'system' && <div ref={setFiltersPortalElement} className="absolute inset-x-0 top-0 z-0 pointer-events-none" data-global-feed-filters-portal />}
+      </FeedFilterAnchor>
+      {/* Active-filter chips — outside the pill, so they read as a line about
+          the feed sitting under the bar rather than as another row of the bar. */}
+      <div ref={setChipsPortalElement} className="contents" data-global-feed-chips-portal />
+    </div>
+  );
+}

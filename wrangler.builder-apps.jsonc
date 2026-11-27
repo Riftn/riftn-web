@@ -1,0 +1,34 @@
+{
+  "name": "dehub-builder-apps",
+  "main": "./workers/builder-apps/index.js",
+  "compatibility_date": "2026-07-18",
+  // Every DeHub Builder app on its own origin: https://<slug>.dhb.gg.
+  // dhb.gg is a separate registrable domain from dehub.io on purpose — the
+  // apps run AI-written code and must never share cookies, storage or link
+  // trust with the main site.
+  //
+  // A route, not a custom domain (custom domains cannot be wildcards). It needs
+  // the proxied wildcard DNS record `*.dhb.gg`, which the deploy workflow
+  // ensures. The apex and www pass through untouched.
+  "routes": [
+    { "pattern": "*.dhb.gg/*", "zone_name": "dhb.gg" }
+  ],
+  "workers_dev": false,
+  // Riftn Cloud (workers/builder-apps/cloud.js): creator apps with their own
+  // backend and database. App code runs as Dynamic Workers through LOADER;
+  // CLOUD_APPS holds one Durable Object per app, CLOUD_REGISTRY the slug list.
+  "worker_loaders": [{ "binding": "LOADER" }],
+  "durable_objects": {
+    "bindings": [
+      { "name": "CLOUD_REGISTRY", "class_name": "CloudRegistry" },
+      { "name": "CLOUD_APPS", "class_name": "CloudApp" }
+    ]
+  },
+  "migrations": [{ "tag": "cloud-v1", "new_sqlite_classes": ["CloudRegistry", "CloudApp"] }],
+  "vars": {
+    // Staff who can list every app and switch one off.
+    "ADMIN_WALLETS": "0xec4e2c7417f781b35d830671f013b3b91f29ba64",
+    // Emergency off switch: space-separated app addresses that stop serving.
+    "BLOCKED_SLUGS": ""
+  }
+}

@@ -1,0 +1,513 @@
+import { useTranslation as _useCopy } from 'react-i18next';
+import { translateCopy as _translateCopy } from '@/i18n/copy';
+import { useSurfaceDraft } from '@/hooks/use-surface-draft';
+/**
+ * Bookmark Folders Panel
+ * ======================
+ * The other half of a feature that was only ever half-visible: posts could be
+ * filed into folders from the save button, and there was nowhere to open one.
+ *
+ * Two views in one panel — the folder list, and one folder's contents. Items
+ * render as compact rows rather than full feed cards on purpose: this is the
+ * screen for tidying a hundred saved posts, and a hundred autoplaying video
+ * cards is the wrong tool for that.
+ *
+ * Sorting and moving happen here because the API has no ordering of its own —
+ * folder items come back newest-first and that is all it offers, so "oldest
+ * first" and "group by channel" are done on the page over the loaded list.
+ *
+ * A folder can be flipped public from here: that makes it a playlist on the
+ * owner's profile (Playlists tab), and the copy-link action hands out the
+ * URL that lands a visitor on it.
+ *
+ * @module components/app/bookmarks/BookmarkFoldersPanel
+ */
+
+import { useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { ChevronLeft, Folder, FolderOpen, Globe, Loader2, ArrowUpDown, FolderInput } from "lucide-react";
+import Link2 from "@/components/ui/cut-icons/link";
+import Pencil from "@/components/ui/cut-icons/edit";
+import Trash2 from "@/components/ui/cut-icons/delete";
+import Check from "@/components/ui/cut-icons/check";
+
+import X from "@/components/ui/cut-icons/close";
+
+import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
+import { cn } from '@/lib/utils';
+import { useAuth } from '@/contexts/AuthContext';
+import { useBookmarkFolders } from '@/hooks/use-bookmark-folders';
+import { getFolderItems, addItemsToFolderBulk, removeItemFromFolder, publicPlaylistPath, type BookmarkFolder, type BookmarkFolderItem } from '@/lib/api/dehub';
+import { buildImageUrl, buildFeedImageUrls } from '@/lib/media-url';
+import { formatTimeAgo } from '@/lib/feed-utils';
+import { AppState } from '@/components/app/AppState';
+
+import { formatCount } from '@/lib/format-count';
+type FolderSort = 'newest' | 'oldest' | 'channel';
+
+const SORT_LABELS: Record<FolderSort, string> = {
+  get newest() { return _translateCopy("copy.562b7ab54780", { defaultValue: "Newest saved" }); },
+  get oldest() { return _translateCopy("copy.0d840153ae44", { defaultValue: "Oldest saved" }); },
+  get channel() { return _translateCopy("copy.51708f08f32f", { defaultValue: "By channel" }); },
+};
+
+/** One page of 100 covers any folder a person actually curates by hand. */
+const ITEMS_LIMIT = 100;
+
+function itemChannel(item: BookmarkFolderItem): string {
+  const post = item.post as (BookmarkFolderItem['post'] & { minterDisplayName?: string; minterUsername?: string }) | undefined;
+  return post?.minterDisplayName || post?.minterUsername || post?.minter || _translateCopy("copy.b764cdc0eab7", { defaultValue: "Unknown" });
+}
+
+function itemThumbnail(item: BookmarkFolderItem): string | undefined {
+  const post = item.post;
+  if (!post) return undefined;
+  const fromImages = buildFeedImageUrls(post.imageUrls, undefined, (post as { imageSizes?: unknown }).imageSizes)?.[0];
+  return fromImages || buildImageUrl(post.tokenId, post.imageUrl);
+}
+
+/**
+ * The public switch and, once public, the copy-link button. Same two controls
+ * on a folder row and on the open folder's header, so the panel never has two
+ * slightly different ways of doing the one thing.
+ */
+function PublicControls({
+  folder,
+  onToggle,
+  onCopyLink,
+  compact = false,
+}: {
+  folder: BookmarkFolder;
+  onToggle: (folder: BookmarkFolder) => void;
+  onCopyLink: (folder: BookmarkFolder) => void;
+  compact?: boolean;
+}) {
+  const { t } = useTranslation();
+  return (
+    <>
+      {folder.isPublic && (
+        <button
+          type="button"
+          onClick={() => onCopyLink(folder)}
+          className="p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-white/10"
+          aria-label={t('bookmarks.playlist.copyLink')}
+          title={t('bookmarks.playlist.copyLink')}
+        >
+          <Link2 className="w-4 h-4" />
+        </button>
+      )}
+      <button
+        type="button"
+        role="switch"
+        aria-checked={!!folder.isPublic}
+        onClick={() => onToggle(folder)}
+        className={cn(
+          'flex items-center gap-1.5 rounded-lg p-2 transition-colors',
+          folder.isPublic ? 'text-white bg-white/10 hover:bg-white/15' : 'text-zinc-400 hover:text-white hover:bg-white/10',
+        )}
+        aria-label={t('bookmarks.playlist.makePublic')}
+        title={`${t('bookmarks.playlist.makePublic')} — ${t('bookmarks.playlist.makePublicHint')}`}
+      >
+        <Globe className="w-4 h-4" />
+        {!compact && folder.isPublic && (
+          <span className="text-[11px] font-semibold uppercase tracking-wide">{t('bookmarks.playlist.publicBadge')}</span>
+        )}
+      </button>
+    </>
+  );
+}
+
+export function BookmarkFoldersPanel() {
+  const { t: _copy } = _useCopy();
+  const navigate = useNavigate();
+  const { t } = useTranslation();
+  const { isAuthenticated, user, walletAddress } = useAuth();
+  const queryClient = useQueryClient();
+  const {
+    folders,
+    isLoading,
+    createFolder,
+    isCreating,
+    updateFolder,
+    deleteFolder,
+  } = useBookmarkFolders();
+
+  const [openFolderId, setOpenFolderId] = useState<string | null>(null);
+  const [newFolderName, setNewFolderName] = useSurfaceDraft("components/app/bookmarks/BookmarkFoldersPanel.tsx:newFolderName", '');
+  const [renamingId, setRenamingId] = useState<string | null>(null);
+  const [renameValue, setRenameValue] = useSurfaceDraft("components/app/bookmarks/BookmarkFoldersPanel.tsx:renameValue", folders.find(folder => folder._id === renamingId)?.name ?? '', renamingId);
+  const [sort, setSort] = useState<FolderSort>('newest');
+  const [selected, setSelected] = useState<Set<number>>(new Set());
+  const [isMoving, setIsMoving] = useState(false);
+
+  const openFolder = folders.find(f => f._id === openFolderId) ?? null;
+
+  const { data: items = [], isLoading: isLoadingItems } = useQuery({
+    // Distinct from useFolderItems' key: same folder, different page size, and
+    // one cache entry cannot hold both. Still under the ['folder-items'] prefix
+    // so the existing invalidations reach it.
+    queryKey: ['folder-items', openFolderId, 'panel'],
+    queryFn: async () => {
+      const res = await getFolderItems(openFolderId!, 1, ITEMS_LIMIT);
+      return res.result || [];
+    },
+    enabled: isAuthenticated && !!openFolderId,
+    staleTime: 60 * 1000,
+  });
+
+  const sortedItems = useMemo(() => {
+    const copy = [...items];
+    if (sort === 'oldest') {
+      return copy.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+    }
+    if (sort === 'channel') {
+      return copy.sort((a, b) => {
+        const byChannel = itemChannel(a).localeCompare(itemChannel(b));
+        return byChannel !== 0 ? byChannel : new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      });
+    }
+    return copy.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }, [items, sort]);
+
+  const closeFolder = () => {
+    setOpenFolderId(null);
+    setSelected(new Set());
+  };
+
+  const toggleSelected = (tokenId: number) => {
+    setSelected(prev => {
+      const next = new Set(prev);
+      if (next.has(tokenId)) next.delete(tokenId);
+      else next.add(tokenId);
+      return next;
+    });
+  };
+
+  const refreshFolders = () => {
+    queryClient.invalidateQueries({ queryKey: ['bookmark-folders'] });
+    queryClient.invalidateQueries({ queryKey: ['folder-items'] });
+  };
+
+  const togglePublic = (folder: BookmarkFolder) => {
+    updateFolder({ folderId: folder._id, isPublic: !folder.isPublic });
+  };
+
+  // The profile URL is the username when there is one; the address route
+  // resolves too, so a profile that never picked a name still gets a link.
+  const profileHandle = user?.username || walletAddress || '';
+  const copyPlaylistLink = async (folder: BookmarkFolder) => {
+    if (!profileHandle) return;
+    const url = `${window.location.origin}${publicPlaylistPath(profileHandle, folder._id)}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      toast.success(t('bookmarks.playlist.linkCopied'));
+    } catch {
+      // Clipboard access can be refused (no permission, insecure context);
+      // the URL is still usable, so put it where the user can grab it.
+      window.prompt(t('bookmarks.playlist.copyLink'), url);
+    }
+  };
+
+  const removeSelected = async () => {
+    if (!openFolderId || selected.size === 0) return;
+    setIsMoving(true);
+    try {
+      // One at a time: the API removes by token, and a partial failure should
+      // still leave the successful removals applied.
+      await Promise.all(Array.from(selected).map(tokenId => removeItemFromFolder(openFolderId, tokenId)));
+      toast.success(selected.size === 1 ? _copy("copy.740df387db52", { defaultValue: "Removed from folder" }) : _copy("copy.7238bf26833c", { count: selected.size, defaultValue: "{{count}} removed" }));
+      setSelected(new Set());
+      refreshFolders();
+    } catch {
+      toast.error(_copy("copy.59a0cf1d40db", { defaultValue: "Could not remove those" }));
+    } finally {
+      setIsMoving(false);
+    }
+  };
+
+  const moveSelected = async (targetFolderId: string) => {
+    if (!openFolderId || selected.size === 0 || targetFolderId === openFolderId) return;
+    setIsMoving(true);
+    const tokenIds = Array.from(selected);
+    try {
+      // Add first: if the add fails the posts are still filed where they were,
+      // which is the safer half to get wrong.
+      await addItemsToFolderBulk(targetFolderId, tokenIds);
+      await Promise.all(tokenIds.map(tokenId => removeItemFromFolder(openFolderId, tokenId)));
+      const target = folders.find(f => f._id === targetFolderId);
+      toast.success(_copy("copy.ead2df37acec", { defaultValue: "Moved to {{value1}}", value1: target?.name ?? _copy("copy.034a00624882", { defaultValue: "folder" }) }));
+      setSelected(new Set());
+      refreshFolders();
+    } catch {
+      toast.error(_copy("copy.77399a91beff", { defaultValue: "Could not move those" }));
+    } finally {
+      setIsMoving(false);
+    }
+  };
+
+  if (!isAuthenticated) return null;
+
+  // ── Folder list ────────────────────────────────────────────────────────
+  if (!openFolder) {
+    return (
+      <div className="space-y-3">
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={newFolderName}
+            onChange={(e) => setNewFolderName(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key !== 'Enter' || !newFolderName.trim()) return;
+              createFolder({ name: newFolderName.trim() }, { onSuccess: () => setNewFolderName.complete(newFolderName, '') });
+            }}
+            maxLength={40}
+            placeholder={_copy("copy.489b9f7c7b08", { defaultValue: "New folder name" })}
+            className="flex-1 h-9 px-3 rounded-xl bg-zinc-800 border border-zinc-700 text-sm text-white placeholder-zinc-500 focus:border-zinc-500 focus:outline-none"
+          />
+          <Button
+            size="sm"
+            variant="ghost"
+            disabled={!newFolderName.trim() || isCreating}
+            onClick={() => { createFolder({ name: newFolderName.trim() }, { onSuccess: () => setNewFolderName.complete(newFolderName, '') }); }}
+            className="h-9 shrink-0 rounded-xl bg-white/10 text-white hover:bg-white/20 disabled:opacity-40"
+          >
+            {isCreating ? <Loader2 className="w-4 h-4 animate-spin" /> : _copy("copy.4759498ac2a7", { defaultValue: "Create" })}
+          </Button>
+        </div>
+
+        {isLoading ? (
+          <div className="space-y-2">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <Skeleton key={i} className="h-16 w-full rounded-xl bg-white/[0.06]" />
+            ))}
+          </div>
+        ) : folders.length === 0 ? (
+          <AppState
+            icon="bookmarks"
+            title={_copy("copy.8a66376ee6fc", { defaultValue: "No folders yet" })}
+            description={_copy("copy.dae053ec2a82", { defaultValue: "Create a folder here or file a saved post into one." })}
+            size="section"
+          />
+        ) : (
+          <div className="space-y-2">
+            {folders.map((folder) => (
+              <div
+                key={folder._id}
+                className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10"
+              >
+                <FolderOpen className="w-5 h-5 text-zinc-400 shrink-0" />
+                {renamingId === folder._id ? (
+                  <input
+                    autoFocus
+                    value={renameValue}
+                    onChange={(e) => setRenameValue(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Escape') setRenamingId(null);
+                      if (e.key !== 'Enter' || !renameValue.trim()) return;
+                      updateFolder({ folderId: folder._id, name: renameValue.trim() }, { onSuccess: () => { if (setRenameValue.complete(renameValue, renameValue)) setRenamingId(null); } });
+                    }}
+                    maxLength={40}
+                    className="flex-1 h-8 px-2 rounded-lg bg-zinc-800 border border-zinc-700 text-sm text-white focus:outline-none"
+                  />
+                ) : (
+                  <button
+                    onClick={() => { setOpenFolderId(folder._id); setSelected(new Set()); }}
+                    className="flex-1 min-w-0 text-left"
+                  >
+                    <span className="flex items-center gap-1.5 font-medium text-white">
+                      <span className="truncate">{folder.name}</span>
+                      {folder.isPublic && (
+                        <span className="inline-flex shrink-0" title={t('bookmarks.playlist.publicBadge')}>
+                          <Globe className="w-3.5 h-3.5 text-zinc-400" aria-label={t('bookmarks.playlist.publicBadge')} />
+                        </span>
+                      )}
+                    </span>
+                    <span className="block text-xs text-zinc-500">
+                      {formatCount(folder.itemCount ?? 0)} {folder.itemCount === 1 ? _copy("copy.72231043bc18", { defaultValue: "post" }) : _copy("copy.a44f1b975171", { defaultValue: "posts" })}
+                    </span>
+                  </button>
+                )}
+
+                {renamingId === folder._id ? (
+                  <>
+                    <button
+                      onClick={() => {
+                        if (!renameValue.trim()) return;
+                        updateFolder({ folderId: folder._id, name: renameValue.trim() }, { onSuccess: () => { if (setRenameValue.complete(renameValue, renameValue)) setRenamingId(null); } });
+                      }}
+                      className="p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-white/10"
+                      aria-label={_copy("copy.b7297226fd1f", { defaultValue: "Save name" })}
+                    >
+                      <Check className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => setRenamingId(null)}
+                      className="p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-white/10"
+                      aria-label={_copy("copy.19766ed6ccb2", { defaultValue: "Cancel" })}
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <PublicControls folder={folder} onToggle={togglePublic} onCopyLink={copyPlaylistLink} compact />
+                    <button
+                      onClick={() => { setRenamingId(folder._id); }}
+                      className="p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-white/10"
+                      aria-label={_copy("copy.f2b9fd00aab3", { defaultValue: "Rename {{value1}}", value1: folder.name })}
+                    >
+                      <Pencil className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => {
+                        if (!confirm(_copy("copy.ee50e58f6326", { defaultValue: "Delete \"{{value1}}\"? The posts stay saved.", value1: folder.name }))) return;
+                        deleteFolder(folder._id);
+                      }}
+                      className="p-2 rounded-lg text-zinc-400 hover:text-red-400 hover:bg-red-500/10"
+                      aria-label={_copy("copy.264fa40661cb", { defaultValue: "Delete {{value1}}", value1: folder.name })}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // ── One folder ─────────────────────────────────────────────────────────
+  const otherFolders = folders.filter(f => f._id !== openFolder._id);
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center gap-2">
+        <button
+          onClick={closeFolder}
+          className="p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-white/10"
+          aria-label={_copy("copy.f3eaabf13fac", { defaultValue: "Back to folders" })}
+        >
+          <ChevronLeft className="w-5 h-5" />
+        </button>
+        <div className="flex-1 min-w-0">
+          <p className="truncate font-semibold text-white">{openFolder.name}</p>
+          <p className="text-xs text-zinc-500">{items.length} {items.length === 1 ? _copy("copy.72231043bc18", { defaultValue: "post" }) : _copy("copy.a44f1b975171", { defaultValue: "posts" })}</p>
+        </div>
+        <PublicControls folder={openFolder} onToggle={togglePublic} onCopyLink={copyPlaylistLink} />
+        <Button
+          size="sm"
+          variant="ghost"
+          onClick={() => setSort(prev => (prev === 'newest' ? 'oldest' : prev === 'oldest' ? 'channel' : 'newest'))}
+          className="h-9 shrink-0 rounded-lg bg-white/5 border border-white/10 text-zinc-300 hover:bg-white/10 hover:text-white text-xs gap-1.5"
+        >
+          <ArrowUpDown className="w-3.5 h-3.5" />
+          {SORT_LABELS[sort]}
+        </Button>
+      </div>
+
+      {isLoadingItems ? (
+        <div className="space-y-2">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} className="h-16 w-full rounded-xl bg-white/[0.06]" />
+          ))}
+        </div>
+      ) : sortedItems.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-12 text-center">
+          <Folder className="w-12 h-12 text-zinc-600 mb-3" />
+          <p className="text-zinc-400 text-lg font-medium">{_copy("copy.3043f9fa4d31", { defaultValue: "This folder is empty" })}</p>
+          <p className="text-zinc-500 text-sm mt-1">{_copy("copy.8fddbde3c81e", { defaultValue: "Save a post and file it here from the bookmark button." })}</p>
+        </div>
+      ) : (
+        <div className="space-y-2">
+          {sortedItems.map((item) => {
+            const isSelected = selected.has(Number(item.tokenId));
+            const thumbnail = itemThumbnail(item);
+            const title = item.post?.name || item.post?.description?.split('\n')[0] || _copy("copy.a17c49cfedad", { defaultValue: "Post #{{value1}}", value1: item.tokenId });
+            return (
+              <div
+                key={item._id}
+                className={cn(
+                  'flex items-center gap-3 p-2 rounded-xl border transition-colors',
+                  isSelected ? 'bg-white/10 border-white/30' : 'bg-white/5 border-white/10',
+                )}
+              >
+                <input
+                  type="checkbox"
+                  checked={isSelected}
+                  onChange={() => toggleSelected(Number(item.tokenId))}
+                  aria-label={_copy("copy.dbe65a7d3b40", { defaultValue: "Select {{value1}}", value1: title })}
+                  className="w-4 h-4 shrink-0 accent-white"
+                />
+                <button
+                  onClick={() => navigate(`/app/post/${item.tokenId}`)}
+                  className="flex flex-1 min-w-0 items-center gap-3 text-left"
+                >
+                  {thumbnail ? (
+                    <img
+                      src={thumbnail}
+                      alt=""
+                      loading="lazy"
+                      className="w-16 h-10 rounded-lg object-cover bg-zinc-800 shrink-0"
+                    />
+                  ) : (
+                    <div className="w-16 h-10 rounded-lg bg-zinc-800 shrink-0" />
+                  )}
+                  <span className="min-w-0">
+                    <span className="block truncate text-sm text-white">{title}</span>
+                    <span className="block truncate text-xs text-zinc-500">
+                      {itemChannel(item)}{_copy("copy.9acd03de6b37", { defaultValue: " · saved " })}{formatTimeAgo(item.createdAt)}
+                    </span>
+                  </span>
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Selection actions. Fixed to the bottom of the panel rather than the
+          viewport — the page's own nav already owns the bottom edge. */}
+      {selected.size > 0 && (
+        <div className="sticky bottom-2 flex items-center gap-2 rounded-xl border border-white/15 bg-zinc-900/95 backdrop-blur-xl p-2">
+          <span className="px-1 text-xs text-zinc-400">{selected.size}{_copy("copy.97a2e8815acd", { defaultValue: " selected" })}</span>
+          {otherFolders.length > 0 && (
+            <div className="relative flex items-center gap-1">
+              <FolderInput className="w-4 h-4 text-zinc-400" />
+              <select
+                value=""
+                disabled={isMoving}
+                onChange={(e) => { if (e.target.value) void moveSelected(e.target.value); }}
+                className="h-8 rounded-lg bg-zinc-800 border border-zinc-700 text-xs text-white px-2 focus:outline-none"
+              >
+                <option value="">{_copy("copy.5af2f53c9459", { defaultValue: "Move to…" })}</option>
+                {otherFolders.map(f => (
+                  <option key={f._id} value={f._id}>{f.name}</option>
+                ))}
+              </select>
+            </div>
+          )}
+          <Button
+            size="sm"
+            variant="ghost"
+            disabled={isMoving}
+            onClick={removeSelected}
+            className="h-8 ml-auto rounded-lg text-red-400 hover:text-red-300 hover:bg-red-500/10"
+          >
+            {isMoving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4 mr-1" />}{_copy("copy.c3812fc4acb8", { defaultValue: "Remove" })}</Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => setSelected(new Set())}
+            className="h-8 rounded-lg text-zinc-400 hover:text-white"
+          >{_copy("copy.83b12c2216ef", { defaultValue: "Clear" })}</Button>
+        </div>
+      )}
+    </div>
+  );
+}

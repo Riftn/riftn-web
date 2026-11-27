@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="referrer" content="no-referrer">
+  <title>Maboroshi | Riftn</title>
+  <link rel="stylesheet" href="static/style.css">
+  <script src="static/presets.js" defer></script>
+  <script src="static/studio.js" defer></script>
+  <script src="static/remake.js" defer></script>
+</head>
+<body>
+<main>
+  <header><div class="identity"><span class="mark" aria-hidden="true">幻</span><div><p class="eyebrow">RIFTN CREATOR</p><h1>Maboroshi</h1></div></div><p>Keep the scene.<br>Change who is in it.</p></header>
+  <div class="library"><label class="sr-only" for="jobs">Your Maboroshi projects</label><select id="jobs"><option value="">New project</option></select><button id="new-project" class="secondary" type="button">New project</button><button id="refresh" class="icon-button secondary" type="button" aria-label="Refresh project">↻</button></div>
+  <p id="connection" role="status">Connecting to Riftn…</p>
+  <p id="error" role="alert" tabindex="-1" hidden></p>
+  <section class="look-showcase" aria-labelledby="looks-heading">
+    <h2 id="looks-heading">Your scene. A different you.</h2>
+    <p class="hint">180 character looks. Choose your inspiration, then bring your own matching reference.</p>
+    <div id="featured-looks" class="featured-looks" role="group" aria-label="Featured character looks"></div>
+    <p class="hint">Look inspiration, not rendered video previews. Your movement and soundtrack stay yours.</p>
+  </section>
+  <ol class="steps" aria-label="Project progress"><li id="step-choose" aria-current="step"><span>1</span>Clip &amp; character</li><li id="step-prepare"><span>2</span>Prepare &amp; review</li><li id="step-export"><span>3</span>Preview &amp; export</li></ol>
+  <div id="progress" class="progress" hidden><strong id="project-status" role="status" aria-live="polite"></strong><p id="next-step" class="hint"></p></div>
+  <div class="creative-grid">
+    <section id="source-section" class="panel">
+      <p class="eyebrow">THE SCENE</p><h2>Start with your video</h2>
+      <p class="hint">Your motion, camera and soundtrack carry into the result.</p>
+      <form id="source-form">
+        <label for="renderer">Rendering option<select id="renderer" name="renderer"><option value="wan">Wan 3.0 — lowest cost, one render</option><option value="seedance-direct">Seedance 720p — one render</option><option value="kling">Kling — one render</option><option value="seedance">Seedance Premium — preparation, preview and optional HD</option></select></label>
+        <p id="renderer-help" class="hint">Wan 3.0: 3–15 seconds, image references, 720p. Our lowest price, one render; original soundtrack preserved.</p>
+        <label class="upload" for="source">Choose a video<small>2–30 seconds · up to 100 MB · include audio</small><input id="source" name="video" type="file" accept="video/mp4,video/quicktime,video/webm" required></label>
+        <div id="source-local" class="media-preview" hidden></div>
+        <label for="subject">Who or what are you replacing?<input id="subject" name="subject" maxlength="200" value="person" required></label>
+        <details id="preparation-options" hidden><summary>Advanced preparation</summary><label for="mode">Motion guide<select id="mode" name="mode"><option value="depth">Depth + subject mask (recommended)</option><option value="face_mesh">Face mesh (one speaker)</option><option value="depth_mesh">Depth + mask + face mesh</option></select></label><p class="hint">Depth separates your subject from the scene. Face mesh follows one centred speaker; review tracking through every cut.</p></details>
+        <div class="action"><button id="upload" disabled>Save project</button><span class="hint">No charge to save.</span></div>
+      </form>
+    </section>
+    <section id="source-preview-section" class="panel" hidden>
+      <p class="eyebrow">YOUR SCENE</p><h2>Original video</h2><p id="source-meta" class="hint"></p>
+      <video id="source-preview" controls playsinline preload="metadata"></video>
+      <a id="source-download" download>Download original</a>
+      <p class="hint">Your original stays saved, including its soundtrack.</p>
+    </section>
+    <section id="references-section" class="panel">
+      <p class="eyebrow">THE CHARACTER</p><h2>Choose the new look</h2>
+      <p class="hint">Use your own character image or video as the reference.</p>
+      <details id="preset-browser">
+        <summary>Choose a preset <span id="preset-total"></span></summary>
+        <p class="hint">Pick a look, upload a character reference showing that look, then review your preview. Presets fill in the direction; they do not include character images.</p>
+        <label for="preset-search" class="sr-only">Search character presets</label>
+        <input id="preset-search" type="search" placeholder="Search plushie, anime, chrome…" autocomplete="off">
+        <label for="preset-group" class="sr-only">Preset category</label>
+        <select id="preset-group"><option value="">All categories</option></select>
+        <p id="preset-count" class="hint" role="status"></p>
+        <div id="preset-list" class="preset-list" role="group" aria-label="Character presets"></div>
+        <button id="preset-reset-search" class="secondary" type="button" hidden>Clear filters</button>
+        <div id="preset-detail" hidden><strong id="preset-name"></strong><p id="preset-direction" class="hint"></p><button id="preset-apply" type="button">Use this preset</button><p id="preset-guidance" class="hint"></p></div>
+      </details>
+      <p id="preset-applied" class="hint" role="status" hidden></p>
+      <form id="references-form"><fieldset id="reference-fields">
+        <label class="upload" for="reference">Character reference<small>Image up to 30 MB, or video up to 100 MB</small><input id="reference" name="reference" type="file" accept="image/png,image/jpeg,image/webp,video/mp4,video/quicktime,video/webm"></label>
+        <div id="reference-preview" class="media-preview" hidden></div>
+        <details id="character-options"><summary>Direction &amp; a second character</summary>
+          <label class="upload" for="second">Second character (optional)<small>Use an image for another subject, up to 30 MB.</small><input id="second" name="second" type="file" accept="image/png,image/jpeg,image/webp"></label>
+          <div id="second-preview" class="media-preview" hidden></div>
+          <label for="prompt">How should the character change?<textarea id="prompt" name="prompt" rows="5" maxlength="6000" required>Replace the complete selected subject with the character reference in every frame, including hair, hands, clothing and footwear. Preserve the background, camera, lighting, motion and timing. Match the embedded speech without adding dialogue.</textarea></label>
+          <p class="hint">For two characters, say which subject each reference replaces. A reference video guides appearance, not audio. Source and reference videos must total 30 seconds or less.</p>
+        </details>
+        <button class="secondary" id="save-references" hidden>Save character changes</button>
+      </fieldset></form>
+      <p id="reference-status" class="hint" role="status">Choose a reference now, or add one before generating your preview.</p>
+    </section>
+  </div>
+  <div id="project" hidden>
+    <section id="prepare-section" class="stage-panel" hidden><div><p class="eyebrow">NEXT · PREPARE</p><h2>Make the clip ready</h2><p>Separate the vocals and preserve the motion. You will review the prepared clip before replacing your character.</p><p class="hint">Each paid step opens Riftn’s usual payment confirmation. Saving a character costs nothing.</p></div><div class="action"><button id="prepare" disabled>Prepare clip</button></div></section>
+    <section id="review-section" class="stage-panel" hidden>
+      <p class="eyebrow">REVIEW THE MOTION</p><h2>Check the whole clip</h2>
+      <div class="tabs" id="preview-tabs" role="group" aria-label="Input preview"></div>
+      <video id="preview" controls playsinline preload="metadata"></video><a id="preview-download" download>Download prepared input</a>
+      <p id="review-guidance" class="hint">Watch the full source clip and confirm the subject, motion and soundtrack.</p>
+      <div id="input-review-actions"><label class="check"><input id="reviewed" type="checkbox"><span id="review-label">I reviewed the whole prepared clip and its alignment is correct.</span></label><div class="row"><button id="approve" disabled>Approve clip</button><button id="reject" class="secondary">Needs correction</button></div></div>
+      <p id="review-status" class="hint" role="status"></p>
+    </section>
+    <section id="remake-section" class="stage-panel" hidden aria-labelledby="remake-heading">
+      <p class="eyebrow">REFERENCE TO EDIT</p><h2 id="remake-heading">Same rhythm. Your cast.</h2>
+      <p>Keep the reference's shot order and soundtrack. Replace the character or product in each shot, then assemble the edit.</p>
+      <p class="hint">Up to eight shots from a 3–15 second reference. Two image references. Generated motion, fine details and text can differ from the original.</p>
+      <div id="remake-planner">
+        <button id="remake-scan" type="button" class="secondary">Detect cuts · no generation charge</button>
+        <label for="remake-cuts">Cut times in seconds<input id="remake-cuts" placeholder="2.4, 5.1, 8.2" maxlength="200" inputmode="decimal"></label>
+        <p class="hint">Review the reference above. Edit the detected cuts or leave empty for one shot. Cuts must be in order, at least 0.2 seconds apart.</p>
+        <button id="remake-plan" type="button">Save shot plan · no generation charge</button>
+        <p id="remake-plan-note" class="hint" role="status">Save your character references and approve the reference clip first.</p>
+      </div>
+      <div id="remake-shots" class="remake-shots"></div>
+      <p id="remake-summary" class="hint" role="status"></p>
+      <button id="remake-assemble" type="button" hidden>Assemble edit · no generation charge</button>
+      <div id="remake-output" hidden><h3 id="remake-output-title">Your finished edit</h3><video id="remake-result" controls playsinline preload="metadata"></video><a id="remake-download" download>Download edit</a><button id="remake-save-library" type="button" hidden>Save to library</button></div>
+    </section>
+    <section id="draft-section" class="stage-panel" hidden>
+      <p class="eyebrow">BRING THE CHARACTER IN</p><h2>Create your preview</h2><p id="draft-guidance">Approve the prepared clip and choose a character to continue.</p>
+      <details id="resolved" hidden><summary>Exact generation prompt</summary><p id="resolved-prompt"></p></details>
+      <div class="action"><button id="draft" disabled>Generate preview</button><span id="render-hint" class="hint">HD is a separate choice after you watch the preview.</span></div>
+    </section>
+    <section id="export-section" class="stage-panel" hidden>
+      <p class="eyebrow">YOUR RESULT</p><h2>Watch it. Make it yours.</h2>
+      <div class="tabs" id="result-tabs" role="group" aria-label="Result preview"></div><video id="result" controls playsinline preload="metadata"></video><a id="result-download" download>Download video</a><button id="result-save-library" type="button" hidden>Save to library</button>
+      <p id="export-guidance">Your full original soundtrack is restored. You can download the preview as it is, or approve HD within six days.</p><p id="duration-note" class="hint" hidden></p>
+      <label class="check" id="hd-review"><input id="draft-reviewed" type="checkbox">I approve this preview and want to purchase the 1080p version.</label><button id="hd" disabled>Generate 1080p</button>
+    </section>
+    <p id="library-save-status" role="status" aria-live="polite"></p>
+  </div>
+  <dialog id="discard-dialog" aria-labelledby="discard-title"><h2 id="discard-title">Leave these changes?</h2><p>Your selected files or character changes have not been saved.</p><div class="row"><button id="keep-editing" type="button">Keep editing</button><button id="discard-changes" class="secondary" type="button">Leave without saving</button></div></dialog>
+  <footer>Saved to your Riftn account. Continue on web or mobile.</footer>
+</main>
+</body>
+</html>

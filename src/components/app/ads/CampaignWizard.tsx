@@ -1,0 +1,554 @@
+import { useTranslation as _useCopy } from 'react-i18next';
+import { useSurfaceDraft } from '@/hooks/use-surface-draft';
+/**
+ * CampaignWizard
+ * ==============
+ * Four-step campaign creation: (1) creative — upload media, write copy, see a
+ * LIVE native-card preview; (2) POVR targeting with real audience estimates;
+ * (3) budget & schedule with honest projections from published CPMs;
+ * (4) review → save draft or submit for moderation. Creates the ad account
+ * row on first use.
+ */
+
+import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Slider } from '@/components/ui/slider';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Loader2, ImageIcon, Film, Type, ChevronLeft, Rocket, Save } from "lucide-react";
+import Upload from "@/components/ui/cut-icons/upload";
+import Wallet from "@/components/ui/cut-icons/wallet";
+
+import ChevronRight from "@/components/ui/cut-icons/next";
+
+import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
+import { useAuth } from '@/contexts/AuthContext';
+import {
+  useAdAccount,
+  useCreateCampaign,
+  useCreateCreative,
+  useEnsureAdAccount,
+  useAudienceEstimate,
+  useUpdateCampaign,
+  uploadAdMedia,
+} from '@/hooks/use-ads';
+import { AdTopUpPanel } from '@/components/app/ads/AdTopUpPanel';
+import { TargetingEditor } from '@/components/app/ads/TargetingEditor';
+import { SponsoredAdCard } from '@/components/app/cards/SponsoredAdCard';
+import {
+  blendedCpmUsd,
+  formatCompact,
+  formatUsd,
+  type AdTargeting,
+  type CreativeKind,
+  type ServedAd,
+} from '@/lib/ads/povr';
+
+interface CampaignWizardProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onCreated?: (campaignId: string) => void;
+}
+
+const STEP_KEYS = ['ads.stepCreative', 'ads.stepAudience', 'ads.stepBudget', 'ads.stepReview'] as const;
+
+export function CampaignWizard({ open, onOpenChange, onCreated }: CampaignWizardProps) {
+  const { t: _copy } = _useCopy();
+  const { t } = useTranslation();
+  const { walletAddress } = useAuth();
+  const [step, setStep] = useState(0);
+
+  // Step 1 — creative
+  const [name, setName] = useSurfaceDraft("components/app/ads/CampaignWizard.tsx:name", '');
+  const [objective, setObjective] = useState('awareness');
+  const [kind, setKind] = useState<CreativeKind>('image');
+  const [mediaUrl, setMediaUrl] = useState<string | null>(null);
+  const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
+  const [mediaDuration, setMediaDuration] = useState<number | null>(null);
+  const [uploading, setUploading] = useState<'media' | 'thumb' | null>(null);
+  const [headline, setHeadline] = useSurfaceDraft("components/app/ads/CampaignWizard.tsx:headline", '');
+  const [bodyText, setBodyText] = useSurfaceDraft("components/app/ads/CampaignWizard.tsx:bodyText", '');
+  const [ctaLabel, setCtaLabel] = useSurfaceDraft("components/app/ads/CampaignWizard.tsx:ctaLabel", 'Learn more');
+  const [ctaUrl, setCtaUrl] = useSurfaceDraft("components/app/ads/CampaignWizard.tsx:ctaUrl", '');
+
+  // Step 2 — targeting
+  const [targeting, setTargeting] = useState<AdTargeting>({});
+
+  // Step 3 — budget (defaults sized to crypto-native CPMs — $100+ per 1000)
+  const [dailyBudget, setDailyBudget] = useSurfaceDraft("src/components/app/ads/CampaignWizard.tsx:dailyBudget", 250);
+  const [totalBudget, setTotalBudget] = useSurfaceDraft("src/components/app/ads/CampaignWizard.tsx:totalBudget", 2500);
+  const [durationDays, setDurationDays] = useState(14);
+  const [frequencyCap, setFrequencyCap] = useState(4);
+
+  const [submitting, setSubmitting] = useState(false);
+
+  /**
+   * A campaign submitted on an empty balance is approved and then never
+   * served — ads-serve drops every candidate whose advertiser has
+   * balance_usd <= 0, silently. So the wizard holds the finished campaign as
+   * a draft, funds the account in place, and submits it for review once the
+   * money is there. Nothing the advertiser typed is lost either way.
+   */
+  const [fundingCampaignId, setFundingCampaignId] = useState<string | null>(null);
+  const [funding, setFunding] = useState(false);
+
+  const createCampaign = useCreateCampaign();
+  const createCreative = useCreateCreative();
+  const updateCampaign = useUpdateCampaign();
+  const ensureAccount = useEnsureAdAccount();
+  const { data: account, isLoading: loadingAccount } = useAdAccount();
+  const { data: estimate } = useAudienceEstimate(targeting, open && step >= 1);
+
+  const balanceUsd = Number(account?.balance_usd ?? 0);
+  // Unknown is not the same as empty — don't send a funded advertiser to a
+  // top-up because their account row hasn't come back yet.
+  const unfunded = !loadingAccount && balanceUsd <= 0;
+
+  const previewAd: ServedAd = useMemo(() => ({
+    serveId: 'preview',
+    token: '',
+    campaignId: 'preview',
+    creativeId: 'preview',
+    kind,
+    mediaUrl,
+    thumbnailUrl,
+    headline: headline || t('ads.headlinePreview'),
+    body: bodyText || null,
+    ctaLabel: ctaLabel || t('ads.learnMore'),
+    ctaUrl: ctaUrl || null,
+    advertiser: t('ads.yourBrand'),
+    width: null,
+    height: null,
+    durationSeconds: null,
+  }), [kind, mediaUrl, thumbnailUrl, headline, bodyText, ctaLabel, ctaUrl, t]);
+
+  const projections = useMemo(() => {
+    const cpm = blendedCpmUsd(targeting.tiers ?? []);
+    const audience = estimate?.audience ?? 0;
+    const budgetImpressionsPerDay = (dailyBudget / cpm) * 1000;
+    const capImpressionsPerDay = audience > 0 ? audience * frequencyCap : Infinity;
+    const impressionsPerDay = Math.min(budgetImpressionsPerDay, capImpressionsPerDay);
+    const days = Math.max(1, Math.min(durationDays, Math.ceil(totalBudget / dailyBudget)));
+    return {
+      cpm,
+      impressionsPerDay,
+      totalImpressions: impressionsPerDay * days,
+      estClicks: impressionsPerDay * days * 0.008, // conservative 0.8% CTR
+      effectiveDays: days,
+      audienceLimited: capImpressionsPerDay < budgetImpressionsPerDay,
+    };
+  }, [targeting.tiers, estimate?.audience, dailyBudget, totalBudget, durationDays, frequencyCap]);
+
+  const handleUpload = async (file: File, kindOf: 'media' | 'thumb') => {
+    if (!walletAddress) { toast.error(t('ads.connectWalletFirst')); return; }
+    const isVideo = file.type.startsWith('video/');
+    if (kindOf === 'media' && kind === 'image' && isVideo) setKind('video');
+    if (kindOf === 'media' && kind === 'video' && !isVideo) setKind('image');
+    setUploading(kindOf);
+    try {
+      if (kindOf === 'media') {
+        setMediaDuration(null);
+        if (isVideo) {
+          const video = document.createElement('video');
+          const objectUrl = URL.createObjectURL(file);
+          try {
+            const duration = await new Promise<number>((resolve, reject) => {
+              const timer = window.setTimeout(() => reject(new Error(_copy("copy.58eb81181fb4", { defaultValue: "Could not read this video duration." }))), 15000);
+              video.onloadedmetadata = () => { window.clearTimeout(timer); resolve(video.duration); };
+              video.onerror = () => { window.clearTimeout(timer); reject(new Error(_copy("copy.07aeaf44279c", { defaultValue: "Could not read this video." }))); };
+              video.preload = 'metadata'; video.src = objectUrl;
+            });
+            if (!Number.isFinite(duration) || duration <= 0) throw new Error(_copy("copy.b165df757061", { defaultValue: "This video has no valid duration." }));
+            setMediaDuration(duration);
+          } finally { video.removeAttribute('src'); video.load(); URL.revokeObjectURL(objectUrl); }
+        }
+      }
+      const url = await uploadAdMedia(walletAddress, file, file.type);
+      if (kindOf === 'media') setMediaUrl(url);
+      else setThumbnailUrl(url);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : t('ads.uploadFailed'));
+    } finally {
+      setUploading(null);
+    }
+  };
+
+  const stepValid = (): boolean => {
+    if (step === 1 && targeting.creatorSupport && (kind !== 'video' || (mediaDuration ?? 0) < 30)) return false;
+    if (step === 0) {
+      if (!name.trim()) return false;
+      if (!headline.trim()) return false;
+      if (kind !== 'text' && !mediaUrl) return false;
+      return true;
+    }
+    if (step === 2) {
+      return dailyBudget >= 1 && totalBudget >= dailyBudget;
+    }
+    return true;
+  };
+
+  const reset = () => {
+    setStep(0); setName.complete(name, ''); setObjective('awareness'); setKind('image');
+    setMediaUrl(null); setThumbnailUrl(null); setHeadline.complete(headline, ''); setBodyText.complete(bodyText, '');
+    setMediaDuration(null);
+    setCtaLabel('Learn more'); setCtaUrl.complete(ctaUrl, ''); setTargeting({});
+    setDailyBudget(250); setTotalBudget(2500); setDurationDays(14); setFrequencyCap(4);
+    setFundingCampaignId(null);
+  };
+
+  const finish = (campaignId: string, message: string) => {
+    toast.success(message);
+    onOpenChange(false);
+    onCreated?.(campaignId);
+    reset();
+  };
+
+  const submit = async (asDraft: boolean) => {
+    if (!walletAddress) { toast.error(t('ads.connectWalletFirst')); return; }
+    // Hold it as a draft while we fund, then flip it to review — a campaign
+    // that reaches moderation unfunded gets approved into silence.
+    const holdForFunding = !asDraft && unfunded;
+    setSubmitting(true);
+    try {
+      await ensureAccount.mutateAsync(undefined);
+      const endAt = new Date(Date.now() + durationDays * 86_400_000).toISOString();
+      const campaign = await createCampaign.mutateAsync({
+        name: name.trim(),
+        objective,
+        status: asDraft || holdForFunding ? 'draft' : 'pending_review',
+        daily_budget_usd: dailyBudget,
+        total_budget_usd: totalBudget,
+        end_at: endAt,
+        targeting,
+        frequency_cap: frequencyCap,
+        cta_url: ctaUrl.trim() || null,
+      });
+      await createCreative.mutateAsync({
+        campaign_id: campaign.id,
+        kind,
+        duration_seconds: mediaDuration,
+        media_url: kind === 'text' ? null : mediaUrl,
+        thumbnail_url: thumbnailUrl,
+        headline: headline.trim(),
+        body: bodyText.trim() || null,
+        cta_label: ctaLabel.trim() || 'Learn more',
+        cta_url: ctaUrl.trim() || null,
+      });
+
+      if (holdForFunding) {
+        setFundingCampaignId(campaign.id);
+        return;
+      }
+      finish(campaign.id, asDraft ? t('ads.savedAsDraft') : t('ads.submittedForReview'));
+    } catch {
+      /* hooks already toast */
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  /** Balance landed — send the held campaign straight on to review. */
+  const submitFunded = async () => {
+    const id = fundingCampaignId;
+    if (!id) return;
+    setSubmitting(true);
+    try {
+      await updateCampaign.mutateAsync({ id, status: 'pending_review' });
+      finish(id, t('ads.toppedUpAndSubmitted'));
+    } catch {
+      /* hooks already toast; the campaign is still a draft they can submit */
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={(o) => { if (!submitting && !funding) onOpenChange(o); }}>
+      <DialogContent className="max-w-3xl max-h-[88vh] overflow-y-auto bg-black/70 backdrop-blur-[24px] border border-white/10">
+        <DialogHeader>
+          <DialogTitle className="text-white flex items-center gap-2">
+            {fundingCampaignId ? <Wallet className="w-5 h-5" /> : <Rocket className="w-5 h-5" />}
+            {fundingCampaignId ? t('ads.fundYourCampaign') : t('ads.newCampaign')}
+          </DialogTitle>
+          <DialogDescription className="text-zinc-400">
+            {fundingCampaignId
+              ? t('ads.campaignSavedAddBalance')
+              : t('ads.stepOf', { step: step + 1, total: STEP_KEYS.length, name: t(STEP_KEYS[step]) })}
+          </DialogDescription>
+        </DialogHeader>
+
+        {fundingCampaignId ? (
+          <div className="max-w-md w-full mx-auto py-2">
+            <AdTopUpPanel
+              suggestedUsd={Math.max(25, Math.ceil(dailyBudget))}
+              onBusyChange={setFunding}
+              cancelLabel={t('ads.leaveAsDraft')}
+              onCancel={() => finish(fundingCampaignId, t('ads.draftTopUpFromCampaigns'))}
+              onCredited={submitFunded}
+            />
+          </div>
+        ) : (
+        <>
+
+        {/* Step indicator */}
+        <div className="flex items-center gap-1.5">
+          {STEP_KEYS.map((s, i) => (
+            <div
+              key={s}
+              className={cn(
+                'h-1 rounded-full flex-1 transition-colors',
+                i <= step ? 'bg-white/80' : 'bg-white/15',
+              )}
+            />
+          ))}
+        </div>
+
+        {/* STEP 1 — creative */}
+        {step === 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 py-2">
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="wiz-name" className="text-white">{t('ads.campaignName')}</Label>
+                <Input id="wiz-name" value={name} onChange={(e) => setName(e.target.value)} placeholder={t('ads.campaignNamePlaceholder')} className="mt-1" />
+              </div>
+              <div>
+                <Label className="text-white">{t('ads.objective')}</Label>
+                <Select value={objective} onValueChange={setObjective}>
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="awareness">{t('ads.objectiveAwareness')}</SelectItem>
+                    <SelectItem value="traffic">{t('ads.objectiveTraffic')}</SelectItem>
+                    <SelectItem value="engagement">{t('ads.objectiveEngagement')}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-white">{t('ads.format')}</Label>
+                <div className="flex gap-2 mt-1">
+                  {([['image', ImageIcon, _copy("copy.1aa4cb0bcca7", { defaultValue: "Image" })], ['video', Film, _copy("copy.d534be829e32", { defaultValue: "Video" })], ['text', Type, _copy("copy.71988c4d8e08", { defaultValue: "Text" })]] as const).map(([k, Icon, label]) => (
+                    <button
+                      key={k}
+                      type="button"
+                      onClick={() => setKind(k)}
+                      className={cn(
+                        'flex-1 flex items-center justify-center gap-1.5 rounded-xl border px-3 py-2 text-sm transition-colors',
+                        kind === k ? 'border-white/50 bg-white/10 text-white' : 'border-white/10 text-zinc-400 hover:bg-white/5',
+                      )}
+                    >
+                      <Icon className="w-4 h-4" />
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {kind !== 'text' && (
+                <div>
+                  <Label className="text-white">{kind === 'video' ? _copy("copy.d534be829e32", { defaultValue: "Video" }) : _copy("copy.1aa4cb0bcca7", { defaultValue: "Image" })}</Label>
+                  <label className={cn(
+                    'mt-1 flex items-center justify-center gap-2 rounded-xl border border-dashed px-3 py-6 cursor-pointer transition-colors',
+                    mediaUrl ? 'border-white/30 bg-white/5' : 'border-white/15 hover:bg-white/5',
+                  )}>
+                    {uploading === 'media' ? (
+                      <Loader2 className="w-5 h-5 text-white animate-spin" />
+                    ) : (
+                      <>
+                        <Upload className="w-4 h-4 text-zinc-400" />
+                        <span className="text-sm text-zinc-400">{mediaUrl ? t('ads.replaceFile') : _copy("copy.00ec9936bf43", { defaultValue: "Upload {{value1}}", value1: kind })}</span>
+                      </>
+                    )}
+                    <input
+                      type="file"
+                      accept={kind === 'video' ? 'video/mp4,video/webm,video/quicktime' : 'image/jpeg,image/png,image/webp,image/gif'}
+                      className="hidden"
+                      onChange={(e) => { const f = e.target.files?.[0]; if (f) handleUpload(f, 'media'); e.target.value = ''; }}
+                    />
+                  </label>
+                </div>
+              )}
+
+              {kind === 'video' && (
+                <div>
+                  <Label className="text-white">{t('ads.thumbnailOptional')}</Label>
+                  <label className="mt-1 flex items-center justify-center gap-2 rounded-xl border border-dashed border-white/15 px-3 py-3 cursor-pointer hover:bg-white/5 transition-colors">
+                    {uploading === 'thumb' ? (
+                      <Loader2 className="w-4 h-4 text-white animate-spin" />
+                    ) : (
+                      <span className="text-xs text-zinc-400">{thumbnailUrl ? t('ads.replaceThumbnail') : t('ads.uploadThumbnail')}</span>
+                    )}
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      className="hidden"
+                      onChange={(e) => { const f = e.target.files?.[0]; if (f) handleUpload(f, 'thumb'); e.target.value = ''; }}
+                    />
+                  </label>
+                </div>
+              )}
+
+              <div>
+                <Label htmlFor="wiz-headline" className="text-white">{t('ads.headline')}</Label>
+                <Input id="wiz-headline" value={headline} onChange={(e) => setHeadline(e.target.value)} maxLength={90} placeholder={t('ads.headlinePlaceholder')} className="mt-1" />
+              </div>
+              <div>
+                <Label htmlFor="wiz-body" className="text-white">{t('ads.bodyOptional')}</Label>
+                <Textarea id="wiz-body" value={bodyText} onChange={(e) => setBodyText(e.target.value)} maxLength={280} rows={3} placeholder={t('ads.bodyPlaceholder')} className="mt-1" />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label htmlFor="wiz-cta-label" className="text-white">{t('ads.ctaLabel')}</Label>
+                  <Input id="wiz-cta-label" value={ctaLabel} onChange={(e) => setCtaLabel(e.target.value)} maxLength={24} className="mt-1" />
+                </div>
+                <div>
+                  <Label htmlFor="wiz-cta-url" className="text-white">{t('ads.ctaLink')}</Label>
+                  <Input id="wiz-cta-url" value={ctaUrl} onChange={(e) => setCtaUrl(e.target.value)} placeholder="https://…" className="mt-1" />
+                </div>
+              </div>
+            </div>
+
+            {/* Live preview */}
+            <div>
+              <p className="text-xs uppercase tracking-wider text-zinc-500 mb-2">{t('ads.feedPreview')}</p>
+              <div className="rounded-2xl border border-white/10 bg-zinc-950/60 p-4 pointer-events-none">
+                <SponsoredAdCard ad={previewAd} />
+              </div>
+              <p className="text-[11px] text-zinc-500 mt-2">{_copy("copy.be629e36e175", { defaultValue: "Exactly how your ad renders between posts — labeled AD, billed per POVR impression." })}</p>
+            </div>
+          </div>
+        )}
+
+        {/* STEP 2 — targeting */}
+        {step === 1 && (
+          <div className="py-2">
+            <TargetingEditor value={targeting} onChange={setTargeting} />
+            {targeting.creatorSupport && (kind !== 'video' || (mediaDuration ?? 0) < 30) ? <p role="status" className="text-sm text-white/70">{_copy("copy.c9036a4e3dc7", { defaultValue: "Creator support needs a video of at least 30 seconds. Return to Creative to choose one." })}</p> : null}
+          </div>
+        )}
+
+        {/* STEP 3 — budget */}
+        {step === 2 && (
+          <div className="space-y-5 py-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="wiz-daily" className="text-white">{t('ads.dailyBudget')}</Label>
+                <Input
+                  id="wiz-daily" type="number" min={1} step={5} value={dailyBudget}
+                  onChange={(e) => setDailyBudget(Math.max(1, Number(e.target.value) || 1))}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label htmlFor="wiz-total" className="text-white">{t('ads.totalBudget')}</Label>
+                <Input
+                  id="wiz-total" type="number" min={dailyBudget} step={25} value={totalBudget}
+                  onChange={(e) => setTotalBudget(Math.max(1, Number(e.target.value) || 1))}
+                  className="mt-1"
+                />
+                {totalBudget < dailyBudget && (
+                  <p className="text-xs text-red-400 mt-1">{t('ads.totalAtLeastDaily')}</p>
+                )}
+              </div>
+            </div>
+
+            <div>
+              <Label className="text-white">{_copy("copy.43d4682b1f68", { defaultValue: "Duration: " })}{durationDays}{_copy("copy.b1c503166f16", { defaultValue: " days" })}</Label>
+              <Slider value={[durationDays]} onValueChange={(v) => setDurationDays(v[0])} min={1} max={60} step={1} className="mt-2" />
+            </div>
+
+            <div>
+              <Label className="text-white">{_copy("copy.2c7c481a6765", { defaultValue: "Frequency cap: " })}{frequencyCap}{_copy("copy.e991eda6eeac", { defaultValue: " views / person / day" })}</Label>
+              <Slider value={[frequencyCap]} onValueChange={(v) => setFrequencyCap(v[0])} min={1} max={10} step={1} className="mt-2" />
+            </div>
+
+            <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div>
+                <p className="text-[11px] text-zinc-500">{t('ads.blendedCpm')}</p>
+                <p className="text-base font-bold text-white">{formatUsd(projections.cpm)}</p>
+              </div>
+              <div>
+                <p className="text-[11px] text-zinc-500">{t('ads.estImpressionsPerDay')}</p>
+                <p className="text-base font-bold text-white">{formatCompact(projections.impressionsPerDay)}</p>
+              </div>
+              <div>
+                <p className="text-[11px] text-zinc-500">{t('ads.estTotalImpressions')}</p>
+                <p className="text-base font-bold text-white">{formatCompact(projections.totalImpressions)}</p>
+              </div>
+              <div>
+                <p className="text-[11px] text-zinc-500">{t('ads.estClicks')}</p>
+                <p className="text-base font-bold text-white">{formatCompact(projections.estClicks)}</p>
+              </div>
+            </div>
+            {projections.audienceLimited && (
+              <p className="text-xs text-yellow-500">{_copy("copy.73153533a07d", { defaultValue: "Your budget exceeds what this audience can deliver at the chosen frequency cap — delivery will be audience-limited. Widen targeting or lower the daily budget." })}</p>
+            )}
+          </div>
+        )}
+
+        {/* STEP 4 — review */}
+        {step === 3 && (
+          <div className="space-y-4 py-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 space-y-2 text-sm">
+                <p className="text-white font-semibold">{name || t('ads.untitledCampaign')}</p>
+                <p className="text-zinc-400">{t('ads.reviewObjective')}<span className="text-white capitalize">{objective}</span></p>
+                <p className="text-zinc-400">{t('ads.reviewBudget')}<span className="text-white">{formatUsd(dailyBudget)}{_copy("copy.09140fcc0a62", { defaultValue: "/day · " })}{formatUsd(totalBudget)}{_copy("copy.88c4fa961179", { defaultValue: " total" })}</span></p>
+                <p className="text-zinc-400">{t('ads.reviewDuration')}<span className="text-white">{durationDays}{_copy("copy.b1c503166f16", { defaultValue: " days" })}</span>{_copy("copy.fdc25d412a87", { defaultValue: " · Cap: " })}<span className="text-white">{frequencyCap}{_copy("copy.ea30d1c554b8", { defaultValue: "/day" })}</span></p>
+                <p className="text-zinc-400">{t('ads.reviewAudience')}<span className="text-white">{formatCompact(estimate?.audience ?? 0)}{_copy("copy.1e08aa05d39d", { defaultValue: " tracked wallets" })}</span></p>
+                <p className="text-zinc-400">{t('ads.reviewTiers')}<span className="text-white">{(targeting.tiers ?? []).length ? (targeting.tiers ?? []).join(', ') : _copy("copy.a52ace420f21", { defaultValue: "All" })}</span></p>
+                <p className="text-zinc-400">{_copy("copy.9a7d4f0d2827", { defaultValue: "Ads balance:" })}{' '}
+                  <span className={unfunded ? 'text-yellow-500' : 'text-white'}>{formatUsd(balanceUsd)}</span>
+                  {unfunded && <span className="text-yellow-500">{_copy("copy.e051887907fb", { defaultValue: " — you'll top up next" })}</span>}
+                </p>
+                <p className="text-[11px] text-zinc-500 pt-2">{_copy("copy.fafb0feed28a", { defaultValue: "Ads go live after moderation approves both campaign and creative, and only while your ads balance stays funded. You pay per verified viewable impression at the viewer's tier CPM." })}</p>
+              </div>
+              <div className="rounded-2xl border border-white/10 bg-zinc-950/60 p-4 pointer-events-none">
+                <SponsoredAdCard ad={previewAd} />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Footer nav */}
+        <div className="flex items-center justify-between gap-3 pt-2">
+          <Button
+            variant="outline"
+            className="bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700"
+            disabled={step === 0 || submitting}
+            onClick={() => setStep((s) => Math.max(0, s - 1))}
+          >
+            <ChevronLeft className="w-4 h-4 mr-1" />{_copy("copy.709d9085c264", { defaultValue: " Back" })}</Button>
+
+          {step < STEP_KEYS.length - 1 ? (
+            <Button
+              variant="glass"
+              disabled={!stepValid() || uploading !== null}
+              onClick={() => setStep((s) => s + 1)}
+            >{_copy("copy.cd447acb4270", { defaultValue: "Next " })}<ChevronRight className="w-4 h-4 ml-1" />
+            </Button>
+          ) : (
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                className="bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700"
+                disabled={submitting}
+                onClick={() => submit(true)}
+              >
+                <Save className="w-4 h-4 mr-1.5" />{_copy("copy.065297892a97", { defaultValue: " Save draft" })}</Button>
+              <Button variant="glass" disabled={submitting} onClick={() => submit(false)}>
+                {submitting ? <Loader2 className="w-4 h-4 mr-1.5 animate-spin" /> : <Rocket className="w-4 h-4 mr-1.5" />}
+                {unfunded ? t('ads.fundAndSubmit') : t('ads.submitForReview')}
+              </Button>
+            </div>
+          )}
+        </div>
+        </>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}

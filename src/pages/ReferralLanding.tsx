@@ -1,0 +1,248 @@
+import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
+import { normalizeSubReferral } from '@/lib/affiliate-subref';
+import { SEOHead } from "@/components/SEOHead";
+import { ArrowRight } from "lucide-react";
+import Copy from "@/components/ui/cut-icons/copy";
+
+import Share2 from "@/components/ui/cut-icons/feedshare";
+
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
+import { isValidAffiliateCode, setAffiliateRef, recordAffiliateClick, recordAffiliateCtaClick, getPersistedViewerAddress } from "@/lib/affiliateRef";
+import { resolveDeepLinkTarget } from "@/lib/affiliateDeepLink";
+import { getAffiliateShareImageUrl } from "@/lib/affiliateShareImage";
+import { DEFAULT_AFFILIATE_LANDING, ownLandingCtaLabel, ownLandingHeadline, ownLandingMessage, parseLandingCtas, withAffiliateRef, type AffiliateLandingCustomization } from "@/lib/affiliate";
+import { API_ORIGIN } from '@/lib/api/api-origin';
+
+
+const SITE = typeof window !== "undefined" ? window.location.origin : "https://riftn.com";
+
+export default function ReferralLanding() {
+  const { t } = useTranslation();
+  const { code: rawCode, "*": splat } = useParams<{ code: string; "*": string }>();
+  const code = (rawCode || "").trim().toUpperCase();
+  const valid = isValidAffiliateCode(code);
+  const { search } = useLocation();
+  const subId = normalizeSubReferral(new URLSearchParams(search).get('sub'));
+  const navigate = useNavigate();
+  // `/r/<CODE>/docs/whatever` (or `?to=/docs/whatever`) attributes the visit and
+  // then hands the visitor straight to that page, so one hyperlink can both earn
+  // and land somewhere specific. Everything below only runs when there is no
+  // destination — with one, this page is a redirect and paints nothing.
+  const deepLink = useMemo(() => (valid ? resolveDeepLinkTarget(splat, search) : null), [splat, search, valid]);
+  const [inviter, setInviter] = useState<string | null>(null);
+  const [imgLoaded, setImgLoaded] = useState(false);
+  const [imgRetry, setImgRetry] = useState(0);
+  const [landing, setLanding] = useState<AffiliateLandingCustomization>(DEFAULT_AFFILIATE_LANDING);
+  const [hasCustomHeadline, setHasCustomHeadline] = useState(false);
+
+  // PNG for OG/social meta (cached cross-platform), SVG for the fast in-page preview.
+  // Bump `v` whenever the share-image renderer changes so social platforms and browsers refetch.
+  const SHARE_IMG_VERSION = "6";
+  const ogImage = `${getAffiliateShareImageUrl(code, 1200, 630, "png")}&v=${SHARE_IMG_VERSION}`;
+  const baseShareImage = `${getAffiliateShareImageUrl(code, 1200, 630, "svg")}&v=${SHARE_IMG_VERSION}`;
+  const shareImage = imgRetry > 0 ? `${baseShareImage}&r=${imgRetry}` : baseShareImage;
+  const pageUrl = `${SITE}/r/${code}`;
+  const shareUrl = subId ? `${pageUrl}?sub=${encodeURIComponent(subId)}` : pageUrl;
+  const ctaUrl = withAffiliateRef("/app", code, subId);
+
+  // Attribution has to be written before the destination page mounts, so the
+  // cookie and the redirect happen in one effect rather than racing a <Navigate>
+  // against the lookup effect below.
+  useEffect(() => {
+    if (!valid || !deepLink) return;
+    setAffiliateRef(code, subId);
+    navigate(withAffiliateRef(deepLink, code, subId), { replace: true });
+  }, [valid, deepLink, code, navigate, subId]);
+
+  useEffect(() => {
+    if (!valid || deepLink) return;
+    setAffiliateRef(code, subId);
+    let cancelled = false;
+    (async () => {
+      // @ts-ignore - new table not in generated types
+      const { data } = await supabase
+        .from("affiliate_codes" as never)
+        .select("share_name,owner_address,landing_headline,landing_message,landing_cta_label,landing_destination,landing_ctas")
+        .eq("code", code)
+        .eq("active", true)
+        .maybeSingle() as unknown as { data: { share_name: string | null; owner_address: string; landing_headline: string | null; landing_message: string | null; landing_cta_label: string | null; landing_destination: string | null; landing_ctas: unknown } | null };
+      if (cancelled) return;
+      if (data) {
+        const headline = ownLandingHeadline(data.landing_headline);
+        setHasCustomHeadline(Boolean(headline));
+        setLanding({
+          headline: headline || DEFAULT_AFFILIATE_LANDING.headline,
+          message: ownLandingMessage(data.landing_message) || DEFAULT_AFFILIATE_LANDING.message,
+          ctaLabel: ownLandingCtaLabel(data.landing_cta_label) || DEFAULT_AFFILIATE_LANDING.ctaLabel,
+          destination: data.landing_destination || DEFAULT_AFFILIATE_LANDING.destination,
+          ctas: parseLandingCtas(data.landing_ctas),
+        });
+      }
+      let resolved: string | null = null;
+      if (data?.owner_address) {
+        try {
+          const r = await fetch(`${API_ORIGIN}/api/account_info/${data.owner_address}`);
+          if (r.ok) {
+            const j = await r.json();
+            const u = j?.result || j;
+            const apiDisplay = (u?.displayName || "").trim();
+            const apiUser = (u?.username || "").trim();
+            resolved = apiDisplay || apiUser || null;
+          }
+        } catch { /* ignore */ }
+      }
+      if (!resolved) {
+        const sn = data?.share_name?.trim();
+        if (sn) resolved = sn;
+        else if (data?.owner_address) resolved = `${data.owner_address.slice(0, 6)}…${data.owner_address.slice(-4)}`;
+      }
+      if (!cancelled && resolved) setInviter(resolved);
+    })();
+    return () => { cancelled = true; };
+  }, [code, valid, deepLink, subId]);
+
+  // This page mounts outside WalletProviders (see App.tsx), so there is no
+  // auth context to ask. The signed-in address is read straight from storage
+  // instead, so an affiliate opening their own link to test it is dropped
+  // from their analytics here and now, not only if they continue into /app
+  // (where the ?ref cookie is re-sent with their wallet attached anyway).
+  // The link itself behaves exactly the same for them.
+  useEffect(() => {
+    if (!valid) return;
+    recordAffiliateClick(code, getPersistedViewerAddress());
+  }, [code, valid]);
+
+  // Preload the share image immediately — its URL only depends on the code,
+  // so it downloads in parallel with the inviter lookup instead of after it.
+  useEffect(() => {
+    if (!valid || deepLink) return;
+    let cancelled = false;
+    const img = new Image();
+    img.onload = () => { if (!cancelled) setImgLoaded(true); };
+    img.onerror = () => {
+      if (cancelled) return;
+      if (imgRetry < 3) setTimeout(() => setImgRetry((n) => n + 1), 600 * (imgRetry + 1));
+      else setImgLoaded(true);
+    };
+    img.src = shareImage;
+    return () => { cancelled = true; };
+  }, [shareImage, valid, imgRetry, deepLink]);
+
+  const title = useMemo(
+    () => (valid && inviter ? t('referral.seoTitleInvited', { inviter }) : t('referral.seoTitle')),
+    [inviter, valid, t],
+  );
+  const description = valid
+    ? t('referral.seoDescriptionInvited', { code })
+    : t('referral.seoDescription');
+
+  const copy = async (txt: string) => {
+    try { await navigator.clipboard.writeText(txt); toast.success(t('referral.copied')); }
+
+    catch { toast.error(t('referral.copyFailed')); }
+  };
+
+  // Redirecting — paint nothing rather than flashing the invite splash.
+  if (deepLink) return null;
+
+  return (
+    <>
+      {/* Referral landings are an unbounded set of near-identical URLs: noindex
+          in the browser too (the edge already noindexes them for bots), and pin
+          the canonical to dehub.io so a mirror-host load never self-canonicalizes.
+          SEOHead writes the head imperatively — the raw Helmet block this
+          replaces rendered nothing (react-helmet-async v3 is inert here). */}
+      <SEOHead
+        title={title}
+        description={description}
+        image={ogImage}
+        url={`https://riftn.com/r/${code}`}
+        noindex
+      />
+
+      {/* No loading gate — the page shell (headline, code, CTAs) paints
+          instantly; the inviter's name and share image fade in as their
+          fetches resolve. This is a new user's first touch of Riftn. */}
+      <main data-glass-page className="min-h-screen bg-black text-white flex items-center justify-center px-6 py-16">
+        <div className="max-w-3xl w-full text-center space-y-8 animate-in fade-in duration-500">
+          {valid ? (
+            <>
+              <p className="text-sm uppercase tracking-[0.3em] text-white/50">{t('referral.youveBeenInvited')}</p>
+              <h1 className="text-4xl md:text-6xl font-bold leading-tight flex flex-col items-center gap-4">
+                {hasCustomHeadline ? (
+                  <span>{landing.headline}</span>
+                ) : inviter ? (
+                  <>
+                    <span>{inviter}</span>
+                    <span>{t('referral.invitedYouToDehub')}</span>
+                  </>
+                ) : (
+                  <span>{t('referral.youveBeenInvitedToDehub')}</span>
+                )}
+              </h1>
+              <p className="mx-auto max-w-2xl text-lg text-white/70 whitespace-pre-line">{landing.message}</p>
+              <p className="text-lg text-white/70">
+                {t('referral.joinWithCode')} <span className="font-mono font-bold tracking-[0.3em] text-white">{code}</span>
+              </p>
+              <div className="mx-auto max-w-2xl overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02] aspect-[1200/630] relative">
+                {!imgLoaded && <div className="absolute inset-0 animate-pulse bg-white/[0.04]" aria-hidden="true" />}
+                <img
+                  src={shareImage}
+                  alt={inviter ? t('referral.inviterInvitedYou', { inviter }) : t('referral.dehubInvite')}
+                  width={1200}
+                  height={630}
+                  className={`absolute inset-0 w-full h-full block transition-opacity duration-500 ${imgLoaded ? "opacity-100" : "opacity-0"}`}
+                />
+              </div>
+              {landing.ctas.length > 0 && (
+                <nav aria-label={t('referral.moreDestinations')} className="mx-auto grid max-w-2xl grid-cols-2 gap-3 sm:grid-cols-3">
+                  {landing.ctas.map((cta, i) => (
+                    <Link
+                      key={`${cta.destination}-${i}`}
+                      to={withAffiliateRef(cta.destination, code, subId)}
+                      onClick={() => recordAffiliateCtaClick(code, cta.destination, getPersistedViewerAddress())}
+                      className="group flex items-center justify-between gap-2 rounded-xl border border-white/15 bg-white/[0.04] px-4 py-3 text-left text-sm font-semibold text-white transition hover:border-white/40 hover:bg-white/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
+                    >
+                      <span className="truncate">{cta.label}</span>
+                      <ArrowRight className="h-4 w-4 shrink-0 text-white/50 transition group-hover:translate-x-0.5 group-hover:text-white" />
+                    </Link>
+                  ))}
+                </nav>
+              )}
+              <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+                <Button asChild size="lg">
+                  <Link
+                    to={landing.destination ? withAffiliateRef(landing.destination, code, subId) : ctaUrl}
+                    onClick={() => recordAffiliateCtaClick(code, landing.destination || "/app", getPersistedViewerAddress())}
+                  >{landing.ctaLabel || t('referral.continueToDehub')} <ArrowRight className="ml-2 h-4 w-4" /></Link>
+                </Button>
+                <Button size="lg" variant="outline" onClick={() => copy(shareUrl)}>
+                  <Copy className="mr-2 h-4 w-4" /> {t('referral.copyInviteLink')}
+                </Button>
+                {typeof navigator !== "undefined" && (navigator as Navigator & { share?: (d: ShareData) => Promise<void> }).share && (
+                  <Button size="lg" variant="ghost" onClick={() => {
+                    (navigator as Navigator & { share: (d: ShareData) => Promise<void> }).share({
+                      title, text: description, url: shareUrl,
+                    }).catch(() => undefined);
+                  }}>
+                    <Share2 className="mr-2 h-4 w-4" /> {t('referral.share')}
+                  </Button>
+                )}
+              </div>
+            </>
+          ) : (
+            <>
+              <h1 className="text-4xl font-bold">{t('referral.invalidInvite')}</h1>
+              <p className="text-white/70">{t('referral.invalidInviteHint')}</p>
+              <Button asChild size="lg"><Link to="/app">{t('referral.goToDehub')}</Link></Button>
+            </>
+          )}
+        </div>
+      </main>
+    </>
+  );
+}

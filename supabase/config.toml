@@ -1,0 +1,478 @@
+project_id = "aigxuutjaqsywioxjefr"
+
+[functions]
+  [functions.account-erasure]
+    verify_jwt = false
+  [functions.trenchstar]
+    verify_jwt = false
+  [functions.editor-assets]
+    verify_jwt = false
+  [functions.ai-free]
+    verify_jwt = false
+  [functions.wallet-session]
+    verify_jwt = false
+  # Public, read-only emoji list for third-party clients (Mastodon/Misskey/Discord shapes).
+  [functions.custom-emojis]
+    verify_jwt = false
+  [functions.creator-library]
+    verify_jwt = false
+  [functions.creator-reconcile]
+    verify_jwt = false
+  # Auth is an ADMIN JWT from api.dehub.io in the Authorization header, checked
+  # against GET /api/admin/me — not a Supabase JWT, so the platform check would
+  # reject every legitimate call.
+  # Same bridge as admin-stages, super admin only: the Traffic page reads
+  # page_view_events, which nothing but the service role can see.
+  [functions.admin-page-views]
+    verify_jwt = false
+  # Same bridge again: the onboarding friction map reads onboarding_events,
+  # which has no SELECT policy at all, so only the service role can see it.
+  [functions.admin-onboarding-friction]
+    verify_jwt = false
+  [functions.admin-stages]
+    verify_jwt = false
+  # Same bridge as admin-stages: an admin JWT from api.dehub.io, re-verified
+  # against GET /api/admin/me. Not a Supabase JWT.
+  [functions.admin-transcripts]
+    verify_jwt = false
+  # Cron sends the vault scheduler key, the panel an admin JWT from api.dehub.io;
+  # neither is a Supabase JWT.
+  [functions.growth-autopost]
+    verify_jwt = false
+  [functions.anon-views]
+    verify_jwt = false
+  [functions.ads-admin]
+    verify_jwt = false
+  [functions.ads-serve]
+    verify_jwt = false
+  [functions.ads-topup]
+    verify_jwt = false
+  [functions.ads-track]
+    verify_jwt = false
+  [functions.affiliate-share-image]
+    verify_jwt = false
+  [functions.agora-token]
+    verify_jwt = false
+  # Auth is the DeHub token in x-dehub-token, not a Supabase JWT, so the
+  # platform check stays off and requireDeHubAuth does the work. Mobile calls
+  # this with a bare fetch and no Authorization header at all, so leaving the
+  # platform check on would 401 every phone before requireDeHubAuth ran.
+  [functions.ai-payment-record]
+    verify_jwt = false
+  # Auth is the DeHub token in x-dehub-token, not a Supabase JWT, so the
+  # platform check stays off and requireDeHubAuth does the work.
+  [functions.ai-quote]
+    verify_jwt = false
+  # Auth is the DeHub token in x-dehub-token, verified by requireDeHubAuth.
+  [functions.arcade-score]
+    verify_jwt = false
+  # Mini app store. miniapp-auth checks the dehub token itself (requireDeHubAuth)
+  # and serves a public JWKS on GET; miniapp-registry is a public manifest check.
+  [functions.miniapp-auth]
+    verify_jwt = false
+  [functions.miniapp-registry]
+    verify_jwt = false
+  # miniapp-user checks the dehub token itself; miniapp-notify is keyed by the
+  # app's own notify key, not a Supabase JWT.
+  [functions.miniapp-user]
+    verify_jwt = false
+  [functions.miniapp-notify]
+    verify_jwt = false
+  [functions.auth-email-hook]
+    verify_jwt = false
+  # Deliberately left verified, unlike most of this list. Every call spends AI
+  # credits, and the only callers are `transcribe` and an operator, both of
+  # which hold the service key. The backfill mode checks for that key on top.
+  [functions.auto-categorize]
+    verify_jwt = true
+  # Driven by pg_cron, which posts an apikey header and no bearer token. The
+  # open mode is idempotent and capped; the backfill mode checks the service
+  # key itself, because that is the only one that can spend in bulk.
+  [functions.auto-transcribe]
+    verify_jwt = false
+  [functions.blog-share-image]
+    verify_jwt = false
+  [functions.bridge-transfers]
+    verify_jwt = false
+  [functions.builder-api]
+    verify_jwt = false
+  [functions.provider-keys]
+    verify_jwt = false
+  # Admin hub Own keys card; callers are checked against api.dehub.io /api/admin/me.
+  [functions.admin-provider-keys]
+    verify_jwt = false
+  [functions.builder-serve]
+    verify_jwt = false
+  # Auth is the DeHub token in x-dehub-token, verified by requireDeHubAuth.
+  # Auth is the CDN_PURGE_SERVICE_SECRET shared secret from the NestJS
+  # backend, verified in-function — not a Supabase JWT.
+  [functions.cdn-purge]
+    verify_jwt = false
+  [functions.chess-match]
+    verify_jwt = false
+  [functions.client-logs]
+    verify_jwt = false
+  [functions.cmc-chart]
+    verify_jwt = false
+  [functions.community-admin-chat]
+    verify_jwt = false
+  # Auth is the DeHub token in x-dehub-token, verified by requireDeHubAuth;
+  # the one public read is IP-limited inside the function.
+  [functions.creator-flows]
+    verify_jwt = false
+  # Unauthenticated by design (the canvas works signed-out); IP-limited.
+  [functions.creator-prompt-assistant]
+    verify_jwt = false
+
+  # Editor AI agent. Unauthenticated like the prompt assistant (editing works
+  # signed out, nothing here spends DHB); IP-limited.
+  [functions.editor-agent]
+    verify_jwt = false
+  [functions.dehub-mcp]
+    verify_jwt = false
+  [functions.dm-upload-media]
+    verify_jwt = false
+  # Auth is the DeHub token in x-dehub-token, verified by requireDeHubAuth.
+  [functions.dub-line]
+    verify_jwt = false
+  # Auth is the DeHub token in x-dehub-token, verified by requireDeHubAuth.
+  [functions.dub-session]
+    verify_jwt = false
+  # ── ElevenLabs audio ───────────────────────────────────────────────────────
+  # Listed so the setting is a decision on the record rather than a default
+  # nobody chose. It stays false for the usual reason — auth is the DeHub token
+  # in x-dehub-token, not a Supabase JWT — and the guard is in the function.
+  #
+  # Turning it on would not be the fix here anyway: the anon key is a publishable
+  # value that ships in every browser bundle and does not expire until 2036, so a
+  # platform JWT check is satisfied by anyone who reads the page source.
+  [functions.elevenlabs-audio-isolation]
+    verify_jwt = false
+  [functions.elevenlabs-clone-voice]
+    verify_jwt = false
+  [functions.elevenlabs-dialogue]
+    verify_jwt = false
+  [functions.elevenlabs-dub]
+    verify_jwt = false
+  [functions.elevenlabs-music]
+    verify_jwt = false
+  [functions.elevenlabs-sound-effects]
+    verify_jwt = false
+  [functions.elevenlabs-transcribe]
+    verify_jwt = false
+  [functions.elevenlabs-tts]
+    verify_jwt = false
+  # Callable signed out on purpose: the stock voice library is not private and
+  # the pickers render before auth. Rate-limited per IP, and filtered so it can
+  # only ever hand back stock voices plus the caller's own.
+  [functions.elevenlabs-voices]
+    verify_jwt = false
+  [functions.elevenlabs-voice-changer]
+    verify_jwt = false
+  [functions.elevenlabs-voice-design]
+    verify_jwt = false
+  # Auth is the EMAIL_LINK_SERVICE_SECRET shared secret from the NestJS
+  # backend, verified in-function — not a Supabase JWT.
+  [functions.email-link-provision]
+    verify_jwt = false
+  [functions.email-link-send]
+    verify_jwt = false
+  [functions.notification-email-send]
+    verify_jwt = false
+  [functions.notification-sms-send]
+    verify_jwt = false
+  [functions.enhance-text]
+    verify_jwt = false
+  # Public, IP rate-limited: reads a trade sentence into form fields, never trades.
+  [functions.trade-intent]
+    verify_jwt = false
+  [functions.fal-ai-tools]
+    verify_jwt = false
+  # Auth is the caller's DeHub token in x-dehub-token, verified by
+  # requireDeHubAuth — not a Supabase JWT.
+  [functions.feature-request-assistant]
+    verify_jwt = false
+  [functions.feature-request-title]
+    verify_jwt = false
+  [functions.finalize-stage-recording]
+    verify_jwt = false
+  [functions.free-stock-assets]
+    verify_jwt = false
+  [functions.fetch-link-preview]
+    verify_jwt = false
+  # Auth is the DeHub token in x-dehub-token, verified by requireDeHubAuth.
+  [functions.fraction-checkout]
+    verify_jwt = false
+  # Called only by the Riftn API with the service secret.
+  [functions.agent-voice]
+    verify_jwt = false
+  [functions.general-ai-chat]
+    verify_jwt = false
+  [functions.generate-3d]
+    verify_jwt = false
+  [functions.generate-image]
+    verify_jwt = false
+  [functions.generate-video]
+    verify_jwt = false
+  [functions.get-dhb-price]
+    verify_jwt = false
+  [functions.get-pimlico-config]
+    verify_jwt = false
+  [functions.get-rpc-endpoints]
+    verify_jwt = false
+  [functions.get-stream-ingest]
+    verify_jwt = false
+  # Public, IP rate-limited: read-only Livepeer stream status for the mobile
+  # producer poll, so the Livepeer key stays server-side.
+  [functions.livepeer-stream-status]
+    verify_jwt = false
+  [functions.get-web3auth-config]
+    verify_jwt = false
+  # Governance writes authenticate on the DeHub token in x-dehub-token
+  # (requireDeHubAuth), not on a Supabase JWT — the board has no Supabase user.
+  [functions.governance-proposal]
+    verify_jwt = false
+  [functions.governance-vote]
+    verify_jwt = false
+  # Creator packs: writes carry the DeHub token in x-dehub-token; the badge
+  # tier and its limits are read on the server, never from the client.
+  [functions.creator-packs]
+    verify_jwt = false
+  # DAO proposal writes use the DeHub token in x-dehub-token. Vote weight is
+  # read from the server-created contribution snapshot, never from the client.
+  [functions.dao-proposals]
+    verify_jwt = false
+  # Reads are public; writes carry the DeHub token in x-dehub-token and are
+  # verified by requireDeHubAuth, not by a Supabase JWT.
+  [functions.film-reviews]
+    verify_jwt = false
+  # Public revenue and costs behind dehub.io/stats — daily totals only.
+  [functions.finance-stats]
+    verify_jwt = false
+  # Read-only DO stats. Auth is the CDN_PURGE_SERVICE_SECRET shared secret in
+  # x-infra-stats-secret, verified in-function — not a Supabase JWT.
+  [functions.infra-stats]
+    verify_jwt = false
+  # Auth is the CDN_PURGE_SERVICE_SECRET shared secret in x-jarvis-tts-secret,
+  # verified in-function — not a Supabase JWT.
+  [functions.jarvis-tts]
+    verify_jwt = false
+  # Auth is the CDN_PURGE_SERVICE_SECRET shared secret in x-jarvis-stt-secret,
+  # verified in-function — not a Supabase JWT.
+  [functions.jarvis-stt]
+    verify_jwt = false
+
+
+  # Public catalogue proxy for /cinema. No user context — it exists to keep the
+  # JustWatch partner token server-side and to add CORS the upstream lacks.
+  [functions.justwatch]
+    verify_jwt = false
+  [functions.legacy-account-check]
+    verify_jwt = true
+  # Auth is the DeHub token in x-dehub-token, verified by requireDeHubAuth.
+  [functions.live-checkout]
+    verify_jwt = false
+  [functions.mark-stream-live]
+    verify_jwt = false
+  # GET is public; writes authenticate with the DeHub token in-function.
+  [functions.map-presence]
+    verify_jwt = false
+  [functions.multipost]
+    verify_jwt = false
+  [functions.social-reach]
+    verify_jwt = false
+  [functions.og-image]
+    verify_jwt = false
+  [functions.preview-transactional-email]
+    verify_jwt = false
+  [functions.handle-email-events]
+    verify_jwt = false
+  # Called by pg_cron with the publishable key; the scan is idempotent and throttled.
+  [functions.dex-position-scan]
+    verify_jwt = false
+  # Called by pg_cron with the publishable key; skips itself while the last snapshot is fresh.
+  [functions.dex-market-sample]
+    verify_jwt = false
+  [functions.dex-pool-create]
+    verify_jwt = false
+  [functions.refresh-leaderboard-cache]
+    verify_jwt = false
+  [functions.refresh-leaderboard-user]
+    verify_jwt = false
+  # Auth is the DeHub token in x-dehub-token, verified by requireDeHubAuth.
+  [functions.register-new-member]
+    verify_jwt = false
+  [functions.report-broken-channel]
+    verify_jwt = false
+  [functions.request-phone-otp]
+    verify_jwt = false
+  # Auth is the DeHub token in x-dehub-token, verified by requireDeHubAuth.
+  [functions.santa-score]
+    verify_jwt = false
+  [functions.send-admin-invite]
+    verify_jwt = false
+  # Called by the API when the assistant files a support ticket. Auth is the
+  # SUPPORT_TICKET_SECRET shared secret, not a Supabase JWT.
+  [functions.send-support-ticket]
+    verify_jwt = false
+  [functions.send-sms-hook]
+    verify_jwt = false
+  [functions.ssr-seo]
+    verify_jwt = false
+  # Auth is the DeHub token in x-dehub-token, verified by requireDeHubAuth.
+  [functions.stage-caption-token]
+    verify_jwt = false
+  # Auth is the DeHub token in x-dehub-token, verified by requireDeHubAuth.
+  [functions.stage-voice-clone]
+    verify_jwt = false
+  [functions.stock-quote]
+    verify_jwt = false
+  # Auth is the DeHub token in x-dehub-token, verified by requireDeHubAuth.
+  [functions.stream-products]
+    verify_jwt = false
+  [functions.sync-category-log]
+    verify_jwt = false
+  [functions.sync-staking-deposits]
+    verify_jwt = false
+  # Auth is the DeHub token in x-dehub-token, verified by requireDeHubAuth.
+  [functions.translate-caption]
+    verify_jwt = false
+  [functions.transcribe-stage]
+    verify_jwt = false
+  [functions.translate-image]
+    verify_jwt = false
+  [functions.translate-text]
+    verify_jwt = false
+  [functions.verify-phone-otp]
+    verify_jwt = false
+  [functions.passkey-auth]
+    verify_jwt = false
+  # ── Previously unlisted ────────────────────────────────────────────────────
+  # These already run without the platform JWT check in production; listing
+  # them keeps a redeploy that honours this file from 401ing every caller.
+
+  # Public read-only proxy; keeps the Alchemy key server-side.
+  [functions.alchemy-tokens]
+    verify_jwt = false
+  # Cron sweep and viewer requests are open; the worker callback checks DUB_WORKER_SECRET.
+  [functions.auto-dub]
+    verify_jwt = false
+  # summarize-transcript calls with the service key; the worker callback checks DUB_WORKER_SECRET.
+  [functions.stage-clips]
+    verify_jwt = false
+  # Live clips: viewer clips and streamer highlights. Checks the DeHub token itself.
+  [functions.live-clips]
+    verify_jwt = false
+  # Public read-only CoinMarketCap proxy; the CMC key stays server-side.
+  [functions.cmc-market-cap]
+    verify_jwt = false
+  # Public read-only CoinMarketCap proxy; the CMC key stays server-side.
+  [functions.cmc-top-100]
+    verify_jwt = false
+  # Public, IP rate-limited.
+  [functions.conversation-coach]
+    verify_jwt = false
+  [functions.create-checkout]
+    verify_jwt = false
+  # Public proxy to the 1Click cross-chain API.
+  [functions.cross-chain-quote]
+    verify_jwt = false
+  # Daily pg_cron cleanup; the function does no caller auth.
+  [functions.editor-assets-cleanup]
+    verify_jwt = false
+  # Auth is the DeHub token in x-dehub-token, verified by requireDeHubAuth.
+  [functions.end-stream-session]
+    verify_jwt = false
+  # Public, IP rate-limited.
+  [functions.generate-lyrics]
+    verify_jwt = false
+  # Mock launchpad trade with no chain interaction; auth is the DeHub token in
+  # x-dehub-token, verified by requireDeHubAuth, and the trade is that wallet's.
+  [functions.launchpad-mock-trade]
+    verify_jwt = false
+  # Public MCP endpoint that forwards tool calls to dehub-mcp.
+  [functions.mcp]
+    verify_jwt = false
+  # Daily pg_cron migration; the function does no caller auth.
+  [functions.migrate-ai-images-to-storage]
+    verify_jwt = false
+  # Stripe webhook; auth is the stripe-signature header, verified in-function.
+  [functions.payments-webhook]
+    verify_jwt = false
+  # Bundler/paymaster relay the smart wallet's viem client calls directly, with
+  # no headers to add; restricted to AA methods and chains, sponsorship IP-limited.
+  [functions.pimlico-rpc]
+    verify_jwt = false
+  # Public sitemap for crawlers.
+  [functions.sitemap-index]
+    verify_jwt = false
+  # Public sitemap for crawlers.
+  [functions.sitemap-posts]
+    verify_jwt = false
+  # Public sitemap for crawlers.
+  [functions.sitemap-profiles]
+    verify_jwt = false
+  # Public, IP rate-limited.
+  [functions.suggest-replies]
+    verify_jwt = false
+  # Public read; only a service-key caller may force a regenerate.
+  [functions.summarize-transcript]
+    verify_jwt = false
+  # Auth is the Telegram login payload's HMAC, verified in-function; IP-limited.
+  [functions.telegram-auth]
+    verify_jwt = false
+  # Public read-only market quotes.
+  [functions.top-assets]
+    verify_jwt = false
+  # Public start and status; only a service-key caller may force a re-run.
+  [functions.transcribe]
+    verify_jwt = false
+  # Reads are public; writes are verified by requireDeHubAuth.
+  [functions.transcript-corrections]
+    verify_jwt = false
+  [functions.translate-transcript]
+    verify_jwt = false
+  # Reads are public; writes are verified by requireDeHubAuth.
+  [functions.video-segments]
+    verify_jwt = false
+  # verify_jwt = false because the caller holds a DeHub *admin* bearer token,
+  # not a Supabase JWT. The function validates it against api.dehub.io itself.
+  [functions.work-admin]
+    verify_jwt = false
+  # Admin bearer token from api.dehub.io, re-verified inside the function.
+  [functions.admin-user-creations]
+    verify_jwt = false
+  # Admin hub review queue; callers are checked against api.dehub.io /api/admin/me.
+  [functions.miniapp-admin]
+    verify_jwt = false
+  # Called by the DeHub API with x-internal-secret (tip/follow/mention webhooks).
+  [functions.miniapp-events]
+    verify_jwt = false
+  [functions.notification-relay]
+    verify_jwt = false
+  # Signed-in callers send x-dehub-token; signed-out exports are journalled by IP.
+  [functions.editor-export-log]
+    verify_jwt = false
+  # Caller identity is verified against the DeHub API token.
+  [functions.ads-creator-support]
+    verify_jwt = false
+
+[functions.editor-visual-highlights]
+verify_jwt = false
+
+# Private worker authenticates using the existing internal service credential.
+[functions.maboroshi-provider]
+verify_jwt = false
+
+[functions.cashout-webhook]
+verify_jwt = false
+[functions.remix-links]
+verify_jwt = false
+
+[functions.follower-rankings]
+verify_jwt = false
+
+# The only writer to tip_records. Public on purpose: a caller names a payment
+# and every column is read back from the API's own record of it.
+[functions.tip-record]
+verify_jwt = false

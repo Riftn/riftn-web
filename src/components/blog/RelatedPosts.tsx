@@ -1,0 +1,67 @@
+import { useTranslation as _useCopy } from 'react-i18next';
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { BlogPost } from '@/types/blog';
+import { BlogBanner } from '@/components/blog/BlogBanner';
+import { formatDate } from '@/utils/blogUtils';
+import { usePublicPageLocale } from '@/hooks/usePublicPageLocale';
+import { localizedPageUrl } from '@/lib/seo/public-locales';
+
+interface RelatedPostsProps {
+  currentPost: BlogPost;
+  allPosts: BlogPost[];
+}
+
+const RelatedPostCard: React.FC<{ post: BlogPost }> = ({ post }) => {
+  const translatedPage = usePublicPageLocale(`/guides/${post.slug}`);
+  const url = new URL(localizedPageUrl(`/guides/${post.slug}`, translatedPage.language));
+  return (
+    <Link
+      to={url.pathname + url.search}
+      className="group bg-plain-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden border border-sky-blue/10"
+    >
+      <BlogBanner
+        src={post.bannerImage}
+        width={480}
+        widths={[360, 480, 736]}
+        sizes="(min-width: 768px) 300px, 100vw"
+        alt={translatedPage.data?.h1 || post.bannerImageAlt}
+        imgClassName="group-hover:scale-105 transition-transform duration-200"
+      />
+      <div className="p-4">
+        <h4 className="font-semibold text-royal-blue group-hover:text-middle-blue transition-colors line-clamp-2 mb-2">
+          {translatedPage.data?.h1 || post.title}
+        </h4>
+        <p className="text-sm text-royal-blue/70 mb-2 line-clamp-2">
+          {translatedPage.data?.description || post.excerpt}
+        </p>
+        <div className="text-xs text-royal-blue/50">
+          {formatDate(post.publishedAt, translatedPage.language)}
+        </div>
+      </div>
+    </Link>
+  );
+};
+
+export const RelatedPosts: React.FC<RelatedPostsProps> = ({ currentPost, allPosts }) => {
+  const { t: _copy } = _useCopy();
+  // Find related posts based on tags or recent posts
+  const relatedPosts = allPosts
+    .filter(post => 
+      post.id !== currentPost.id && 
+      post.status === 'published' &&
+      (post.tags.some(tag => currentPost.tags.includes(tag)) || true)
+    )
+    .slice(0, 3);
+
+  if (relatedPosts.length === 0) return null;
+
+  return (
+    <section className="mt-12 pt-8 border-t border-sky-blue/20">
+      <h3 className="text-2xl font-bold text-royal-blue mb-6 font-exo">{_copy("copy.bddb629fc59a", { defaultValue: "Related Posts" })}</h3>
+      <div className="grid gap-6 md:grid-cols-3">
+        {relatedPosts.map((post) => <RelatedPostCard key={post.id} post={post} />)}
+      </div>
+    </section>
+  );
+};

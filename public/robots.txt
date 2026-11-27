@@ -1,0 +1,67 @@
+# Riftn welcomes search engines, link previews and AI assistants that send
+# people here (ChatGPT search, Claude search, Perplexity and the like).
+# Crawlers that only collect pages to train AI models may read what Riftn
+# publishes about itself (home, docs, guides, blog, product pages, llms.txt) and nothing
+# that members post. Google-Extended is not in that list: it also decides
+# whether Gemini may use Riftn pages to ground its answers, so it follows the
+# rules for everyone.
+
+User-agent: GPTBot
+User-agent: CCBot
+User-agent: ClaudeBot
+User-agent: Claude-Web
+User-agent: anthropic-ai
+User-agent: Applebot-Extended
+User-agent: Bytespider
+User-agent: Meta-ExternalAgent
+User-agent: FacebookBot
+User-agent: Diffbot
+User-agent: Omgilibot
+User-agent: Omgili
+User-agent: ImagesiftBot
+User-agent: Timpibot
+User-agent: AI2Bot
+User-agent: PanguBot
+User-agent: img2dataset
+User-agent: cohere-ai
+User-agent: cohere-training-data-crawler
+User-agent: Webzio-Extended
+User-agent: Scrapy
+Allow: /$
+Allow: /llms.txt
+Allow: /llms-full.txt
+Allow: /rss.xml
+Allow: /docs
+Allow: /guides/
+Allow: /blog
+Allow: /compare$
+Allow: /compare?
+Allow: /glossary$
+Allow: /glossary?
+Allow: /pricing$
+Allow: /pricing?
+Allow: /premium$
+Allow: /premium?
+Allow: /bridge$
+Allow: /bridge?
+Allow: /creator$
+Allow: /creator?
+Allow: /converter$
+Allow: /converter?
+Allow: /migrate-youtube$
+Allow: /migrate-youtube?
+Allow: /dehub-app$
+Allow: /dehub-app?
+Allow: /connect$
+Allow: /connect?
+Allow: /connect/
+Disallow: /
+
+User-agent: *
+Content-Signal: search=yes, ai-input=yes, ai-train=no
+Allow: /
+Disallow: /_api/
+Disallow: /_sb/
+Disallow: /api/
+
+Sitemap: https://riftn.com/sitemap.xml

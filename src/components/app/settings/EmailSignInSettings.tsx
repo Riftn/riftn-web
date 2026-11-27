@@ -1,0 +1,239 @@
+import { useTranslation as _useCopy } from 'react-i18next';
+import { useSurfaceDraft } from '@/hooks/use-surface-draft';
+import { useEffect, useState } from 'react';
+import { Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { ThemedIcon } from '@/components/app/war/WarHudIcon';
+import {
+  SettingsRow,
+  SETTINGS_CONTROL_CLASS,
+  SETTINGS_FIELD_CLASS,
+  SETTINGS_INLINE_ACTION_CLASS,
+} from './SettingsRow';
+import {
+  getEmailLinkStatus,
+  requestEmailLinkCode,
+  confirmEmailLink,
+  unlinkEmailLogin,
+  type EmailLinkStatusResponse,
+} from '@/lib/api/dehub';
+
+/**
+ * "Sign-in email" — lets an account that logs in with a wallet attach an
+ * email address it can sign in with instead, and take it off again.
+ *
+ * The backend owns every rule (cooldowns, caps, collisions, which links may
+ * be removed); this component only shuttles the handshake and surfaces the
+ * server's copy verbatim.
+ *
+ * The form sits UNDER the row rather than in its action slot: an email field
+ * plus a button does not fit beside the label on a phone, and the settings
+ * row grid does not wrap.
+ */
+export function EmailSignInSettings() {
+  const { t: _copy } = _useCopy();
+  const { t } = useTranslation();
+  const [status, setStatus] = useState<EmailLinkStatusResponse | null>(null);
+  const [email, setEmail] = useSurfaceDraft("components/app/settings/EmailSignInSettings.tsx:email", '');
+  const [code, setCode] = useState('');
+  const [awaitingCode, setAwaitingCode] = useState(false);
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    let alive = true;
+    getEmailLinkStatus()
+      .then((s) => alive && setStatus(s))
+      .catch(
+        () =>
+          alive &&
+          setStatus({ status: false, linked: false, email: null, canLink: true, source: null }),
+      );
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  const sendCode = async () => {
+    if (!email.trim()) return;
+    setBusy(true);
+    try {
+      await requestEmailLinkCode(email.trim());
+      setAwaitingCode(true);
+      toast.success(t('settings.emailSignInSent', 'Check your inbox for the code'));
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : String(e));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const confirm = async () => {
+    if (!email.trim() || !code.trim()) return;
+    setBusy(true);
+    try {
+      const result = await confirmEmailLink(email.trim(), code.trim());
+      setAwaitingCode(false);
+      setCode('');
+      setEmail.complete(email, '');
+      setStatus({
+        status: true,
+        linked: true,
+        email: result.email ?? maskLocal(email.trim()),
+        canLink: true,
+        source: 'wallet-email',
+      });
+      toast.success(t('settings.emailSignInDone', 'You can now sign in with this email'));
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : String(e));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const remove = async () => {
+    setBusy(true);
+    try {
+      await unlinkEmailLogin();
+      setStatus({ status: true, linked: false, email: null, canLink: true, source: null });
+      setEmail.complete(email, '');
+      setCode('');
+      setAwaitingCode(false);
+      toast.success(
+        t('settings.emailSignInRemoved', 'Removed — this email can no longer sign you in'),
+      );
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : String(e));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const linked = !!status?.linked;
+  // A login this flow did not write (a social signup) already works on other
+  // devices and must not be replaced from here — show it, offer nothing.
+  const foreignLogin = !!status && !status.linked && status.canLink === false;
+  const loading = status === null;
+
+  return (
+    <div className="space-y-3">
+      <SettingsRow
+        icon={<ThemedIcon icon="email" alt="" className="size-5 object-contain" />}
+        title={t('settings.emailSignIn', 'Sign-in email')}
+        description={
+          linked
+            ? t('settings.emailSignInLinked', 'Code login is active for {{email}}', {
+                email: status?.email ?? '',
+              })
+            : foreignLogin
+              ? status?.email
+                ? t('settings.emailSignInExisting', 'You already sign in with {{email}}', {
+                    email: status.email,
+                  })
+                : t(
+                    'settings.emailSignInExistingUnknown',
+                    'This account already signs in without a wallet.',
+                  )
+              : t(
+                  'settings.emailSignInDesc',
+                  'Attach an email address to sign in without your wallet.',
+                )
+        }
+        action={
+          linked ? (
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={busy}
+              className={SETTINGS_CONTROL_CLASS}
+              onClick={remove}
+            >
+              {busy ? (
+                <Loader2 className="w-3 h-3 animate-spin" />
+              ) : (
+                t('settings.emailSignInRemove', 'Remove')
+              )}
+            </Button>
+          ) : loading ? (
+            <Loader2 className="w-4 h-4 animate-spin text-zinc-500" />
+          ) : null
+        }
+      />
+
+      {!linked && !foreignLogin && !loading && (
+        <div className="flex flex-col gap-2 pl-8 sm:flex-row sm:items-center">
+          {awaitingCode ? (
+            <>
+              <Input
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                maxLength={6}
+                placeholder="123456"
+                value={code}
+                onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
+                className={`${SETTINGS_FIELD_CLASS} w-full sm:w-28 sm:text-center`}
+              />
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  disabled={busy || code.length !== 6}
+                  className={SETTINGS_INLINE_ACTION_CLASS}
+                  onClick={confirm}
+                >
+                  {busy ? (
+                    <Loader2 className="w-3 h-3 animate-spin" />
+                  ) : (
+                    t('settings.emailSignInConfirm', 'Confirm')
+                  )}
+                </Button>
+                <Button
+                  variant="ghost"
+                  disabled={busy}
+                  className="h-10 shrink-0 rounded-xl px-3 text-zinc-400 hover:text-white"
+                  onClick={() => {
+                    setAwaitingCode(false);
+                    setCode('');
+                  }}
+                >
+                  {t('settings.cancel', 'Cancel')}
+                </Button>
+              </div>
+            </>
+          ) : (
+            <>
+              <Input
+                type="email"
+                autoComplete="email"
+                placeholder={_copy("copy.53e6cdc30765", { defaultValue: "you@example.com" })}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className={`${SETTINGS_FIELD_CLASS} w-full sm:w-64`}
+              />
+              <Button
+                variant="outline"
+                disabled={busy || !/.+@.+\..+/.test(email)}
+                className={SETTINGS_INLINE_ACTION_CLASS}
+                onClick={sendCode}
+              >
+                {busy ? (
+                  <Loader2 className="w-3 h-3 animate-spin" />
+                ) : (
+                  t('settings.emailSignInSend', 'Send code')
+                )}
+              </Button>
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** Local stand-in for the rare case confirm answers without the masked copy. */
+function maskLocal(email: string): string {
+  const at = email.indexOf('@');
+  if (at <= 0) return '***';
+  return `${email.slice(0, Math.min(2, at))}***${email.slice(at)}`;
+}

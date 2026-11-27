@@ -1,0 +1,622 @@
+/**
+ * Where a post is allowed to appear.
+ *
+ * - `safe` — anywhere. Also what an absent value means, on every post made
+ *   before ratings existed.
+ * - `mature` — adult or graphic. Off the public home, shorts, search and
+ *   suggestion feeds; still on the creator's profile, in the Following feed
+ *   and behind its own link, where clients put a content warning over it.
+ *   A viewer who turns on "show mature content" gets it in the public feeds
+ *   too, unwarned.
+ * - `blocked` — a moderation verdict. Served nowhere, so clients never see it.
+ * - `pending` — uploaded but not yet rated. Reserved for automated
+ *   classification; nothing produces it yet.
+ */
+export type ContentRating = 'safe' | 'mature' | 'blocked' | 'pending';
+
+/** Who may quote a post (dehub-stream-backend src/repost/quote-policy). Absent means anyone. */
+export type QuotePolicy = 'public' | 'followers' | 'nobody';
+
+/** Who may reply to a post (dehub-stream-backend src/reaction/reply-policy). Absent means anyone. */
+export type ReplyPolicy = 'public' | 'followers' | 'following' | 'mentioned';
+
+/**
+ * Who may see a post (riftn-backend common/util/post-visibility). Absent means everyone.
+ * 'self' ("Only me") is only ever sent when making a post: the server stores it
+ * as a direct post that names nobody, so it reads back as 'direct'.
+ */
+export type PostVisibility = 'public' | 'followers' | 'direct' | 'self';
+
+// Types based on Riftn API response (supports both API field naming conventions)
+export interface DeHubUser {
+  _id?: string;
+  id?: string;
+  address?: string;
+  wallet_address?: string;
+  /**
+   * How the account's Supabase identity was attached — 'wallet-email' when
+   * the email-link flow wrote it, absent otherwise. Server-vetted by
+   * construction (the backend only returns what its own confirm endpoint
+   * wrote), which is what lets an email login finish on a browser holding no
+   * local wallet state for the account.
+   */
+  loginLinkSource?: string | null;
+  username?: string | null;
+  /**
+   * A verified ENS name, e.g. `mal.eth`, proved at /api/ens/link. Present only
+   * when the account has one; never client-writable through /update_profile.
+   */
+  ensName?: string | null;
+  /** When that name was last proven against Ethereum. */
+  ensVerifiedAt?: string | null;
+  /**
+   * The Solana account this profile owns, proven by an Ed25519 signature over
+   * the Riftn login message. This is where Solana tips and PPV payments are
+   * sent, so its absence is what makes "pay on Solana" unavailable for a
+   * creator. Never client-writable through /update_profile — see
+   * /api/solana/link.
+   */
+  solanaAddress?: string | null;
+  /** When that address was last proven. */
+  solanaAddressVerifiedAt?: string | null;
+  displayName?: string | null;
+  display_name?: string;
+  bio?: string;
+  aboutMe?: string | null;
+  avatarImageUrl?: string | null;
+  avatarUrl?: string;
+  avatar_url?: string;
+  coverImageUrl?: string | null;
+  coverUrl?: string;
+  cover_url?: string;
+  isVerified?: boolean;
+  is_verified?: boolean;
+  followers?: number | string[];
+  follower_count?: number;
+  followings?: number | string[];
+  followingsList?: string[];
+  followersList?: string[];
+  following_count?: number;
+  likes?: number | number[];
+  uploads?: number;
+  post_count?: number;
+  sentTips?: number;
+  receivedTips?: number;
+  unlocked?: number[];
+  isFollowing?: boolean;
+  followsYou?: boolean;
+  isPending?: boolean;
+  isFollowRequestPending?: boolean;
+  isPrivate?: boolean;
+  hideBadgeAndBalance?: boolean;
+  /**
+   * The account is banned. The API already leaves banned accounts out of every
+   * list it builds itself, so this matters to the lists we build here — an
+   * account ranked from data the API does not hold has to be checked against
+   * its profile instead.
+   */
+  isBanned?: boolean;
+  /**
+   * On the caller's OWN account, the ban's reason and when it landed. A ban is
+   * read-only rather than locked-out — the account keeps its sign-in, its
+   * conversations and its data, and loses posting, commenting, voting,
+   * following and messaging — so the client has to be able to say so. Never
+   * present for anyone else's profile.
+   */
+  bannedReason?: string | null;
+  bannedAt?: string | null;
+  /** This viewer asked to be served mature posts in the public feeds. */
+  showMatureContent?: boolean;
+  defaultProfileView?: 'grid' | 'list';
+  profileViewOthers?: 'grid' | 'list' | 'owner';
+  youBlocked?: boolean;
+  blockedYou?: boolean;
+  isBlocked?: boolean;
+  balanceData?: Array<{
+    chainId: number;
+    tokenAddress: string;
+    walletBalance: number;
+    staked: number;
+    /** Lifetime DHB contributions credited toward badges, separate from holdings. */
+    daoContributed?: number;
+  }>;
+  dmSettings?: {
+    disables?: string[];
+    minTipDhb?: number;
+  };
+  customs?: Record<string, unknown>;
+  seenModal?: boolean;
+  online?: boolean;
+  staked?: number;
+  badgeBalance?: number;
+  /** What the account holds itself, before any badge lent to it. */
+  ownBadgeBalance?: number;
+  legacyDhbBalance?: number;
+  /**
+   * The tier this holder has already earned and the DHB it cost them.
+   * Written by the API; keeps a badge from being taken back when the token
+   * price moves the ladder under them. See lib/staking-badges.
+   */
+  badgeLock?: { tier: string; requirement: number } | null;
+  createdAt?: string;
+  created_at?: string;
+  lastLoginTimestamp?: number;
+}
+
+export interface AuthResponse {
+  status: boolean;
+  token: string;
+  refreshToken?: string;
+  expiresIn?: number;
+  user: DeHubUser;
+  result: {
+    address: string;
+    isMobile: boolean;
+    lastLoginTimestamp: number;
+    tokenExpiry: string;
+    isNewAccount?: boolean;
+  };
+  message: string;
+}
+
+/**
+ * One row of a post's Shop board.
+ *
+ * Affiliate links are allowed and expected here — that is what the board is
+ * for. The server refuses anything that is not http(s), plus known-bad and
+ * DeHub-lookalike hosts, so a label is safe to render as an anchor.
+ */
+export interface ShopLink {
+  label: string;
+  url: string;
+}
+
+export interface DeHubNFT {
+  tokenId: number;
+  ppvPreview?: { ready?: boolean };
+  id?: string;
+  token_id?: string;
+  name: string;
+  title?: string;
+  description?: string;
+  articleBody?: string;
+  articleImageUrl?: string;
+  socialImageUrl?: string;
+  imageUrl: string;
+  imageUrls?: string[];
+  /** Each picture's size by file name, sent so cards can reserve their shape. */
+  imageSizes?: { f: string; w: number; h: number }[];
+  videoUrl?: string;
+  /** HLS master playlist key, on public posts with a rendition ready. See buildHlsUrl. */
+  hlsUrl?: string;
+  media_url?: string;
+  thumbnail_url?: string;
+  postType: "video" | "image" | "audio";
+  media_type?: "video" | "image" | "audio";
+  minter: string;
+  mintername?: string;
+  minterUsername?: string;
+  minterDisplayName?: string;
+  minterAvatarUrl?: string;
+  creator?: DeHubUser;
+  owner?: DeHubUser;
+  /**
+   * Signed-in viewers only. Read `totalViews` instead for anything a viewer
+   * sees — see resolveViewCount in lib/engagement.
+   */
+  views?: number;
+  view_count?: number;
+  /** Every viewer, signed in or not. The count to display. */
+  totalViews?: number;
+  /** Viewers with no session. Served for completeness; nothing displays it. */
+  anonViews?: number;
+  commentCount?: number;
+  comment_count?: number;
+  totalVotes?: { for?: number; against?: number };
+  /** Backend-computed total DHB tipped on this post — authoritative, unlike the
+   *  client-side tip_records tally (see usePostTipCount), which can undercount
+   *  if a tip's post-send confirmation step failed to persist. */
+  totalTips?: number;
+  likes?: number;
+  dislikes?: number;
+  like_count?: number;
+  dislike_count?: number;
+  videoDuration?: number;
+  /** Probed at upload: the source clip's coded size. See lib/video-aspect. */
+  videoInfo?: { w?: number; h?: number };
+  duration?: number;
+  createdAt: string;
+  created_at?: string;
+  category?: string | string[];
+  tags?: string[];
+  is_live?: boolean;
+  is_ppv?: boolean;
+  ppv_price?: number;
+  ppv_currency?: string;
+  is_w2e?: boolean;
+  is_locked?: boolean;
+  locked_price?: number;
+  locked_currency?: string;
+  streamInfo?: {
+    isLockContent?: boolean;
+    lockContentAmount?: number;
+    lockContentTokenSymbol?: string;
+    lockContentContractAddress?: string;
+    lockContentChainIds?: number[];
+    isPayPerView?: boolean;
+    payPerViewAmount?: number;
+    /** The token a PPV price is denominated in. Absent means the chain's DHB. */
+    payPerViewTokenSymbol?: string;
+    payPerViewContractAddress?: string;
+    /** The chain a PPV payment settles on. */
+    payPerViewChainIds?: number[];
+    isAddBounty?: boolean;
+    addBountyFirstXViewers?: number | string;
+    addBountyFirstXComments?: number | string;
+    addBountyAmount?: number;
+    addBountyTokenSymbol?: string;
+    addBountyChainId?: number;
+  };
+  isLiked?: boolean;
+  isDisliked?: boolean;
+  /** The viewer's persisted reaction; absent only on anonymous responses. */
+  myReaction?: import('@/lib/reactions').PostReaction | null;
+  /** Per-reaction totals used to restore the leading emoji after a reload. */
+  reactionCounts?: import('@/lib/reactions').ReactionCounts | null;
+  isSaved?: boolean;
+  isOwner?: boolean;
+  isUnlocked?: boolean;
+  minterUser?: DeHubUser;
+  minterFollowers?: number;
+  minterFollowings?: number;
+  stream?: {
+    streamId?: string;
+    /** 'mediamtx' for the self-hosted ingest; absent means Livepeer. */
+    provider?: string;
+    status?: string;
+    isActive?: boolean;
+    viewerCount?: number;
+    title?: string;
+    category?: string;
+    streamKey?: string;
+    playbackId?: string;
+    playbackUrl?: string;
+    startedAt?: string;
+    endedAt?: string;
+    scheduledFor?: string;
+    peakViewers?: number;
+    totalViews?: number;
+    likes?: number;
+    totalTips?: number;
+    duration?: number;
+    streamDelay?: number;
+  };
+  chainId?: number;
+  mintTxHash?: string;
+  status?: string;
+  /** Async video transcode state, written optimistically before the CDN file
+   *  exists. Absent on posts predating this field — treat as 'done'. */
+  transcodingStatus?: 'pending' | 'on' | 'done' | 'failed';
+  /** How far a video still encoding has got, 0-100. */
+  progress?: number;
+  /**
+   * Seek-preview sprite sheet as the API sends it: `url` is a bucket key, and
+   * `private` marks a paid post's sheet. Read it through toStoryboard.
+   */
+  storyboard?: {
+    url: string;
+    spriteWidth: number;
+    spriteHeight: number;
+    spriteCount: number;
+    spriteDuration: number;
+    columns: number;
+    private?: boolean;
+  };
+  audioUrl?: string;
+  audioDuration?: number;
+
+  // Quote post / repost fields
+  isQuotePost?: boolean;
+  quotedTokenId?: number | null;
+  quotedPost?: DeHubNFT | null;
+  reposts?: number;
+  totalReposts?: number;
+  quotes?: number;
+  isReposted?: boolean;
+
+  // Moderation / visibility
+  isHidden?: boolean;
+  isDeleted?: boolean;
+  /** Absent means safe — the API stores nothing for the default. */
+  contentRating?: ContentRating;
+  /** Alt text, one per piece of media in display order (gallery images by position, a video first). */
+  mediaDescriptions?: string[];
+  /** 'comic' shows the gallery as collector cards. */
+  layout?: 'comic';
+  /** Comic captions, one per page in display order. */
+  mediaCaptions?: string[];
+  /** The comic's border preset; absent is the theme foil. */
+  comicBorder?: string;
+  /** The poster closed the market card for the $TICKER / address in the text, so no surface draws one. */
+  hideAssetCards?: boolean;
+  /** Links in the text whose preview card the poster closed, so no surface draws one. */
+  hiddenLinkPreviews?: string[];
+  /** People tagged on the photos. */
+  imageTags?: { address?: string; username: string; i: number; x: number; y: number }[];
+  /** A quiz hangs off this post (GET /quiz/:tokenId). */
+  hasQuiz?: boolean;
+  /** Content warning: the post opens collapsed behind this one line. */
+  spoilerText?: string;
+  /** Who may quote it; absent means anyone. */
+  quotePolicy?: 'public' | 'followers' | 'nobody';
+  /** A quote whose quoted author took their post back out of it. */
+  quoteRevoked?: boolean;
+  /** Who may reply; absent means anyone. */
+  replyPolicy?: 'public' | 'followers' | 'following' | 'mentioned';
+  /** Who may see it; absent means everyone. */
+  visibility?: 'public' | 'followers' | 'direct';
+  /**
+   * The creator published this for children — the Kids Mode allowlist.
+   *
+   * The opposite polarity to `contentRating`: absent means NOT for kids, so a
+   * post that predates the field is invisible in Kids Mode rather than
+   * defaulting into it. It also keeps the post off the ordinary discovery
+   * lanes — cards only meet one outside Kids Mode on a profile, the Following
+   * feed, in search, or through a shared link, where the comment box is
+   * read-only.
+   */
+  forKids?: boolean;
+  /** Creator turned replies off. Existing comments remain readable; only new
+   *  ones are refused, server-side in requestCommentFunc. */
+  commentsDisabled?: boolean;
+  /**
+   * The creator's Shop board — affiliate and shop links they attached to this
+   * post. Absent or empty means the toggle is off and no Shop button draws.
+   *
+   * Carried on every feed item (it is in the shared tokenTemplate projection),
+   * so a card knows whether there is a board before anyone taps.
+   */
+  shopLinks?: ShopLink[];
+  /** How many of the creator's own store listings are on this post's board. */
+  shopListingCount?: number;
+
+  // Pay-per-view
+  ppvBuyerCount?: number;
+
+  // Staking
+  minterStaked?: number;
+}
+
+export interface DeHubComment {
+  id: string;
+  content: string;
+  user: DeHubUser;
+  created_at: string;
+  like_count?: number;
+  reply_count?: number;
+  parent_id?: string;
+}
+
+export interface DeHubCategory {
+  id: string;
+  name: string;
+  slug: string;
+  icon_url?: string;
+  nft_count?: number;
+}
+
+export interface PaginatedResponse<T> {
+  data: T[];
+  total: number;
+  page: number;
+  limit: number;
+  has_more: boolean;
+}
+
+export interface SearchNFTsParams {
+  page?: number;
+  unit?: number;
+  category?: string;
+  sortMode?: "new" | "popular" | "trending" | "by-comments" | "by-tips";
+  /** Only posts created inside this window (the server's /feed `range`). */
+  range?: "day" | "week" | "month" | "year";
+  creator_id?: string;
+  postType?: string;
+  search?: string;
+  /** @deprecated Viewer context is now extracted from JWT Bearer token */
+  address?: string;
+  status?: "minted" | "signed" | "all" | "pending" | "failed";
+}
+
+export interface UniversalSearchParams {
+  q: string;
+  page?: number;
+  unit?: number;
+  type?: "accounts" | "videos" | "livestreams";
+  postType?: string;
+  /** @deprecated Viewer context is now extracted from JWT Bearer token */
+  address?: string;
+}
+
+export interface SearchAccount {
+  id: string;
+  address: string;
+  username: string;
+  displayName?: string;
+  /** Staked DHB, the grandfathered tier, and the opt-out — for the badge. */
+  badgeBalance?: number;
+  badgeLock?: { tier: string; requirement: number } | null;
+  hideBadgeAndBalance?: boolean;
+  bio?: string;
+  avatarUrl?: string;
+  avatarImageUrl?: string;
+  verified?: boolean;
+  followerCount?: number;
+  followingCount?: number;
+  isFollowing?: boolean;
+  followsYou?: boolean;
+  /** The search API's own names for the follower count and bio. */
+  followers?: number;
+  aboutMe?: string | null;
+  coverImageUrl?: string | null;
+}
+
+export interface SearchLivestream {
+  id: string;
+  title: string;
+  description?: string;
+  thumbnailUrl?: string;
+  viewerCount?: number;
+  streamer?: {
+    address: string;
+    username?: string;
+    displayName?: string;
+    avatarUrl?: string;
+  };
+}
+
+export interface UniversalSearchResponse {
+  accounts?: SearchAccount[];
+  videos?: DeHubNFT[];
+  livestreams?: SearchLivestream[];
+  total?: number;
+  has_more?: boolean;
+}
+
+export interface SearchSuggestionsParams {
+  q: string;
+  limit?: number;
+}
+
+export interface SearchSuggestion {
+  text: string;
+  type: 'query' | 'account' | 'tag';
+  data?: {
+    address?: string;
+    username?: string;
+    avatarUrl?: string;
+  };
+}
+
+export interface SearchLogParams {
+  query: string;
+  type?: 'accounts' | 'videos' | 'livestreams' | 'all';
+  resultCount?: number;
+  clicked?: boolean;
+  clickedResultId?: string;
+}
+
+// ─── Bookmark Folders ────────────────────────────────────────────────
+
+export interface BookmarkFolder {
+  _id: string;
+  address: string;
+  name: string;
+  description?: string;
+  isDefault: boolean;
+  /** Shown on the owner's profile as a playlist. */
+  isPublic?: boolean;
+  order: number;
+  itemCount?: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface BookmarkFolderItem {
+  _id: string;
+  folderId: string;
+  tokenId: number;
+  address: string;
+  createdAt: string;
+  post?: DeHubNFT;
+}
+
+// ─── Public Playlists (a profile's public bookmark folders) ─────────────
+
+export interface PublicPlaylist {
+  id: string;
+  name: string;
+  description: string;
+  itemCount: number;
+  updatedAt: string;
+  coverTokenId: number | null;
+  coverImageUrl: string | null;
+}
+
+export interface PublicPlaylistItem {
+  _id: string;
+  folderId: string;
+  tokenId: number;
+  createdAt: string;
+  /** Feed-shaped post, same enrichment as pins. */
+  post: DeHubNFT;
+}
+
+export interface PublicPlaylistPage {
+  status: boolean;
+  address: string;
+  playlist: { id: string; name: string; description: string; updatedAt: string };
+  result: PublicPlaylistItem[];
+  hasMore: boolean;
+  nextCursor: string | null;
+}
+
+// ─── Pins ─────────────────────────────────────────────────────────────
+
+export interface DeHubPin {
+  pinId: string;
+  tokenId: number;
+  address: string;
+  pinnedAt: string;
+  pinnedBy: string;
+  isPinned: boolean;
+  name?: string;
+  description?: string;
+  postType?: string;
+  isReposted?: boolean;
+  post?: DeHubNFT;
+}
+
+export interface PinUser {
+  user: {
+    address: string;
+    username?: string;
+    displayName?: string;
+    avatarImageUrl?: string;
+  };
+  pinnedAt: string;
+}
+
+// ─── Polls ────────────────────────────────────────────────────────────
+
+export interface PollOption {
+  index: number;
+  text: string;
+  voteCount: number;
+}
+
+export interface DeHubPoll {
+  _id: string;
+  tokenId: number;
+  address: string;
+  question: string;
+  options: PollOption[];
+  totalVotes: number;
+  isActive: boolean;
+  isExpired?: boolean;
+  expiresAt?: string;
+  isMultipleChoice: boolean;
+  userVote?: {
+    optionIndexes: number[];
+    votedAt: string;
+  } | null;
+  createdAt: string;
+}
+
+export interface PaginationMeta {
+  page: number;
+  limit: number;
+  totalCount: number;
+  totalPages: number;
+  hasMore: boolean;
+}

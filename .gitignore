@@ -1,0 +1,129 @@
+# .env holds ONLY publishable VITE_* client keys (Supabase anon, WalletConnect
+# project id) — these ship in the browser bundle by design, so it is committed so
+# CI builds are self-contained. Real secrets live in Supabase/Cloudflare env,
+# never in the repo. .env.development (Stripe TEST key) stays ignored.
+.env.*
+!.env.example
+!.env.development.example
+
+# bun.lock is an editor sandbox artifact, not this repo's lockfile, and it must
+# not come back. Cloudflare Workers Builds picks a package manager by which
+# lockfile it finds, and bun.lock outranks the two we actually maintain — so the
+# deploy ran `bun install` against it. Dependabot updates package.json,
+# package-lock.json and pnpm-lock.yaml and leaves bun.lock alone, so #127 desynced
+# it and every build from that commit on failed in zero seconds, before compiling
+# anything. Five merges sat on main undeployed until it was found.
+#
+# It was never safe even in sync: 131 of its entries resolve from
+# a private sandbox registry the build has no access to.
+bun.lock
+
+# Untracked local artifacts (removed from repo pre-open-source)
+/e.js
+/live.js
+/docsroutes.js
+perf-trace*.json.gz
+AUTH-CHANGES-REPORT.md
+.lovable/plan.md
+.lovable/unused-endpoints.md
+CLOUDFLARE_DNS_SETUP.md
+CLOUDFLARE_SETUP_GUIDE.md
+QUICK_DEPLOY.md
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+ponzi
+node_modules
+dist
+dist-ssr
+*.local
+cosmic-echo-hero-main
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+dehub-nx
+
+# ── Local / unpushed tooling (not pushed to GitHub) ─────────────────────────
+# code-review-graph + Claude Code / Cursor MCP & injected rules
+.code-review-graph/
+.claude/
+.cursor/
+.mcp.json
+.cursorrules
+.windsurfrules
+AGENTS.md
+CLAUDE.md
+GEMINI.md
+
+# Root scratch & notes (keep out of repo)
+AuthContext.tsx
+chat-system.md
+doc.md
+# scripts/ holds local scratch, EXCEPT build-time scripts which must ship —
+# `npm run build` runs them in CI (a bare `scripts/` dir rule can't be
+# negated, hence the `scripts/*` form). generate-blog-manifest.mjs was once
+# written without this exception and silently never shipped, freezing the
+# bot-visible blog at Feb 2026 — keep every build-referenced script negated.
+scripts/*
+!scripts/check-migration-versions.mjs
+!scripts/event-audit-migration-ledger.sql
+!scripts/check-counters.mjs
+!scripts/patch-security-dependencies.cjs
+!scripts/security-dependencies.test.cjs
+!scripts/security/
+!scripts/translation-request.mjs
+!scripts/translation-request.test.mjs
+!scripts/locale-retention.mjs
+!scripts/edge-route-recovery.mjs
+!scripts/standby-switch.mjs
+!scripts/indexnow-submit.mjs
+!scripts/carry-retired-assets.mjs
+!scripts/patch-vaul-scroll.mjs
+!scripts/patch-radix-focus-guards.mjs
+!scripts/patch-remove-scroll-bar.mjs
+!scripts/build-seo-i18n.mjs
+!scripts/build-developer-docs-content.mjs
+!scripts/seo-i18n-copy/
+!scripts/public-page-translations/
+!scripts/check-entry-bundle.mjs
+!scripts/critical-css.mjs
+!scripts/generate-blog-manifest.mjs
+!scripts/generate-guide-content.mjs
+!scripts/build-home-intro-html.mjs
+!scripts/page-bones.mjs
+!scripts/page-bones-extract.js
+!scripts/boot-path-report.mjs
+!scripts/boot-path-baseline.json
+!scripts/i18n-coverage.mjs
+!scripts/i18n-fanout.mjs
+!scripts/i18n-garbled-keep.json
+!scripts/i18n-guards.mjs
+!scripts/i18n-guards.test.mjs
+!scripts/i18n-script-check.mjs
+!scripts/docs-i18n-fanout.mjs
+!scripts/docs-i18n-fill.mjs
+!scripts/docs-i18n-garbled-keep.json
+!scripts/i18n-rebuild-pr.mjs
+!scripts/edge-cors-check.mjs
+!scripts/build-theme-icon-materials.mjs
+!scripts/build-glass-icons.mjs
+!scripts/edge-imports-check.mjs
+!scripts/mojibake-check.mjs
+!scripts/build-badge-plates.mjs
+!scripts/build-emoji-data.mjs
+
+/public/locale-packs/
+!scripts/fill-public-article-locales.mjs

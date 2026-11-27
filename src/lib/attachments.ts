@@ -1,0 +1,136 @@
+/**
+ * Document attachments on direct messages.
+ *
+ * The allowlist here mirrors `ALLOWED_DOCUMENT_TYPES` in the backend's
+ * `src/cdn/cdn.service.ts`. The backend is the real gate — it re-validates every
+ * upload and stores objects with `Content-Disposition: attachment` — so this copy
+ * exists purely to keep the file picker honest and to fail fast with a readable
+ * message instead of a 415 after a 200 MB upload. Keep the two in step: an
+ * extension added here but not there is rejected on upload.
+ */
+import { translateCopy as _translateCopy } from '@/i18n/copy';
+
+/** Extensions the backend accepts, in the order they appear in its table. */
+export const ALLOWED_ATTACHMENT_EXTENSIONS = [
+  '.pdf', '.doc', '.docx', '.odt', '.rtf', '.txt', '.md',
+  '.xls', '.xlsx', '.ods', '.csv',
+  '.ppt', '.pptx', '.odp',
+  '.zip', '.rar', '.7z', '.gz',
+  '.json', '.xml',
+  '.epub',
+] as const;
+
+/** `accept` attribute for the file input. */
+export const ATTACHMENT_ACCEPT = ALLOWED_ATTACHMENT_EXTENSIONS.join(',');
+
+/** Matches the backend's DM_FILE_MAX_SIZE. */
+export const MAX_ATTACHMENT_SIZE = 200 * 1024 * 1024;
+
+/** A document attached to a message, as returned by the API. */
+export interface PostAttachment {
+  url: string;
+  name: string;
+  size: number;
+  mimeType: string;
+}
+
+export function getAttachmentExtension(name: string): string {
+  const dot = name.lastIndexOf('.');
+  return dot === -1 ? '' : name.slice(dot).toLowerCase();
+}
+
+export function isAllowedAttachment(name: string): boolean {
+  return (ALLOWED_ATTACHMENT_EXTENSIONS as readonly string[]).includes(
+    getAttachmentExtension(name),
+  );
+}
+
+/**
+ * Human-readable size. Uses 1024-based units to match how the caps are defined,
+ * and drops the decimal on bytes and whole numbers so "1 KB" doesn't read "1.0 KB".
+ */
+export function formatAttachmentSize(bytes: number): string {
+  if (!Number.isFinite(bytes) || bytes < 0) return '';
+  if (bytes < 1024) return `${bytes} B`;
+  const units = ['KB', 'MB', 'GB'];
+  let value = bytes / 1024;
+  let unit = 0;
+  while (value >= 1024 && unit < units.length - 1) {
+    value /= 1024;
+    unit += 1;
+  }
+  return `${value >= 10 || Number.isInteger(value) ? Math.round(value) : value.toFixed(1)} ${units[unit]}`;
+}
+
+/**
+ * Coarse family for a filename, used to pick an icon and an accent. Grouped by
+ * what the file *is* to a reader rather than by MIME, so .csv sits with .xlsx.
+ */
+export type AttachmentKind = 'pdf' | 'document' | 'spreadsheet' | 'presentation' | 'archive' | 'code' | 'ebook' | 'file';
+
+export function getAttachmentKind(name: string): AttachmentKind {
+  switch (getAttachmentExtension(name)) {
+    case '.pdf':
+      return 'pdf';
+    case '.doc':
+    case '.docx':
+    case '.odt':
+    case '.rtf':
+    case '.txt':
+    case '.md':
+      return 'document';
+    case '.xls':
+    case '.xlsx':
+    case '.ods':
+    case '.csv':
+      return 'spreadsheet';
+    case '.ppt':
+    case '.pptx':
+    case '.odp':
+      return 'presentation';
+    case '.zip':
+    case '.rar':
+    case '.7z':
+    case '.gz':
+      return 'archive';
+    case '.json':
+    case '.xml':
+      return 'code';
+    case '.epub':
+      return 'ebook';
+    default:
+      return 'file';
+  }
+}
+
+/** Uppercase extension without the dot, for the card badge. e.g. "PDF". */
+export function getAttachmentLabel(name: string): string {
+  return getAttachmentExtension(name).slice(1).toUpperCase() || 'FILE';
+}
+
+export interface AttachmentValidationResult {
+  ok: boolean;
+  error?: string;
+}
+
+
+/**
+ * Validate a picked file against the same rules the backend applies, so the
+ * composer can refuse it before an upload starts rather than after 200 MB has
+ * gone over the wire.
+ */
+export function validateAttachment(file: File): AttachmentValidationResult {
+  if (!isAllowedAttachment(file.name)) {
+    return { ok: false, error: _translateCopy("copy.c6e54a2ced80", { defaultValue: "\"{{value1}}\" isn't a supported file type.", value1: file.name }) };
+  }
+  if (file.size === 0) {
+    return { ok: false, error: _translateCopy("copy.5b48de2ed0c6", { defaultValue: "\"{{value1}}\" is empty.", value1: file.name }) };
+  }
+  if (file.size > MAX_ATTACHMENT_SIZE) {
+    return {
+      ok: false,
+      error: _translateCopy("copy.dcc6fd585985", { defaultValue: "\"{{value1}}\" is over the {{value2}} limit.", value1: file.name, value2: formatAttachmentSize(MAX_ATTACHMENT_SIZE) }),
+    };
+  }
+  return { ok: true };
+}

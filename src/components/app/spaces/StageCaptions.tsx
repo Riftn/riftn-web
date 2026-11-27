@@ -1,0 +1,300 @@
+import { useTranslation as _useCopy } from 'react-i18next';
+import type { ReactNode } from 'react';
+/**
+ * StageCaptions — live subtitles under a stage, in the viewer's language.
+ *
+ * The overlay is a passive reader: it subscribes to the caption broadcast and
+ * draws whatever arrives. Nothing here transcribes or translates, so it is
+ * safe to mount on any surface showing a room, including for a signed-out
+ * guest on an invite link.
+ *
+ * Unfinished lines are drawn at reduced opacity, and so are lines still
+ * waiting on their translation. That is the only cue a viewer gets that the
+ * words may still change, and it is worth having — live transcription revises
+ * itself mid-sentence, and text that silently rewrites reads as a glitch
+ * unless it looked provisional first.
+ */
+
+import { CaptionsOff, Headphones } from "lucide-react";
+import Captions from "@/components/ui/cut-icons/captions";
+import Check from "@/components/ui/cut-icons/check";
+import Volume2 from "@/components/ui/cut-icons/volume";
+
+import { DhbAmount, DhbCoin } from '@/components/app/DhbAmount';
+import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { cn } from '@/lib/utils';
+import { useTranslation } from 'react-i18next';
+import { useStageCaptionFeed } from '@/hooks/use-stage-captions';
+import { useStageDubbing } from '@/hooks/use-stage-dubbing';
+import {
+  CAPTION_LANGUAGES,
+  setCaptionLanguage,
+  setSendCaptions,
+  setShowCaptions,
+  type CaptionScope,
+  useCaptionLanguage,
+  useSendCaptions,
+  useShowCaptions,
+} from '@/lib/stage-captions';
+
+interface StageCaptionsOverlayProps {
+  spaceId: string | undefined | null;
+  className?: string;
+  /** A call's own people. Stages leave this out and use their seats. */
+  speakers?: string[] | null;
+  scope?: CaptionScope;
+}
+
+export function StageCaptionsOverlay({ spaceId, className, speakers, scope = 'stage' }: StageCaptionsOverlayProps) {
+  const show = useShowCaptions(scope);
+  const language = useCaptionLanguage();
+  const lines = useStageCaptionFeed(spaceId, show, speakers);
+
+  if (!show || lines.length === 0) return null;
+
+  return (
+    <div
+      className={cn(
+        // Bounded height, bottom-aligned, clipped: on a phone this shows the
+        // newest line or two and on a laptop all three, without a long
+        // sentence ever pushing the room's controls off screen.
+        'pointer-events-none flex flex-col items-center justify-end gap-1 px-3',
+        'max-h-24 sm:max-h-32 overflow-hidden',
+        className,
+      )}
+      aria-live="polite"
+    >
+      {lines.map((line) => {
+        const translated = language ? line.translations?.[language] : undefined;
+        // Until the translation lands, the source line stands in. Showing
+        // nothing would blank the overlay for the second it takes, which reads
+        // as captions breaking rather than as translation being in flight.
+        const awaitingTranslation = !!language && !translated;
+        const text = translated ?? line.text;
+
+        return (
+          <div
+            key={line.id}
+            className={cn(
+              'max-w-[92vw] sm:max-w-xl rounded-xl bg-black/70 backdrop-blur-[24px] border border-white/10',
+              'px-2.5 py-1 sm:px-3 sm:py-1.5',
+              // line-clamp on the pill, not the text span: it needs display
+              // -webkit-box, which on the span would break the name out onto
+              // its own line instead of clamping the two together.
+              'text-xs sm:text-sm leading-snug text-white text-center transition-opacity duration-200 line-clamp-3',
+              line.final && !awaitingTranslation ? 'opacity-100' : 'opacity-70',
+            )}
+          >
+            <span
+              className={cn(
+                'mr-1.5 text-[10px] sm:text-xs font-medium',
+                line.kind === 'ai' ? 'text-white/50 italic' : 'text-white/60',
+              )}
+            >
+              {line.name}
+            </span>
+            <span>{text}</span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+interface StageCaptionsButtonProps {
+  /** Speakers get the extra switch for their own microphone; listeners have nothing to send. */
+  isSpeaker: boolean;
+  /** Needed to price and buy dubbing; without it the audio section stays hidden. */
+  spaceId?: string | null;
+  /** The buyer. Dubbing is metered per minute, so it needs a wallet to charge. */
+  wallet?: string | null;
+  className?: string;
+  /** Lowers the others under a dubbed line. A call passes its own; a stage uses the room's. */
+  setRoomVolume?: (volume: number) => void;
+  /** Draws the menu's button. A call swaps the stage's square button for its own round one. */
+  renderTrigger?: (state: { show: boolean; code: string | null; label: string }) => ReactNode;
+  scope?: CaptionScope;
+  /** Raises the menu and the bill above a full-screen surface such as a call. */
+  layerClassName?: string;
+}
+
+export function StageCaptionsButton({ isSpeaker, spaceId, wallet, className, setRoomVolume, renderTrigger, scope = 'stage', layerClassName }: StageCaptionsButtonProps) {
+  const { t: _copy } = _useCopy();
+  const { t } = useTranslation();
+  const show = useShowCaptions(scope);
+  const send = useSendCaptions();
+  const language = useCaptionLanguage();
+
+  const dubbing = useStageDubbing(spaceId, wallet ?? null, setRoomVolume);
+  const dubQuote = dubbing.quote;
+
+  const active = CAPTION_LANGUAGES.find((l) => l.code === language);
+
+  return (
+    <>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        {renderTrigger ? renderTrigger({ show, code: show && active ? active.code : null, label: t('stages.subtitles') }) : <Button
+          size="lg"
+          className={cn(
+            'relative rounded-xl w-12 h-12 shrink-0',
+            show
+              ? 'bg-white/20 hover:bg-white/30 text-white ring-2 ring-white/30'
+              : 'bg-white/10 backdrop-blur-md border border-white/10 hover:bg-white/20 text-white',
+            className,
+          )}
+          title={active ? t('stages.subtitlesIn', { language: active.name }) : t('stages.subtitles')}
+          aria-label={t('stages.subtitles')}
+        >
+          {show ? <Captions className="w-5 h-5" /> : <CaptionsOff className="w-5 h-5" />}
+          {/* Which language you are reading, without opening the menu. */}
+          {show && active && (
+            <span className="absolute bottom-0.5 inset-x-0 text-[9px] font-semibold uppercase tracking-wide text-white/80">
+              {active.code}
+            </span>
+          )}
+        </Button>}
+      </DropdownMenuTrigger>
+
+      {/* One flat scrolling menu rather than a nested submenu: nested menus are
+          awkward to open on touch, and this is one tap fewer on every device. */}
+      <DropdownMenuContent align="center" className={cn('w-56 max-h-[60vh] overflow-y-auto', layerClassName)}>
+        <DropdownMenuItem onSelect={() => setShowCaptions(!show, scope)}>
+          <Check className={cn('w-4 h-4 mr-2 shrink-0', show ? 'opacity-100' : 'opacity-0')} />
+          {t('stages.showSubtitles')}
+        </DropdownMenuItem>
+        {isSpeaker && (
+          <DropdownMenuItem onSelect={() => setSendCaptions(!send)}>
+            <Check className={cn('w-4 h-4 mr-2 shrink-0', send ? 'opacity-100' : 'opacity-0')} />
+            {t('stages.subtitleMyVoice')}
+          </DropdownMenuItem>
+        )}
+
+        <DropdownMenuSeparator />
+        <DropdownMenuLabel className="text-xs text-muted-foreground">{t('stages.language')}</DropdownMenuLabel>
+
+        <DropdownMenuItem onSelect={() => setCaptionLanguage(null)}>
+          <Check className={cn('w-4 h-4 mr-2 shrink-0', language ? 'opacity-0' : 'opacity-100')} />
+          {t('stages.asSpoken')}
+        </DropdownMenuItem>
+        {CAPTION_LANGUAGES.map((option) => (
+          <DropdownMenuItem key={option.code} onSelect={() => setCaptionLanguage(option.code)}>
+            <Check
+              className={cn(
+                'w-4 h-4 mr-2 shrink-0',
+                language === option.code ? 'opacity-100' : 'opacity-0',
+              )}
+            />
+            {option.name}
+          </DropdownMenuItem>
+        ))}
+
+        <DropdownMenuSeparator />
+        <DropdownMenuLabel className="text-xs text-muted-foreground">{_copy("copy.bc1b88907d3b", { defaultValue: "Audio" })}</DropdownMenuLabel>
+
+        {/* Dubbing follows the subtitle language rather than offering its own
+            picker. Reading Turkish and hearing Spanish is not a thing anyone
+            wants, and two lists for one decision is two chances to get it
+            wrong — including expensively, since this one is metered. */}
+        {!language ? (
+          <DropdownMenuItem disabled className="text-xs">
+            {t('stages.pickLanguageToDub')}
+          </DropdownMenuItem>
+        ) : dubbing.language ? (
+          <DropdownMenuItem onSelect={() => dubbing.stop()}>
+            <Volume2 className="w-4 h-4 mr-2 shrink-0 text-primary" />
+            <span className="flex-1">{t('stages.stopDubbing')}</span>
+            <span className="ml-2 text-[10px] font-mono text-muted-foreground tabular-nums">
+              {t('stages.minutesShort', { count: dubbing.minutes })}
+            </span>
+          </DropdownMenuItem>
+        ) : (
+          <DropdownMenuItem
+            disabled={dubbing.starting || !dubQuote}
+            onSelect={(event) => {
+              // Money leaves the wallet on this click. Keep the menu open so
+              // the price and the failure toast land on the same surface the
+              // decision was made on.
+              event.preventDefault();
+              // Subtitles carry the entitlement. The token that tells speakers
+              // to generate this language rides the caption feed's presence,
+              // and that feed is only subscribed while subtitles are shown — so
+              // starting with them hidden billed by the minute for audio no
+              // speaker was ever asked to produce. Turning them on is the fix
+              // rather than refusing: the listener asked to hear the stage in
+              // their language, and this is what delivers it.
+              if (!show) setShowCaptions(true, scope);
+              void dubbing.start(language);
+            }}
+          >
+            <Headphones className="w-4 h-4 mr-2 shrink-0" />
+            <span className="flex-1">{t('stages.hearItIn', { language: active?.name ?? language })}</span>
+            {dubQuote && (
+              <span className="ml-2 text-[10px] font-mono text-muted-foreground tabular-nums">
+                {dubQuote.pricePerMinuteDhb}{_copy("copy.ad17a742ccdb", { defaultValue: "/min" })}</span>
+            )}
+          </DropdownMenuItem>
+        )}
+        {dubQuote && !dubQuote.clonedVoice && language && (
+          <DropdownMenuLabel className="text-[10px] font-normal text-muted-foreground pt-0">
+            {t('stages.stockVoiceNote')}
+          </DropdownMenuLabel>
+        )}
+      </DropdownMenuContent>
+    </DropdownMenu>
+
+      {/* The one moment money moves. Raised when listening stops, never on a
+          timer and never silently — the whole point of running a tab is that
+          the charge is a thing the listener does, not a thing that happens. */}
+      <AlertDialog open={!!dubbing.bill} onOpenChange={(open) => { if (!open) dubbing.dismissBill(); }}>
+        <AlertDialogContent className={layerClassName}>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('stages.payForDubbing')}</AlertDialogTitle>
+            {/* One sentence, one key. Splitting it around the styled spans put
+                three fragments in the JSON and left every translator guessing
+                at the word order between them. */}
+            <AlertDialogDescription>
+              {t('stages.dubbingBill', {
+                count: dubbing.bill?.minutes ?? 0,
+                amount: dubbing.bill?.owedDhb,
+              })}{' '}
+              <DhbCoin />
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            {/* Not paying leaves the session open, and an open session blocks
+                the next one. Saying so here beats a confusing refusal later. */}
+            <AlertDialogCancel>{t('stages.notNow')}</AlertDialogCancel>
+            <AlertDialogAction disabled={dubbing.settling} onClick={(event) => { event.preventDefault(); void dubbing.settle(); }}>
+              {dubbing.settling ? (
+                t('stages.paying')
+              ) : (
+                <>
+                  {t('stages.pay')} <DhbAmount amount={dubbing.bill?.owedDhb} />
+                </>
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
+  );
+}

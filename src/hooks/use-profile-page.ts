@@ -1,0 +1,824 @@
+import { useTranslation as _useCopy } from 'react-i18next';
+import { useSurfaceDraft } from '@/hooks/use-surface-draft';
+import { useMemo, useEffect, useLayoutEffect, useRef, useCallback, useState } from 'react';
+import { useSearchParams, useParams, useNavigate } from 'react-router-dom';
+import { Film, Star, Pin, ListVideo, ThumbsDown, ThumbsUp } from "lucide-react";
+import Image from "@/components/ui/cut-icons/images";
+import Radio from "@/components/ui/cut-icons/live";
+import PieChart from "@/components/ui/cut-icons/fractions";
+import { useFractionPortfolio, livePositions } from "@/hooks/use-fraction-portfolio";
+
+import Home from "@/components/ui/cut-icons/home";
+import ArticleIcon from "@/components/ui/cut-icons/blog";
+import MessageSquare from "@/components/ui/cut-icons/messages";
+import Play from "@/components/ui/cut-icons/play";
+
+import { useQuery, useInfiniteQuery as useInfiniteQueryTQ, useQueryClient } from '@tanstack/react-query';
+import { useAuth } from '@/contexts/AuthContext';
+import { isOwnHandle } from '@/lib/own-profile-path';
+import {
+  useDeHubProfile,
+  useDeHubUserContent,
+  separateUserContent,
+  countActiveProfileFilters,
+  EMPTY_PROFILE_FILTERS,
+  type ProfileContentFilters,
+  type ProfileSortMode,
+} from '@/hooks/use-dehub-profile';
+import { useDebouncedValue } from '@/hooks/use-debounced-value';
+import { useCreatorPlans, useIsSubscribed } from '@/hooks/use-subscriptions';
+import { parseFollowLists } from '@/hooks/use-privacy-settings';
+import { useReauthHandler } from '@/hooks/use-reauth-handler';
+
+import { getBadgeName, getBadgeUrl } from '@/lib/staking-badges';
+import { useSelfBadge, preferLiveBalance } from '@/hooks/use-self-badge-balance';
+import { useOptimisticPosts } from '@/hooks/use-optimistic-posts';
+import { useUserPins, usePinnedPostIds } from '@/hooks/use-pins';
+import type { UnifiedFeedItem } from '@/hooks/use-unified-feed';
+import { usePublicPlaylists } from '@/hooks/use-bookmark-folders';
+import { usePullToRefresh } from '@/hooks/use-pull-to-refresh';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { getUserComments, blockUser, unblockUser, getUserReposts, getUserProposalReposts, getNFTInfo } from '@/lib/api/dehub';
+import { toast } from 'sonner';
+import type { TextPost, ImagePost, VideoItem } from '@/types/feed.types';
+import type { TabValue } from '@/components/app/profile/ProfileConstants';
+import { useProfileContentCounts } from '@/hooks/use-profile-content-counts';
+import { canSeeDislikesTab, useProfileDislikes } from '@/hooks/use-profile-dislikes';
+import { canSeeLikesTab, useProfileLikes } from '@/hooks/use-profile-likes';
+
+/** The /api/feed postType each type tab lists; the same split the app uses. */
+const PROFILE_TAB_POST_TYPE: Partial<Record<TabValue, string>> = {
+  posts: 'feed-simple',
+  images: 'feed-images',
+  videos: 'video',
+  songs: 'feed-audio',
+  live: 'live',
+  articles: 'article',
+};
+import { scrollDocumentTo } from '@/lib/document-scroll';
+import { ASSISTANT_PROFILE_PATH, isAssistantHandle, profilePath } from '@/lib/profile-path';
+
+/** A reposted governance proposal on the profile timeline. */
+export interface ProfileProposalItem {
+  id: string;
+  proposalId: string;
+}
+
+export type ProfileContentItem =
+  | { type: 'post' | 'image' | 'video'; data: TextPost | ImagePost | VideoItem; createdAt: string; isRepost?: boolean; repostedAt?: string; isPinned?: boolean }
+  | { type: 'proposal'; data: ProfileProposalItem; createdAt: string; isRepost?: boolean; repostedAt?: string; isPinned?: boolean };
+
+const PULL_THRESHOLD = 80;
+const PULL_REFRESH_MIN_MS = 900;
+const PULL_REFRESH_MAX_MS = 10_000;
+
+interface UseProfilePageOptions {
+  /** The tab the visitor is on. Only the filter panel's post-type row cares. */
+  activeTab?: TabValue;
+}
+
+export function useProfilePage({ activeTab = 'home' }: UseProfilePageOptions = {}) {
+  const { t: _copy } = _useCopy();
+  const [searchParams] = useSearchParams();
+  const { username: routeParam } = useParams<{ username: string }>();
+  // /<your username> is your own profile, exactly as /profile: same lookup,
+  // same owner view (see lib/own-profile-path).
+  const routeUsername = isOwnHandle(routeParam) ? undefined : routeParam;
+  const navigate = useNavigate();
+  const userId = searchParams.get('id');
+  const { user: currentUser, walletAddress: currentWalletAddress, isAuthenticated, isLoading: isAuthLoading } = useAuth();
+  const selfBadge = useSelfBadge();
+
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [translatedBio, setTranslatedBio] = useState<string | null>(null);
+  const [isBlockLoading, setIsBlockLoading] = useState(false);
+  const profileContainerRef = useRef<HTMLDivElement>(null);
+  const queryClient = useQueryClient();
+
+  // Settle the incoming profile before paint and before its navigation snapshot.
+  useLayoutEffect(() => {
+    scrollDocumentTo(0);
+    setTranslatedBio(null);
+  }, [routeUsername, userId]);
+
+  // Determine lookup method
+  const lookupUsername = routeUsername;
+  const lookupUserId = userId || (!routeUsername ? (currentUser?.address || currentWalletAddress || undefined) : undefined);
+
+  // Fetch profile
+  const {
+    data: apiProfile,
+    isLoading: isLoadingProfile,
+    isError: isProfileError,
+    error: profileError,
+    isFetchingProfile,
+    isPlaceholderData: isProfileFromCache,
+    setFollowStatus,
+    refetch: refetchProfile,
+  } = useDeHubProfile({
+    userId: lookupUserId,
+    username: lookupUsername,
+    address: currentWalletAddress || undefined,
+    enabled: !!(lookupUserId || lookupUsername),
+  });
+
+  // If the URL contains a wallet address but the profile has a username, replace the URL
+  useEffect(() => {
+    if (apiProfile?.handle) {
+      const cleanHandle = apiProfile.handle.replace('@', '');
+      if (!cleanHandle) return;
+      // @assistant's profile stays on its address link (see profile-path).
+      if (isAssistantHandle(cleanHandle)) {
+        if (routeUsername) navigate(ASSISTANT_PROFILE_PATH, { replace: true });
+        return;
+      }
+
+      // Route like /0xABC... → /username
+      if (routeUsername && /^0x[a-fA-F0-9]{40}$/i.test(routeUsername)) {
+        if (cleanHandle.toLowerCase() !== routeUsername.toLowerCase()) {
+          navigate(profilePath(cleanHandle), { replace: true });
+        }
+      }
+      // Route like /sableraven_9847 where canonical is /SableRaven_9847 → normalize casing
+      else if (routeUsername && cleanHandle.toLowerCase() === routeUsername.toLowerCase() && cleanHandle !== routeUsername) {
+        navigate(profilePath(cleanHandle), { replace: true });
+      }
+      // Route like /app/profile?id=0xABC... → /username
+      else if (userId && !routeUsername) {
+        navigate(profilePath(cleanHandle), { replace: true });
+      }
+      // Old handle after a rename (/d → /riftn): the API answered with whoever
+      // wore it last. Wait for the real answer, never a cached placeholder from
+      // the previous page, and leave ENS names (mal.eth) alone.
+      else if (routeUsername && !isProfileFromCache && !routeUsername.includes('.')
+        && cleanHandle.toLowerCase() !== routeUsername.replace(/^@/, '').toLowerCase()) {
+        navigate(profilePath(cleanHandle), { replace: true });
+      }
+    }
+  }, [routeUsername, userId, apiProfile?.handle, isProfileFromCache, navigate]);
+
+  // If the URL lookup key is already a wallet address, we can start fetching content
+  // immediately without waiting for the profile query to resolve first.
+  const lookupIsAddress = !!(lookupUserId && /^0x[a-fA-F0-9]{40}$/i.test(lookupUserId));
+  const contentUserId = apiProfile?.walletAddress ?? (lookupIsAddress ? lookupUserId : undefined);
+  const isOwnContent = !!(
+    contentUserId &&
+    currentWalletAddress &&
+    contentUserId.toLowerCase() === currentWalletAddress.toLowerCase()
+  );
+
+  // Sort + search over this creator's own content. Both are server-side
+  // (/api/feed takes sortBy/sortOrder/search alongside minter) — sorting only
+  // the pages already downloaded would put the oldest *loaded* post first
+  // rather than the creator's actual first upload.
+  // A creator who arranged their own order has the profile open in it; a
+  // sort the visitor picks themselves wins until they move to another profile.
+  const [pickedSort, setContentSort] = useState<ProfileSortMode | null>(null);
+  const hasCustomOrder = apiProfile?.hasCustomOrder === true;
+  const contentSort: ProfileSortMode = pickedSort ?? (hasCustomOrder ? 'custom' : 'newest');
+  const [contentSearch, setContentSearch] = useSurfaceDraft("src/hooks/use-profile-page.ts:contentSearch", '', lookupUsername || lookupUserId);
+  const debouncedContentSearch = useDebouncedValue(contentSearch, 350);
+
+  // The home feed's filter panel, scoped to this channel. Server-side too, for
+  // the same reason — and because this one query also feeds the tab counts.
+  const [contentFilters, setContentFilters] = useState<ProfileContentFilters>(EMPTY_PROFILE_FILTERS);
+  const [contentFiltersOpen, setContentFiltersOpen] = useState(false);
+  const resetContentFilters = useCallback(() => setContentFilters(EMPTY_PROFILE_FILTERS), []);
+
+  // Post type only means something on the All tab. Every other content tab IS
+  // a post type, so a second control that can contradict it would empty the tab
+  // the visitor is standing on with no way to see why. The choice is parked
+  // rather than cleared, so coming back to All restores it.
+  const showPostTypeFilter = activeTab === 'home';
+  const visitorFilters = useMemo<ProfileContentFilters>(
+    () => (showPostTypeFilter ? contentFilters : { ...contentFilters, postType: 'all' }),
+    [showPostTypeFilter, contentFilters],
+  );
+  // A type tab asks the server for its own type. Splitting one mixed list on
+  // the client meant a tab only ever held what the first pages happened to
+  // contain: a creator whose latest 30 posts were text showed "Videos 0", and
+  // the videos only arrived once the tab was opened and scrolled.
+  const tabPostType = PROFILE_TAB_POST_TYPE[activeTab];
+  const appliedContentFilters = useMemo<ProfileContentFilters>(
+    () => (tabPostType ? { ...visitorFilters, postType: tabPostType as ProfileContentFilters['postType'] } : visitorFilters),
+    [tabPostType, visitorFilters],
+  );
+
+  // Drives the "no matches" empty state and suppresses the client-side merges
+  // (reposts, comments) that a server-ordered list has no place for. Only the
+  // visitor's own choices count; the tab's type is not a filter they set.
+  const isContentFiltered =
+    contentSort !== 'newest' ||
+    !!debouncedContentSearch.trim() ||
+    countActiveProfileFilters(visitorFilters) > 0;
+
+  // The owner can drag tiles on the grid itself only while it shows the order
+  // a drag would change: their saved order, or newest first before any is saved.
+  const canReorderGrid =
+    isOwnContent &&
+    !debouncedContentSearch.trim() &&
+    countActiveProfileFilters(visitorFilters) === 0 &&
+    (contentSort === 'custom' || (contentSort === 'newest' && !hasCustomOrder));
+
+  // Reset the toolbar when the visitor moves to another profile — a query
+  // typed on one channel has no meaning on the next, and neither does a
+  // category the next creator never posts in.
+  // Only the profile changing resets it. Reading the query through a ref keeps
+  // each keystroke from re-running this and wiping what was just typed.
+  const contentSearchRef = useRef(contentSearch);
+  contentSearchRef.current = contentSearch;
+  useEffect(() => {
+    setContentSort(null);
+    setContentSearch.complete(contentSearchRef.current, '');
+    setContentFilters(EMPTY_PROFILE_FILTERS);
+    setContentFiltersOpen(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [routeUsername, userId]);
+
+  // Fetch user content — small first page for fast initial paint, then auto-fetch rest
+  // The tab's list exactly as asked for, so a post opened from it can carry on
+  // through the same pages (see lib/profile-feed-origin).
+  const contentQuery = useMemo(() => ({
+    userId: contentUserId,
+    viewerAddress: currentWalletAddress || undefined,
+    sortMode: contentSort,
+    search: debouncedContentSearch,
+    filters: appliedContentFilters,
+    includeOwnScheduled: isOwnContent,
+  }), [contentUserId, currentWalletAddress, contentSort, debouncedContentSearch, appliedContentFilters, isOwnContent]);
+  const {
+    data: userContentData,
+    isLoading: isLoadingContent,
+    fetchNextPage: fetchNextContentPage,
+    hasNextPage: hasNextContentPage,
+    isFetchingNextPage: isFetchingNextContentPage,
+    refetch: refetchContent,
+  } = useDeHubUserContent({ ...contentQuery, enabled: !!contentUserId });
+
+  // Only the first 10 load with the page. Every later page is asked for by
+  // the scroll sentinel in ProfileTabContent as the visitor nears the end.
+
+
+  // Defer reposts slightly so the user's own first content page wins the wire
+  // on slow connections — reposts merge into the "All" tab a beat later instead
+  // of competing with the initial posts fetch (and its quote-post enrichment).
+  const [repostsEnabled, setRepostsEnabled] = useState(false);
+  useEffect(() => {
+    if (!apiProfile?.walletAddress) { setRepostsEnabled(false); return; }
+    const timer = setTimeout(() => setRepostsEnabled(true), 700);
+    return () => clearTimeout(timer);
+  }, [apiProfile?.walletAddress]);
+
+  // Fetch user reposts (and enrich quote posts with quoted post data)
+  // Capped at 5 concurrent getNFTInfo calls to avoid N+1 API floods
+  const { data: repostsData } = useQuery({
+    queryKey: ['user-reposts', apiProfile?.walletAddress],
+    queryFn: async () => {
+      if (!apiProfile?.walletAddress) throw new Error('No address');
+      const res = await getUserReposts(apiProfile.walletAddress, 1, 50);
+      const items = res.result || [];
+      
+      // Separate items that need enrichment vs those that don't
+      const needsEnrich: { idx: number; item: any }[] = [];
+      const result = [...items];
+      
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        if (item.isQuotePost && item.quotedTokenId && !item.quotedPost) {
+          needsEnrich.push({ idx: i, item });
+        }
+      }
+      
+      // Process in batches of 5
+      const BATCH_SIZE = 5;
+      for (let b = 0; b < needsEnrich.length; b += BATCH_SIZE) {
+        const batch = needsEnrich.slice(b, b + BATCH_SIZE);
+        const settled = await Promise.allSettled(
+          batch.map(({ item }) => getNFTInfo(String(item.quotedTokenId)))
+        );
+        settled.forEach((outcome, i) => {
+          if (outcome.status === 'fulfilled' && outcome.value) {
+            result[batch[i].idx] = { ...batch[i].item, quotedPost: outcome.value };
+          }
+        });
+      }
+      
+      return result;
+    },
+    enabled: repostsEnabled && !!apiProfile?.walletAddress,
+    staleTime: 2 * 60 * 1000,
+  });
+
+  // Governance proposals this user reposted. They have no tokenId, so they come
+  // from their own endpoint and merge into "All" as proposal cards.
+  const { data: proposalRepostsData } = useQuery({
+    queryKey: ['user-proposal-reposts', apiProfile?.walletAddress?.toLowerCase()],
+    queryFn: () => getUserProposalReposts(apiProfile!.walletAddress!, 1, 50),
+    enabled: repostsEnabled && !!apiProfile?.walletAddress,
+    staleTime: 2 * 60 * 1000,
+    retry: false,
+  });
+
+  const profile = apiProfile;
+  const isOwnProfile = !routeUsername && (!userId || (currentUser?.address === userId) || (currentWalletAddress === userId));
+  const isViewingOwnProfile = isOwnProfile || (apiProfile?.walletAddress && apiProfile.walletAddress.toLowerCase() === currentWalletAddress?.toLowerCase());
+
+  // Badge — the API's stored balance, except on your own profile, where the
+  // live on-chain reading is allowed to promote you straight away rather than
+  // waiting for the backend to catch up. It can only ever raise the tier.
+  const badgeBalance = selfBadge.isSelf(apiProfile?.handle || routeUsername) ||
+    selfBadge.isSelf(apiProfile?.walletAddress)
+      ? preferLiveBalance(apiProfile?.badgeBalance, selfBadge.balance)
+      : apiProfile?.badgeBalance;
+  const badgeUsername = apiProfile?.handle || routeUsername;
+  const badgeContext = { lock: apiProfile?.badgeLock ?? (isViewingOwnProfile ? selfBadge.lock : null) };
+  const badgeUrl = getBadgeUrl(badgeBalance, badgeUsername, badgeContext);
+  // The tier by name, for the ascension ceremony: it compares tiers, not URLs,
+  // and the balance is what it prints under the threshold.
+  const badgeTier = getBadgeName(badgeBalance, badgeUsername, badgeContext);
+
+  // Pinned posts lead the All tab. On your own profile the pinned ids come
+  // from the list a pin flips instantly, so a post you pin jumps to the top
+  // (and an unpinned one drops back) before the server answers.
+  const { data: pinsData } = useUserPins(contentUserId || '');
+  const { data: myPinnedIds } = usePinnedPostIds();
+  const pinnedIds = useMemo(() => {
+    if (isViewingOwnProfile && myPinnedIds) return myPinnedIds;
+    return (pinsData?.items ?? []).map((pin) => String(pin.tokenId));
+  }, [isViewingOwnProfile, myPinnedIds, pinsData]);
+
+  // Text posts that carry their own backdrop (Token.postBg), by post id.
+  const POST_BGS = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const page of userContentData?.pages ?? []) {
+      for (const nft of (page.data || []) as Array<{ tokenId?: number | string; postBg?: string }>) {
+        if (nft?.tokenId !== undefined && typeof nft.postBg === 'string' && nft.postBg) map.set(String(nft.tokenId), nft.postBg);
+      }
+    }
+    return map;
+  }, [userContentData]);
+
+  // Content separation
+  const { PROFILE_POSTS, PROFILE_IMAGES, ALL_PROFILE_VIDEOS, PROFILE_LIVE, ALL_CONTENT } = useMemo(() => {
+    if (!userContentData?.pages) {
+      return { PROFILE_POSTS: [], PROFILE_IMAGES: [], ALL_PROFILE_VIDEOS: [], PROFILE_LIVE: [], ALL_CONTENT: [] };
+    }
+    const allNFTs = userContentData.pages.flatMap(page => page.data || []);
+    const separated = separateUserContent(allNFTs);
+
+    // The server's own order, by tokenId. Once a sort other than "newest" is
+    // running, that order IS the answer — the mapped card types carry views as
+    // a formatted string ("1.2K"), so they cannot be re-sorted client-side.
+    const serverRank = new Map<string, number>();
+    allNFTs.forEach((nft: { tokenId?: number | string }, i) => {
+      if (nft?.tokenId !== undefined) serverRank.set(String(nft.tokenId), i);
+    });
+
+    const unified: Array<ProfileContentItem> = [
+      ...separated.posts.map(p => ({ type: 'post' as const, data: p, createdAt: p.createdAt || '' })),
+      ...separated.images.map(i => ({ type: 'image' as const, data: i, createdAt: i.createdAt || '' })),
+      ...separated.videos.map(v => ({ type: 'video' as const, data: v, createdAt: v.createdAt || '' })),
+      ...separated.lives.map(v => ({ type: 'video' as const, data: v, createdAt: v.createdAt || '' })),
+    ];
+
+    // A sorted or searched view is a view of what this creator posted, so
+    // reposts stay out of it: they are somebody else's post, they arrive from
+    // a separate always-newest-first endpoint, and no server rank exists to
+    // place them under "most viewed".
+    if (isContentFiltered) {
+      unified.sort((a, b) => (serverRank.get(a.data.id) ?? 0) - (serverRank.get(b.data.id) ?? 0));
+      return {
+        PROFILE_POSTS: separated.posts,
+        PROFILE_IMAGES: separated.images,
+        ALL_PROFILE_VIDEOS: separated.videos,
+        PROFILE_LIVE: separated.lives,
+        ALL_CONTENT: unified,
+      };
+    }
+
+    // Merge reposts into the unified feed
+    if (repostsData?.length) {
+      const repostItems = separateUserContent(repostsData as any);
+      const repostUnified = [
+        ...repostItems.posts.map(p => ({ type: 'post' as const, data: p, createdAt: p.createdAt || '', isRepost: true, repostedAt: (repostsData as any[]).find(r => String(r.tokenId) === String(p.id?.replace('text-', '')))?.repostedAt || p.createdAt || '' })),
+        ...repostItems.images.map(i => ({ type: 'image' as const, data: i, createdAt: i.createdAt || '', isRepost: true, repostedAt: (repostsData as any[]).find(r => String(r.tokenId) === String(i.id?.replace('image-', '')))?.repostedAt || i.createdAt || '' })),
+        ...repostItems.videos.map(v => ({ type: 'video' as const, data: v, createdAt: v.createdAt || '', isRepost: true, repostedAt: (repostsData as any[]).find(r => String(r.tokenId) === String(v.id?.replace('video-', '')))?.repostedAt || v.createdAt || '' })),
+        ...repostItems.lives.map(v => ({ type: 'video' as const, data: v, createdAt: v.createdAt || '', isRepost: true, repostedAt: (repostsData as any[]).find(r => String(r.tokenId) === String(v.id?.replace('video-', '')))?.repostedAt || v.createdAt || '' })),
+      ];
+      // Use repostedAt for sorting reposts, not original createdAt
+      repostUnified.forEach(item => {
+        if (item.repostedAt) {
+          item.createdAt = item.repostedAt;
+        }
+      });
+      // Add reposts, deduplicating by ID
+      const existingIds = new Set(unified.map(u => u.data.id));
+      repostUnified.forEach(r => {
+        if (!existingIds.has(r.data.id)) {
+          unified.push(r);
+        }
+      });
+    }
+
+    for (const r of proposalRepostsData ?? []) {
+      unified.push({
+        type: 'proposal',
+        data: { id: `proposal-${r.proposalId}`, proposalId: r.proposalId },
+        createdAt: r.repostedAt,
+        isRepost: true,
+        repostedAt: r.repostedAt,
+      });
+    }
+
+    unified.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+    // Reposts come as one list of 50, but the creator's own posts arrive a page
+    // at a time. Show only the reposts that fall inside the pages loaded so
+    // far, so the first screen is the first rows and not 50 extra tiles (and
+    // their pictures) all at once. Older ones join as the next pages load.
+    if (hasNextContentPage) {
+      const ownTimes = unified
+        .filter((item) => !item.isRepost)
+        .map((item) => new Date(item.createdAt).getTime())
+        .filter(Number.isFinite);
+      const floor = ownTimes.length ? Math.min(...ownTimes) : Infinity;
+      const kept = unified.filter((item) => !item.isRepost || new Date(item.createdAt).getTime() >= floor);
+      unified.length = 0;
+      unified.push(...kept);
+    }
+
+    // Pinned posts first, newest pin on top, each shown once. A post pinned a
+    // moment ago that the pins list has not caught up with yet is lifted out
+    // of the feed itself.
+    if (pinnedIds.length) {
+      const wanted = new Set(pinnedIds);
+      const fromPins = separateUserContent((pinsData?.items ?? []).map((pin) => ((pin as { post?: unknown }).post || pin) as unknown as UnifiedFeedItem));
+      const pinListed: ProfileContentItem[] = [
+        ...fromPins.posts.map(p => ({ type: 'post' as const, data: p, createdAt: p.createdAt || '' })),
+        ...fromPins.images.map(i => ({ type: 'image' as const, data: i, createdAt: i.createdAt || '' })),
+        ...fromPins.videos.map(v => ({ type: 'video' as const, data: v, createdAt: v.createdAt || '' })),
+        ...fromPins.lives.map(v => ({ type: 'video' as const, data: v, createdAt: v.createdAt || '' })),
+      ];
+      const byId = new Map<string, ProfileContentItem>();
+      for (const item of [...pinListed, ...unified]) {
+        if (item.type !== 'proposal' && wanted.has(item.data.id) && !byId.has(item.data.id)) byId.set(item.data.id, item);
+      }
+      const serverOrder = (pinsData?.items ?? []).map((pin) => String(pin.tokenId));
+      const order = [...pinnedIds.filter((id) => !serverOrder.includes(id)).reverse(), ...serverOrder.filter((id) => wanted.has(id))];
+      const pinned: ProfileContentItem[] = [];
+      for (const id of order) {
+        const item = byId.get(id);
+        if (item && !pinned.some((p) => p.data.id === id)) pinned.push({ ...item, isRepost: false, isPinned: true } as ProfileContentItem);
+      }
+      const pinnedSet = new Set(pinned.map((p) => p.data.id));
+      const rest = unified.filter((item) => item.type === 'proposal' || !pinnedSet.has(item.data.id));
+      unified.length = 0;
+      unified.push(...pinned, ...rest);
+    }
+
+    return {
+      PROFILE_POSTS: separated.posts,
+      PROFILE_IMAGES: separated.images,
+      ALL_PROFILE_VIDEOS: separated.videos,
+      PROFILE_LIVE: separated.lives,
+      ALL_CONTENT: unified,
+    };
+  }, [userContentData, repostsData, proposalRepostsData, isContentFiltered, pinnedIds, pinsData, hasNextContentPage]);
+
+  // Comment count — lazy-loaded after a short delay to avoid blocking initial paint
+  const [commentCountEnabled, setCommentCountEnabled] = useState(false);
+  useEffect(() => {
+    if (!apiProfile?.walletAddress) return;
+    const timer = setTimeout(() => setCommentCountEnabled(true), 500);
+    return () => clearTimeout(timer);
+  }, [apiProfile?.walletAddress]);
+
+  const { data: commentCountData } = useQuery({
+    queryKey: ['user-comments-count', apiProfile?.walletAddress],
+    queryFn: () => getUserComments(apiProfile!.walletAddress, 1, 1), // fetch only 1 item, we just need .total
+    enabled: commentCountEnabled && !!apiProfile?.walletAddress,
+    staleTime: 5 * 60 * 1000,
+  });
+  const commentCount = commentCountData?.total || commentCountData?.data?.length || 0;
+
+  const pinnedCount = isViewingOwnProfile && myPinnedIds ? myPinnedIds.length : pinsData?.items?.length ?? 0;
+
+  // Public bookmark folders. The same query feeds the Playlists panel, so the
+  // tab's badge and its content can never disagree; the tab only exists while
+  // there is at least one.
+  const { data: publicPlaylists } = usePublicPlaylists(apiProfile?.walletAddress);
+  const playlistCount = publicPlaylists?.length ?? 0;
+
+  // True total of the list on screen, from the API's pagination metadata, not
+  // the number of pages loaded so far.
+  const contentTotal = (userContentData?.pages?.[0] as { total?: number } | undefined)?.total ?? 0;
+
+  // Every badge comes from the server's per-type totals, counted with the same
+  // filter its tab lists with, so a badge never says 0 above a full tab. While
+  // the visitor has a search or filter running, the tab they are on shows how
+  // many of its posts match instead.
+  const { data: serverCounts, isFetched: countsFetched } = useProfileContentCounts(contentUserId);
+  // The header waits for these so tab numbers and their order land with it.
+  const isCountsSettled = !contentUserId || countsFetched;
+  const tabCount = (tab: TabValue, fallback: number): number => {
+    if (tab === activeTab && isContentFiltered) return contentTotal;
+    const server = serverCounts?.[tab as keyof typeof serverCounts];
+    if (typeof server === 'number') return server;
+    return tab === activeTab ? Math.max(contentTotal, fallback) : fallback;
+  };
+
+  // Subscriptions — deferred slightly so profile + first content page win the
+  // wire on the (slow) API; the header Subscribe button pops in right after.
+  const [secondaryEnabled, setSecondaryEnabled] = useState(false);
+  useEffect(() => {
+    if (!apiProfile?.walletAddress) return;
+    const timer = setTimeout(() => setSecondaryEnabled(true), 800);
+    return () => clearTimeout(timer);
+  }, [apiProfile?.walletAddress]);
+
+  const { plans, isLoading: isLoadingPlans, hasPlans, isOwnPlans } = useCreatorPlans(apiProfile?.walletAddress, secondaryEnabled);
+
+  // Dislikes: always on your own profile, on anyone else's only if they made it public.
+  const showDislikesTab = canSeeDislikesTab(!!isViewingOwnProfile, apiProfile?.customs as Record<string, unknown> | undefined);
+  const dislikesQuery = useProfileDislikes(apiProfile?.walletAddress, showDislikesTab && secondaryEnabled);
+  const dislikesCount = dislikesQuery.data?.pages?.[0]?.totalCount ?? 0;
+  // Likes: same rule, and private by default for everyone.
+  const showLikesTab = canSeeLikesTab(!!isViewingOwnProfile, apiProfile?.customs as Record<string, unknown> | undefined);
+  const likesQuery = useProfileLikes(apiProfile?.walletAddress, showLikesTab && secondaryEnabled);
+  const likesCount = likesQuery.data?.pages?.[0]?.totalCount ?? 0;
+
+  // Fractions: the same portfolio read the tab itself lists (shared cache, so
+  // opening the tab is instant). Blank until it answers, never a false 0.
+  // The read is heavy (the creator's last 50 posts, three market tables, chain
+  // balances and a check per position), so it waits until the first rows and
+  // their pictures are in, unless the Fractions tab itself is opened.
+  const [fractionsWarm, setFractionsWarm] = useState(false);
+  useEffect(() => {
+    setFractionsWarm(false);
+    if (!apiProfile?.walletAddress) return;
+    const timer = setTimeout(() => setFractionsWarm(true), 4000);
+    return () => clearTimeout(timer);
+  }, [apiProfile?.walletAddress]);
+  const fractionsQuery = useFractionPortfolio(apiProfile?.walletAddress, { enabled: secondaryEnabled && (fractionsWarm || activeTab === 'fractions') });
+  const fractionsCount: number | null = fractionsQuery.data ? livePositions(fractionsQuery.data).length : null;
+
+  const articleCount = tabCount('articles', activeTab === 'articles' ? PROFILE_POSTS.length : 0);
+  const PROFILE_TABS: { icon: typeof Home; label: string; value: TabValue; count: number | null }[] = useMemo(() => {
+    // All also merges in reposts the server total leaves out.
+    const homeCount = Math.max(tabCount('home', 0), activeTab === 'home' && !isContentFiltered ? ALL_CONTENT.length : 0);
+    const homeTab = { icon: Home, label: _copy("copy.a52ace420f21", { defaultValue: "All" }), value: 'home' as TabValue, count: homeCount };
+    const restTabs = [
+      { icon: MessageSquare, label: _copy("copy.a80811cf6889", { defaultValue: "Posts" }), value: 'posts' as TabValue, count: tabCount('posts', PROFILE_POSTS.length + commentCount) },
+      { icon: Image, label: _copy("copy.be7e2f201293", { defaultValue: "Images" }), value: 'images' as TabValue, count: tabCount('images', PROFILE_IMAGES.length) },
+      { icon: Film, label: _copy("copy.c9a9639463c2", { defaultValue: "Videos" }), value: 'videos' as TabValue, count: tabCount('videos', ALL_PROFILE_VIDEOS.length) },
+      { icon: Star, label: _copy("copy.17371507e9f7", { defaultValue: "Subs" }), value: 'subscribers' as TabValue, count: plans.length },
+      { icon: Play, label: _copy("copy.bc1b88907d3b", { defaultValue: "Audio" }), value: 'songs' as TabValue, count: tabCount('songs', ALL_PROFILE_VIDEOS.length) },
+      { icon: Radio, label: _copy("copy.b64ac05f17e6", { defaultValue: "Live" }), value: 'live' as TabValue, count: tabCount('live', PROFILE_LIVE.length) },
+      { icon: PieChart, label: _copy("copy.487aaa977933", { defaultValue: "Fractions" }), value: 'fractions' as TabValue, count: fractionsCount },
+      { icon: Pin, label: _copy("copy.f20c87946555", { defaultValue: "Pinned" }), value: 'pinned' as TabValue, count: pinnedCount },
+      // Only once the profile has an article; kept while open so a search
+      // with no matches does not pull the tab out from under the visitor.
+      ...(articleCount > 0 || activeTab === 'articles'
+        ? [{ icon: ArticleIcon, label: _copy("profile.tabs.articles", { defaultValue: "Articles" }), value: 'articles' as TabValue, count: articleCount }]
+        : []),
+      ...(playlistCount > 0
+        ? [{ icon: ListVideo, label: _copy("copy.dcd0a4d2c65a", { defaultValue: "Playlists" }), value: 'playlists' as TabValue, count: playlistCount }]
+        : []),
+    ].sort((a, b) => (b.count ?? 0) - (a.count ?? 0));
+    // Last, not sorted in: it is about what you turned away, not what you made.
+    const likesTab = showLikesTab
+      ? [{ icon: ThumbsUp as unknown as typeof Home, label: _copy("profile.tabs.likes", { defaultValue: "Likes" }), value: 'likes' as TabValue, count: likesCount }]
+      : [];
+    const dislikesTab = showDislikesTab
+      ? [{ icon: ThumbsDown as unknown as typeof Home, label: _copy("profile.tabs.dislikes", { defaultValue: "Dislikes" }), value: 'dislikes' as TabValue, count: dislikesCount }]
+      : [];
+    // Blank, never a false 0, until the number that tab shows has answered.
+    const answered = (tab: TabValue) =>
+      tab === 'subscribers' ? secondaryEnabled && !isLoadingPlans
+        : tab === 'pinned' || tab === 'playlists' || tab === 'likes' || tab === 'dislikes' || tab === 'fractions' ? true
+        : isCountsSettled;
+    return [homeTab, ...restTabs, ...likesTab, ...dislikesTab].map((tab) =>
+      tab.count === 0 && !answered(tab.value) ? { ...tab, count: null } : tab);
+    // tabCount reads only the values listed here.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isCountsSettled, secondaryEnabled, isLoadingPlans, serverCounts, activeTab, isContentFiltered, contentTotal, ALL_CONTENT.length, PROFILE_POSTS.length, PROFILE_IMAGES.length, ALL_PROFILE_VIDEOS.length, PROFILE_LIVE.length, commentCount, plans.length, pinnedCount, playlistCount, articleCount, fractionsCount, showDislikesTab, dislikesCount, showLikesTab, likesCount, _copy]);
+  const { isSubscribed, isLoading: isLoadingSubscription } = useIsSubscribed(
+    !isViewingOwnProfile ? apiProfile?.walletAddress : undefined,
+    secondaryEnabled
+  );
+
+  // Optimistic posts
+  const { optimisticPosts, clearOptimisticPosts } = useOptimisticPosts();
+
+  // Privacy — parse straight off the profile we already fetched.
+  // (useUserPrivacySettings re-fetched the same profile keyed by wallet
+  // address — a fully redundant round-trip on every profile view.)
+  const { showFollowersList, showFollowingList, hideFollowerCounts } = parseFollowLists(
+    apiProfile?.customs as Record<string, unknown> | undefined
+  );
+  const showFollowersFollowing = showFollowersList || showFollowingList;
+
+  // Re-auth
+  const { handleApiError } = useReauthHandler();
+
+  // Follow status
+  const isFollowing = apiProfile?.isFollowing ?? false;
+  const isPending = apiProfile?.isPending ?? false;
+  const isTargetPrivate = apiProfile?.isPrivate ?? false;
+
+  // Block status - use account_info data (youBlocked/blockedYou) as primary source
+  // The dedicated /api/block/status/ endpoint is unreliable, so we use it only
+  // for optimistic updates after block/unblock actions
+  const { data: blockStatusOverride } = useQuery<{ isBlocked: boolean; isBlockedBy: boolean }>({
+    queryKey: ['block-status', apiProfile?.walletAddress],
+    queryFn: () => ({ isBlocked: false, isBlockedBy: false }), // dummy, only used for optimistic setQueryData
+    enabled: false, // never auto-fetch; only populated via setQueryData
+    staleTime: Infinity,
+  });
+
+  // Prefer optimistic override (set after block/unblock action), then account_info data
+  const isBlocked = blockStatusOverride?.isBlocked ?? apiProfile?.youBlocked ?? false;
+  const isBlockedBy = blockStatusOverride?.isBlockedBy ?? apiProfile?.blockedYou ?? false;
+
+  const handleBlock = useCallback(async () => {
+    if (!apiProfile?.walletAddress || isBlockLoading) return;
+    setIsBlockLoading(true);
+    const newBlocked = !isBlocked;
+    const who = apiProfile.name || apiProfile.handle;
+    try {
+      if (isBlocked) {
+        await unblockUser(apiProfile.walletAddress);
+        toast.success(who
+          ? _copy("copy.ebfaa387fdce", { defaultValue: "Unblocked {{value1}}", value1: who })
+          : _copy("copy.3a964f319e8c", { defaultValue: "Unblocked user" }));
+      } else {
+        await blockUser(apiProfile.walletAddress);
+        toast.success(who
+          ? _copy("copy.158312be3ce0", { defaultValue: "Blocked {{value1}}", value1: who })
+          : _copy("copy.890879a6be14", { defaultValue: "Blocked user" }));
+      }
+      // Optimistic: set block status immediately so UI updates
+      queryClient.setQueryData(['block-status', apiProfile.walletAddress], {
+        isBlocked: newBlocked,
+        isBlockedBy: isBlockedBy,
+      });
+      queryClient.invalidateQueries({ queryKey: ['block-list'] });
+      // Also refresh the profile so account_info youBlocked stays in sync
+      queryClient.invalidateQueries({ queryKey: ['dehub-profile'] });
+    } catch (error) {
+      // Revert optimistic update on failure
+      queryClient.setQueryData(['block-status', apiProfile.walletAddress], {
+        isBlocked: isBlocked,
+        isBlockedBy: isBlockedBy,
+      });
+      handleApiError(error, isBlocked ? _copy("copy.91509428edaa", { defaultValue: "Failed to unblock user" }) : _copy("copy.d2b91e7b896f", { defaultValue: "Failed to block user" }));
+    } finally {
+      setIsBlockLoading(false);
+    }
+  }, [apiProfile, isBlocked, isBlockedBy, isBlockLoading, queryClient, handleApiError, _copy]);
+  // Pull-to-refresh (phones only). One pull reloads the header (photo, bio,
+  // counts) and the posts together; the cover stretch and the avatar ring are
+  // driven by CSS variables so a pull never re-renders the page.
+  const isPhone = useIsMobile();
+  const triggerRefresh = useCallback(async () => {
+    if (isRefreshing) return;
+    setIsRefreshing(true);
+    if (isViewingOwnProfile) clearOptimisticPosts();
+    const began = Date.now();
+    const work = Promise.allSettled([
+      refetchProfile(),
+      refetchContent(),
+      queryClient.invalidateQueries({ queryKey: ['profile-content-counts', contentUserId?.toLowerCase()] }),
+      queryClient.invalidateQueries({ queryKey: ['user-reposts'] }),
+      queryClient.invalidateQueries({ queryKey: ['user-proposal-reposts'] }),
+      queryClient.invalidateQueries({ queryKey: ['user-comments-count'] }),
+    ]);
+    await Promise.race([work, new Promise(resolve => setTimeout(resolve, PULL_REFRESH_MAX_MS))]);
+    // Keep the ring visible long enough to read as "refreshed".
+    const wait = Math.max(0, PULL_REFRESH_MIN_MS - (Date.now() - began));
+    setTimeout(() => setIsRefreshing(false), wait);
+  }, [isRefreshing, isViewingOwnProfile, clearOptimisticPosts, refetchProfile, refetchContent, queryClient, contentUserId]);
+
+  const coverHeight = useRef(130);
+  const onPullMotion = useCallback((distance: number, pulling: boolean) => {
+    const node = profileContainerRef.current;
+    if (!node) return;
+    // Measure the cover once per pull, never per frame.
+    if (!node.hasAttribute('data-profile-pulling')) {
+      coverHeight.current = node.querySelector<HTMLElement>('[data-profile-cover]')?.offsetHeight || 130;
+    }
+    node.style.setProperty('--profile-pull', `${distance.toFixed(1)}px`);
+    node.style.setProperty('--profile-pull-sy', (distance / coverHeight.current).toFixed(3));
+    node.style.setProperty('--profile-pull-p', Math.min(1, distance / PULL_THRESHOLD).toFixed(3));
+    if (distance > 0) node.setAttribute('data-profile-pulling', pulling ? 'drag' : 'return');
+    else node.removeAttribute('data-profile-pulling');
+  }, []);
+
+  const { pullDistance, isPulling, isHoldingAtThreshold, holdProgress, handlers: pullHandlers } = usePullToRefresh({
+    enabled: isPhone,
+    pullThreshold: PULL_THRESHOLD,
+    onRefresh: triggerRefresh,
+    isRefreshing,
+    containerRef: profileContainerRef,
+    onMotion: onPullMotion,
+  });
+
+  return {
+    // Text posts with their own backdrop: post id -> stored "id|colours|key".
+    POST_BGS,
+    // Route info
+    routeUsername,
+    userId,
+    // Auth
+    isAuthenticated,
+    isAuthLoading,
+    currentWalletAddress,
+    // Profile
+    profile,
+    apiProfile,
+    isLoadingProfile,
+    isFetchingProfile,
+    isProfileFromCache,
+    isCountsSettled,
+    isProfileError,
+    // Nobody has this handle (the API answers 404, or an empty shell). Not a
+    // load failure: the page offers the free name instead of "try again".
+    isProfileNotFound:
+      isProfileError &&
+      ((profileError as (Error & { httpStatus?: number }) | null)?.httpStatus === 404 ||
+        (profileError as Error | null)?.message === 'Profile not found'),
+    refetchProfile,
+    isOwnProfile,
+    isViewingOwnProfile,
+    setFollowStatus,
+    // Badge
+    badgeUrl,
+    badgeTier,
+    badgeBalance,
+    // Content
+    PROFILE_POSTS,
+    PROFILE_IMAGES,
+    ALL_PROFILE_VIDEOS,
+    PROFILE_LIVE,
+    ALL_CONTENT,
+    PROFILE_TABS,
+    userContentData,
+    isLoadingContent,
+    fetchNextContentPage,
+    hasNextContentPage,
+    isFetchingNextContentPage,
+    // Channel toolbar
+    contentSort,
+    setContentSort,
+    hasCustomOrder,
+    contentSearch,
+    setContentSearch,
+    contentFilters,
+    setContentFilters,
+    resetContentFilters,
+    contentFiltersOpen,
+    setContentFiltersOpen,
+    showPostTypeFilter,
+    isContentFiltered,
+    canReorderGrid,
+    contentQuery,
+    // Subscriptions
+    plans,
+    isLoadingPlans,
+    hasPlans,
+    hasPinnedPlans: plans.some((plan) => plan.isPinned && plan.isPublished && Number.isInteger(Number(plan.duration)) && (Number(plan.duration) === 999 || (Number(plan.duration) >= 0 && Number(plan.duration) <= 12))),
+    isOwnPlans,
+    isSubscribed,
+    isLoadingSubscription,
+    // Optimistic
+    optimisticPosts,
+    // Privacy
+    showFollowersFollowing,
+    showFollowersList,
+    showFollowingList,
+    hideFollowerCounts,
+    // Re-auth
+    handleApiError,
+    // Follow
+    isFollowing,
+    isPending,
+    isTargetPrivate,
+    // Block
+    isBlocked,
+    isBlockedBy,
+    isBlockLoading,
+    handleBlock,
+    // Pull-to-refresh
+    profileContainerRef,
+    pullDistance,
+    isPulling,
+    isHoldingAtThreshold,
+    holdProgress,
+    pullHandlers,
+    isRefreshing,
+    PULL_THRESHOLD,
+    // Bio translation
+    translatedBio,
+    setTranslatedBio,
+  };
+}

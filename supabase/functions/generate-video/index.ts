@@ -1,0 +1,1372 @@
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import Replicate from "https://esm.sh/replicate@0.25.2";
+// corsHeaders is the shared list — the only one that names x-wallet-address and
+// x-dehub-token, which chargeForJob requires and the browser will not send
+// unless the preflight says they are allowed. A local copy silently drops them.
+import { corsHeaders, rateLimitByIp, serviceClient } from "../_shared/auth.ts";
+import { isVeniceVideo, VENICE_VIDEO_MODELS, veniceVideoOptions } from '../_shared/venice-catalog.ts';
+import { quoteVenice, veniceFetch, VeniceError } from '../_shared/venice.ts';
+import { isStoreAppRequest, WEB_ONLY_MODEL_CODE, WEB_ONLY_MODEL_MESSAGE } from '../_shared/client-surface.ts';
+import { recordGeneration, settleGeneration } from '../_shared/generation-jobs.ts';
+import { authorizeGenerationPoll } from '../_shared/generation-poll-auth.ts';
+import { chargeForJob } from "../_shared/ai-payment-guard.ts";
+import { falQueueUrls } from "../_shared/fal-queue.ts";
+import { CREATOR_FAL_VIDEO_MODELS } from '../_shared/creator-fal-catalog.ts';
+import { buildCreatorFalVideoRequest } from '../_shared/creator-fal-input.ts';
+import { buildSeedance2Input, buildSeedance2Request, seedance2RoutingDecision, seedance2QuoteRoute } from '../_shared/seedance2-input.ts';
+import { quotePriceDhb } from '../_shared/ai-pricing.ts';
+import { AVATAR_MODEL, AVATAR_ENDPOINT, prepareAvatar, verifyAvatarQuote, avatarDeliveryReleased, type AvatarInputs } from '../_shared/creator-avatar.ts';
+import { referenceVideoDuration } from '../_shared/creator-reference-video.ts';
+import { requireDeHubAuth } from '../_shared/auth.ts';
+import {
+  kieKey,
+  kieUsableUrl,
+  kieCreateTask,
+  kieTaskStatus,
+  kieVeoGenerate,
+  kieVeoStatus,
+} from "../_shared/kie.ts";
+
+/**
+ * fal.ai model families.
+ *
+ * Each family names its inputs differently — Veo takes `generate_audio`, Kling
+ * takes `cfg_scale` and `negative_prompt`, Hailuo takes `prompt_optimizer`,
+ * Wan takes `num_frames`. Unknown keys are not ignored: fal 422s the request.
+ * So the family selects an explicit input builder instead of one shared spread.
+ */
+type FalFamily =
+  | 'seedance'
+  | 'seedance25'
+  | 'veo'
+  | 'kling'
+  | 'hailuo'
+  | 'wan'
+  | 'luma'
+  | 'pixverse'
+  | 'ltx';
+
+// Premium video generation models via Replicate and fal.ai
+const VIDEO_MODELS: Record<string, {
+  id: string;
+  name: string;
+  description: string;
+  supports: readonly string[];
+  duration: string;
+  version?: string;
+  provider?: 'replicate' | 'fal' | 'venice';
+  falFamily?: FalFamily;
+  falTextModel?: string;
+  falImageModel?: string;
+  falReferenceModel?: string;
+  /**
+   * Drop `generate_audio` from the family's input.
+   *
+   * Kling 2.5 Turbo predates Kling's audio track and has no such field, so the
+   * shared kling builder would 422 it on every request.
+   */
+  falOmitAudio?: boolean;
+}> = {
+  ...Object.fromEntries(Object.entries(VENICE_VIDEO_MODELS).map(([id, model]) => [id, {
+    id, name: model.name, description: 'Venice video at provider cost',
+    supports: [model.imageRequired ? 'image-to-video' : 'text-to-video'],
+    duration: '5–15s', provider: 'venice' as const,
+  }])),
+  ...CREATOR_FAL_VIDEO_MODELS,
+  'seedance-2.5': {
+    id: 'bytedance/seedance-2.5',
+    name: 'Seedance 2.5',
+    description: 'ByteDance flagship — 30s takes, unified multimodal input',
+    supports: ['text-to-video', 'image-to-video'],
+    duration: '4-30s',
+    provider: 'fal',
+    falFamily: 'seedance25',
+    falTextModel: 'bytedance/seedance-2.5/text-to-video',
+    falImageModel: 'bytedance/seedance-2.5/image-to-video',
+    falReferenceModel: 'bytedance/seedance-2.5/reference-to-video',
+  },
+  'kling-2.6-pro': {
+    id: 'kwaivgi/kling-v2.6',
+    name: 'Kling 2.6 Pro',
+    description: 'Top-tier cinematic visuals with native audio generation',
+    supports: ['text-to-video', 'image-to-video'],
+    duration: '5s or 10s',
+  },
+  'luma-ray2': {
+    id: 'luma/ray-2-720p',
+    name: 'Luma Ray 2',
+    description: 'Latest Luma model, photorealistic results (720p)',
+    supports: ['text-to-video'],
+    duration: '5s',
+  },
+  'minimax-video': {
+    id: 'minimax/video-01',
+    name: 'Minimax Video-01',
+    description: 'Fast generation, good quality',
+    supports: ['text-to-video', 'image-to-video'],
+    duration: '6s',
+  },
+  'runway-gen4': {
+    id: 'runwayml/gen4-turbo',
+    name: 'Runway Gen-4 Turbo',
+    description: 'Latest Runway model, stunning visual quality (image-to-video only)',
+    supports: ['image-to-video'],
+    duration: '10s',
+  },
+  'ltx-video': {
+    id: 'lightricks/ltx-video',
+    version: '8c47da666861d081eeb4d1261853087de23923a268a69b63febdf5dc1dee08e4',
+    name: 'LTX Video',
+    description: 'Fast, efficient, good for quick generations',
+    supports: ['text-to-video', 'image-to-video'],
+    duration: '5s',
+  },
+  'seedance-1.5-pro': {
+    id: 'bytedance/seedance-1.5-pro',
+    name: 'Seedance 1.5 Pro',
+    description: 'ByteDance cinematic quality with native audio generation',
+    supports: ['text-to-video', 'image-to-video'],
+    duration: '2-12s',
+  },
+  'seedance-2.0': {
+    id: 'bytedance/seedance-2.0',
+    name: 'Seedance 2.0',
+    description: 'Latest ByteDance model via fal.ai, superior quality & audio',
+    supports: ['text-to-video', 'image-to-video'],
+    duration: '4-15s',
+    provider: 'fal',
+    falFamily: 'seedance',
+    falTextModel: 'bytedance/seedance-2.0/text-to-video',
+    falImageModel: 'bytedance/seedance-2.0/image-to-video',
+    falReferenceModel: 'bytedance/seedance-2.0/reference-to-video',
+  },
+  'seedance-2.0-fast': {
+    id: 'bytedance/seedance-2.0-fast',
+    name: 'Seedance 2.0 Fast',
+    description: 'Faster Seedance 2.0 variant via fal.ai',
+    supports: ['text-to-video', 'image-to-video'],
+    duration: '4-15s',
+    provider: 'fal',
+    falFamily: 'seedance',
+    falTextModel: 'bytedance/seedance-2.0/fast/text-to-video',
+    falImageModel: 'bytedance/seedance-2.0/fast/image-to-video',
+    falReferenceModel: 'bytedance/seedance-2.0/fast/reference-to-video',
+  },
+
+  // ─── Expanded fal.ai catalogue ───
+  'veo-3.1': {
+    id: 'fal-ai/veo3.1',
+    name: 'Veo 3.1',
+    description: 'Google flagship, ultra-realistic with native audio',
+    supports: ['text-to-video', 'image-to-video'],
+    duration: '4-8s',
+    provider: 'fal',
+    falFamily: 'veo',
+    falTextModel: 'fal-ai/veo3.1',
+    falImageModel: 'fal-ai/veo3.1/image-to-video',
+  },
+  'veo-3.1-fast': {
+    id: 'fal-ai/veo3.1/fast',
+    name: 'Veo 3.1 Fast',
+    description: 'Faster, cheaper Veo 3.1',
+    supports: ['text-to-video', 'image-to-video'],
+    duration: '4-8s',
+    provider: 'fal',
+    falFamily: 'veo',
+    falTextModel: 'fal-ai/veo3.1/fast',
+    falImageModel: 'fal-ai/veo3.1/fast/image-to-video',
+  },
+  'kling-3.0': {
+    id: 'fal-ai/kling-video/v3/pro',
+    name: 'Kling 3.0 Pro',
+    description: 'Multi-shot with audio sync and long takes',
+    supports: ['text-to-video', 'image-to-video'],
+    duration: '3-15s',
+    provider: 'fal',
+    falFamily: 'kling',
+    falTextModel: 'fal-ai/kling-video/v3/pro/text-to-video',
+    falImageModel: 'fal-ai/kling-video/v3/pro/image-to-video',
+  },
+  'kling-3.0-standard': {
+    id: 'fal-ai/kling-video/v3/standard',
+    name: 'Kling 3.0 Standard',
+    description: 'Kling 3.0 on the lighter render tier',
+    supports: ['text-to-video', 'image-to-video'],
+    duration: '3-15s',
+    provider: 'fal',
+    falFamily: 'kling',
+    falTextModel: 'fal-ai/kling-video/v3/standard/text-to-video',
+    falImageModel: 'fal-ai/kling-video/v3/standard/image-to-video',
+  },
+  'kling-2.5-turbo': {
+    id: 'fal-ai/kling-video/v2.5-turbo/pro',
+    name: 'Kling 2.5 Turbo Pro',
+    description: 'Fluid motion and tight prompt precision, no audio track',
+    supports: ['text-to-video', 'image-to-video'],
+    duration: '5s or 10s',
+    provider: 'fal',
+    falFamily: 'kling',
+    falOmitAudio: true,
+    falTextModel: 'fal-ai/kling-video/v2.5-turbo/pro/text-to-video',
+    falImageModel: 'fal-ai/kling-video/v2.5-turbo/pro/image-to-video',
+  },
+  'hailuo-2.3': {
+    id: 'fal-ai/minimax/hailuo-2.3',
+    name: 'MiniMax Hailuo 2.3',
+    description: 'Natural physics and facial emotion',
+    supports: ['text-to-video', 'image-to-video'],
+    duration: '6s',
+    provider: 'fal',
+    falFamily: 'hailuo',
+    falTextModel: 'fal-ai/minimax/hailuo-2.3/pro/text-to-video',
+    falImageModel: 'fal-ai/minimax/hailuo-2.3/pro/image-to-video',
+  },
+  'hailuo-2.3-fast': {
+    id: 'fal-ai/minimax/hailuo-2.3-fast',
+    name: 'Hailuo 2.3 Fast',
+    description: 'Faster, cheaper Hailuo (image-to-video only)',
+    supports: ['image-to-video'],
+    duration: '6s',
+    provider: 'fal',
+    falFamily: 'hailuo',
+    falImageModel: 'fal-ai/minimax/hailuo-2.3-fast/pro/image-to-video',
+  },
+  'wan-2.6': {
+    id: 'wan/v2.6',
+    name: 'Wan 2.6',
+    description: 'Character-consistent video with synced audio',
+    supports: ['image-to-video'],
+    duration: '5-10s',
+    provider: 'fal',
+    falFamily: 'wan',
+    falImageModel: 'wan/v2.6/image-to-video',
+    falReferenceModel: 'wan/v2.6/reference-to-video',
+  },
+  'wan-2.5': {
+    id: 'fal-ai/wan-25-preview',
+    name: 'Wan 2.5',
+    description: 'Open-weight, stylised and experimental',
+    supports: ['text-to-video', 'image-to-video'],
+    duration: '5-10s',
+    provider: 'fal',
+    falFamily: 'wan',
+    falTextModel: 'fal-ai/wan-25-preview/text-to-video',
+    falImageModel: 'fal-ai/wan-25-preview/image-to-video',
+  },
+  'luma-ray2-flash': {
+    id: 'fal-ai/luma-dream-machine/ray-2-flash',
+    name: 'Luma Ray 2 Flash',
+    description: 'Dreamy Luma aesthetic on the budget tier',
+    supports: ['text-to-video', 'image-to-video'],
+    duration: '5s',
+    provider: 'fal',
+    falFamily: 'luma',
+    falTextModel: 'fal-ai/luma-dream-machine/ray-2-flash',
+    falImageModel: 'fal-ai/luma-dream-machine/ray-2-flash/image-to-video',
+  },
+  'pixverse-v5': {
+    id: 'fal-ai/pixverse/v5',
+    name: 'PixVerse V5',
+    description: 'Stylised and anime-leaning motion',
+    supports: ['text-to-video', 'image-to-video'],
+    duration: '5-8s',
+    provider: 'fal',
+    falFamily: 'pixverse',
+    falTextModel: 'fal-ai/pixverse/v5/text-to-video',
+    falImageModel: 'fal-ai/pixverse/v5/image-to-video',
+  },
+  'ltx-13b': {
+    id: 'fal-ai/ltxv-13b-098-distilled',
+    name: 'LTX Video 13B',
+    description: 'Cheapest per second, good for drafts',
+    supports: ['text-to-video', 'image-to-video'],
+    duration: '5-10s',
+    provider: 'fal',
+    falFamily: 'ltx',
+    falTextModel: 'fal-ai/ltxv-13b-098-distilled',
+    falImageModel: 'fal-ai/ltxv-13b-098-distilled/image-to-video',
+  },
+};
+
+type ModelKey = keyof typeof VIDEO_MODELS;
+
+interface GenerateVideoRequest {
+  effect?: string;
+  prompt: string;
+  model: ModelKey;
+  sourceImage?: string;
+  duration?: '5s' | '10s' | string;
+  aspectRatio?: '16:9' | '9:16' | '1:1';
+  negativePrompt?: string;
+  resolution?: string;
+  referenceImageUrls?: string[];
+  endFrameUrl?: string;
+  audioUrls?: string[];
+  videoUrls?: string[];
+  seed?: number;
+}
+
+interface VideoGenerationResponse {
+  videoUrl?: string;
+  predictionId?: string;
+  provider?: string;
+  status: 'starting' | 'processing' | 'succeeded' | 'failed';
+  error?: string;
+}
+
+// ─── fal.ai helpers ───
+
+async function falSubmit(
+  falKey: string,
+  appId: string,
+  input: Record<string, unknown>,
+): Promise<{ request_id: string; status_url?: string; response_url?: string }> {
+  const res = await fetch(`https://queue.fal.run/${appId}`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Key ${falKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(input),
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`fal.ai submit error (${res.status}): ${text}`);
+  }
+  return res.json();
+}
+
+async function falStatus(
+  falKey: string,
+  statusUrl: string,
+): Promise<{ status: string; response_url?: string }> {
+  const res = await fetch(statusUrl, { headers: { Authorization: `Key ${falKey}` } });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`fal.ai status error (${res.status}): ${text}`);
+  }
+  return res.json();
+}
+
+async function falResult(
+  falKey: string,
+  responseUrl: string,
+): Promise<{ video?: { url: string }; [key: string]: unknown }> {
+  const res = await fetch(responseUrl, { headers: { Authorization: `Key ${falKey}` } });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`fal.ai result error (${res.status}): ${text}`);
+  }
+  return res.json();
+}
+
+function mapFalStatus(s: string): VideoGenerationResponse['status'] {
+  switch (s) {
+    case 'COMPLETED': return 'succeeded';
+    case 'FAILED': return 'failed';
+    case 'IN_QUEUE': return 'starting';
+    case 'IN_PROGRESS': return 'processing';
+    default: return 'processing';
+  }
+}
+
+// ─── Replicate input builders ───
+
+interface ReplicateInputOptions {
+  prompt: string;
+  sourceImage?: string;
+  duration?: string;
+  aspectRatio?: string;
+  negativePrompt?: string;
+  resolution?: string;
+  seed?: number;
+}
+
+function buildReplicateInput(
+  model: string,
+  opts: ReplicateInputOptions,
+): Record<string, unknown> {
+  const { prompt, sourceImage, duration = '5s', aspectRatio = '16:9', negativePrompt, resolution, seed } = opts;
+
+  switch (model) {
+    // Replicate's Kling 2.6 and Gen-4 Turbo take duration as an enum of 5 or
+    // 10 and 422 anything else, so a 7s pick from a 5-10 slider never started.
+    case 'kling-2.6-pro':
+      return {
+        prompt,
+        duration: snapDuration(parseInt(duration) || 5, [5, 10]),
+        aspect_ratio: aspectRatio,
+        generate_audio: true,
+        ...(sourceImage && { start_image: sourceImage }),
+        ...(negativePrompt && { negative_prompt: negativePrompt }),
+        ...(seed !== undefined && { seed }),
+      };
+    case 'luma-ray2':
+      return { prompt, aspect_ratio: aspectRatio, loop: false };
+    case 'minimax-video':
+      return { prompt, ...(sourceImage && { first_frame_image: sourceImage }) };
+    case 'runway-gen4':
+      return {
+        prompt,
+        duration: snapDuration(parseInt(duration) || 10, [5, 10]),
+        ratio: aspectRatio,
+        ...(sourceImage && { image: sourceImage }),
+      };
+    case 'ltx-video':
+      return {
+        prompt,
+        ...(sourceImage && { image: sourceImage }),
+        ...(negativePrompt && { negative_prompt: negativePrompt }),
+        ...(seed !== undefined && { seed }),
+      };
+    case 'seedance-1.5-pro':
+      return {
+        prompt,
+        duration: Math.min(Math.max(parseInt(duration) || 5, 2), 12),
+        aspect_ratio: aspectRatio,
+        resolution: resolution || '720p',
+        generate_audio: true,
+        ...(sourceImage && { image: sourceImage }),
+        ...(negativePrompt && { negative_prompt: negativePrompt }),
+        ...(seed !== undefined && { seed }),
+      };
+    default:
+      return { prompt };
+  }
+}
+
+// ─── fal.ai input builders ───
+
+interface FalInputOptions {
+  prompt: string;
+  sourceImage?: string;
+  duration: number;
+  aspectRatio: string;
+  negativePrompt?: string;
+  resolution?: string;
+  referenceImageUrls?: string[];
+  endFrameUrl?: string;
+  audioUrls?: string[];
+  videoUrls?: string[];
+  seed?: number;
+  /** Suppress `generate_audio` for tiers that have no such field. */
+  omitAudio?: boolean;
+}
+
+/**
+ * Snap a requested duration onto the values a family actually accepts.
+ *
+ * Every one of these families types `duration` as a closed enum, so an
+ * in-between value is a 422 rather than a rounding. Snapping DOWN is
+ * deliberate: the creator has already been charged on the slider's value, and
+ * rounding up would render — and bill fal for — more than they paid for.
+ */
+function snapDuration(seconds: number, allowed: number[]): number {
+  const eligible = allowed.filter((a) => a <= seconds);
+  return eligible.length ? Math.max(...eligible) : Math.min(...allowed);
+}
+
+/** Pick the closest resolution a family supports, never exceeding the request. */
+function snapResolution(requested: string | undefined, allowed: string[], fallback: string): string {
+  if (requested && allowed.includes(requested)) return requested;
+  const order = ['360p', '480p', '512', '540p', '720p', '768', '1080p', '4k'];
+  const wantIdx = order.indexOf(requested ?? '');
+  if (wantIdx < 0) return fallback;
+  // Best supported option at or below what was asked for.
+  const below = allowed.filter((a) => order.indexOf(a) >= 0 && order.indexOf(a) <= wantIdx);
+  if (below.length) {
+    return below.reduce((best, a) => (order.indexOf(a) > order.indexOf(best) ? a : best));
+  }
+  return fallback;
+}
+
+function buildFalInput(family: FalFamily, o: FalInputOptions): Record<string, unknown> {
+  const {
+    prompt, sourceImage, duration, aspectRatio, negativePrompt, resolution,
+    referenceImageUrls, endFrameUrl, audioUrls, videoUrls, seed, omitAudio,
+  } = o;
+
+  switch (family) {
+    case 'seedance':
+      return buildSeedance2Input({ prompt, duration, aspectRatio, resolution, sourceImage, endFrameUrl, referenceImageUrls, audioUrls, videoUrls, negativePrompt, seed }).input;
+
+    // duration is '4s' | '6s' | '8s'; aspect ratio is 16:9 or 9:16 only.
+    case 'veo':
+      return {
+        prompt,
+        duration: `${snapDuration(duration, [4, 6, 8])}s`,
+        aspect_ratio: aspectRatio === '9:16' ? '9:16' : '16:9',
+        resolution: snapResolution(resolution, ['720p', '1080p', '4k'], '720p'),
+        generate_audio: true,
+        ...(sourceImage && { image_url: sourceImage }),
+        ...(negativePrompt && { negative_prompt: negativePrompt }),
+        ...(seed !== undefined && seed !== null && { seed }),
+      };
+
+    /**
+     * Seedance 2.5. Same shape as 2.0 with three differences that each 422 if
+     * they are got wrong: the ceiling is 30s rather than 15, the end frame is
+     * `end_image_url` rather than `last_image_url`, and there is no
+     * `negative_prompt` field at all.
+     */
+    case 'seedance25':
+      return {
+        prompt,
+        duration: Math.min(Math.max(duration, 4), 30),
+        aspect_ratio: aspectRatio,
+        resolution: snapResolution(resolution, ['480p', '720p'], '720p'),
+        generate_audio: true,
+        ...(sourceImage && { image_url: sourceImage }),
+        ...(endFrameUrl && { end_image_url: endFrameUrl }),
+        ...(referenceImageUrls?.length && { image_urls: referenceImageUrls }),
+        ...(seed !== undefined && seed !== null && { seed }),
+      };
+
+    // duration is a stringified integer 3-15. No resolution field. The 2.5
+    // Turbo tier has no audio track, hence omitAudio.
+    case 'kling':
+      return {
+        prompt,
+        duration: String(Math.min(Math.max(duration, 3), 15)),
+        aspect_ratio: aspectRatio,
+        ...(omitAudio ? {} : { generate_audio: true }),
+        cfg_scale: 0.5,
+        ...(sourceImage && { image_url: sourceImage }),
+        ...(negativePrompt && { negative_prompt: negativePrompt }),
+      };
+
+    // The pro tier takes neither duration nor resolution — sending either 422s.
+    case 'hailuo':
+      return {
+        prompt,
+        prompt_optimizer: true,
+        ...(sourceImage && { image_url: sourceImage }),
+      };
+
+    // duration is a stringified '5' | '10' | '15'; 2.6 has no 480p.
+    case 'wan':
+      return {
+        prompt,
+        duration: String(snapDuration(duration, [5, 10, 15])),
+        aspect_ratio: aspectRatio,
+        resolution: snapResolution(resolution, ['480p', '720p', '1080p'], '720p'),
+        enable_prompt_expansion: true,
+        ...(sourceImage && { image_url: sourceImage }),
+        ...(negativePrompt && { negative_prompt: negativePrompt }),
+        ...(audioUrls?.length && { audio_url: audioUrls[0] }),
+        ...(seed !== undefined && seed !== null && { seed }),
+      };
+
+    // duration is '5s' | '9s'. No 1:1, and no negative prompt.
+    case 'luma':
+      return {
+        prompt,
+        duration: `${snapDuration(duration, [5, 9])}s`,
+        aspect_ratio: aspectRatio === '1:1' ? '16:9' : aspectRatio,
+        resolution: snapResolution(resolution, ['540p', '720p', '1080p'], '720p'),
+        loop: false,
+        ...(sourceImage && { image_url: sourceImage }),
+      };
+
+    // duration is a stringified '5' | '8'; resolution starts at 360p.
+    case 'pixverse':
+      return {
+        prompt,
+        duration: String(snapDuration(duration, [5, 8])),
+        aspect_ratio: aspectRatio,
+        resolution: snapResolution(resolution, ['360p', '540p', '720p', '1080p'], '720p'),
+        ...(sourceImage && { image_url: sourceImage }),
+        ...(negativePrompt && { negative_prompt: negativePrompt }),
+        ...(seed !== undefined && seed !== null && { seed }),
+      };
+
+    // LTX has no duration field at all — length is num_frames at frame_rate.
+    // 121 frames at 24 fps is the model default, roughly five seconds.
+    case 'ltx': {
+      const frameRate = 24;
+      return {
+        prompt,
+        num_frames: Math.min(Math.max(Math.round(duration * frameRate) + 1, 9), 1441),
+        frame_rate: frameRate,
+        aspect_ratio: aspectRatio,
+        resolution: snapResolution(resolution, ['480p', '720p'], '720p'),
+        ...(sourceImage && { image_url: sourceImage }),
+        ...(negativePrompt && { negative_prompt: negativePrompt }),
+        ...(seed !== undefined && seed !== null && { seed }),
+      };
+    }
+
+    default:
+      return { prompt };
+  }
+}
+
+// ─── kie.ai routing ───
+//
+// kie.ai resells most of this catalogue below fal's rates, and the cost
+// tables in _shared/ai-pricing.ts assume the models below actually run
+// there. Routing is best-effort: any job kie cannot take (inline data:
+// inputs, audio/video tracks, an unsupported sub-mode) and any kie submit
+// failure falls through to the declared fal/Replicate provider, so kie can
+// only ever lower the bill, never break a render. Like fal, kie 422s unknown
+// keys, so every family builds its own input shape.
+
+/** The three ratios every kie video model here accepts. */
+function kieAspect(aspectRatio: string): string {
+  return ['16:9', '9:16', '1:1'].includes(aspectRatio) ? aspectRatio : '16:9';
+}
+
+/**
+ * Map a studio model + options onto a kie jobs-API task, or null when this
+ * particular job cannot ride kie and must use the standard provider.
+ */
+function buildKieVideoTask(
+  model: string,
+  o: FalInputOptions,
+): { model: string; input: Record<string, unknown> } | null {
+  const { prompt, sourceImage, duration, aspectRatio, negativePrompt, resolution, referenceImageUrls, endFrameUrl } = o;
+
+  switch (model) {
+    // One kie model covers both tiers; `mode` picks the render quality.
+    // Sound stays on to match the fal behaviour (and the audio-on price in
+    // the cost table). The 3.0 schema has no negative_prompt field.
+    case 'kling-3.0':
+    case 'kling-3.0-standard': {
+      if (referenceImageUrls?.length) return null;
+      return {
+        model: 'kling-3.0/video',
+        input: {
+          prompt,
+          sound: true,
+          duration: String(Math.min(Math.max(duration, 3), 15)),
+          aspect_ratio: kieAspect(aspectRatio),
+          mode: model === 'kling-3.0' ? 'pro' : 'std',
+          multi_shots: false,
+          multi_prompt: [],
+          ...(sourceImage && { image_urls: [sourceImage] }),
+        },
+      };
+    }
+
+    // Text and image are separate kie models, and the image one takes no
+    // aspect ratio — framing follows the source image.
+    case 'kling-2.5-turbo': {
+      if (referenceImageUrls?.length) return null;
+      const dur = String(snapDuration(duration, [5, 10]));
+      if (sourceImage) {
+        return {
+          model: 'kling/v2-5-turbo-image-to-video-pro',
+          input: {
+            prompt,
+            image_url: sourceImage,
+            duration: dur,
+            cfg_scale: 0.5,
+            ...(negativePrompt && { negative_prompt: negativePrompt }),
+          },
+        };
+      }
+      return {
+        model: 'kling/v2-5-turbo-text-to-video-pro',
+        input: {
+          prompt,
+          duration: dur,
+          aspect_ratio: kieAspect(aspectRatio),
+          cfg_scale: 0.5,
+          ...(negativePrompt && { negative_prompt: negativePrompt }),
+        },
+      };
+    }
+
+    // Resolution snaps to 720p: kie's 2.0 schema lists 1080p/4k but only
+    // prices 480p/720p, and the cost table charges the 720p rate. Neither
+    // schema has a negative_prompt field.
+    case 'seedance-2.0':
+    case 'seedance-2.5': {
+      const is25 = model === 'seedance-2.5';
+      if (!is25 && seedance2RoutingDecision(o).provider !== 'kie') return null;
+      return {
+        model: is25 ? 'bytedance/seedance-2-5' : 'bytedance/seedance-2',
+        input: {
+          prompt,
+          duration: Math.min(Math.max(duration, 4), is25 ? 30 : 15),
+          resolution: snapResolution(resolution, ['480p', '720p'], '720p'),
+          aspect_ratio: aspectRatio,
+          generate_audio: true,
+          ...(sourceImage && { first_frame_url: sourceImage }),
+          ...(endFrameUrl && { last_frame_url: endFrameUrl }),
+          ...(referenceImageUrls?.length && { reference_image_urls: referenceImageUrls }),
+        },
+      };
+    }
+
+    // Text and image are separate kie models; the image one reads framing
+    // from the source, so only the text route takes aspect_ratio.
+    case 'wan-2.5': {
+      if (referenceImageUrls?.length) return null;
+      const dur = String(snapDuration(duration, [5, 10]));
+      const res = snapResolution(resolution, ['720p', '1080p'], '720p');
+      if (sourceImage) {
+        return {
+          model: 'wan/2-5-image-to-video',
+          input: {
+            prompt,
+            image_url: sourceImage,
+            duration: dur,
+            resolution: res,
+            enable_prompt_expansion: true,
+            ...(negativePrompt && { negative_prompt: negativePrompt }),
+          },
+        };
+      }
+      return {
+        model: 'wan/2-5-text-to-video',
+        input: {
+          prompt,
+          duration: dur,
+          aspect_ratio: kieAspect(aspectRatio),
+          resolution: res,
+          enable_prompt_expansion: true,
+          ...(negativePrompt && { negative_prompt: negativePrompt }),
+        },
+      };
+    }
+
+    // kie serves 2.6 as image-to-video only; reference-to-video stays on fal.
+    case 'wan-2.6': {
+      if (!sourceImage || referenceImageUrls?.length) return null;
+      return {
+        model: 'wan/2-6-image-to-video',
+        input: {
+          prompt,
+          image_urls: [sourceImage],
+          duration: String(snapDuration(duration, [5, 10, 15])),
+          resolution: snapResolution(resolution, ['720p', '1080p'], '720p'),
+        },
+      };
+    }
+
+    default:
+      return null;
+  }
+}
+
+/**
+ * Veo rides kie's dedicated endpoint pair rather than the jobs API, and it is
+ * the biggest saving in the catalogue: kie bills a flat rate per video where
+ * fal billed per second. Field casing is kie's, verbatim: `imageUrls` and
+ * `generationType` are camelCase while `aspect_ratio` is not.
+ */
+async function handleKieVeoGeneration(
+  key: string,
+  model: string,
+  prompt: string,
+  sourceImage: string | undefined,
+  duration: number,
+  aspectRatio: string,
+  resolution?: string,
+): Promise<Response> {
+  const body: Record<string, unknown> = {
+    prompt,
+    model: model === 'veo-3.1' ? 'veo3' : 'veo3_fast',
+    aspect_ratio: aspectRatio === '9:16' ? '9:16' : '16:9',
+    resolution: snapResolution(resolution, ['720p', '1080p'], '720p'),
+    duration: snapDuration(duration, [4, 6, 8]),
+    // Never let kie substitute a different model: it bills differently and
+    // the creator picked Veo.
+    enableFallback: false,
+    ...(sourceImage
+      ? { imageUrls: [sourceImage], generationType: 'FIRST_AND_LAST_FRAMES_2_VIDEO' }
+      : { generationType: 'TEXT_2_VIDEO' }),
+  };
+
+  console.log('[kie-veo] Submitting', JSON.stringify(body).substring(0, 500));
+  const taskId = await kieVeoGenerate(key, body);
+  console.log(`[kie-veo] Task started: ${taskId}`);
+
+  const response: VideoGenerationResponse = {
+    status: 'starting',
+    predictionId: taskId,
+    provider: 'kie-veo',
+  };
+  return new Response(JSON.stringify(response), {
+    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+  });
+}
+
+/**
+ * Try to start this render on kie. Null means "use the standard provider" —
+ * either the job is not kie-eligible or the submit failed, and the caller
+ * falls through to fal/Replicate either way.
+ */
+async function tryKieGeneration(
+  model: string,
+  o: FalInputOptions,
+): Promise<Response | null> {
+  const key = kieKey();
+  if (!key) return null;
+  if (model === 'seedance-2.0') {
+    const route = seedance2RoutingDecision(o);
+    if (route.provider === 'fal') {
+      console.info('[video-routing]', { model, provider: route.provider, reason: route.reason });
+      return null;
+    }
+  }
+  // Use the full-capability route when kie would silently omit a control.
+  if (o.seed !== undefined || o.negativePrompt || o.endFrameUrl) return null;
+
+  // kie fetches every input by URL, so inline data: payloads stay on fal.
+  const inputUrls = [o.sourceImage, o.endFrameUrl, ...(o.referenceImageUrls ?? [])];
+  if (!inputUrls.every(kieUsableUrl)) return null;
+
+  // No kie model here takes an audio or video track input, and on Seedance
+  // those tracks change kie's billing formula. They ride fal.
+  if (o.audioUrls?.length || o.videoUrls?.length) return null;
+
+  try {
+    if (model === 'veo-3.1' || model === 'veo-3.1-fast') {
+      return await handleKieVeoGeneration(
+        key, model, o.prompt, o.sourceImage, o.duration, o.aspectRatio, o.resolution,
+      );
+    }
+
+    const task = buildKieVideoTask(model, o);
+    if (!task) return null;
+
+    console.log(`[kie] Submitting ${task.model}`, JSON.stringify(task.input).substring(0, 500));
+    const taskId = await kieCreateTask(key, task.model, task.input);
+    console.log(`[kie] Task started: ${taskId}`);
+
+    const response: VideoGenerationResponse = {
+      status: 'starting',
+      predictionId: taskId,
+      provider: 'kie',
+    };
+    return new Response(JSON.stringify(response), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  } catch (e) {
+    console.warn(`[kie] ${model} submit failed — using the standard provider:`, (e as Error).message);
+    return null;
+  }
+}
+
+// ─── kie status checks ───
+
+async function handleKieStatusCheck(taskId: string): Promise<Response> {
+  const key = kieKey();
+  if (!key) throw new Error('KIE_API_KEY is not configured');
+
+  const s = await kieTaskStatus(key, taskId);
+  let status: VideoGenerationResponse['status'];
+  if (s.state === 'success') {
+    // A success without a URL is a failure the creator can see, not a hang.
+    status = s.resultUrls[0] ? 'succeeded' : 'failed';
+  } else if (s.state === 'fail') {
+    status = 'failed';
+  } else if (s.state === 'waiting' || s.state === 'queuing') {
+    status = 'starting';
+  } else {
+    status = 'processing';
+  }
+
+  const response: VideoGenerationResponse = {
+    status,
+    videoUrl: status === 'succeeded' ? s.resultUrls[0] : undefined,
+    predictionId: taskId,
+    provider: 'kie',
+    ...(status === 'failed' && { error: s.failMsg || 'Video generation failed on kie.ai' }),
+  };
+  return new Response(JSON.stringify(response), {
+    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+  });
+}
+
+async function handleKieVeoStatusCheck(taskId: string): Promise<Response> {
+  const key = kieKey();
+  if (!key) throw new Error('KIE_API_KEY is not configured');
+
+  const s = await kieVeoStatus(key, taskId);
+  const response: VideoGenerationResponse = {
+    status: s.status,
+    videoUrl: s.videoUrl,
+    predictionId: taskId,
+    provider: 'kie-veo',
+    ...(s.status === 'failed' && { error: s.error }),
+  };
+  return new Response(JSON.stringify(response), {
+    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+  });
+}
+
+// ─── Main handler ───
+
+serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const body = await req.json();
+    if (body.avatarStatus) {
+      const auth = await requireDeHubAuth(req);
+      if (!auth.ok) return auth.response;
+      const limited = await rateLimitByIp(req, 'creator-avatar-status', { limit: 60, windowMs: 60 * 60 * 1000 });
+      if (limited) return limited;
+      if (typeof body.avatarStatus !== 'string' || !/^[a-f0-9-]{36}$/i.test(body.avatarStatus)) return new Response(JSON.stringify({ error: 'Invalid avatar job' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      const job = await serviceClient().from('ai_generation_jobs').select('status,result,tx_hash,payment_source').eq('id', body.avatarStatus).eq('wallet_address',auth.wallet).eq('model',AVATAR_MODEL).eq('endpoint','generate-video').maybeSingle();
+      if (job.error) return new Response(JSON.stringify({ error: 'Avatar recovery is unavailable' }), { status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      return new Response(JSON.stringify({ canStartNew: !!job.data && avatarDeliveryReleased(job.data), txHash: job.data?.payment_source === 'credits' ? 'credits' : job.data?.tx_hash || undefined }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
+
+    // ─── Status check ───
+    // Polling must not share the generation budget. This route serves two very
+    // different calls: starting a render (expensive, 10/hour is right) and
+    // asking whether it finished (cheap, and unavoidable — every provider here
+    // returns only a predictionId, so one 1-3 minute render needs dozens of
+    // polls). Charging both to the same bucket killed a render at roughly the
+    // tenth poll, about 50 seconds in, long before any real render completes
+    // and after the caller had already paid in DHB. Status checks get their
+    // own generous bucket.
+    if (body.predictionId) {
+      const pollLimited = await rateLimitByIp(req, 'generate-video-status', {
+        limit: 600,
+        windowMs: 60 * 60 * 1000,
+      });
+      if (pollLimited) return pollLimited;
+
+      const authorized = await authorizeGenerationPoll(req, 'generate-video', body.predictionId);
+      if (!authorized.ok) return authorized.response;
+      const ticket = authorized.ticket;
+      const provider = ticket.provider;
+      body.falAppId = ticket.provider_app;
+      if (['succeeded', 'failed', 'canceled', 'cancelled'].includes(ticket.result?.status)) {
+        const recorded = new Response(JSON.stringify(ticket.result), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+        return await settleGeneration('generate-video', body.predictionId, recorded);
+      }
+
+      if (provider === 'venice') {
+        return await settleGeneration('generate-video', body.predictionId, await handleVeniceStatus(body.predictionId, ticket.result, ticket.wallet_address));
+      }
+
+      if (provider === 'kie') {
+        return await settleGeneration('generate-video', body.predictionId, await handleKieStatusCheck(body.predictionId));
+      }
+      if (provider === 'kie-veo') {
+        return await settleGeneration('generate-video', body.predictionId, await handleKieVeoStatusCheck(body.predictionId));
+      }
+      if (provider === 'fal') {
+        return await settleGeneration('generate-video', body.predictionId, await handleFalStatusCheck(body.predictionId, body.falAppId, ticket?.result));
+      }
+      return await settleGeneration('generate-video', body.predictionId, await handleReplicateStatusCheck(body.predictionId));
+    }
+
+    // ─── New generation ───
+    const { prompt, model, sourceImage, duration = '5s', aspectRatio = '16:9', negativePrompt, resolution, referenceImageUrls, endFrameUrl, audioUrls, videoUrls, seed, effect } = body as GenerateVideoRequest;
+
+    if (typeof prompt !== 'string' || !prompt.trim()) {
+      return new Response(JSON.stringify({ status: 'failed', error: 'A text prompt is required' }), {
+        status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    if (!model || !VIDEO_MODELS[model]) {
+      throw new Error(`Invalid model. Available: ${Object.keys(VIDEO_MODELS).join(', ')}`);
+    }
+
+    const modelConfig = VIDEO_MODELS[model];
+    console.log(`Generating video with ${modelConfig.name}: "${prompt.substring(0, 100)}..."`);
+
+    // Validate image-to-video only models
+    if (model === 'runway-gen4' && !sourceImage) {
+      return new Response(
+        JSON.stringify({
+          error: 'Runway Gen-4 requires an image. Please attach an image to animate, or select a different model.',
+          status: 'failed',
+        }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+      );
+    }
+
+    let preparedAvatar: Awaited<ReturnType<typeof prepareAvatar>> | undefined;
+    let validatedDuration: number | undefined;
+    let providerPriceDhb: number | undefined;
+    let seedanceRoute: ReturnType<typeof seedance2QuoteRoute> | undefined;
+    let veniceInput: Record<string, unknown> | undefined;
+    if (modelConfig.falFamily === 'seedance') {
+      try {
+        validatedDuration = buildSeedance2Request(modelConfig, { prompt, duration, aspectRatio, resolution, sourceImage, endFrameUrl, referenceImageUrls, audioUrls, videoUrls, negativePrompt, seed }).durationSeconds;
+        seedanceRoute = seedance2QuoteRoute(model, {
+          resolution, hasEndFrame: !!endFrameUrl, hasAudioReferences: !!audioUrls?.length,
+          hasVideoReferences: !!videoUrls?.length,
+          hasInlineMedia: ![sourceImage, endFrameUrl, ...(referenceImageUrls ?? []), ...(audioUrls ?? []), ...(videoUrls ?? [])].filter(Boolean).every(kieUsableUrl),
+        }, !!kieKey());
+        providerPriceDhb = quotePriceDhb('video', model, { durationSeconds: validatedDuration, videoProvider: seedanceRoute.provider }) ?? undefined;
+        if (!providerPriceDhb) throw new Error('The selected video route has no verified price');
+        console.log('[video-routing]', { model, ...seedanceRoute });
+      } catch (error) {
+        return new Response(JSON.stringify({ status: 'failed', error: (error as Error).message }), {
+          status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+    }
+    if (isVeniceVideo(model)) {
+      // Venice models are web only: the store apps must not be able to make adult content.
+      if (isStoreAppRequest(req)) {
+        return new Response(JSON.stringify({ status: 'failed', error: WEB_ONLY_MODEL_MESSAGE, code: WEB_ONLY_MODEL_CODE }), { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      }
+      const seconds = Number(String(duration).replace(/s$/, ''));
+      try {
+        if (VENICE_VIDEO_MODELS[model].imageRequired !== !!sourceImage) throw new Error(VENICE_VIDEO_MODELS[model].imageRequired ? 'Attach an image to animate.' : 'Choose Wan Animate to animate an attached image.');
+        if (referenceImageUrls?.length || endFrameUrl || audioUrls?.length || videoUrls?.length || seed !== undefined || effect || negativePrompt) throw new Error('These options are not supported by this Venice model.');
+        veniceInput = veniceVideoOptions(model, { durationSeconds: seconds, resolution, aspectRatio });
+        providerPriceDhb = (await quoteVenice(model, { durationSeconds: seconds, resolution, aspectRatio })).priceDhb;
+      } catch (error) {
+        return new Response(JSON.stringify({ error: (error as Error).message }), { status: error instanceof VeniceError ? 503 : 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      }
+    }
+    if (model === AVATAR_MODEL) {
+      try {
+        if (!Deno.env.get('FAL_KEY')) throw new Error('Avatar generation is unavailable');
+        if (sourceImage || endFrameUrl || referenceImageUrls?.length || audioUrls?.length || videoUrls?.length || negativePrompt || seed !== undefined || effect) throw new Error('Avatar takes only the reviewed portrait, audio and prompt');
+        preparedAvatar = await prepareAvatar(body.avatar, prompt);
+        validatedDuration = preparedAvatar.durationSeconds;
+        providerPriceDhb = quotePriceDhb('video', model, { durationSeconds: validatedDuration }) ?? undefined;
+        if (!providerPriceDhb) throw new Error('Avatar pricing is unavailable');
+        verifyAvatarQuote(body.avatar as AvatarInputs, preparedAvatar, providerPriceDhb);
+      } catch (error) { return new Response(JSON.stringify({ status: 'failed', error: (error as Error).message }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }); }
+    }
+    if (CREATOR_FAL_VIDEO_MODELS[model] && model !== AVATAR_MODEL) {
+      try {
+        validatedDuration = buildCreatorFalVideoRequest(model, { prompt, sourceImage, duration, aspectRatio, resolution, negativePrompt, referenceImageUrls, endFrameUrl, audioUrls, videoUrls, seed, effect }).durationSeconds;
+        if (CREATOR_FAL_VIDEO_MODELS[model].requiresVideoInput) {
+          const auth = await requireDeHubAuth(req);
+          if (!auth.ok) return auth.response;
+          const metadata = CREATOR_FAL_VIDEO_MODELS[model];
+          const sourceSeconds = await referenceVideoDuration(videoUrls![0], metadata.maxSourceDuration ?? metadata.maxDuration, new URL(Deno.env.get('SUPABASE_URL')!).hostname);
+          if (metadata.referenceMode !== 'extend') validatedDuration = sourceSeconds;
+        }
+      } catch (error) {
+        return new Response(JSON.stringify({ status: 'failed', error: (error as Error).message }), {
+          status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+    }
+
+    // Authenticate, price and debit. Charged after validation so a rejected
+    // request never costs anything, and before the provider so a render cannot
+    // be started for free.
+    const charged = await chargeForJob(req, {
+      providerPriceDhb,
+      kind: 'video',
+      modelId: model,
+      body,
+      actionType: 'generate-video',
+      rateLimit: { limit: 20, windowMs: 60 * 60 * 1000 },
+      durationSeconds: validatedDuration ?? (parseInt(String(duration), 10) || undefined),
+    });
+    if (!charged.ok) return charged.response;
+
+    // Route to provider. kie gets first refusal on the models it serves —
+    // the cost tables assume those jobs land there — and anything it cannot
+    // or will not take runs on the model's declared provider as before.
+    try {
+      if (preparedAvatar) {
+        const key = Deno.env.get('FAL_KEY');
+        if (!key) throw new Error('FAL_KEY is not configured');
+        const ticket = await falSubmit(key, AVATAR_ENDPOINT, preparedAvatar.input);
+        return await recordGeneration(charged, new Response(JSON.stringify({ status: 'starting', predictionId: ticket.request_id, provider: 'fal', falAppId: AVATAR_ENDPOINT, statusUrl: ticket.status_url, responseUrl: ticket.response_url }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }));
+      }
+      if (veniceInput) {
+        const submission = await veniceFetch('/video/queue', { ...veniceInput, prompt, ...(sourceImage ? { image_url: sourceImage } : {}) }, true);
+        const result = await submission.json();
+        if (!result.queue_id || result.model !== veniceInput.model) throw new VeniceError('Venice accepted the request but returned an incomplete render ticket.', 503, true);
+        return await recordGeneration(charged, new Response(JSON.stringify({
+          status: 'starting', predictionId: result.queue_id, provider: 'venice',
+          veniceModel: result.model, downloadUrl: result.download_url,
+          providerCostUsd: charged.priceDhb / 1000, markup: 0,
+        }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }));
+      }
+      const kieResponse = seedanceRoute?.provider === 'fal' ? null : await tryKieGeneration(model, {
+        prompt,
+        sourceImage,
+        duration: Math.min(Math.max(parseInt(duration) || 5, 3), 30),
+        aspectRatio,
+        negativePrompt,
+        resolution,
+        referenceImageUrls,
+        endFrameUrl,
+        audioUrls,
+        videoUrls,
+        seed,
+      });
+      // Preserve the existing availability fallback at the accepted price. A provider
+      // failure never authorizes another debit; the platform absorbs this difference.
+      if (seedanceRoute?.provider === 'kie' && !kieResponse) console.warn('[video-routing]', {
+        model, provider: 'fal', reason: 'direct-provider-submit-failed', quotedProvider: 'kie',
+        absorbedProviderCostUsd: (0.3034 - 0.165) * (validatedDuration ?? 5),
+      });
+      const response = kieResponse
+        ?? (modelConfig.provider === 'fal'
+          ? await handleFalGeneration(modelConfig, prompt, sourceImage, duration, aspectRatio, negativePrompt, resolution, referenceImageUrls, endFrameUrl, audioUrls, videoUrls, seed, effect)
+          : await handleReplicateGeneration(modelConfig, model, prompt, sourceImage, duration, aspectRatio, negativePrompt, resolution, seed));
+      if (!response.ok) await charged.refund();
+      return await recordGeneration(charged, response);
+    } catch (providerError) {
+      if (providerError instanceof VeniceError && providerError.uncertain) {
+        await serviceClient().from('ai_generation_jobs').update({ status: 'starting', provider: 'venice', result: { status: 'processing', error: providerError.message, submissionUnconfirmed: true }, updated_at: new Date().toISOString() }).eq('id', charged.jobId).eq('status', 'submitting');
+        return new Response(JSON.stringify({ error: providerError.message, code: 'SUBMISSION_UNCONFIRMED', paymentRestored: false }), { status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      }
+      // The provider refused the job before it started, so nothing was
+      // rendered and the price goes back on the payer's transfer. Say so in
+      // the response: the client used to show a bare "failed to start" and
+      // the user, rightly seeing the DHB leave their wallet, took it as lost.
+      // The restored amount is spent automatically by their next generation.
+      const paymentRestored = await charged.refund();
+      console.error('Error starting generate-video job:', providerError);
+      const errorMessage = providerError instanceof Error ? providerError.message : 'Unknown error';
+      return new Response(
+        JSON.stringify({
+          error: errorMessage,
+          status: 'failed',
+          code: 'START_FAILED',
+          paymentRestored,
+          restoredDhb: paymentRestored ? charged.priceDhb : 0,
+        }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+      );
+    }
+
+  } catch (error) {
+    console.error('Error in generate-video:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    return new Response(
+      JSON.stringify({ error: errorMessage, status: 'failed' }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+    );
+  }
+});
+
+async function handleVeniceStatus(queueId: string, ticket: any, wallet: string): Promise<Response> {
+  if (!ticket?.veniceModel) throw new Error('Missing Venice render ticket');
+  let response: Response;
+  try { response = await veniceFetch('/video/retrieve', { model: ticket.veniceModel, queue_id: queueId }); }
+  catch (error) {
+    if (error instanceof VeniceError && error.status === 400) return new Response(JSON.stringify({ status: 'failed', predictionId: queueId, provider: 'venice', error: error.message }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    throw error;
+  }
+  let media: ArrayBuffer | undefined;
+  let result: any;
+  if (response.headers.get('Content-Type')?.includes('video/')) media = await response.arrayBuffer();
+  else {
+    result = await response.json();
+    if (['FAILED', 'CANCELED', 'CANCELLED'].includes(result.status)) return new Response(JSON.stringify({ status: 'failed', predictionId: queueId, provider: 'venice', error: 'Venice could not complete this render.' }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    if (result.status !== 'COMPLETED') return new Response(JSON.stringify({ status: 'processing', predictionId: queueId, provider: 'venice' }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    if (!ticket.downloadUrl || !String(ticket.downloadUrl).startsWith('https://')) throw new Error('Venice returned no download link');
+    const file = await fetch(ticket.downloadUrl, { signal: AbortSignal.timeout(60_000) });
+    if (!file.ok || !file.headers.get('Content-Type')?.includes('video/')) throw new Error('Video download is pending. Reconnect to collect it.');
+    media = await file.arrayBuffer();
+  }
+  if (!media?.byteLength) throw new Error('Venice returned an empty video');
+  const db = serviceClient();
+  const path = `${wallet}/venice-${queueId.replace(/[^a-zA-Z0-9-]/g, '')}/original`;
+  const { error } = await db.storage.from('creator-assets').upload(path, media, { contentType: 'video/mp4', upsert: true });
+  if (error) throw new Error('Video save is pending. Reconnect to collect it.');
+  const signed = await db.storage.from('creator-assets').createSignedUrl(path, 3600);
+  if (signed.error || !signed.data?.signedUrl) throw new Error('Video link is pending. Reconnect to collect it.');
+  const videoUrl = signed.data.signedUrl;
+  return new Response(JSON.stringify({ status: 'succeeded', predictionId: queueId, provider: 'venice', videoUrl, model: ticket.veniceModel, providerCostUsd: ticket.providerCostUsd, markup: 0 }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+}
+
+// ─── fal.ai generation ───
+
+async function handleFalGeneration(
+  modelConfig: typeof VIDEO_MODELS[string],
+  prompt: string,
+  sourceImage?: string,
+  duration = '5s',
+  aspectRatio = '16:9',
+  negativePrompt?: string,
+  resolution?: string,
+  referenceImageUrls?: string[],
+  endFrameUrl?: string,
+  audioUrls?: string[],
+  videoUrls?: string[],
+  seed?: number,
+  effect?: string,
+) {
+  const FAL_KEY = Deno.env.get('FAL_KEY');
+  if (!FAL_KEY) throw new Error('FAL_KEY is not configured');
+
+  const prepared = CREATOR_FAL_VIDEO_MODELS[modelConfig.id]
+    ? buildCreatorFalVideoRequest(modelConfig.id, { prompt, sourceImage, duration, aspectRatio, resolution, negativePrompt, referenceImageUrls, endFrameUrl, audioUrls, videoUrls, seed, effect })
+    : modelConfig.falFamily === 'seedance'
+      ? buildSeedance2Request(modelConfig, { prompt, sourceImage, duration, aspectRatio, resolution, negativePrompt, referenceImageUrls, endFrameUrl, audioUrls, videoUrls, seed })
+      : undefined;
+
+  // Choose the right endpoint: reference-to-video if ref images, image-to-video if source image, else text-to-video
+  let appId: string;
+  if (prepared) {
+    appId = prepared.appId;
+  } else if (referenceImageUrls && referenceImageUrls.length > 0 && modelConfig.falReferenceModel) {
+    appId = modelConfig.falReferenceModel;
+  } else if (sourceImage && modelConfig.falImageModel) {
+    appId = modelConfig.falImageModel;
+  } else {
+    appId = modelConfig.falTextModel || modelConfig.id;
+  }
+
+  // 30 is Seedance 2.5's ceiling and the highest any family here accepts. Every
+  // builder clamps or snaps to its own model's range below, so this outer bound
+  // only has to avoid truncating the longest of them — it used to cap at 15,
+  // which silently billed a 30s Seedance 2.5 render as a 15s one.
+  const parsedDuration = Math.min(Math.max(parseInt(duration) || 5, 3), 30);
+
+  if (!prepared && !modelConfig.falFamily) throw new Error('No provider input mapping is configured for this video model');
+  const input = prepared?.input ?? buildFalInput(modelConfig.falFamily!, {
+    prompt,
+    sourceImage,
+    duration: parsedDuration,
+    aspectRatio,
+    negativePrompt,
+    resolution,
+    referenceImageUrls,
+    endFrameUrl,
+    audioUrls,
+    videoUrls,
+    seed,
+    omitAudio: modelConfig.falOmitAudio,
+  });
+
+  console.log(`[fal.ai] Submitting to ${appId}`, JSON.stringify(input).substring(0, 500));
+
+  const result = await falSubmit(FAL_KEY, appId, input);
+  console.log(`[fal.ai] Request started: ${result.request_id}`);
+
+  const response: VideoGenerationResponse = {
+    status: 'starting',
+    predictionId: result.request_id,
+    provider: 'fal',
+  };
+
+  // statusUrl and responseUrl ride into the ticket's stored result, which the
+  // status check reads back — fal's own URLs, not ones rebuilt from appId.
+  return new Response(JSON.stringify({
+    ...response,
+    falAppId: appId,
+    statusUrl: result.status_url,
+    responseUrl: result.response_url,
+  }), {
+    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+  });
+}
+
+// ─── fal.ai status check ───
+
+async function handleFalStatusCheck(
+  requestId: string,
+  falAppId?: string,
+  stored?: { statusUrl?: unknown; responseUrl?: unknown } | null,
+) {
+  const FAL_KEY = Deno.env.get('FAL_KEY');
+  if (!FAL_KEY) throw new Error('FAL_KEY is not configured');
+
+  const appId = falAppId || 'fal-ai/seedance-2.0/text-to-video';
+  const urls = falQueueUrls(appId, requestId, stored);
+  console.log(`[fal.ai] Checking status for ${requestId} at ${urls.statusUrl}`);
+
+  const statusData = await falStatus(FAL_KEY, urls.statusUrl);
+  const mappedStatus = mapFalStatus(statusData.status);
+
+  let videoUrl: string | undefined;
+  if (mappedStatus === 'succeeded') {
+    const resultData = await falResult(FAL_KEY, urls.responseUrl);
+    videoUrl = resultData.video?.url;
+  }
+
+  const response: VideoGenerationResponse = {
+    status: mappedStatus,
+    videoUrl,
+    predictionId: requestId,
+    provider: 'fal',
+    ...(mappedStatus === 'failed' && { error: 'Video generation failed on fal.ai' }),
+  };
+
+  return new Response(JSON.stringify(response), {
+    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+  });
+}
+
+// ─── Replicate status check ───
+
+async function handleReplicateStatusCheck(predictionId: string) {
+  const REPLICATE_API_KEY = Deno.env.get('REPLICATE_API_KEY');
+  if (!REPLICATE_API_KEY) throw new Error('REPLICATE_API_KEY is not configured');
+
+  const replicate = new Replicate({ auth: REPLICATE_API_KEY });
+  console.log('Checking status for prediction:', predictionId);
+  const prediction = await replicate.predictions.get(predictionId);
+  console.log('Status:', prediction.status);
+
+  let videoUrl: string | undefined;
+  if (prediction.status === 'succeeded' && prediction.output) {
+    if (typeof prediction.output === 'string') {
+      videoUrl = prediction.output;
+    } else if (Array.isArray(prediction.output)) {
+      videoUrl = prediction.output[0];
+    } else if (prediction.output.video) {
+      videoUrl = prediction.output.video;
+    }
+  }
+
+  const response: VideoGenerationResponse = {
+    status: prediction.status as VideoGenerationResponse['status'],
+    videoUrl,
+    predictionId,
+    error: prediction.error,
+  };
+
+  return new Response(JSON.stringify(response), {
+    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+  });
+}
+
+// ─── Replicate generation ───
+
+async function handleReplicateGeneration(
+  modelConfig: typeof VIDEO_MODELS[string],
+  model: string,
+  prompt: string,
+  sourceImage?: string,
+  duration = '5s',
+  aspectRatio = '16:9',
+  negativePrompt?: string,
+  resolution?: string,
+  seed?: number,
+) {
+  const REPLICATE_API_KEY = Deno.env.get('REPLICATE_API_KEY');
+  if (!REPLICATE_API_KEY) throw new Error('REPLICATE_API_KEY is not configured');
+
+  const replicate = new Replicate({ auth: REPLICATE_API_KEY });
+  const input = buildReplicateInput(model, { prompt, sourceImage, duration, aspectRatio, negativePrompt, resolution, seed });
+
+  console.log('Model input:', JSON.stringify(input).substring(0, 200));
+
+  const predictionParams: { model?: string; version?: string; input: Record<string, unknown> } = { input };
+
+  if (modelConfig.version) {
+    predictionParams.version = modelConfig.version;
+  } else {
+    predictionParams.model = modelConfig.id;
+  }
+
+  const prediction = await replicate.predictions.create(predictionParams);
+  console.log('Prediction started:', prediction.id);
+
+  const response: VideoGenerationResponse = {
+    status: prediction.status as VideoGenerationResponse['status'],
+    predictionId: prediction.id,
+  };
+
+  return new Response(JSON.stringify(response), {
+    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+  });
+}

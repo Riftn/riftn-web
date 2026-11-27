@@ -1,0 +1,927 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <script type="module">
+      import { Buffer } from 'buffer'
+      import process from 'process'
+      window.Buffer = Buffer
+      window.process = process
+    </script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content" />
+    <!-- A post link asks for its post now, while the app code is still on its
+         way, instead of after it has arrived and drawn the page (that wait was
+         ~4 s on desktop, ~6 s on a mid phone). src/lib/post-prefetch.ts picks
+         the answer up. Mirrors apiCall's headers; an expired sign-in is left to
+         the app, which refreshes it first.
+
+         It asks for the post page's code now too, and for the live player's
+         the moment the answer says the post is a live. Those used to wait their
+         turn: the post page was asked for once the app had run, the player
+         once the post page had. The file lists are written in at build
+         (postLinkCodePlugin, vite.config.ts); a dev server leaves the marker
+         as it is and nothing extra is asked for. -->
+    <script>
+      (function () {
+        try {
+          var m = location.pathname.match(/^\/(?:app\/)?(?:post|video|posts)\/(\d+)(?:\/b(?:\/[^/]+)?)?\/?$/);
+          var chat = /^\/chat\/?$/i.test(location.pathname);
+          var code = "__POST_LINK_CODE__";
+          var conn = navigator.connection;
+          if (typeof code !== 'object' || (conn && conn.saveData)) code = null;
+          // Fetched and compiled only: nothing runs early.
+          var want = function (files) {
+            for (var i = 0; i < files.length; i++) {
+              var href = '/' + files[i], css = /\.css$/.test(href);
+              // Already asked for (the app got to it first, and writes whole
+              // addresses): nothing to add.
+              if (document.querySelector('link[href="' + href + '"],link[href="' + location.origin + href + '"]')) continue;
+              var l = document.createElement('link');
+              l.rel = css ? 'preload' : 'modulepreload';
+              if (css) l.as = 'style';
+              l.crossOrigin = '';
+              l.href = href;
+              document.head.appendChild(l);
+            }
+          };
+          if (chat) {
+            // The starter runs this after the HTML chat skeleton has painted.
+            var chatCode = "__CHAT_LINK_CODE__";
+            if (Array.isArray(chatCode) && !(conn && conn.saveData)) {
+              window.__preloadRouteCode = function () { want(chatCode); };
+            }
+            var params = new URLSearchParams(location.search);
+            var room = params.get('room');
+            var opensPublic = params.get('chat') === 'public' ||
+              (!params.has('chat') && !params.has('with') && !window.matchMedia('(max-width: 1023px)').matches);
+            if (!opensPublic || (room && room !== 'global') || !window.fetch ||
+              (conn && conn.saveData) || localStorage.getItem('dehub_token') ||
+              localStorage.getItem('dehub_refresh_token') || localStorage.getItem('dhb_kids_mode') === '1') return;
+            var controller = new AbortController();
+            var timer = setTimeout(function () { controller.abort(); }, 6000);
+            window.__publicChatHistory = {
+              at: Date.now(),
+              promise: fetch('https://api.dehub.io/api/livechat/messages?limit=20&roomId=global', {
+                headers: { Accept: 'application/json' }, cache: 'no-store', signal: controller.signal
+              }).then(function (r) { return r.ok ? r.json() : null; })
+                .catch(function () { return null; })
+                .finally(function () { clearTimeout(timer); })
+            };
+            if (params.get('chat') === 'public' && !params.has('msg') && !params.has('with') &&
+              window.matchMedia('(max-width: 767px)').matches) {
+              var history = window.__publicChatHistory.promise;
+              import('/chat-startup-preview.js').then(function (preview) {
+                return preview.showPublicChatPreview(history);
+              }).catch(function () {});
+            }
+            return;
+          }
+          // Ordinary app routes still fetch the feed layout alongside the
+          // shared entry, even though full-screen chat can now skip it.
+          var appLayoutCode = "__APP_LAYOUT_CODE__";
+          if (Array.isArray(appLayoutCode) && !(conn && conn.saveData)) {
+            window.__preloadRouteCode = function () { want(appLayoutCode); };
+          }
+          if (!m) return;
+          if (code) want(code.r);
+          if (!window.fetch) return;
+          var ls = window.localStorage, h = { Accept: 'application/json' };
+          var tok = ls.getItem('dehub_token');
+          if (tok) {
+            var exp = parseInt(ls.getItem('dehub_token_expires_at') || '', 10);
+            if (!(exp > Date.now() + 5000)) return;
+            h.Authorization = 'Bearer ' + tok;
+          }
+          if (ls.getItem('dhb_kids_mode') === '1') h['X-Kids-Mode'] = '1';
+          window.__postPrefetch = {
+            id: m[1],
+            at: Date.now(),
+            signedIn: !!tok,
+            p: fetch('https://api.dehub.io/api/nft_info/' + m[1], { headers: h, cache: 'no-store' })
+              .then(function (r) { return r.ok ? r.json() : null; })
+              .then(function (j) {
+                try {
+                  var n = j && (j.result || j);
+                  // Same test as the post page's getContentType.
+                  if (code && n && (n.postType === 'live' || n.isLive !== undefined)) want(code.l);
+                } catch (e) {}
+                return j;
+              })
+              .catch(function () { return null; })
+          };
+        } catch (e) {}
+      })();
+    </script>
+    <!-- Apply the saved theme (+ dim settings) to <html> synchronously, during
+         head parse — before the render-blocking stylesheet is matched and long
+         before React mounts. ThemeContext also sets data-theme, but only in a
+         PASSIVE effect that React defers under load, so a light-theme reload
+         painted the dark default first: the sidebar's bg-zinc-* tiles flashed
+         as ugly black boxes until the effect ran. Must be a classic (non-module)
+         script so it runs inline at parse time, not deferred. Keys/migration/
+         defaults mirror ThemeContext.tsx — keep them in sync. -->
+    <script>
+      (function () {
+        try {
+          var d = document.documentElement;
+          var t = localStorage.getItem('dehub.theme') || 'system';
+          if (t === 'christmas') t = 'winter'; // legacy name migration
+          // Halloween 2026: Horror until local midnight unless this device opted
+          // out by picking a theme (mirrors src/lib/halloween-override.ts).
+          var now = new Date();
+          if (now.getFullYear() === 2026 && now.getMonth() === 9 && now.getDate() === 31 &&
+              localStorage.getItem('dehub.halloween2026.optOut') !== '1') t = 'horror';
+          // System Light runs as System with a light tone (ThemeContext SYSTEM_LIGHT).
+          var tone = t === 'system-light' ? 'light' : 'dark';
+          if (tone === 'light') t = 'system';
+          d.dataset.theme = t;
+          d.dataset.systemTone = tone;
+          // Post separator: thin lines instead of cards (src/lib/feed-separator.ts).
+          if (localStorage.getItem('dehub.feedSeparator') === 'line') d.dataset.feedSep = 'line';
+          // Own-line bubbles in General Chat (src/lib/chat-own-bubble.ts).
+          if (localStorage.getItem('riftn.chat.ownBubble') === 'true') d.dataset.chatOwnBubble = '';
+          d.dataset.shortsEnabled = localStorage.getItem('shorts-enabled') === 'false' ? 'false' : 'true';
+          d.dataset.sidebarCollapsed = localStorage.getItem('sidebar-collapsed') === 'true' ? 'true' : 'false';
+
+          // color-scheme is what the browser paints the CANVAS with — the
+          // backdrop it shows for a document before that document's own styles
+          // have painted, plus the scrollbars and the overscroll/rubber-band
+          // area. Left undeclared it computes to `normal`, i.e. light, i.e.
+          // WHITE, which is the flash on reload: nothing in the app's CSS can
+          // prevent it, because it happens before any stylesheet applies. Eight
+          // of the eleven themes (cosmic/hazy/swarms/lavalamp/winter/war/osaka/
+          // jungle) make body AND #app-root `transparent !important` so their
+          // canvas shows through, leaving <html> as the only thing that paints
+          // — so on those the white canvas stays visible for the whole of that
+          // window rather than being covered by an opaque body.
+          d.style.colorScheme = t === 'light' || tone === 'light' ? 'light' : 'dark';
+
+          // Paint the theme's own backdrop NOW, at head-parse time, rather than
+          // waiting for the render-blocking stylesheet that normally carries it.
+          // Values mirror the settled `background-color` of <html> per theme —
+          // keep them in sync with index.css if a theme's backdrop changes.
+          var BG = { glass: '#082a30', light: '#f9f8f4', osaka: '#0a0812', jungle: '#16110c' };
+          d.style.setProperty('--boot-bg', tone === 'light' ? '#fff' : BG[t] || '#000');
+          d.style.setProperty('--boot-fg', t === 'light' || tone === 'light' ? '#09090b' : '#fff');
+
+          // An OBS browser source (/overlay/<token>, ObsOverlayPage). The page
+          // is composited over somebody's live stream, so NOTHING may paint
+          // but the widgets — not the backdrop, not the boot skeleton, and not
+          // before the bundle arrives either, or every source refresh flashes
+          // a black frame into the broadcast. color-scheme goes back to normal
+          // because a dark scheme makes the browser paint the canvas itself.
+          if (location.pathname.indexOf('/overlay/') === 0) {
+            d.dataset.obsOverlay = 'on';
+            d.style.setProperty('--boot-bg', 'transparent');
+            d.style.colorScheme = 'normal';
+          }
+
+          d.dataset.dimLights = localStorage.getItem('dehub.dimLights') === '1' ? 'true' : 'false';
+          var s = Number(localStorage.getItem('dehub.dimStrength'));
+          if (!(s > 0)) s = 50;
+          s = Math.min(100, s);
+          d.style.setProperty('--dim-lights-opacity', (0.12 + 0.6 * (s / 100)).toFixed(3));
+
+          // Frost the app shell from the FIRST painted frame (the sheet itself
+          // is html[data-feed-loading] #root::after, in index.css), so the
+          // welcome panel is the only thing that ever reads as sharp and
+          // everything else — the boot skeleton, the sidebars, the theme
+          // canvas — sits behind it out of focus.
+          //
+          // This must be set HERE, not from React. The first attempt drove it
+          // off the home feed's isLoadingState, which is usually ALREADY FALSE
+          // by the time HomeFeed first renders: the boot prefetch below starts
+          // page 1 at parse time and use-unified-feed adopts it, and the
+          // persisted query cache restores synchronously. So the frost almost
+          // never appeared, and when it did the skeletons had already painted
+          // sharp before React got there — the wrong order, which is the whole
+          // point of the effect.
+          //
+          // FIRST VISIT ONLY, and it lifts on SCROLLING DOWN — never on a
+          // timer. The frost exists to point a brand-new visitor at the welcome
+          // panel; it has no job for anyone who has already seen it, so it is
+          // skipped for a returning visitor, for anyone signed in, and for
+          // anyone who has dismissed the panel. Those are the same conditions
+          // under which HomeIntro itself declines to render, plus the
+          // seen-it-once flag set below.
+          //
+          // `dehub_token` alone is NOT a signed-in test: it is the wallet/API
+          // token, and a visitor authenticated through Supabase has none. That
+          // mistake shipped once and made the panel flash for every Supabase
+          // user, so the sb-* session is checked by SHAPE across all keys — the
+          // project ref is a build-time value, the key can be relocated, and
+          // supabase-js chunks a large session across `.0`/`.1`.
+          // Desktop only — the blur read as an unexplained delay on mobile
+          // first load with no payoff. 767px matches the mobile breakpoint
+          // used elsewhere in index.css.
+          // "Would HomeIntro render?" — shared by the prerendered panel below and
+          // the frost. Signed in means an sb-* Supabase session OR a live wallet
+          // token (see the note above on why dehub_token alone is not enough).
+          var introDismissed = localStorage.getItem('dehub.homeIntroDismissed') === '1';
+          var introSignedIn = false;
+          for (var fi = 0; fi < localStorage.length; fi++) {
+            var fk = localStorage.key(fi);
+            if (fk && /^sb-.*-auth-token/.test(fk) && localStorage.getItem(fk)) { introSignedIn = true; break; }
+          }
+          if (!introSignedIn) {
+            var ftk = localStorage.getItem('dehub_token');
+            var fex = parseInt(localStorage.getItem('dehub_token_expires_at') || '0', 10);
+            introSignedIn = !!ftk && (!fex || Date.now() < fex);
+          }
+          // The welcome panel is prerendered into the boot skeleton at build
+          // (prerenderHomeIntroPlugin, vite.config.ts) so its plate — the page's
+          // LCP element — paints with the first frame instead of after the
+          // bundle. Hide it exactly when HomeIntro itself would return null.
+          if (location.pathname !== '/' || introDismissed || introSignedIn) d.dataset.homeIntro = 'off';
+          // The Moments seat (src/lib/story-shelf-seat.ts): the row of tiles,
+          // or the ask bar when that is what Home showed last visit, or
+          // nothing, so the posts do not move when the real one lands.
+          var shelfSeat = localStorage.getItem('dehub.shelfShown');
+          if (!/^\/(app)?\/?$/.test(location.pathname) || shelfSeat === '0') d.dataset.bootShelf = 'off';
+          else if (shelfSeat === 'ask') d.dataset.bootShelf = 'ask';
+
+          if (location.pathname === '/' && window.innerWidth > 767) {
+            var skip = localStorage.getItem('dehub.introFrostSeen') === '1' || introDismissed || introSignedIn;
+
+            if (!skip) {
+              d.dataset.feedLoading = 'on';
+              try { localStorage.setItem('dehub.introFrostSeen', '1'); } catch (e2) { /* one repeat is fine */ }
+
+              var unfrost = function () {
+                if (d.dataset.feedLoading !== 'on') return;
+                d.dataset.feedLoading = 'off';
+                // Past the 1.2s transition in index.css; the sheet is a
+                // full-viewport backdrop-filter, so it has to stop existing
+                // rather than merely go clear.
+                setTimeout(function () { delete d.dataset.feedLoading; }, 1300);
+              };
+
+              // DOWNWARD scroll only. Reading the panel is the point, so moving
+              // up or sideways must not clear it.
+              //
+              // MUST be null-safe on document.body. This script runs during
+              // <head> parse, where document.body is still null — reading
+              // `document.body.scrollTop` there threw a TypeError, the outer
+              // try/catch swallowed it, and every line below (i.e. all of the
+              // listeners) never ran. The frost went up and could never come
+              // down. It looked fine in a test harness that passed a stub body
+              // object; only a null one reproduces it.
+              //
+              // Measured on dehub.io: <body> is the scroller (overflow-y:auto,
+              // scrollHeight 12419 vs clientHeight 720) while <html> does not
+              // scroll at all, so window.scrollY and documentElement.scrollTop
+              // both stay 0 forever and body.scrollTop is the only real value.
+              var scrollTopNow = function () {
+                var b = document.body;
+                return window.scrollY || d.scrollTop || (b ? b.scrollTop : 0) || 0;
+              };
+              var lastY = 0; // nothing is scrolled at parse time
+              var onScroll = function () {
+                var y = scrollTopNow();
+                if (y > lastY) unfrost();
+                lastY = y;
+              };
+              // Capture phase: a scroll event on an element does not bubble, so
+              // a listener on window never sees <body> scrolling without it.
+              window.addEventListener('scroll', onScroll, { passive: true, capture: true });
+              // And directly on the scroller once it exists, so the unfrost does
+              // not hinge on that capture-phase subtlety being right.
+              document.addEventListener('DOMContentLoaded', function () {
+                if (document.body) document.body.addEventListener('scroll', onScroll, { passive: true });
+              }, { once: true });
+              // Wheel-down covers the gesture before any scrolling has actually
+              // happened — a trackpad flick on a page still settling fires wheel
+              // first, and the two agree on direction.
+              window.addEventListener('wheel', function (e) {
+                if (e.deltaY > 0) unfrost();
+              }, { passive: true, capture: true });
+              // A click anywhere outside the panel (a feed tab, the side menu)
+              // means the visitor is off to use the app: clear the frost so
+              // what they went to see is not left blurred. Clicks inside the
+              // panel keep it, since reading the panel is the point.
+              window.addEventListener('click', function (e) {
+                var t = e.target;
+                if (t && t.closest && t.closest('.dehub-intro')) return;
+                unfrost();
+              }, { capture: true });
+            }
+          }
+        } catch (e) { /* never block boot */ }
+      })();
+    </script>
+    <!-- Belt and braces for the line above: if the inline script is stripped
+         (the preview mirror hosts do this) the meta still gets the browser off
+         its white canvas default. The script wins where both run, because it
+         can tell the light theme apart. -->
+    <meta name="color-scheme" content="dark light" />
+    <title>Riftn</title>
+    <meta name="description" content="Riftn is an open source, user owned and censorship resistant social media protocol giving you all the features incumbents refused to.">
+    <meta name="author" content="Riftn" />
+    <meta name="robots" content="index, follow">
+    <!-- Preview mirror hosts serve this same build
+         outside our Cloudflare worker, so they can't get an X-Robots-Tag header;
+         flip robots to noindex client-side so rendered crawls never index a
+         duplicate of riftn.com. -->
+    <script>
+      if (!/^(?:www\.)?(?:riftn\.com|dehub\.io)$|^localhost$|^127\.0\.0\.1$/.test(location.hostname)) {
+        var dhRobots = document.querySelector('meta[name="robots"]');
+        if (dhRobots) dhRobots.setAttribute("content", "noindex, nofollow");
+      }
+    </script>
+    <meta name="google-site-verification" content="fCbsM2lCr6JdQuMh1uHAHwzbLC1OoXzvK-VKFnkbZnQ" />
+    <!-- Canonical set per-route imperatively (SEOHead/DocsSEO via lib/head-meta) so each leaf route self-references -->
+
+    <!-- Organization entity: one canonical identity + sameAs graph so Google can
+         reconcile the Riftn brand across properties. Keep this list in sync with
+         ORG_SAME_AS in CLOUDFLARE_WORKER_SEO.js. -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "Riftn",
+      "alternateName": ["DeHub", "dehub.io"],
+      "url": "https://riftn.com",
+      "logo": { "@type": "ImageObject", "url": "https://riftn.com/icon-512.png", "width": 512, "height": 512 },
+      "description": "Riftn is an open source, user owned and censorship resistant social media protocol giving you all the features incumbents refused to.",
+      "sameAs": [
+        "https://www.wikidata.org/wiki/Q140518527",
+        "https://x.com/riftn_com",
+        "https://github.com/Riftn",
+        "https://www.linkedin.com/company/dehub-dao",
+        "https://t.me/riftn_com",
+        "https://play.google.com/store/apps/details?id=io.dehub.mobile",
+        "https://www.instagram.com/riftn_com/",
+        "https://www.tiktok.com/@riftn_com",
+        "https://apps.apple.com/app/id6770382811"
+      ]
+    }
+    </script>
+
+    <!-- WebSite entity: reinforces riftn.com as the canonical Riftn site (distinct
+         from the DePaul/Rowan "DeHUB" university portals) for the brand term. -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "Riftn",
+      "alternateName": "riftn.com",
+      "url": "https://riftn.com",
+      "publisher": { "@type": "Organization", "name": "Riftn", "url": "https://riftn.com" }
+    }
+    </script>
+
+    <!-- SoftwareApplication entity: tells Google/AI that Riftn is a free social
+         networking app (not a university portal), and links the Google Play app. -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "Riftn",
+      "applicationCategory": "SocialNetworkingApplication",
+      "operatingSystem": "Android, iOS, Web",
+      "url": "https://riftn.com",
+      "downloadUrl": "https://riftn.com/dehub-app",
+      "publisher": { "@type": "Organization", "name": "Riftn", "url": "https://riftn.com" },
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+      "description": "Riftn is an open-source, user-owned, censorship-resistant decentralised social network for Web3 creators and communities, with watch-to-earn, tokenised on-chain subscriptions, live streaming and play-to-earn."
+    }
+    </script>
+
+    <!-- Open Graph — generic brand fallback; per-route tags override via Helmet -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Riftn" />
+    
+    
+    <meta property="og:image" content="https://riftn.com/og/home.jpg?v=5">
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <!-- No og:url: this shell is served for every SPA route, so a fixed one
+         declared every page to be the homepage. SEOHead writes it per route. -->
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@riftn_com" />
+    
+    
+    <meta name="twitter:image" content="https://riftn.com/og/home.jpg?v=5">
+
+    <!-- Favicons -->
+    <link rel="icon" href="/favicon.ico?v=7" sizes="48x48">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=7">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96.png?v=7">
+    <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png?v=7">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=3">
+    <link rel="manifest" href="/manifest.json">
+
+    <!-- Always-used origin (every route, incl. light landing pages like /prompt):
+         Supabase (edge fns / i18n / storage). A static <link> so the preload
+         scanner finds it at the earliest possible moment. -->
+    <link rel="preconnect" href="https://aigxuutjaqsywioxjefr.supabase.co" crossorigin>
+
+    <!-- Route-aware boot warming + feed prefetch.
+         api.dehub.io (feed API, CORS fetch) and the DO Spaces CDN (post media) are
+         contacted ONLY inside the app tree ("/" and "/app/*"). Warming them on
+         light landing routes like /prompt, /docs or the SEO pages just opens
+         sockets that are never used (DebugBear "resource hint not used" 7/15).
+         Emitting the hints from this inline head script — which the parser runs
+         before <body> — keeps them nearly as early as a static <link> on the
+         routes that DO need them, and skips them everywhere else. Wallet origins
+         (web3auth / web3modal / walletconnect) are warmed separately, on login
+         intent (warmWalletOrigins in AuthProvider), so they no longer sit unused
+         here either. Preview mirror hosts strip inline scripts — the app's hooks
+         then connect normally, so the only loss is the head-start, never correctness. -->
+    <script>
+      (function () {
+        try {
+          var p = location.pathname;
+          var isApp = p === "/" || p === "/app" || p.indexOf("/app/") === 0 || p === "/chat";
+
+          if (isApp) {
+            var head = document.head;
+            var hint = function (rel, href, cors) {
+              var l = document.createElement("link");
+              l.rel = rel;
+              l.href = href;
+              if (cors) l.crossOrigin = "anonymous";
+              head.appendChild(l);
+            };
+            // Feed API is hit at boot via fetch() (CORS) — the warmed socket is
+            // reused only when the preconnect is crossorigin (DebugBear 7/14).
+            hint("preconnect", "https://api.dehub.io", true);
+            // Video files play straight from DO Spaces, but only after first
+            // paint, so a DNS lookup is enough there (a full preconnect made
+            // five, and PSI flags more than four).
+            hint("dns-prefetch", "https://dehubcdn.ams3.cdn.digitaloceanspaces.com", false);
+            // Posters and avatars come through the dehub.io image transform
+            // (cdnImage in media-url.ts) as plain <img>, so no crossorigin.
+            hint("preconnect", "https://dehub.io", false);
+          }
+
+          // Boot feed fetch: start the page-1 /api/feed request at parse time,
+          // long before the entry bundle downloads and React mounts (LCP audit
+          // 7/14: the hook-issued request didn't hit the wire until ~1.8s). The
+          // promise is adopted by fetchUnifiedFeedFromAPI (use-unified-feed.ts)
+          // only when the params match this exact default request; any mismatch,
+          // error, or non-OK response resolves null and the hook fetches normally.
+          // Gated to the default-feed routes only (deep /app/* routes request
+          // different params, so they can't adopt this promise anyway).
+          // The token is sent only while it is still live: /api/feed answers an
+          // expired one with 200 and a body stripped of per-viewer fields
+          // (isLiked…), which the SPA would cache as "this user liked nothing".
+          // __DEHUB_FEED_VIEWER__ records whose engagement state this response
+          // describes so the SPA refuses to adopt it for anyone else.
+          // The welcome panel's silk plate. It is a CSS background set from an
+          // inline style in HomeIntro, so the preload scanner cannot see it —
+          // it is only discovered once React has rendered and styles resolve,
+          // which is why the panel sat as an empty box while the sidebars (text
+          // and inline SVG, zero requests) painted immediately. Hinting it here
+          // puts it on the wire at parse time instead. Root only: that is the
+          // one route the panel renders on.
+          // Not via hint() above: that helper sets only rel/href, and a
+          // rel="preload" without an `as` is ignored by the browser (and warns).
+          if (p === "/") {
+            var plate = document.createElement("link");
+            plate.rel = "preload";
+            plate.as = "image";
+            plate.href = "/brand-kit/bg/bg-16.jpg";
+            // Phones never show this plate: they draw the inline crop below.
+            if (!window.matchMedia("(max-width: 639px)").matches) document.head.appendChild(plate);
+          }
+
+          if (p === "/" || p === "/app" || p === "/app/") {
+            // No Content-Type: a bodyless GET with one needs a CORS preflight.
+            var h = { "Accept": "application/json" };
+            var t = localStorage.getItem("dehub_token");
+            var exp = parseInt(localStorage.getItem("dehub_token_expires_at") || "0", 10);
+            var live = !!t && (!exp || Date.now() < exp);
+            if (live) h["Authorization"] = "Bearer " + t;
+            window.__DEHUB_FEED_VIEWER__ = live
+              ? (localStorage.getItem("dehub_wallet") || "").toLowerCase() || null
+              : null;
+            window.__DEHUB_FEED__ = fetch(
+              "https://api.dehub.io/api/feed?page=1&limit=10&sortBy=createdAt&sortOrder=desc&status=all",
+              { headers: h }
+            ).then(function (r) { return r.ok ? r.json() : null; })
+             .catch(function () { return null; });
+
+            // First poster: on phones the first feed card's <video poster> is
+            // the LCP, and the app only names it after the entry bundle has
+            // run and the card has rendered (PSI: 2.3 s resource load delay).
+            // The feed response already says which image it is, so start it
+            // as soon as the response lands. The URL must match the card's
+            // byte for byte or this is a wasted download: it mirrors
+            // mapVideoItem (use-unified-feed.ts), cdnImage + deviceWidth
+            // (media-url.ts) and VideoCard's deviceWidth(isMdUp() ? 680 : 360).
+            // Video and live posts only; photo posts use a srcset.
+            window.__DEHUB_FEED__.then(function (d) {
+              try {
+                var first = d && Array.isArray(d.result) ? d.result[0] : null;
+                if (!first || (first.postType !== "video" && first.postType !== "live")) return;
+                var src = (first.postType === "live" && first.stream && first.stream.thumbnail) || first.imageUrl;
+                if (!src || /\.(svg|gif)(\?|$)/i.test(src)) return;
+                if (sessionStorage.getItem("dehub:image-transforms-down") === "1") return;
+                var cdn = "https://dehubcdn.ams3.cdn.digitaloceanspaces.com/";
+                if (/^https?:\/\//.test(src)) {
+                  if (src.indexOf(cdn) !== 0) return;
+                } else if (/^(images|shorts|live)\//.test(src)) {
+                  src = cdn + src;
+                } else return;
+                var dpr = Math.min(window.devicePixelRatio || 1, 3);
+                var need = (window.matchMedia("(min-width: 768px)").matches ? 680 : 360) * dpr;
+                var ladder = [64, 96, 128, 192, 256, 360, 480, 736, 1100, 1440, 1920];
+                var w = 1920;
+                for (var i = 0; i < ladder.length; i++) if (ladder[i] >= need) { w = ladder[i]; break; }
+                var l = document.createElement("link");
+                l.rel = "preload";
+                l.as = "image";
+                l.href = "https://dehub.io/cdn-cgi/image/format=auto,quality=80,width=" + w + "/" + src;
+                l.setAttribute("fetchpriority", "high");
+                l.setAttribute("data-feed-poster", "");
+                document.head.appendChild(l);
+              } catch (e) { /* hint only */ }
+            });
+          }
+        } catch (e) { /* never block boot */ }
+      })();
+    </script>
+
+    <!-- LCP: header logo — same URL as DesktopSidebar / MobileHeader so browser discovers early -->
+    <link rel="preload" as="image" href="/dehub-header-logo.png" fetchpriority="high">
+    <!-- Phone welcome card silk (.dehub-intro-silk in index.css), inlined so the
+         prerendered card paints it in the first frame. It is the page's LCP on
+         phones; fetched, the app could replace the prerendered card before the
+         image arrived, and LCP fell to late app-rendered text instead. -->
+    <style>@media (max-width: 639px) { :root { --silk-phone: url(data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5Ojf/2wBDAQoKCg0MDRoPDxo3JR8lNzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzf/wgARCALiAeADASIAAhEBAxEB/8QAGgABAQEBAQEBAAAAAAAAAAAAAQACAwYFBP/EABQBAQAAAAAAAAAAAAAAAAAAAAD/2gAMAwEAAhADEAAAAfgXcOGf0ZOJ3Dhdg43YOV1jkdo43aON2jjdo43aON2DldY5HaON2DldY5XaOV1Tk9U5PVOT10cHvHG7xwu4cD9Afnu4cDuHE7hxuwcbtH7TsHHPYOJ1DldQ5XSOZ1jldI53SOd0jndI53SOV1DndI5nUOd0Tk9I53VOT1TlronN6py100crqnG7RxuocjqHI6hyOocjrHI6xyusfsz0yczpkwbDBuMWoxbjFqM2oxbjFqM2oxbDNqM2ozbjNtMO9GHaY1tMO0w7jNqMWwwbDBsMGwwbDFsMm4w6j9OdZDOgzIBoCYzMEwVBMFQSFUUwWoFQdJnWkzpQdQLBMAhEEQFQCBIEwTBMdcwRAkCQJRRDEUQkDEJRIkiLJNom0TJNDEMA2YQBAEAbMMAxDEMQxGgBCGAYhCGAYhCGIYhhFEU0WjRaNEySQxDZDRkNGQ0ZDQBozDENmNWYYhiGzGoBgGIQhswwGgDQQuUYRTRaNFo0WhFEYhgNGQ0ZDRkNGQ0AMBoIYhiGzGgDVmGzG4iiEIQhswwDEMIoimi0aLRotCNQxCAaDJoyDZBswgGghiGIbMMQhDZhswxHQIbMNmGzDAaCFEk0WjRaNFo0WhGIYhAEATIaAEAYBiGIYhCGAYBsw2Y1ZRhNQDAMAxFCMIoi2i0aLRoUSSKA0ZDWQEAQBgGISBiGIohCEA0AMQxCiOjRiAYBiGIahTQsjo0WjRNDEIAgCAIAgDEUQxCQMQhCEIAwDEMQpotGx1bPyhCEMQoimi1I6NFo0SQxCAIAgCAIRRDEVAxCEMAhCAMAwGohZHRst2x3dD5ZAwkiOhHRoW0WhGoSBAEAQBAEgYiiGISBiKIiBAEIYhhLRotmy3bHZ0HodD4cQoimh0aLUiySQwCAJZEAQhIEoohiKgSBCEASCgGIYRTQ6Njs6F0tj0Og7tnm2S0aFtFo0LQ1CERBFkQiiKIqiiGIohIKASCgEgSiRFNDo2OzoO7oXQ6Ds6Dq0eYZHRodCLJJDAIAgCAJAxFUVAxFEURQCERAhFENJNotmx2bHodB6HQuhsdmh0J5lkdGhRGg0AJBEFAJAxFUVRRFQIRQCERBRFENJMjq2W7oXQ6F0uhdDY6tFoRiPOsiySQkCAIAkCQMQxFUVAkCQUAkEQIRUDUKaHVodnQeh0LpbHZsdmhRGgYD4OhGIYigEASBKKIYhKKgSBIEIiCgEgqiqFNDo2OzoXQ6D0Og7Njo0LJJCAIB8ZISBCKASBKKoqBiGIoiiIgoBIIgqiqFkdGx2dC6HQd2x3bLZoWhqKgiCIPjxCEUAkCUVRVFUVBUCQUAkEQRAlEiSaHRst2x6HQd3Qt2y3aJkmiqAQigEPixEQJRRFUVRJFURRECQRAhEQVAwk2i1aLdseh0HodC6HQtWyVBkhgkA0AaAmPgECUVRVFUVAxFEVBECQRQUFQTRNol0W7Y7tj0OhdDoW7RbNEyDITGZgmM2kzajzMRVFUVRVFQJAkCQRREFUEwTE2g06DbsOlsulsd2y3bLVomSZBopgmCUzaglPKFFUVRVFUURRFERAlEUVIMg6Q06DbszvWw27LdstWy1I6EURpKkqimBYJimPIxDEMQxCURREFQVRVFMCoadBp0GtbM71oNug26LVotGhRFkahRJEmiRJEqiRPH1FUVRRFEVBUFUVIKgugdaDWtGd62Y3rQadBpS1JMiiKaFyiiKJIjCMQpDEMR5CoqioEoiiiKopQVDToNOw1rZnbszt0GlDSgyTQojCKIoikKIpDCMQ1FEMR5FISiiKoiiqJkm0GnRadht2G3ZnboFQVBomiqFIURRGoURSFIahiGIYiiPJVFQJRVFUTJKlp2G7Zbdht0G7QakpiqKoYhhJEURcpqEURhGIYhiGIYBgPKVFEMQwkmibRbtlu2W3Ybtlq0TJVFUURUDUMIojUKIojCMIxDEMRUCQIB5aIYhqJktWi2bHdsulst2w3JMlUURRFEMQpCiLlFEURco1DEMQxDEIRQCAeYiGEaRbQ6tlu6F0OhbtlqSZKIqCiKIqiSFymoRRFyikahGIXKJAxCEIREEWTzcJJoW0WzY9DoO7ZdDZatE0VREFAMAxDEKQoi5RRFyikKQwjEJAwDAIRADmyeeRHRodmx2dB6HQuhsdGhpKIiBAEIohiFyi5RSNOUUjTlFyjEMQxDEIRECAQBAHwtGh3noOzoPQ6D0Njo0NJREQRBQCEMQxGohRFymoRcouUXKMQxDEIQgCAIBAFmyfJ0bHodB6HQdnQdWi0JUFAIBEFAMQxC5RcopGoRSNRGohSGIYhgEgQCLIhkc2RyB8/obNdDoPQ2a0bFoYiIIsiAIAxDZjUQpCkahFymoRhGI1EMQhCEIAgEAObI5MjmycemehrobNbNGk0MREEWSLIhFEIQuY1EahGEURhFyi5RiGIYhgEIiyIBAEAWbI5smuh0NbNjo0NAwEAOQEAQiiGIXKLlFyikacouUXKLlGIYDVmEIQBDIgEAQZHNkQD9XTPQd50aSEIgCDIgCEIQxDEaiNRGoRhFyi5RcoxDEMQhCAIA5siGRzZHNkQCIPo7zsURgEAs2RAIgQhsxqIXKLlFyi5RcouUXMacxqzGrMMBoAQBAHNkQCAIAiCIPq6ymnIaMghkTIIA2YbMasxpwmrKaspqzG7MbsxuzG7MasxuxGrMaMxoyGjIayAgDkBAKAiBCPquE0ZDechrOQQyaANAGrMasxuzGnCacJpxG3EbsxuwmnEbsRuxGzIbMhsyGjIaMggCAIAgDAJB9N5xswG85DRgNWI0ZjViN2I3ZjdiNvNN2I6WI2803Yjpc03YjdiN2I2ZDZkNmQ1YhshoyGjMIBoAYBiP3HOOhzjZgNmA2ZjViNWY1ZjdiN2I6WI3YjpYjdiOlzjpYjdiN2I3YjdzjdiNWI1YjRmNGYQhCEgYhCP01EUFQFFURRVFUVRNFUVRNFUTQVE0RRVFURRVBURRVBUFRVBUVR//xAAfEAEBAQEAAQQDAAAAAAAAAAARAAFQECAwgKBgcJD/2gAIAQEAAQUCIiIiIiIj3SIiPSRERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERER5IjweSPJ4PQRERERERERERERERERERHBIiIiIiIjpEREREfV0z4T58Js7WfrDO7nayzu59JTPk9n5rnbyztZZZ2sss7WdzO5n9R//xAAUEQEAAAAAAAAAAAAAAAAAAACg/9oACAEDAQE/ATBf/8QAFBEBAAAAAAAAAAAAAAAAAAAAoP/aAAgBAgEBPwEwX//EABQQAQAAAAAAAAAAAAAAAAAAAMD/2gAIAQEABj8CLmf/xAAcEAEBAQADAQEBAAAAAAAAAAAAAREQMFAgQGD/2gAIAQEAAT8h7AAMYxjGMYxjGfQMYxn9GAAAAAAAAAAAIAAAAYz4GcMZyYzhnDGM/eAAAABjFjGMYxjGMYxjGMYxjGMYxjGMYztAAxjGMYxjGMYxjGMYxYxjGMYxjGMYxjGMYxjGMYxjGM6QDGMYxjGMYsYxjGMYz5z7znGc59ZzjGMYxjGMYxjGM7M4xjGfrxjGMYxjGMYz08YxjGM9XGd+/g3xt41rWta1rfFnM6da1rWta1vbrW+HrWta1rWt7t7t651a1rWta1rW9e8bxv5pzOjWta1rWtb+HW/mnM6da1vG+vvGtb+Hf0zt1rWt8qJ061rWta38G/pnM+951vOt8qdWta1rf1RE7onbv7oiTsnETr1v7ZxEiTtidWtbxv7IiRIk7InRvGta1v7IiRIkSdMTidet/bESJEiRIk6Z161rf2TiIkSJEiRJ9zidWt/dERIkSJEiRIk+oidW+BESJEiRIhIkSfERE6N41rf2ziRIkSJEiRIkSJzERE8mIkSJEiRIkSJETmInVvG/tiJEiRIkSJEiRInzETp3wIiRIkSJEiRIkT5ieVESJEiRIhIkSJ9Tp1rf3xIkSJEiRIkSJE+5974URIkSJEiRIkRPrU8mJEiRIkSJEiRInoRIkSJEiRIkSJET61vkyJEiRIhIkSJE9CJEiRIhIkSJEiehESJEiRIkSJEnoxEiRIkSJEiRE9GJEiEiRIkSJE9CIkSJEiEiRIkRPPxIkSJEISJEiRIk7c8ORIkSJEiRCRIkRJ2Zxn78YkSJEiRIkSJEiRE7M4xn7sYxIkSJEiRIkSJESdueDIkSJEiRIkSJEiROJ5eMSJEiRIkSJEiRIkSJxPLxIkSJEiRIkSJEiIieXiRiRIkSJEiRIkSJE4nl4kSJEiRIkSJEiRJxE8vGJEiRIkSJEiRIziebiRIkSJEiRIkSJGM83EiRIkSJEiRIkSJGM86RIkSJEiRIkSM9DEiRIkSJEiRIxjPOnEiRIkSJEiRIkZ6EiRIkSJEiRIkYz0JEiRIkSJEiRJ6MSJEiRIkSJEiejEiRIkSJEiRInoTiJEiRIkSJEiejESJEiRIkSJEnoxEiRIhIkSJE9KJEiRIkSJET0okSJEiRIkT0ZxEiRIkSJEiJ5e8bzERIkSJEiRIk87W/ESJEiRIkSJ5mta1vERIkSJEiRIieXvNrWoiJEiRCRETzda1a3iJEiRIkSJE8zedWreIkSISJEiInma1q1a1qJEISJEiJ0a3wta1rWrVrUiEISIife+PrWtWreJEIQkT71rWt8HWt41rWq1qRCRIiJ92+NvGta1bzIhIiJ961vgbxvG8a1rWq3iRCRE+da1rWtb+vWta1rWta1rWt5kRE6t8DejfrURE6Lzv7d436vTET6vib037iJzrWrW+DreNa1vZOda1q1rWta3t1vO8bxrWta1rWta1rWta1rWt+9a1rWta1rWt6Na3jWt41reNa1rWta1rWta1rWt5361rWtata1rfrWt41reNb9a1rWta1rWta1rWta3p1rWta1rWta1rWta1rWta3jWta1rWta1rWta1rWta1rWt6Na1rWta1rWta1vxrW8a1rWta1rWta1rWta1rWta1rerWta1rWta1rWta1rWta1rWta1rWta1rWta1rWta1rWta1rfrWta1rWta1rWta1rWta1rWta1rWta1rWta1rWta1rWt6ta1rWta1rWta1rWta1rWta1rWta1rWta1rWta1rWta3+G//2gAMAwEAAgADAAAAELFAJJDEssMMNAEtPtnDDCNABEJPEAMOmnprkvvvjgtglupssrlqmspjiguntgphmisjisvgtijlnulpvtjtuoglpnrlmplguojsjpjglrtortpuvjjqhpsgkkthlkrgqlolqrguumpnhqkovqpvugghvhsmpumogmgmqqsvujjjjtnsjjvsippomrplnqnmqqrqmpjggjktmssjlgqoumnrpvvgiqqrnuvhirqnnqgjsmiqsmiiqpnouoruonuksrglpvugnppqrinpppgughkqugovjnsvpolqgumnlshtrppqglulqqtinvqghovglqnmjoohuukinloitiqjvnugguugtqnoulohhtitkluvprkrklvughlgvjlqosjvgioosnvhongtkvrvtvmhkvitlmjsrqvnnipjlsqkulkmstuqqsniqkrtrkkogjikrmkljhsrhvgjtrshirqrmtirksqhrqrhhluntnssplisoitmpmsqrklksrsrkpvlsrkjjshjisphgrgsiplnlngtnqntpqnupjlkrjntllitpgolnnivmgnsojvglmphkstjgqqkrglstljirlsrhuohjuiplkosghpgrgkvnqvitikksnvgtinqtkrvvrsklgvilpjuhvjgqmkukhtljvkggghirovgmpppulphiutqiqgvjuhqsssstllhunoslitsprgsknqrgjqtmkvvvsiqqnmnijthoskgklhrmmhlovnhjjjkmlpqhhvrjmtgoginslqqprqhqgggjrppvmonnlqtjvhvnujuoqijpjjsspmmrvsssvkqrjovpgnvshuhunsvqokromvoitnvgonupolhugluhpsjigqutmsholsjkprrnvsgkugjnomjvvvhpsrjiinohkvninuitsnolvummhjgtljvjgssrhpgpukqqvnpgjtsisnvvgmrjjnlkkuqmhujoqosprmojtmlqlvnmstiukrqgqugslrpolpoisitpuglppmvlrhgnqrjmitjmvgqiphtiilvvuisguqpqvsoimivupnsvhsrkqvqvvqmnngqsnogmkqtqgspogqqpmpljosshkgthsitktmluutjhojhptmrkklgommniukjljtlmisttuonrlmvskiikvshutqqqvlskuloqmgmvvqrvtiqqqghiughqqrtiurgmqrrmmgvhlmmqqqtvsmhilhllgsimpolosgjkqgqqqqrpjjthvqlgijsttprprsqjvqmmnnntkvjumjnmsngosiuvmmtslvvlqqrrtmpjillhjjtohjplomkjqsjjshqnhqlitvklllqojinhpsnighsissjvgvgtjgMsgjqqqmiumlonvAIHAHPPPIHPIHIPIHvPPIIHIIPAIAP/8QAFBEBAAAAAAAAAAAAAAAAAAAAoP/aAAgBAwEBPxAwX//EABQRAQAAAAAAAAAAAAAAAAAAAKD/2gAIAQIBAT8QMF//xAAfEAEBAQEBAAMBAQEBAAAAAAABABEQIDBhcSExQEH/2gAIAQEAAT8QfrP1n6T9OGP0vxfi/HT835+H/wDzfn0D8+P+I+kfSPpEPpH1j6x9Y+t+Y+t+b8z9b8zGP0vx4H8f+X4vxw/WfrNY/WfWD0fjj8X49MfjAYQ+sfWKU+sfWKfS/N+b8355frNfrNY1r5O/SYxjHyB/4GLN/E8/z0IQhT6R9I+kU+sfSJ+L88sYxjGMYx8ga8rWtb+Z+s83/h/+T+L88lPpH0j6RD6R9I+kfSPpH0vxfjn8zWtY15vN72n1mMeBjH0A/IAA+gClKQhCEIQh45jGMY9B9gEkkkmJJJZJZwlnTLOMsssk4yzghCFKUpSlKQ6Mkkkkkkkkss4zyCSSSSSWWWSWWWWcyyyyySyyyyyIQhCEIUpCEIFllkkzM8ZJJJLLLLLLJmf9njx5k9zr8GQQQQRCEIQhAsgsnjMssstsvHjZZZZZZLLLLLb4Xw8222W3wcIIIhAgggggg7sssssxZZbZbbeb15ssxZZbbbbZbbbbbbbbbbbbbeEREEEEEQR3beFmMYxjGPDbbbbbbbbbbZZZbbbbbZbbZbbbbbbbbbYYiOAghEEEc223hjGMYxjwW22222222223hjFtttttltttttttttttiIgggggggiObbbMYxjGMeDFtttttttttttt42WWW2222W222XjbbbbeEQQQggggjm22zGMYxjGMeGy22y222228bwvGy2y222y2y22y2222xERCCCEEERFtvDGMYxjGM2W2222222222W223hm2222y22y22y22228IiCEEHBERbbLLMYxizFllttttttttttttttttttttlttltllttttt4REQQQQQQRHNllllmLMYxZZbbbbbbbbbbbbbeNtttttttt5sttttttscIgghBBBHC22WWWWYxjGLbLbbbbbbbbbbbLbbbLbbbFstttttttttvCIiCCEIIiObbLMYxjGMZstttttttttttstszbbbbbYi2W222W223wRBBCCCEEd22YssxiyzGLbbbbLbbbbbbLbLLLbbb0ggtllltttt8ERBBCCCO7bLLMYxjGLLLbbbbbbbbbbLbbbbbLbbbbHAhbbLbbbbbwiCCEIIIIjmyyyyyzFlllllttttttttttltllllttttiIIQ4bLbbb4IghBCEEERzbZZZZjFllllltttt5ttttstsssssttvTgIdpbZbbbYYiCCCEIIIiLbZZZjGLMWWWWW3m82222WW2WWWW2222IghDwUttttvCIIIIQgiO7bMWYxjGLLLL42222222W2WWWW223hEEIeKv87bbbY4EEIQQggjq2yyyzGLLLLbbbbze7bbLLLLLLLbzeEEIeir/AJltvgiCEEEERzbZZZjGM2WWWW3xvNttltllllltltt6IIQ8VbeqIIIQQggju2yyzGLLLLbL8G2yyyyyyyyy22/3pCEPiKvoiIhCEEEcGW2WWYssssttvNt8bxbZZZZZZZZbenCEPiCooIghCEIII7ssxZjGLLLbbbbzerLbLLLLLLLLbLbbEQg+MK/oERCEIQiO7bLLLLLLLbLbbb4222WZZZZZZZZbbekEIfEVdQIQQQhCCI7tsssxZiy22zzfG92WWWWWWWWW23hwQ+MKugEEQQQhCIjm22yzFtllttt87PNtllllllllllt4RBCHxFVUCCOBCEEERbbLLLLLLbLbbzbbZt4ttssssssssssvgghDxV9XqKBBEWwQgiI5tssxjFtttttt8ttsssssssssstvSIIfGV/8AAggi22CERHNtmLLLLLbbb422222W2WWWWWWWWWW3pBCHw1VUIQRzbeBBHNttlllllltt+HbZZZZZZZZZZZbeEEEPjKqoBERbbLLBEW2y2y2y2y2222+dttltllllllllllt6QQ+MqqgEI5tssxhf+RbbbLLLLbLbb3fGy2y2yyyyyyyyyy9IIPZVH8vFAgiLbbZZZYttttlltlttt87bbbLbbLLLLLLLLLLbwiCHwFRX8ugII8LLLLL3ZZZbbbbfLbbNtttssssssssssvSCCEO1/L3VQEEEHGbZZZm22WW2W2W3jwnxstsssssssssssttvCCEPhqqowggsiePGZm222W2W234dtllllllllllll8EEEPiorqEEFkcePUsstllttt7tttvW22W2WWWWWWWWW2eEQQh6qn/LxQIQWQcZ42WSWWSy22228222222222222WWWWWWWWWehBHyg5egAggss4k2WWWcZbLLLb8O22y22yyyyyyyy+Agg9FX/AGO5/LoDgFlllllllllnGcLLbbb8LbbLLLLLLLLL4CCIfACv/wCXigQgggssssssss4zps/BvdttttlllllltnoQRCHxgv6gcAgggssssgsss4yyy223u22222222y222y2y2z3IIIPlAX/qEEIIIIO5ZZZZZZZZZbbbb7bbbbZbZbbfOQRDof68fr75+voEEIIiyyCyyyyyyyyyz4Xj1bbZl85ZBBHkC/X7/YEIQgiI6eMssssssstt9r1bbZbbepZZBBHAfIVfcAQcBERHTwcOnrfe29X0EEEfKBVVQCEIIiIiI4dOnT4d5tvdl4+MgiHxhV1QgQggiIiIjhw9Fvdt9PF5vN8kEEEfIFVUAhAgiCIiIiIjh6Obbbbb4Xuy+N6EEEeAH0308fp9KgQgQRERERERERwt+Hfger4CCCDwD9ft1QgQWQRBERERERERHN8Hdttt+FbfBBBHxAPcCEJllnMjhERERERERHB97bb1+EIIQfGBuqECD4CIiIiIiOHg5tttvN8tvogg+MD5QIQLIO75IiIiIiI9bb3bbbfe+CCD2Rb/AG8IBBBZ3fRERERERw+DbbbbZfiIIfAAVf04CCCO7b43pEREREcGLbfW2222y+dt6EEPiAvQEEFnN873eEREREdLYfG222222yy+yIQQ+ELABBB52W23m82IiIiOEdObbbbbbbbbLLL7IIQ+IvoAIPCzbLb6IYiI4PDu2+Ntltlllll5tvSCEPhKfAQR4WWWW3yQxERERHDu82222222WWWWXwRBBD4CugQiOsssstvN6RERERERHdttttttlttltlllttiIIIfAVVCCDwyyyyy83wMRDERER3bebbbbbbLbLLLLLLbEQgh8BVEIQRzZZZZZZbbbbejEREMMMRDHdtttttttltllmLMOCEPhiqgIO7LLLLLLbbbbbwiIhiIYhti222222222W2W2WWWYwgiHwFVAgg5/LZZZZZZZbbbeDDDEMQwwwxbwbbbbbbbbbZZZZZjGMYQh8EVUIQRbbbLLLLLbbbbbbwYiIiIYhhthtttttttttlllmLLwYwQj6KIwhHW2WWWWWWW22222HgwwwxDFtsNsNttttttttsssssxjwMCPwFVAiOrLLLLLbLbbbbDbDwhiGGIYebbDbbbbbLbLbLLMWWegWHuiowhES2yyyyyyy222222wwwwxERDDEPNtttttltlllllmMegYw+4KhCObLLLLMYstttttttsMPBhhhhhthhttttttttltllmMYxj0D6QEYQjm2yyzFllltltttththhhhhhh4MMNtttttttstssssssxjHoF9QEYIi22WYxjGLLbbbbbDDDDDbDDDDbDDDbbbbbbbbLLLMYxZjGMUx8ooQ4ObLLLwWWWW222222G2GGGIYYYYYYbbbbbbbbbZZZZZZizGMeBZfERhCObLLLMYxbbZbbbbbbYYYbbYYYYYbbYbbbbbbZZZizFmLMYxjFMXxEIRzZZjGMYx4bbbbbbbDDbDDDDDDDbbDbbbbbbwxjGMYxjGMYxiy8jHg5tssssssxZbbbbbbbYYbYYYbYYYYbbbYbbbbbZZZiyyyyyyzFllllmGMOC22WWWWUsszbbbbf7bbbDbDDDbDDDDDbbbbbbbbLMWYssssspZZZZZZbYxhFtssspZZZZZbbbbbbYbYbYYYYbYYYYbbbbbbbbZZZiyyyyyyyyllllltjf442WYx4GLLLLLbbbbbbDbDbDbDDbDDDbbbbbbLbbMYsxjGLLLLLLLLLLbwQ8MY8DGMYxm22222w2w2wwxCbbxsTfhAGMYxjGMYxjGMWW2WGH+cMYxjGMY+A2222223g4DHAmxDhvwAGPBjGPBjGMWWYsttsPRjWPAxjGLbbbb4G8HDYhNtttt+EAYxjGMYxjGMWWWW2WW3oxjGNax4MfjAAcNj5gAB4MYxjGMYxjFlttttt6ta1rWvQ+Qbbb4GxwPQn7+IgNYxjGMYxi222y2222937z95rXm+cPsAewn7v157937v3595vNrWMYxjwYzbbbbe7Xm15v/AAgAA/fm/wBX6jx/7v3479p4MYx4MZssttstttvd5teT4B8gPjAAfOCAHofAPBZbbbbbbbes8ePh6f8AO/A+n4f/2Q==) } }</style>
+
+    <!-- Manrope, served from our own origin. It used to come from Google Fonts:
+         a CSS file from fonts.googleapis.com, then the font from
+         fonts.gstatic.com, two extra connections before a single glyph. On a
+         phone the font landed after the first frame, so the welcome panel
+         painted in the fallback face and the app's copy of it (drawn once the
+         bundle ran, in Manrope) measured bigger and was timed as a second,
+         late "largest paint". Same files (Manrope v23, OFL), same unicode-range
+         subsets; the Latin file (24 KB) is preloaded so it is normally in hand
+         when the render-blocking stylesheet is. One variable file per subset
+         covers weights 400-800. -->
+    <link rel="preload" as="font" type="font/woff2" href="/fonts/manrope/manrope-v23-latin.woff2" crossorigin>
+    <style>
+      @font-face { font-family: 'Manrope'; font-style: normal; font-weight: 400 800; font-display: swap; src: url(/fonts/manrope/manrope-v23-cyrillic-ext.woff2) format('woff2'); unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F; }
+      @font-face { font-family: 'Manrope'; font-style: normal; font-weight: 400 800; font-display: swap; src: url(/fonts/manrope/manrope-v23-cyrillic.woff2) format('woff2'); unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116; }
+      @font-face { font-family: 'Manrope'; font-style: normal; font-weight: 400 800; font-display: swap; src: url(/fonts/manrope/manrope-v23-greek.woff2) format('woff2'); unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF; }
+      @font-face { font-family: 'Manrope'; font-style: normal; font-weight: 400 800; font-display: swap; src: url(/fonts/manrope/manrope-v23-vietnamese.woff2) format('woff2'); unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB; }
+      @font-face { font-family: 'Manrope'; font-style: normal; font-weight: 400 800; font-display: swap; src: url(/fonts/manrope/manrope-v23-latin-ext.woff2) format('woff2'); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+      @font-face { font-family: 'Manrope'; font-style: normal; font-weight: 400 800; font-display: swap; src: url(/fonts/manrope/manrope-v23-latin.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+    </style>
+
+    <!-- Noto Color Emoji: fills the gaps in the platform emoji font (Windows has
+         no flag glyphs, older Segoe UI Emoji misses recent codepoints). Google
+         serves it as ~10 unicode-range subsets, so a browser downloads only the
+         chunk for an emoji it can't already draw — and nothing at all on
+         Android/macOS, where the system font wins earlier in the stack.
+         Deferred to idle-after-load rather than preloaded alongside Manrope. On
+         Windows the subsets it actually picks are big — a real load of
+         dehub.io in Aug 2026 pulled 693 KB + 135 KB of woff2 — and spending
+         that during the load window costs bandwidth for glyphs that are, by
+         definition, never the largest contentful paint. `display=swap` already
+         means emoji paint in the platform font first and upgrade on arrival,
+         so deferring changes only WHEN the upgrade lands, not whether.
+         Windows only: it is the one platform whose emoji font has the gaps
+         this fills. Android, iOS and macOS never used the download, and Linux
+         (which is what Lighthouse and most headless audits run as) pulled the
+         whole set — 694 KB on the 2026-09-02 run — to draw a handful of
+         glyphs the monochrome fallback handles fine. -->
+    <script>
+      (function () {
+        if (!/Windows/.test(navigator.userAgent)) return;
+        var href = 'https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&display=swap';
+        function loadEmojiFont() {
+          var l = document.createElement('link');
+          l.rel = 'stylesheet';
+          l.href = href;
+          document.head.appendChild(l);
+        }
+        // Idle callback keeps it off the tail of the load event too, so it
+        // never competes with the app's own post-load work. The timeout is the
+        // guarantee it still happens on a permanently busy main thread.
+        function schedule() {
+          if ('requestIdleCallback' in window) {
+            requestIdleCallback(loadEmojiFont, { timeout: 3000 });
+          } else {
+            setTimeout(loadEmojiFont, 1200);
+          }
+        }
+        if (document.readyState === 'complete') schedule();
+        else window.addEventListener('load', schedule, { once: true });
+      })();
+    </script>
+    <noscript>
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&display=swap" />
+    </noscript>
+
+    <!-- Critical CSS — prevents the pre-stylesheet flash.
+         Colours come from --boot-bg / --boot-fg, set per theme by the head
+         script above, so this no longer hard-codes #000 for all eleven themes:
+         that made the light theme flash BLACK on every reload, the same bug in
+         the other direction. The fallbacks in var() cover the stripped-script
+         case. -->
+    <style>
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+      html, body { height: 100%; width: 100%; background-color: var(--boot-bg, #000); color: var(--boot-fg, #fff); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+      #root { height: 100%; min-height: 100dvh; background-color: var(--boot-bg, #000); }
+      /* OBS browser source: transparent all the way down, whatever a theme's
+         stylesheet says later, and none of the app's chrome or toasts. */
+      html[data-obs-overlay][data-obs-overlay],
+      html[data-obs-overlay][data-obs-overlay] body,
+      html[data-obs-overlay][data-obs-overlay] #root { background: transparent !important; overflow: hidden !important; }
+      html[data-obs-overlay] .bskel,
+      html[data-obs-overlay] [data-sonner-toaster] { display: none !important; }
+
+      /* --- Boot skeleton ------------------------------------------------
+         The three-column app shell, painted at parse time with no JavaScript,
+         so the FIRST frame is already a complete-looking page. Without it the
+         middle column is empty until React mounts while the rails arrive with
+         the bundle, and the page reads as "a panel is missing" and then jumps
+         to filled.
+
+         It lives INSIDE #root, which is what removes it: createRoot() clears
+         its container on the first render, so React swaps the skeleton for the
+         real tree in one commit with no hand-off code to get wrong. Nothing
+         here is ever seen by a screen reader or a crawler — it is empty divs.
+
+         Sizes mirror the real shell so the swap does not shift: rail widths
+         from navigation/DesktopSidebar (60/231px, lg-only), the right rail from
+         PageSkeletons' own HomeRightSidebarSkeleton (w-72/xl:w-80, 288/320px), the 80rem
+         cap and mx-auto from AppLayout, and the tab-bar block from HomePage's
+         sticky bar (35px buttons inside pt-1 pb-2 / sm:pb-3 / lg:pt-2).
+
+         It sits under the frost sheet (#root::after, z-120) with no z-index of
+         its own, so it is blurred like everything else while the welcome panel
+         above it stays sharp. */
+      .bskel { display: flex; width: 100%; max-width: 80rem; margin: 0 auto; }
+      /* The rails must be DRAWN, not merely reserved. They shipped as empty
+         width-only spacers, so the first frame was middle blocks floating in
+         two blank gutters — and the "side panel skeletons" a visitor actually
+         saw were React's real sidebars arriving later, by which time this
+         skeleton had already been cleared. That is the gap that read as the
+         middle loading out of step with the sides. */
+      .bskel-rail, .bskel-rrail { display: none; flex: none; }
+      /* riftn.com/chat has no rails or feed: it waits as a chat list beside an
+         empty chat, the shape of FullScreenChatShell. The script before #root
+         picks it. */
+      .bskel-chat { display: none; position: fixed; inset: 0; }
+      html:is([data-boot-chat],[data-boot-docs]) .bskel { display: none; }
+      html[data-boot-chat] .bskel-chat { display: flex; }
+      .bskel-docs { display: none; }
+      html[data-boot-docs] .bskel-docs { display: block; }
+      .docs-loading-shell { min-height: 100dvh; }
+      .docs-loading-header, .docs-loading-sidebar, .docs-loading-frame { box-sizing: border-box; }
+      .docs-loading-header { display: flex; align-items: center; gap: .75rem; height: 3.5rem; padding: 0 .75rem; border-bottom: 1px solid var(--bskel-b); }
+      .docs-loading-header span:first-child { width: 2rem; height: 2rem; }
+      .docs-loading-header span:nth-child(2) { width: 5.5rem; height: 1.25rem; }
+      .docs-loading-header span:last-child { width: 2rem; height: 2rem; margin-inline-start: auto; }
+      .docs-loading-row { display: flex; }
+      .docs-loading-sidebar { display: none; }
+      .docs-loading-column { flex: 1; min-width: 0; }
+      .docs-loading-frame { max-width: 56rem; margin-inline: auto; padding: 2rem 1.5rem; }
+      .docs-loading-shell span, .docs-loading-content span { display: block; border-radius: .5rem; background: color-mix(in srgb, currentColor 9%, transparent); }
+      .docs-loading-crumb { width: 8rem; max-width: 100%; height: 1rem; margin-bottom: 1.5rem; }
+      .docs-loading-title { width: 84%; height: clamp(2.25rem, 5vw, 3.25rem); margin-bottom: 1rem; }
+      .docs-loading-meta { width: min(15rem, 68%); height: 1.125rem; margin-bottom: 2rem; }
+      .docs-loading-content .docs-loading-cover { display: none; aspect-ratio: 40 / 21; border-radius: 1rem; margin-bottom: 2rem; }
+      :is([data-boot-docs="article"], [data-docs-loading-article]) .docs-loading-cover { display: block; }
+      .docs-loading-line { width: 100%; height: 1rem; margin-bottom: .75rem; }
+      .docs-loading-line:last-child { width: 72%; }
+      @media (min-width: 1024px) {
+        .docs-loading-header { display: none; }
+        .docs-loading-sidebar { display: block; flex: 0 0 16rem; min-height: 100dvh; padding: 1.375rem .75rem; border-inline-end: 1px solid var(--bskel-b); }
+        .docs-loading-sidebar span { width: 78%; height: 1.25rem; margin: 1.25rem .5rem; }
+        .docs-loading-sidebar span:first-child { width: 6rem; margin-top: 0; }
+        .docs-loading-sidebar span:nth-child(2) { width: auto; height: 2.25rem; margin-inline: 0; }
+      }
+      .bskel-chat-list { width: 100%; padding-top: 12px; }
+      .bskel-chat-top { height: 48px; margin: 0 12px 12px; border-radius: 16px; background: var(--bskel, rgba(255,255,255,.07)); }
+      .bskel-chat-row { height: 80px; padding: 16px; display: flex; align-items: center; gap: 12px; }
+      .bskel-chat-row::before { content: ''; flex: none; width: 48px; height: 48px; border-radius: 8px; background: var(--bskel, rgba(255,255,255,.07)); }
+      .bskel-chat-row::after { content: ''; width: 55%; height: 14px; border-radius: 4px; background: var(--bskel, rgba(255,255,255,.07)); }
+      @media (min-width: 768px) {
+        .bskel-chat-list { flex: none; width: clamp(18rem, 30vw, 26.5rem); border-right: 1px solid rgba(255,255,255,.07); }
+      }
+      .bskel-wash { background: var(--bskel, rgba(255,255,255,.07)); border-radius: 4px; }
+      .bskel-logo { height: 41px; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+      .bskel-sidebar { height: calc(100dvh - 123px); padding: 10px; border-radius: 16px; background: var(--bskel-surface, #18181b); overflow: hidden; }
+      .bskel-navrow { height: 58px; display: flex; align-items: center; gap: 12px; }
+      .bskel-navrow::before { content: ''; width: 36px; height: 36px; border-radius: 10px; background: var(--bskel, rgba(255,255,255,.07)); }
+      .bskel-navrow::after { content: ''; width: 72px; height: 14px; border-radius: 4px; background: var(--bskel, rgba(255,255,255,.07)); }
+      .bskel-create { height: 46px; margin-top: 12px; border-radius: 16px; background: var(--bskel, rgba(255,255,255,.07)); }
+      .bskel-panel { height: 438px; margin-bottom: 16px; padding: 12px; border-radius: 16px; background: var(--bskel-surface, #18181b); }
+      .bskel-panel:last-child { height: 414px; }
+      .bskel-panel-tabs { display: flex; justify-content: space-around; margin: 0 0 24px; }
+      .bskel-panel-tabs > div { width: 20px; height: 20px; }
+      .bskel-search { height: 38px; margin-bottom: 11px; border-radius: 12px; background: var(--bskel, rgba(255,255,255,.06)); }
+      .bskel-main { flex: 1 1 auto; min-width: 0; width: 100%; padding-top: 44px; }
+      /* Bottom margins are one px over the tab bar's: measured on the live
+         site, the app's welcome panel sits at y=92 (phone) / y=56 (desktop)
+         and the prerendered one in this skeleton sat one px above both. */
+      .bskel-tabs { height: 35px; margin: 4px 8px 9px; border-radius: 12px; background: var(--bskel, rgba(255,255,255,.06)); }
+      .bskel-tabs { height: 35px; margin: 4px 8px 13px; border-radius: 12px; background: var(--bskel-nav, var(--bskel-surface, #18181b)); display: flex; align-items: center; }
+      .bskel-tabs > div { flex: 1; display: flex; justify-content: center; }
+      .bskel-tabs > div:first-child { flex: none; width: 40px; }
+      .bskel-tabs span { width: 16px; height: 16px; }
+      html[data-shorts-enabled="false"] .bskel-shorts { display: none; }
+      .bskel-island { display: none; }
+      .bskel-shelf { display: none; gap: 8px; overflow: hidden; padding: 2px 0; margin: 0 0 10px; }
+      .bskel-shelf > div { flex: none; width: 150px; height: 52px; border-radius: 17px; }
+      .bskel-shelf > div:first-child { width: 52px; }
+      html[data-boot-shelf="ask"] .bskel-shelf { padding: 0; margin: 2px 0 12px; }
+      html[data-boot-shelf="ask"] .bskel-shelf > div:first-child { flex: 1 1 auto; width: auto; height: 48px; border-radius: 12px; }
+      html[data-boot-shelf="ask"] .bskel-shelf > div + div { display: none; }
+      .bskel-card { height: 300px; margin: 0 8px 12px; border-radius: 16px;
+                    background: var(--bskel, rgba(255,255,255,.06));
+                    border: 1px solid var(--bskel-b, rgba(255,255,255,.08)); }
+      .bskel-post { height: 180px; margin: 0 8px 12px; border-radius: 16px; background: var(--bskel, rgba(255,255,255,.06)); }
+      .bskel-feed { padding: 0 8px; }
+      .bskel-feed-card { padding: 12px 12px 24px; margin-bottom: 12px; border: 1px solid var(--bskel-b, rgba(255,255,255,.12)); border-radius: 16px; background: var(--bskel-card, rgba(255,255,255,.03)); break-inside: avoid; }
+      .bskel-header { display: flex; align-items: flex-start; gap: 12px; height: 44px; }
+      .bskel-avatar { width: 36px; height: 36px; border-radius: 6px; flex: none; }
+      .bskel-identity { flex: 1; padding-top: 2px; }
+      .bskel-identity > div:first-child { width: 128px; max-width: 70%; height: 14px; margin-bottom: 6px; }
+      .bskel-identity > div:last-child { width: 80px; max-width: 50%; height: 12px; }
+      .bskel-menu { width: 4px; height: 16px; margin: 4px 8px 0 0; }
+      .bskel-media { aspect-ratio: 16/9; border-radius: 16px; }
+      .bskel-media-image { aspect-ratio: 3/4; }
+      .bskel-caption { padding-top: 16px; }
+      .bskel-caption > div { height: 14px; width: 80%; margin: 4px 0 5px; }
+      .bskel-caption > div:last-child { height: 12px; width: 72px; margin: 14px 0 2px; }
+      .bskel-actions { display: flex; justify-content: space-between; align-items: center; height: 25px; margin-top: 8px; }
+      .bskel-actions > div { width: 36px; height: 20px; border-radius: 6px; }
+      .bskel-actions > div:last-child { width: 52px; }
+      /* The welcome panel prerendered into the card slot at build (vite.config.ts
+         prerenderHomeIntroPlugin). The boot script sets data-home-intro="off"
+         when HomeIntro would not render: off "/", signed in, or dismissed. */
+      html[data-home-intro="off"] [data-prerendered-intro] { display: none; }
+      /* Chrome paints while the parser is still inside the panel, so the first
+         frame could show a half-built card (300 px instead of 565). Its silk was
+         then a small LCP candidate, and the app's full-size card a later, larger
+         one. Keep the panel unpainted until its end marker is parsed. */
+      [data-prerendered-intro]:not(:has(> [data-intro-done])) { visibility: hidden; }
+      html[data-home-intro="off"] [data-home-intro-slot] { display: none; }
+      @media (prefers-reduced-motion: no-preference) {
+        .bskel-wash { animation: bskel-pulse 2s ease-in-out infinite; }
+        @keyframes bskel-pulse { 50% { opacity: .5; } }
+      }
+      @media (max-width: 1023px) {
+        html:not([data-boot-shelf="off"]):not([data-boot-chat]) .bskel-shelf { display: flex; }
+        html[data-theme="immersive"] .bskel-main { padding-top: 0; }
+        html[data-theme="immersive"] .bskel-tabs { display: none; }
+        html[data-theme="immersive"] .bskel-island { position: fixed; top: calc(env(safe-area-inset-top, 0px) + 6px); left: 50%; transform: translateX(-50%); width: 148px; height: 44px; display: flex; align-items: center; justify-content: space-between; padding: 0 10px; border: 1px solid rgba(255,255,255,.12); border-radius: 16px; background: rgba(16,16,18,.9); z-index: 120; }
+      }
+      @media (max-width: 639px) {
+        html[data-theme="immersive"] .bskel-feed-card { display: flex; flex-direction: column; margin: 0 -8px; padding: 22px 0; border: 0; border-bottom: 1px solid rgba(255,255,255,.12); border-radius: 0; background: transparent; }
+        html[data-theme="immersive"] .bskel-feed-card:first-child { padding-top: 0; }
+        html[data-theme="immersive"] .bskel-feed-card:first-child .bskel-media { order: -1; }
+        html[data-theme="immersive"] .bskel-feed-card:first-child .bskel-media { aspect-ratio: 9/16; }
+        html[data-theme="immersive"] .bskel-feed-card :is(.bskel-header,.bskel-caption,.bskel-actions) { margin-left: 16px; margin-right: 16px; }
+        html[data-theme="immersive"] .bskel-media { border-radius: 0; }
+      }
+      @media (min-width: 640px) {
+        .bskel-tabs { margin: 4px 12px 13px; }
+        .bskel-card, .bskel-post { margin: 0 12px 12px; }
+        .bskel-card { margin: 0 12px 12px; }
+        .bskel-feed { padding: 0 12px; }
+      }
+      @media (min-width: 1024px) {
+        .bskel-rail { display: block; width: 231px; padding: 8px 18px; }
+        .bskel-rrail { display: block; width: 288px; padding: 8px 16px; }
+        .bskel-main { padding-top: 0; }
+        .bskel-tabs { margin-top: 8px; }
+        .bskel-card { height: 360px; }
+        html[data-sidebar-collapsed="true"] .bskel { max-width: none; }
+        html[data-sidebar-collapsed="true"] .bskel-rail { width: 60px; padding: 8px; }
+        html[data-sidebar-collapsed="true"] .bskel-navrow::after,
+        html[data-sidebar-collapsed="true"] .bskel-rrail,
+        html[data-sidebar-collapsed="true"] .bskel-tabs { display: none; }
+        html[data-sidebar-collapsed="true"] .bskel-feed { column-count: 3; column-gap: 12px; padding-top: 8px; }
+      }
+      @media (min-width: 1280px) { .bskel-rrail { width: 320px; } }
+      /* No wider step at 1536px: the real rail tops out at w-80 (320px). */
+      /* The light theme needs dark blocks, not white ones. data-theme is
+         already on <html> by this point — the script at the top of <head>
+         sets it synchronously, before this stylesheet is even matched. */
+      html:is([data-theme="light"], [data-system-tone="light"]) { --bskel: rgba(0,0,0,.07); --bskel-b: rgba(0,0,0,.10); --bskel-surface: rgba(0,0,0,.02); --bskel-card: transparent; }
+      html:is([data-theme="system"], [data-theme="immersive"]) { --bskel-surface: transparent; --bskel-card: transparent; }
+      html[data-system-tone="light"] { --bskel-nav: rgba(11,11,13,.045); }
+      html[data-system-tone="light"] .bskel-feed-card {
+        border: 0; border-bottom: 1px solid var(--bskel-b); border-radius: 0;
+      }
+      html[data-theme="minimal"] { --bskel: rgba(255,255,255,.04); --bskel-surface: transparent; --bskel-card: transparent; }
+      html:is([data-theme="minimal"],[data-theme="war"],[data-theme="hacker"]) .bskel * { border-radius: 0; }
+    </style>
+  
+  
+  
+  
+  <meta property="og:title" content="Riftn">
+  <meta name="twitter:title" content="Riftn">
+  <meta property="og:description" content="Riftn is an open source, user owned and censorship resistant social media protocol giving you all the features incumbents refused to.">
+  <meta name="twitter:description" content="Riftn is an open source, user owned and censorship resistant social media protocol giving you all the features incumbents refused to.">
+</head>
+
+  <body>
+    <!-- Radix's leading focus guard, kept here for good (see
+         scripts/patch-radix-focus-guards.mjs): inserting or removing a node in
+         front of #root restyles the whole page, which every sheet open paid. -->
+    <span data-radix-focus-guard data-guard-static tabindex="-1" style="outline:none;opacity:0;position:fixed;pointer-events:none"></span>
+    <!-- Boot skeleton — see the .bskel rules in the critical CSS above.
+         Inside #root on purpose: createRoot() clears its container on first
+         render, so React replaces this in the same commit that paints the app.
+         aria-hidden because it is decorative scaffolding; the no-JS fallback
+         below is what non-rendering fetchers get. -->
+    <script>
+      try {
+        var bootPath = location.pathname.replace(/\/+$/, '');
+        if (bootPath === '/chat') document.documentElement.setAttribute('data-boot-chat', '');
+        if (/^\/(?:docs|guides)(?:\/|$)/.test(bootPath)) {
+          document.documentElement.setAttribute('data-boot-docs', /^\/(?:guides|docs\/blog)\/[^/]+$/.test(bootPath) ? 'article' : 'page');
+        }
+      } catch(e) {}
+    </script>
+    <div id="root"><div class="bskel-docs docs-loading-shell" aria-hidden="true">
+      <div class="docs-loading-header"><span></span><span></span><span></span></div>
+      <div class="docs-loading-row">
+        <div class="docs-loading-sidebar"><span></span><span></span><span></span><span></span><span></span><span></span></div>
+        <div class="docs-loading-column"><div class="docs-loading-frame">
+          <div class="docs-loading-content">
+            <span class="docs-loading-crumb"></span><span class="docs-loading-title"></span><span class="docs-loading-meta"></span>
+            <span class="docs-loading-cover"></span><span class="docs-loading-line"></span><span class="docs-loading-line"></span>
+          </div>
+        </div></div>
+      </div>
+    </div><div class="bskel-chat" aria-hidden="true"><div class="bskel-chat-list"><div class="bskel-chat-top"></div><div class="bskel-chat-row"></div><div class="bskel-chat-row"></div><div class="bskel-chat-row"></div><div class="bskel-chat-row"></div><div class="bskel-chat-row"></div><div class="bskel-chat-row"></div><div class="bskel-chat-row"></div></div></div><div class="bskel" aria-hidden="true">
+      <div class="bskel-rail">
+        <div class="bskel-logo"><div class="bskel-wash" style="width:28px;height:28px"></div><div class="bskel-wash" style="width:135px;height:28px"></div></div>
+        <div class="bskel-sidebar" data-desktop-sidebar-bento>
+        <div class="bskel-navrow"></div><div class="bskel-navrow"></div><div class="bskel-navrow"></div>
+        <div class="bskel-navrow"></div><div class="bskel-navrow"></div><div class="bskel-navrow"></div>
+        <div class="bskel-navrow"></div><div class="bskel-navrow"></div>
+        </div>
+      </div>
+      <div class="bskel-main">
+        <div class="bskel-island"><div class="bskel-wash" style="width:28px;height:28px"></div><div class="bskel-wash" style="width:32px;height:28px"></div><div class="bskel-wash" style="width:20px;height:20px"></div></div>
+        <div class="bskel-tabs" data-feed-nav>
+          <div><span class="bskel-wash"></span></div><div><span class="bskel-wash"></span></div><div class="bskel-shorts"><span class="bskel-wash"></span></div><div><span class="bskel-wash"></span></div><div><span class="bskel-wash"></span></div><div><span class="bskel-wash"></span></div><div><span class="bskel-wash"></span></div>
+        </div>
+        <div class="bskel-card" data-home-intro-slot></div>
+        <div class="bskel-feed">
+          <div class="bskel-shelf" aria-hidden="true"><div class="bskel-wash"></div><div class="bskel-wash"></div><div class="bskel-wash"></div><div class="bskel-wash"></div><div class="bskel-wash"></div></div>
+          <div class="bskel-feed-card" data-feed-item>
+            <div class="bskel-header"><div class="bskel-wash bskel-avatar"></div><div class="bskel-identity"><div class="bskel-wash"></div><div class="bskel-wash"></div></div><div class="bskel-wash bskel-menu"></div></div>
+            <div class="bskel-wash bskel-media"></div>
+            <div class="bskel-caption"><div class="bskel-wash"></div><div class="bskel-wash"></div></div>
+            <div class="bskel-actions"><div class="bskel-wash"></div><div class="bskel-wash"></div><div class="bskel-wash"></div><div class="bskel-wash"></div></div>
+          </div>
+          <div class="bskel-feed-card" data-feed-item>
+            <div class="bskel-header"><div class="bskel-wash bskel-avatar"></div><div class="bskel-identity"><div class="bskel-wash"></div><div class="bskel-wash"></div></div><div class="bskel-wash bskel-menu"></div></div>
+            <div class="bskel-wash bskel-media bskel-media-image"></div>
+            <div class="bskel-caption"><div class="bskel-wash"></div><div class="bskel-wash"></div></div>
+            <div class="bskel-actions"><div class="bskel-wash"></div><div class="bskel-wash"></div><div class="bskel-wash"></div><div class="bskel-wash"></div></div>
+          </div>
+          <div class="bskel-feed-card" data-feed-item>
+            <div class="bskel-header"><div class="bskel-wash bskel-avatar"></div><div class="bskel-identity"><div class="bskel-wash"></div><div class="bskel-wash"></div></div><div class="bskel-wash bskel-menu"></div></div>
+            <div class="bskel-caption"><div class="bskel-wash"></div><div class="bskel-wash"></div><div class="bskel-wash"></div></div>
+            <div class="bskel-actions"><div class="bskel-wash"></div><div class="bskel-wash"></div><div class="bskel-wash"></div><div class="bskel-wash"></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="bskel-rrail">
+        <div class="bskel-search"></div>
+        <div class="bskel-panel" data-side-panel><div class="bskel-panel-tabs"><div class="bskel-wash"></div><div class="bskel-wash"></div><div class="bskel-wash"></div></div><div class="bskel-navrow"></div><div class="bskel-navrow"></div><div class="bskel-navrow"></div><div class="bskel-navrow"></div><div class="bskel-navrow"></div></div>
+        <div class="bskel-panel" data-side-panel><div class="bskel-panel-tabs"><div class="bskel-wash"></div><div class="bskel-wash"></div><div class="bskel-wash"></div></div><div class="bskel-navrow"></div><div class="bskel-navrow"></div></div>
+      </div>
+    </div></div>
+    <!-- No-JS fallback. The app is client-rendered, so anything that fetches
+         this page without executing JS previously saw an empty <div id="root">
+         and nothing else. The Cloudflare worker only prerenders for UAs matching
+         BOT_UA_PATTERN, which misses non-crawler fetchers — Google's OAuth
+         verification checker among them, which reported dehub.io as
+         unresponsive (July 2026). This block guarantees every no-JS fetch gets
+         the app name, what it does, and the policy links reviewers look for. -->
+    <noscript>
+      <div style="font-family: sans-serif; background: #000; color: #fff; min-height: 100vh; margin: 0; padding: 40px 20px; box-sizing: border-box;">
+        <div style="max-width: 720px; margin: 0 auto; text-align: center;">
+          <h1>Riftn | Open Source, User Owned Social Media</h1>
+          <p>Riftn is an open source, user owned and censorship resistant social media protocol giving you all the features incumbents refused to.</p>
+          <p>Riftn needs JavaScript to run. Please enable it, or open the app at <a href="https://riftn.com/" style="color:#9f9">riftn.com</a>.</p>
+          <nav style="margin-top: 24px; font-size: 14px;">
+            <a href="/explore" style="color:#aaa; margin:0 8px;">Explore</a>
+            <a href="/features" style="color:#aaa; margin:0 8px;">Features</a>
+            <a href="/docs" style="color:#aaa; margin:0 8px;">Docs</a>
+            <a href="/docs/privacy" style="color:#aaa; margin:0 8px;">Privacy Policy</a>
+            <a href="/docs/terms" style="color:#aaa; margin:0 8px;">Terms of Service</a>
+            <a href="/delete-account" style="color:#aaa; margin:0 8px;">Delete Account</a>
+          </nav>
+        </div>
+      </div>
+    </noscript>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

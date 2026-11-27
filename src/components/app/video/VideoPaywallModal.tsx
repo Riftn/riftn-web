@@ -1,0 +1,920 @@
+import { useTranslation as _useCopy } from 'react-i18next';
+import { useSurfaceDraft } from '@/hooks/use-surface-draft';
+import { useState, useEffect, useRef, lazy, Suspense } from 'react';
+import { useTranslation } from 'react-i18next';
+import { DhbCoin } from '@/components/app/DhbAmount';
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from '@/components/ui/drawer';
+import { Button } from '@/components/ui/button';
+import { clientNavigate } from '@/lib/client-navigate';
+import { Loader2, AlertCircle, ChevronDown, Film, Hash } from "lucide-react";
+import Video from "@/components/ui/cut-icons/video";
+import Volume2 from "@/components/ui/cut-icons/volume";
+import Upload from "@/components/ui/cut-icons/upload";
+import Image from "@/components/ui/cut-icons/images";
+import Music from "@/components/ui/cut-icons/music";
+
+import X from "@/components/ui/cut-icons/close";
+import Plus from "@/components/ui/cut-icons/add";
+
+import { VideoModel, VideoModelKey, VIDEO_MODELS, VIDEO_MODEL_OPTIONS, getVideoCostUsd, getVideoCostDhb, getVideoResolutions, snapVideoDuration } from '@/constants/video-models.constants';
+import { supabase } from '@/integrations/supabase/client';
+import dhbCoinImage from '@/assets/dehub-coin.png';
+import { useAuth } from '@/contexts/AuthContext';
+
+import { payForJob, useSpendableDhb } from '@/lib/ai-payment';
+import { useJobQuote, fetchJobQuote, type QuoteRequest } from '@/hooks/use-ai-quote';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
+import { dhbText } from '@/lib/dhb-toast';
+import { AvatarVideoPaywall } from './AvatarVideoPaywall';
+import { Slider } from '@/components/ui/slider';
+import { BrandIcon } from '@/components/app/war/WarHudIcon';
+import { ScrollArea } from '@/components/ui/scroll-area';
+
+// Opens when Create is pressed without enough DHB: pay the same amount in another coin.
+const PayWithCoinSheet = lazy(() => import('@/components/app/credits/PayWithCoinSheet'));
+
+export interface VideoGenerationOptions {
+  avatar?: import('@/lib/creator/avatar').AvatarSubmission;
+  duration?: number;
+  resolution?: string;
+  negativePrompt?: string;
+  referenceImageUrls?: string[];
+  endFrameUrl?: string;
+  audioUrls?: string[];
+  videoUrls?: string[];
+  seed?: number;
+}
+
+export interface VideoPaywallModalProps {
+  avatarPrompt?: string;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  model: VideoModel;
+  selectedModelKey: VideoModelKey;
+  onModelChange: (modelKey: VideoModelKey) => void;
+  /** Receives the options and the hash of the transfer that paid for this run. */
+  onConfirm: (options: VideoGenerationOptions | undefined, txHash: string) => void;
+  isGenerating?: boolean;
+  /**
+   * Seed values from a caller that already collected them, so the Creator
+   * Studio's duration and resolution chips are not silently overwritten by
+   * this modal's own defaults. Omit to keep the model defaults.
+   */
+  initialDuration?: number;
+  initialResolution?: string;
+  hasExternalVideoReferences?: boolean;
+}
+
+/** Upload a file to Supabase storage and return its public URL */
+async function uploadToStorage(file: File, folder: string): Promise<string> {
+  const ext = file.name.split('.').pop() || 'bin';
+  const path = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+  const { error } = await supabase.storage.from('ai-media-uploads').upload(path, file);
+  if (error) throw error;
+  const { data } = supabase.storage.from('ai-media-uploads').getPublicUrl(path);
+  return data.publicUrl;
+}
+
+function StandardVideoPaywallModal({
+  open, 
+  onOpenChange, 
+  model, 
+  selectedModelKey,
+  onModelChange,
+  onConfirm,
+  isGenerating = false,
+  initialDuration,
+  initialResolution,
+  hasExternalVideoReferences = false,
+}: VideoPaywallModalProps) {
+  const { t: _copy } = _useCopy();
+  const [dhbPrice, setDhbPrice] = useState<number | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [modelSelectorOpen, setModelSelectorOpen] = useState(false);
+const [modelSearch, setModelSearch] = useState('');
+  const [isPaying, setIsPaying] = useState(false);
+
+  // Basic Seedance 2.0 options
+  const [duration, setDuration] = useState(initialDuration ?? model.defaultDuration ?? 5);
+  const [resolution, setResolution] = useState<string>(initialResolution ?? '720p');
+  const [negativePrompt, setNegativePrompt] = useSurfaceDraft("components/app/video/VideoPaywallModal.tsx:negativePrompt", '');
+
+  // Advanced Seedance 2.0 options
+  const [referenceImages, setReferenceImages] = useState<{ file: File; preview: string }[]>([]);
+  const [endFrameFile, setEndFrameFile] = useState<{ file: File; preview: string } | null>(null);
+  const [audioFiles, setAudioFiles] = useState<File[]>([]);
+  const [videoFiles, setVideoFiles] = useState<File[]>([]);
+  const [seed, setSeed] = useSurfaceDraft<string>("components/app/video/VideoPaywallModal.tsx:seed", '');
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+
+  // Mirrors of the staged attachments, so the unmount cleanup can revoke their
+  // preview URLs without re-running on every change.
+  const referenceImagesRef = useRef<{ file: File; preview: string }[]>([]);
+  const endFrameRef = useRef<{ file: File; preview: string } | null>(null);
+  useEffect(() => {
+    referenceImagesRef.current = referenceImages;
+  }, [referenceImages]);
+  useEffect(() => {
+    endFrameRef.current = endFrameFile;
+  }, [endFrameFile]);
+
+  const refImageInputRef = useRef<HTMLInputElement>(null);
+  const endFrameInputRef = useRef<HTMLInputElement>(null);
+  const audioInputRef = useRef<HTMLInputElement>(null);
+  const videoInputRef = useRef<HTMLInputElement>(null);
+
+  const { walletAddress } = useAuth();
+  // What the wallet actually holds on the two chains the treasury accepts.
+  // That is the only balance there is now — the job is paid for by a transfer
+  // signed here and verified on chain by generate-video.
+  const { walletDhb, isLoading: isWalletLoading } = useSpendableDhb();
+  const navigate = useNavigate();
+  const { t } = useTranslation();
+
+  // Reset options when model changes. Duration and resolution fall back to the
+  // caller's seed first, so a value the creator already chose upstream survives.
+  useEffect(() => {
+    const seeded = initialDuration ?? model.defaultDuration ?? 5;
+    // Snapping here as well as in the studio: this modal is the last thing to
+    // touch the duration before it is priced and charged, and several models
+    // only accept a closed set of lengths.
+    setDuration(snapVideoDuration(model, seeded));
+    const resolutions = getVideoResolutions(model);
+    setResolution(initialResolution && resolutions.includes(initialResolution) ? initialResolution : resolutions.includes('720p') ? '720p' : resolutions[0]);
+    setNegativePrompt.initialize('');
+    // Release the preview URLs before dropping the items, otherwise every
+    // model switch pins another set of image blobs for the page's lifetime.
+    setReferenceImages((prev) => {
+      for (const r of prev) {
+        try { URL.revokeObjectURL(r.preview); } catch { /* already revoked */ }
+      }
+      return [];
+    });
+    setEndFrameFile((prev) => {
+      if (prev) {
+        try { URL.revokeObjectURL(prev.preview); } catch { /* already revoked */ }
+      }
+      return null;
+    });
+    setAudioFiles([]);
+    setVideoFiles([]);
+    setSeed.initialize('');
+    setShowAdvanced(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedModelKey, initialDuration, initialResolution, setNegativePrompt, setSeed]);
+
+  // Same on unmount: the modal can close with attachments still staged.
+  useEffect(() => {
+    return () => {
+      for (const r of referenceImagesRef.current) {
+        try { URL.revokeObjectURL(r.preview); } catch { /* already revoked */ }
+      }
+      const end = endFrameRef.current;
+      if (end) {
+        try { URL.revokeObjectURL(end.preview); } catch { /* already revoked */ }
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (open) {
+      fetchDhbPrice();
+    }
+  }, [open]);
+
+  const fetchDhbPrice = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const { data, error: fetchError } = await supabase.functions.invoke('get-dhb-price');
+      if (fetchError) throw fetchError;
+      const price = data?.prices?.DHB;
+      if (price) {
+        setDhbPrice(price);
+      } else {
+        throw new Error('Failed to get DHB price');
+      }
+    } catch (err) {
+      console.error('Error fetching DHB price:', err);
+      setError(t('tokenPaywall.priceFetchFailed'));
+      setDhbPrice(0.001);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const isPerSecond = !!model.perSecondCostUsd;
+  // Priced by the server, not from the constants. The wallet now transfers
+  // exactly this number and generate-video verifies that the transfer covers
+  // its own quote, so a client-side price that drifted by a single DHB would
+  // fail at the chain rather than merely look wrong.
+  const quoteRequest: QuoteRequest = { kind: 'video', modelId: selectedModelKey, durationSeconds: duration, resolution,
+    hasEndFrame: !!endFrameFile, hasAudioReferences: audioFiles.length > 0, hasVideoReferences: hasExternalVideoReferences || videoFiles.length > 0 };
+  const quoteKey = JSON.stringify(quoteRequest);
+  const latestQuoteKey = useRef(quoteKey);
+  latestQuoteKey.current = quoteKey;
+  const { priceDhb: costDhb, priceUsd: quotedUsd, isLoading: isQuoting, error: quoteError } = useJobQuote(
+    quoteRequest,
+    open,
+  );
+  const costUsd = model.provider === 'venice' || selectedModelKey === 'seedance-2.0' || selectedModelKey === 'seedance-2.0-fast' ? quotedUsd : getVideoCostUsd(model, isPerSecond ? duration : undefined);
+  // Offering a payment someone cannot make would only fail at the signature,
+  // so a wallet short of the price is sent to buy instead.
+  const needsTokens = !isWalletLoading && costDhb > 0 && walletDhb < costDhb;
+  const [coinPayOpen, setCoinPayOpen] = useState(false);
+
+  const hasAdvancedFeatures = !model.requiresVideoInput && (model.supportsReferenceImages || model.supportsEndFrame || model.supportsAudioInput || model.supportsVideoInput || model.supportsSeed);
+
+  const formatDhb = (amount: number) => {
+    if (amount >= 1000000) return `${(amount / 1000000).toFixed(2)}M`;
+    if (amount >= 1000) return `${(amount / 1000).toFixed(1)}K`;
+    return amount.toFixed(0);
+  };
+
+  const handleAddReferenceImages = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    const maxAllowed = (model.maxReferenceImages || 9) - referenceImages.length;
+    const toAdd = files.slice(0, maxAllowed);
+    const newItems = toAdd.map(file => ({ file, preview: URL.createObjectURL(file) }));
+    setReferenceImages(prev => [...prev, ...newItems]);
+    e.target.value = '';
+  };
+
+  const handleRemoveReferenceImage = (idx: number) => {
+    setReferenceImages(prev => {
+      URL.revokeObjectURL(prev[idx].preview);
+      return prev.filter((_, i) => i !== idx);
+    });
+  };
+
+  const handleEndFrame = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (endFrameFile) URL.revokeObjectURL(endFrameFile.preview);
+      setEndFrameFile({ file, preview: URL.createObjectURL(file) });
+    }
+    e.target.value = '';
+  };
+
+  const handleAudioFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []).slice(0, 3 - audioFiles.length);
+    setAudioFiles(prev => [...prev, ...files]);
+    e.target.value = '';
+  };
+
+  const handleVideoFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []).slice(0, 3 - videoFiles.length);
+    setVideoFiles(prev => [...prev, ...files]);
+    e.target.value = '';
+  };
+
+  const handlePayAndGenerate = async (funded = false) => {
+    if (costDhb <= 0 || isQuoting || quoteError) return;
+    if (model.supportsSeed && seed.trim() && (!/^\d+$/.test(seed.trim()) || !Number.isSafeInteger(Number(seed)) || Number(seed) > 2147483647)) {
+      toast.error(_copy('creator.invalidSeed', { defaultValue: 'Seed must be a whole number from 0 to 2147483647.' }));
+      return;
+    }
+    setIsPaying(true);
+    try {
+      // Uploads happen BEFORE the transfer. They used to run after it, inside
+      // the same try block, so a storage failure surfaced as "Payment failed"
+      // when the payment had in fact succeeded, and the paid-for generation was
+      // dropped. Nothing is charged until every asset is safely uploaded.
+      const options: VideoGenerationOptions = {};
+      if (model.minDuration && model.maxDuration) options.duration = duration;
+      if (model.supportsResolution) options.resolution = resolution;
+      if (model.supportsNegativePrompt && negativePrompt.trim()) options.negativePrompt = negativePrompt.trim();
+      if (model.supportsSeed && seed.trim()) options.seed = Number(seed.trim());
+
+      const hasUploads =
+        referenceImages.length > 0 || !!endFrameFile || audioFiles.length > 0 || videoFiles.length > 0;
+
+      if (hasUploads) {
+        setIsUploading(true);
+        try {
+          if (referenceImages.length > 0) {
+            toast.loading(_copy("copy.89e6858f1b9a", { defaultValue: "Uploading reference images..." }), { id: 'video-gen-payment' });
+            options.referenceImageUrls = await Promise.all(
+              referenceImages.map((r) => uploadToStorage(r.file, 'video-ref-images')),
+            );
+          }
+          if (endFrameFile) {
+            toast.loading(_copy("copy.ed6c51709397", { defaultValue: "Uploading end frame..." }), { id: 'video-gen-payment' });
+            options.endFrameUrl = await uploadToStorage(endFrameFile.file, 'video-end-frames');
+          }
+          if (audioFiles.length > 0) {
+            toast.loading(_copy("copy.12d3032e240b", { defaultValue: "Uploading audio..." }), { id: 'video-gen-payment' });
+            options.audioUrls = await Promise.all(
+              audioFiles.map((f) => uploadToStorage(f, 'video-audio')),
+            );
+          }
+          if (videoFiles.length > 0) {
+            toast.loading(_copy("copy.5392a62fda9b", { defaultValue: "Uploading video references..." }), { id: 'video-gen-payment' });
+            options.videoUrls = await Promise.all(
+              videoFiles.map((f) => uploadToStorage(f, 'video-refs')),
+            );
+          }
+        } catch (uploadErr) {
+          console.error('[VideoPaywall] Upload failed before payment:', uploadErr);
+          toast.dismiss('video-gen-payment');
+          toast.error(_copy("copy.c25c2d7af025", { defaultValue: "Could not upload your attachments. Nothing has been charged." }));
+          setIsUploading(false);
+          setIsPaying(false);
+          return;
+        }
+        setIsUploading(false);
+      }
+
+      if (needsTokens && !funded) {
+        // The upload phase claims this toast id and sonner loading toasts
+        // never auto-dismiss, so an early return has to clear it or a
+        // spinner is left running forever.
+        toast.dismiss('video-gen-payment');
+        setCoinPayOpen(true);
+        setIsPaying(false);
+        return;
+      }
+
+      toast.loading(t('tokenPaywall.paying', { amount: formatDhb(costDhb) }), { id: 'video-gen-payment' });
+      const freshQuote = await fetchJobQuote(quoteRequest);
+      if (latestQuoteKey.current !== quoteKey || freshQuote.priceDhb !== costDhb) throw new Error(t('creator.priceRetry'));
+      const txHash = await payForJob(costDhb);
+
+      toast.dismiss('video-gen-payment');
+      onConfirm(options, txHash);
+    } catch (err: unknown) {
+      console.error('[VideoPaywall] Generation setup failed:', err);
+      toast.dismiss('video-gen-payment');
+      toast.error(err instanceof Error ? err.message : _copy("copy.91d7353c7fd3", { defaultValue: "Could not start the generation." }));
+    } finally {
+      setIsPaying(false);
+      setIsUploading(false);
+    }
+  };
+
+  return (
+    // Locked while uploading or paying: dismissing mid-transfer only unmounts
+    // the UI, it cannot recall the on-chain transfer, and the generation would
+    // be lost with the money already gone.
+    <>
+    <Drawer
+      open={open}
+      onOpenChange={(next) => {
+        if (!next && (isPaying || isUploading)) return;
+        onOpenChange(next);
+      }}
+    >
+      <DrawerContent column glass hideHandle={false} className="max-h-[85dvh] md:w-[min(40rem,var(--app-main-width,100vw))] md:left-[calc(var(--app-main-left,0px)_+_(var(--app-main-width,100vw)_-_min(40rem,var(--app-main-width,100vw)))_/_2)]">
+        <DrawerHeader className="text-left pb-2">
+          <DrawerTitle className="flex items-center gap-2 text-white">
+            <BrandIcon src="/theme-icons/system/videos.webp" alt="" className="h-6 w-6 shrink-0 object-contain" />{_copy("copy.2fd59b9cdec1", { defaultValue: "Generate Video" })}</DrawerTitle>
+          <DrawerDescription className="text-zinc-400">{_copy("copy.a16541cb1ea8", { defaultValue: "Select a model and confirm payment" })}</DrawerDescription>
+        </DrawerHeader>
+
+        <ScrollArea className="flex-1 overflow-y-auto px-4">
+          <div className="space-y-3 pb-4">
+            {/* Model Selector */}
+            <div className="relative">
+              <button
+                type="button"
+                disabled={model.requiresVideoInput || model.id === 'pixverse-effects'}
+                onClick={() => setModelSelectorOpen(!modelSelectorOpen)}
+                className="w-full bg-zinc-800/50 hover:bg-zinc-800 transition-colors rounded-xl p-3 text-left"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <p className="font-medium text-white text-sm">{model.name}</p>
+                        {model.hasAudio && (
+                          <span className="flex items-center gap-1 px-1.5 py-0.5 bg-zinc-700/60 text-zinc-300 text-[10px] rounded-md">
+                            <Volume2 className="w-2.5 h-2.5" />{_copy("creator.withSound", { defaultValue: "With sound" })}</span>
+                        )}
+                      </div>
+                      <p className="text-xs text-zinc-500">{model.description}</p>
+                    </div>
+                  </div>
+                  <ChevronDown className={`w-4 h-4 text-zinc-400 transition-transform ${modelSelectorOpen ? 'rotate-180' : ''}`} />
+                </div>
+              </button>
+              
+              {modelSelectorOpen && model.id !== 'pixverse-effects' && (
+                <div className="absolute top-full left-0 right-0 mt-1 bg-zinc-800 border border-zinc-700 rounded-xl overflow-hidden z-10 max-h-72 overflow-y-auto">
+                  <div className="sticky top-0 z-10 bg-zinc-800 p-2 border-b border-zinc-700">
+<input
+type="search"
+value={modelSearch}
+onChange={(e) => setModelSearch(e.target.value)}
+placeholder={_copy("creator.searchModels", { defaultValue: "Search models" })}
+className="w-full bg-zinc-900/60 border border-zinc-700/50 rounded-lg px-2.5 py-1.5 text-xs text-white placeholder:text-zinc-500 focus:outline-none focus:border-zinc-500"
+/>
+</div>
+{VIDEO_MODEL_OPTIONS.filter((option) => {
+const q = modelSearch.trim().toLowerCase();
+return !q || `${option.name} ${option.description || ''}`.toLowerCase().includes(q);
+}).map((option) => {
+                    const optionModel = VIDEO_MODELS[option.id as VideoModelKey];
+                    const optionCostUsd = getVideoCostUsd(optionModel);
+                    const optionCostDhb = dhbPrice ? getVideoCostDhb(optionModel, dhbPrice) : 0;
+                    
+                    return (
+                      <button
+                        key={option.id}
+                        type="button"
+                        onClick={() => {
+                          onModelChange(option.id as VideoModelKey);
+                          setModelSelectorOpen(false);
+setModelSearch('');
+                        }}
+                        className={`w-full flex items-center justify-between gap-3 px-3 py-2.5 text-left hover:bg-zinc-700 transition-colors ${
+                          selectedModelKey === option.id ? 'bg-zinc-700/50' : ''
+                        }`}
+                      >
+                        <div className="flex items-center gap-2.5">
+                          <div>
+                            <div className="flex items-center gap-1.5">
+                              <p className="font-medium text-white text-xs">{option.name}</p>
+                              {option.hasAudio && (
+                                <span className="flex items-center gap-0.5 px-1 py-0.5 bg-zinc-700/60 text-zinc-300 text-[9px] rounded">
+                                  <Volume2 className="w-2 h-2" />
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-[10px] text-zinc-500">{option.description}</p>
+                          </div>
+                        </div>
+                        <div className="text-right shrink-0">
+                          <p className="text-xs font-medium text-white">
+                            {optionModel.provider === 'venice' ? t('creator.liveQuote', { defaultValue: 'Live quote' }) : optionModel.perSecondCostUsd 
+                              ? `$${(optionModel.perSecondCostUsd * 2).toFixed(2)}/s`
+                              : `$${optionCostUsd.toFixed(2)}`
+                            }
+                          </p>
+                          {optionModel.provider !== 'venice' && <p className="text-[10px] text-zinc-500">{formatDhb(optionCostDhb)} <DhbCoin label={t('buyCoins.tokensUnit')} /></p>}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Duration Slider (for models with configurable duration) */}
+            {model.minDuration && model.maxDuration && !model.requiresVideoInput && (
+              <div className="bg-zinc-800/50 rounded-xl p-3 space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-zinc-400">{_copy("copy.4fc52a3c4c55", { defaultValue: "Duration" })}</span>
+                  <span className="text-white font-medium">
+                    {duration}s
+                    {isPerSecond && <span className="text-zinc-500 ml-1 text-[10px]">(${costUsd.toFixed(2)})</span>}
+                  </span>
+                </div>
+                {model.allowedDurations?.length ? (
+                  // A slider would let someone land on a value this provider
+                  // rejects, after they had already been priced on it.
+                  <div className="flex gap-1.5">
+                    {model.allowedDurations.map((d) => (
+                      <button
+                        key={d}
+                        type="button"
+                        onClick={() => setDuration(d)}
+                        className={`px-2.5 py-1 text-xs font-medium rounded-lg transition-colors ${
+                          duration === d
+                            ? 'bg-purple-500/30 text-purple-300 border border-purple-500/40'
+                            : 'bg-zinc-700/50 text-zinc-400 border border-zinc-600/30 hover:bg-zinc-700'
+                        }`}
+                      >
+                        {d}s
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <>
+                    <Slider
+                      value={[duration]}
+                      onValueChange={([v]) => setDuration(v)}
+                      min={model.minDuration}
+                      max={model.maxDuration}
+                      step={1}
+                      className="py-1"
+                    />
+                    <div className="flex justify-between text-[10px] text-zinc-500">
+                      <span>{model.minDuration}s</span>
+                      <span>{model.maxDuration}s</span>
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
+
+            {/* Resolution Toggle (for supported models) */}
+            {model.supportsResolution && (
+              <div className="bg-zinc-800/50 rounded-xl p-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-zinc-400">{_copy("copy.d4055fafa379", { defaultValue: "Resolution" })}</span>
+                  <div className="flex gap-1.5">
+                    {/* Only what this model renders. Seedance 2.5 stops at
+                        720p, and offering 1080p there takes payment for a
+                        resolution the provider quietly downgrades. */}
+                    {getVideoResolutions(model).map((res) => (
+                      <button
+                        key={res}
+                        type="button"
+                        onClick={() => setResolution(res as string)}
+                        className={`px-2.5 py-1 text-xs font-medium rounded-lg transition-colors ${
+                          resolution === res
+                            ? 'bg-purple-500/30 text-purple-300 border border-purple-500/40'
+                            : 'bg-zinc-700/50 text-zinc-400 border border-zinc-600/30 hover:bg-zinc-700'
+                        }`}
+                      >
+                        {res}
+                        {res === '480p' && <span className="ml-0.5 text-[9px] opacity-60">{_copy("copy.115dc3606fbf", { defaultValue: "fast" })}</span>}
+                        {res === '1080p' && <span className="ml-0.5 text-[9px] opacity-60">2K</span>}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Model Tips */}
+{model.tips && model.tips.length > 0 && (
+<div className="-mx-4 flex gap-1.5 overflow-x-auto px-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+{model.tips.map((tip, idx) => (
+<span key={idx} className="shrink-0 whitespace-nowrap rounded-full border border-white/10 bg-zinc-800/60 px-3 py-1.5 text-[11px] leading-snug text-zinc-300">{tip}</span>
+))}
+</div>
+)}
+
+
+            {/* Negative Prompt (for supported models) */}
+            {model.supportsNegativePrompt && (
+              <div className="bg-zinc-800/50 rounded-xl p-3 space-y-1.5">
+                <label className="text-sm text-zinc-400">{_copy("copy.9973b8991b35", { defaultValue: "Negative Prompt " })}<span className="text-zinc-600">{_copy("copy.0059798b7f70", { defaultValue: "(optional)" })}</span></label>
+                <textarea
+                  value={negativePrompt}
+                  onChange={(e) => setNegativePrompt(e.target.value)}
+                  placeholder={_copy("copy.d5e3a72caf7e", { defaultValue: "Elements to exclude, e.g. blur, watermark, low quality..." })}
+                  className="w-full bg-zinc-900/60 border border-zinc-700/50 rounded-lg p-2 text-sm text-white placeholder:text-zinc-600 resize-none focus:outline-none focus:border-purple-500/40"
+                  rows={2}
+                  maxLength={500}
+                />
+              </div>
+            )}
+
+            {/* Advanced Options Toggle */}
+            {hasAdvancedFeatures && (
+              <button
+                type="button"
+                onClick={() => setShowAdvanced(!showAdvanced)}
+                className="w-full flex items-center justify-between text-sm text-purple-400 hover:text-purple-300 transition-colors px-1"
+              >
+                <span className="font-medium">{_copy("copy.dfa2817fb222", { defaultValue: "Advanced Options" })}</span>
+                <ChevronDown className={`w-4 h-4 transition-transform ${showAdvanced ? 'rotate-180' : ''}`} />
+              </button>
+            )}
+
+            {showAdvanced && hasAdvancedFeatures && (
+              <div className="space-y-2.5">
+                {/* Reference Images */}
+                {model.supportsReferenceImages && (
+                  <div className="bg-zinc-800/50 rounded-xl p-3 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-zinc-300 font-medium flex items-center gap-1.5">
+                          <Image className="w-3.5 h-3.5 text-blue-400" />{_copy("copy.1f218e788605", { defaultValue: "Reference Images" })}</p>
+                        <p className="text-[10px] text-zinc-500 mt-0.5">
+                          {/* The @Image tokens are what the model reads in the prompt, so they stay untranslated. */}
+                          {(() => {
+                            const [before, after] = _copy("copy.1bb9b6960e55", { defaultValue: "Use {{value1}} in prompt", value1: '\u0001' }).split('\u0001');
+                            return <>{before}<code className="text-purple-400">@Image1</code>–<code className="text-purple-400">@Image9</code>{after}</>;
+                          })()}
+                        </p>
+                      </div>
+                      {referenceImages.length < (model.maxReferenceImages || 9) && (
+                        <button
+                          type="button"
+                          onClick={() => refImageInputRef.current?.click()}
+                          className="p-1.5 bg-zinc-700/50 hover:bg-zinc-700 rounded-lg transition-colors"
+                        >
+                          <Plus className="w-3.5 h-3.5 text-zinc-300" />
+                        </button>
+                      )}
+                    </div>
+                    <input
+                      ref={refImageInputRef}
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      className="hidden"
+                      onChange={handleAddReferenceImages}
+                    />
+                    {referenceImages.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5">
+                        {referenceImages.map((img, idx) => (
+                          <div key={idx} className="relative group w-12 h-12 rounded-lg overflow-hidden border border-zinc-600/50">
+                            <img src={img.preview} alt={_copy("copy.eb6549d50f07", { defaultValue: "Ref {{value1}}", value1: idx + 1 })} className="w-full h-full object-cover" />
+                            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                              <button type="button" onClick={() => handleRemoveReferenceImage(idx)} className="text-white">
+                                <X className="w-3 h-3" />
+                              </button>
+                            </div>
+                            <span className="absolute bottom-0 left-0 right-0 text-center text-[7px] bg-black/70 text-purple-300 py-0.5">@Image{idx + 1}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* End Frame Image */}
+                {model.supportsEndFrame && (
+                  <div className="bg-zinc-800/50 rounded-xl p-3 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-zinc-300 font-medium flex items-center gap-1.5">
+                          <Film className="w-3.5 h-3.5 text-green-400" />{_copy("copy.30fd40fd22fd", { defaultValue: "End Frame" })}</p>
+                        <p className="text-[10px] text-zinc-500 mt-0.5">{_copy("copy.2cc3e03f4453", { defaultValue: "AI interpolates between start & end" })}</p>
+                      </div>
+                      {!endFrameFile && (
+                        <button
+                          type="button"
+                          onClick={() => endFrameInputRef.current?.click()}
+                          className="p-1.5 bg-zinc-700/50 hover:bg-zinc-700 rounded-lg transition-colors"
+                        >
+                          <Upload className="w-3.5 h-3.5 text-zinc-300" />
+                        </button>
+                      )}
+                    </div>
+                    <input
+                      ref={endFrameInputRef}
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleEndFrame}
+                    />
+                    {endFrameFile && (
+                      <div className="relative group w-16 h-12 rounded-lg overflow-hidden border border-zinc-600/50">
+                        <img src={endFrameFile.preview} alt={_copy("copy.67763f91d586", { defaultValue: "End frame" })} className="w-full h-full object-cover" />
+                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                          <button type="button" onClick={() => { URL.revokeObjectURL(endFrameFile.preview); setEndFrameFile(null); }} className="text-white">
+                            <X className="w-3 h-3" />
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Audio Input (Lip-sync) */}
+                {model.supportsAudioInput && (
+                  <div className="bg-zinc-800/50 rounded-xl p-3 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-zinc-300 font-medium flex items-center gap-1.5">
+                          <Music className="w-3.5 h-3.5 text-pink-400" />{_copy("copy.44d3ad658904", { defaultValue: "Audio Input" })}</p>
+                        <p className="text-[10px] text-zinc-500 mt-0.5">{_copy("copy.5152ac7a5f5b", { defaultValue: "Lip-sync / music-reactive (up to 3)" })}</p>
+                      </div>
+                      {audioFiles.length < 3 && (
+                        <button
+                          type="button"
+                          onClick={() => audioInputRef.current?.click()}
+                          className="p-1.5 bg-zinc-700/50 hover:bg-zinc-700 rounded-lg transition-colors"
+                        >
+                          <Plus className="w-3.5 h-3.5 text-zinc-300" />
+                        </button>
+                      )}
+                    </div>
+                    <input
+                      ref={audioInputRef}
+                      type="file"
+                      accept="audio/*"
+                      multiple
+                      className="hidden"
+                      onChange={handleAudioFiles}
+                    />
+                    {audioFiles.length > 0 && (
+                      <div className="space-y-1">
+                        {audioFiles.map((f, idx) => (
+                          <div key={idx} className="flex items-center justify-between bg-zinc-900/50 rounded-lg px-2.5 py-1.5 text-xs">
+                            <span className="text-zinc-300 truncate max-w-[180px]">{f.name}</span>
+                            <button type="button" onClick={() => setAudioFiles(prev => prev.filter((_, i) => i !== idx))} className="text-zinc-500 hover:text-white ml-2">
+                              <X className="w-3 h-3" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Video Input (Restyling) */}
+                {model.supportsVideoInput && (
+                  <div className="bg-zinc-800/50 rounded-xl p-3 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-zinc-300 font-medium flex items-center gap-1.5">
+                          <Video className="w-3.5 h-3.5 text-orange-400" />{_copy("copy.4116f98065fd", { defaultValue: "Video Input" })}</p>
+                        <p className="text-[10px] text-zinc-500 mt-0.5">{_copy("copy.d38bd93df9c5", { defaultValue: "Restyle existing video (up to 3)" })}</p>
+                      </div>
+                      {videoFiles.length < 3 && (
+                        <button
+                          type="button"
+                          onClick={() => videoInputRef.current?.click()}
+                          className="p-1.5 bg-zinc-700/50 hover:bg-zinc-700 rounded-lg transition-colors"
+                        >
+                          <Plus className="w-3.5 h-3.5 text-zinc-300" />
+                        </button>
+                      )}
+                    </div>
+                    <input
+                      ref={videoInputRef}
+                      type="file"
+                      accept="video/*"
+                      multiple
+                      className="hidden"
+                      onChange={handleVideoFiles}
+                    />
+                    {videoFiles.length > 0 && (
+                      <div className="space-y-1">
+                        {videoFiles.map((f, idx) => (
+                          <div key={idx} className="flex items-center justify-between bg-zinc-900/50 rounded-lg px-2.5 py-1.5 text-xs">
+                            <span className="text-zinc-300 truncate max-w-[180px]">{f.name}</span>
+                            <button type="button" onClick={() => setVideoFiles(prev => prev.filter((_, i) => i !== idx))} className="text-zinc-500 hover:text-white ml-2">
+                              <X className="w-3 h-3" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Seed */}
+                {model.supportsSeed && (
+                  <div className="bg-zinc-800/50 rounded-xl p-3">
+                    <div className="flex items-center gap-3">
+                      <div className="flex-1">
+                        <p className="text-sm text-zinc-300 font-medium flex items-center gap-1.5">
+                          <Hash className="w-3.5 h-3.5 text-yellow-400" />{_copy("copy.0802bcab258d", { defaultValue: "Seed " })}<span className="text-zinc-600 text-xs font-normal">{_copy("copy.0059798b7f70", { defaultValue: "(optional)" })}</span>
+                        </p>
+                        <p className="text-[10px] text-zinc-500 mt-0.5">{_copy("copy.fefa3c8ec824", { defaultValue: "Same seed + prompt = same result" })}</p>
+                      </div>
+                      <input
+                        type="number"
+                        value={seed}
+                        onChange={(e) => setSeed(e.target.value)}
+                        placeholder={_copy("copy.67bc484430fe", { defaultValue: "Random" })}
+                        className="w-24 bg-zinc-900/60 border border-zinc-700/50 rounded-lg px-2 py-1.5 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-purple-500/40 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Cost Breakdown */}
+            <div className="bg-zinc-800/50 rounded-xl p-3 space-y-2">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-zinc-400">{_copy("copy.2f51aac56113", { defaultValue: "Video Cost" })}</span>
+                <span className="text-zinc-300">
+                  ${costUsd.toFixed(2)}
+                  {isPerSecond && <span className="text-zinc-500 ml-1 text-[10px]">({duration}s × ${(costUsd / duration).toFixed(3)}/s)</span>}
+                </span>
+              </div>
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-zinc-400">{_copy("copy.6689b99d8132", { defaultValue: "Staker Discount" })}</span>
+                <span className="text-white font-bold">0%</span>
+              </div>
+              <div className="border-t border-zinc-700 pt-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-zinc-300 font-medium text-sm">{_copy("copy.c9b3c38247f7", { defaultValue: "Total" })}</span>
+                  <span className="text-white font-semibold">${costUsd.toFixed(2)}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* DHB Cost */}
+            <div className="bg-zinc-800/50 rounded-xl p-3 border border-white/10">
+              {loading || isQuoting ? (
+                <div className="flex items-center justify-center py-2">
+                  <Loader2 className="w-4 h-4 animate-spin text-purple-400" />
+                  <span className="ml-2 text-zinc-400 text-sm">{_copy("copy.3730788afedc", { defaultValue: "Fetching live price..." })}</span>
+                </div>
+              ) : (
+                <>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <img src={dhbCoinImage} alt="" className="w-5 h-5" />
+                      <span className="text-white font-medium text-sm">{t('tokenPaywall.payWithTokens')}</span>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-lg font-bold text-white">{formatDhb(costDhb)} <DhbCoin label={t('buyCoins.tokensUnit')} /></p>
+                      <p className="text-[10px] text-zinc-500">{t('tokenPaywall.pricePerToken', { price: dhbPrice?.toFixed(6) })}</p>
+                    </div>
+                  </div>
+                  {(error || quoteError) && (
+                    <div className="flex items-center gap-2 mt-1.5 text-yellow-500 text-xs">
+                      <AlertCircle className="w-3 h-3" />
+                      <span>{quoteError || error}</span>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+
+            {/* Wallet balance */}
+            <div className="flex items-center justify-between text-sm bg-zinc-800/30 rounded-lg p-2.5">
+              <span className="text-zinc-400">{t('tokenPaywall.yourTokens')}</span>
+              <div className="flex items-center gap-2">
+                <img src={dhbCoinImage} alt="" className="w-4 h-4" />
+                {isWalletLoading ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin text-zinc-400" />
+                ) : (
+                  <span className={needsTokens ? 'text-red-400' : 'text-white font-bold'}>
+                    {formatDhb(walletDhb)} <DhbCoin label={t('buyCoins.tokensUnit')} />
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {needsTokens && !loading && (
+              <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-2.5 flex flex-col items-center gap-1.5">
+                <p className="text-red-400 text-xs text-center">
+                  {t('tokenPaywall.notEnoughNeedMore', { amount: formatDhb(costDhb - walletDhb) })}
+                </p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="bg-emerald-600/20 border-emerald-500/40 text-emerald-400 hover:bg-emerald-600/30 text-xs h-7"
+                  onClick={() => setCoinPayOpen(true)}
+                >
+                  {t('coinPay.open', { defaultValue: 'Pay with another coin' })}
+                </Button>
+              </div>
+            )}
+          </div>
+        </ScrollArea>
+
+        {/* Actions - sticky footer. Same size and layout as the studio Create button. */}
+        <div className="flex items-center justify-end gap-2 px-4 py-3 border-t border-white/5">
+          <Button
+            variant="outline"
+            className="h-10 rounded-xl px-3 text-[14px] font-bold bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700"
+            onClick={() => onOpenChange(false)}
+            disabled={isGenerating || isPaying || isUploading}
+          >{_copy("copy.19766ed6ccb2", { defaultValue: "Cancel" })}</Button>
+          <Button
+            variant="glass"
+            className="h-10 gap-2 rounded-xl px-2.5 font-bold"
+            onClick={() => handlePayAndGenerate()}
+            disabled={loading || isQuoting || isWalletLoading || isGenerating || isPaying || isUploading}
+          >
+            {isUploading ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />{_copy("copy.72cb29c90ccd", { defaultValue: "Uploading..." })}</>
+            ) : isPaying ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />{_copy("copy.6f1c75a574dc", { defaultValue: "Paying..." })}</>
+            ) : isGenerating ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />{_copy("copy.49286f33b674", { defaultValue: "Generating..." })}</>
+            ) : (
+              <>
+                <span className="relative flex h-6 w-6 shrink-0 items-center justify-center overflow-hidden rounded-full bg-black/15 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.35)]">
+                  <img src={dhbCoinImage} alt="" className="h-6 w-6" />
+                </span>
+                <span className="grid min-w-0 text-left leading-none">
+                  <span className="font-exo text-[14px] font-black tracking-tight">{_copy("copy.49e49bb4401e", { defaultValue: "Generate" })}</span>
+                  {costDhb > 0 && (
+                    <span className="mt-1 truncate text-[10px] font-semibold tabular-nums opacity-80">
+                      {_copy("creator.generateCost", { defaultValue: "{{tokens}} tokens · ≈ ${{usd}}", tokens: costDhb.toLocaleString(), usd: costUsd.toFixed(2) })}
+                    </span>
+                  )}
+                </span>
+              </>
+            )}
+          </Button>
+        </div>
+      </DrawerContent>
+    </Drawer>
+      {coinPayOpen && (
+        <Suspense fallback={null}>
+          <PayWithCoinSheet
+            open={coinPayOpen}
+            onOpenChange={setCoinPayOpen}
+            costDhb={costDhb}
+            walletDhb={walletDhb}
+            onFunded={() => { setCoinPayOpen(false); void handlePayAndGenerate(true); }}
+          />
+        </Suspense>
+      )}
+    </>
+  );
+}
+
+export function VideoPaywallModal(props: VideoPaywallModalProps) { return props.model.id === 'kling-avatar-v2' ? <AvatarVideoPaywall {...props} /> : <StandardVideoPaywallModal {...props} />; }

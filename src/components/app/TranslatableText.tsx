@@ -1,0 +1,1361 @@
+import { reportPostEvent } from '@/lib/api/dehub/post-stats';
+import { useTranslation as _useCopy } from 'react-i18next';
+import { TranslationCooldown } from '@/lib/translation-cooldown';
+import { translateCopy as _translateCopy } from '@/i18n/copy';
+/**
+ * Translatable Text Component
+ * ===========================
+ * Wraps text content and offers translation when foreign language detected.
+ * Uses hybrid detection: instant regex for non-Latin + AI for Latin scripts.
+ * 
+ * Two usage patterns:
+ * 1. TranslatableText - single text with inline translate control
+ * 2. TranslatableGroup - wraps multiple elements, shows single control at end
+ */
+
+import { useState, useMemo, useEffect, useCallback, useRef, useSyncExternalStore, createContext, useContext, ReactNode, RefObject } from 'react';
+import { Mail } from "lucide-react";
+import Check from "@/components/ui/cut-icons/check";
+
+import { toast } from 'sonner';
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
+import { RotateCcw, Loader2 } from "lucide-react";
+import Languages from "@/components/ui/cut-icons/language";
+
+import { supabase } from '@/integrations/supabase/client';
+import { autoTranslateEnabled, setAutoTranslateEnabled, subscribeAutoTranslate } from '@/lib/auto-translate-setting';
+import { chatLineIsForeign, chatLineMatchesLanguage } from '@/lib/chat-language-hint';
+import { takeAutoTranslateSlot } from '@/lib/auto-translate-budget';
+import { useUserLanguage, LANGUAGE_NAMES } from '@/hooks/use-user-language';
+import { recordTickerSearch } from '@/lib/ticker-search-tracker';
+import { clientNavigate } from '@/lib/client-navigate';
+import { setFilterValue } from '@/hooks/use-persisted-feed-filter';
+import { parseDehubLink, ownSitePath } from '@/lib/dehub-links';
+import { expandEmojiTokens } from '@/components/app/emoji/EmojiText';
+import { applyBold } from '@/lib/bold-markup';
+import { postTextRuns } from '@/lib/post-text-format';
+
+export { LANGUAGE_NAMES };
+import { cn } from '@/lib/utils';
+import { abbreviateUrl } from '@/lib/link-display';
+import { profilePath } from '@/lib/profile-path';
+
+
+// URL regex pattern for detecting links (with or without protocol)
+// Only matches common TLDs to avoid false positives like "higher.mp4"
+// All 2-letter country-code TLDs + popular generic TLDs (~300+)
+// Brand TLDs (.xbox, .toyota, .amazon etc.) excluded to prevent false positives
+const CC_TLDS = 'ac|ad|ae|af|ag|al|am|ao|aq|ar|as|at|au|aw|ax|az|ba|bb|bd|be|bf|bg|bh|bi|bj|bm|bn|bo|br|bs|bt|bw|by|bz|ca|cd|cf|cg|ch|ci|ck|cl|cm|cn|co|cr|cu|cv|cw|cx|cy|cz|de|dj|dk|dm|do|dz|ec|ee|eg|er|es|et|fi|fj|fk|fm|fo|fr|ga|gd|ge|gf|gg|gh|gi|gl|gm|gn|gp|gq|gr|gs|gt|gu|gw|gy|hk|hm|hn|hr|ht|hu|id|ie|il|im|in|io|iq|ir|is|it|je|jm|jo|jp|ke|kg|kh|ki|km|kn|kp|kr|kw|ky|kz|la|lb|lc|li|lk|lr|ls|lt|lu|lv|ly|ma|mc|md|me|mg|mh|mk|ml|mm|mn|mo|mp|mq|mr|ms|mt|mu|mv|mw|mx|my|mz|na|nc|ne|nf|ng|ni|nl|no|np|nr|nu|nz|om|pa|pe|pf|pg|ph|pk|pl|pm|pn|pr|ps|pt|pw|py|qa|re|ro|rs|ru|rw|sa|sb|sc|sd|se|sg|sh|si|sk|sl|sm|sn|so|sr|ss|st|sv|sx|sy|sz|tc|td|tf|tg|th|tj|tk|tl|tm|tn|to|tr|tt|tv|tw|tz|ua|ug|us|uy|uz|va|vc|ve|vg|vi|vn|vu|wf|ws|ye|za|zm|zw';
+const GENERIC_TLDS = 'com|org|net|info|biz|xyz|app|dev|ai|io|cc|gg|me|tv|ly|fm|sh|digital|store|online|site|tech|world|club|live|space|art|design|social|link|page|one|pro|media|studio|agency|blog|shop|network|land|zone|fund|games|gaming|vc|nft|crypto|dao|eth|web3|defi|music|video|news|chat|cloud|data|host|email|money|bank|pay|finance|trade|market|exchange|casino|bet|poker|win|lol|wtf|meme|cool|guru|ninja|expert|solutions|services|systems|technology|software|computer|science|education|academy|school|university|institute|training|health|medical|dental|fitness|yoga|beauty|fashion|style|clothing|shoes|jewelry|luxury|estate|property|house|apartments|construction|auto|car|bike|travel|flights|holiday|tours|hotel|restaurant|food|pizza|coffee|bar|pub|wine|beer|recipes|photography|photo|camera|gallery|graphics|ink|tattoo|wedding|events|party|flowers|gifts|toys|baby|kids|family|pets|dog|cat|vet|garden|green|eco|solar|energy|organic|farm|legal|law|attorney|consulting|accountant|tax|insurance|loans|credit|investments|capital|ventures|partners|associates|group|team|community|foundation|charity|church|bible|faith|domains|website|web|blog|forum|wiki|directory|guide|tips|how|reviews|best|top|cheap|discount|sale|deals|coupons|free|plus|vip|gold|black|blue|red|pink|green|orange|theater|movie|film|show|radio|audio|stream|tube|band|rocks|dance|dj|actor|place|city|town|country|earth|world|global|international|company|business|corp|inc|ltd|enterprises|holdings|industries|works|careers|jobs|hire|run|fit|life|love|date|singles|camp|center|care|support|help|repair|direct|express|delivery|supply|tools|parts|equipment|kitchen|house|furniture|lighting|glass|flooring|tiles|build|builders|contractors|plumbing|heating|cleaning|security|cctv|codes|dev|engineer|hacker|geek|tech|digital|cyber|net|systems|app|cloud|host|storage|server|mobile|phone|computer|monitor|watch|today|now|news|report|press|media|social|pics|photos|video|click|download|online|email|chat|games|play|game|poker|bet|casino|win|lol|fail|wtf|meme|cool|fun|sexy|xxx|adult|porn|sucks|gripe|icu|rest|cafe|pub|bar|bio|ceo|voting|democrat|republican|forex|trading|rip|memorial|giving|christmas|theater';
+const COMMON_TLDS = `${CC_TLDS}|${GENERIC_TLDS}`;
+
+// `*` so a link inside **bold** is still a link.
+const URL_BOUNDARY_REGEX_SRC = `(?:^|\\s|[\\(\\[<"'*])`;
+
+// TLD-restricted regex for non-www links (avoids false positives like "file.mp4")
+// Allow dots in hostname to support subdomains like "Kokoroko.lnk.to"
+const TLD_URL_CORE_REGEX_SRC = `(?:https?:\\/\\/)?(?:www\\.)?[-a-zA-Z0-9@:%_+~#=]+(?:\\.[-a-zA-Z0-9@:%_+~#=]+)*\\.(?:${COMMON_TLDS})(?:\\.[a-zA-Z]{2,3})?\\b(?:[-a-zA-Z0-9()@:%_+.~#?&\\/=]*)`;
+
+// www. prefix always means a link, regardless of TLD
+const WWW_URL_CORE_REGEX_SRC = `(?:https?:\\/\\/)?www\\.[-a-zA-Z0-9@:%_+~#=]+(?:\\.[-a-zA-Z0-9@:%_+~#=]+)*\\.[a-zA-Z]{2,63}\\b(?:[-a-zA-Z0-9()@:%_+.~#?&\\/=]*)`;
+
+// Core URL matcher for tooltips/hrefs, plus boundary-aware version for inline text scanning
+const URL_REGEX = new RegExp(`(?:${WWW_URL_CORE_REGEX_SRC})|(?:${TLD_URL_CORE_REGEX_SRC})`, 'gi');
+const URL_WITH_BOUNDARY_REGEX = new RegExp(`(?:${URL_BOUNDARY_REGEX_SRC})(?:${URL_REGEX.source})`, 'gi');
+const URL_LEADING_BOUNDARY_REGEX = /^[\s(\[<"'*]+/;
+
+/** A fresh copy of the matcher the feed renders with, for editors that chip links. */
+export function createLinkScanRegex(): RegExp {
+  return new RegExp(URL_WITH_BOUNDARY_REGEX.source, 'gi');
+}
+
+export function splitLeadingUrlBoundary(match: string) {
+  const leadingBoundary = match.match(URL_LEADING_BOUNDARY_REGEX)?.[0] ?? '';
+  return {
+    leadingBoundary,
+    url: match.slice(leadingBoundary.length),
+  };
+}
+
+/**
+ * Replace URLs in plain text with 🔗 emoji (for use in textarea inputs).
+ * Returns the transformed text.
+ */
+export function replaceLinksWithEmoji(text: string): string {
+  return text.replace(URL_WITH_BOUNDARY_REGEX, (match, offset: number, whole: string) => {
+    const { leadingBoundary, url } = splitLeadingUrlBoundary(match);
+    // `<url>` is shown as text by choice — keep it.
+    if (leadingBoundary.endsWith('<') && whole[offset + match.length] === '>') {
+      return `${leadingBoundary}${url}`;
+    }
+    return `${leadingBoundary}🔗`;
+  });
+}
+
+interface TranslatableTextProps {
+  text: string;
+  className?: string;
+  as?: 'p' | 'span' | 'div' | 'h1' | 'h2' | 'h3';
+  /** When true, hides the translate/show-original controls (text still gets translated if auto-translated via parent) */
+  hideControls?: boolean;
+  /**
+   * Translate without being asked. Defaults to true, which is right for public
+   * content and wrong for anything private.
+   *
+   * This component is the way auto-translate leaks: a call site that opts its
+   * own useTranslation call out of auto still gets auto-translation if it
+   * renders text through here, because this calls the hook itself. That is
+   * exactly what happened to direct-message image captions. Pass auto={false}
+   * for private content — and note this component renders no controls of its
+   * own, so the call site must provide the manual trigger.
+   *
+   * 'chat' is auto-translate for public live chat, where lines are too short
+   * for the post length floor.
+   */
+  auto?: boolean | 'chat';
+  /** Public text only: may reach a free tier that trains on input. */
+  publicContent?: boolean;
+  /** Post's link was flagged by the Community Alert threshold — border it like a highlighter instead of the plain 🔗 chip. */
+  flagged?: boolean;
+}
+
+/**
+ * Inline email copy button - shows mail icon with tooltip, copies on click
+ */
+function EmailCopyInline({ email }: { email: string }) {
+  const { t: _copy } = _useCopy();
+  const [copied, setCopied] = useState(false);
+
+  const handleClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    navigator.clipboard.writeText(email).then(() => {
+      setCopied(true);
+      toast.success(_copy("copy.28411e5e86b6", { defaultValue: "Email copied" }));
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
+
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <button
+          onClick={handleClick}
+          className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-white/10 hover:bg-white/20 transition-colors text-xs text-white/70 hover:text-white align-middle"
+        >
+          {copied ? <Check className="w-3 h-3 text-white" /> : <Mail className="w-3 h-3" />}
+        </button>
+      </TooltipTrigger>
+      <TooltipContent>{copied ? _copy("copy.ea61bc15688d", { defaultValue: "Copied!" }) : email}</TooltipContent>
+    </Tooltip>
+  );
+}
+
+/**
+ * Punctuation that ends a sentence rather than a link: "see example.com." or
+ * "(details at example.com/a)". A closing bracket stays when the link opened
+ * one itself, as in wikipedia.org/wiki/Foo_(bar).
+ */
+export function trimTrailingUrlPunctuation(url: string): string {
+  let out = url;
+  for (;;) {
+    if (/[.,:;?!]$/.test(out)) { out = out.slice(0, -1); continue; }
+    if (out.endsWith(')') && (out.match(/\(/g)?.length ?? 0) < (out.match(/\)/g)?.length ?? 0)) {
+      out = out.slice(0, -1);
+      continue;
+    }
+    return out;
+  }
+}
+
+const PROFILE_HANDLE_SOURCE = '[a-zA-Z0-9_](?:[a-zA-Z0-9_.-]*[a-zA-Z0-9_])?';
+
+/**
+ * Renders text with URLs replaced by clickable link emojis and @mentions as profile links
+ */
+export function renderTextWithLinks(text: string, opts?: { flagged?: boolean }): ReactNode[] {
+  const runs = postTextRuns(text);
+  if (runs.length === 1 && !runs[0].styles.length) return renderTextRunWithLinks(text, opts);
+  return runs.map((run, index) => (
+    <span key={index} style={{
+      fontWeight: run.styles.includes('b') ? 'bolder' : undefined,
+      fontStyle: run.styles.includes('i') ? 'italic' : undefined,
+      textDecoration: run.styles.includes('u') ? 'underline' : undefined,
+    }}>
+      {renderTextRunWithLinks(run.text, opts)}
+    </span>
+  ));
+}
+
+function renderTextRunWithLinks(text: string, opts?: { flagged?: boolean }): ReactNode[] {
+  const flaggedLinkProps = opts?.flagged
+    ? {
+        className:
+          'inline-flex items-center hover:scale-110 transition-transform cursor-pointer relative z-10 border-2 border-red-500/80 rounded-md px-1 bg-red-500/10',
+        title: (url: string) => _translateCopy("copy.82e397cc758f", { defaultValue: "{{value1}} — flagged by the community as a possible scam, pending review", value1: url }),
+      }
+    : null;
+  const parts: ReactNode[] = [];
+  let lastIndex = 0;
+  
+  // Combined regex: match emails, URLs, @mentions, $cashtags, or #hashtags
+  const combinedRegex = new RegExp(
+      `([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,})|(${URL_WITH_BOUNDARY_REGEX.source})|(@${PROFILE_HANDLE_SOURCE})|(\\$[a-zA-Z]{1,20})|(#[a-zA-Z][a-zA-Z0-9_]*)`,
+    'gi'
+  );
+  
+  let match: RegExpExecArray | null;
+  
+  while ((match = combinedRegex.exec(text)) !== null) {
+    // Add text before the match
+    if (match.index > lastIndex) {
+      parts.push(text.slice(lastIndex, match.index));
+    }
+    
+    const fullMatch = match[0];
+
+    // Check if this is an email address
+    const isEmail = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(fullMatch);
+    
+    if (isEmail) {
+      parts.push(
+        <EmailCopyInline key={`email-${match.index}`} email={fullMatch} />
+      );
+    } else if (fullMatch.startsWith('@')) {
+      // @mention — render as a clickable profile link
+      const username = fullMatch.slice(1); // Remove @
+      parts.push(
+        <a
+          key={`mention-${username}-${match.index}`}
+          href={profilePath(username)}
+          className="text-white font-bold hover:underline transition-colors"
+          onClick={(e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            clientNavigate(profilePath(username));
+          }}
+          onPointerDown={(e) => e.stopPropagation()}
+          onMouseDown={(e) => e.stopPropagation()}
+          data-no-navigate="true"
+        >
+          @{username}
+        </a>
+      );
+    } else if (fullMatch.startsWith('$')) {
+      // $cashtag — render as clickable bold white, searches on click
+      const tag = fullMatch; // e.g. $DHB
+      parts.push(
+        <a
+          key={`cashtag-${tag}-${match.index}`}
+          href={`/app/explore?q=${encodeURIComponent(tag)}`}
+          className="text-white font-bold hover:underline transition-colors"
+          onClick={(e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            recordTickerSearch(tag);
+            clientNavigate(`/app/explore?q=${encodeURIComponent(tag)}`);
+          }}
+          data-no-navigate="true"
+        >
+          {tag}
+        </a>
+      );
+    } else if (fullMatch.startsWith('#')) {
+      // #hashtag — render as clickable bold white, navigates to feed filtered by category
+      const tag = fullMatch.slice(1).toLowerCase(); // Remove # and lowercase
+      parts.push(
+        <a
+          key={`hashtag-${tag}-${match.index}`}
+          href={`/app?category=${encodeURIComponent(tag)}`}
+          className="text-white font-bold hover:underline transition-colors"
+          onClick={(e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            // Two deliveries, because a hashtag is tapped from places the home
+            // feed is not mounted at all — a directly-loaded post page, a
+            // profile, explore. The event reaches a mounted feed; the write to
+            // the persisted filters is what a feed mounting a moment later
+            // reads. Without the second one the tap navigated home and dropped
+            // the tag on the floor.
+            //
+            // `replace` because the feed only filters server-side while ONE
+            // category is selected: a second tag falls back to filtering a
+            // page of twenty unfiltered posts on the client, which shows
+            // almost nothing and reads as the tag being broken.
+            setFilterValue('home', 'categories', [tag]);
+            window.dispatchEvent(new CustomEvent('category-filter-changed', {
+              detail: { categoryId: tag, replace: true },
+            }));
+            clientNavigate('/app');
+          }}
+          data-no-navigate="true"
+        >
+          {fullMatch}
+        </a>
+      );
+    } else {
+      // URL — render as link emoji, or as its text when written `<url>`
+      const { leadingBoundary, url: rawUrl } = splitLeadingUrlBoundary(fullMatch);
+      // `<url>` is the author choosing to show the link itself (see
+      // lib/link-display): drop the brackets and print the address, shortened
+      // in the middle when long.
+      const showAsText = leadingBoundary.endsWith('<') && text[combinedRegex.lastIndex] === '>';
+      const url = showAsText ? rawUrl : trimTrailingUrlPunctuation(rawUrl);
+      const boundary = showAsText ? leadingBoundary.slice(0, -1) : leadingBoundary;
+      if (boundary) {
+        parts.push(boundary);
+      }
+      if (url.length < rawUrl.length) {
+        // The sentence's full stop (or closing bracket) goes back to the text.
+        combinedRegex.lastIndex -= rawUrl.length - url.length;
+      }
+      // The link matcher starts at the space in front of a word, one character
+      // before the email alternative could, so "mail hi@dehub.io" lands here.
+      if (!showAsText && /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(url)) {
+        parts.push(<EmailCopyInline key={`email-${match.index}`} email={url} />);
+        lastIndex = combinedRegex.lastIndex;
+        continue;
+      }
+      if (showAsText) {
+        const dehub = parseDehubLink(url);
+        const target = dehub ? dehub.path : url.match(/^https?:\/\//i) ? url : `https://${url}`;
+        parts.push(
+          <a
+            key={`text-link-${match.index}`}
+            href={target}
+            target={dehub ? undefined : '_blank'}
+            rel={dehub ? undefined : 'noopener noreferrer'}
+            className="underline underline-offset-2 decoration-white/40 hover:decoration-white text-white relative z-10"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              if (dehub) clientNavigate(dehub.path);
+              else window.open(target, '_blank', 'noopener,noreferrer');
+            }}
+            onPointerDown={(e) => e.stopPropagation()}
+            onMouseDown={(e) => e.stopPropagation()}
+            title={url}
+            data-no-navigate="true"
+          >
+            {abbreviateUrl(url)}
+          </a>
+        );
+        combinedRegex.lastIndex += 1; // consume the closing '>'
+        lastIndex = combinedRegex.lastIndex;
+        continue;
+      }
+
+      // A link to something inside Riftn stays inside Riftn: same 🔗 affordance,
+      // but a client navigation instead of a new tab.
+      //
+      // This used to `continue` for community and store links — dropping them
+      // from the rendered text entirely, on the assumption that a card was
+      // being rendered alongside. That assumption held on the two surfaces that
+      // had the cards and nowhere else, so the same link that carded up in the
+      // feed simply vanished from a post title or a comment. Surfaces now strip
+      // exactly the links they card (see `useDehubLinks`), which leaves this
+      // free to render whatever is left rather than guess.
+      const dehubLink = parseDehubLink(url);
+      if (dehubLink) {
+        parts.push(
+          <a
+            key={`dehub-${dehubLink.path}-${match.index}`}
+            href={dehubLink.path}
+            className={flaggedLinkProps?.className ?? "inline-flex items-center hover:scale-110 transition-transform cursor-pointer relative z-10"}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              clientNavigate(dehubLink.path);
+            }}
+            onPointerDown={(e) => e.stopPropagation()}
+            onMouseDown={(e) => e.stopPropagation()}
+            title={flaggedLinkProps ? flaggedLinkProps.title(url) : url}
+            data-no-navigate="true"
+          >
+            🔗
+          </a>
+        );
+        lastIndex = combinedRegex.lastIndex;
+        continue;
+      }
+
+      const href = url.match(/^https?:\/\//i) ? url : `https://${url}`;
+      parts.push(
+        <a
+          key={`${url}-${match.index}`}
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={flaggedLinkProps?.className ?? "inline-flex items-center hover:scale-110 transition-transform cursor-pointer relative z-10"}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            reportPostEvent(e.currentTarget.closest('[data-stats-token]')?.getAttribute('data-stats-token'), 'link');
+            window.open(href, '_blank', 'noopener,noreferrer');
+          }}
+          onPointerDown={(e) => e.stopPropagation()}
+          onMouseDown={(e) => e.stopPropagation()}
+          title={flaggedLinkProps ? flaggedLinkProps.title(url) : url}
+          data-no-navigate="true"
+        >
+          🔗
+        </a>
+      );
+    }
+    
+    lastIndex = combinedRegex.lastIndex;
+  }
+  
+  // Add remaining text after last match
+  if (lastIndex < text.length) {
+    parts.push(text.slice(lastIndex));
+  }
+  
+  // Custom and shortcode emoji (`:fire:`, `<:pepe:123>`) inside the plain-text
+  // runs — see components/app/emoji/EmojiText.
+  // `**bold**` last, so a bold run can hold any of the above.
+  return applyBold(expandEmojiTokens(parts.length > 0 ? parts : [text]));
+}
+
+/**
+ * Chat variant of {@link renderTextWithLinks}: makes URLs clickable while
+ * leaving the link text itself on screen.
+ *
+ * The feed collapses a URL to a 🔗 affordance, which works there because the
+ * link arrives beside a card that already says where it goes. A message has no
+ * card. The URL *is* what the sender typed, so swallowing it leaves the
+ * recipient a bubble reading "have a look at 🔗" — nothing to read, nothing to
+ * copy, and no way to judge a link before opening it. `title` is not the answer
+ * either: these bubbles are mostly read on a touchscreen, where nothing hovers.
+ *
+ * Riftn's own links are usually carded up by the caller before they reach here
+ * (see `findDehubLinks` in the DM bubble); any that survive stripping still
+ * navigate in-app rather than through a new tab.
+ */
+export function renderChatTextWithLinks(text: string): ReactNode[] {
+  const parts: ReactNode[] = [];
+  let lastIndex = 0;
+
+  // The matcher the feed already uses, so both surfaces agree on what counts as
+  // a link. It carries its own leading boundary (space/bracket/quote), which
+  // has to be handed back or the punctuation before a link is eaten with it.
+  const urlRegex = new RegExp(URL_WITH_BOUNDARY_REGEX.source, 'gi');
+
+  let match: RegExpExecArray | null;
+
+  while ((match = urlRegex.exec(text)) !== null) {
+    if (match.index > lastIndex) {
+      parts.push(text.slice(lastIndex, match.index));
+    }
+
+    const { leadingBoundary, url } = splitLeadingUrlBoundary(match[0]);
+    // `<url>` already means "show the link" — here it always is, so just drop
+    // the brackets.
+    const wrapped = leadingBoundary.endsWith('<') && text[urlRegex.lastIndex] === '>';
+    const boundary = wrapped ? leadingBoundary.slice(0, -1) : leadingBoundary;
+    if (boundary) {
+      parts.push(boundary);
+    }
+    if (wrapped) urlRegex.lastIndex += 1;
+
+    // Our own pages open in place, card or not; other sites get a new tab.
+    const dehubLink = parseDehubLink(url);
+    const ownPath = dehubLink ? dehubLink.path : ownSitePath(url);
+    const href = ownPath
+      ? ownPath
+      : url.match(/^https?:\/\//i)
+        ? url
+        : `https://${url}`;
+
+    parts.push(
+      <a
+        key={`chat-link-${match.index}`}
+        href={href}
+        target={ownPath ? undefined : '_blank'}
+        rel={ownPath ? undefined : 'noopener noreferrer'}
+        className="underline underline-offset-2 decoration-white/40 hover:decoration-white break-all transition-colors"
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          if (ownPath) {
+            clientNavigate(ownPath);
+          } else {
+            window.open(href, '_blank', 'noopener,noreferrer');
+          }
+        }}
+        // A bubble sits inside a long-press/context-menu surface and the thread
+        // itself is drag-scrolled. Without these the gesture layer claims the
+        // pointer and the tap never reaches the anchor.
+        onPointerDown={(e) => e.stopPropagation()}
+        onMouseDown={(e) => e.stopPropagation()}
+        title={url}
+        data-no-navigate="true"
+      >
+        {url}
+      </a>,
+    );
+
+    lastIndex = urlRegex.lastIndex;
+  }
+
+  if (lastIndex < text.length) {
+    parts.push(text.slice(lastIndex));
+  }
+
+  // Custom and shortcode emoji (`:fire:`, `<:pepe:123>`) inside the plain-text
+  // runs — see components/app/emoji/EmojiText.
+  return applyBold(expandEmojiTokens(linkChatMentions(parts.length > 0 ? parts : [text])));
+}
+
+/** @name in a message; the character before the @ can't be part of a word, so name@mail.com stays text. */
+const CHAT_MENTION_SOURCE = `(^|[^a-zA-Z0-9_@./])@(${PROFILE_HANDLE_SOURCE})`;
+/** Group-wide pings, not people. */
+const NON_PROFILE_MENTIONS = new Set(['here', 'everyone', 'channel']);
+
+/**
+ * Turn @name in the plain-text runs of a message into a link to that profile,
+ * as posts and comments do. Links are anchors by the time this runs, so a
+ * URL's @ is never touched. The tap stops at the anchor, like the links above,
+ * so it doesn't also open the bubble's reply/long-press menu.
+ */
+function linkChatMentions(parts: ReactNode[]): ReactNode[] {
+  const out: ReactNode[] = [];
+  parts.forEach((part, partIndex) => {
+    if (typeof part !== 'string' || !part.includes('@')) {
+      out.push(part);
+      return;
+    }
+    const mentionRegex = new RegExp(CHAT_MENTION_SOURCE, 'g');
+    let last = 0;
+    let found: RegExpExecArray | null;
+    while ((found = mentionRegex.exec(part)) !== null) {
+      const username = found[2];
+      if (NON_PROFILE_MENTIONS.has(username.toLowerCase())) continue;
+      const at = found.index + found[1].length;
+      if (at > last) out.push(part.slice(last, at));
+      out.push(
+        <a
+          key={`chat-mention-${partIndex}-${at}`}
+          href={profilePath(username)}
+          className="font-semibold hover:underline underline-offset-2"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            clientNavigate(profilePath(username));
+          }}
+          onPointerDown={(e) => e.stopPropagation()}
+          onMouseDown={(e) => e.stopPropagation()}
+          data-no-navigate="true"
+        >
+          @{username}
+        </a>,
+      );
+      last = at + 1 + username.length;
+    }
+    if (last < part.length) out.push(part.slice(last));
+  });
+  return out;
+}
+
+// Translation cache to avoid repeat API calls. Capped: entries hold full
+// translated post bodies and the map lives for the session — unbounded it
+// grows with every translated post scrolled past (same idiom as
+// lib/language-detection-cache.ts).
+const MAX_TRANSLATION_CACHE = 500;
+const translationCache = new Map<string, { translated: string; sourceLang: string }>();
+
+// ...and mirrored into localStorage, so it also survives a reload.
+//
+// Session-only caching was survivable when a translation cost one deliberate
+// button press. Now that the feed translates itself, a reload used to mean
+// re-requesting every post on screen — which is free for the user but is a
+// paid call for us on any post the shared server cache has since evicted, and
+// a visible re-flicker either way. Persisting it makes a refresh cost nothing.
+// v2: v1 was populated while the server could cache a model's refusal prose or
+// a wrong-language guess as the "translation", and this cache is checked before
+// the server is ever re-asked — so on affected devices the bad text would
+// outlive every server-side fix. Bumping the key is the only way to reach it.
+const TRANSLATION_STORE_KEY = 'dehub-translation-cache-v4';
+const LEGACY_TRANSLATION_STORE_KEYS = ['dehub-translation-cache-v1', 'dehub-translation-cache-v2', 'dehub-translation-cache-v3'];
+// Well under the ~5MB localStorage budget: post bodies are large, and this
+// shares that budget with everything else the app keeps there.
+const MAX_PERSISTED_TRANSLATIONS = 300;
+
+type CachedTranslation = { translated: string; sourceLang: string };
+
+function loadPersistedTranslations(): void {
+  try {
+    // Poisoned generations don't deserve the storage they sit in.
+    for (const key of LEGACY_TRANSLATION_STORE_KEYS) localStorage.removeItem(key);
+    const raw = localStorage.getItem(TRANSLATION_STORE_KEY);
+    if (!raw) return;
+    const entries = JSON.parse(raw) as [string, CachedTranslation][];
+    if (!Array.isArray(entries)) return;
+    // Oldest first, so the in-memory eviction order matches what was stored.
+    for (const [key, value] of entries.slice(-MAX_TRANSLATION_CACHE)) {
+      if (typeof value?.translated === 'string') translationCache.set(key, value);
+    }
+  } catch {
+    // A corrupt or oversized blob is not worth failing a render over; the cache
+    // simply starts empty and refills.
+  }
+}
+loadPersistedTranslations();
+
+// Writing on every hit would serialise the whole map per translated post during
+// a scroll. Coalesce into one write per tick instead.
+let persistTimer: ReturnType<typeof setTimeout> | null = null;
+function schedulePersist(): void {
+  if (persistTimer) return;
+  persistTimer = setTimeout(() => {
+    persistTimer = null;
+    try {
+      const entries = Array.from(translationCache.entries()).slice(-MAX_PERSISTED_TRANSLATIONS);
+      localStorage.setItem(TRANSLATION_STORE_KEY, JSON.stringify(entries));
+    } catch {
+      // Quota exceeded or storage disabled (private mode, embedded webview).
+      // The in-memory cache still works for this session.
+    }
+  }, 1000);
+}
+
+function cacheTranslation(key: string, value: CachedTranslation) {
+  if (translationCache.size >= MAX_TRANSLATION_CACHE) {
+    const oldest = translationCache.keys().next().value;
+    if (oldest !== undefined) translationCache.delete(oldest);
+  }
+  translationCache.set(key, value);
+  schedulePersist();
+}
+
+// The auto-translate setting now lives in lib/auto-translate-setting, so the
+// new-version toast can read it without dragging this module onto the entry
+// chunk. Re-exported here because this was its import path.
+export { autoTranslateEnabled, setAutoTranslateEnabled };
+
+// A translation that came back as the text it was given did not translate
+// anything — the body was already in the reader's language. Compared loosely
+// because providers normalise trailing whitespace.
+function isNoOpTranslation(translated: string, original: string): boolean {
+  return translated.trim() === original.trim();
+}
+
+// Provider junk that arrives dressed as a successful translation: MyMemory
+// answers some short queries out of its shared translation memory with API
+// boilerplate somebody else once fed it, and older server versions cached that
+// prose as the post's "translation" — permanently, on both sides. Anything
+// matching this is refused wherever it surfaces: fresh from the network, out of
+// this device's persisted cache, and (server-side) out of the shared table.
+const TRANSLATION_GARBAGE_REGEX =
+  /MYMEMORY WARNING|QUERY LENGTH LIMIT|INVALID LANGUAGE PAIR|UNSUPPORTED LANGUAGE|API KEY|PLEASE CONTACT|INTERNAL SERVER|SERVICE UNAVAILABLE/i;
+
+function looksLikeTranslationGarbage(translated: string): boolean {
+  return TRANSLATION_GARBAGE_REGEX.test(translated);
+}
+
+// ============================================================================
+// Auto-translate scheduling
+//
+// Auto-translation decorates the page; it must never compete with loading it.
+// Left unscheduled, every card that mounts fires its own request during the
+// initial render pass, so opening the feed meant a dozen-plus translate calls
+// racing the feed query, the avatars and the media for the same connections —
+// on a phone that is most of the reason the page felt slow to appear.
+//
+// So nothing queued here starts until the page has actually finished loading,
+// and after that only a few run at a time, during idle. Anything the reader
+// asks for by pressing the button skips this entirely and goes out immediately.
+// ============================================================================
+
+const AUTO_TRANSLATE_CONCURRENCY = 3;
+
+type QueuedJob = { run: () => Promise<unknown>; cancelled: boolean };
+
+const autoQueue: QueuedJob[] = [];
+let inFlightAuto = 0;
+let drainScheduled = false;
+
+let pageLoaded = typeof document === 'undefined' || document.readyState === 'complete';
+if (!pageLoaded) {
+  window.addEventListener('load', () => {
+    pageLoaded = true;
+    drainAutoQueue();
+  }, { once: true });
+}
+
+function whenIdle(cb: () => void): void {
+  const ric = (window as { requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => void })
+    .requestIdleCallback;
+  // The timeout matters: on a page that never goes idle, translations should
+  // still land rather than wait forever.
+  if (typeof ric === 'function') ric(cb, { timeout: 2000 });
+  else setTimeout(cb, 200);
+}
+
+function drainAutoQueue(): void {
+  if (!pageLoaded || drainScheduled) return;
+  if (inFlightAuto >= AUTO_TRANSLATE_CONCURRENCY || autoQueue.length === 0) return;
+
+  drainScheduled = true;
+  whenIdle(() => {
+    drainScheduled = false;
+    while (inFlightAuto < AUTO_TRANSLATE_CONCURRENCY) {
+      const job = autoQueue.shift();
+      if (!job) break;
+      // Cards scroll out of an infinite feed faster than a queue drains; a job
+      // whose component is gone should cost nothing.
+      if (job.cancelled) continue;
+      inFlightAuto++;
+      job.run()
+        .catch(() => {})
+        .then(() => {
+          inFlightAuto--;
+          drainAutoQueue();
+        });
+    }
+    if (autoQueue.length > 0) drainAutoQueue();
+  });
+}
+
+/** Queue an auto-translation. Returns a cancel function for unmount. */
+function queueAutoTranslate(run: () => Promise<unknown>): () => void {
+  const job: QueuedJob = { run, cancelled: false };
+  autoQueue.push(job);
+  drainAutoQueue();
+  return () => { job.cancelled = true; };
+}
+
+// One observer for every auto-translating element. The margin starts the
+// request about two phone screens ahead, so the translation is in place by the
+// time the post scrolls into view.
+const nearScreenCallbacks = new WeakMap<Element, () => void>();
+let nearScreenObserver: IntersectionObserver | null = null;
+
+function observeNearScreen(el: Element, onNear: () => void): () => void {
+  if (typeof IntersectionObserver === 'undefined') {
+    onNear();
+    return () => {};
+  }
+  nearScreenObserver ??= new IntersectionObserver((entries) => {
+    for (const entry of entries) {
+      if (!entry.isIntersecting) continue;
+      nearScreenObserver?.unobserve(entry.target);
+      nearScreenCallbacks.get(entry.target)?.();
+      nearScreenCallbacks.delete(entry.target);
+    }
+  }, { rootMargin: '1400px 0px' });
+  nearScreenCallbacks.set(el, onNear);
+  nearScreenObserver.observe(el);
+  return () => {
+    nearScreenCallbacks.delete(el);
+    nearScreenObserver?.unobserve(el);
+  };
+}
+
+// The same (text, language) pair is routinely asked for by more than one
+// component at once — a card owns the translate control while the component
+// rendering its body asks for the same text, and a repost shows the same body
+// twice on one screen. Sharing the promise makes those one request instead of
+// several identical ones landing on the edge function within a frame.
+type TranslateResult = {
+  translatedText?: string;
+  detectedLanguage?: { language: string };
+  sameLanguage?: boolean;
+};
+
+const inFlightRequests = new Map<string, Promise<TranslateResult>>();
+const translationCooldown = new TranslationCooldown();
+
+/**
+ * `isPublic` marks text anyone can read — a feed post, a bio. Only that may go
+ * to a free model tier that trains on what it is sent; a DM never does.
+ */
+function requestTranslation(text: string, targetLang: string, isPublic: boolean, isChat: boolean): Promise<TranslateResult> {
+  const key = `${text}-${targetLang}-${isPublic ? 'p' : 'x'}${isChat ? '-chat' : ''}`;
+  const existing = inFlightRequests.get(key);
+  if (existing) return existing;
+
+  const request = (async () => {
+    translationCooldown.assertReady(key);
+    const { data, error } = await supabase.functions.invoke('translate-text', {
+      body: { text, targetLang, ...(isPublic && { public: true }), ...(isChat && { purpose: 'chat' }) },
+    });
+    if (error) {
+      await translationCooldown.observe(key, error);
+      throw error;
+    }
+    return (data ?? {}) as TranslateResult;
+  })();
+
+  inFlightRequests.set(key, request);
+  // Settled either way — a failure must not pin the key and make every later
+  // attempt at this text replay the same rejection.
+  request.catch(() => {}).then(() => { inFlightRequests.delete(key); });
+  return request;
+}
+
+// Auto-translate skips Latin-script bodies shorter than this. Language cannot
+// be guessed from a word or two of Latin script — "no" is Portuguese, Italian
+// and English, "nice" could be anything — so a short post translated at all is
+// as likely to be "translated" out of its own language into it, and the only
+// honest answer is to leave it alone until asked. Non-Latin scripts are exempt:
+// kana, hangul, Arabic and friends identify themselves on sight.
+const MIN_TEXT_LENGTH_FOR_DETECTION = 15;
+
+// Live chat goes further. Chat is slang, names and in-jokes ("hiya bashmo
+// bro"), and the translator turns those into a confident sentence nobody wrote
+// ("its basmati my friend"), shown in place of what the sender typed. So a
+// Latin-script chat line is only auto-translated when its own words say which
+// language it is in ("bom dia galera", "hola a todos", see chat-language-hint)
+// and that language is not the reader's. Scripts that identify themselves on
+// sight are auto-translated once they have a few letters ("gm", "ok" stay as
+// written). The translate control stays either way.
+const MIN_CHAT_LETTERS_FOR_AUTO = 4;
+
+function skipsAutoTranslate(text: string, chat = false, readerLang = 'en'): boolean {
+  const ownScript = !!detectNonLatinScript(text);
+  if (!chat) return !ownScript && text.trim().length < MIN_TEXT_LENGTH_FOR_DETECTION;
+  if (!ownScript) return !chatLineIsForeign(text, readerLang);
+  const words = text
+    .replace(/https?:\/\/\S+|www\.\S+/gi, ' ')
+    .replace(/[@#$][\p{L}\p{N}_.-]+/gu, ' ');
+  return (words.match(/\p{L}/gu)?.length ?? 0) < MIN_CHAT_LETTERS_FOR_AUTO;
+}
+
+// Detect if text contains non-Latin scripts (instant, no API needed)
+function detectNonLatinScript(text: string): string | null {
+  const patterns: [RegExp, string][] = [
+    [/[\u3040-\u309F]/, 'ja'], // Hiragana
+    [/[\u30A0-\u30FF]/, 'ja'], // Katakana
+    [/[\u4E00-\u9FFF]/, 'zh'], // CJK (Chinese/Japanese)
+    [/[\uAC00-\uD7AF]/, 'ko'], // Korean Hangul
+    [/[\u0400-\u04FF]/, 'ru'], // Cyrillic
+    [/[\u0600-\u06FF]/, 'ar'], // Arabic
+    [/[\u0E00-\u0E7F]/, 'th'], // Thai
+    [/[\u0900-\u097F]/, 'hi'], // Devanagari (Hindi)
+    [/[\u0590-\u05FF]/, 'he'], // Hebrew
+    [/[\u1100-\u11FF]/, 'ko'], // Korean Jamo
+    [/[\u0370-\u03FF]/, 'el'], // Greek
+  ];
+
+  for (const [pattern, lang] of patterns) {
+    if (pattern.test(text)) {
+      return lang;
+    }
+  }
+
+  return null;
+}
+
+// Check if text is predominantly ASCII/Latin
+function isLatinText(text: string): boolean {
+  const latinChars = text.match(/[a-zA-Z]/g)?.length || 0;
+  const totalChars = text.replace(/\s/g, '').length;
+  return totalChars > 0 && latinChars / totalChars > 0.7;
+}
+
+// Whether a post is plainly already in the reader's language, judged on the
+// client so the common case never costs a request.
+//
+// Most of a feed is in the language of the person reading it, and each of those
+// posts used to go to translate-text only to be told the text back. Scripts that
+// identify themselves settle it on sight; Latin text is judged by function words,
+// which are the most frequent and most language-specific tokens in any sentence.
+// This only says yes when the evidence is lopsided: a wrong "no" costs one
+// request, which is what every post cost before, while a wrong "yes" would leave
+// a post untranslated.
+const FUNCTION_WORDS: Record<string, Set<string>> = {
+  en: new Set('the and is are was were of to it that this with for you your on be have has not but what will my we they just from at so if can do about there their been would'.split(' ')),
+  es: new Set('el la los las que y es por una para con no se del al lo como más pero su muy está hay ser yo mi tu esto esta'.split(' ')),
+  pt: new Set('o os as que e do da dos das em um uma para com não é se na no mais mas seu sua muito está isso eu você'.split(' ')),
+  fr: new Set('le la les des et est une du que pour dans pas qui sur avec ce il je vous nous sont mais très cette au aux'.split(' ')),
+  de: new Set('der die das und ist nicht ich du zu mit den ein eine es auf für von sich auch dem wir sie sind aber noch'.split(' ')),
+  it: new Set('il lo gli le di che è una per con non sono del della mi ma anche questo come più io tu ci'.split(' ')),
+};
+
+export function looksLikeReaderLanguage(text: string, readerLang: string): boolean {
+  const reader = readerLang.toLowerCase().split(/[-_]/)[0];
+  const script = detectNonLatinScript(text);
+  // Han characters alone cannot distinguish Simplified and Traditional Chinese.
+  if (script) return script !== 'zh' && !isLatinText(text) && script === reader;
+
+  const own = FUNCTION_WORDS[reader];
+  if (!own || !isLatinText(text)) return false;
+
+  const tokens: string[] = text.toLowerCase().match(/\p{L}+/gu) ?? [];
+  if (tokens.length < 4) return false;
+
+  const hitsFor = (set: Set<string>) => tokens.filter((t) => set.has(t)).length;
+  const ownHits = hitsFor(own);
+  let otherHits = 0;
+  for (const [lang, set] of Object.entries(FUNCTION_WORDS)) {
+    if (lang !== reader) otherHits = Math.max(otherHits, hitsFor(set));
+  }
+  return ownHits >= 2 && ownHits / tokens.length >= 0.15 && ownHits >= otherHits * 2;
+}
+
+// ============================================================================
+// Shared Translation Context
+// Allows multiple TranslatableText components to sync: when one triggers
+// translation, all siblings within the same provider auto-translate too.
+// ============================================================================
+
+interface SharedTranslationContextValue {
+  /** Increments each time translation is requested */
+  translateSignal: number;
+  /** Increments each time "show original" is requested */
+  originalSignal: number;
+  requestTranslate: () => void;
+  requestOriginal: () => void;
+}
+
+export const SharedTranslationContext = createContext<SharedTranslationContextValue | null>(null);
+
+/**
+ * Wrap multiple TranslatableText components to share a single translate trigger.
+ * When any child with a visible button triggers translation, all siblings translate too.
+ */
+export function SharedTranslationProvider({ children }: { children: ReactNode }) {
+  const [translateSignal, setTranslateSignal] = useState(0);
+  const [originalSignal, setOriginalSignal] = useState(0);
+
+  const requestTranslate = useCallback(() => setTranslateSignal(s => s + 1), []);
+  const requestOriginal = useCallback(() => setOriginalSignal(s => s + 1), []);
+
+  const value = useMemo(
+    () => ({ translateSignal, originalSignal, requestTranslate, requestOriginal }),
+    [translateSignal, originalSignal, requestTranslate, requestOriginal],
+  );
+
+  return (
+    <SharedTranslationContext.Provider value={value}>
+      {children}
+    </SharedTranslationContext.Provider>
+  );
+}
+
+/**
+ * Hook to control translation from outside TranslatableText (e.g. a translate button in PostMetadata).
+ * Must be used inside a SharedTranslationProvider.
+ */
+export function useSharedTranslationControl() {
+  const ctx = useContext(SharedTranslationContext);
+  const [isTranslated, setIsTranslated] = useState(false);
+
+  return {
+    isTranslated,
+    isLoading: false,
+    error: null as string | null,
+    handleTranslate: useCallback(() => {
+      ctx?.requestTranslate();
+      setIsTranslated(true);
+    }, [ctx]),
+    handleShowOriginal: useCallback(() => {
+      ctx?.requestOriginal();
+      setIsTranslated(false);
+    }, [ctx]),
+  };
+}
+
+// There is nothing to translate unless the text carries at least one letter in
+// some script. A blank, emoji-only or punctuation-only body used to still reach
+// translate-text, and MyMemory answers a query like that with an unrelated
+// segment out of its shared translation memory — which showed up in the feed as
+// a stranger's caption appearing under a post that has no text at all.
+const TRANSLATABLE_TEXT_REGEX = /\p{L}/u;
+
+export function hasTranslatableText(text: string | null | undefined): boolean {
+  return !!text && TRANSLATABLE_TEXT_REGEX.test(text);
+}
+
+// Custom hook for translation logic (shared between components)
+// On-demand only: no auto-detection, translate-text is called when user clicks
+/**
+ * @param auto  Translate without being asked. Public content should; private
+ *              content must not — see the auto-translate effect below.
+ *              'chat' also translates short lines, for public live chat.
+ */
+export function useTranslation(
+  text: string,
+  auto: boolean | 'chat' = true,
+  /** Element the text renders in. When given, auto-translate waits until it nears the viewport. */
+  nearRef?: RefObject<Element>,
+  /** Public text (post, comment, bio) may reach a training tier; chats never. */
+  publicContent = false,
+) {
+  const { t: _copy } = _useCopy();
+  const { language: userLang } = useUserLanguage();
+  const autoEnabled = useSyncExternalStore(subscribeAutoTranslate, autoTranslateEnabled);
+  const [isTranslated, setIsTranslated] = useState(false);
+  const [translatedText, setTranslatedText] = useState('');
+  const [sourceLang, setSourceLang] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Whether a request is out, tracked in a ref rather than read off `isLoading`.
+  //
+  // The state value is a snapshot of the render the callback was created in, so
+  // guarding on it rejected any second call made before React re-rendered —
+  // including the one auto-translate makes when the reader's language resolves
+  // a beat after mount. That request never went out and nothing ever retried
+  // it, which is why auto-translate did nothing at all for anyone not reading
+  // in the language the hook happened to start with.
+  const inFlightRef = useRef(false);
+
+  // A response only belongs to the text and language that requested it.
+  // Reset the busy flag too, so a previous request cannot block the new one.
+  const generationRef = useRef(0);
+  const autoDoneRef = useRef<string | null>(null);
+  useEffect(() => {
+    generationRef.current += 1;
+    inFlightRef.current = false;
+    autoDoneRef.current = null;
+    setIsTranslated(false);
+    setTranslatedText('');
+    setSourceLang(null);
+    setIsLoading(false);
+    setError(null);
+    return () => { generationRef.current += 1; };
+  }, [text, userLang]);
+
+  // Nothing worth sending to the translator
+  const isTooShort = !hasTranslatableText(text);
+
+  const isChat = auto === 'chat';
+  const runTranslate = useCallback(async (silent: boolean) => {
+    if (!hasTranslatableText(text) || inFlightRef.current) return;
+
+    const generation = generationRef.current;
+    const current = () => generation === generationRef.current;
+    const targetLang = userLang;
+    const cacheKey = `${text}-${targetLang}${isChat ? (publicContent ? '-chat-public' : '-chat-private') : ''}`;
+    const languageCode = (lang: string) => {
+      const code = lang.toLowerCase().replace(/_/g, '-');
+      return /^zh-(hant|tw|hk|mo)(-|$)/.test(code) ? 'zh-tw' : code.split('-')[0];
+    };
+    const inTargetLanguage = (source?: string | null) => {
+      const code = source ? languageCode(source) : 'unknown';
+      return ['auto', 'und', 'unknown'].includes(code)
+        ? chatLineMatchesLanguage(text, targetLang)
+        : code === languageCode(targetLang);
+    };
+    const showChatNoOp = (alreadyInLanguage: boolean) => {
+      if (silent) return;
+      setError(alreadyInLanguage
+        ? _copy('copy.caac88c81c38', { defaultValue: 'Already in your language' })
+        : _copy('copy.81cb3cf414b1', { defaultValue: 'Translation unavailable' }));
+      setTimeout(() => { if (current()) setError(null); }, 3000);
+    };
+
+    if (translationCache.has(cacheKey)) {
+      const cached = translationCache.get(cacheKey)!;
+      // Poison from before the garbage guard existed must not outlive this
+      // session: drop it here and the next persist writes it out of
+      // localStorage too, then fall through to ask the server afresh.
+      if (looksLikeTranslationGarbage(cached.translated)) {
+        translationCache.delete(cacheKey);
+        schedulePersist();
+      } else if (isNoOpTranslation(cached.translated, text)) {
+        const alreadyInLanguage = isChat && inTargetLanguage(cached.sourceLang);
+        if (!isChat || silent || alreadyInLanguage) {
+          setSourceLang(alreadyInLanguage ? targetLang : cached.sourceLang);
+          if (isChat) showChatNoOp(alreadyInLanguage);
+          return;
+        }
+        translationCache.delete(cacheKey);
+        schedulePersist();
+      } else {
+        setError(null);
+        setTranslatedText(cached.translated);
+        setSourceLang(cached.sourceLang);
+        setIsTranslated(true);
+        return;
+      }
+    }
+
+    inFlightRef.current = true;
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const data = await requestTranslation(text, targetLang, publicContent, isChat);
+
+      if (!data.translatedText) {
+        if (!current()) return;
+        setError(_copy("copy.81cb3cf414b1", { defaultValue: "Translation unavailable" }));
+        setTimeout(() => { if (current()) setError(null); }, 3000);
+        return;
+      }
+
+      const translated = data.translatedText;
+      const reported = data.detectedLanguage?.language;
+      const detected = text.replace(/[^\p{L}]/gu, '').length >= 60 && reported && !['auto', 'und'].includes(reported)
+        ? reported : 'unknown';
+
+      // An error message is not a translation of anything. Refuse it without
+      // caching — the next attempt may reach a provider that answers honestly.
+      if (looksLikeTranslationGarbage(translated)) {
+        console.error('[Translate] Provider returned an error message, discarding');
+        if (!current()) return;
+        setError(_copy("copy.81cb3cf414b1", { defaultValue: "Translation unavailable" }));
+        setTimeout(() => { if (current()) setError(null); }, 3000);
+        return;
+      }
+
+      // Nothing changed, so do not claim anything did. The server returns the
+      // body untouched when the text is already in the target language, and
+      // flipping to the translated state on that put a "Show original" control
+      // on a change that never happened — on a feed whose posts match the
+      // reader's language, which is most of them, every post looked translated
+      // and none of them were.
+      if (data.sameLanguage === true || isNoOpTranslation(translated, text)) {
+        const alreadyInLanguage = data.sameLanguage === true || (isChat && inTargetLanguage(reported));
+        const source = isChat && alreadyInLanguage ? targetLang : detected;
+        if (!isChat || silent || alreadyInLanguage) cacheTranslation(cacheKey, { translated, sourceLang: source });
+        if (current()) {
+          setSourceLang(source);
+          if (isChat) showChatNoOp(alreadyInLanguage);
+        }
+        return;
+      }
+
+      cacheTranslation(cacheKey, { translated, sourceLang: detected });
+      if (!current()) return;
+      setTranslatedText(translated);
+      setSourceLang(detected);
+      setIsTranslated(true);
+    } catch (err) {
+      console.error('[Translate] Translation failed:', err);
+      if (!current()) return;
+      setError(_copy("copy.81cb3cf414b1", { defaultValue: "Translation unavailable" }));
+      setTimeout(() => { if (current()) setError(null); }, 3000);
+    } finally {
+      if (current()) {
+        inFlightRef.current = false;
+        setIsLoading(false);
+      }
+    }
+  }, [text, userLang, publicContent, isChat, _copy]);
+
+  const handleTranslate = useCallback(() => runTranslate(false), [runTranslate]);
+  const handleTranslateSilently = useCallback(() => runTranslate(true), [runTranslate]);
+
+  const handleShowOriginal = useCallback(() => {
+    generationRef.current += 1;
+    inFlightRef.current = false;
+    autoDoneRef.current = `${text}-${userLang}`;
+    setIsTranslated(false);
+    setIsLoading(false);
+  }, [text, userLang]);
+
+  // Auto-translate.
+  //
+  // Deferred, never immediate: the work is queued behind the page load and run
+  // a few at a time while the browser is idle (see queueAutoTranslate). The
+  // reader gets the page first and the translation a moment later, instead of
+  // the page waiting behind a burst of translate calls it did not ask for.
+  //
+  // Fires once per (text, language) rather than per render: handleTranslate's
+  // identity changes with `text`, so keying the effect on it directly would
+  // re-enter whenever a translation swapped the text out from under it.
+  //
+  // Reading a post the reader cannot read is the failure this removes, so it is
+  // on by default and opting out is remembered. A reader who has pressed "show
+  // original" on this text is not overridden. A cancelled queue entry does not
+  // count as an attempt; it can be scheduled again when the setting changes.
+  //
+  // Call sites opt out with auto=false, and private content must. Translating
+  // sends the body to a third party, and the free tier is MyMemory — a SHARED
+  // translation memory, which is why an unrelated segment somebody else once
+  // submitted can come back out of it. A reader choosing to translate one
+  // message accepts that; doing it silently to every message they receive does
+  // not, and a direct message is not ours to upload on their behalf.
+  const [nearScreen, setNearScreen] = useState(false);
+  const translateRef = useRef(runTranslate);
+  useEffect(() => { translateRef.current = runTranslate; }, [runTranslate]);
+
+  useEffect(() => {
+    if (!auto) return;
+    if (!autoEnabled) return;
+    if (isTooShort) return;
+    // A word or two of Latin script cannot be told apart from the reader's own
+    // language, so auto-translating it is as likely wrong as right — and it is
+    // the exact shape of query that pulls junk out of a shared translation
+    // memory. The translate control stays; only the unasked-for pass skips.
+    if (skipsAutoTranslate(text, auto === 'chat', userLang)) return;
+
+    const key = `${text}-${userLang}`;
+    if (autoDoneRef.current === key) return;
+
+    // Already in the reader's language: nothing to ask the server.
+    if (looksLikeReaderLanguage(text, userLang)) {
+      autoDoneRef.current = key;
+      return;
+    }
+
+    // Already known — the cache survives a reload, so this is the common case on
+    // a refresh. No request to schedule, and waiting for idle would only show
+    // the reader a paragraph they cannot read before swapping it out.
+    if (translationCache.has(key)) {
+      autoDoneRef.current = key;
+      void translateRef.current(true);
+      return;
+    }
+
+    // A feed mounts cards well below the fold. Those wait until they are about
+    // to be seen, and most never are.
+    const el = nearRef?.current;
+    if (el && !nearScreen) return observeNearScreen(el, () => setNearScreen(true));
+
+    return queueAutoTranslate(() => {
+      if (autoDoneRef.current === key || !autoTranslateEnabled()) return Promise.resolve();
+      // Each device gets a set number of unasked-for translations an hour
+      // (lib/auto-translate-budget). Past it, the text stays as written and the
+      // Translate control still works.
+      if (!takeAutoTranslateSlot()) return Promise.resolve();
+      autoDoneRef.current = key;
+      return translateRef.current(true);
+    });
+  }, [text, userLang, isTooShort, auto, autoEnabled, nearScreen, nearRef]);
+
+  return {
+    userLang,
+    isTranslated,
+    translatedText,
+    sourceLang,
+    isLoading,
+    error,
+    isTooShort,
+    handleTranslate,
+    handleTranslateSilently,
+    handleShowOriginal,
+  };
+}
+
+/**
+ * TranslatableText - single text element with translation
+ */
+export function TranslatableText({
+  text,
+  className,
+  as: Component = 'span',
+  hideControls = false,
+  auto = true,
+  flagged = false,
+  publicContent = false,
+}: TranslatableTextProps) {
+  const sharedCtx = useContext(SharedTranslationContext);
+  const elementRef = useRef<HTMLElement>(null);
+  const {
+    userLang,
+    isTranslated,
+    translatedText,
+    sourceLang,
+    isLoading,
+    error,
+    isTooShort,
+    handleTranslate,
+    handleShowOriginal,
+  } = useTranslation(text, auto, elementRef, publicContent);
+
+  // Listen to shared context signals — auto-translate/show-original when a sibling triggers
+  const [lastTranslateSignal, setLastTranslateSignal] = useState(0);
+  const [lastOriginalSignal, setLastOriginalSignal] = useState(0);
+
+  useEffect(() => {
+    if (!sharedCtx) return;
+    if (sharedCtx.translateSignal > lastTranslateSignal && !isTranslated && !isTooShort) {
+      setLastTranslateSignal(sharedCtx.translateSignal);
+      handleTranslate();
+    }
+  }, [sharedCtx?.translateSignal]);
+
+  useEffect(() => {
+    if (!sharedCtx) return;
+    if (sharedCtx.originalSignal > lastOriginalSignal && isTranslated) {
+      setLastOriginalSignal(sharedCtx.originalSignal);
+      handleShowOriginal();
+    }
+  }, [sharedCtx?.originalSignal]);
+
+  // Wrapped handlers that also notify siblings via shared context
+  const onTranslate = () => {
+    handleTranslate();
+    sharedCtx?.requestTranslate();
+  };
+
+  const onShowOriginal = () => {
+    handleShowOriginal();
+    sharedCtx?.requestOriginal();
+  };
+
+  // Rendered as the requested element and nothing else.
+  //
+  // This used to sit inside an AnimatePresence/motion.div pair for a 150ms
+  // cross-fade, which cost two things. Every post body, comment and chat line
+  // in an infinite feed carried its own framer-motion instance — the animation
+  // library is not free per node, and this is the most-repeated node in the
+  // app. And the wrapper div broke `line-clamp` on the containers that clamp
+  // this text, because the clamp applies to the element's own line boxes and a
+  // block child is not one. The key still restarts the fade on a translate
+  // toggle; the fade is now a CSS animation on the element itself.
+  return (
+    <Component
+      ref={elementRef as React.Ref<never>}
+      key={isTranslated ? 'translated' : 'original'}
+      className={cn("whitespace-pre-wrap break-words animate-in fade-in duration-150", className)}
+    >
+      {renderTextWithLinks(isTranslated ? translatedText : text, { flagged })}
+    </Component>
+  );
+}
+
+/**
+ * Split a translation that was requested as `title\n\n body` back into the two
+ * halves it was joined from.
+ *
+ * Cards translate their title and body in one call to halve the request count,
+ * which means guessing where the join was on the way back — and a translator is
+ * under no obligation to keep a blank line. When the separator does not survive,
+ * a naive `split('\n\n')[0]` hands the WHOLE body back as the title, and the
+ * title renders unclamped while the body is capped at a couple of hundred
+ * characters. That is how pressing translate on a long post silently expanded
+ * it to full length instead of translating it: the button behaved like "show
+ * more".
+ *
+ * With the separator gone there is no way to know where the title ended, so the
+ * whole translation goes to the body — the half that is clamped and has an
+ * expand control. Nothing is lost: the body text already opens with the title.
+ */
+export function splitTranslatedTitleAndBody(
+  translated: string,
+  title?: string,
+  body?: string,
+): [string | undefined, string | undefined] {
+  if (!title) return [undefined, translated];
+  if (!body) return [translated, undefined];
+
+  const separator = translated.indexOf('\n\n');
+  if (separator === -1) return [undefined, translated];
+
+  const translatedTitle = translated.slice(0, separator).trim();
+  const translatedBody = translated.slice(separator + 2).trim();
+  if (!translatedTitle || !translatedBody) return [undefined, translated];
+
+  return [translatedTitle, translatedBody];
+}
+
+/**
+ * TranslatableGroup - wraps multiple text elements with a single translate control at the end
+ * Use when you have title + description that should share one translate button
+ */
+interface TranslatableGroupProps {
+  /** Combined text for language detection (e.g., title + " " + description) */
+  text: string;
+  children: ReactNode;
+}
+
+export function TranslatableGroup({ text, children }: TranslatableGroupProps) {
+  // TranslatableGroup now just renders children — translation controls are in PostMetadata
+  return <>{children}</>;
+}

@@ -1,0 +1,227 @@
+import { z } from "zod";
+
+/** The team wallet the agents are filed under: @maldoteth's account. */
+export const AGENT_OWNER = "0xec4e2c7417f781b35d830671f013b3b91f29ba64";
+/** His erased account's wallet, kept so agents still filed under it keep working until they are moved. */
+export const PREVIOUS_AGENT_OWNER = "0x9324840523a5d17dd12a2f11a9472e5a199c1937";
+/** Any signed-in wallet can own agents. */
+export const agentOwnerAllowed = (wallet: unknown): boolean =>
+  typeof wallet === "string" && /^0x[0-9a-f]{40}$/i.test(wallet);
+/** Group runs, runs across every post or user, and Alive mode stay with the team account. */
+export const agentTeamOwner = (wallet: unknown): boolean =>
+  typeof wallet === "string" && [AGENT_OWNER, PREVIOUS_AGENT_OWNER].includes(wallet.toLowerCase());
+/** A plan that acts on one target at a time, or likes up to three recent posts. */
+export const singleTargetPlan = (plan: { steps: { audience: string }[] }): boolean =>
+  plan.steps.every(step => step.audience === "single" || step.audience === "selected_posts");
+export const TEAM_ONLY_MESSAGE = "Your agents can act on one post or person at a time, or like up to 3 recent posts. Runs across every post or every user are not open yet.";
+
+const tools = ["dehub_post_create", "dehub_follow", "dehub_vote", "dehub_comment", "dehub_update_profile", "dehub_view"] as const;
+/** How far ahead a post window may end. Until then the task keeps checking for new posts. */
+export const LIVE_WINDOW_MAX_DAYS = 31;
+/** How often a window that ends in the future is checked for new posts. */
+export const LIVE_WINDOW_RECHECK_MINUTES = 30;
+export const windowSteps = (step: { audience: string }) => step.audience === "posts" || step.audience === "post_authors";
+export const taskStepSchema = z.object({
+  tool: z.enum(tools),
+  arguments: z.record(z.unknown()),
+  audience: z.enum(["single", "all_users", "post_authors", "posts", "selected_posts"]),
+  from: z.string().datetime().nullable().default(null),
+  to: z.string().datetime().nullable().default(null),
+  author: z.string().trim().regex(/^(?:@?[a-z0-9_]{1,50}|0x[a-f0-9]{40})$/i).nullable().optional(),
+  category: z.string().trim().min(1).max(100).regex(/^[^\r\n]+$/).nullable().optional(),
+  categories: z.array(z.string().trim().min(1).max(100).regex(/^[^\r\n]+$/)).min(1).max(20).nullable().optional(),
+  topic: z.string().max(2000).nullable().default(null),
+  news: z.boolean().optional(),
+  recent_keywords: z.array(z.string().trim().min(2).max(40)).min(1).max(6).nullable().default(null),
+  recent_limit: z.number().int().min(1).max(3).nullable().default(null),
+  media_pool: z.array(z.object({ url: z.string().url(), type: z.enum(["image", "video"]), subject: z.string().min(3).max(200), caption: z.string().trim().min(1).max(480).optional(), thumbnail_url: z.string().url().optional() }).strict()).max(12).nullable().default(null),
+}).strict();
+export const taskPlanSchema = z.object({
+  summary: z.string().min(1).max(1000),
+  steps: z.array(taskStepSchema).min(1).max(12),
+  interval_minutes: z.number().finite().min(30).max(525600).nullable(),
+  pacing: z.object({ gap_seconds: z.number().finite().min(0).max(86400), duration_minutes: z.number().int().min(1).max(1440) }).strict().optional(),
+}).strict().superRefine((plan, ctx) => {
+  if (plan.pacing && (plan.interval_minutes !== null || plan.steps.length !== 1 || plan.steps[0].tool !== 'dehub_vote' || plan.steps[0].audience !== 'posts')) {
+    ctx.addIssue({ code: 'custom', message: 'Pacing supports one fixed-window reaction task.' });
+  }
+  plan.steps.forEach((step, index) => {
+    const invalid = (message: string) => ctx.addIssue({ code: "custom", message, path: ["steps", index] });
+    if ((step.author || step.category || step.categories) && !windowSteps(step)) invalid("Author and category filters require a post window.");
+    if (step.category && step.categories) invalid("Use one category filter format.");
+    if (step.news && (step.tool !== 'dehub_post_create' || !step.topic)) invalid('News requires a generated post.');
+    if (step.audience === "all_users" && step.tool !== "dehub_follow") invalid("All users supports following only.");
+    if (step.audience === "post_authors" && step.tool !== "dehub_follow") invalid("Post authors supports following only.");
+    if (step.audience === "posts" && !["dehub_vote", "dehub_comment", "dehub_view"].includes(step.tool)) invalid("Posts supports views, reactions and comments only.");
+    if (step.tool === "dehub_view" && !["single", "posts"].includes(step.audience)) invalid("Views are for one post or every post in a time window.");
+    if (step.audience === "selected_posts" && (step.tool !== "dehub_vote" || step.arguments.vote_type !== "like" || !step.recent_keywords || !step.recent_limit || step.from || step.to)) invalid("Selected recent posts require a like, keywords, and a limit of up to three.");
+    if (step.audience !== "selected_posts" && (step.recent_keywords || step.recent_limit)) invalid("Recent-post selection is only for selected posts.");
+    if (["posts", "post_authors"].includes(step.audience) && (!step.from || !step.to)) invalid("Choose a start and end time for the posts.");
+    if (step.from && step.to && Date.parse(step.from) >= Date.parse(step.to)) invalid("The start must precede the end.");
+    if (step.topic && step.tool !== "dehub_post_create" && !(step.tool === "dehub_comment" && step.audience === "posts")) invalid("Topics are for generated posts and replies to every post in a window.");
+    if (step.media_pool && (step.tool !== "dehub_post_create" || !step.topic)) invalid("Curated media is for generated posts.");
+    if (step.media_pool?.some(media => media.type === "video" && !media.thumbnail_url)) invalid("Videos need a thumbnail URL.");
+    if (plan.interval_minutes && step.tool === "dehub_post_create" && step.arguments.media_url) invalid("Recurring posts need a curated media pool so the same file is not repeated.");
+    if (step.audience !== "single" && step.tool === "dehub_follow" && step.arguments.action === "unfollow") invalid("Unfollowing requires a specific user.");
+  });
+  if (plan.interval_minutes !== null && plan.steps.some(step => !["single", "selected_posts"].includes(step.audience))) {
+    ctx.addIssue({ code: "custom", message: "Bulk tasks use a fixed time window. Schedule individual actions or topic posts instead." });
+  }
+  const posts = plan.steps.filter(step => step.tool === "dehub_post_create").length;
+  if (plan.interval_minutes && posts * 60 / plan.interval_minutes > 2) {
+    ctx.addIssue({ code: "custom", message: "The schedule exceeds two posts per hour." });
+  }
+});
+export type TaskPlan = z.infer<typeof taskPlanSchema>;
+export type TaskStep = z.infer<typeof taskStepSchema>;
+
+/** Exact commands need no model round trip; other wording uses the planner. */
+export function explicitTaskPlan(prompt: string, now = new Date(), timezone = "UTC"): TaskPlan | null {
+  const text = prompt.trim();
+  const simplePost = text.match(/^Post (once|once per day|twice per day) about (.+?)\.?$/i);
+  if (simplePost) return taskPlanSchema.parse({ summary: text, interval_minutes: simplePost[1].toLowerCase() === 'once' ? null : simplePost[1].toLowerCase() === 'once per day' ? 1440 : 720,
+    steps: [{ tool: 'dehub_post_create', arguments: {}, audience: 'single', topic: simplePost[2], news: /\b(?:news|current events|real.world events|headlines)\b/i.test(simplePost[2]) }] });
+  // Universal likes are a time-window task, never a keyword-limited selection.
+  const universal = text.toLowerCase().replace(/[.!]+$/, '').replace(/\s+/g, ' ').match(
+    /^(like|dislike|view) (?:all|every) posts? (?:from |in |for |over |during )?(?:the )?(today|last hour|past hour|last 24 hours|past 24 hours|last day|past day|last 7 days|past 7 days|last week|past week|last month|past month|last 30 days|past 30 days|today in last day)(?: (?:in |across )?(?:all|every) categor(?:y|ies|hy))?$/,
+  );
+  if (universal) {
+    let from = now.getTime() - (/hour$/.test(universal[2]) ? 1 / 24 : /7 days|week/.test(universal[2]) ? 7 : /30 days|month/.test(universal[2]) ? 30 : 1) * 86400000;
+    if (universal[2] === 'today') {
+      // Solve local midnight against the zone offset, including DST boundaries.
+      const parts = (date: Date) => Object.fromEntries(new Intl.DateTimeFormat('en-GB', {
+        timeZone: timezone, year: 'numeric', month: '2-digit', day: '2-digit',
+        hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23',
+      }).formatToParts(date).map(part => [part.type, part.value]));
+      const local = parts(now);
+      const midnight = Date.UTC(+local.year, +local.month - 1, +local.day);
+      from = midnight;
+      for (let attempt = 0; attempt < 4; attempt++) {
+        const at = parts(new Date(from));
+        const represented = Date.UTC(+at.year, +at.month - 1, +at.day, +at.hour, +at.minute, +at.second);
+        const next = from + midnight - represented;
+        if (next === from) break;
+        from = next;
+      }
+    }
+    return everyPostPlan(new Date(from).toISOString(), now.toISOString(), universal[1]);
+  }
+  const daily = text.match(/^Post once per day about: ([^\n]+)\nStyle: ([^\n]+)\nLike up to ([1-3]) recent posts per day about: ([^\n]+)$/i);
+  if (daily) {
+    const keywords = daily[4].split(',').map(value => value.trim()).filter(Boolean);
+    const topic = `${daily[1].trim()} Voice: ${daily[2].trim()}`;
+    return taskPlanSchema.parse({ summary: `Post daily about ${daily[1].trim()} and like up to ${daily[3]} relevant recent posts.`, interval_minutes: 1440,
+      steps: [
+        { tool: 'dehub_vote', arguments: { vote_type: 'like' }, audience: 'selected_posts', from: null, to: null, topic: null, recent_keywords: keywords, recent_limit: Number(daily[3]) },
+        { tool: 'dehub_post_create', arguments: {}, audience: 'single', from: null, to: null, topic },
+      ] });
+  }
+  const window = text.match(/^Every post from (\S+) to (\S+)\nActions: ([a-z, ]+)(?:\nAuthor: ([^\n]+))?(?:\nCategory: ([^\n]+))?(?:\nCategories: ([^\n]+))?(?:\nReply style: ([^\n]{1,500}))?$/i);
+  if (window) return everyPostPlan(window[1], window[2], window[3], window[7], window[4], window[5], window[6] ? JSON.parse(window[6]) : undefined);
+  const follow = text.match(/^follow\s+(@[a-z0-9_]{3,20}|0x[a-f0-9]{40})(?:\s+once)?[.!]?$/i);
+  if (follow) return taskPlanSchema.parse({ summary: `Follow ${follow[1]} once.`, interval_minutes: null,
+    steps: [{ tool: 'dehub_follow', arguments: { target_wallet: follow[1].replace(/^@/, ''), action: 'follow' }, audience: 'single', from: null, to: null, topic: null }] });
+  if (/^follow\s+(?:every user|everyone|all users)(?:\s+once)?[.!]?$/i.test(text)) return taskPlanSchema.parse({
+    summary: 'Follow every user in the public directory once.', interval_minutes: null,
+    steps: [{ tool: 'dehub_follow', arguments: { action: 'follow' }, audience: 'all_users', from: null, to: null, topic: null }],
+  });
+  const posts = text.match(/^(?:post|publish)\s+(\d+)\s+(?:times|posts?)\s+(?:per day|a day|daily)\s+about\s+([\s\S]+)$/i);
+  if (!posts) return null;
+  const count = Number(posts[1]);
+  if (count < 1 || count > 48) throw new Error('Choose between 1 and 48 posts per day (at most two per hour).');
+  const topic = posts[2].trim();
+  if (topic.length > 2000) throw new Error('Keep the posting topic within 2,000 characters.');
+  return taskPlanSchema.parse({ summary: `Post ${count} times per day about ${topic}`, interval_minutes: 1440 / count,
+    steps: [{ tool: 'dehub_post_create', arguments: {}, audience: 'single', from: null, to: null, topic }] });
+}
+
+/** A readable UTC time for task summaries, e.g. "17 Oct 2026 12:00 UTC". */
+export const readableTime = (value: string | number | Date) =>
+  new Date(value).toLocaleString("en-GB", { timeZone: "UTC", day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }).replace(",", "") + " UTC";
+
+/** "Every post from A to B" from the task form: exact, so it never goes through the planner. */
+function everyPostPlan(from: string, to: string, list: string, style?: string, author?: string, category?: string, categories?: string[]): TaskPlan {
+  const start = new Date(from), end = new Date(to);
+  if (!Number.isFinite(start.getTime()) || !Number.isFinite(end.getTime())) throw new Error("Choose a valid start and end time.");
+  const actions = [...new Set(list.toLowerCase().split(",").map(value => value.trim()).filter(Boolean))];
+  if (!actions.length || actions.some(action => !["view", "like", "dislike", "reply"].includes(action))) throw new Error("Choose view, like, dislike or reply.");
+  if (actions.includes("like") && actions.includes("dislike")) throw new Error("Choose either like or dislike, not both.");
+  if (actions.includes("reply") && !style?.trim()) throw new Error("Describe how the agent should reply.");
+  const window = { audience: "posts", from: start.toISOString(), to: end.toISOString(), topic: null, ...(author ? { author } : {}), ...(category ? { category } : {}), ...(categories ? { categories } : {}) };
+  const steps = [
+    ...(actions.includes("view") ? [{ ...window, tool: "dehub_view", arguments: {} }] : []),
+    ...(actions.includes("like") ? [{ ...window, tool: "dehub_vote", arguments: { vote_type: "like" } }] : []),
+    ...(actions.includes("dislike") ? [{ ...window, tool: "dehub_vote", arguments: { vote_type: "dislike" } }] : []),
+    ...(actions.includes("reply") ? [{ ...window, tool: "dehub_comment", arguments: {}, topic: style!.trim() }] : []),
+  ];
+  const names = actions.map(action => ({ view: "view", like: "like", dislike: "dislike", reply: "reply to" })[action]).join(", ").replace(/, ([^,]*)$/, " and $1");
+  return taskPlanSchema.parse({ summary: `${names[0].toUpperCase()}${names.slice(1)} every post${author ? ` by ${author}` : ' by all creators'}${categories ? ` in any of: ${categories.join(', ')}` : category ? ` in category ${category}` : ' across all categories'} from ${readableTime(start)} to ${readableTime(end)}.`, interval_minutes: null, steps });
+}
+
+export const PLAN_TOOL = {
+  type: "function",
+  function: {
+    name: "plan_agent_task",
+    description: "Translate the owner's request into actions, or return a clarification if it cannot be represented exactly.",
+    parameters: {
+      type: "object",
+      properties: {
+        clarification: { type: ["string", "null"], description: "Null for a supported task. Otherwise explain what is needed and set plan to null." },
+        plan: {
+          type: ["object", "null"],
+          properties: {
+            summary: { type: "string" },
+            interval_minutes: { type: ["number", "null"], description: "Null for once. For N posts/day use 1440/N, minimum 30. Each run executes every step." },
+            steps: { type: "array", items: {
+              type: "object",
+              properties: {
+                tool: { type: "string", enum: tools },
+                arguments: { type: "object", description: "Only arguments for the selected tool. Omit irrelevant fields. For bulk omit the target: the runner supplies it.",
+                  properties: {
+                    target_wallet: { type: "string" }, action: { type: "string", enum: ["follow", "unfollow"] },
+                    token_id: { type: "string" }, vote_type: { type: "string", enum: ["like", "dislike"] },
+                    content: { type: "string" }, title: { type: "string" }, category: { type: "string" },
+                    media_url: { type: "string" }, media_type: { type: "string", enum: ["text", "image", "video"] },
+                    reply_to_comment_id: { type: "string" }, bio: { type: "string" }, display_name: { type: "string" },
+                    avatar_url: { type: "string" }, banner_url: { type: "string" },
+                  }, additionalProperties: false,
+                },
+                audience: { type: "string", enum: ["single", "all_users", "post_authors", "posts", "selected_posts"] },
+                from: { type: ["string", "null"], description: "Inclusive ISO UTC start of a bulk post time window." },
+                author: { type: ["string", "null"], description: "Exact username or wallet of the post creator to filter by; null for all authors. Resolved before queueing." },
+                category: { type: ["string", "null"], description: "Exact post category to filter by, case insensitive; null for all categories. This is not a keyword search." },
+                categories: { type: ["array", "null"], items: { type: "string" }, description: "Up to 20 exact category names. Match any selected category; combine with author when supplied. Use null for all categories. Do not also set category." },
+                to: { type: ["string", "null"], description: `Exclusive ISO UTC end of a bulk post time window. May be up to ${LIVE_WINDOW_MAX_DAYS} days ahead; new posts are then covered as they appear.` },
+                topic: { type: ["string", "null"], description: "Instructions for an original post on each run, or for a reply written to each post in a window; null for literal supplied content." },
+                recent_keywords: { type: ["array", "null"], items: { type: "string" }, description: "One to six exact interests for selected_posts; null otherwise." },
+                recent_limit: { type: ["integer", "null"], description: "Maximum one to three matching recent posts to like each run; null otherwise." },
+                media_pool: { type: ["array", "null"], description: "Owner-supplied or licensed media for recurring posts. Each asset is used once. An optional caption is posted verbatim; otherwise a new caption is written from the subject. Videos also need a thumbnail_url.", items: { type: "object", properties: { url: { type: "string" }, type: { type: "string", enum: ["image", "video"] }, subject: { type: "string" }, caption: { type: "string" }, thumbnail_url: { type: "string" } }, required: ["url", "type", "subject"], additionalProperties: false } },
+              },
+              required: ["tool", "arguments", "audience", "from", "to", "topic"],
+              additionalProperties: false,
+            } },
+          },
+          required: ["summary", "steps", "interval_minutes"],
+          additionalProperties: false,
+        },
+      },
+      required: ["plan", "clarification"],
+      additionalProperties: false,
+    },
+  },
+};
+
+export function parseTaskPlan(output: unknown): TaskPlan {
+  const envelope = z.object({ plan: z.unknown(), clarification: z.string().nullable().optional() }).safeParse(output);
+  if (!envelope.success) throw new Error('Could not prepare a complete task. Try stating one action and its schedule.');
+  if (envelope.data.clarification) throw new Error(envelope.data.clarification);
+  const parsed = taskPlanSchema.safeParse(envelope.data.plan);
+  if (!parsed.success) throw new Error('Could not prepare a complete task. Try stating one action and its schedule.');
+  return parsed.data;
+}
+
+export function nextScheduledRun(previous: string, minutes: number, now: number): string {
+  const interval = minutes * 60000;
+  const prior = Date.parse(previous);
+  return new Date(prior + Math.max(1, Math.floor((now - prior) / interval) + 1) * interval).toISOString();
+}

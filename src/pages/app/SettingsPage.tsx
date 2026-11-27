@@ -1,0 +1,4227 @@
+import { translateCopy as _translateCopy } from '@/i18n/copy';
+import { useTranslation as _useCopy } from 'react-i18next';
+import { useSurfaceDraft } from '@/hooks/use-surface-draft';
+import { useSessionText } from '@/hooks/use-session-text';
+import { tokenLabel } from '@/lib/token-label';
+﻿import { ThemedIcon } from '@/components/app/war/WarHudIcon';
+import { useState, useRef, useEffect, useCallback, useMemo, type CSSProperties } from 'react';
+import { DhbCoin } from '@/components/app/DhbAmount';
+import { cn } from '@/lib/utils';
+import { useDragTabIndicator } from '@/hooks/use-drag-tab-indicator';
+import { IslandAction, PageBody, PageIsland, usePhonePill } from '@/components/app/page-kit/PageKit';
+import { useGlobalDropZone } from '@/hooks/use-global-drop-zone';
+import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { useTabIndicator } from '@/hooks/use-tab-indicator';
+import { GlassIndicator } from '@/components/app/feeds/GlassIndicator';
+import { Shield, Palette, Clock, Globe, Sun, Wand2, Save, FileText, AtSign, Handshake, Loader2, Lamp, Bug, Bot, Film, Hand, Paintbrush, Gauge, FastForward, LifeBuoy, ChevronDown } from "lucide-react";
+import Eye from "@/components/ui/cut-icons/visibility";
+import SettingsCog from "@/components/ui/cut-icons/settings-cog";
+import EyeOff from "@/components/ui/cut-icons/hidden";
+import Camera from "@/components/ui/cut-icons/camera";
+import Link2 from "@/components/ui/cut-icons/link";
+import Users from "@/components/ui/cut-icons/communities";
+import CreatorIcon from "@/components/ui/cut-icons/creator";
+import ConnectIcon from "@/components/ui/cut-icons/connect";
+import Moon from "@/components/ui/cut-icons/appearance";
+import Lock from "@/components/ui/cut-icons/privacy";
+import LayoutGrid from "@/components/ui/cut-icons/apps";
+import HomeCutIcon from "@/components/ui/cut-icons/home";
+import FilterCutIcon from "@/components/ui/cut-icons/filter";
+import { FEED_TABS } from "@/constants/app.constants";
+import { FEED_DEFAULTS_CHANGED_EVENT, hasFeedToggles, parseDefaultFeedTab, readDefaultFeedTab, resetFeedToggles, setDefaultFeedTab, type FeedTabValue } from "@/lib/feed-defaults";
+import VolumeX from "@/components/ui/cut-icons/mute";
+import Sparkles from "@/components/ui/cut-icons/assistant";
+import MapPin from "@/components/ui/cut-icons/location";
+import Wallet from "@/components/ui/cut-icons/wallet";
+import ExternalLink from "@/components/ui/cut-icons/open-externally";
+import PieChart from "@/components/ui/cut-icons/fractions";
+import UserPlus from "@/components/ui/cut-icons/add-account";
+import Check from "@/components/ui/cut-icons/check";
+import Copy from "@/components/ui/cut-icons/copy";
+import LogOut from "@/components/ui/cut-icons/sign-out";
+import Coins from "@/components/ui/cut-icons/coins";
+import Gift from "@/components/ui/cut-icons/gifts";
+import Ban from "@/components/ui/cut-icons/blocked";
+import Megaphone from "@/components/ui/cut-icons/advertising";
+import Radio from "@/components/ui/cut-icons/live";
+import LastSeenIcon from "@/components/ui/cut-icons/history";
+import Trash2 from "@/components/ui/cut-icons/delete";
+import Pause from "@/components/ui/cut-icons/pause";
+
+import SettingsIcon from "@/components/ui/cut-icons/settings";
+import User from "@/components/ui/cut-icons/profile";
+import Bell from "@/components/ui/cut-icons/alerts";
+import { setShowMessagesCount, setShowNotificationCount, useShowMessagesCount, useShowNotificationCount } from "@/lib/notification-count-pref";
+import ThumbsUp from "@/components/ui/cut-icons/like";
+import MessageSquare from "@/components/ui/cut-icons/messages";
+import MessageCircle from "@/components/ui/cut-icons/messages";
+import Repeat2 from "@/components/ui/cut-icons/repost";
+import Play from "@/components/ui/cut-icons/play";
+import Gem from "@/components/ui/cut-icons/diamond";
+import X from "@/components/ui/cut-icons/close";
+import Download from "@/components/ui/cut-icons/download";
+
+import { toast } from 'sonner';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Switch } from '@/components/ui/switch';
+import { readPublicTimeZone } from '@/hooks/use-profile-local-time';
+import { BadgeMuseumSetting } from '@/components/app/settings/BadgeMuseumSetting';
+import { ProfileSongSetting } from '@/components/app/settings/ProfileSongSetting';
+import { Slider } from '@/components/ui/slider';
+import { Button } from '@/components/ui/button';
+import { LiquidGlassBubble2 } from '@/components/ui/liquid-glass-bubble-2';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
+import { SettingDrawerSelect } from '@/components/app/settings/SettingDrawerSelect';
+import { DuetSetting } from '@/components/app/settings/DuetSetting';
+import { StitchPolicySetting } from '@/components/app/settings/StitchPolicySetting';
+import { SUPPORTED_CHAINS, type PostChainId } from '@/components/app/ChainSelector';
+import { usePostingChain } from '@/hooks/use-posting-chain';
+import { useTipNetwork, type TipNetworkOption } from '@/hooks/use-tip-network';
+import { setSmartRepliesEnabled, useSmartRepliesEnabled } from '@/hooks/use-smart-replies-enabled';
+import { setCoachEnabled, useCoachEnabled } from '@/hooks/use-coach-enabled';
+import {
+  SettingsRow,
+  SETTINGS_CONTROL_CLASS,
+  SETTINGS_FIELD_CLASS,
+  SETTINGS_HEADING_CLASS,
+  SETTINGS_LABEL_CLASS,
+} from '@/components/app/settings/SettingsRow';
+import { TwoFactorSettings } from '@/components/app/settings/TwoFactorSettings';
+import { useAuth } from '@/contexts/AuthContext';
+import { AuthGate } from '@/components/app/AuthGate';
+import { SearchRequestPrompt } from '@/components/app/navigation/SearchRequestPrompt';
+import Search from "@/components/ui/cut-icons/search";
+import Share2 from "@/components/ui/cut-icons/feedshare";
+
+import { useBuyBotHidden } from '@/hooks/use-buy-bot-hidden';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { updateProfile, getAccountInfo, type UpdateProfileData, type DeHubUser } from '@/lib/api/dehub';
+import type { ProfileData } from '@/hooks/use-dehub-profile';
+import { useProfileImageMenu } from '@/components/app/profile/useProfileImageMenu';
+import { getBlockListPaginated, unblockUser as apiUnblockUser, type BlockedUser, checkUsernameAvailability } from '@/lib/api/dehub';
+import { isReservedUsername } from '@/lib/reserved-usernames';
+import { buildAvatarUrl, buildCoverUrl, bumpProfileImageVersion, deviceWidth } from '@/lib/media-url';
+import { useDebouncedValue } from '@/hooks/use-debounced-value';
+import { useStoriesEnabled } from '@/hooks/use-stories-enabled';
+import { useAuth as useAuthContext } from '@/contexts/AuthContext';
+import { useMatureContent } from '@/hooks/use-mature-content';
+import { useKidsMode } from '@/hooks/use-kids-mode';
+import { KidsModeDrawer } from '@/components/app/settings/KidsModeDrawer';
+import { Baby, RectangleHorizontal, ThumbsDown, UserCheck, Hash } from 'lucide-react';
+import type { FreeAccessUser } from '@/lib/api/dehub/dm';
+import { JungleMoodToggle } from '@/components/app/jungle/JungleMoodToggle';
+import { useJungleMood } from '@/lib/jungle-mood';
+import { useHideWatched } from '@/hooks/use-watched-videos';
+import { useUsernameHoldings } from '@/hooks/use-username-market';
+import { UsernameVault } from '@/components/app/usernames/UsernameVault';
+import { DataPortability } from '@/components/app/settings/DataPortability';
+import { normaliseAdLoad, useAdLoad, writeAdLoad } from '@/lib/ad-load';
+import { useSkipSegments, writeSkipSegments } from '@/lib/skip-segments';
+import { API_ORIGIN } from '@/lib/api/api-origin';
+import { useVideoGlitch, writeVideoGlitch } from '@/lib/video-glitch';
+import { useUserPreferences } from '@/contexts/UserPreferencesContext';
+import { getCreatorPlaybackRateCount, clearCreatorPlaybackRates } from '@/lib/video-preferences';
+import { normaliseFeedVideoShape, useFeedVideoShape, writeFeedVideoShape } from '@/lib/feed-video-shape';
+import { MENU_LAYOUT_PREF_KEY, normaliseMenuLayout, useMenuLayout, writeMenuLayout } from '@/lib/menu-layout';
+import { isWideVideoMode, useWideVideoMode, writeWideVideoMode } from '@/lib/wide-video-mode';
+import { useIsDesktopViewport } from '@/hooks/use-is-desktop';
+import { useCoinPlacement } from '@/hooks/use-coin-placement';
+import { usePrivacySettings } from '@/hooks/use-privacy-settings';
+import { useNewMemberSelf } from '@/hooks/use-new-members';
+import { useWalletUnlockInterval, type WalletUnlockIntervalOption } from '@/hooks/use-wallet-unlock-interval';
+import { WalletRecoveryTools } from '@/components/app/settings/WalletRecoveryTools';
+import { ResetWalletSettings } from '@/components/app/settings/ResetWalletSettings';
+import { BiometricUnlockSettings } from '@/components/app/settings/BiometricUnlockSettings';
+import { EmailNotificationsSetting } from '@/components/app/settings/EmailNotificationsSetting';
+import { SmsNotificationsSetting } from '@/components/app/settings/SmsNotificationsSetting';
+import { EmailSignInSettings } from '@/components/app/settings/EmailSignInSettings';
+import { EnsHandleSettings } from '@/components/app/settings/EnsHandleSettings';
+import { SolanaWalletSettings } from '@/components/app/settings/SolanaWalletSettings';
+import { StreamKeySettings } from '@/components/app/settings/StreamKeySettings';
+import { TwitchMirrorSettings } from '@/components/app/settings/TwitchMirrorSettings';
+import { ActiveSessions } from '@/components/app/settings/ActiveSessions';
+import { ProfilesSection } from '@/components/app/settings/ProfilesSection';
+import { CollapsibleStack } from '@/components/app/settings/CollapsibleStack';
+import { GettingStartedSetting } from '@/components/app/settings/GettingStartedSetting';
+import { DesktopAppSetting } from '@/components/app/settings/DesktopAppSetting';
+import { BadgeDelegationSection } from '@/components/app/settings/BadgeDelegationSection';
+import type { SocialPlatform, VerifiedSocialAccount } from '@/lib/social-reach';
+import { SocialConnectControl, useOwnSocialReach } from '@/components/app/settings/SocialReachConnect';
+import { GithubLinkSetting } from '@/components/app/settings/GithubLinkSetting';
+import { getInAppPref, type NotificationKey } from '@/lib/api/dehub';
+import { getQuietHours, QH_ENABLED_KEY, QH_START_KEY, QH_END_KEY } from '@/lib/quiet-hours';
+import { PROFILE_TAB_OPTIONS } from '@/components/app/profile/ProfileConstants';
+import { useDmSettings, type WhoCanMessage } from '@/hooks/use-dm-settings';
+import { useSidebarCollapse } from '@/contexts/SidebarCollapseContext';
+import { useAutoplay } from '@/contexts/AutoplayContext';
+import { useConnectionQuality, setLiteModePref } from '@/hooks/use-connection-quality';
+import { useAnimations } from '@/contexts/AnimationsContext';
+import { useShortsEnabled } from '@/contexts/ShortsEnabledContext';
+import { useLeftHanded } from '@/hooks/use-left-handed';
+import { BrowserNotificationsSetting } from '@/components/app/settings/BrowserNotificationsSetting';
+import { PostLandingSetting } from '@/components/app/settings/PostLandingSetting';
+import { FeedSeparatorSetting } from '@/components/app/settings/FeedSeparatorSetting';
+import { ShareIconSetting } from '@/components/app/settings/ShareIconSetting';
+import { ChatTextSizeSetting } from '@/components/app/settings/ChatTextSizeSetting';
+import { ChatOwnBubbleSetting, MessagesPillsSetting } from '@/components/app/settings/ChatOwnBubbleSetting';
+import { LoginLookSetting } from '@/components/app/settings/LoginLookSetting';
+import { ArrivalLookSetting } from '@/components/app/settings/ArrivalLookSetting';
+import { ChatDeleteChoiceSetting } from '@/components/app/settings/ChatDeleteChoiceSetting';
+import { ChatReactionStyleSetting } from '@/components/app/settings/ChatReactionStyleSetting';
+import { PublicChatAlertsSetting } from '@/components/app/settings/PublicChatAlertsSetting';
+import { WalletMenuContent } from '@/components/app/CoinBalanceMenu';
+import { useDhbHoldings } from '@/hooks/use-dhb-holdings';
+import { FollowRequestsDrawer } from '@/components/app/profile/FollowRequestsDrawer';
+import dehubCoin from '@/assets/dehub-coin.png';
+import { useUserLanguage } from '@/hooks/use-user-language';
+import { SUPPORTED_LANGUAGES } from '@/i18n';
+import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
+
+const TAB_KEYS: Record<string, string> = {
+  profile: 'settings.profile',
+  notifications: 'settings.notifications',
+  privacy: 'settings.privacy',
+  appearance: 'settings.appearance',
+  content: 'settings.content',
+  messages: 'settings.messages',
+  assets: 'settings.assets',
+  skills: 'settings.skills',
+  characters: 'settings.characters',
+  support: 'settings.support',
+};
+
+/**
+ * DM access options, shared by the Privacy and Messages tabs so the two never
+ * drift. Mirrors mobile's three-state DM model (`DMSettingsSection`): open,
+ * existing-threads-only, and fully disabled.
+ */
+const DM_ACCESS_OPTIONS = (t: TFunction) => [
+  {
+    value: 'everyone',
+    label: t('settings.everyone', 'Everyone'),
+    description: t('settings.dmEveryoneHelp', 'Anyone on the platform can message you'),
+  },
+  {
+    value: 'no-new',
+    label: t('settings.noNewMessages', 'No new conversations'),
+    description: t('settings.noNewMessagesDesc', 'Keep your existing threads, but nobody new can start one'),
+  },
+  {
+    value: 'none',
+    label: t('settings.noOneClosed', 'No one'),
+    description: t('settings.noOneClosedDesc', 'Disable all incoming messages'),
+  },
+];
+
+/**
+ * The message-fee field, rendered in both the Privacy and Messages tabs. One
+ * component so the two can never drift again (they had: one copy lost its DHB
+ * mark, the other its wording). The hook is react-query backed, so a second
+ * instance reads the same cache as the tab around it.
+ */
+function MessageFeeControl() {
+  const { t } = useTranslation();
+  const { messageFee, isUpdating, updateMessageFee } = useDmSettings();
+  const [feeInput, setFeeInput] = useSurfaceDraft("src/pages/app/SettingsPage.tsx:feeInput", '');
+  const dirty = feeInput !== '' && parseFloat(feeInput) !== messageFee;
+  const commit = () => {
+    const val = parseFloat(feeInput);
+    if (!isNaN(val) && val >= 0 && val !== messageFee) updateMessageFee(val, () => setFeeInput.complete(feeInput, ''));
+    else setFeeInput.complete(feeInput, '');
+  };
+  return (
+    <div className="flex items-center gap-2">
+      <Input
+        type="number"
+        inputMode="decimal"
+        min={0}
+        placeholder="0"
+        aria-label={t('settings.messageFee', 'Message fee')}
+        value={feeInput !== '' ? feeInput : (messageFee > 0 ? String(messageFee) : '')}
+        onChange={(e) => setFeeInput(e.target.value)}
+        onKeyDown={(e) => { if (e.key === 'Enter') commit(); }}
+        className="h-9 w-24 rounded-xl border-zinc-700 bg-zinc-800 text-right text-white [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+        disabled={isUpdating}
+      />
+      <DhbCoin className="size-5" />
+      {dirty && (
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className={SETTINGS_CONTROL_CLASS}
+          loading={isUpdating}
+          onClick={commit}
+        >
+          {t('settings.save', 'Save')}
+        </Button>
+      )}
+    </div>
+  );
+}
+
+const tabs = [
+  { icon: User, value: 'profile', label: "settings.profile" },
+  { icon: Palette, value: 'appearance', label: "settings.appearance" },
+  { icon: Bell, value: 'notifications', label: "settings.notifications" },
+  { icon: Shield, value: 'privacy', label: "settings.privacy" },
+  { icon: Eye, value: 'content', label: "settings.content" },
+  { icon: MessageSquare, value: 'messages', label: "settings.messages" },
+  { icon: Wallet, value: 'assets', label: "settings.assets" },
+  { icon: Share2, value: 'multipost', label: "multiPost.tab" },
+  { icon: Sparkles, value: 'skills', get label() { return _translateCopy("copy.626facc50d5a", { defaultValue: "settings.skills" }); } },
+  { icon: Users, value: 'characters', get label() { return _translateCopy("copy.0b202be8ae82", { defaultValue: "settings.characters" }); } },
+  { icon: LifeBuoy, value: 'support', label: "settings.support" },
+];
+
+import { SkillsLibrary } from '@/components/app/skills/SkillsLibrary';
+import { MultiPostSettings } from '@/components/app/settings/MultiPostSettings';
+import { CharactersLibrary } from '@/components/app/characters/CharactersLibrary';
+
+import { SEOHead } from '@/components/SEOHead';
+import {
+  SETTINGS_SEARCH_INDEX,
+  searchSettings,
+  revealSettingAnchor,
+  type SettingsSearchHit,
+} from '@/lib/settings-search';
+import { useAppTheme, DEFAULT_THEME_HUES } from '@/contexts/ThemeContext';
+import { THEME_COLOR, isSpecialThemeColor } from '@/lib/theme-color';
+import { extractBrandColors } from '@/lib/brand-colors';
+import { DeHubPageLoader, ButtonLoader } from '@/components/app/DeHubLoader';
+import { useAccountSignOut } from '@/components/app/AccountSignOut';
+import { useScrollFadeMask } from '@/components/app/feeds/useScrollFadeMask';
+import { ThemePreviewCard } from '@/components/app/settings/ThemePreviewCard';
+import { KeywordFiltersSection } from '@/components/app/settings/KeywordFiltersSection';
+import { AccountAllowReactions } from '@/components/app/remix/AllowReactionsSwitch';
+import { NotificationFiltersSetting } from '@/components/app/settings/NotificationFiltersSetting';
+import { AccountTypeSetting } from '@/components/app/settings/AccountTypeSetting';
+import { ProfileFieldsSetting } from '@/components/app/settings/ProfileFieldsSetting';
+import { FediverseHandleSetting } from '@/components/app/settings/FediverseHandleSetting';
+import { SignedFollowsSetting } from '@/components/app/settings/SignedFollowsSetting';
+import { ConnectedAppsSetting } from '@/components/app/settings/ConnectedAppsSetting';
+import { OwnAiKeysSetting } from '@/components/app/settings/OwnAiKeysSetting';
+
+import { formatCount } from '@/lib/format-count';
+/** `initialTab` opens a tab directly (the full-screen chat opens Messages). */
+export default function SettingsPage({ initialTab }: { initialTab?: string } = {}) {
+  const { t: _copy } = _useCopy();
+  // `?tab=privacy` deep-links a tab. Anything pointing someone at one specific
+  // setting — the new-member notice toast, a support reply — otherwise lands
+  // them on Profile and leaves them hunting for it.
+  const [activeTab, setActiveTab] = useState(() => {
+    if (initialTab && tabs.some((tab) => tab.value === initialTab)) return initialTab;
+    const params = new URLSearchParams(window.location.search);
+    const requested = params.get('tab');
+    if (requested && tabs.some((tab) => tab.value === requested)) return requested;
+    // `?highlight=` on its own is enough: the index knows which tab a setting
+    // lives in, so a link does not have to name both and cannot name the
+    // wrong one.
+    const highlight = params.get('highlight');
+    return SETTINGS_SEARCH_INDEX.find((entry) => entry.anchor === highlight)?.tab ?? 'profile';
+  });
+  const settingsIsDraggingRef = useRef(false);
+  const { layerRef: settingsTabLayerRef, setRef: setSettingsTabRef, rect: settingsTabRect, onScroll: onSettingsTabScroll } = useTabIndicator(activeTab, undefined, settingsIsDraggingRef);
+
+  const { theme, themeChoice, setTheme } = useAppTheme();
+  const { isAuthenticated } = useAuth();
+
+  const { t } = useTranslation();
+
+  const [settingsSearch, setSettingsSearch] = useSessionText("settings-search");
+  const [settingsSearchFocused, setSettingsSearchFocused] = useState(false);
+  const [searchCursor, setSearchCursor] = useState(0);
+  const settingsSearchResults = useMemo(
+    () => searchSettings(settingsSearch, t),
+    [settingsSearch, t],
+  );
+
+  // A hit has to land on the setting, not just on the tab it lives in:
+  // switch tab, then scroll that row clear of the sticky header and flash it.
+  // revealSettingAnchor polls for the anchor, so it copes with the tab it
+  // belongs to only mounting after this render — and with tabs that fetch
+  // before they render anything at all.
+  const openSearchResult = useCallback((result: SettingsSearchHit) => {
+    setActiveTab(result.tab);
+    setSettingsSearch.complete(settingsSearch, '');
+    setSettingsSearchFocused(false);
+    setSearchCursor(0);
+    revealSettingAnchor(result.anchor);
+  }, [setSettingsSearch, settingsSearch]);
+
+  // `?highlight=geo-blocking` opens one specific setting — the same jump
+  // search makes, reusable from a toast or a support reply. The tab it lives
+  // in is looked up above, so the link only needs the one parameter.
+  useEffect(() => {
+    const anchor = new URLSearchParams(window.location.search).get('highlight');
+    if (anchor) revealSettingAnchor(anchor);
+  }, []);
+
+  const { pending: isLoggingOut, requestSignOut, signOutDialog } = useAccountSignOut({
+    onComplete: () => toast.success(t('settings.loggedOut')),
+  });
+
+  // Drag-to-swipe for settings tab indicator (before conditional return to satisfy hooks rules)
+  const settingsTabPositions = useRef<Partial<Record<string, HTMLElement | null>>>({});
+
+  const { isDragging: isSettingsDragging, indicatorRef: settingsIndicatorRef, handleDragStart: handleSettingsDragStart, handleDragMove: handleSettingsDragMove, handleDragEnd: handleSettingsDragEnd } = useDragTabIndicator({
+    tabRect: settingsTabRect,
+    tabLayerRef: settingsTabLayerRef,
+    tabButtonPositions: settingsTabPositions,
+    tabValues: tabs.map(t => t.value),
+    activeTab,
+    onTabChange: setActiveTab,
+    isDraggingRef: settingsIsDraggingRef,
+  });
+
+  const phonePill = usePhonePill();
+  const settingsTabRow = (
+    <>
+      {/* Tab Icons. Ten of them no longer fit a phone-width bento, so the
+          row scrolls (same layer/scroller split as Bookmarks and Music: the
+          layer clips x so the indicator is not painted past the edge, the
+          row scrolls and reports scroll so the indicator follows). */}
+      <div ref={settingsTabLayerRef} className="relative overflow-x-clip overflow-y-visible">
+        <GlassIndicator ref={settingsIndicatorRef} rect={settingsTabRect} enableTransition={!isSettingsDragging} />
+        {settingsTabRect.ready && (
+          <div
+            className="absolute z-30 cursor-grab active:cursor-grabbing"
+            style={{
+              transform: `translate(${settingsTabRect.x}px, ${settingsTabRect.y}px)`,
+              width: settingsTabRect.width,
+              height: settingsTabRect.height,
+            }}
+            onPointerDown={handleSettingsDragStart}
+            onPointerMove={handleSettingsDragMove}
+            onPointerUp={handleSettingsDragEnd}
+            onPointerCancel={handleSettingsDragEnd}
+          />
+        )}
+        <div role="tablist" className="relative z-20 flex gap-[6px] overflow-x-auto scrollbar-hide sm:gap-2" onScroll={onSettingsTabScroll}>
+          {tabs.map((tab) => {
+            const Icon = tab.icon;
+            return (
+              <button
+                key={tab.value}
+                type="button"
+                role="tab"
+                aria-selected={activeTab === tab.value}
+                aria-label={t(tab.label)}
+                ref={(el) => {
+                  setSettingsTabRef(tab.value)(el);
+                  settingsTabPositions.current[tab.value] = el;
+                }}
+                onClick={() => setActiveTab(tab.value)}
+                className={`relative z-40 shrink-0 p-[11px] sm:p-3 rounded-xl transition-colors ${
+                  activeTab === tab.value
+                    ? 'text-white'
+                    : 'text-zinc-500 hover:text-white'
+                }`}
+                title={t(tab.label)}
+              >
+                <Icon className="relative z-10 w-[18px] h-[18px] sm:w-5 sm:h-5" />
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </>
+  );
+
+  // Block access for unauthenticated users (AuthGate handles loading state internally)
+  if (!isAuthenticated) {
+    return (
+      <AuthGate description={t('settings.loginDescription')} />
+    );
+  }
+
+  return (
+    <div className="min-h-screen">
+      {signOutDialog}
+      <SEOHead title={_copy("copy.5171c5a15461", { defaultValue: "Settings: Manage Your Account" })} description={_copy("copy.6f1213e68e58", { defaultValue: "Customize your Riftn experience. Update your profile, privacy settings, notification preferences, and connected wallets." })} url="https://riftn.com/app/settings" />
+      <h1 className="sr-only">{_copy("copy.4761c6b1cd64", { defaultValue: "Riftn Settings — Decentralised Social Media, Censorship Resistant & Freedom of Speech" })}</h1>
+      {/* Header + tab nav — anchored (sticky) so it stays pinned while the
+          settings content scrolls under it and is swallowed at its top edge. */}
+      <PageIsland
+        // Inside the full-screen chat the page keeps that page's 2D icons.
+        icon={initialTab ? <SettingsCog className="h-6 w-6 text-zinc-200" /> : 'settings'}
+        title={t('settings.title')}
+        subtitle={t('settings.manageAccount')}
+        actions={
+          <div className="hidden md:flex items-center">
+            <IslandAction label={t('settings.logOut')} onClick={requestSignOut} disabled={isLoggingOut}>
+              {isLoggingOut ? <ButtonLoader /> : <LogOut className="h-[18px] w-[18px]" />}
+            </IslandAction>
+          </div>
+        }
+      >
+        {/* Search across settings — switches tab, scrolls to the match and
+            flashes it. Index and jump live in src/lib/settings-search.ts.
+            Results open inline and push the tab row down, as the app does: a
+            floating list hung over the tabs and the page below, half under the
+            island's glass, and read as no results at all. */}
+        <div>
+          <div className="relative">
+            <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+            <Input
+              data-search-surface
+              value={settingsSearch}
+              onChange={(e) => { setSettingsSearch(e.target.value); setSearchCursor(0); }}
+              onFocus={() => setSettingsSearchFocused(true)}
+              onBlur={(e) => {
+                // Moving into the request box under "no results" keeps the list open.
+                if ((e.relatedTarget as HTMLElement | null)?.closest('#settings-search-results')) return;
+                setTimeout(() => setSettingsSearchFocused(false), 150);
+              }}
+              onKeyDown={(e) => {
+                const count = settingsSearchResults.length;
+                if (e.key === 'Escape') { setSettingsSearch.complete(settingsSearch, ''); setSettingsSearchFocused(false); return; }
+                if (!count) return;
+                if (e.key === 'ArrowDown') { e.preventDefault(); setSearchCursor((c) => (c + 1) % count); }
+                else if (e.key === 'ArrowUp') { e.preventDefault(); setSearchCursor((c) => (c - 1 + count) % count); }
+                else if (e.key === 'Enter') {
+                  e.preventDefault();
+                  openSearchResult(settingsSearchResults[Math.min(searchCursor, count - 1)]);
+                  e.currentTarget.blur();
+                }
+              }}
+              placeholder={t('settings.searchPlaceholder', 'Search settings')}
+              className="h-10 rounded-xl pl-9 bg-white/5 border-white/10"
+              role="combobox"
+              aria-expanded={settingsSearchFocused && settingsSearchResults.length > 0}
+              aria-controls="settings-search-results"
+            />
+          </div>
+          {settingsSearchFocused && settingsSearch.trim() && (
+            <div
+              id="settings-search-results"
+              role="listbox"
+              onBlur={(e) => {
+                const next = e.relatedTarget as HTMLElement | null;
+                if (next?.closest('#settings-search-results') || next?.matches('[data-search-surface]')) return;
+                setTimeout(() => setSettingsSearchFocused(false), 150);
+              }}
+              className="mt-2 max-h-[min(352px,50dvh)] overflow-y-auto overscroll-contain bg-white/5 border border-white/10 rounded-xl">
+              {settingsSearchResults.length > 0 ? (
+                settingsSearchResults.map((result, i) => (
+                  <button
+                    key={result.tab + ':' + result.anchor}
+                    type="button"
+                    role="option"
+                    aria-selected={i === searchCursor}
+                    // onMouseDown, not onClick: the input blurs first, and the
+                    // blur handler closes this list before a click can land.
+                    onMouseDown={(e) => { e.preventDefault(); openSearchResult(result); }}
+                    onMouseEnter={() => setSearchCursor(i)}
+                    className={cn(
+                      'w-full flex items-center justify-between gap-3 px-4 py-3 text-left transition-colors',
+                      i === searchCursor ? 'bg-white/10' : 'hover:bg-white/5',
+                    )}
+                  >
+                    <span className="text-white text-sm">{result.displayLabel}</span>
+                    <span className="text-zinc-500 text-xs">{t(TAB_KEYS[result.tab] ?? '', result.tab)}</span>
+                  </button>
+                ))
+              ) : settingsSearch.trim().length >= 2 ? (
+                // onMouseDown keeps the input focused: its blur closes this list.
+                <div className="p-2.5" onMouseDown={(e) => { if (!(e.target instanceof HTMLInputElement)) e.preventDefault(); }}>
+                  <SearchRequestPrompt query={settingsSearch} source="settings" />
+                </div>
+              ) : (
+                <div className="px-4 py-3 text-zinc-500 text-sm">{t('settings.noSearchResults', 'No matching settings')}</div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {!phonePill && settingsTabRow}
+      </PageIsland>
+
+      {/* Phones: the island folds into a pill whose extra rows only show
+          while its search is open, which left the tab row out of reach and
+          Settings looking like just Profile. The row sits under the pill. */}
+      {phonePill && <div data-settings-phone-tabs className="px-2 pb-2">{settingsTabRow}</div>}
+
+      {/* Content — scrolls under the anchored header and is swallowed at its
+          top edge (clip logic in PageBody). */}
+      <PageBody>
+      <div data-page-bento data-kit-section className="bg-zinc-900 p-4 sm:p-6">
+        {activeTab === 'profile' && <ProfileSettings />}
+        {activeTab === 'notifications' && <NotificationSettings />}
+        {activeTab === 'privacy' && <PrivacySettings />}
+        {activeTab === 'appearance' && <AppearanceSettings theme={theme} themeChoice={themeChoice} setTheme={setTheme} />}
+        {activeTab === 'content' && <ContentSettings />}
+        {activeTab === 'messages' && <MessagesSettings />}
+        {activeTab === 'assets' && <AssetsSettings />}
+        {activeTab === 'multipost' && <MultiPostSettings />}
+        {activeTab === 'skills' && <div data-setting-anchor="skills"><SkillsLibrary /></div>}
+        {activeTab === 'characters' && <div data-setting-anchor="characters"><CharactersLibrary /></div>}
+        {activeTab === 'support' && <SupportSettings />}
+      </div>
+      </PageBody>
+    </div>
+  );
+}
+
+function ProfileSettings() {
+  const { t: _copy } = _useCopy();
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const { user: authUser, refreshUser, patchUser } = useAuthContext();
+  const queryClient = useQueryClient();
+  const { suppressGlobalDrop, unsuppressGlobalDrop } = useGlobalDropZone();
+
+  // Suppress global drop-to-post while on edit profile
+  useEffect(() => {
+    suppressGlobalDrop();
+    return () => unsuppressGlobalDrop();
+  }, [suppressGlobalDrop, unsuppressGlobalDrop]);
+  
+  // Form state declarations
+  const [displayName, setDisplayName] = useSurfaceDraft("pages/app/SettingsPage.tsx:displayName", '');
+  const [username, setUsername] = useSurfaceDraft("pages/app/SettingsPage.tsx:username", '');
+  const [bio, setBio] = useSurfaceDraft("pages/app/SettingsPage.tsx:bio", '');
+  const [publicTimeZone, setPublicTimeZone] = useState('');
+  const deviceTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const [twitterLink, setTwitterLink] = useSurfaceDraft("pages/app/SettingsPage.tsx:twitterLink", '');
+  const [discordLink, setDiscordLink] = useSurfaceDraft("pages/app/SettingsPage.tsx:discordLink", '');
+  const [instagramLink, setInstagramLink] = useSurfaceDraft("pages/app/SettingsPage.tsx:instagramLink", '');
+  const [tiktokLink, setTiktokLink] = useSurfaceDraft("pages/app/SettingsPage.tsx:tiktokLink", '');
+  const [youtubeLink, setYoutubeLink] = useSurfaceDraft("pages/app/SettingsPage.tsx:youtubeLink", '');
+  const [telegramLink, setTelegramLink] = useSurfaceDraft("pages/app/SettingsPage.tsx:telegramLink", '');
+  const [facebookLink, setFacebookLink] = useSurfaceDraft("pages/app/SettingsPage.tsx:facebookLink", '');
+  // The socials connected for verified follower counts. Coming back from a
+  // Connect fills that platform's link if it was empty, ready to save.
+  const linkDrafts: Record<SocialPlatform, [string, (value: string) => void]> = {
+    twitter: [twitterLink, setTwitterLink],
+    instagram: [instagramLink, setInstagramLink],
+    tiktok: [tiktokLink, setTiktokLink],
+    youtube: [youtubeLink, setYoutubeLink],
+    discord: [discordLink, setDiscordLink],
+    facebook: [facebookLink, setFacebookLink],
+  };
+  const { data: connectedSocials, isLoading: socialsLoading } = useOwnSocialReach((account: VerifiedSocialAccount) => {
+    const draft = linkDrafts[account.platform as SocialPlatform];
+    if (draft && !draft[0].trim() && account.profileUrl) draft[1](account.profileUrl);
+  });
+  const connectFor = (platform: SocialPlatform) => (
+    <SocialConnectControl
+      platform={platform}
+      loading={socialsLoading}
+      account={connectedSocials?.find((a) => a.platform === platform)}
+    />
+  );
+
+  const [originalValues, setOriginalValues] = useState({
+    displayName: '',
+    username: '',
+    bio: '',
+    publicTimeZone: '',
+    twitterLink: '',
+    discordLink: '',
+    instagramLink: '',
+    tiktokLink: '',
+    youtubeLink: '',
+    telegramLink: '',
+    facebookLink: '',
+  });
+  
+  const [avatarPreview, setAvatarPreview] = useState<string | undefined>();
+  const [coverPreview, setCoverPreview] = useState<string | undefined>();
+  const [avatarFile, setAvatarFile] = useState<File | undefined>();
+  const [coverFile, setCoverFile] = useState<File | undefined>();
+  // Delete from the picture / banner menu: cleared on screen now, on Save for real.
+  const [removeAvatar, setRemoveAvatar] = useState(false);
+  const [removeCover, setRemoveCover] = useState(false);
+  const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null);
+  const [isCheckingUsername, setIsCheckingUsername] = useState(false);
+  const debouncedUsername = useDebouncedValue(username, 300);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
+  
+  // Load profile data via react-query so cached tab returns render instantly
+  const { data: profileData, error: profileError } = useQuery({
+    queryKey: ['settings-profile', authUser?.address],
+    queryFn: () => getAccountInfo(authUser!.address),
+    staleTime: 5 * 60_000,
+    enabled: !!authUser?.address,
+  });
+
+  useEffect(() => {
+    if (profileError) {
+      console.error('Failed to load profile:', profileError);
+      toast.error(t('settings.failedLoadProfile'));
+    }
+  }, [profileError, t]);
+
+  // Seed the form ONCE per account from profile data. A background refetch
+  // (focus, staleTime expiry) must not re-seed — that would wipe whatever the
+  // user is currently typing into the form.
+  const seededForAddressRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!profileData) return;
+    const seedKey = authUser?.address || '';
+    if (seededForAddressRef.current === seedKey) return;
+    seededForAddressRef.current = seedKey;
+    const userData = profileData;
+
+    const loadedDisplayName = userData.displayName || userData.display_name || '';
+    const loadedUsername = userData.username || '';
+    const loadedBio = userData.aboutMe || userData.bio || '';
+
+    const customs = userData.customs as Record<string, string> | undefined;
+    const loadedTimeZone = readPublicTimeZone(customs?.publicTimeZone);
+    const raw = userData as Record<string, unknown>;
+    // Check both top-level API fields and customs object (API may return either)
+    const loadedTwitter = (raw.twitterLink as string) || customs?.twitterLink || '';
+    const loadedDiscord = (raw.discordLink as string) || customs?.discordLink || '';
+    const loadedInstagram = (raw.instagramLink as string) || customs?.instagramLink || '';
+    const loadedTiktok = (raw.tiktokLink as string) || customs?.tiktokLink || '';
+    const loadedYoutube = (raw.youtubeLink as string) || customs?.youtubeLink || '';
+    const loadedTelegram = (raw.telegramLink as string) || customs?.telegramLink || '';
+    const loadedFacebook = (raw.facebookLink as string) || customs?.facebookLink || '';
+
+    setDisplayName.initialize(loadedDisplayName);
+    setUsername.initialize(loadedUsername);
+    setBio.initialize(loadedBio);
+    setPublicTimeZone(loadedTimeZone);
+    setTwitterLink.initialize(loadedTwitter);
+    setDiscordLink.initialize(loadedDiscord);
+    setInstagramLink.initialize(loadedInstagram);
+    setTiktokLink.initialize(loadedTiktok);
+    setYoutubeLink.initialize(loadedYoutube);
+    setTelegramLink.initialize(loadedTelegram);
+    setFacebookLink.initialize(loadedFacebook);
+
+    setOriginalValues({
+      displayName: loadedDisplayName,
+      username: loadedUsername,
+      bio: loadedBio,
+      publicTimeZone: loadedTimeZone,
+      twitterLink: loadedTwitter,
+      discordLink: loadedDiscord,
+      instagramLink: loadedInstagram,
+      tiktokLink: loadedTiktok,
+      youtubeLink: loadedYoutube,
+      telegramLink: loadedTelegram,
+      facebookLink: loadedFacebook,
+    });
+
+    const address = userData.address || userData.wallet_address || '';
+    const rawAvatarUrl = userData.avatarImageUrl || userData.avatarUrl || userData.avatar_url;
+    const rawCoverUrl = userData.coverImageUrl || userData.coverUrl || userData.cover_url;
+    // Settings renders the preview at w-20, above the default avatar size.
+    setAvatarPreview(buildAvatarUrl(address, rawAvatarUrl, deviceWidth(80)));
+    setCoverPreview(buildCoverUrl(address, rawCoverUrl));
+  }, [profileData, authUser?.address, setBio, setDisplayName, setUsername, setDiscordLink, setFacebookLink, setInstagramLink, setTelegramLink, setTiktokLink, setTwitterLink, setYoutubeLink]);
+  
+  // Check username availability
+  useEffect(() => {
+    if (!debouncedUsername || debouncedUsername === originalValues.username) {
+      setUsernameAvailable(null);
+      setIsCheckingUsername(false);
+      return;
+    }
+    // No minimum length — the API has never enforced one and short handles are
+    // wanted. The 30-character ceiling is the only length rule.
+    if (debouncedUsername.length > 30) {
+      setUsernameAvailable(false);
+      setIsCheckingUsername(false);
+      return;
+    }
+    // Route-colliding names would make the profile unreachable at /:username.
+    // Checked before the availability call, which does not reject these.
+    if (isReservedUsername(debouncedUsername)) {
+      setUsernameAvailable(false);
+      setIsCheckingUsername(false);
+      return;
+    }
+    let cancelled = false;
+    setIsCheckingUsername(true);
+    checkUsernameAvailability(debouncedUsername)
+      .then((res) => {
+        if (!cancelled) {
+          setUsernameAvailable(res.available);
+          setIsCheckingUsername(false);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setUsernameAvailable(null);
+          setIsCheckingUsername(false);
+        }
+      });
+    return () => { cancelled = true; };
+  }, [debouncedUsername, originalValues.username]);
+
+  const hasChanges = 
+    displayName !== originalValues.displayName ||
+    username !== originalValues.username ||
+    bio !== originalValues.bio ||
+    publicTimeZone !== originalValues.publicTimeZone ||
+    twitterLink !== originalValues.twitterLink ||
+    discordLink !== originalValues.discordLink ||
+    instagramLink !== originalValues.instagramLink ||
+    tiktokLink !== originalValues.tiktokLink ||
+    youtubeLink !== originalValues.youtubeLink ||
+    telegramLink !== originalValues.telegramLink ||
+    facebookLink !== originalValues.facebookLink ||
+    !!avatarFile ||
+    !!coverFile ||
+    removeAvatar ||
+    removeCover;
+
+  // A changed username must be positively cleared before Save unlocks. The old
+  // gate was `usernameAvailable !== false`, which passes while it is still null
+  // — and it is null for the whole 500ms debounce window, so typing a name and
+  // hitting Save immediately submitted it with no reserved check and no
+  // availability check at all. Require the debounce to have caught up with the
+  // field (`usernameSettled`) and the answer to be an explicit `true`.
+  const usernameChanged = username !== originalValues.username;
+  const usernameSettled = debouncedUsername === username;
+  const usernameCleared =
+    !usernameChanged ||
+    (usernameSettled &&
+      !isCheckingUsername &&
+      usernameAvailable === true &&
+      !isReservedUsername(username));
+  const canSave = hasChanges && usernameCleared;
+  
+  const updateMutation = useMutation({
+    mutationFn: async (data: UpdateProfileData) => {
+      if (data.customs && authUser?.address) {
+        const latest = await getAccountInfo(authUser.address);
+        const latestCustoms = latest.customs as UpdateProfileData['customs'];
+        data = { ...data, customs: { ...latestCustoms, ...data.customs } };
+      }
+      return updateProfile(data);
+    },
+    onSuccess: async (_result, variables) => {
+      console.log('[Settings] updateProfile result:', JSON.stringify(_result));
+      console.log('[Settings] Had avatarImg:', !!variables.avatarImg, 'Had coverImg:', !!variables.coverImg);
+      toast.success(t('settings.profileUpdated'));
+      
+      // Bump CDN cache-bust for this address so future renders force a fresh fetch
+      if ((variables.avatarImg || variables.coverImg) && authUser?.address) {
+        bumpProfileImageVersion(authUser.address);
+      }
+
+      // Optimistically update profile cache with local previews so avatar/cover
+      // appear instantly everywhere, instead of waiting for CDN propagation.
+      if (variables.avatarImg || variables.coverImg) {
+        queryClient.setQueriesData<ProfileData>(
+          { queryKey: ['dehub-profile'] },
+          (old) => {
+            if (!old) return old;
+            return {
+              ...old,
+              ...(variables.avatarImg && avatarPreview ? { avatarUrl: avatarPreview } : {}),
+              ...(variables.coverImg && coverPreview ? { coverUrl: coverPreview } : {}),
+            };
+          }
+        );
+        // Invalidate all profile caches so the new ?v= cache-bust is picked up
+        queryClient.invalidateQueries({ queryKey: ['dehub-profile'] });
+        if (variables.avatarImg && avatarPreview) {
+          queryClient.invalidateQueries({ queryKey: ['profile-avatar'] });
+        }
+      }
+
+      // Total reach on the profile header reads the profile query, and the
+      // privacy hook merges its own customs writes over that same cached blob,
+      // so both need the counts that were just saved.
+      if (variables.customs) {
+        queryClient.invalidateQueries({ queryKey: ['dehub-profile'] });
+      }
+
+      // Capture blob URLs before clearing file state
+      const savedAvatarPreview = variables.avatarImg ? avatarPreview : null;
+      const savedCoverPreview = variables.coverImg ? coverPreview : null;
+
+      setAvatarFile(undefined);
+      setCoverFile(undefined);
+      setRemoveAvatar(false);
+      setRemoveCover(false);
+      if (variables.removeAvatar || variables.removeCover) {
+        if (authUser?.address) bumpProfileImageVersion(authUser.address);
+        const own = authUser?.address?.toLowerCase();
+        queryClient.setQueriesData<ProfileData>({ queryKey: ['dehub-profile'] }, (old) => {
+          if (!old || old.walletAddress?.toLowerCase() !== own) return old;
+          return {
+            ...old,
+            ...(variables.removeAvatar ? { avatarUrl: undefined } : {}),
+            ...(variables.removeCover ? { coverUrl: undefined } : {}),
+          };
+        });
+        queryClient.invalidateQueries({ queryKey: ['profile-avatar'] });
+      }
+
+      // Reset file inputs so re-selecting the same file triggers onChange
+      if (avatarInputRef.current) avatarInputRef.current.value = '';
+
+      await refreshUser();
+      // Re-apply optimistic avatar/cover to AuthContext user (sidebar, navbar, etc.)
+      // since refreshUser fetches stale CDN URL before propagation
+      if (savedAvatarPreview || savedCoverPreview) {
+        patchUser({
+          ...(savedAvatarPreview ? { avatarImageUrl: savedAvatarPreview } : {}),
+          ...(savedCoverPreview ? { coverImageUrl: savedCoverPreview } : {}),
+        });
+      }
+      if (authUser?.address) {
+        const userData = await getAccountInfo(authUser.address);
+        // Mark the settings-profile cache stale without refetching now (the optimistic
+        // blob previews must survive) so the next tab return re-seeds the saved values
+        queryClient.invalidateQueries({ queryKey: ['settings-profile', authUser.address], refetchType: 'none' });
+        const refreshedCustoms = userData.customs as Record<string, string> | undefined;
+        const refreshedRaw = userData as Record<string, unknown>;
+        const newOriginals = {
+          displayName: userData.displayName || userData.display_name || '',
+          username: userData.username || '',
+          bio: userData.aboutMe || userData.bio || '',
+          publicTimeZone: readPublicTimeZone(refreshedCustoms?.publicTimeZone),
+          twitterLink: (refreshedRaw.twitterLink as string) || refreshedCustoms?.twitterLink || '',
+          discordLink: (refreshedRaw.discordLink as string) || refreshedCustoms?.discordLink || '',
+          instagramLink: (refreshedRaw.instagramLink as string) || refreshedCustoms?.instagramLink || '',
+          tiktokLink: (refreshedRaw.tiktokLink as string) || refreshedCustoms?.tiktokLink || '',
+          youtubeLink: (refreshedRaw.youtubeLink as string) || refreshedCustoms?.youtubeLink || '',
+          telegramLink: (refreshedRaw.telegramLink as string) || refreshedCustoms?.telegramLink || '',
+          facebookLink: (refreshedRaw.facebookLink as string) || refreshedCustoms?.facebookLink || '',
+        };
+        setOriginalValues(newOriginals);
+        setTwitterLink(newOriginals.twitterLink);
+        setDiscordLink(newOriginals.discordLink);
+        setInstagramLink(newOriginals.instagramLink);
+        setTiktokLink(newOriginals.tiktokLink);
+        setYoutubeLink(newOriginals.youtubeLink);
+        setTelegramLink(newOriginals.telegramLink);
+        setFacebookLink(newOriginals.facebookLink);
+      }
+      queryClient.invalidateQueries({ queryKey: ['dehub-user-content'] });
+
+      // Re-apply optimistic blob URLs AFTER invalidation to prevent stale CDN overwrite.
+      // The CDN may take seconds to propagate the new image; the blob URL bridges the gap.
+      if (savedAvatarPreview || savedCoverPreview) {
+        queryClient.setQueriesData<ProfileData>(
+          { queryKey: ['dehub-profile'] },
+          (old) => {
+            if (!old) return old;
+            return {
+              ...old,
+              ...(savedAvatarPreview ? { avatarUrl: savedAvatarPreview } : {}),
+              ...(savedCoverPreview ? { coverUrl: savedCoverPreview } : {}),
+            };
+          }
+        );
+        // Delay the real profile refresh to give CDN time to propagate
+        setTimeout(() => {
+          queryClient.invalidateQueries({ queryKey: ['dehub-profile'] });
+        }, 15_000);
+      } else {
+        queryClient.invalidateQueries({ queryKey: ['dehub-profile'] });
+      }
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || t('settings.failedUpdateProfile'));
+    },
+  });
+  
+  // Preview state holds either the server URL or a local blob: URL — revoke
+  // only the latter when replacing, so re-picking images doesn't leak blobs.
+  const swapBlobPreview = (prev: string | undefined, file: File) => {
+    if (prev?.startsWith('blob:')) {
+      try { URL.revokeObjectURL(prev); } catch { /* noop */ }
+    }
+    return URL.createObjectURL(file);
+  };
+
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error(t('settings.imageTooLarge5'));
+        return;
+      }
+      setAvatarFile(file);
+      setRemoveAvatar(false);
+      setAvatarPreview(prev => swapBlobPreview(prev, file));
+    }
+  };
+  
+  // Right-click / hold menu and Ctrl/Cmd+V paste on the banner and picture.
+  // Same as picking a file: shown at once, saved with Save.
+  const setPickedCover = (file: File) => {
+    setCoverFile(file);
+    setRemoveCover(false);
+    setCoverPreview(prev => swapBlobPreview(prev, file));
+  };
+  const setPickedAvatar = (file: File) => {
+    setAvatarFile(file);
+    setRemoveAvatar(false);
+    setAvatarPreview(prev => swapBlobPreview(prev, file));
+  };
+  const coverMenu = useProfileImageMenu({
+    kind: 'cover',
+    canEdit: true,
+    imageUrl: coverPreview,
+    hasImage: !!coverPreview,
+    onFile: setPickedCover,
+    onRemove: () => {
+      setCoverFile(undefined);
+      setRemoveCover(true);
+      setCoverPreview(prev => { if (prev?.startsWith('blob:')) { try { URL.revokeObjectURL(prev); } catch { /* noop */ } } return undefined; });
+    },
+  });
+  const avatarMenu = useProfileImageMenu({
+    kind: 'avatar',
+    canEdit: true,
+    imageUrl: avatarPreview,
+    hasImage: !!avatarPreview,
+    onFile: setPickedAvatar,
+    onRemove: () => {
+      setAvatarFile(undefined);
+      setRemoveAvatar(true);
+      setAvatarPreview(prev => { if (prev?.startsWith('blob:')) { try { URL.revokeObjectURL(prev); } catch { /* noop */ } } return undefined; });
+    },
+  });
+
+  const handleSave = () => {
+    if (usernameAvailable === false) {
+      toast.error(
+        isReservedUsername(username)
+          ? 'This username is reserved'
+          : t('settings.usernameTaken') || 'Username is already taken'
+      );
+      return;
+    }
+    if (isCheckingUsername) {
+      toast.error(_copy("copy.524bd0bb22d8", { defaultValue: "Please wait, checking username availability..." }));
+      return;
+    }
+    if (usernameChanged && isReservedUsername(username)) {
+      toast.error(_copy("copy.71bfd7fdb453", { defaultValue: "This username is reserved" }));
+      return;
+    }
+    const data: UpdateProfileData = {};
+
+    if (displayName) data.displayName = displayName;
+    // Only send the username when it actually changed. It used to go on every
+    // save, which meant any user already holding a now-reserved name (the real
+    // `admin` / `explore` / `creators` / `wallet` / `blog` accounts among them)
+    // would be refused by the guard in updateProfile while editing their bio.
+    if (username && usernameChanged) data.username = username;
+    if (bio) data.aboutMe = bio;
+    if (publicTimeZone !== originalValues.publicTimeZone) {
+      // The server replaces the whole blob, so carry every other saved
+      // setting (account type, follow visibility, ...) along with this one.
+      const kept: Record<string, string | number | boolean> = {};
+      const stored = {
+        ...((profileData?.customs as Record<string, unknown> | undefined) ?? {}),
+        ...((authUser?.customs as Record<string, unknown> | undefined) ?? {}),
+      };
+      for (const [key, value] of Object.entries(stored)) {
+        if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') kept[key] = value;
+      }
+      data.customs = { ...kept, publicTimeZone: publicTimeZone || false };
+    }
+    // Always send social links (even empty strings) so they persist correctly
+    data.twitterLink = twitterLink;
+    data.discordLink = discordLink;
+    data.instagramLink = instagramLink;
+    data.tiktokLink = tiktokLink;
+    data.telegramLink = telegramLink;
+    data.youtubeLink = youtubeLink;
+    data.facebookLink = facebookLink;
+    if (avatarFile) data.avatarImg = avatarFile;
+    if (coverFile) data.coverImg = coverFile;
+    if (removeAvatar && !avatarFile) data.removeAvatar = true;
+    if (removeCover && !coverFile) data.removeCover = true;
+    
+    updateMutation.mutate(data, { onSuccess: () => {
+        if (data.displayName !== undefined) setDisplayName.complete(displayName, displayName);
+        if (data.username !== undefined) setUsername.complete(username, username);
+        if (data.aboutMe !== undefined) setBio.complete(bio, bio);
+        setTwitterLink.complete(twitterLink, twitterLink);
+        setDiscordLink.complete(discordLink, discordLink);
+        setInstagramLink.complete(instagramLink, instagramLink);
+        setTiktokLink.complete(tiktokLink, tiktokLink);
+        setYoutubeLink.complete(youtubeLink, youtubeLink);
+        setTelegramLink.complete(telegramLink, telegramLink);
+        setFacebookLink.complete(facebookLink, facebookLink);
+      } });
+  };
+  
+  // Only block the form on the first-ever load — cached tab returns render
+  // instantly. On a load ERROR, fall through and render the (empty) form
+  // instead of spinning forever; the error toast above already fired.
+  if (!profileData && !profileError) {
+    return (
+      <DeHubPageLoader minHeight="40vh" />
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <User className="w-5 h-5 text-zinc-400" />
+          <h2 className="text-lg font-semibold text-white">{t('settings.profileSettings')}</h2>
+        </div>
+        <LiquidGlassBubble2
+          label={t('settings.save', 'Save')}
+          icon={<Save className="w-4 h-4" />}
+          onClick={handleSave}
+          loading={updateMutation.isPending}
+          loadingLabel={t('settings.saving', 'Saving...')}
+          disabled={!canSave}
+          width="auto"
+          height="36px"
+          className={cn(
+            hasChanges ? 'opacity-100' : 'opacity-0 pointer-events-none'
+          )}
+        />
+      </div>
+
+      {/* Cover Image */}
+      <div 
+        data-setting-anchor="cover-image"
+        data-keep-dark
+        className="relative aspect-[3/1] bg-zinc-800 rounded-xl overflow-hidden group"
+        {...coverMenu.targetProps}
+      >
+        {coverPreview && (
+          <img src={coverPreview} alt={_copy("copy.fa8d84566676", { defaultValue: "Cover" })} className="w-full h-full object-cover" />
+        )}
+        {/* The cover used to sit under a permanent 30% black wash; now it is
+            shown as uploaded and only dims on hover, with the camera in its
+            own chip so it stays legible over any picture. */}
+        <button
+          type="button"
+          data-on-media
+          onClick={coverMenu.openPicker}
+          aria-label={t('settings.clickCameraUpload')}
+          className="absolute inset-0 flex items-center justify-center bg-black/0 transition-colors hover:bg-black/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
+        >
+          <span className="flex size-10 items-center justify-center rounded-xl bg-black/50 backdrop-blur-sm transition-colors group-hover:bg-black/70">
+            <Camera className="size-5 text-white" />
+          </span>
+        </button>
+        {coverMenu.menu}
+      </div>
+
+      {/* Profile Picture */}
+      <div data-setting-anchor="profile-picture" className="flex items-center gap-4 -mt-10">
+        <div
+          className="relative rounded-xl"
+          {...avatarMenu.targetProps}
+        >
+          <Avatar className="w-20 h-20 border-4 border-zinc-900">
+            <AvatarImage src={avatarPreview} />
+            <AvatarFallback className="bg-zinc-700 text-white text-xl font-medium">
+              {displayName?.[0]?.toUpperCase() || username?.[0]?.toUpperCase() || 'U'}
+            </AvatarFallback>
+          </Avatar>
+          <button
+            type="button"
+            onClick={() => avatarInputRef.current?.click()}
+            aria-label={t('settings.clickCameraUpload')}
+            data-keep-dark
+            data-on-media
+            className="absolute bottom-0 right-0 flex size-8 items-center justify-center rounded-xl border border-zinc-700 bg-zinc-800 transition-colors hover:bg-zinc-700"
+          >
+            <Camera className="w-4 h-4 text-white" />
+          </button>
+          <input
+            ref={avatarInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleAvatarChange}
+          />
+          {avatarMenu.menu}
+        </div>
+        <div>
+          <h3 className="font-medium text-white">{t('settings.profilePicture')}</h3>
+          <p className="text-zinc-500 text-sm">{t('settings.clickCameraUpload')}</p>
+        </div>
+      </div>
+
+      {/* Display Name & Username */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div data-setting-anchor="display-name">
+          <label htmlFor="settings-display-name" className={SETTINGS_LABEL_CLASS}>{t('settings.displayName')}</label>
+          <Input
+            id="settings-display-name"
+            placeholder={t('settings.enterDisplayName')}
+            value={displayName}
+            onChange={(e) => setDisplayName(e.target.value)}
+            className={SETTINGS_FIELD_CLASS}
+          />
+        </div>
+        <div data-setting-anchor="username">
+          <label htmlFor="settings-username" className={SETTINGS_LABEL_CLASS}>{t('settings.username')}</label>
+          <Input
+            id="settings-username"
+            placeholder={t('settings.usernamePlaceholder')}
+            value={username}
+            onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
+            aria-invalid={usernameAvailable === false || undefined}
+            className={cn(
+              SETTINGS_FIELD_CLASS,
+              usernameAvailable === false ? 'border-red-500' : usernameAvailable === true ? 'border-green-500' : '',
+            )}
+          />
+          <div className="mt-1 flex items-center gap-1 min-h-[18px]">
+            {isCheckingUsername && (
+              <>
+                <Loader2 className="w-3 h-3 text-zinc-400 animate-spin" />
+                <span className="text-zinc-400 text-xs">{_copy("copy.2e5f79bb94a8", { defaultValue: "Checking..." })}</span>
+              </>
+            )}
+            {!isCheckingUsername && usernameAvailable === true && username !== originalValues.username && (
+              <>
+                <Check className="w-3 h-3 text-green-500" />
+                <span className="text-green-500 text-xs">{_copy("copy.e674447337e8", { defaultValue: "Available" })}</span>
+              </>
+            )}
+            {!isCheckingUsername && usernameAvailable === false && (
+              <>
+                <X className="w-3 h-3 text-red-500" />
+                <span className="text-red-500 text-xs">
+                  {isReservedUsername(username)
+                    ? _copy("copy.71bfd7fdb453", { defaultValue: "This username is reserved" })
+                    : _copy("copy.34141f3f22aa", { defaultValue: "Username is already taken" })}
+                </span>
+              </>
+            )}
+            {!isCheckingUsername && usernameAvailable === null && (
+              <span className="text-zinc-500 text-xs">{t('settings.usernameHint')}</span>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Bio */}
+      <div data-setting-anchor="bio">
+        <label htmlFor="settings-bio" className={SETTINGS_LABEL_CLASS}>{t('settings.bio')}</label>
+        <Textarea
+          id="settings-bio"
+          placeholder={t('settings.bioPlaceholder')}
+          value={bio}
+          onChange={(e) => setBio(e.target.value)}
+          className="min-h-[100px] rounded-xl border-zinc-700 bg-zinc-800 text-white placeholder:text-zinc-500"
+        />
+      </div>
+
+      {/* Profile song — one song under the bio; saves on its own */}
+      <ProfileSongSetting />
+
+      {/* Profile fields — label/value lines under the bio, links verified by rel="me" */}
+      <ProfileFieldsSetting />
+
+      <div className="flex items-center justify-between gap-4">
+        <div>
+          <label htmlFor="settings-public-timezone" className={SETTINGS_LABEL_CLASS}>
+            {t('profile.shareLocalTime', { defaultValue: 'Show my local time' })}
+          </label>
+          <p className="text-sm text-zinc-400">
+            {t('profile.shareLocalTimeHint', { defaultValue: 'Show your timezone and local time on your public profile and in chat.' })}
+          </p>
+        </div>
+        <Switch
+          id="settings-public-timezone"
+          checked={!!publicTimeZone}
+          disabled={!deviceTimeZone && !publicTimeZone}
+          onCheckedChange={enabled => setPublicTimeZone(enabled ? deviceTimeZone || '' : '')}
+        />
+      </div>
+
+      {/* Badge Museum: off by default, so this is its home until it is
+          switched on for the profile. Saves on its own. */}
+      <BadgeMuseumSetting />
+
+      {/* Personal, Creator or Business: a category under the name, a Contact button */}
+      <AccountTypeSetting />
+
+      {/* Fediverse — the @username@riftn.com address Mastodon can follow */}
+      <FediverseHandleSetting />
+
+      {/* Your follows, on chain — signed by the wallet, stamped on Base daily */}
+      <SignedFollowsSetting />
+
+      {/* Connected apps — Mastodon apps signed in to this account */}
+      <ConnectedAppsSetting />
+
+      {/* Links */}
+      <div className="space-y-6">
+        {/* Only the social rows collapse — there are seven of them and most
+            people fill in one. The identity rows below are one apiece and
+            hiding them is what made them impossible to find in the first
+            place. */}
+        <div data-setting-anchor="social-links">
+          <h3 className={SETTINGS_HEADING_CLASS}>{t('settings.socialLinks')}</h3>
+          <p className="-mt-2 mb-4 text-xs text-zinc-500">{t('settings.socialConnectHint')}</p>
+          <CollapsibleStack>
+            <SocialLinkInput 
+              label={_copy("copy.89c9b65356e3", { defaultValue: "X (Twitter)" })} 
+              placeholder="https://x.com/username"
+              value={twitterLink}
+              onChange={setTwitterLink}
+              connect={connectFor('twitter')}
+              icon={
+                <svg className="w-4 h-4 text-zinc-500" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                </svg>
+              }
+            />
+            <SocialLinkInput 
+              label="Instagram" 
+              placeholder="https://instagram.com/username"
+              value={instagramLink}
+              onChange={setInstagramLink}
+              connect={connectFor('instagram')}
+              icon={
+                <svg className="w-4 h-4 text-zinc-500" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                </svg>
+              }
+            />
+            <SocialLinkInput 
+              label="TikTok" 
+              placeholder="https://tiktok.com/@username"
+              value={tiktokLink}
+              onChange={setTiktokLink}
+              connect={connectFor('tiktok')}
+              icon={
+                <svg className="w-4 h-4 text-zinc-500" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/>
+                </svg>
+              }
+            />
+            <SocialLinkInput 
+              label="YouTube" 
+              placeholder="https://youtube.com/@channel"
+              value={youtubeLink}
+              onChange={setYoutubeLink}
+              connect={connectFor('youtube')}
+              icon={
+                <svg className="w-4 h-4 text-zinc-500" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                </svg>
+              }
+            />
+            <SocialLinkInput 
+              label="Discord" 
+              placeholder={_copy("copy.dcd932e65e57", { defaultValue: "discord_username" })}
+              value={discordLink}
+              onChange={setDiscordLink}
+              connect={connectFor('discord')}
+              icon={
+                <svg className="w-4 h-4 text-zinc-500" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189Z"/>
+                </svg>
+              }
+            />
+            <SocialLinkInput
+              label="Telegram"
+              placeholder="https://t.me/username"
+              value={telegramLink}
+              onChange={setTelegramLink}
+              icon={
+                <svg className="w-4 h-4 text-zinc-500" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+                </svg>
+              }
+            />
+            <SocialLinkInput
+              label="Facebook"
+              placeholder="https://facebook.com/username"
+              value={facebookLink}
+              onChange={setFacebookLink}
+              connect={connectFor('facebook')}
+              icon={
+                <svg className="w-4 h-4 text-zinc-500" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                </svg>
+              }
+            />
+          </CollapsibleStack>
+          {/* Outside the stack so it is never folded away: a verified GitHub
+              is proven by signing in, not typed, which is the point of it. */}
+          <div className="mt-6">
+            <GithubLinkSetting />
+          </div>
+        </div>
+
+        {/* How you get back in. */}
+        <div data-setting-anchor="sign-in">
+          <h3 className={SETTINGS_HEADING_CLASS}>{t('settings.signIn', 'Sign-in')}</h3>
+          <EmailSignInSettings />
+        </div>
+
+        {/* An ENS name is an alias for the profile URL, not a rename. */}
+        <div data-setting-anchor="ens">
+          <h3 className={SETTINGS_HEADING_CLASS}>{t('settings.ensSection', 'ENS')}</h3>
+          <EnsHandleSettings />
+        </div>
+
+        {/* Permanent encoder credentials -- set OBS, a capture app or a
+            console up once and never re-key it again. */}
+        <div data-setting-anchor="stream-key">
+          <h3 className={SETTINGS_HEADING_CLASS}>{t('settings.streamKey.section', 'Stream key')}</h3>
+          <StreamKeySettings />
+        </div>
+        <div data-setting-anchor="twitch-mirror" id="twitch-mirror">
+          <h3 className={SETTINGS_HEADING_CLASS}>{t('twitchMirror.title')}</h3>
+          <TwitchMirrorSettings />
+        </div>
+
+        {/* Badge delegation — a badge is a profile-facing thing (who holds
+            what tier, who lent it), so it lives here rather than in Assets. */}
+        <div data-setting-anchor="badge-delegation">
+          <BadgeDelegationSection />
+        </div>
+
+        {/* Other accounts saved on this browser, and the control that adds one
+            — last, because adding a profile leaves this page. */}
+        <div data-setting-anchor="profiles">
+          <ProfilesSection />
+        </div>
+
+        {/* Creators' own provider keys: Creator tools run on their account. */}
+        <OwnAiKeysSetting />
+
+        {/* The Creator studio's way in, now the Assistant header no longer
+            carries a shortcut to it. Last on the tab Settings opens on. */}
+        <SettingsRow
+          as="button"
+          anchor="creator"
+          icon={<CreatorIcon />}
+          title={t('commandCentre.creator', 'Creator')}
+          description={t('creator.heroSubtitle', 'Images, video, music and 3D. Pay per creation in tokens.')}
+          onClick={() => navigate('/creator')}
+          action={<ExternalLink className="size-4 text-zinc-500" />}
+        />
+
+        {/* Use the account (and the agents you own) from an AI assistant over MCP. */}
+        <SettingsRow
+          as="button"
+          anchor="connect-ai"
+          icon={<ConnectIcon />}
+          title={t('nav.connectAi', 'Connect AI')}
+          description={t('mcpKeys.settingsBody')}
+          onClick={() => navigate('/connect')}
+          action={<ExternalLink className="size-4 text-zinc-500" />}
+        />
+      </div>
+
+    </div>
+  );
+}
+
+/**
+ * Support tab — mirrors mobile's Support panel
+ * (`screens/AccountSettingsScreen.tsx` supportPanel). Report a Bug moved here
+ * from the Profile tab so both clients group support in the same place.
+ *
+ * Mobile's "Rate & Review" row is deliberately not ported: it opens the native
+ * app-store review sheet, which has no web equivalent.
+ */
+function SupportSettings() {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const { user: authUser } = useAuthContext();
+  const username = authUser?.username || 'Anonymous';
+
+  // Same row as every other tab — these were zinc cards with a
+  // hover:bg-zinc-750 that is not a Tailwind colour, so they never lit up.
+  const arrow = <ExternalLink className="size-4 text-zinc-500" />;
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center gap-3 mb-6">
+        <LifeBuoy className="w-5 h-5 text-zinc-400" />
+        <h2 className="text-lg font-semibold text-white">{t('settings.support', 'Support')}</h2>
+      </div>
+
+      <div className="space-y-4">
+        <SettingsRow
+          as="button"
+          anchor="report-bug"
+          icon={<Bug />}
+          title={t('settings.reportBug', 'Report a Bug')}
+          description={t('settings.reportBugDesc', 'Help us fix issues by reporting bugs')}
+          onClick={() => navigate('/build?report=bug')}
+          action={arrow}
+        />
+        <SettingsRow
+          as="button"
+          anchor="terms"
+          icon={<FileText />}
+          title={t('settings.termsOfService', 'Terms of Service')}
+          onClick={() => navigate('/docs/terms-of-service')}
+          action={arrow}
+        />
+        <SettingsRow
+          as="button"
+          anchor="privacy-policy"
+          icon={<Shield />}
+          title={t('settings.privacyPolicy', 'Privacy Policy')}
+          onClick={() => navigate('/docs/privacy')}
+          action={arrow}
+        />
+        <SettingsRow
+          as="button"
+          anchor="deactivate-account"
+          icon={<Pause />}
+          title={t('accountDeactivation.title', 'Deactivate account')}
+          description={t('accountDeactivation.short', 'Hide your profile for now. Sign back in to restore it')}
+          onClick={() => navigate('/delete-account#deactivate')}
+          action={arrow}
+        />
+        <SettingsRow
+          as="button"
+          anchor="delete-account"
+          icon={<Trash2 style={{ color: '#ef4444' }} />}
+          title={t('accountDeletion.title', 'Delete account')}
+          description={t('accountDeletion.description', 'Permanently delete your account and personal data')}
+          onClick={() => navigate('/delete-account')}
+          action={arrow}
+        />
+      </div>
+    </div>
+  );
+}
+
+function NotificationSettings() {
+  const { t: _copy } = _useCopy();
+  const { t } = useTranslation();
+  const { isAuthenticated, walletAddress } = useAuthContext();
+
+  // Reads the account document, which is the store the notification service
+  // actually consults. See the note above getAccountNotificationPreferences —
+  // these toggles used to write to the push-preferences collection, which is
+  // only ever read for quiet hours and digest mode, so none of them did
+  // anything. Quiet hours on web is separate and localStorage-backed
+  // (QuietHoursSection below), so nothing here still needs that endpoint.
+  const prefsKey = ['account-notification-preferences', walletAddress?.toLowerCase() ?? null];
+
+  const { data: notifPrefs, isLoading: prefsLoading } = useQuery({
+    queryKey: prefsKey,
+    queryFn: () => import('@/lib/api/dehub').then(m => m.getAccountNotificationPreferences(walletAddress!)),
+    enabled: isAuthenticated && !!walletAddress,
+    // Mutations invalidate this key, so a long staleTime is safe — 60s was
+    // refetching on nearly every tab return.
+    staleTime: 5 * 60_000,
+  });
+
+  const queryClient = useQueryClient();
+
+  const completionWallet = isAuthenticated ? walletAddress?.toLowerCase() : undefined;
+  const completionPreference = useQuery({
+    queryKey: ['liked-request-completion', completionWallet],
+    enabled: !!completionWallet,
+    staleTime: 0,
+    refetchOnWindowFocus: true,
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('get_liked_request_completion_preference')
+        .setHeader('x-wallet-address', completionWallet!);
+      if (error) throw error;
+      return data;
+    },
+  });
+  const updateCompletionPreference = useMutation({
+    mutationFn: async ({ wallet, enabled }: { wallet: string; enabled: boolean }) => {
+      const { data, error } = await supabase.rpc('set_liked_request_completion_preference', { p_enabled: enabled })
+        .setHeader('x-wallet-address', wallet);
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: async (enabled, { wallet }) => {
+      const queryKey = ['liked-request-completion', wallet];
+      await queryClient.cancelQueries({ queryKey });
+      queryClient.setQueryData(queryKey, enabled);
+    },
+    onError: () => toast.error(t('settings.failedUpdateProfile')),
+  });
+
+  const updatePrefMutation = useMutation({
+    mutationFn: ({ key, value }: { key: NotificationKey; value: boolean }) =>
+      import('@/lib/api/dehub').then(m => m.updateInAppNotificationPref(key, value)),
+    onMutate: async ({ key, value }) => {
+      await queryClient.cancelQueries({ queryKey: prefsKey });
+      const prev = queryClient.getQueryData(prefsKey);
+      queryClient.setQueryData(prefsKey, (old: any) => ({
+        ...old,
+        inApp: { ...(old?.inApp ?? {}), [key]: value },
+      }));
+      return { prev };
+    },
+    onError: (_err, _vars, context) => {
+      if (context?.prev) queryClient.setQueryData(prefsKey, context.prev);
+      toast.error(t('settings.failedUpdateProfile'));
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: prefsKey }),
+  });
+
+  const handleToggle = (key: NotificationKey) => (checked: boolean) => {
+    updatePrefMutation.mutate({ key, value: checked });
+  };
+
+  const privateMessagePushOnlyMutation = useMutation({
+    mutationFn: async (value: boolean) => {
+      const { updatePrivateMessagePushOnly } = await import('@/lib/api/dehub');
+      const response = await updatePrivateMessagePushOnly(value);
+      if (!response?.result) throw new Error('Could not save private message notification settings');
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: prefsKey }),
+    onError: () => toast.error(t('settings.failedUpdateProfile')),
+  });
+
+  const isDisabled = prefsLoading || updatePrefMutation.isPending;
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center gap-3 mb-6">
+        <Bell className="w-5 h-5 text-zinc-400" />
+        <h2 className="text-lg font-semibold text-white">{t('settings.notificationSettings')}</h2>
+      </div>
+
+      {/* General */}
+      <div>
+        <h3 className="font-medium text-zinc-400 text-sm mb-4">{t('settings.general')}</h3>
+        <div className="space-y-4">
+          {/*
+            Account-level and it owns two states a plain toggle cannot show —
+            which address these go to, and that there isn't one yet. See
+            EmailNotificationsSetting.
+          */}
+          <EmailNotificationsSetting />
+          {/*
+            The paid channel, and the only switch on this page that spends
+            money — so it owns an unlock flow of its own rather than being a
+            toggle. See SmsNotificationsSetting.
+          */}
+          <SmsNotificationsSetting />
+          {/*
+            Owns the browser permission as well as the stored flag — see
+            BrowserNotificationsSetting for why a plain toggle isn't enough
+            once a reader has blocked us.
+          */}
+          <div data-setting-anchor="browser-notifications">
+            <BrowserNotificationsSetting />
+          </div>
+          {/* Off by default: the bell's glow is the standard look. */}
+          <NotificationCountRow />
+          <MessagesCountRow />
+        </div>
+      </div>
+
+      {/* Who may reach you at all — Mastodon's notification filters */}
+      <NotificationFiltersSetting />
+
+      {/* Activity */}
+      <div>
+        <h3 className="font-medium text-zinc-400 text-sm mb-4">{t('settings.activity')}</h3>
+        <div className="space-y-4">
+          <SettingToggle
+            icon={ThumbsUp}
+            anchor="notify-likes"
+            title={t('settings.likes')}
+            description={t('settings.likesDesc')}
+            defaultChecked={getInAppPref(notifPrefs, 'likes')}
+            onCheckedChange={handleToggle('likes')}
+            disabled={isDisabled}
+          />
+          <SettingToggle
+            icon={Check}
+            anchor="notify-liked-request-completion"
+            title={t('settings.notifyLikedRequestCompletion')}
+            defaultChecked={completionPreference.data === true}
+            onCheckedChange={enabled => {
+              if (completionWallet) updateCompletionPreference.mutate({ wallet: completionWallet, enabled });
+            }}
+            disabled={typeof completionPreference.data !== 'boolean' || updateCompletionPreference.isPending}
+          />
+          <SettingToggle
+            icon={MessageSquare}
+            anchor="notify-comments"
+            title={t('settings.comments')}
+            description={t('settings.commentsDesc')}
+            defaultChecked={getInAppPref(notifPrefs, 'comments')}
+            onCheckedChange={handleToggle('comments')}
+            disabled={isDisabled}
+          />
+          {/* Not a notification, but it is about comments and this is where
+              people look for anything the comment box does. Device-local. */}
+          <CoachSuggestionsToggle />
+          <SettingToggle
+            icon={Users}
+            anchor="notify-new-followers"
+            title={t('settings.newFollowers')}
+            description={t('settings.newFollowersDesc')}
+            defaultChecked={getInAppPref(notifPrefs, 'newFollowers')}
+            onCheckedChange={handleToggle('newFollowers')}
+            disabled={isDisabled}
+          />
+          <SettingToggle
+            icon={MessageSquare}
+            anchor="private-message-push-only"
+            title={t('settings.privateMessagePushOnly', 'Private messages: push only')}
+            description={t('settings.privateMessagePushOnlyDesc', 'Send new one-to-one message alerts as push only. Alerts already in your inbox stay there.')}
+            defaultChecked={notifPrefs?.privateMessagePushOnly === true}
+            onCheckedChange={value => privateMessagePushOnlyMutation.mutate(value)}
+            disabled={!notifPrefs || privateMessagePushOnlyMutation.isPending}
+          />
+          <SettingToggle
+            icon={MessageSquare}
+            anchor="notify-comment-replies"
+            title={_copy("copy.68be60ea70c8", { defaultValue: "Comment Replies" })}
+            description={_copy("copy.e58201630b42", { defaultValue: "When someone replies to your comment" })}
+            defaultChecked={getInAppPref(notifPrefs, 'commentReplies')}
+            onCheckedChange={handleToggle('commentReplies')}
+            disabled={isDisabled}
+          />
+          <SettingToggle
+            icon={AtSign}
+            anchor="notify-mentions"
+            title={_copy("copy.6f32e692ede0", { defaultValue: "Mentions" })}
+            description={_copy("copy.9d301c77ae49", { defaultValue: "When someone mentions you in a post or comment" })}
+            defaultChecked={getInAppPref(notifPrefs, 'mentions')}
+            onCheckedChange={handleToggle('mentions')}
+            disabled={isDisabled}
+          />
+        </div>
+      </div>
+
+      {/* Monetization */}
+      <div>
+        <h3 className="font-medium text-zinc-400 text-sm mb-4">{_copy("copy.4d07f6012a60", { defaultValue: "Monetization" })}</h3>
+        <div className="space-y-4">
+          <SettingToggle
+            icon={Coins}
+            anchor="notify-tips"
+            title={_copy("copy.b9c1fb1d8de8", { defaultValue: "Tips Received" })}
+            description={t('settings.notifyTipsDesc')}
+            defaultChecked={getInAppPref(notifPrefs, 'tips')}
+            onCheckedChange={handleToggle('tips')}
+            disabled={isDisabled}
+          />
+          <SettingToggle
+            icon={Handshake}
+            anchor="notify-subscribers"
+            title={_copy("copy.a0ce07fbc726", { defaultValue: "New Subscribers" })}
+            description={_copy("copy.bdfdedebdafa", { defaultValue: "When someone subscribes to your plan" })}
+            defaultChecked={getInAppPref(notifPrefs, 'subscriptions')}
+            onCheckedChange={handleToggle('subscriptions')}
+            disabled={isDisabled}
+          />
+          <SettingToggle
+            icon={Coins}
+            anchor="notify-ppv"
+            title={_copy("copy.dbc6e9280cb5", { defaultValue: "PPV Purchases" })}
+            description={_copy("copy.12874f91ea76", { defaultValue: "When someone purchases your pay-per-view content" })}
+            defaultChecked={getInAppPref(notifPrefs, 'ppvPurchases')}
+            onCheckedChange={handleToggle('ppvPurchases')}
+            disabled={isDisabled}
+          />
+        </div>
+      </div>
+
+      {/* Content & Platform */}
+      <div>
+        <h3 className="font-medium text-zinc-400 text-sm mb-4">{_copy("copy.d56c1dff8692", { defaultValue: "Content & Platform" })}</h3>
+        <div className="space-y-4">
+          <SettingToggle
+            icon={Play}
+            anchor="notify-livestream"
+            title={_copy("copy.36389cced6a5", { defaultValue: "Livestream Start" })}
+            description={_copy("copy.73bcd1190b63", { defaultValue: "When someone you follow starts a livestream" })}
+            defaultChecked={getInAppPref(notifPrefs, 'livestreamStart')}
+            onCheckedChange={handleToggle('livestreamStart')}
+            disabled={isDisabled}
+          />
+          <SettingToggle
+            icon={Sparkles}
+            anchor="notify-milestones"
+            title={_copy("copy.39c33dc2375f", { defaultValue: "Milestones" })}
+            description={_copy("copy.236a62b1e534", { defaultValue: "When you reach a follower or engagement milestone" })}
+            defaultChecked={getInAppPref(notifPrefs, 'milestones')}
+            onCheckedChange={handleToggle('milestones')}
+            disabled={isDisabled}
+          />
+          {/* Key name matches mobile's `accountAlerts` (services/push/push.service.ts). */}
+          <SettingToggle
+            icon={Shield}
+            anchor="notify-account-alerts"
+            title={_copy("copy.1d3358ba19cc", { defaultValue: "Account Alerts" })}
+            description={_copy("copy.9fe70131f0db", { defaultValue: "Security and account activity you should know about" })}
+            defaultChecked={getInAppPref(notifPrefs, 'accountAlerts')}
+            onCheckedChange={handleToggle('accountAlerts')}
+            disabled={isDisabled}
+          />
+          <SettingToggle
+            icon={Bell}
+            anchor="notify-announcements"
+            title={_copy("copy.fe02680f2479", { defaultValue: "Announcements" })}
+            description={_copy("copy.b71d244c89db", { defaultValue: "Platform updates and important announcements" })}
+            defaultChecked={getInAppPref(notifPrefs, 'announcements')}
+            onCheckedChange={handleToggle('announcements')}
+            disabled={isDisabled}
+          />
+        </div>
+      </div>
+
+      {/* Chat */}
+      <div>
+        <h3 className="font-medium text-zinc-400 text-sm mb-4">{t('settings.chat', 'Chat')}</h3>
+        <div className="space-y-4">
+          {/* Owns its own rate limit as well as its switch — see the component. */}
+          <PublicChatAlertsSetting />
+          <div data-setting-anchor="buy-bot">
+            <BuyBotToggle />
+          </div>
+        </div>
+      </div>
+
+      {/* Quiet Hours */}
+      <QuietHoursSection />
+    </div>
+  );
+}
+
+const fmtHour = (h: number) => `${String(h).padStart(2, '0')}:00`;
+const HOUR_OPTIONS = Array.from({ length: 24 }, (_, i) => ({ value: String(i), label: fmtHour(i) }));
+
+function QuietHoursSection() {
+  const { t: _copy } = _useCopy();
+  const { t } = useTranslation();
+  // Reads/writes go through @/lib/quiet-hours so this control and the delivery
+  // check in use-browser-notifications can never drift apart on key names.
+  const [enabled, setEnabled] = useState(() => getQuietHours().enabled);
+  const [start, setStart] = useState<number>(() => getQuietHours().start);
+  const [end, setEnd] = useState<number>(() => getQuietHours().end);
+  const fmt = fmtHour;
+
+  const handleToggle = (checked: boolean) => {
+    setEnabled(checked);
+    try { localStorage.setItem(QH_ENABLED_KEY, String(checked)); } catch {}
+    toast.success(checked ? 'Quiet hours enabled' : 'Quiet hours disabled');
+  };
+
+  const handleStartChange = (h: number) => {
+    setStart(h);
+    try { localStorage.setItem(QH_START_KEY, String(h)); } catch {}
+  };
+
+  const handleEndChange = (h: number) => {
+    setEnd(h);
+    try { localStorage.setItem(QH_END_KEY, String(h)); } catch {}
+  };
+
+  return (
+    <div data-setting-anchor="quiet-hours">
+      <h3 className={SETTINGS_HEADING_CLASS}>{t('settings.quietHours')}</h3>
+      <div className="space-y-4">
+        {/* Same row as every other toggle on the page — this used to be the
+            one card-shaped setting with native <select>s inside it. The hour
+            pickers are the same drawer select every other choice here uses. */}
+        <SettingsRow
+          as="label"
+          className="cursor-pointer"
+          icon={<Clock />}
+          title={t('settings.enableQuietHours')}
+          description={enabled ? _copy("copy.a0c199c85b21", { defaultValue: "Silenced {{value1}} → {{value2}}", value1: fmt(start), value2: fmt(end) }) : t('settings.quietHoursDesc')}
+          action={<Switch checked={enabled} onCheckedChange={handleToggle} />}
+        />
+
+        {enabled && (
+          <div className="pl-8">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+              <span className="text-sm text-zinc-400">{_copy("copy.218197693424", { defaultValue: "From" })}</span>
+              <SettingDrawerSelect
+                value={String(start)}
+                onValueChange={(v) => handleStartChange(Number(v))}
+                title={_copy("copy.218197693424", { defaultValue: "From" })}
+                options={HOUR_OPTIONS}
+              />
+              <span className="text-sm text-zinc-400">{_copy("copy.f4b06ef6d3c8", { defaultValue: "To" })}</span>
+              <SettingDrawerSelect
+                value={String(end)}
+                onValueChange={(v) => handleEndChange(Number(v))}
+                title={_copy("copy.f4b06ef6d3c8", { defaultValue: "To" })}
+                options={HOUR_OPTIONS}
+              />
+            </div>
+            <p className="mt-2 text-xs text-zinc-500">{_copy("copy.07ab6f23cc93", { defaultValue: "Push notifications will be silenced during these hours." })}</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function PrivacySettings() {
+  const { t: _copy } = _useCopy();
+  const { t } = useTranslation();
+  const { showFollowersList, showFollowingList, hideFollowerCounts, isPrivate, hideBadgeAndBalance, defaultPostVisibility, aiScraping, showOnline, showLastSeen, showDislikes, showLikes, updateSettings, isUpdating, isLoading } = usePrivacySettings();
+  const { option: walletUnlockInterval, setOption: setWalletUnlockInterval } = useWalletUnlockInterval();
+  const [isUpdatingVisibility, setIsUpdatingVisibility] = useState(false);
+  const { user } = useAuthContext();
+  const [followRequestsOpen, setFollowRequestsOpen] = useState(false);
+  const [goPublicModalOpen, setGoPublicModalOpen] = useState(false);
+  const [goPublicBusy, setGoPublicBusy] = useState(false);
+  const [pendingRequestCount, setPendingRequestCount] = useState(0);
+  const {
+    isNewMember,
+    optedOut: newMemberOptedOut,
+    isLoading: isNewMemberLoading,
+    setOptedOut: setNewMemberOptedOut,
+    isUpdating: isNewMemberUpdating,
+  } = useNewMemberSelf();
+
+  const handleNewMemberToggle = useCallback(async (checked: boolean) => {
+    try {
+      await setNewMemberOptedOut(!checked);
+      toast.success(checked ? 'Showing as a new member' : 'Hidden from new members');
+    } catch {
+      toast.error(_copy("copy.8eb4917bbe54", { defaultValue: "Failed to update" }));
+    }
+  }, [setNewMemberOptedOut, _copy]);
+
+  const handlePrivateToggle = useCallback(async (checked: boolean) => {
+    if (!checked && isPrivate) {
+      // Going from private → public: check pending requests first
+      try {
+        const { getFollowRequests } = await import('@/lib/api/dehub/social');
+        const requests = await getFollowRequests();
+        if (requests.length > 0) {
+          setPendingRequestCount(requests.length);
+          setGoPublicModalOpen(true);
+          return;
+        }
+      } catch {
+        // If we can't fetch, proceed anyway
+      }
+    }
+    updateSettings({ is_private: checked });
+  }, [isPrivate, updateSettings]);
+
+  const handleAcceptAllAndGoPublic = useCallback(async () => {
+    setGoPublicBusy(true);
+    try {
+      const { acceptAllFollowRequests } = await import('@/lib/api/dehub/social');
+      await acceptAllFollowRequests();
+      updateSettings({ is_private: false });
+      setGoPublicModalOpen(false);
+      toast.success(_copy("copy.b7380bf75280", { defaultValue: "All requests accepted. Account is now public." }));
+    } catch {
+      toast.error(_copy("copy.6064f2a6586f", { defaultValue: "Failed to accept requests" }));
+    } finally {
+      setGoPublicBusy(false);
+    }
+  }, [updateSettings, _copy]);
+
+  const handleDeclineAllAndGoPublic = useCallback(async () => {
+    setGoPublicBusy(true);
+    try {
+      const { rejectAllFollowRequests } = await import('@/lib/api/dehub/social');
+      await rejectAllFollowRequests();
+      updateSettings({ is_private: false });
+      setGoPublicModalOpen(false);
+      toast.success(_copy("copy.dd2a6b92f9c0", { defaultValue: "All requests declined. Account is now public." }));
+    } catch {
+      toast.error(_copy("copy.05a9b84aa310", { defaultValue: "Failed to decline requests" }));
+    } finally {
+      setGoPublicBusy(false);
+    }
+  }, [updateSettings, _copy]);
+  
+  const handlePostVisibilityChange = async (newVisibility: 'public' | 'private') => {
+    if (!user?.address) {
+      toast.error(t('settings.connectWalletFirst'));
+      return;
+    }
+    
+    setIsUpdatingVisibility(true);
+    
+    try {
+      updateSettings({ default_post_visibility: newVisibility });
+      
+      const { getAuthToken } = await import('@/lib/api/dehub');
+      const token = getAuthToken();
+      if (token) {
+        const response = await fetch(`${API_ORIGIN}/api/batch_token_visibility`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            visibility: newVisibility === 'private' ? 'private' : 'public',
+          }),
+        });
+        
+        if (!response.ok) {
+          console.warn('Batch visibility update not supported, posts will use new default going forward');
+        }
+      }
+      
+      toast.success(
+        newVisibility === 'private' 
+          ? t('settings.allPostsPrivate')
+          : t('settings.allPostsPublic')
+      );
+    } catch (error) {
+      console.error('Failed to update visibility:', error);
+      toast.error(t('settings.failedUpdateVisibility'));
+    } finally {
+      setIsUpdatingVisibility(false);
+    }
+  };
+  
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center gap-3 mb-6">
+        <Shield className="w-5 h-5 text-zinc-400" />
+        <h2 className="text-lg font-semibold text-white">{t('settings.privacySecurity')}</h2>
+      </div>
+
+      {/* Profile Visibility */}
+      <div>
+        <h3 className="font-medium text-zinc-400 text-sm mb-4">{t('settings.profileVisibility')}</h3>
+        <div className="space-y-4">
+          <SettingToggle
+            icon={Lock}
+            anchor="private-account"
+            title={t('settings.privateAccount')}
+            description={t('settings.privateAccountDesc')}
+            defaultChecked={isPrivate}
+            onCheckedChange={handlePrivateToggle}
+            disabled={isUpdating || isLoading}
+          />
+          <SettingToggle
+            icon={EyeOff}
+            anchor="private-balance"
+            title={_copy("copy.e3043f1c05b3", { defaultValue: "Hide badge and balance" })}
+            description={_copy("copy.72bb78fb365d", { defaultValue: "Hides your badge, token balances, and tip history from public view. Riftn will also disable sends and tips to you." })}
+            defaultChecked={hideBadgeAndBalance}
+            onCheckedChange={(checked) => updateSettings({ hide_badge_and_balance: checked })}
+            disabled={isUpdating || isLoading}
+          />
+          {hideBadgeAndBalance && !isLoading && (
+            <div role="status" className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-xs font-medium leading-relaxed text-zinc-200">
+              {t('settings.tipsOffNote', 'Tips and sends to you are off while this is on. Turn it off to get tipped again.')}
+            </div>
+          )}
+          <div className="rounded-xl border border-amber-500/25 bg-amber-500/10 p-4 text-xs leading-relaxed text-zinc-300">{_copy("copy.660711e7d4af", { defaultValue: "On-chain transactions are public. Sending tokens or tips can reveal your wallet address, including transactions made before private balance mode was enabled." })}</div>
+          {isPrivate && (
+            <div className="pl-8">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setFollowRequestsOpen(true)}
+                className={SETTINGS_CONTROL_CLASS}
+              >
+                <UserPlus />
+                {t('settings.viewFollowRequests')}
+              </Button>
+              <FollowRequestsDrawer open={followRequestsOpen} onOpenChange={setFollowRequestsOpen} />
+            </div>
+          )}
+          <SettingToggle
+            icon={Radio}
+            anchor="show-online"
+            title={t('settings.showOnline')}
+            description={t('settings.showOnlineDesc')}
+            defaultChecked={showOnline}
+            onCheckedChange={(checked) => updateSettings({ show_online: checked })}
+            disabled={isUpdating || isLoading}
+          />
+          <SettingToggle
+            icon={LastSeenIcon}
+            anchor="show-last-seen"
+            title={t('settings.showLastSeen')}
+            description={t('settings.showLastSeenDesc')}
+            defaultChecked={showLastSeen}
+            onCheckedChange={(checked) => updateSettings({ show_last_seen: checked })}
+            disabled={isUpdating || isLoading}
+          />
+          <SettingToggle
+            icon={ThumbsUp}
+            anchor="show-likes"
+            title={t('settings.showLikes')}
+            description={t('settings.showLikesDesc')}
+            defaultChecked={showLikes}
+            onCheckedChange={(checked) => updateSettings({ show_likes: checked })}
+            disabled={isUpdating || isLoading}
+          />
+          <SettingToggle
+            icon={ThumbsDown}
+            anchor="show-dislikes"
+            title={t('settings.showDislikes')}
+            description={t('settings.showDislikesDesc')}
+            defaultChecked={showDislikes}
+            onCheckedChange={(checked) => updateSettings({ show_dislikes: checked })}
+            disabled={isUpdating || isLoading}
+          />
+          {/* Only rendered while it still does something. Outside the 30-day
+              window there is no row to update and no chip to hide, and a toggle
+              that silently changes nothing is worse than no toggle. */}
+          {isNewMember && (
+            <SettingToggle
+              icon={Sparkles}
+              anchor="new-member"
+              title={t('settings.showAsNewMember', 'Show me as a new member')}
+              description={t(
+                'settings.showAsNewMemberDesc',
+                'Lets other members see you just joined so they can welcome you. Ends automatically 30 days after you signed up.',
+              )}
+              defaultChecked={!newMemberOptedOut}
+              onCheckedChange={handleNewMemberToggle}
+              disabled={isNewMemberUpdating || isNewMemberLoading}
+            />
+          )}
+          <SettingToggle
+            icon={Users}
+            anchor="show-followers-list"
+            title={t('settings.showFollowersList')}
+            description={t('settings.showFollowersListDesc')}
+            defaultChecked={showFollowersList}
+            onCheckedChange={(checked) => updateSettings({ show_followers_list: checked })}
+            disabled={isUpdating || isLoading}
+          />
+          <SettingToggle
+            icon={UserCheck}
+            anchor="show-following-list"
+            title={t('settings.showFollowingList')}
+            description={t('settings.showFollowingListDesc')}
+            defaultChecked={showFollowingList}
+            onCheckedChange={(checked) => updateSettings({ show_following_list: checked })}
+            disabled={isUpdating || isLoading}
+          />
+          <SettingToggle
+            icon={Hash}
+            anchor="follow-visibility"
+            title={t('settings.showFollowCounts')}
+            description={t('settings.showFollowCountsDesc')}
+            defaultChecked={!hideFollowerCounts}
+            onCheckedChange={(checked) => updateSettings({ show_follower_counts: checked })}
+            disabled={isUpdating || isLoading}
+          />
+        </div>
+      </div>
+
+      {/* Post Visibility */}
+      <div>
+        <h3 className="font-medium text-zinc-400 text-sm mb-4">{t('settings.postVisibility')}</h3>
+        <div className="space-y-4">
+          <SettingsRow
+            icon={<Eye />}
+            anchor="default-post-visibility"
+            title={t('settings.defaultPostVisibility')}
+            description={t('settings.defaultPostVisibilityDesc')}
+            action={<SettingDrawerSelect
+              value={defaultPostVisibility}
+              onValueChange={(value) => handlePostVisibilityChange(value as 'public' | 'private')}
+              disabled={isUpdating || isLoading || isUpdatingVisibility}
+              title={t('settings.defaultPostVisibility')}
+              options={[
+                { value: 'public', label: t('settings.public'), description: t('settings.publicDesc') },
+                { value: 'private', label: t('settings.private'), description: t('settings.privateDesc') },
+              ]}
+            />}
+          />
+          <div className="rounded-xl border border-zinc-700/50 bg-zinc-800/50 p-4 text-sm text-zinc-400">
+            <p><strong className="text-white">{t('settings.note')}:</strong> {t('settings.postVisibilityNote')}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* AI Scraping */}
+      <div>
+        <h3 className="font-medium text-zinc-400 text-sm mb-4">{t('settings.aiScraping.section', 'AI training')}</h3>
+        <div className="space-y-4">
+          <SettingToggle
+            icon={Bot}
+            anchor="ai-scraping"
+            title={t('settings.aiScraping.label')}
+            description={aiScraping === 'allow' ? t('settings.aiScraping.hintAllow') : t('settings.aiScraping.hintDeny')}
+            defaultChecked={aiScraping === 'allow'}
+            onCheckedChange={(checked) => updateSettings({ ai_scraping: checked ? 'allow' : 'deny' })}
+            disabled={isUpdating || isLoading}
+          />
+        </div>
+      </div>
+
+      {/* Remixes: duets and stitches */}
+      <div>
+        <h3 className="font-medium text-zinc-400 text-sm mb-4">{t('remixLinks.settingsHeading', 'Remixes')}</h3>
+        <div className="space-y-4">
+          <DuetSetting address={user?.address} />
+          <StitchPolicySetting />
+          <div data-setting-anchor="allow-reactions"><AccountAllowReactions /></div>
+        </div>
+      </div>
+
+      {/* Message settings (who can message, fee, do not disturb, free access)
+          live only on the Messages tab. */}
+
+      {/* Account Security */}
+      <div>
+        <h3 className="font-medium text-zinc-400 text-sm mb-4">{t('settings.accountSecurity')}</h3>
+        <div className="space-y-4">
+          <TwoFactorSettings />
+          <SettingsRow
+            icon={<Shield />}
+            anchor="wallet-unlock"
+            title={t('settings.walletUnlockInterval', 'Wallet unlock prompt')}
+            description={t('settings.walletUnlockIntervalDesc', 'How long your wallet stays unlocked for posting, tipping and transfers before we ask for your password again. Survives refreshes; logging out always locks it.')}
+            action={<SettingDrawerSelect
+              value={walletUnlockInterval}
+              onValueChange={(value) => setWalletUnlockInterval(value as WalletUnlockIntervalOption)}
+              title={t('settings.walletUnlockInterval', 'Wallet unlock prompt')}
+              options={[
+                { value: 'never', label: t('settings.walletUnlockNever', 'Never (until you log out)') },
+                { value: '15m', label: t('settings.walletUnlock15m', 'After 15 minutes') },
+                { value: '1h', label: t('settings.walletUnlock1h', 'After 1 hour') },
+                { value: '6h', label: t('settings.walletUnlock6h', 'After 6 hours') },
+                { value: '24h', label: t('settings.walletUnlock24h', 'After 24 hours (standard)') },
+              ]}
+            />}
+          />
+          <div data-setting-anchor="biometric-unlock">
+            <BiometricUnlockSettings />
+          </div>
+          <div data-setting-anchor="wallet-recovery">
+            <WalletRecoveryTools />
+          </div>
+          <div data-setting-anchor="reset-wallet">
+            <ResetWalletSettings />
+          </div>
+        </div>
+      </div>
+
+      {/* Active Sessions */}
+      <div data-setting-anchor="active-sessions">
+        <ActiveSessions />
+      </div>
+
+      {/* Extract Data */}
+      <div data-setting-anchor="your-data">
+        <h3 className="font-medium text-zinc-400 text-sm mb-4">{t('settings.yourData')}</h3>
+        <div className="space-y-4">
+          <DataPortability />
+        </div>
+      </div>
+
+      {/* Blocked Users */}
+      <div data-setting-anchor="blocked-users">
+        <BlockedUsersSection />
+      </div>
+
+      {/* Muted words — keyword filters */}
+      <div data-setting-anchor="muted-words">
+        <KeywordFiltersSection />
+      </div>
+
+      {/* Geo-Blocking */}
+      <div data-setting-anchor="geo-blocking">
+        <h3 className={SETTINGS_HEADING_CLASS}>{t('settings.geoBlocking')}</h3>
+        <p className="text-zinc-500 text-sm mb-4">{t('settings.geoBlockingDesc')}</p>
+        <GeoBlockingSelector />
+      </div>
+
+      {/* Go Public Security Gate Modal — monochrome glass like every other
+          dialog; the blue/red pair it shipped with is not in the palette. */}
+      {goPublicModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div role="dialog" aria-modal="true" aria-labelledby="go-public-title" className="w-full max-w-sm space-y-4 rounded-2xl border border-white/10 bg-zinc-950/90 p-6 shadow-[0_8px_32px_rgba(0,0,0,0.3)] backdrop-blur-xl">
+            <div className="mx-auto flex size-14 items-center justify-center rounded-full border border-white/10 bg-white/10">
+              <Users className="size-7 text-white" />
+            </div>
+            <h3 id="go-public-title" className="text-white font-bold text-lg text-center">{_copy("copy.e186aeeede46", { defaultValue: "Switch to Public?" })}</h3>
+            <p className="text-zinc-300 text-sm text-center">{_copy("copy.1bd68dc16f30", { defaultValue: "You have " })}<span className="text-white font-semibold">{formatCount(pendingRequestCount)}</span>{_copy("copy.8342c8fd8b8e", { defaultValue: " pending follow " })}{pendingRequestCount === 1 ? _copy("copy.1f58b9145b24", { defaultValue: "request" }) : _copy("copy.ec72420df5df", { defaultValue: "requests" })}{_copy("copy.942059c59c39", { defaultValue: ". What would you like to do before going public?" })}</p>
+            <div className="space-y-2 pt-1">
+              <Button
+                type="button"
+                onClick={handleAcceptAllAndGoPublic}
+                loading={goPublicBusy}
+                className="h-11 w-full font-semibold"
+              >{_copy("copy.49a212b67b4d", { defaultValue: "Accept All & Go Public" })}</Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleDeclineAllAndGoPublic}
+                loading={goPublicBusy}
+                className={cn(SETTINGS_CONTROL_CLASS, 'h-11 w-full font-semibold')}
+              >{_copy("copy.4be2a1270a46", { defaultValue: "Decline All & Go Public" })}</Button>
+              <button
+                type="button"
+                onClick={() => setGoPublicModalOpen(false)}
+                disabled={goPublicBusy}
+                className="w-full py-3 rounded-xl text-zinc-400 hover:text-white text-sm transition-colors"
+              >{_copy("copy.19766ed6ccb2", { defaultValue: "Cancel" })}</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function BlockedUsersSection() {
+  const { t: _copy } = _useCopy();
+  const { t } = useTranslation();
+  const queryClient = useQueryClient();
+  const { isAuthenticated } = useAuthContext();
+  const [unblockingId, setUnblockingId] = useState<string | null>(null);
+
+  const { data: blockData, isLoading } = useQuery({
+    queryKey: ['block-list-settings'],
+    queryFn: () => getBlockListPaginated(1, 50),
+    enabled: isAuthenticated,
+    // Block/unblock actions invalidate this key, so a long staleTime is safe.
+    staleTime: 5 * 60_000,
+  });
+
+  const items = blockData?.items ?? [];
+
+  const handleUnblock = async (user: BlockedUser) => {
+    setUnblockingId(user.address);
+    try {
+      await apiUnblockUser(user.address);
+      toast.success(`Unblocked ${user.username || user.displayName || user.address.slice(0, 8)}`);
+      queryClient.invalidateQueries({ queryKey: ['block-list-settings'] });
+      queryClient.invalidateQueries({ queryKey: ['block-list'] });
+    } catch {
+      toast.error(_copy("copy.91509428edaa", { defaultValue: "Failed to unblock user" }));
+    } finally {
+      setUnblockingId(null);
+    }
+  };
+
+  return (
+    <div>
+      <h3 className={SETTINGS_HEADING_CLASS}>
+        <Ban className="size-4" />{_copy("copy.34e1447eb1e2", { defaultValue: "Blocked Users" })}</h3>
+      {isLoading ? (
+        <div className="flex items-center gap-2 text-zinc-500 text-sm py-4">
+          <Loader2 className="w-4 h-4 animate-spin" />{_copy("copy.47d2a515ef2f", { defaultValue: "Loading..." })}</div>
+      ) : items.length === 0 ? (
+        <p className="text-zinc-500 text-sm py-2">{_copy("copy.3aac05abe9c2", { defaultValue: "You haven't blocked anyone." })}</p>
+      ) : (
+        <div className="space-y-2">
+          {items.map((user) => (
+            <div
+              key={user.blockId || user.address}
+              className="flex items-center justify-between gap-3 rounded-xl border border-zinc-700/50 bg-zinc-800/50 p-3"
+            >
+              <div className="flex items-center gap-3 min-w-0">
+                <Avatar className="size-9">
+                  <AvatarImage src={user.avatarImageUrl} />
+                  <AvatarFallback className="bg-zinc-700 text-white text-xs">
+                    {(user.username || user.address)?.[0]?.toUpperCase() || '?'}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="min-w-0">
+                  <p className="text-white text-sm font-medium truncate">
+                    {user.displayName || user.username || `${user.address.slice(0, 6)}...${user.address.slice(-4)}`}
+                  </p>
+                  {user.username && (
+                    <p className="text-zinc-500 text-xs truncate">@{user.username.replace('@', '')}</p>
+                  )}
+                </div>
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className={cn(SETTINGS_CONTROL_CLASS, 'shrink-0')}
+                onClick={() => handleUnblock(user)}
+                loading={unblockingId === user.address}
+              >{_copy("copy.712da63171e0", { defaultValue: "Unblock" })}</Button>
+            </div>
+          ))}
+          {blockData && blockData.total > items.length && (
+            <p className="text-zinc-500 text-xs text-center pt-2">{_copy("copy.7282e1fbb2c6", { defaultValue: "Showing " })}{items.length}{_copy("copy.a4282e4b2298", { defaultValue: " of " })}{blockData.total}{_copy("copy.87d3d0e14422", { defaultValue: " blocked users" })}</p>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function JungleMoodIcon() {
+  const [mood] = useJungleMood();
+  return mood === 'evening' ? <Moon /> : <Sun />;
+}
+
+function DimLightsToggle() {
+  const { t } = useTranslation();
+  const { dimLights, setDimLights, dimStrength, setDimStrength } = useAppTheme();
+  return (
+    <div>
+      <SettingsRow
+        as="label"
+        className="cursor-pointer"
+        icon={<Lamp />}
+        title={t('settings.dimLights', 'Dim Lights')}
+        description={t('settings.dimLightsDesc', 'Reduce blue light exposure')}
+        action={<Switch checked={dimLights} onCheckedChange={setDimLights} />}
+      />
+
+      {/* Strength slider — animatedly pops up once Dim Lights is switched on. */}
+      <div
+        className={cn(
+          'grid transition-all duration-300 ease-out',
+          dimLights
+            ? 'grid-rows-[1fr] opacity-100 mt-3'
+            : 'grid-rows-[0fr] opacity-0 mt-0 pointer-events-none'
+        )}
+      >
+        <div className="overflow-hidden">
+          <div className="flex items-center gap-3 pl-8 pr-1">
+            <span className="text-zinc-500 text-sm shrink-0">{t('settings.dimStrength', 'Strength')}</span>
+            <Slider
+              value={[dimStrength]}
+              onValueChange={(v) => setDimStrength(v[0])}
+              min={0}
+              max={100}
+              step={1}
+              className="flex-1"
+              aria-label={t('settings.dimStrength', 'Strength')}
+            />
+            <span className="text-zinc-400 text-sm tabular-nums w-9 text-right shrink-0">{dimStrength}%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function AutoPlayToggle() {
+  const { t } = useTranslation();
+  const { autoplayEnabled, setAutoplayEnabled } = useAutoplay();
+  return (
+    <SettingsRow
+      as="label"
+      className="cursor-pointer"
+      icon={<Play />}
+      anchor="autoplay"
+      title={t('settings.autoPlay')}
+      description={t('settings.autoPlayDesc')}
+      action={<Switch checked={autoplayEnabled} onCheckedChange={setAutoplayEnabled} />}
+    />
+  );
+}
+
+function AutoPlayMutedToggle() {
+  const { t } = useTranslation();
+  const { autoplayEnabled, autoplayMuted, setAutoplayMuted } = useAutoplay();
+  if (!autoplayEnabled) return null;
+  return (
+    <SettingsRow
+      as="label"
+      className="cursor-pointer"
+      icon={<VolumeX />}
+      anchor="autoplay-muted"
+      title={t('settings.autoPlayMuted')}
+      description={t('settings.autoPlayMutedDesc')}
+      action={<Switch checked={autoplayMuted} onCheckedChange={setAutoplayMuted} />}
+    />
+  );
+}
+
+function DataSaverToggle() {
+  const { t } = useTranslation();
+  const { pref } = useConnectionQuality();
+  return (
+    <SettingsRow
+      as="label"
+      className="cursor-pointer"
+      icon={<Gauge />}
+      anchor="data-saver"
+      title={t('settings.dataSaver', 'Data Saver')}
+      description={t('settings.dataSaverDesc', 'Stop videos autoplaying and preloading to save data. Turns on automatically on slow connections.')}
+      action={<Switch
+        checked={pref === 'on'}
+        onCheckedChange={(v) => setLiteModePref(v ? 'on' : 'auto')}
+      />}
+    />
+  );
+}
+
+function ShowAnimationsToggle() {
+  const { t } = useTranslation();
+  const { animationsEnabled, setAnimationsEnabled } = useAnimations();
+  return (
+    <SettingsRow
+      as="label"
+      className="cursor-pointer"
+      icon={<Sparkles />}
+      anchor="show-animations"
+      title={t('settings.showAnimations')}
+      description={t('settings.showAnimationsDesc')}
+      action={<Switch checked={animationsEnabled} onCheckedChange={setAnimationsEnabled} />}
+    />
+  );
+}
+
+function LeftHandedToggle() {
+  const { t } = useTranslation();
+  const { leftHanded, setLeftHanded } = useLeftHanded();
+  return (
+    <SettingsRow
+      as="label"
+      className="cursor-pointer"
+      icon={<Hand />}
+      anchor="left-handed"
+      title={t('settings.leftHanded')}
+      description={t('settings.leftHandedDesc')}
+      action={<Switch checked={leftHanded} onCheckedChange={setLeftHanded} />}
+    />
+  );
+}
+
+function ShortsEnabledToggle() {
+  const { t } = useTranslation();
+  const { shortsEnabled, setShortsEnabled } = useShortsEnabled();
+  return (
+    <SettingsRow
+      as="label"
+      className="cursor-pointer"
+      icon={<Film />}
+      anchor="shorts"
+      title={t('settings.shortsEnabled', 'Shorts')}
+      description={t('settings.shortsEnabledDesc', 'Show the Shorts feed tab and Shorts carousels on Home.')}
+      action={<Switch checked={shortsEnabled} onCheckedChange={setShortsEnabled} />}
+    />
+  );
+}
+
+
+
+/** Representative hex for a hue at full saturation, mid lightness. */
+function hueToHex(hue: number): string {
+  const h = ((hue % 360) + 360) % 360;
+  const channel = (n: number) => {
+    const k = (n + h / 30) % 12;
+    const v = 0.5 - 0.5 * Math.max(-1, Math.min(k - 3, 9 - k, 1));
+    return Math.round(v * 255).toString(16).padStart(2, '0');
+  };
+  return `#${channel(0)}${channel(8)}${channel(4)}`;
+}
+
+/** Extract the hue (0–359) from a #RGB / #RRGGBB string, or null if invalid. */
+function hexToHue(input: string): number | null {
+  const hex = input.trim().replace(/^#/, '');
+  const full = hex.length === 3 ? hex.split('').map((c) => c + c).join('') : hex;
+  if (!/^[0-9a-fA-F]{6}$/.test(full)) return null;
+  const r = parseInt(full.slice(0, 2), 16) / 255;
+  const g = parseInt(full.slice(2, 4), 16) / 255;
+  const b = parseInt(full.slice(4, 6), 16) / 255;
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  const d = max - min;
+  if (d === 0) return 0; // greyscale carries no hue
+  let h: number;
+  if (max === r) h = ((g - b) / d) % 6;
+  else if (max === g) h = (b - r) / d + 2;
+  else h = (r - g) / d + 4;
+  return Math.round((((h * 60) % 360) + 360) % 360) % 360;
+}
+
+/** Polished-metal sheen shown on the Brand badge before any picture is sampled —
+ *  light/dark silver bands with a bright specular highlight read as shiny chrome. */
+const BRAND_METALLIC_SHEEN =
+  'linear-gradient(135deg, #8a9099 0%, #dfe4ea 18%, #ffffff 30%, #aeb6c2 46%, #6b7280 62%, #c4ccd6 80%, #8a9099 100%)';
+
+/** CSS background for a brand palette: a gradient of the extracted colours, or
+ *  a metallic-sheen placeholder before any picture has been sampled. */
+function brandGradient(colors: string[]): string {
+  if (colors.length >= 2) return `linear-gradient(135deg, ${colors.join(', ')})`;
+  if (colors.length === 1) return `linear-gradient(135deg, ${colors[0]}, ${colors[0]})`;
+  return BRAND_METALLIC_SHEEN;
+}
+
+function ThemeColorPicker({ theme }: { theme: string }) {
+  const { t: _copy } = _useCopy();
+  const { t } = useTranslation();
+  const { themeHues, setThemeHue, brandColors, setBrandColors } = useAppTheme();
+  const { user } = useAuth();
+  const defaultValue = DEFAULT_THEME_HUES[theme] ?? 260;
+  const value = themeHues[theme] ?? defaultValue;
+  const special = isSpecialThemeColor(value);
+  // Hue the slider/hex reflect: the live hue, or a sensible fallback when a
+  // special mode (White/Black/Rainbow/Brand) is active so the slider still sits somewhere.
+  const fallbackHue = isSpecialThemeColor(defaultValue) ? 260 : defaultValue;
+  const sliderHue = special ? fallbackHue : value;
+  // Draft lets the user type a partial hex without the field snapping back.
+  const [hexDraft, setHexDraft] = useState<string | null>(null);
+  const hexValue = hexDraft ?? (special ? '' : hueToHex(value));
+  const [brandLoading, setBrandLoading] = useState(false);
+
+  // Preview swatch for the currently-selected colour.
+  const previewStyle: CSSProperties =
+    value === THEME_COLOR.WHITE
+      ? { backgroundColor: '#ffffff' }
+      : value === THEME_COLOR.BLACK
+        ? { backgroundColor: '#000000' }
+        : value === THEME_COLOR.RAINBOW
+          ? { backgroundImage: 'linear-gradient(135deg, #ff0000, #ff9900, #33cc33, #0099ff, #cc33ff)' }
+          : value === THEME_COLOR.BRAND
+            ? { backgroundImage: brandGradient(brandColors) }
+            : { backgroundColor: hueToHex(value) };
+
+  const specialLabelKey =
+    value === THEME_COLOR.WHITE ? 'White'
+      : value === THEME_COLOR.BLACK ? 'Black'
+        : value === THEME_COLOR.RAINBOW ? 'Rainbow'
+          : value === THEME_COLOR.BRAND ? 'Brand' : '';
+
+  // Brand mode: re-derive up to 3 prominent colours from the *current* profile
+  // picture on every click, so the palette can never lag a pic change or account
+  // switch (the persisted palette still paints the live shaders across reloads —
+  // it just never substitutes for a fresh read here). Reads user.avatarImageUrl
+  // live, which the profile save updates optimistically to the new blob preview.
+  const handleBrand = async () => {
+    const url = buildAvatarUrl(user?.address || '', user?.avatarImageUrl || null);
+    if (!url) {
+      toast.error(t('settings.themeColorBrandNoAvatar', 'Add a profile picture to use Brand colors'));
+      return;
+    }
+    // If Brand is already applied with a valid palette, a transient re-read
+    // failure shouldn't alarm the user — Brand keeps working with what it has.
+    const brandAlreadyActive = value === THEME_COLOR.BRAND && brandColors.length > 0;
+    setBrandLoading(true);
+    try {
+      const colors = await extractBrandColors(url, 3);
+      if (colors.length > 0) {
+        setBrandColors(colors);
+        setThemeHue(theme, THEME_COLOR.BRAND);
+        setHexDraft(null);
+      } else if (!brandAlreadyActive) {
+        toast.error(t('settings.themeColorBrandFailed', "Couldn't read colors from your profile picture"));
+      }
+    } catch {
+      if (!brandAlreadyActive) {
+        toast.error(t('settings.themeColorBrandFailed', "Couldn't read colors from your profile picture"));
+      }
+    } finally {
+      setBrandLoading(false);
+    }
+  };
+
+  const swatches: { key: string; label: string; mode: number; style: CSSProperties }[] = [
+    { key: 'white', label: t('settings.themeColorWhite', 'White'), mode: THEME_COLOR.WHITE, style: { backgroundColor: '#ffffff' } },
+    { key: 'black', label: t('settings.themeColorBlack', 'Black'), mode: THEME_COLOR.BLACK, style: { backgroundColor: '#000000' } },
+    { key: 'rainbow', label: t('settings.themeColorRainbow', 'Rainbow'), mode: THEME_COLOR.RAINBOW, style: { backgroundImage: 'linear-gradient(135deg, #ff0000, #ff9900, #33cc33, #0099ff, #cc33ff)' } },
+  ];
+
+  return (
+    <div className="mt-4 space-y-4 rounded-xl border border-zinc-700/50 bg-zinc-800/50 p-4">
+      <SettingsRow
+        icon={<Paintbrush />}
+        title={t('settings.themeColor', 'Theme Color')}
+        description={t('settings.themeColorDesc', 'Pick a custom color for this theme')}
+        action={value !== defaultValue ? (
+          <button
+            type="button"
+            onClick={() => {
+              setThemeHue(theme, null);
+              setHexDraft(null);
+            }}
+            className="text-sm text-zinc-400 hover:text-white transition-colors"
+          >
+            {t('settings.themeColorReset', 'Reset')}
+          </button>
+        ) : undefined}
+      />
+
+      {/* Preset modes: White, Black, Rainbow, Brand */}
+      <div className="flex flex-wrap gap-2">
+        {swatches.map((s) => (
+          <button
+            key={s.key}
+            type="button"
+            onClick={() => {
+              setThemeHue(theme, s.mode);
+              setHexDraft(null);
+            }}
+            aria-pressed={value === s.mode}
+            className={`flex items-center gap-2 pl-1.5 pr-3 py-1.5 rounded-xl border transition-colors ${
+              value === s.mode
+                ? 'border-white bg-zinc-900'
+                : 'border-zinc-700 bg-zinc-900/50 hover:border-zinc-500'
+            }`}
+          >
+            <span aria-hidden="true" className="w-5 h-5 rounded-full border border-zinc-600" style={s.style} />
+            <span className="text-white text-sm">{s.label}</span>
+          </button>
+        ))}
+
+        {/* Brand: a gradient built from the user's profile-picture colours. */}
+        <button
+          type="button"
+          onClick={handleBrand}
+          disabled={brandLoading}
+          aria-pressed={value === THEME_COLOR.BRAND}
+          title={t('settings.themeColorBrandDesc', 'Use your profile picture colors')}
+          className={`flex items-center gap-2 pl-1.5 pr-3 py-1.5 rounded-xl border transition-colors ${
+            value === THEME_COLOR.BRAND
+              ? 'border-white bg-zinc-900'
+              : 'border-zinc-700 bg-zinc-900/50 hover:border-zinc-500'
+          } ${brandLoading ? 'opacity-70 cursor-wait' : ''}`}
+        >
+          <span
+            aria-hidden="true"
+            className="w-5 h-5 rounded-full border border-zinc-600 flex items-center justify-center overflow-hidden"
+            style={{ backgroundImage: brandGradient(brandColors) }}
+          >
+            {brandLoading && <Loader2 className="w-3 h-3 animate-spin text-white" />}
+          </span>
+          <span className="text-white text-sm">{t('settings.themeColorBrand', 'Brand')}</span>
+        </button>
+      </div>
+
+      {/* Custom hue */}
+      <div className="flex items-center gap-3">
+        <span
+          aria-hidden="true"
+          className="w-9 h-9 rounded-lg border border-zinc-700 flex-shrink-0"
+          style={previewStyle}
+        />
+        <input
+          type="range"
+          min={0}
+          max={359}
+          value={sliderHue}
+          data-hue-slider
+          aria-label={t('settings.themeColor', 'Theme Color')}
+          onChange={(e) => {
+            setThemeHue(theme, Number(e.target.value));
+            setHexDraft(null);
+          }}
+          className="flex-1 min-w-0"
+        />
+        <Input
+          value={hexValue}
+          maxLength={7}
+          spellCheck={false}
+          placeholder={special && specialLabelKey ? t(`settings.themeColor${specialLabelKey}`) : undefined}
+          aria-label={_copy("copy.b295d3fadc18", { defaultValue: "Hex color code" })}
+          onChange={(e) => {
+            const next = e.target.value;
+            setHexDraft(next);
+            const parsed = hexToHue(next);
+            if (parsed !== null) setThemeHue(theme, parsed);
+          }}
+          onBlur={() => setHexDraft(null)}
+          className="h-9 w-24 shrink-0 rounded-xl border-zinc-700 bg-zinc-900 text-center font-mono text-sm text-white"
+        />
+      </div>
+    </div>
+  );
+}
+
+const THEME_OPTIONS = [
+  { value: 'system', labelKey: 'settings.system', available: true },
+  { value: 'system-light', labelKey: 'settings.systemLight', available: true },
+  { value: 'immersive', labelKey: 'settings.immersive', available: true },
+  { value: 'minimal', labelKey: 'settings.minimal', available: true },
+  { value: 'light', labelKey: 'settings.minimalLight', available: true },
+  { value: 'glass', labelKey: 'settings.glass', available: true },
+  { value: 'cosmic', labelKey: 'settings.cosmic', available: true },
+  { value: 'hazy', labelKey: 'settings.hazy', available: true },
+  { value: 'swarms', labelKey: 'settings.swarms', available: true },
+  { value: 'lavalamp', labelKey: 'settings.lavalamp', available: true },
+  { value: 'winter', labelKey: 'settings.winter', available: true },
+  { value: 'war', labelKey: 'settings.war', available: true },
+  { value: 'osaka', labelKey: 'settings.osaka', available: true },
+  { value: 'jungle', labelKey: 'settings.jungle', available: true },
+  { value: 'island', labelKey: 'settings.island', available: true },
+  { value: 'hacker', labelKey: 'settings.hacker', available: true },
+  { value: 'horror', labelKey: 'settings.horror', available: true },
+];
+
+function AppearanceSettings({ theme, themeChoice, setTheme }: { theme: string; themeChoice: string; setTheme: (v: string) => void }) {
+  const { t } = useTranslation();
+  const { isCollapsed, setCollapsed } = useSidebarCollapse();
+  const { ref: themePickerFadeRef, style: themePickerFadeStyle } = useScrollFadeMask<HTMLDivElement>();
+  const [feedLayout, setFeedLayout] = useState('comfortable');
+  const { defaultProfileTab, defaultProfileView, readerProfileView, updateSettings, isUpdating, isLoading } = usePrivacySettings();
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center gap-3 mb-6">
+        <Palette className="w-5 h-5 text-zinc-400" />
+        <h2 className="text-lg font-semibold text-white">{t('settings.appearance')}</h2>
+      </div>
+
+      {/* Theme */}
+      <div data-setting-anchor="theme">
+        <h3 className="font-medium text-zinc-400 text-sm mb-4">{t('settings.theme')}</h3>
+        <div className="relative">
+          {/* The strip that used to sit here had to be recoloured per theme in
+              three separate stylesheets — a grey smear over wood in jungle, a
+              black bar in minimal. The mask has no colour to get wrong. */}
+          <div ref={themePickerFadeRef} style={themePickerFadeStyle} className="flex gap-3 overflow-x-auto scrollbar-hide pb-2">
+            {THEME_OPTIONS.map((option) => (
+              <ThemePreviewCard
+                key={option.value}
+                value={option.value}
+                label={t(option.labelKey)}
+                active={themeChoice === option.value}
+                available={option.available}
+                onSelect={() => {
+                  if (option.available) {
+                    setTheme(option.value);
+                  } else {
+                    toast.info(t('settings.comingSoon', 'Coming soon'));
+                  }
+                }}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* Custom color for hue-driven WebGL themes */}
+        {(theme === 'glass' || theme === 'cosmic' || theme === 'hazy' || theme === 'swarms' || theme === 'lavalamp') && (
+          <div data-setting-anchor="theme-color">
+            <ThemeColorPicker theme={theme} />
+          </div>
+        )}
+
+        {/* Jungle only: its own day / evening switch */}
+        {theme === 'jungle' && (
+          <div data-setting-anchor="jungle-mood" className="mt-4">
+            <SettingsRow
+              icon={<JungleMoodIcon />}
+              title={t('jungleMood.title')}
+              description={t('jungleMood.desc')}
+              action={<JungleMoodToggle />}
+            />
+          </div>
+        )}
+
+        {/* Dim Lights — blue light filter, independent of the chosen theme */}
+        <div data-setting-anchor="dim-lights" className="mt-4">
+          <DimLightsToggle />
+        </div>
+      </div>
+
+      {/* Sign-in screen look: Tube TV, VHS, LED wall, Hologram, Neon glow, 3D or Flat */}
+      <LoginLookSetting />
+
+      {/* What plays after signing in: Rift, Trace, Picture frame or Orbit */}
+      <ArrivalLookSetting />
+
+      {/* Language */}
+      <div data-setting-anchor="language">
+        <h3 className="font-medium text-zinc-400 text-sm mb-4">{t('settings.language')}</h3>
+        <div className="space-y-4">
+          <SettingsRow
+            icon={<Globe />}
+            title={t('settings.language')}
+            description={t('settings.languageDesc')}
+            action={<LanguageSelector />}
+          />
+          <GettingStartedSetting />
+          <DesktopAppSetting />
+        </div>
+      </div>
+
+      <div>
+        <h3 className="font-medium text-zinc-400 text-sm mb-4">{t('settings.layout')}</h3>
+        <div className="space-y-4">
+          <SettingsRow
+            icon={<LayoutGrid />}
+            anchor="feed-layout"
+            title={t('settings.feedLayout')}
+            description={t('settings.feedLayoutDesc')}
+            action={<SettingDrawerSelect
+              value={isCollapsed ? 'compact' : 'comfortable'}
+              onValueChange={(val) => setCollapsed(val === 'compact')}
+              title={t('settings.feedLayout')}
+              options={[
+                { value: 'comfortable', label: t('settings.comfortable'), description: t('settings.comfortableDesc') },
+                { value: 'compact', label: t('settings.compact'), description: t('settings.compactDesc') },
+              ]}
+            />}
+          />
+          <FeedSeparatorSetting />
+          <ShareIconSetting />
+          <MenuLayoutRow />
+          <DefaultFeedSetting />
+          <FeedTogglesSetting />
+          <PostLandingSetting />
+          <ChatTextSizeSetting />
+          <ChatOwnBubbleSetting />
+          <MessagesPillsSetting />
+          <ChatDeleteChoiceSetting />
+          <ChatReactionStyleSetting />
+          <SettingsRow
+            icon={<LayoutGrid />}
+            anchor="default-profile-tab"
+            title={t('settings.defaultProfileTab', 'Default profile tab')}
+            description={t('settings.defaultProfileTabDesc', 'Choose which tab visitors see first on your profile')}
+            action={<SettingDrawerSelect
+              value={defaultProfileTab}
+              onValueChange={(value) => updateSettings({ default_profile_tab: value })}
+              disabled={isUpdating || isLoading}
+              title={t('settings.defaultProfileTab', 'Default profile tab')}
+              options={PROFILE_TAB_OPTIONS.map((o) => ({
+                value: o.value,
+                label: t(`profile.tabs.${o.value}`, o.label),
+              }))}
+            />}
+          />
+          <SettingsRow
+            icon={<LayoutGrid />}
+            anchor="default-profile-view"
+            title={t('settings.defaultProfileView', 'Profile posts layout')}
+            description={t('settings.defaultProfileViewDesc', 'Show your posts as a grid or a list when people open your profile')}
+            action={<SettingDrawerSelect
+              value={defaultProfileView}
+              onValueChange={(value) => updateSettings({ default_profile_view: value === 'list' ? 'list' : 'grid' })}
+              disabled={isUpdating || isLoading}
+              title={t('settings.defaultProfileView', 'Profile posts layout')}
+              options={[
+                { value: 'grid', label: t('profile.viewGrid', 'Grid view') },
+                { value: 'list', label: t('profile.viewList', 'List view') },
+              ]}
+            />}
+          />
+          <SettingsRow
+            icon={<LayoutGrid />}
+            anchor="reader-profile-view"
+            title={t('settings.readerProfileView', 'Open other profiles as')}
+            description={t('settings.readerProfileViewDesc', 'Pick grid or list for every profile you open, or keep each person\'s own choice')}
+            action={<SettingDrawerSelect
+              value={readerProfileView}
+              onValueChange={(value) => updateSettings({ reader_profile_view: value === 'grid' || value === 'list' ? value : 'owner' })}
+              disabled={isUpdating || isLoading}
+              title={t('settings.readerProfileView', 'Open other profiles as')}
+              options={[
+                { value: 'owner', label: t('settings.readerProfileViewOwner', 'Each person\'s choice') },
+                { value: 'grid', label: t('profile.viewGrid', 'Grid view') },
+                { value: 'list', label: t('profile.viewList', 'List view') },
+              ]}
+            />}
+          />
+        </div>
+      </div>
+
+      {/* Media */}
+      <div>
+        <h3 className="font-medium text-zinc-400 text-sm mb-4">{t('settings.media')}</h3>
+        <div className="space-y-4">
+          <AutoPlayToggle />
+          <AutoPlayMutedToggle />
+          <DataSaverToggle />
+          <ShowAnimationsToggle />
+          <WideVideoModeRow />
+          <ShortsEnabledToggle />
+          <LeftHandedToggle />
+        </div>
+      </div>
+
+    </div>
+  );
+}
+
+/** Settings > Appearance > Layout: the feed a new session opens on. */
+function DefaultFeedSetting() {
+  const { t } = useTranslation();
+  const [tab, setTab] = useState<FeedTabValue>(() => readDefaultFeedTab());
+  return (
+    <SettingsRow
+      icon={<HomeCutIcon />}
+      anchor="default-feed"
+      title={t('settings.defaultFeed', 'Default feed')}
+      description={t('settings.defaultFeedDesc', 'Choose which feed opens every time you open Riftn')}
+      action={<SettingDrawerSelect
+        value={tab}
+        onValueChange={(value) => {
+          const next = parseDefaultFeedTab(value);
+          setTab(next);
+          setDefaultFeedTab(next);
+        }}
+        title={t('settings.defaultFeed', 'Default feed')}
+        options={FEED_TABS.map((o) => ({ value: o.value, label: t(`feed.${o.value}`, o.label) }))}
+      />}
+    />
+  );
+}
+
+/**
+ * Filter toggles a viewer turns on in any feed stay on as their defaults
+ * (lib/feed-defaults). This is the one place that puts them all back.
+ */
+function FeedTogglesSetting() {
+  const { t } = useTranslation();
+  const [saved, setSaved] = useState(() => hasFeedToggles());
+  useEffect(() => {
+    const sync = () => setSaved(hasFeedToggles());
+    window.addEventListener(FEED_DEFAULTS_CHANGED_EVENT, sync);
+    return () => window.removeEventListener(FEED_DEFAULTS_CHANGED_EVENT, sync);
+  }, []);
+  return (
+    <SettingsRow
+      icon={<FilterCutIcon />}
+      anchor="feed-toggles"
+      title={t('settings.feedToggles', 'Reset feed toggles')}
+      description={t('settings.feedTogglesDesc', 'Filters you turn on in a feed stay on as your defaults until you reset them')}
+      action={
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={!saved}
+          onClick={() => {
+            resetFeedToggles();
+            toast.success(t('settings.feedTogglesCleared', 'Feed toggles reset'));
+          }}
+        >
+          {t('settings.reset', 'Reset')}
+        </Button>
+      }
+    />
+  );
+}
+
+function LanguageSelector() {
+  const { t } = useTranslation();
+  const { language, setPreferredLanguage } = useUserLanguage();
+  return (
+    <SettingDrawerSelect
+      value={language}
+      onValueChange={setPreferredLanguage}
+      title={t('settings.language')}
+      searchable
+      options={SUPPORTED_LANGUAGES.map(l => ({
+        value: l.code,
+        label: `${l.nativeName}`,
+        description: l.name,
+      }))}
+    />
+  );
+}
+
+function ContentSettings() {
+  const { storiesEnabled, canChange, setStoriesEnabled } = useStoriesEnabled();
+  const { t } = useTranslation();
+  const { chainId, setChainId, saving } = usePostingChain();
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center gap-3 mb-6">
+        <Eye className="w-5 h-5 text-zinc-400" />
+        <h2 className="text-lg font-semibold text-white">{t('settings.contentPreferences')}</h2>
+      </div>
+
+      {/* Post Settings. The "Default post visibility" select that sat here
+          was a second copy of the Privacy tab's real one, except this copy
+          never saved — it toasted "coming soon" and snapped back. Two
+          identical controls, one of them fake, is worse than one. */}
+      <div>
+        <h3 className="font-medium text-zinc-400 text-sm mb-4">{t('settings.postSettings')}</h3>
+        <div className="space-y-4">
+          <SettingsRow
+            anchor="posting-chain"
+            icon={<Globe />}
+            title={t('settings.postingChain')}
+            action={<SettingDrawerSelect
+              value={String(chainId)}
+              onValueChange={value => void setChainId(Number(value) as PostChainId)}
+              title={t('settings.postingChain')}
+              disabled={saving}
+              options={SUPPORTED_CHAINS.map(chain => ({ value: String(chain.id), label: chain.name }))}
+            />}
+          />
+        </div>
+      </div>
+
+      {/* Content Filtering */}
+      <div>
+        <h3 className="font-medium text-zinc-400 text-sm mb-4">{t('settings.contentFiltering')}</h3>
+        <div className="space-y-4">
+          {/* One real switch replaces three that only ever said "coming soon".
+              "Filter explicit content" and "Content warnings" were the same
+              setting worded twice, and are what this one does when it is off. */}
+          <MatureContentToggle />
+          <KidsModeToggle />
+        </div>
+      </div>
+
+      {/* Playback */}
+      <div>
+        <h3 className="font-medium text-zinc-400 text-sm mb-4">{t('settings.playback', 'Playback')}</h3>
+        <div className="space-y-4">
+          <SettingToggle
+            icon={Eye}
+            anchor="show-stories"
+            title={t('settings.showStories', 'Show Stories on Home')}
+            description={t('settings.showStoriesDesc', 'Live broadcasts stay visible when Stories are off.')}
+            defaultChecked={storiesEnabled}
+            onCheckedChange={setStoriesEnabled}
+            disabled={!canChange}
+          />
+          <HideWatchedToggle />
+          <SkipSegmentsToggle />
+          <VideoGlitchToggle />
+          <ChannelSpeedRow />
+          <FeedVideoShapeRow />
+          <AdLoadRow />
+        </div>
+      </div>
+
+
+
+
+    </div>
+  );
+}
+
+function FreeAccessListSection() {
+  const { t: _copy } = _useCopy();
+  const { t } = useTranslation();
+  const { isAuthenticated, walletAddress } = useAuthContext();
+  const queryClient = useQueryClient();
+  const [search, setSearch] = useState('');
+  const term = search.trim().replace(/^@/, '').toLowerCase();
+  const debouncedTerm = useDebouncedValue(term, 250);
+  const currentSearch = term.length >= 2 && term === debouncedTerm;
+  const listKey = ['free-dm-access', walletAddress] as const;
+  const searchLabel = t('settings.freeDmSearch', 'Search by username');
+
+  const list = useQuery({
+    queryKey: listKey,
+    queryFn: async () => {
+      const { getFreeDmAccessList } = await import('@/lib/api/dehub');
+      return getFreeDmAccessList();
+    },
+    enabled: isAuthenticated,
+  });
+  const matches = useQuery({
+    queryKey: ['free-dm-access-search', walletAddress, debouncedTerm],
+    queryFn: async () => {
+      const { searchUsers } = await import('@/lib/api/dehub');
+      const { data } = await searchUsers({ q: debouncedTerm, limit: 20 });
+      return (data ?? []).flatMap(user => {
+        const { address, username } = user;
+        if (!address || address.toLowerCase() === walletAddress?.toLowerCase() || !username?.toLowerCase().includes(debouncedTerm)) {
+          return [];
+        }
+        return [{ address, username, displayName: user.displayName, avatarImageUrl: user.avatarImageUrl }];
+      });
+    },
+    enabled: isAuthenticated && currentSearch,
+  });
+
+  const changeAccess = useMutation({
+    mutationFn: async ({ user, grant }: { user: FreeAccessUser; grant: boolean }) => {
+      const { grantFreeDmAccess, revokeFreeDmAccess } = await import('@/lib/api/dehub');
+      const action = grant ? grantFreeDmAccess : revokeFreeDmAccess;
+      if (!(await action(user.address)).success) throw new Error('Could not update free DM access');
+      await queryClient.cancelQueries({ queryKey: listKey, exact: true });
+      queryClient.setQueryData<FreeAccessUser[]>(listKey, previous => {
+        const remaining = (previous ?? []).filter(item => item.address.toLowerCase() !== user.address.toLowerCase());
+        return grant ? [user, ...remaining] : remaining;
+      });
+    },
+    onSuccess: (_, { grant }) => toast.success(grant
+      ? t('settings.freeDmGranted', 'Free access granted')
+      : _copy('copy.dbadc4f1e698', { defaultValue: 'Free access revoked' })),
+    onError: (_, { grant }) => toast.error(grant
+      ? t('settings.freeDmGrantFailed', 'Failed to grant access')
+      : _copy('copy.d461cbfcf242', { defaultValue: 'Failed to revoke access' })),
+  });
+
+  const freeAccessUsers = list.data ?? [];
+  const granted = new Set(freeAccessUsers.map(user => user.address.toLowerCase()));
+  const searching = Boolean(term);
+  const users = searching ? (currentSearch ? matches.data ?? [] : []) : freeAccessUsers;
+  const loading = list.isLoading || (term.length >= 2 && (!currentSearch || matches.isLoading));
+  const failedQuery = list.isError ? list : currentSearch && matches.isError ? matches : null;
+
+  return (
+    <div data-setting-anchor="free-dm-access">
+      <h3 className={SETTINGS_HEADING_CLASS}>
+        <Gift className="size-4" />
+        {t('settings.freeAccessList', 'Free DM Access List')}
+      </h3>
+      <p className="text-zinc-500 text-sm mb-4">{t('settings.freeAccessListDesc', 'Users who can message you for free, bypassing your message fee.')}</p>
+      <div className="relative mb-3">
+        <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-zinc-400" aria-hidden="true" />
+        <Input
+          type="search"
+          value={search}
+          onChange={event => setSearch(event.target.value)}
+          aria-label={searchLabel}
+          placeholder={searchLabel}
+          autoComplete="off"
+          className={cn(SETTINGS_FIELD_CLASS, 'w-full pl-9')}
+        />
+      </div>
+
+      {loading ? (
+        <div className="flex items-center justify-center py-6">
+          <Loader2 className="w-5 h-5 animate-spin text-zinc-500" />
+        </div>
+      ) : failedQuery ? (
+        <div className="flex flex-col items-center gap-2 py-6 text-sm text-zinc-500">
+          {t('common.failedToLoad', 'Failed to load')}
+          <Button type="button" variant="outline" size="sm" className={SETTINGS_CONTROL_CLASS} onClick={() => void failedQuery.refetch()}>
+            {t('common.retry', 'Retry')}
+          </Button>
+        </div>
+      ) : users.length === 0 ? (
+        <div role="status" className="text-center py-6 text-zinc-500 text-sm">
+          {!searching ? t('settings.freeDmEmpty', 'No users have free access yet. Search for a username to add someone.')
+            : term.length < 2 ? t('settings.freeDmSearchMin', 'Enter at least two characters.')
+              : t('settings.freeDmNoMatches', 'No matching users.')}
+        </div>
+      ) : (
+        <div className="space-y-2">
+          {users.map((u) => {
+            const name = u.displayName || u.username || `${u.address.slice(0, 6)}...${u.address.slice(-4)}`;
+            const avatarUrl = u.avatarImageUrl
+              ? (u.avatarImageUrl.startsWith('http') ? u.avatarImageUrl : `https://cdn.dehub.io/${u.avatarImageUrl}`)
+              : undefined;
+            const selected = searching && granted.has(u.address.toLowerCase());
+            const busy = changeAccess.isPending && changeAccess.variables?.user.address === u.address;
+            return (
+              <div key={u.address} className={cn('flex items-center justify-between gap-3 rounded-xl border p-3', selected ? 'border-primary/30 bg-primary/10' : 'border-zinc-700/50 bg-zinc-800/50')}>
+                <div className="flex items-center gap-3 min-w-0">
+                  <Avatar className="size-9">
+                    {avatarUrl && <AvatarImage src={avatarUrl} />}
+                    <AvatarFallback className="bg-zinc-700 text-white text-sm">{name.charAt(0).toUpperCase()}</AvatarFallback>
+                  </Avatar>
+                  <div className="min-w-0">
+                    <p className="text-white text-sm font-medium truncate">{name}</p>
+                    {u.username && <p className="text-zinc-500 text-xs truncate">@{u.username}</p>}
+                  </div>
+                </div>
+                {selected ? (
+                  <span className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-xl bg-primary/15 px-3 text-xs font-semibold text-primary">
+                    <Check className="size-3.5" aria-hidden="true" />
+                    {t('settings.freeDmSelected', 'Selected')}
+                  </span>
+                ) : (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className={cn(SETTINGS_CONTROL_CLASS, 'shrink-0')}
+                    onClick={() => changeAccess.mutate({ user: u, grant: searching })}
+                    disabled={!isAuthenticated || changeAccess.isPending}
+                    loading={busy}
+                  >
+                    {searching ? t('settings.freeDmSelect', 'Select') : t('common.remove', 'Remove')}
+                  </Button>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function SettingToggle({
+  icon: Icon, 
+  title, 
+  description, 
+  defaultChecked = false,
+  onCheckedChange,
+  disabled = false,
+  comingSoon = false,
+  anchor,
+}: { 
+  icon: any; 
+  title: string; 
+  description?: string;
+  defaultChecked?: boolean;
+  onCheckedChange?: (checked: boolean) => void;
+  disabled?: boolean;
+  comingSoon?: boolean;
+  /** Search anchor — see src/lib/settings-search.ts. */
+  anchor?: string;
+}) {
+  const { t } = useTranslation();
+  // A switch that only ever toasts used to look exactly like one that works.
+  // Say so on the row, and dim the control, so nobody flips it three times
+  // wondering why nothing sticks.
+  const soon = t('settings.comingSoon', 'Coming soon');
+  return (
+    <SettingsRow
+      as="label"
+      anchor={anchor}
+      icon={<Icon />}
+      title={
+        comingSoon ? (
+          <span className="inline-flex flex-wrap items-center gap-x-2 gap-y-1">
+            <span>{title}</span>
+            <span className="rounded-md bg-white/10 px-1.5 py-0.5 text-[10px] font-semibold uppercase leading-4 tracking-wide text-zinc-300">
+              {soon}
+            </span>
+          </span>
+        ) : title
+      }
+      description={description}
+      className={disabled ? undefined : 'cursor-pointer'}
+      disabled={disabled}
+      action={<Switch
+        defaultChecked={defaultChecked}
+        checked={onCheckedChange ? defaultChecked : undefined}
+        onCheckedChange={comingSoon ? () => toast.info(soon) : onCheckedChange}
+        disabled={disabled}
+        aria-label={typeof title === 'string' ? title : undefined}
+        className={comingSoon ? 'opacity-50' : undefined}
+      />}
+    />
+  );
+}
+
+/**
+ * Mature content: the only account-level content filter that does anything.
+ *
+ * Off, the public feeds are filtered server-side and a mature post served
+ * anywhere else (a profile, the Following feed, a shared link) renders behind
+ * a content warning. On, both stop.
+ *
+ * New i18n keys rather than the existing settings.showSensitive pair: that
+ * one's copy — "display content warnings for sensitive posts" — describes the
+ * opposite of what this switch does when it is on, and it is already
+ * translated that way into every locale.
+ */
+function MatureContentToggle() {
+  const { t } = useTranslation();
+  const { isAuthenticated } = useAuthContext();
+  const { showMatureContent, setShowMatureContent, isSaving } = useMatureContent();
+
+  return (
+    <SettingToggle
+      icon={EyeOff}
+      anchor="mature-content"
+      title={t('settings.matureContent', 'Show Mature Content')}
+      description={t(
+        'settings.matureContentDesc',
+        'Include adult and graphic posts in your feeds, and drop the warning on ones you already see. Off by default.',
+      )}
+      defaultChecked={showMatureContent}
+      onCheckedChange={setShowMatureContent}
+      disabled={!isAuthenticated || isSaving}
+    />
+  );
+}
+
+/**
+ * Kids Mode: the only setting here that needs a PIN to undo.
+ *
+ * It sits beside the mature switch because both answer "what may this account
+ * be shown", but it is not the same kind of control. Mature widens what one
+ * viewer sees and is theirs to flip back; this narrows the whole product to
+ * posts somebody published for children, and turning it off is the thing being
+ * protected.
+ *
+ * Off is one tap into a pad, then the PIN twice. On is the PIN once. Neither
+ * direction is a bare switch — a switch that silently drops a device out of
+ * Kids Mode is the failure this feature exists to prevent.
+ */
+function KidsModeToggle() {
+  const { t } = useTranslation();
+  const { isAuthenticated } = useAuthContext();
+  const { isKidsMode, enable, disable, isSaving } = useKidsMode();
+  const [padOpen, setPadOpen] = useState(false);
+
+  return (
+    <>
+      <SettingToggle
+        icon={Baby}
+        anchor="kids-mode"
+        title={t('settings.kidsMode', 'Kids Mode')}
+        description={t(
+          'settings.kidsModeDesc',
+          'Shows only posts published for children, everywhere. A PIN turns it back off.',
+        )}
+        // Controlled on this value — SettingToggle passes it as `checked`
+        // whenever a handler is given — so the switch only ever moves once the
+        // PIN pad has succeeded, never on the tap that opens it.
+        defaultChecked={isKidsMode}
+        onCheckedChange={() => setPadOpen(true)}
+        disabled={!isAuthenticated || isSaving}
+      />
+      <KidsModeDrawer
+        open={padOpen}
+        onOpenChange={setPadOpen}
+        mode={isKidsMode ? 'disable' : 'enable'}
+        onSubmit={pin => (isKidsMode ? disable(pin) : enable(pin))}
+        busy={isSaving}
+      />
+    </>
+  );
+}
+
+/**
+ * Hide watched: drops videos already in this account's watch history out of
+ * the home and video feeds. Off by default — nothing disappears until it is
+ * deliberately turned on.
+ *
+ * Videos only, and signed-in only: a watch record on an image or text post
+ * means it sat on screen for two seconds, not that it was watched, and signed
+ * out there is no history to read at all (see hooks/use-watched-videos.ts).
+ *
+ * Kept in the wallet's preference blob, so it follows the account to another
+ * device; localStorage mirrors it for instant paint and for signed-out
+ * readers. Not the Riftn account row — a named setting there has to be
+ * whitelisted server-side or the write is silently dropped.
+ */
+function HideWatchedToggle() {
+  const { t } = useTranslation();
+  const { isAuthenticated } = useAuthContext();
+  const [hideWatched, setHideWatched] = useHideWatched();
+
+  return (
+    <SettingToggle
+      icon={EyeOff}
+      anchor="hide-watched"
+      title={t('settings.hideWatched', 'Hide watched videos')}
+      description={t(
+        'settings.hideWatchedDesc',
+        'Keep videos you have already played out of your feeds. Watched videos stay marked either way. Off by default.',
+      )}
+      defaultChecked={hideWatched}
+      onCheckedChange={setHideWatched}
+      disabled={!isAuthenticated}
+    />
+  );
+}
+
+/**
+ * Per-channel playback speed, and the only way to undo it.
+ *
+ * Changing speed on a video pins that speed to its creator (see
+ * lib/video-preferences.ts), which is what makes 1.5× on one channel and 1×
+ * on another stick. That is invisible once set, so the count and a reset live
+ * here. The map rides the wallet's preference blob (ViewingPreferencesSync),
+ * so the channels tuned on one device are tuned on the next.
+ */
+function NotificationCountRow() {
+  const { t } = useTranslation();
+  const on = useShowNotificationCount();
+  return (
+    <SettingToggle
+      icon={Bell}
+      anchor="notify-show-count"
+      title={t('settings.notificationShowCount', 'Show the number on the bell')}
+      description={t('settings.notificationShowCountDesc', 'See how many notifications are unread instead of just the glow')}
+      defaultChecked={on}
+      onCheckedChange={setShowNotificationCount}
+    />
+  );
+}
+
+/** Same switch for the Messages envelope, off by default. */
+function MessagesCountRow() {
+  const { t } = useTranslation();
+  const on = useShowMessagesCount();
+  return (
+    <SettingToggle
+      icon={MessageSquare}
+      anchor="messages-show-count"
+      title={t('settings.messagesShowCount', 'Show the number on Messages')}
+      description={t('settings.messagesShowCountDesc', 'See how many messages are unread instead of just the glow')}
+      defaultChecked={on}
+      onCheckedChange={setShowMessagesCount}
+    />
+  );
+}
+
+function ChannelSpeedRow() {
+  const { t } = useTranslation();
+  const [count, setCount] = useState(() => getCreatorPlaybackRateCount());
+
+  // The count changes from the players, which announce writes on this event.
+  useEffect(() => {
+    const handler = () => setCount(getCreatorPlaybackRateCount());
+    window.addEventListener('video-prefs-changed', handler);
+    return () => window.removeEventListener('video-prefs-changed', handler);
+  }, []);
+
+  return (
+    <SettingsRow
+      icon={<Gauge />}
+      anchor="channel-speed"
+      title={t('settings.channelSpeed', 'Playback speed per channel')}
+      description={
+        count === 0
+          ? t('settings.channelSpeedNone', 'Change the speed while watching someone and it stays that way for their videos.')
+          : t('settings.channelSpeedCount', '{{count}} channel(s) play at their own speed.', { count })
+      }
+      action={
+        <Button
+          variant="ghost"
+          size="sm"
+          disabled={count === 0}
+          onClick={() => {
+            clearCreatorPlaybackRates();
+            setCount(0);
+            toast.success(t('settings.channelSpeedCleared', 'Channel speeds reset'));
+          }}
+          className="text-zinc-400 hover:text-white disabled:opacity-40"
+        >
+          {t('settings.reset', 'Reset')}
+        </Button>
+      }
+    />
+  );
+}
+
+/**
+ * Ad load: how often a sponsored post lands in the home feed. Standard is one
+ * every eight, Fewer halves it. There is no "none" — the line about creators
+ * is not decoration, it is the reason the option stops where it does.
+ */
+/**
+ * Sponsor / intro skipping, off by default.
+ *
+ * Skipping a sponsor read is a decision about someone else's income, so it is
+ * one the viewer makes deliberately rather than one they find has been made
+ * for them. The sections themselves are crowdsourced — anyone can mark one
+ * from a video's options menu, and every skip offers an undo.
+ */
+function SkipSegmentsToggle() {
+  const { t } = useTranslation();
+  const skipSegments = useSkipSegments();
+  const prefs = useUserPreferences();
+
+  return (
+    <SettingToggle
+      icon={FastForward}
+      anchor="skip-segments"
+      title={t('settings.skipSegments', 'Skip sponsors and intros')}
+      description={t(
+        'settings.skipSegmentsDesc',
+        'Jump past sections other viewers have marked as sponsor reads, intros or outros. Every skip can be undone. Off by default.',
+      )}
+      defaultChecked={skipSegments}
+      onCheckedChange={(checked) => {
+        writeSkipSegments(checked);
+        prefs?.setPref('skipVideoSegments', checked);
+      }}
+    />
+  );
+}
+
+/**
+ * The glitch is an accent, not a resting state — on a feed it fires once per
+ * card, so it is opt-in. Off, videos still show their first frame while they
+ * load, just without the noise.
+ */
+function VideoGlitchToggle() {
+  const { t } = useTranslation();
+  const videoGlitch = useVideoGlitch();
+  const prefs = useUserPreferences();
+
+  return (
+    <SettingToggle
+      icon={Radio}
+      anchor="video-glitch"
+      title={t('settings.videoGlitch', 'Glitch effect while videos load')}
+      description={t(
+        'settings.videoGlitchDesc',
+        'Play an RGB-split TV-static animation over the first frame while a video loads. Off by default.',
+      )}
+      defaultChecked={videoGlitch}
+      onCheckedChange={(checked) => {
+        writeVideoGlitch(checked);
+        prefs?.setPref('videoGlitchLoader', checked);
+      }}
+    />
+  );
+}
+
+/**
+ * Settings > Appearance > Media: how a tall or square video or photo fills the
+ * column on a computer (lib/wide-video-mode). Phones and tablets never use it,
+ * so the row only shows on wide screens.
+ */
+function WideVideoModeRow() {
+  const { t } = useTranslation();
+  const mode = useWideVideoMode();
+  const isDesktop = useIsDesktopViewport();
+  if (!isDesktop) return null;
+  const title = t('settings.wideMediaMode', 'Long form media on wide screens');
+  return (
+    <SettingsRow
+      icon={<RectangleHorizontal />}
+      anchor="wide-video-mode"
+      title={title}
+      description={t('settings.wideMediaModeDesc', 'What fills the space beside tall and square videos and photos on a computer')}
+      action={<SettingDrawerSelect
+        value={mode}
+        onValueChange={(value) => { if (isWideVideoMode(value)) writeWideVideoMode(value); }}
+        title={title}
+        options={[
+          { value: 'ambient', label: t('settings.wideVideoAmbient', 'Ambient'), description: t('settings.wideMediaAmbientDesc', 'The video or photo fills the width, with a soft blurred glow of itself on each side') },
+          { value: 'rails', label: t('settings.wideVideoRails', 'Glass rails'), description: t('settings.wideMediaRailsDesc', 'The video or photo beside one glass panel with what it is, a Follow button and the top comments') },
+          { value: 'standard', label: t('settings.wideVideoStandard', 'Standard'), description: t('settings.wideMediaStandardDesc', 'The video or photo on its own, as before') },
+        ]}
+      />}
+    />
+  );
+}
+
+/** Phone menu grouping (lib/menu-layout). Phones only: desktop has no such menu. */
+function MenuLayoutRow() {
+  const { t } = useTranslation();
+  const layout = useMenuLayout();
+  const prefs = useUserPreferences();
+  const isDesktop = useIsDesktopViewport();
+  if (isDesktop) return null;
+
+  return (
+    <SettingsRow
+      icon={<LayoutGrid />}
+      anchor="menu-layout"
+      title={t('settings.menuLayout', 'Menu layout')}
+      description={t('settings.menuLayoutDesc', 'How the menu groups its pages')}
+      action={<SettingDrawerSelect
+        value={layout}
+        onValueChange={(value) => {
+          const next = normaliseMenuLayout(value);
+          writeMenuLayout(next);
+          prefs?.setPref(MENU_LAYOUT_PREF_KEY, next);
+        }}
+        title={t('settings.menuLayout', 'Menu layout')}
+        options={[
+          { value: 'tabs', label: t('settings.menuLayoutTabs', 'Tabs'), description: t('settings.menuLayoutTabsDesc', 'One group at a time, with big icons') },
+          { value: 'sections', label: t('settings.menuLayoutSections', 'Sections'), description: t('settings.menuLayoutSectionsDesc', 'Every page at once, under group headers') },
+          { value: 'folders', label: t('settings.menuLayoutFolders', 'Folders'), description: t('settings.menuLayoutFoldersDesc', 'Your main pages, then a folder for each group') },
+        ]}
+      />}
+    />
+  );
+}
+
+function FeedVideoShapeRow() {
+  const { t } = useTranslation();
+  const shape = useFeedVideoShape();
+  const prefs = useUserPreferences();
+
+  return (
+    <SettingsRow
+      icon={<RectangleHorizontal />}
+      anchor="feed-video-shape"
+      title={t('settings.feedVideoShape', 'Video size in your feed')}
+      description={t('settings.feedVideoShapeDesc', 'Keep tall vertical videos from filling the screen while you scroll. Tap a video to see it full size.')}
+      action={<SettingDrawerSelect
+        value={shape}
+        onValueChange={(value) => {
+          const next = normaliseFeedVideoShape(value);
+          writeFeedVideoShape(next);
+          prefs?.setPref('feedVideoShape', next);
+        }}
+        title={t('settings.feedVideoShape', 'Video size in your feed')}
+        options={[
+          { value: 'original', label: t('settings.feedVideoShapeOriginal', 'Original'), description: t('settings.feedVideoShapeOriginalDesc', 'Every video keeps its own shape') },
+          { value: 'square', label: t('settings.feedVideoShapeSquare', 'Square'), description: t('settings.feedVideoShapeSquareDesc', 'Tall videos fit inside a square') },
+          { value: 'wide', label: t('settings.feedVideoShapeWide', 'Widescreen'), description: t('settings.feedVideoShapeWideDesc', 'Every video fits a 16:9 frame') },
+        ]}
+      />}
+    />
+  );
+}
+
+function AdLoadRow() {
+  const { t } = useTranslation();
+  const adLoad = useAdLoad();
+  // The blob is applied by ViewingPreferencesSync; this only pushes the write,
+  // so the choice reaches the account's other devices.
+  const prefs = useUserPreferences();
+
+  return (
+    <SettingsRow
+      icon={<Megaphone />}
+      anchor="ad-load"
+      title={t('settings.adLoad', 'Ads in your feed')}
+      description={t('settings.adLoadDesc', 'Ads pay the creators you watch. Fewer means half as many in the feed.')}
+      action={<SettingDrawerSelect
+        value={adLoad}
+        onValueChange={(value) => {
+          const next = normaliseAdLoad(value);
+          writeAdLoad(next);
+          prefs?.setPref('adLoad', next);
+        }}
+        title={t('settings.adLoad', 'Ads in your feed')}
+        options={[
+          { value: 'standard', label: t('settings.adLoadStandard', 'Standard'), description: t('settings.adLoadStandardDesc', 'One sponsored post every eight') },
+          { value: 'fewer', label: t('settings.adLoadFewer', 'Fewer'), description: t('settings.adLoadFewerDesc', 'One every sixteen') },
+        ]}
+      />}
+    />
+  );
+}
+
+function BuyBotToggle() {
+  const { t: _copy } = _useCopy();
+  const { isHidden, hide, show } = useBuyBotHidden();
+  return (
+    <SettingToggle
+      icon={Bot}
+      title={_copy("copy.62bdeec861d8", { defaultValue: "Buy Bot Alerts" })}
+      description={_copy("copy.654e331e74b2", { defaultValue: "Show buy bot transaction alerts in chat" })}
+      defaultChecked={!isHidden}
+      onCheckedChange={(checked) => (checked ? show() : hide())}
+    />
+  );
+}
+
+function SocialLinkInput({
+  label,
+  placeholder,
+  icon,
+  value,
+  onChange,
+  connect,
+}: {
+  label: string;
+  placeholder: string;
+  icon: React.ReactNode;
+  value?: string;
+  onChange?: (value: string) => void;
+  /** Connect button, or the connected account and its verified count. */
+  connect?: React.ReactNode;
+}) {
+  return (
+    <div>
+      <label className={SETTINGS_LABEL_CLASS}>{label}</label>
+      {/* Icon column matches SettingsRow (20px + 12px gap) so the field's
+          left edge lines up with every title on the page. */}
+      <div className="flex items-center gap-3">
+        <div className="flex size-5 shrink-0 items-center justify-center [&_svg]:size-5">
+          {icon}
+        </div>
+        <Input
+          placeholder={placeholder}
+          value={value}
+          onChange={(e) => onChange?.(e.target.value)}
+          className={SETTINGS_FIELD_CLASS}
+        />
+      </div>
+      {connect && (
+        <div className="mt-2 flex min-w-0 items-center gap-3">
+          <div className="size-5 shrink-0" />
+          {connect}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function AssetsSettings() {
+  const { t: _copy } = _useCopy();
+  const { t } = useTranslation();
+  const { walletAddress, connectionSource } = useAuthContext();
+  const navigate = useNavigate();
+  const [walletDrawerOpen, setWalletDrawerOpen] = useState(false);
+  const [usernamesDrawerOpen, setUsernamesDrawerOpen] = useState(false);
+  const { option: tipNetwork, setOption: setTipNetwork } = useTipNetwork();
+  // Names are an asset now — bought, held and resellable — so they belong on
+  // this tab next to the wallet rather than buried in the marketplace.
+  const { data: heldUsernames } = useUsernameHoldings();
+
+  const isGasSponsored = connectionSource === 'web3auth';
+  // Was hardcoded to 0, so this row read "0" for everyone no matter what they
+  // held. Same hook as the wallet page, so the two always agree.
+  const { total: coinBalance, isLoading: balanceLoading } = useDhbHoldings();
+
+  const truncatedAddress = walletAddress 
+    ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`
+    : t('settings.notConnected');
+
+  const handleCopyWallet = () => {
+    if (walletAddress) {
+      navigator.clipboard.writeText(walletAddress);
+      toast.success(t('settings.walletCopied'));
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center gap-3 mb-6">
+        <Wallet className="w-5 h-5 text-zinc-400" />
+        <h2 className="text-lg font-semibold text-white">{t('settings.assets')}</h2>
+      </div>
+
+      {/* These were the one tab built as a stack of zinc cards with 40px icon
+          tiles; every other tab is bare rows on the bento. Same row contract
+          now, with the clickable ones getting the row hover wash. The
+          hover:bg-zinc-750 the cards asked for is not a Tailwind colour, so
+          they never had a hover at all. */}
+      <div className="space-y-4">
+        {/* Wallet Address */}
+        <SettingsRow
+          as="button"
+          anchor="wallet-address"
+          icon={<Wallet />}
+          title={<span className="font-mono">{truncatedAddress}</span>}
+          onClick={handleCopyWallet}
+          disabled={!walletAddress}
+          action={<Copy className="size-5 text-zinc-500" />}
+        />
+
+        {/* DHB Balance */}
+        <SettingsRow
+          as="button"
+          anchor="dhb-balance"
+          icon={<img src={dehubCoin} alt={tokenLabel()} />}
+          title={balanceLoading && !coinBalance ? '—' : Math.floor(coinBalance).toLocaleString()}
+          description={t('settings.dhbBalanceIncludesStaked')}
+          onClick={() => setWalletDrawerOpen(true)}
+          action={<span className="text-sm text-zinc-500">{t('settings.manage')}</span>}
+        />
+
+        {/* Usernames */}
+        <SettingsRow
+          as="button"
+          anchor="usernames"
+          icon={<AtSign />}
+          title={t('settings.usernames')}
+          description={
+            heldUsernames?.length
+              ? t('settings.usernamesCount', { count: heldUsernames.length })
+              : t('settings.usernamesDesc')
+          }
+          onClick={() => setUsernamesDrawerOpen(true)}
+          action={<span className="text-sm text-zinc-500">{t('settings.manage')}</span>}
+        />
+
+        {/* Wallet */}
+        <SettingsRow
+          as="button"
+          anchor="wallet"
+          icon={<Wallet />}
+          title={_copy("copy.d1c9a01d57e9", { defaultValue: "Wallet" })}
+          onClick={() => navigate('/app/wallet')}
+          action={<ExternalLink className="size-5 text-zinc-500" />}
+        />
+
+        {/* Gas Sponsorship */}
+        <SettingsRow
+          anchor="gas-fees"
+          icon={<Coins />}
+          title={_copy("copy.70f5f804b634", { defaultValue: "Gas Fees" })}
+          description={isGasSponsored
+            ? _copy("copy.ec917e978281", { defaultValue: "Transaction gas fees are sponsored" })
+            : _copy("copy.4a367cdb8047", { defaultValue: "You pay gas fees via your external wallet" })}
+          action={<span className={cn(
+            'rounded-full px-2.5 py-1 text-xs font-semibold',
+            isGasSponsored ? 'border border-white/20 bg-white/10 text-white' : 'border border-zinc-700 bg-zinc-800 text-zinc-400',
+          )}>
+            {isGasSponsored ? _copy("copy.c01d19506818", { defaultValue: "Sponsored" }) : _copy("copy.8fd493e5689e", { defaultValue: "Self-paid" })}
+          </span>}
+        />
+
+        {/* Where Solana money arrives. Sits with Tip network because both answer
+            "how does value move", and an account without this simply cannot be
+            paid on Solana at all. */}
+        <SolanaWalletSettings />
+
+        {/* Tip network. Tucked in here rather than on the tip drawer: almost
+            nobody needs it, and asking on the way to sending money made the
+            choice look consequential when Automatic is right for them. */}
+        <SettingsRow
+          anchor="tip-network"
+          icon={<Gem />}
+          title={_copy("copy.39ea78d27b31", { defaultValue: "Tip network" })}
+          description={_copy("copy.faa60ebb3539", { defaultValue: "Which chain your tips are paid from. Automatic uses whichever holds enough, Base first." })}
+          action={<SettingDrawerSelect
+            value={tipNetwork}
+            onValueChange={value => setTipNetwork(value as TipNetworkOption)}
+            title={_copy("copy.39ea78d27b31", { defaultValue: "Tip network" })}
+            options={[
+              { value: 'auto', label: _copy("copy.d461a493a375", { defaultValue: "Automatic" }), description: _copy("copy.bcefe590e7f0", { defaultValue: "Base if it covers the tip, otherwise BNB" }) },
+              { value: 'base', label: _copy("copy.19e519a44d7f", { defaultValue: "Always Base" }) },
+              { value: 'bnb', label: _copy("copy.13a6b6ae9a0b", { defaultValue: "Always BNB" }) },
+            ]}
+          />}
+        />
+      </div>
+
+      {/* Usernames Drawer. The vault renders the same here as it does on the
+          marketplace tab — two screens disagreeing about what you own is
+          exactly the bug this feature cannot afford. */}
+      <Drawer open={usernamesDrawerOpen} onOpenChange={setUsernamesDrawerOpen}>
+        <DrawerContent column glass hideHandle={false} className="px-4 pt-1 pb-8">
+          <DrawerHeader className="px-0">
+            <DrawerTitle className="text-left text-base">{t('settings.usernames')}</DrawerTitle>
+          </DrawerHeader>
+          <UsernameVault />
+        </DrawerContent>
+      </Drawer>
+
+      {/* Wallet Drawer */}
+      <Drawer open={walletDrawerOpen} onOpenChange={setWalletDrawerOpen}>
+        <DrawerContent column glass hideHandle={false} className="px-4 pt-1 pb-8">
+          <DrawerHeader className="sr-only">
+            <DrawerTitle>{_copy("copy.d1c9a01d57e9", { defaultValue: "Wallet" })}</DrawerTitle>
+          </DrawerHeader>
+          <WalletMenuContent balance={coinBalance} onClose={() => setWalletDrawerOpen(false)} />
+        </DrawerContent>
+      </Drawer>
+
+      {/* Fractions */}
+      <div data-setting-anchor="fractions">
+        <h3 className={SETTINGS_HEADING_CLASS}>
+          <PieChart className="size-4" />
+          {t('settings.fractionsOwn')}
+        </h3>
+        <div className="flex flex-col items-center justify-center py-8 text-center">
+          <ThemedIcon icon="fractions" alt="" className="w-14 h-14 object-contain mb-3 opacity-65" />
+          <p className="text-zinc-500">{t('settings.noFractions')}</p>
+        </div>
+      </div>
+
+      {/* Owned Usernames */}
+      <div data-setting-anchor="owned-usernames">
+        <h3 className={SETTINGS_HEADING_CLASS}>
+          <AtSign className="size-4" />
+          {t('settings.usernamesOwn')}
+        </h3>
+        <div className="flex flex-col items-center justify-center py-8 text-center">
+          <ThemedIcon icon="profile" alt="" className="w-14 h-14 object-contain mb-3 opacity-65" />
+          <p className="text-zinc-500">{t('settings.noUsernames')}</p>
+        </div>
+      </div>
+
+      {/* Offers Made */}
+      <div data-setting-anchor="offers-made">
+        <h3 className={SETTINGS_HEADING_CLASS}>
+          <Handshake className="size-4" />
+          {t('settings.offersMade')}
+        </h3>
+        <div className="flex flex-col items-center justify-center py-8 text-center">
+          <ThemedIcon icon="profile" alt="" className="w-14 h-14 object-contain mb-3 opacity-65" />
+          <p className="text-zinc-500">{t('settings.noOffers')}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Suggested replies (the two drafted cards above the chat box, with the orb).
+ *
+ * The × on the rail switches this off, which is the only way most people will
+ * ever meet this setting — so it has to be findable afterwards. Device-local,
+ * on the same storage key mobile writes.
+ */
+/**
+ * Coaching suggestions in the comment composer — the "Check my tone" button
+ * and the final review step of a Common Ground reply. Device-local, on the
+ * same storage key mobile writes; suggestions only, so switching this off
+ * changes nothing about what can be posted.
+ */
+function CoachSuggestionsToggle() {
+  const { t } = useTranslation();
+  const enabled = useCoachEnabled();
+  return (
+    <SettingsRow
+      as="label"
+      className="cursor-pointer"
+      icon={<Sparkles />}
+      anchor="coach-suggestions"
+      title={t('conversation.coach.settingLabel')}
+      description={t('conversation.coach.settingHint')}
+      action={<Switch checked={enabled} onCheckedChange={setCoachEnabled} />}
+    />
+  );
+}
+
+function SmartRepliesToggle() {
+  const { t } = useTranslation();
+  const enabled = useSmartRepliesEnabled();
+  return (
+    <SettingsRow
+      as="label"
+      className="cursor-pointer"
+      icon={<Wand2 />}
+      anchor="smart-replies"
+      title={t('settings.smartReplies', 'Suggested replies')}
+      description={t('settings.smartRepliesDesc', 'Draft two replies you can tap in a chat. The × on the suggestions turns this off.')}
+      action={<Switch checked={enabled} onCheckedChange={setSmartRepliesEnabled} />}
+    />
+  );
+}
+
+function MessagesSettings() {
+  const { t } = useTranslation();
+  const { whoCanMessage, doNotDisturb, isUpdating: isDmUpdating, updateWhoCanMessage, updateDoNotDisturb } = useDmSettings();
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center gap-3 mb-6">
+        <MessageSquare className="w-5 h-5 text-zinc-400" />
+        <h2 className="text-lg font-semibold text-white">{t('settings.messageSettings')}</h2>
+      </div>
+
+      {/* DM Access Control */}
+      <div>
+        <h3 className="font-medium text-zinc-400 text-sm mb-4">{t('settings.directMessageAccess')}</h3>
+        <div className="space-y-4">
+          <SettingsRow
+            icon={<MessageCircle />}
+            anchor="allow-dms"
+            title={t('settings.allowDirectMessages', 'Allow direct messages')}
+            description={t('settings.controlDMs', 'Control who can send you DMs')}
+            action={<SettingDrawerSelect
+              value={whoCanMessage}
+              onValueChange={(value) => updateWhoCanMessage(value as WhoCanMessage)}
+              disabled={isDmUpdating}
+              title={t('settings.allowDirectMessages', 'Allow direct messages')}
+              options={DM_ACCESS_OPTIONS(t)}
+            />}
+          />
+
+          {/* Message Fee */}
+          <SettingsRow
+            icon={<img src={dehubCoin} alt="" />}
+            anchor="message-fee"
+            title={t('settings.messageFee', 'Message fee')}
+            description={t('settings.messageFeeDesc')}
+            action={<MessageFeeControl />}
+          />
+
+          {/* Do Not Disturb */}
+          <SettingToggle
+            icon={Ban}
+            anchor="do-not-disturb"
+            title={t('settings.doNotDisturb', 'Do not disturb')}
+            description={t('settings.doNotDisturbDesc', 'Mute all message notifications')}
+            defaultChecked={doNotDisturb}
+            onCheckedChange={(checked) => updateDoNotDisturb(checked)}
+            disabled={isDmUpdating}
+          />
+
+          <div className="rounded-xl border border-zinc-700/50 bg-zinc-800/50 p-4 text-sm text-zinc-400">
+            {/* One line per state the API actually supports — "Followers" was
+                listed here but has never been a selectable option. */}
+            <p className="mb-2"><strong className="text-white">{t('settings.everyone', 'Everyone')}:</strong> {t('settings.dmEveryoneHelp', 'Anyone on the platform can message you')}</p>
+            <p className="mb-2"><strong className="text-white">{t('settings.noNewMessages', 'No new conversations')}:</strong> {t('settings.dmNoNewHelp', 'Existing threads keep working; nobody new can start one')}</p>
+            <p><strong className="text-white">{t('settings.noOneClosed', 'No one')}:</strong> {t('settings.dmClosedHelp', 'All incoming messages are disabled')}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Free DM Access List — its own section (it has its own heading), not
+          a row inside the access list above. */}
+      <FreeAccessListSection />
+
+      {/* Message Preferences */}
+      <div>
+        <h3 className="font-medium text-zinc-400 text-sm mb-4">{t('settings.preferences')}</h3>
+        <div className="space-y-4">
+          <SmartRepliesToggle />
+          <SettingsRow
+            icon={<Lock />}
+            anchor="e2e-encryption"
+            title={t('settings.e2eEncryption')}
+            description={t('settings.e2eEncryptionDesc')}
+            action={<span className="text-sm font-medium text-zinc-300">{t('settings.automatic', "Automatic")}</span>}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const COUNTRIES = [
+  { code: 'US', name: 'United States' },
+  { code: 'GB', name: 'United Kingdom' },
+  { code: 'CA', name: 'Canada' },
+  { code: 'AU', name: 'Australia' },
+  { code: 'DE', name: 'Germany' },
+  { code: 'FR', name: 'France' },
+  { code: 'IT', name: 'Italy' },
+  { code: 'ES', name: 'Spain' },
+  { code: 'NL', name: 'Netherlands' },
+  { code: 'BE', name: 'Belgium' },
+  { code: 'CH', name: 'Switzerland' },
+  { code: 'AT', name: 'Austria' },
+  { code: 'SE', name: 'Sweden' },
+  { code: 'NO', name: 'Norway' },
+  { code: 'DK', name: 'Denmark' },
+  { code: 'FI', name: 'Finland' },
+  { code: 'PL', name: 'Poland' },
+  { code: 'PT', name: 'Portugal' },
+  { code: 'IE', name: 'Ireland' },
+  { code: 'GR', name: 'Greece' },
+  { code: 'CZ', name: 'Czech Republic' },
+  { code: 'RO', name: 'Romania' },
+  { code: 'HU', name: 'Hungary' },
+  { code: 'JP', name: 'Japan' },
+  { code: 'KR', name: 'South Korea' },
+  { code: 'CN', name: 'China' },
+  { code: 'IN', name: 'India' },
+  { code: 'SG', name: 'Singapore' },
+  { code: 'HK', name: 'Hong Kong' },
+  { code: 'TW', name: 'Taiwan' },
+  { code: 'TH', name: 'Thailand' },
+  { code: 'MY', name: 'Malaysia' },
+  { code: 'ID', name: 'Indonesia' },
+  { code: 'PH', name: 'Philippines' },
+  { code: 'VN', name: 'Vietnam' },
+  { code: 'NZ', name: 'New Zealand' },
+  { code: 'BR', name: 'Brazil' },
+  { code: 'MX', name: 'Mexico' },
+  { code: 'AR', name: 'Argentina' },
+  { code: 'CL', name: 'Chile' },
+  { code: 'CO', name: 'Colombia' },
+  { code: 'PE', name: 'Peru' },
+  { code: 'ZA', name: 'South Africa' },
+  { code: 'EG', name: 'Egypt' },
+  { code: 'NG', name: 'Nigeria' },
+  { code: 'KE', name: 'Kenya' },
+  { code: 'AE', name: 'United Arab Emirates' },
+  { code: 'SA', name: 'Saudi Arabia' },
+  { code: 'IL', name: 'Israel' },
+  { code: 'TR', name: 'Turkey' },
+  { code: 'RU', name: 'Russia' },
+  { code: 'UA', name: 'Ukraine' },
+];
+
+function GeoBlockingSelector() {
+  const { t } = useTranslation();
+  const [blockedCountries, setBlockedCountries] = useState<string[]>([]);
+  const [isOpen, setIsOpen] = useState(false);
+  const [search, setSearch] = useSurfaceDraft("pages/app/SettingsPage.tsx:search", '');
+
+  const filteredCountries = COUNTRIES.filter(c => 
+    c.name.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const toggleCountry = (code: string) => {
+    setBlockedCountries(prev => 
+      prev.includes(code) 
+        ? prev.filter(c => c !== code)
+        : [...prev, code]
+    );
+  };
+
+  const removeCountry = (code: string) => {
+    setBlockedCountries(prev => prev.filter(c => c !== code));
+  };
+
+  return (
+    <div className="space-y-3">
+      {/* Selected Countries */}
+      {blockedCountries.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {blockedCountries.map(code => {
+            const country = COUNTRIES.find(c => c.code === code);
+            return (
+              <span
+                key={code}
+                className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-white/20 bg-white/10 pl-2.5 pr-1.5 text-sm text-white"
+              >
+                <MapPin className="size-3.5 text-zinc-400" />
+                {country?.name}
+                <button
+                  type="button"
+                  onClick={() => removeCountry(code)}
+                  aria-label={`${country?.name}: ×`}
+                  className="flex size-5 items-center justify-center rounded-md text-zinc-400 transition-colors hover:bg-white/10 hover:text-white"
+                >
+                  <X className="size-3.5" />
+                </button>
+              </span>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Trigger Button */}
+      <button
+        type="button"
+        onClick={() => setIsOpen(true)}
+        aria-haspopup="dialog"
+        aria-expanded={isOpen}
+        data-keep-dark
+        className={cn(SETTINGS_CONTROL_CLASS, 'flex h-10 w-full items-center justify-between gap-2 px-4 font-normal')}
+      >
+        <span className="flex min-w-0 items-center gap-2">
+          <MapPin className="size-4 shrink-0 text-zinc-500" />
+          <span className="truncate text-zinc-400">
+            {blockedCountries.length === 0
+              ? t('settings.selectCountries')
+              : `${blockedCountries.length} ${blockedCountries.length === 1 ? t('settings.countryBlocked') : t('settings.countriesBlocked')}`}
+          </span>
+        </span>
+        <ChevronDown className="size-4 shrink-0 text-zinc-500" aria-hidden="true" />
+      </button>
+
+      {/* Drawer */}
+      <Drawer open={isOpen} onOpenChange={setIsOpen}>
+        <DrawerContent column glass data-country-block-drawer className="max-h-[70dvh]">
+          <DrawerHeader className="border-b border-white/10">
+            <DrawerTitle className="text-white">{t('settings.blockCountries')}</DrawerTitle>
+          </DrawerHeader>
+          
+          {/* Search input */}
+          <div className="p-4 border-b border-white/10">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+              <input
+                type="text"
+                placeholder={t('settings.searchCountries')}
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full pl-10 pr-10 py-2.5 bg-white/5 border border-white/10 rounded-xl text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-white/20"
+              />
+              {search && (
+                <button
+                  onClick={() => setSearch.complete(search, '')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center text-zinc-500 hover:text-white transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+          </div>
+          
+          {/* Country List */}
+          <div className="flex-1 overflow-y-auto max-h-[50vh] pb-safe">
+            {filteredCountries.length > 0 ? (
+              filteredCountries.map(country => (
+                <button
+                  key={country.code}
+                  onClick={() => toggleCountry(country.code)}
+                  className="w-full flex items-center justify-between px-4 py-3 hover:bg-white/5 transition-colors text-left"
+                >
+                  <span className="text-white text-sm">{country.name}</span>
+                  {blockedCountries.includes(country.code) && (
+                    <span className="flex size-5 items-center justify-center rounded-md bg-white">
+                      <Check className="size-3 text-black" />
+                    </span>
+                  )}
+                </button>
+              ))
+            ) : (
+              <div className="px-4 py-8 text-center text-sm text-zinc-500">
+                {t('settings.noCountriesFound')}
+              </div>
+            )}
+          </div>
+        </DrawerContent>
+      </Drawer>
+    </div>
+  );
+}

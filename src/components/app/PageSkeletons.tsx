@@ -1,0 +1,624 @@
+/**
+ * Page Skeletons
+ * ==============
+ * Lightweight skeleton screens shown on first load of each page.
+ *
+ * Split of responsibilities: the page's STRUCTURAL chrome — nav pills, tab
+ * bentos, sticky headers, sidebars — still renders as skeleton, because that is
+ * what holds the layout still across the boot HTML → Suspense fallback → real
+ * component handoff. The CONTENT area does not: a stack of grey blocks
+ * pretending to be posts reads as a broken page, so it shows the animated Riftn
+ * mark instead (ContentLoader below). Content is the part whose shape we can't
+ * know anyway.
+ *
+ * Liquid glass aesthetic: bg-white/[0.06] shimmer, border-white/[0.08] outlines.
+ */
+
+import { Skeleton } from '@/components/ui/skeleton';
+import '@/styles/home-skeleton.css';
+import { useAppTheme } from '@/contexts/ThemeContext';
+import { cn } from '@/lib/utils';
+import { DeHubPageLoader } from '@/components/app/DeHubLoader';
+import { FeedCardSkeletonList } from '@/components/app/cards/FeedCardSkeleton';
+import { FEED_TABS } from '@/constants/app.constants';
+import { expectedShelfSeat, isShelfPath } from '@/lib/story-shelf-seat';
+import { useShortsEnabled } from '@/contexts/ShortsEnabledContext';
+import { useParams, useSearchParams } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
+import { useSyncExternalStore, type ComponentType } from 'react';
+
+const SK = "theme-skeleton";
+const SK_LIGHT = "theme-skeleton";
+
+/**
+ * Content-area stand-in: the animated Riftn mark, centred in whatever box the
+ * page's chrome leaves for it.
+ *
+ * The mark fades in on a 250 ms delay (see index.css `.dehub-loader-mark`), so
+ * a page whose data is already cached still shows nothing at all rather than
+ * blipping a loader — the same flash guard the route-level fallback relies on.
+ */
+function ContentLoader({ minHeight = '46vh' }: { minHeight?: string }) {
+  return <DeHubPageLoader minHeight={minHeight} />;
+}
+
+
+// ─── Phone page pill ────────────────────────────────────────────────────────
+
+/** Same width as PageIsland's phone pill (page-kit/PageKit.tsx). */
+const PHONE_QUERY = '(max-width: 1023px)';
+function subscribePhone(cb: () => void) {
+  const mql = window.matchMedia(PHONE_QUERY);
+  mql.addEventListener('change', cb);
+  return () => mql.removeEventListener('change', cb);
+}
+function useIsPhoneWidth() {
+  return useSyncExternalStore(subscribePhone, () => window.matchMedia(PHONE_QUERY).matches, () => false);
+}
+
+/**
+ * Phones: a page's loading state draws its real top pill, same spot, same
+ * 36px glass, just empty. The pill then holds still while the page loads and
+ * its contents fade in when the page lands (PillRouteMotion), instead of a
+ * differently shaped header block swapping out for the pill.
+ */
+export function PhonePillSkeleton() {
+  return (
+    <div data-feed-nav-outer data-kit-pill-outer data-pill-skeleton aria-hidden="true" className="sticky top-11 z-50 px-2 pt-1 pb-2 sm:px-3">
+      <div data-feed-nav data-kit-pill className="relative z-10 flex flex-col rounded-xl bg-zinc-900" style={{ overflowX: 'clip', overflowClipMargin: '8px' }}>
+        <span data-nav-glass-backdrop aria-hidden="true" />
+        <div className="relative z-20 flex min-h-9 items-center" />
+      </div>
+    </div>
+  );
+}
+
+/** A page skeleton that draws the empty pill + loader on phones and its own
+ *  desktop layout above the phone width. */
+export function withPhonePill(Desktop: ComponentType): ComponentType {
+  function PhoneAwareSkeleton() {
+    const phone = useIsPhoneWidth();
+    if (!phone) return <Desktop />;
+    return (
+      <div data-phone-page-skeleton>
+        <PhonePillSkeleton />
+        <ContentLoader />
+      </div>
+    );
+  }
+  PhoneAwareSkeleton.displayName = `withPhonePill(${Desktop.displayName || Desktop.name || 'Skeleton'})`;
+  return PhoneAwareSkeleton;
+}
+
+// ─── Home Feed ──────────────────────────────────────────────────────────────
+
+/**
+ * Sticky tab-bar skeleton — matches the real HomePage feed nav exactly so it
+ * stays in place during boot → React fallback → real component handoff.
+ * Real source of truth: src/pages/app/HomePage.tsx (sticky top-11 lg:top-0).
+ */
+export function FeedTabBarSkeleton() {
+  const { shortsEnabled } = useShortsEnabled();
+  const tabs = FEED_TABS.filter(tab => shortsEnabled || tab.value !== 'shorts');
+  return (
+    <div data-home-skeleton-nav data-feed-nav-outer aria-hidden="true" className="sticky top-11 lg:top-0 bg-background z-50 px-2 pt-1 pb-3 sm:px-3 sm:pt-1 sm:pb-3 lg:pt-2">
+      <div data-feed-nav className="bg-card rounded-xl">
+        <div className="flex h-[35px]">
+          <div className="flex items-center justify-center px-3"><div className="home-skeleton-block w-4 h-4 rounded" /></div>
+          {tabs.map(tab => (
+            <div key={tab.value} className="flex-1 flex items-center justify-center px-3 sm:px-4">
+              <div className="home-skeleton-block w-4 h-4 rounded" />
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * The Moments seat, same size and place as what Home showed last visit: the
+ * row of tiles (stories.css [data-story-shelf]) or the ask bar
+ * ([data-create-ask]), so the posts do not move when it lands.
+ */
+export function ShelfSeatSkeleton() {
+  if (typeof window === 'undefined' || !isShelfPath(window.location.pathname)) return null;
+  const seat = expectedShelfSeat();
+  if (seat === 'none') return null;
+  if (seat === 'ask') {
+    return <div data-shelf-seat="ask" aria-hidden="true" className="home-skeleton-block h-12 mt-[2px] mb-3 rounded-xl" />;
+  }
+  return (
+    <div data-shelf-seat="row" aria-hidden="true" className="flex gap-2 overflow-hidden py-[2px] mb-[10px]">
+      <div className="home-skeleton-block flex-none w-[52px] h-[52px] rounded-[17px]" />
+      {[0, 1, 2].map(index => (
+        <div key={index} className="home-skeleton-block flex-none w-[150px] h-[52px] rounded-[17px]" />
+      ))}
+    </div>
+  );
+}
+
+/**
+ * In-page home feed skeleton (center column).
+ * Includes the sticky feed tab bar so the nav placeholder NEVER disappears
+ * between boot HTML, Suspense fallback, and the real HomePage mounting.
+ */
+export function FeedSkeleton() {
+  return (
+    <div className="min-w-0 flex-1">
+      <FeedTabBarSkeleton />
+      <div data-feed-root className="home-skeleton-body p-2 sm:p-3 pt-0 sm:pt-0">
+        <ShelfSeatSkeleton />
+        <FeedCardSkeletonList />
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Feed body only — no tab bar. Use this inside HomeFeed where the real
+ * sticky tab bar above it is already mounted by HomePage.
+ */
+export function FeedBodySkeleton() {
+  return <div data-feed-root className="p-2 sm:p-3 pt-0 sm:pt-0"><FeedCardSkeletonList /></div>;
+}
+
+/** Left desktop sidebar shell — mirrors real DesktopSidebar geometry exactly */
+function HomeLeftSidebarSkeleton() {
+  return (
+    <aside className="hidden lg:flex sticky top-0 h-dvh w-[231px] shrink-0 px-[18px] pb-2 -mt-[3px] flex-col items-stretch">
+      {/* Logo row — matches real DesktopSidebar */}
+      <div className="flex items-center justify-between w-full mb-[15px]">
+        <div className="flex items-center mt-[9px]">
+          <div className="w-7 h-7 mr-1.5 flex items-center justify-center">
+            <Skeleton className={`w-[18px] h-[18px] rounded ${SK}`} />
+          </div>
+          <Skeleton className={`h-[40.6px] w-[135px] rounded relative -top-[3px] ${SK}`} />
+        </div>
+      </div>
+      {/* Nav bento — matches -mt-[9px] + lg:p-2.5 lg:space-y-[2px] from real */}
+      <div data-side-panel data-desktop-sidebar-bento className="relative -mt-[9px] bg-zinc-900 rounded-2xl flex-1 min-h-0 overflow-hidden">
+        <div className="lg:p-2.5 lg:space-y-[2px] flex flex-col items-stretch h-full">
+          {Array.from({ length: 10 }).map((_, i) => (
+            <div key={i} className="flex items-center gap-3 px-2.5 py-2.5 w-full">
+              <Skeleton className={`w-9 h-9 rounded-xl flex-shrink-0 ${SK}`} />
+              <Skeleton className={`h-3.5 rounded ${SK}`} style={{ width: `${60 + (i % 4) * 18}px` }} />
+            </div>
+          ))}
+        </div>
+      </div>
+      {/* Post button — matches real py-[7px] lg:py-3 (~46px) rounded-2xl */}
+      <div className="mt-3">
+        <Skeleton className={`h-[46px] w-full rounded-2xl ${SK}`} />
+      </div>
+    </aside>
+  );
+}
+
+/**
+ * Right desktop rail skeleton — the SAME look as the boot skeleton's right
+ * rail in index.html (.bskel-rrail) and the same block style as the feed
+ * cards, so the rail reads as one steady placeholder from first paint until
+ * the real rail lands: boot HTML → this (shell fallback) → this again
+ * (AppLayout's lazy-rail fallback) → real rail. Exported for AppLayout.
+ */
+function RailNavRow() {
+  return (
+    <div className="h-[58px] flex items-center gap-3">
+      <div className="home-skeleton-block w-9 h-9 rounded-[10px] shrink-0" />
+      <div className="home-skeleton-block w-[72px] h-3.5 rounded" />
+    </div>
+  );
+}
+function RailPanel({ rows, height }: { rows: number; height: number }) {
+  return (
+    <div data-side-panel className="mb-4 p-3 rounded-2xl bg-zinc-900 overflow-hidden" style={{ height }}>
+      <div className="flex justify-around mb-6">
+        {[0, 1, 2].map(i => <div key={i} className="home-skeleton-block w-5 h-5 rounded" />)}
+      </div>
+      {Array.from({ length: rows }, (_, i) => <RailNavRow key={i} />)}
+    </div>
+  );
+}
+export function HomeRightSidebarSkeleton() {
+  return (
+    <aside aria-hidden="true" data-right-rail-skeleton className="hidden lg:block w-72 xl:w-80 shrink-0 h-dvh sticky top-0 px-4 pt-[8px] pb-4">
+      <div className="home-skeleton-block h-[36px] w-full rounded-xl mb-3" />
+      <RailPanel rows={5} height={444} />
+      <RailPanel rows={2} height={220} />
+    </aside>
+  );
+}
+
+/**
+ * Full app-shell home skeleton — used by App-level Suspense fallbacks
+ * (before AppLayout mounts) so first paint matches the real layout
+ * with both sidebars on desktop.
+ */
+export function HomeShellSkeleton() {
+  return (
+    <div data-home-shell-skeleton aria-hidden="true" className="flex w-full mx-auto pt-11 lg:pt-0" style={{ maxWidth: '80rem' }}>
+      <div className="home-skeleton-island">
+        <div className="home-skeleton-block w-7 h-7 rounded-lg" />
+        <div className="home-skeleton-block w-8 h-7 rounded" />
+        <div className="home-skeleton-block w-5 h-5 rounded" />
+      </div>
+      <HomeLeftSidebarSkeleton />
+      <FeedSkeleton />
+      <HomeRightSidebarSkeleton />
+    </div>
+  );
+}
+
+
+// ─── Explore ────────────────────────────────────────────────────────────────
+
+/** Explore page skeleton — sticky search header + tab bar + feed cards */
+export function ExploreSkeleton() {
+  return (
+    <div className="min-h-screen">
+      {/* Search Header */}
+      <div className="p-2 sm:p-3 space-y-2 sm:space-y-3">
+        <div data-page-bento data-glass-loading-surface className="bg-zinc-900 rounded-2xl p-3 sm:p-4">
+          <div className="flex gap-2">
+            <Skeleton className={`flex-1 h-[48px] rounded-xl ${SK}`} />
+            <Skeleton className={`w-12 h-[48px] rounded-xl ${SK}`} />
+          </div>
+        </div>
+
+        {/* Tabs Bento */}
+        <div data-page-bento data-glass-loading-surface className="bg-zinc-900 rounded-2xl p-2">
+          <div className="flex">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="flex-1 flex items-center justify-center gap-2 py-2 px-2">
+                <Skeleton className={`w-4 h-4 rounded ${SK}`} />
+                <Skeleton className={`h-4 w-12 rounded hidden sm:block ${SK}`} />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="p-2 sm:p-3 pt-0">
+        <ContentLoader />
+      </div>
+    </div>
+  );
+}
+
+// ─── Profile ────────────────────────────────────────────────────────────────
+
+/** Profile page skeleton — cover photo + avatar + glass tabs with icon/count stacks */
+/** What the tap already knows about the person: drawn instead of grey bars. */
+export interface ProfileSkeletonSeed {
+  name?: string;
+  handle?: string;
+  avatarUrl?: string;
+  coverUrl?: string;
+}
+
+export function ProfileSkeleton({ seed }: { seed?: ProfileSkeletonSeed | null } = {}) {
+  const handle = seed?.handle ? `@${seed.handle.replace(/^@/, '')}` : '';
+  return (
+    <div className="p-2 sm:p-3 space-y-2 sm:space-y-3">
+      {/* Profile Card Bento */}
+      <div data-page-bento data-glass-loading-surface className="max-sm:-mx-2 bg-zinc-900 rounded-2xl overflow-hidden">
+        {seed?.coverUrl ? (
+          <img src={seed.coverUrl} alt="" className="aspect-[3/1] w-full object-cover" decoding="async" />
+        ) : (
+          <Skeleton className={`aspect-[3/1] w-full ${SK}`} />
+        )}
+        <div className="px-4 sm:px-6 pb-4">
+          <div className="flex items-end justify-between -mt-12 sm:-mt-14 mb-4">
+            {seed?.avatarUrl ? (
+              <img data-profile-seed-avatar src={seed.avatarUrl} alt="" className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-xl border-2 border-zinc-900 object-cover bg-zinc-800" decoding="async" />
+            ) : seed?.name ? (
+              <div data-profile-seed-avatar className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-xl border-2 border-zinc-900 bg-zinc-700 flex items-center justify-center text-white text-2xl font-medium">
+                {seed.name.charAt(0).toUpperCase()}
+              </div>
+            ) : (
+              <Skeleton className={`w-24 h-24 sm:w-28 sm:h-28 rounded-xl border-2 border-zinc-900 ${SK}`} />
+            )}
+            <Skeleton className={`-mr-1 h-9 w-24 rounded-xl ${SK}`} />
+          </div>
+          {seed?.name || handle ? (
+            <div data-profile-seed-name className="min-w-0">
+              {seed?.name && <div className="text-xl font-bold text-white truncate leading-7">{seed.name}</div>}
+              {handle && <div className="text-zinc-400 truncate leading-6">{handle}</div>}
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <Skeleton className={`h-5 w-40 ${SK}`} />
+              <Skeleton className={`h-4 w-28 ${SK}`} />
+            </div>
+          )}
+          <div className="mt-3 space-y-1.5">
+            <Skeleton className={`h-4 w-full ${SK}`} />
+            <Skeleton className={`h-4 w-3/4 ${SK}`} />
+          </div>
+          <div className="flex gap-4 mt-3">
+            <Skeleton className={`h-4 w-24 ${SK}`} />
+            <Skeleton className={`h-4 w-24 ${SK}`} />
+          </div>
+        </div>
+      </div>
+
+      {/* Profile Tabs Bento — icon + count stacks */}
+      <div className="bg-black/50 backdrop-blur-[24px] border border-white/[0.12] rounded-2xl p-1.5">
+        <div className="flex gap-0.5">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div key={i} className="flex-1 flex flex-col items-center justify-center gap-0.5 h-11 min-w-14">
+              <Skeleton className={`w-[18px] h-[18px] rounded ${SK}`} />
+              <Skeleton className={`w-5 h-[10px] rounded ${SK}`} />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Content */}
+      <ContentLoader minHeight="38vh" />
+    </div>
+  );
+}
+
+/**
+ * The profile route's loading state. A tap on a name or avatar seeds the
+ * profile cache (lib/profile-cache-seed) before navigating, so the person's
+ * photo and name are known the moment the page opens: draw them, rather than a
+ * faceless skeleton, while the page code and the rest of the profile load.
+ */
+export function SeededProfileSkeleton() {
+  const { username } = useParams<{ username?: string }>();
+  const [params] = useSearchParams();
+  const queryClient = useQueryClient();
+  const key = username || params.get('id') || '';
+  let seed: ProfileSkeletonSeed | null = null;
+  if (key) {
+    for (const [, value] of queryClient.getQueriesData<{ name?: string; handle?: string; avatarUrl?: string; coverUrl?: string }>({ queryKey: ['dehub-profile', key] })) {
+      if (value && (value.name || value.avatarUrl)) { seed = value; break; }
+    }
+  }
+  return <ProfileSkeleton seed={seed} />;
+}
+
+// ─── Messages ───────────────────────────────────────────────────────────────
+
+/** Messages page skeleton — full-height bento with header, search, conversation list */
+export function MessagesSkeleton() {
+  return (
+    <div className="h-full p-3 sm:p-4">
+      <div data-page-bento data-glass-loading-surface className="w-full h-[calc(100dvh-120px)] lg:h-[calc(100dvh-32px)] bg-zinc-900 rounded-2xl flex flex-col overflow-hidden">
+        {/* Header */}
+        <div className="p-4">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <Skeleton className={`w-10 h-10 rounded-xl ${SK}`} />
+              <Skeleton className={`h-6 w-28 ${SK}`} />
+            </div>
+            <Skeleton className={`w-8 h-8 rounded-lg ${SK}`} />
+          </div>
+          {/* Search bar */}
+          <Skeleton className={`h-10 w-full rounded-xl ${SK}`} />
+        </div>
+
+        {/* Conversation list — the bento above is full-height, so the mark
+            centres in the remaining space rather than needing its own box. */}
+        <div className="flex-1 min-h-0 flex items-center justify-center">
+          <ContentLoader minHeight="100%" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Notifications ──────────────────────────────────────────────────────────
+
+/** Notifications skeleton — header bento + scrollable tab bar + notification rows */
+export function NotificationsSkeleton() {
+  return (
+    <div className="min-h-screen">
+      {/* Header */}
+      <div className="p-3 sm:p-4">
+        <div data-page-bento data-glass-loading-surface className="bg-zinc-900 rounded-2xl px-4 py-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Skeleton className={`w-9 h-9 rounded-xl ${SK}`} />
+              <Skeleton className={`h-5 w-32 ${SK}`} />
+            </div>
+            <Skeleton className={`w-8 h-8 rounded-xl ${SK}`} />
+          </div>
+        </div>
+      </div>
+
+      {/* Tab bar bento */}
+      <div className="px-3 sm:px-4 py-2">
+        <div data-page-bento data-glass-loading-surface className="bg-zinc-900 rounded-2xl p-2">
+          <div className="flex gap-1 overflow-hidden">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="flex-shrink-0 flex items-center justify-center gap-2 px-3 sm:px-4 py-2">
+                <Skeleton className={`w-4 h-4 rounded ${SK}`} />
+                <Skeleton className={`h-4 w-10 rounded hidden sm:block ${SK}`} />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Notification rows */}
+      <div className="px-3 sm:px-4">
+        <ContentLoader />
+      </div>
+    </div>
+  );
+}
+
+// ─── Leaderboard ────────────────────────────────────────────────────────────
+
+/** Leaderboard skeleton — header bento with trophy + filter pills + search + table rows */
+export function LeaderboardSkeleton() {
+  const { theme, themeChoice } = useAppTheme();
+  const isLight = (theme === 'light' || themeChoice === 'system-light');
+  const bentoClass = isLight ? 'bg-zinc-50 border border-zinc-200' : 'bg-zinc-900';
+  const sk = isLight ? 'bg-zinc-200' : SK;
+
+  return (
+    <div className="min-h-screen p-3 sm:p-4">
+      {/* Header Bento */}
+      <div className={cn('rounded-2xl p-4 sm:p-6 mb-4', bentoClass)}>
+        <div className="flex items-center gap-4 mb-4">
+          <Skeleton className={cn('w-14 h-14 rounded-full', sk)} />
+          <div className="space-y-2">
+            <Skeleton className={cn('h-5 w-32', sk)} />
+            <Skeleton className={cn('h-4 w-48', sk)} />
+          </div>
+        </div>
+        {/* Category filter pills */}
+        <div className="flex gap-1.5 overflow-hidden mb-3">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <Skeleton key={i} className={cn('h-9 rounded-xl flex-shrink-0', i === 0 ? 'w-24' : 'w-20', sk)} />
+          ))}
+        </div>
+        {/* Time period pills + sort */}
+        <div className="flex items-center gap-2 mb-4">
+          <div className="flex gap-1.5 flex-1 overflow-hidden">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <Skeleton key={i} className={cn('h-8 w-12 rounded-lg flex-shrink-0', sk)} />
+            ))}
+          </div>
+          <Skeleton className={cn('w-8 h-8 rounded-lg', sk)} />
+        </div>
+        {/* Search bar */}
+        <Skeleton className={cn('h-10 w-full rounded-xl', sk)} />
+      </div>
+
+      {/* Table Bento */}
+      <div className={cn('rounded-2xl overflow-hidden', bentoClass)}>
+        <ContentLoader minHeight="42vh" />
+      </div>
+    </div>
+  );
+}
+
+// ─── Settings ───────────────────────────────────────────────────────────────
+
+/** Settings skeleton — header bento with icon tabs + content bento with form fields */
+export function SettingsSkeleton() {
+  return (
+    <div className="min-h-screen p-3 sm:p-4">
+      {/* Header Bento */}
+      <div data-page-bento data-glass-loading-surface className="bg-zinc-900 rounded-2xl p-4 sm:p-6 mb-4">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-4">
+            <Skeleton className={`w-10 h-10 rounded-xl ${SK}`} />
+            <div className="space-y-2">
+              <Skeleton className={`h-5 w-24 ${SK}`} />
+              <Skeleton className={`h-4 w-40 ${SK}`} />
+            </div>
+          </div>
+          <Skeleton className={`h-9 w-20 rounded-xl ${SK}`} />
+        </div>
+        {/* Tab icon pills */}
+        <div className="flex gap-[6px] sm:gap-2">
+          {Array.from({ length: 7 }).map((_, i) => (
+            <Skeleton key={i} className={`p-[11px] sm:p-3 w-10 h-10 sm:w-11 sm:h-11 rounded-xl ${SK}`} />
+          ))}
+        </div>
+      </div>
+
+      {/* Content Bento */}
+      <div data-page-bento data-glass-loading-surface className="bg-zinc-900 rounded-2xl p-4 sm:p-6">
+        <ContentLoader minHeight="42vh" />
+      </div>
+    </div>
+  );
+}
+
+// ─── Features ───────────────────────────────────────────────────────────────
+
+/** Features page skeleton — header bento with search + page tabs + category pills */
+export function FeaturesSkeleton() {
+  return (
+    <div className="min-h-screen p-3 sm:p-4">
+      <div data-page-bento data-glass-loading-surface className="bg-zinc-900 rounded-2xl p-4 sm:p-6 mb-4">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <Skeleton className={`w-12 h-12 rounded-xl ${SK}`} />
+            <div className="space-y-2">
+              <Skeleton className={`h-5 w-32 ${SK}`} />
+              <Skeleton className={`h-4 w-40 ${SK}`} />
+            </div>
+          </div>
+          <Skeleton className={`h-9 w-20 rounded-xl ${SK}`} />
+        </div>
+        {/* Search */}
+        <Skeleton className={`h-10 w-full rounded-xl mb-3 ${SK}`} />
+        {/* Page tabs */}
+        <div className="flex gap-1 bg-zinc-800/40 rounded-xl p-1 mb-3">
+          <Skeleton className={`flex-1 h-9 rounded-lg ${SK}`} />
+          <Skeleton className={`flex-1 h-9 rounded-lg ${SK}`} />
+        </div>
+        {/* Category pills */}
+        <div className="flex gap-2 overflow-hidden mb-3">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <Skeleton key={i} className={`h-8 w-20 rounded-lg flex-shrink-0 ${SK}`} />
+          ))}
+        </div>
+        {/* Sort pills */}
+        <div className="flex gap-1.5 overflow-hidden">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} className={`h-8 w-16 rounded-lg flex-shrink-0 ${SK}`} />
+          ))}
+        </div>
+      </div>
+
+      {/* Feature request cards */}
+      <ContentLoader minHeight="38vh" />
+    </div>
+  );
+}
+
+// ─── Grid (TV, Music) ───────────────────────────────────────────────────────
+
+/** Grid-style skeleton for media pages — header + category pills + video grid */
+export function GridSkeleton() {
+  return (
+    <div className="p-3 sm:p-4 space-y-4">
+      {/* Header bento */}
+      <div data-page-bento data-glass-loading-surface className="bg-zinc-900 rounded-2xl p-4">
+        <div className="flex items-center gap-3 mb-4">
+          <Skeleton className={`w-10 h-10 rounded-xl ${SK}`} />
+          <Skeleton className={`h-5 w-28 ${SK}`} />
+        </div>
+        {/* Category pills */}
+        <div className="flex gap-2 overflow-hidden">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <Skeleton key={i} className={`h-8 w-20 rounded-lg flex-shrink-0 ${SK}`} />
+          ))}
+        </div>
+      </div>
+      {/* Grid */}
+      <ContentLoader minHeight="46vh" />
+    </div>
+  );
+}
+
+// ─── Generic Fallback ───────────────────────────────────────────────────────
+
+/** Generic page skeleton fallback */
+export function GenericPageSkeleton() {
+  return (
+    <div className="p-3 sm:p-4 space-y-4">
+      <div data-page-bento data-glass-loading-surface className="bg-zinc-900 rounded-2xl p-4 sm:p-6">
+        <div className="flex items-center gap-3 mb-4">
+          <Skeleton className={`w-10 h-10 rounded-xl ${SK}`} />
+          <div className="space-y-2">
+            <Skeleton className={`h-5 w-32 ${SK}`} />
+            <Skeleton className={`h-4 w-48 ${SK}`} />
+          </div>
+        </div>
+      </div>
+      <ContentLoader />
+    </div>
+  );
+}

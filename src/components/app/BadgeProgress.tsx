@@ -1,0 +1,280 @@
+import { useBadgeTierLabel } from '@/i18n/badge-tier-label';
+import { useTranslation as _useCopy } from 'react-i18next';
+/**
+ * BadgeProgress — where a holder sits on the badge ladder, and what the next
+ * rung costs.
+ *
+ * The badge next to a name is nine pixels wide and says nothing about how it
+ * was earned or how close the next one is. This is the other half: the tier
+ * you hold, the bar filling toward the one above it, and the whole thirteen-rung
+ * ladder with the ones you have lit and the ones you have not dimmed.
+ *
+ * Requirements come from `badgeThresholds()`, not from the reference table, so
+ * every number on screen is what that tier costs *today* — the ladder is pegged
+ * in dollars and moves with the token price. A holder who is standing on a
+ * grandfathered tier is told so, because otherwise the bar would read as if
+ * they were below the rung they are visibly on.
+ *
+ * Monochrome by design (src/index.css): the glow is white, not a colour.
+ */
+
+import { useContext, useMemo } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
+import { DhbAmount, DhbCoin } from '@/components/app/DhbAmount';
+import { motion, useReducedMotion } from 'framer-motion';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { cn } from '@/lib/utils';
+import {
+  badgeImage,
+  badgeThresholds,
+  getBadgeStanding,
+  type BadgeLock,
+} from '@/lib/staking-badges';
+import { useBadgeLadderPrice, useBadgeScale } from '@/hooks/use-badge-scale';
+import { useSelfBadge, preferLiveBalance } from '@/hooks/use-self-badge-balance';
+import { AuthContext } from '@/contexts/AuthContext';
+
+export interface BadgeProgressProps {
+  /**
+   * DHB counted toward the ladder. Omit to read the signed-in user's own —
+   * their live wallet balance included, so the bar moves on the same beat as
+   * the badge does.
+   */
+  balance?: number | string | null;
+  /** Username, for the override table. Defaults to the signed-in user's. */
+  username?: string | null;
+  /** The holder's grandfathered tier. Defaults to the signed-in user's. */
+  lock?: BadgeLock | null;
+  /** `rail` drops the ladder strip, for tight columns. */
+  variant?: 'full' | 'rail';
+  className?: string;
+}
+
+/** Compact DHB, in the same shape the staking page uses. */
+function formatDhb(value: number): string {
+  if (!Number.isFinite(value)) return '0';
+  if (value >= 1_000_000_000) return `${(value / 1_000_000_000).toFixed(2).replace(/\.?0+$/, '')}B`;
+  if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(2).replace(/\.?0+$/, '')}M`;
+  if (value >= 1_000) return `${(value / 1_000).toFixed(1).replace(/\.0$/, '')}K`;
+  return Math.round(value).toLocaleString();
+}
+
+/** Whole dollars below four figures, compact above. */
+function formatUsd(value: number): string {
+  if (!Number.isFinite(value) || value <= 0) return '$0';
+  if (value >= 1_000_000) return `$${(value / 1_000_000).toFixed(1).replace(/\.0$/, '')}M`;
+  if (value >= 1_000) return `$${Math.round(value / 1_000)}K`;
+  if (value >= 1) return `$${Math.round(value)}`;
+  return `$${value.toFixed(2)}`;
+}
+
+export function BadgeProgress({ balance, username, lock, variant = 'full', className }: BadgeProgressProps) {
+  const { t: _copy } = _useCopy();
+  const tierLabel = useBadgeTierLabel();
+  // Read the context directly rather than through useAuth: badges render on
+  // surfaces above AuthProvider, where the hook throws.
+  const auth = useContext(AuthContext);
+  const { t } = useTranslation();
+  const self = useSelfBadge();
+  const scale = useBadgeScale();
+  const price = useBadgeLadderPrice();
+  const reduceMotion = useReducedMotion();
+
+  // Nothing passed means "me": the account row's balance, promoted by the live
+  // wallet read the same way every badge on the site is.
+  const ownBalance = preferLiveBalance(auth?.user?.badgeBalance, self.balance);
+  const effectiveBalance = balance ?? ownBalance;
+  const effectiveName = username ?? auth?.user?.username ?? null;
+  const effectiveLock = lock ?? self.lock ?? null;
+
+  const ladder = useMemo(() => badgeThresholds(scale), [scale]);
+  const standing = useMemo(
+    () => getBadgeStanding(effectiveBalance, { username: effectiveName, scale, lock: effectiveLock }),
+    [effectiveBalance, effectiveName, scale, effectiveLock],
+  );
+
+  const percent = Math.round(standing.progress * 100);
+
+  return (
+    <div
+      className={cn(
+        'rounded-2xl border border-white/10 bg-white/[0.03] p-4 sm:p-5 overflow-hidden relative',
+        className,
+      )}
+    >
+      {/* The one soft light in the panel, behind the medallion. */}
+      <div className="pointer-events-none absolute -top-16 -left-10 w-40 h-40 rounded-full bg-white/[0.07] blur-3xl" />
+
+      <div className="relative flex items-center gap-3 sm:gap-4">
+        <BadgeMedallion url={standing.imageUrl} tier={standing.tier} />
+
+        <div className="min-w-0 flex-1">
+          <div className="text-sm sm:text-base font-semibold text-white truncate">
+            {standing.tier ? tierLabel(standing.tier) : _copy("copy.2270efa16745", { defaultValue: "No badge yet" })}
+          </div>
+          <div className="text-[11px] sm:text-xs text-white/50 font-mono truncate">
+            {formatDhb(standing.balance)} <DhbCoin />
+            {price ? <span className="text-white/30"> · {formatUsd(standing.balance * price)}</span> : null}
+          </div>
+        </div>
+
+        <div className="text-right shrink-0">
+          {standing.nextTier ? (
+            <>
+              <div className="text-[10px] uppercase tracking-wider text-white/30">{_copy("copy.1ff57a29d7c9", { defaultValue: "Next" })}</div>
+              <div className="text-xs sm:text-sm font-medium text-white/80">{tierLabel(standing.nextTier)}</div>
+            </>
+          ) : (
+            <div className="text-[10px] uppercase tracking-wider text-white/40">{_copy("copy.b10700f112ad", { defaultValue: "Top tier" })}</div>
+          )}
+        </div>
+      </div>
+
+      {/* The bar. Fills across the current tier, not across the whole ladder —
+          crawling 2% of the way to Megalodon is not progress anyone can feel. */}
+      <div
+        role="progressbar"
+        aria-valuenow={percent}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-label={standing.nextTier ? _copy("copy.afc70b19df93", { defaultValue: "Progress to {{value1}}", value1: tierLabel(standing.nextTier) }) : _copy("copy.0b69d8573e32", { defaultValue: "Top tier reached" })}
+        className="relative mt-4 h-2.5 rounded-full bg-white/[0.06] border border-white/10 overflow-hidden"
+      >
+        <motion.div
+          className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-white/40 via-white/75 to-white shadow-[0_0_14px_2px_rgba(255,255,255,0.45)]"
+          initial={reduceMotion ? false : { width: 0 }}
+          animate={{ width: `${Math.max(percent, standing.progress > 0 ? 2 : 0)}%` }}
+          transition={{ duration: reduceMotion ? 0 : 1.1, ease: [0.22, 1, 0.36, 1] }}
+        >
+          {/* Sweep, clipped to the filled length so it reads as the bar being
+              charged rather than as a loading skeleton. */}
+          {!reduceMotion && standing.progress > 0.02 && (
+            <span className="absolute inset-0 overflow-hidden rounded-full">
+              <span
+                className="absolute inset-y-0 -left-1/4 w-1/4 bg-gradient-to-r from-transparent via-white to-transparent opacity-60"
+                style={{ animation: 'shimmer-sweep 2.6s ease-in-out infinite' }}
+              />
+            </span>
+          )}
+        </motion.div>
+      </div>
+
+      <div className="mt-2 flex items-center justify-between gap-2 text-[11px]">
+        <span className="font-mono text-white/40">{percent}%</span>
+        <span className="text-white/60 truncate">
+          {standing.nextTier
+            ? (
+              <>
+                <Trans
+                  i18nKey="copy.6ed656c2254e"
+                  defaults="<amount></amount> to {{value1}}"
+                  values={{ value1: tierLabel(standing.nextTier) }}
+                  components={{ amount: <DhbAmount amount={formatDhb(standing.remaining)} /> }}
+                />
+              </>
+            )
+            : _copy("copy.a6be2efe5bce", { defaultValue: "Every tier unlocked" })}
+        </span>
+      </div>
+
+      {variant === 'full' && (
+        <BadgeLadderRail ladder={ladder} index={standing.index} reduceMotion={!!reduceMotion} price={price} />
+      )}
+
+      <p className="mt-3 text-[10px] leading-relaxed text-white/45">
+        {t('badgeAscension.keepWhileHolding')}
+      </p>
+    </div>
+  );
+}
+
+/** The current badge, lit. Falls back to an empty ring below the entry rung. */
+function BadgeMedallion({
+  url,
+  tier,
+}: {
+  url: string | null;
+  tier: string | null;
+}) {
+  const { t: _copy } = _useCopy();
+  const tierLabel = useBadgeTierLabel();
+  return (
+    <div className="relative w-12 h-12 sm:w-14 sm:h-14 shrink-0">
+      {url ? (
+        <img
+          src={url}
+          alt={tier ? tierLabel(tier) : _copy("copy.002474e36821", { defaultValue: "Badge" })}
+          className="w-full h-full object-contain drop-shadow-[0_0_6px_rgba(255,255,255,0.5)]"
+        />
+      ) : (
+        <span className="absolute inset-0 flex items-center justify-center text-[9px] uppercase tracking-wider text-white/30">{_copy("copy.dc937b598926", { defaultValue: "None" })}</span>
+      )}
+    </div>
+  );
+}
+
+/** All thirteen rungs: earned ones lit, the rest waiting. */
+function BadgeLadderRail({
+  ladder,
+  index,
+  reduceMotion,
+  price,
+}: {
+  ladder: readonly { name: string; min: number }[];
+  index: number;
+  reduceMotion: boolean;
+  price?: number;
+}) {
+  const tierLabel = useBadgeTierLabel();
+  return (
+    <div className="mt-4 -mx-1 flex items-center gap-0.5 md:gap-1.5 overflow-x-auto md:overflow-visible px-1 pb-1 scrollbar-hide">
+      {ladder.map((rung, i) => {
+        const earned = i <= index;
+        const current = i === index;
+        const art = badgeImage(rung.name);
+        const label = tierLabel(rung.name);
+
+        return (
+          <Tooltip key={rung.name}>
+            <TooltipTrigger asChild>
+              <motion.div
+                initial={reduceMotion ? false : { opacity: 0, y: 4 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: reduceMotion ? 0 : i * 0.035, duration: 0.3 }}
+                className={cn(
+                  'relative shrink-0 w-7 h-7 sm:w-8 sm:h-8 md:flex-1 md:w-auto md:h-auto md:aspect-square md:max-w-16 rounded-lg flex items-center justify-center transition-all',
+                  earned ? 'bg-white/[0.07]' : 'bg-white/[0.02]',
+                  current && 'bg-white/[0.12]',
+                )}
+              >
+                {art && (
+                  <img
+                    src={art}
+                    alt={label}
+                    loading="lazy"
+                    decoding="async"
+                    className={cn(
+                      'w-4 h-4 sm:w-[18px] sm:h-[18px] md:w-3/5 md:h-3/5 object-contain transition-all',
+                      earned ? 'opacity-100' : 'opacity-25',
+                      current && 'drop-shadow-[0_0_6px_rgba(255,255,255,0.75)]',
+                    )}
+                  />
+                )}
+              </motion.div>
+            </TooltipTrigger>
+            <TooltipContent side="top" className="text-xs">
+              <span className="font-medium">{label}</span>
+              <span className="text-white/50">
+                {' '}
+                · {formatDhb(rung.min)} <DhbCoin />
+                {price ? ` · ${formatUsd(rung.min * price)}` : ''}
+              </span>
+            </TooltipContent>
+          </Tooltip>
+        );
+      })}
+    </div>
+  );
+}
+
+export default BadgeProgress;

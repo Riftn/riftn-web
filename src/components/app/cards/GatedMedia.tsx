@@ -1,0 +1,318 @@
+import { useTranslation as _useCopy } from 'react-i18next';
+/**
+ * Gated media
+ * ===========
+ * One paywall for every kind of post. It wraps whatever the card would have
+ * rendered — a player, a poster frame, a live video — and stands in front of it
+ * while the viewer is not entitled to it, with the sheet that resolves the
+ * particular gate behind the tap.
+ *
+ * The four gates it knows, in the order they are shown:
+ *
+ * - **Mature** sits outermost. It is a warning, not a lock, and revealing it
+ *   falls through to whatever real gate the post has rather than replacing it.
+ * - **PPV** — pay once, per post.
+ * - **Subscribers** — hold an active subscription to THIS creator. Not a hold
+ *   gate: only the creator can grant it.
+ * - **Holdings** — own N of a token. Any stranger can satisfy it by buying some.
+ *
+ * PPV and holdings can both be set on one post; that combination gets its own
+ * panel, because unlocking the first still leaves the second.
+ *
+ * Bundle note: this renders inside eager feed cards, so nothing here may
+ * statically import the wallet stack (scripts/check-entry-bundle.mjs fails the
+ * build otherwise) — SubscriberGateDrawer pulls in the subscription contracts
+ * and is therefore lazy, exactly as the cards load it today.
+ */
+import { Suspense, lazy, useState } from 'react';
+import { Ticket, Star, Loader2 } from "lucide-react";
+import Lock from "@/components/ui/cut-icons/privacy";
+
+import X from "@/components/ui/cut-icons/close";
+
+import { useTranslation } from 'react-i18next';
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
+import { cn } from '@/lib/utils';
+import { DhbAmount } from '@/components/app/DhbAmount';
+import { MatureContentGate, useMatureGate } from './MatureContentGate';
+import { PPVDrawerContent } from './LazyPPVDrawerContent';
+import { VerifyUnlockButton } from './VerifyUnlockButton';
+import { isTokenUnlocked, markTokenUnlocked } from '@/lib/unlocked-tokens-store';
+import {
+  isHoldGated,
+  isSubscriberGated,
+  cheapestSubscriberQuote,
+  type SubscriberPlan,
+} from '@/lib/content-gate';
+import { GatePreview } from './GatePreview';
+import { SubscribeFromPrice } from './SubscribeFromPrice';
+import { UnlockReveal } from '@/components/app/unlock/UnlockReveal';
+import { nextUnlockRevealKind, type UnlockRevealKind } from '@/components/app/unlock/unlock-reveal-kind';
+import { useIsMobile } from '@/hooks/use-mobile';
+import type { ContentRating } from '@/lib/api/dehub/types';
+
+const SubscriberGateDrawer = lazy(() =>
+  import('./SubscriberGateDrawer').then((m) => ({ default: m.SubscriberGateDrawer }))
+);
+
+export interface ContentGateInfo {
+  /** The post's tokenId — what a PPV payment is recorded against. */
+  tokenId: string;
+  creatorAddress?: string;
+  /** Shown when the creator's plans have no price to name. */
+  creatorName?: string;
+  isPPV?: boolean;
+  ppvPrice?: number;
+  ppvCurrency?: string;
+  /** The chain a PPV payment settles on. Absent means the post's default. */
+  ppvChainId?: number;
+  isLocked?: boolean;
+  lockedPrice?: number;
+  lockedCurrency?: string;
+  lockedTokenAddress?: string;
+  lockedChainId?: number;
+  subscriberPlans?: SubscriberPlan[];
+  contentRating?: ContentRating;
+  /**
+   * The creator, or someone who has already paid or subscribed. Every gate is
+   * open to them — a creator who could not watch their own stream would be a
+   * bug report within the hour.
+   */
+  canBypass?: boolean;
+}
+
+interface GatedMediaProps {
+  gate: ContentGateInfo;
+  /** Image blurred behind the gate. A dark panel is used without one. */
+  preview?: string;
+  className?: string;
+  children: React.ReactNode;
+}
+
+function formatCompact(num: number): string {
+  if (!Number.isFinite(num)) return '0';
+  if (num >= 1_000_000) return `${(num / 1_000_000).toFixed(1).replace(/\.0$/, '')}M`;
+  if (num >= 1_000) return `${(num / 1_000).toFixed(1).replace(/\.0$/, '')}K`;
+  return String(Math.round(num * 100) / 100);
+}
+
+export function GatedMedia({ gate, preview, className, children }: GatedMediaProps) {
+  const { t: _copy } = _useCopy();
+  const { t } = useTranslation();
+  const [showPPVDrawer, setShowPPVDrawer] = useState(false);
+  const [showLockedDrawer, setShowLockedDrawer] = useState(false);
+  const [showSubDrawer, setShowSubDrawer] = useState(false);
+  // An unlock that lands while the card is mounted opens it there and then; the
+  // store remembers it across a remount so a scroll away and back does not put
+  // the paywall back over content that has been paid for.
+  const [locallyUnlocked, setLocallyUnlocked] = useState(false);
+  const [locallySubscribed, setLocallySubscribed] = useState(false);
+
+  const matureGate = useMatureGate(gate.contentRating);
+  // Phones: a paid unlock ends with a reveal on the media itself.
+  const isMobile = useIsMobile();
+  const [revealKind, setRevealKind] = useState<UnlockRevealKind | null>(null);
+  // After a reveal the frame stays, so the media under it never remounts (a video keeps playing).
+  const [revealed, setRevealed] = useState(false);
+
+  const canBypass = !!gate.canBypass || locallyUnlocked || isTokenUnlocked(gate.tokenId);
+  const isPPVLocked = !!gate.isPPV && !canBypass;
+  const isHoldingsLocked = isHoldGated(gate.isLocked, gate.lockedPrice) && !canBypass;
+  const isSubGated = isSubscriberGated(gate.subscriberPlans, !!gate.canBypass || locallySubscribed);
+  const isComboLocked = isPPVLocked && isHoldingsLocked;
+
+  const onUnlocked = () => {
+    markTokenUnlocked(gate.tokenId);
+    setLocallyUnlocked(true);
+  };
+  const onPaidUnlock = () => {
+    if (isMobile) { setRevealKind(nextUnlockRevealKind()); setRevealed(true); }
+    onUnlocked();
+  };
+
+  const isGated = matureGate.isGated || isPPVLocked || isHoldingsLocked || isSubGated;
+
+  if (!isGated) {
+    if (!revealed) return <>{children}</>;
+    return (
+      <div className={cn('relative w-full h-full overflow-hidden', className)}>
+        {children}
+        {revealKind && <UnlockReveal
+          kind={revealKind}
+          cover={<GatePreview src={preview} className="w-full h-full object-cover" />}
+          onDone={() => setRevealKind(null)}
+        />}
+      </div>
+    );
+  }
+
+  const cheapestQuote = cheapestSubscriberQuote(gate.subscriberPlans);
+
+  /** Every gate is the same tile: blurred poster, glass icon, two lines, one tap. */
+  const panel = (
+    icon: React.ReactNode,
+    heading: React.ReactNode,
+    detail: React.ReactNode,
+    onOpen: () => void,
+  ) => (
+    <>
+      <GatePreview src={preview} className="w-full h-full object-cover" />
+      <button
+        type="button"
+        data-no-navigate
+        data-gate-overlay
+        data-keep-dark
+        className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 text-center px-6"
+        onClick={(e) => {
+          // Cards navigate on click; opening the sheet must not open the post.
+          e.stopPropagation();
+          onOpen();
+        }}
+      >
+        <div data-keep-dark className="w-16 h-16 rounded-2xl bg-black/40 backdrop-blur-[24px] backdrop-saturate-[180%] flex items-center justify-center border border-white/10 mb-3">
+          {icon}
+        </div>
+        <p className="text-white font-semibold text-sm mb-1 flex items-center justify-center gap-1 flex-wrap">{heading}</p>
+        <p className="text-white/70 text-xs flex items-center justify-center gap-1 flex-wrap">{detail}</p>
+      </button>
+    </>
+  );
+
+  return (
+    <div className={cn('relative w-full h-full overflow-hidden', className)}>
+      {matureGate.isGated ? (
+        <MatureContentGate
+          preview={preview}
+          onReveal={matureGate.reveal}
+          className="w-full h-full [&>img]:h-full [&>img]:max-h-none"
+        />
+      ) : isComboLocked ? (
+        panel(
+          <div className="flex items-center gap-1">
+            <Ticket className="h-5 w-5 text-white" />
+            <Lock className="h-5 w-5 text-white" />
+          </div>,
+          <>
+            {t('drawers.unlockFor')}
+            <DhbAmount amount={formatCompact(Number(gate.ppvPrice))} currency={gate.ppvCurrency} iconClassName="h-3.5 w-3.5" />
+          </>,
+          <>{_copy("copy.b8d42680be12", { defaultValue: "Must be holding" })}<DhbAmount amount={formatCompact(Number(gate.lockedPrice))} currency={gate.lockedCurrency} iconClassName="h-3.5 w-3.5" />
+          </>,
+          () => setShowPPVDrawer(true),
+        )
+      ) : isPPVLocked ? (
+        panel(
+          <Ticket className="h-7 w-7 text-white" />,
+          t('drawers.ppvTitle'),
+          <>
+            {t('drawers.unlockFor')}
+            <DhbAmount amount={formatCompact(Number(gate.ppvPrice))} currency={gate.ppvCurrency} iconClassName="h-3.5 w-3.5" />
+          </>,
+          () => setShowPPVDrawer(true),
+        )
+      ) : isSubGated ? (
+        panel(
+          <Star className="h-7 w-7 text-white" />,
+          _copy("copy.109ddfc1cc4a", { defaultValue: "Subscribers only" }),
+          cheapestQuote ? (
+            <SubscribeFromPrice quote={cheapestQuote} />
+          ) : gate.creatorName ? (
+            _copy("copy.855f365abafc", { defaultValue: "Subscribe to {{value1}}", value1: gate.creatorName })
+          ) : (
+            _copy("copy.aad8e3e9e836", { defaultValue: "Subscribe to this creator" })
+          ),
+          () => setShowSubDrawer(true),
+        )
+      ) : (
+        panel(
+          <Lock className="h-7 w-7 text-white" />,
+          _copy("copy.490f4babbf34", { defaultValue: "Holdings Required" }),
+          <>{_copy("copy.b8d42680be12", { defaultValue: "Must be holding" })}<DhbAmount amount={formatCompact(Number(gate.lockedPrice))} currency={gate.lockedCurrency} iconClassName="h-3.5 w-3.5" />
+          </>,
+          () => setShowLockedDrawer(true),
+        )
+      )}
+
+      <Drawer open={showPPVDrawer} onOpenChange={setShowPPVDrawer}>
+        <PPVDrawerContent open={showPPVDrawer}
+          tokenId={gate.tokenId}
+          price={Number(gate.ppvPrice)}
+          currency={gate.ppvCurrency || 'DHB'}
+          creatorAddress={gate.creatorAddress}
+          chainId={gate.ppvChainId}
+          onClose={() => setShowPPVDrawer(false)}
+          onUnlocked={onPaidUnlock}
+          formatCompact={formatCompact}
+        />
+      </Drawer>
+
+      <Drawer open={showLockedDrawer} onOpenChange={setShowLockedDrawer}>
+        <DrawerContent scrollable glass className="px-4 pb-6">
+          <DrawerHeader className="pb-3 relative">
+            <DrawerTitle className="text-white text-lg flex items-center gap-2">
+              <Lock className="w-5 h-5 text-white" />
+              {t('drawers.gatedTitle')}
+            </DrawerTitle>
+            <button
+              onClick={() => setShowLockedDrawer(false)}
+              className="absolute top-3 right-0 p-1.5 rounded-lg bg-white/[0.06] hover:bg-white/[0.12] transition-colors"
+            >
+              <X className="w-4 h-4 text-zinc-400" />
+            </button>
+          </DrawerHeader>
+          <div className="flex flex-col gap-4">
+            {!!gate.lockedPrice && gate.lockedPrice > 0 && (
+              <div className="flex items-center justify-between px-4 py-4 bg-white/5 rounded-xl border border-white/10">
+                <span className="text-white text-sm">{t('drawers.mustHoldToView')}</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-white text-lg font-bold">
+                    <DhbAmount
+                      amount={formatCompact(gate.lockedPrice)}
+                      currency={gate.lockedCurrency}
+                      iconClassName="h-5 w-5"
+                    />
+                  </span>
+                </div>
+              </div>
+            )}
+            <p className="text-center text-white/60 text-sm">{t('drawers.gatedDescription')}</p>
+            {!!gate.lockedPrice && gate.lockedPrice > 0 && (
+              <VerifyUnlockButton
+                requiredAmount={gate.lockedPrice}
+                currency={gate.lockedCurrency || 'DHB'}
+                tokenAddress={gate.lockedTokenAddress}
+                chainId={gate.lockedChainId}
+                onUnlocked={() => {
+                  setShowLockedDrawer(false);
+                  onUnlocked();
+                }}
+              />
+            )}
+          </div>
+        </DrawerContent>
+      </Drawer>
+
+      <Drawer open={showSubDrawer} onOpenChange={setShowSubDrawer}>
+        <DrawerContent scrollable glass className="px-4 pb-6">
+          <Suspense
+            fallback={
+              <div className="flex items-center justify-center py-10">
+                <Loader2 className="w-5 h-5 animate-spin text-white" />
+              </div>
+            }
+          >
+            <SubscriberGateDrawer
+              creatorAddress={gate.creatorAddress || ''}
+              creatorName={gate.creatorName || _copy("copy.c48cabf53e9c", { defaultValue: "this creator" })}
+              previewPlans={gate.subscriberPlans}
+              onSubscribed={() => {
+                setShowSubDrawer(false);
+                setLocallySubscribed(true);
+              }}
+            />
+          </Suspense>
+        </DrawerContent>
+      </Drawer>
+    </div>
+  );
+}

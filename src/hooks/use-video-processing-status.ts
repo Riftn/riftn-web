@@ -1,0 +1,105 @@
+import { useEffect, useState, type RefObject } from 'react';
+import { useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query';
+import { getNFTInfo } from '@/lib/api/dehub';
+
+export type VideoProcessingStatus = 'pending' | 'on' | 'done' | 'failed';
+const POLL_MS = 5_000;
+const processingKey = (tokenId: number | string) => ['video-processing', String(tokenId)] as const;
+const progressKey = (tokenId: number | string) => ['video-processing-progress', String(tokenId)] as const;
+
+/**
+ * How far a video still encoding has got, 0-100, or undefined before the
+ * first figure. Fed by the same poll and socket as the status, so it costs
+ * no requests of its own.
+ */
+export function useVideoProcessingProgress(tokenId: number | string, initial?: number): number | undefined {
+  const { data } = useQuery<number>({
+    queryKey: progressKey(tokenId),
+    queryFn: () => Promise.resolve(initial ?? 0),
+    enabled: false,
+    initialData: typeof initial === 'number' ? initial : undefined,
+  });
+  return data;
+}
+const isPending = (status: VideoProcessingStatus | undefined) => status === 'pending' || status === 'on';
+
+export function markVideoProcessing(client: QueryClient, tokenId: number | string) {
+  client.setQueryData(processingKey(tokenId), 'pending');
+}
+
+export function setVideoProcessingStatus(client: QueryClient, tokenId: number | string, status: VideoProcessingStatus) {
+  client.setQueryData(processingKey(tokenId), status);
+}
+
+/** Follow only visible, unfinished videos. A shared key keeps duplicate cards
+ * on the same status without refreshing the feed or moving its scroll position. */
+export function useVideoProcessingStatus(
+  tokenId: number | string,
+  initialStatus: VideoProcessingStatus | undefined,
+  enabled: boolean,
+  element?: RefObject<HTMLElement>,
+) {
+  const client = useQueryClient();
+  const [visible, setVisible] = useState(!element);
+  const [foreground, setForeground] = useState(document.visibilityState === 'visible');
+  const canFollow = isPending(initialStatus) || initialStatus === 'failed';
+  useEffect(() => {
+    const change = () => setForeground(document.visibilityState === 'visible');
+    document.addEventListener('visibilitychange', change);
+    return () => document.removeEventListener('visibilitychange', change);
+  }, []);
+  useEffect(() => {
+    if (!element || !enabled || !canFollow) return;
+    const node = element.current;
+    if (!node) return;
+    const observer = new IntersectionObserver(([entry]) => setVisible(entry.isIntersecting));
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [element, enabled, canFollow]);
+
+  const key = processingKey(tokenId);
+  const cached = client.getQueryData<VideoProcessingStatus>(key);
+  const active = enabled && visible && foreground && canFollow && isPending(cached ?? initialStatus);
+  const query = useQuery<VideoProcessingStatus>({
+    queryKey: key,
+    queryFn: async () => {
+      const post = await getNFTInfo(String(tokenId));
+      const status = post.transcodingStatus;
+      const progress = Number((post as { progress?: unknown }).progress);
+      if (Number.isFinite(progress) && progress > 0) client.setQueryData(progressKey(tokenId), progress);
+      if (!status || !['pending', 'on', 'done', 'failed'].includes(status)) throw new Error('Missing video processing status');
+      return status;
+    },
+    enabled: active,
+    staleTime: POLL_MS,
+    refetchInterval: q => active && isPending(q.state.data ?? initialStatus) ? POLL_MS : false,
+    refetchIntervalInBackground: false,
+    retry: false,
+  });
+  // The token's socket channel says `done` the moment the transcode lands, so
+  // a card on screen flips without waiting for its next poll. Shared through
+  // the same key, so every card showing this post flips together.
+  const listening = enabled && canFollow && isPending(query.data ?? cached ?? initialStatus);
+  useEffect(() => {
+    if (!listening) return;
+    // Loaded on demand: feed cards are on the boot path, the socket is not.
+    let cancelled = false;
+    let unsubscribe: (() => void) | undefined;
+    void import('@/lib/api/dehub/job-socket').then(({ subscribeJobChannel }) => {
+      if (cancelled) return;
+      unsubscribe = subscribeJobChannel(String(tokenId), (event) => {
+        if (typeof event.progress === 'number' && event.stage === 'transcoding' && event.progress > 0) {
+          client.setQueryData(progressKey(tokenId), event.progress);
+        }
+        if (event.stage === 'done') client.setQueryData(processingKey(tokenId), 'done');
+        else if (event.stage === 'failed') client.setQueryData(processingKey(tokenId), 'failed');
+      });
+    });
+    return () => {
+      cancelled = true;
+      unsubscribe?.();
+    };
+  }, [listening, tokenId, client]);
+
+  return canFollow ? query.data ?? initialStatus : initialStatus;
+}

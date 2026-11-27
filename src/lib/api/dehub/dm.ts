@@ -1,0 +1,1163 @@
+import type { DmDestruct, DmDestructChoice } from '@/lib/dm-destruct';
+import type { DmVideoOptions } from '@/lib/dm-video-options';
+import { supabase } from '@/integrations/supabase/client';
+import { apiCall, getAuthToken, authedUpload, ensureFreshToken } from './core';
+import { getAccountSummaries, type AccountSummary } from './users';
+import type { DeHubUser, DeHubNFT } from './types';
+import type { MediaDescriptor, MediaKind } from '@/lib/dm-e2ee/media';
+import { translateCopy as _translateCopy } from '@/i18n/copy';
+import { DHB_PRELISTING_USD } from '@/lib/dm-lock-price';
+
+// ─── Legacy types (kept for backward compat with GroupSettingsDrawer etc.) ────
+
+export type DMMessageType = 'text' | 'image' | 'gif' | 'audio' | 'video' | 'tip';
+
+export interface GroupInfo {
+  id: string;
+  name: string;
+  description?: string;
+  avatarUrl?: string;
+  creatorAddress: string;
+  memberCount: number;
+  members?: DeHubUser[];
+  isPublic?: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface DeHubConversation {
+  id: string;
+  participants: DeHubUser[];
+  lastMessage?: DeHubDMMessage;
+  unreadCount: number;
+  createdAt: string;
+  updatedAt: string;
+  otherUser?: DeHubUser;
+  groupInfo?: GroupInfo;
+  isGroup?: boolean;
+  isBlocked?: boolean;
+  /** A first message from someone you don't follow: listed under Requests, not the inbox. */
+  isRequest?: boolean;
+  dmFee?: DmFee;
+  pinnedMessages?: string[];
+}
+
+export interface DeHubDMMessage {
+  id: string;
+  conversationId: string;
+  sender: DeHubUser;
+  content: string;
+  encrypted?: boolean;
+  undecryptable?: boolean;
+  /** Opened descriptor of an end-to-end encrypted attachment. */
+  encMedia?: MediaDescriptor;
+  type: DMMessageType;
+  mediaUrl?: string;
+  createdAt: string;
+  readAt?: string;
+  tipAmount?: number;
+  tipCurrency?: string;
+  duration?: number;
+}
+
+// ─── New types (Riftn DM API v2) ──────────────────────────────────────────────
+
+export type DmMsgType = 'msg' | 'media' | 'gif' | 'voice' | 'tip' | 'poll';
+
+export interface DmSender {
+  _id: string;
+  username: string;
+  address: string;
+  displayName: string;
+  avatarImageUrl: string;
+}
+
+/** One attachment on a message. `encrypted` marks ciphertext whose key is in the encrypted `content`. */
+export interface DmMediaUrl {
+  url: string;
+  type: string;
+  mimeType?: string;
+  name?: string;
+  size?: number;
+  encrypted?: boolean;
+}
+
+export interface ReplyPreview {
+  _id: string;
+  content: string;
+  encMedia?: MediaDescriptor;
+  msgType: DmMsgType;
+  mediaUrls: Array<{ url: string; type: string; mimeType: string; name?: string; size?: number; encrypted?: boolean }>;
+  voiceDuration: number | null;
+  sender: DmSender;
+  /**
+   * The replied-to line was a view-once / on-open photo or video: the quote
+   * shows "Photo · Opened", never the picture.
+   */
+  destruct?: DmDestruct | null;
+}
+
+/**
+ * A photo or video the sender put behind a price (pay to unlock). The real
+ * file is only ever in `mediaUrl`, and only for the sender or a buyer;
+ * `mediaUrls[0]` is always the blurred preview.
+ */
+export interface DmLock {
+  /** DHB to pay right now for `priceUsd` (live rate on reads, send-time quote on sockets). */
+  price: number;
+  /** What the buyer pays, in USD. */
+  priceUsd?: number;
+  /** DHB rate the server used for `price`. */
+  dhbPriceUsd?: number;
+  symbol: string;
+  kind: 'image' | 'video' | 'file';
+  previewUrl: string | null;
+  /** Locked files: shown on the card before paying. */
+  fileName?: string | null;
+  fileSize?: number | null;
+  unlocked: boolean;
+  mine?: boolean;
+  /** False while the upload is still being processed. */
+  ready?: boolean;
+  unlockCount?: number;
+  /** Signed URL of the real file (sender or buyer only). */
+  mediaUrl?: string;
+  mediaUrlExpiresAt?: string;
+}
+
+export interface DmLockStatus {
+  messageId: string;
+  conversationId: string;
+  /** The sender's address: who the unlock payment goes to. */
+  payTo: string;
+  lock: DmLock;
+  pendingTxHash?: string;
+}
+
+export interface DmMessage {
+  _id: string;
+  conversation: string;
+  sender: DmSender;
+  content: string;
+  /** Set once an `e2e:` envelope has been opened (or failed to open) client-side. */
+  encrypted?: boolean;
+  /** Encrypted, but this device holds no key for it — render a placeholder, never the envelope. */
+  undecryptable?: boolean;
+  /**
+   * An end-to-end encrypted attachment's descriptor (file key, real type,
+   * name, preview), opened from `content`; `content` then holds its caption.
+   */
+  encMedia?: MediaDescriptor;
+  msgType: DmMsgType;
+  mediaUrls: DmMediaUrl[];
+  uploadStatus?: 'pending' | 'success' | 'failed' | 'simple';
+  voiceDuration: number | null;
+  isRead: boolean;
+  isEdited: boolean;
+  editedAt: string | null;
+  isForwarded: boolean;
+  replyTo: ReplyPreview | null;
+  reactions?: Record<string, string[]>;
+  /** How a plain video plays (trim, cover, mirror, rotate, hide until tapped). */
+  mediaOptions?: DmVideoOptions | null;
+  /** Self-destruct: gone after a set time, or once the other person watched it. */
+  destruct?: DmDestruct | null;
+  paymentStatus: null | 'pending' | 'confirmed';
+  paymentTxHash: string | null;
+  /** Sent "when they're next online". The sender's bubble shows an hourglass until it is read. */
+  whenOnline?: boolean;
+  /**
+   * Sent with "Send in their language": `content` is the line in the
+   * recipient's language and this is what the sender typed.
+   */
+  original?: { content: string; lang: string } | null;
+  tipAmount: number | null;
+  tipSymbol: string | null;
+  /** Only set when msgType === 'poll'; votes are read from the poll itself. */
+  poll?: { tokenId: number; question: string } | null;
+  /** Set for a locked (pay-to-unlock) photo or video. */
+  lock?: DmLock | null;
+  isDeleted: boolean;
+  author: 'me' | 'other';
+  createdAt: string;
+  updatedAt: string;
+  /**
+   * Local only. The id the line was first drawn under while it was being sent.
+   * It survives the swap to the server id so the bubble keeps its element.
+   */
+  clientKey?: string;
+  /** Local only. Set while a send of your own is in flight, or after it failed. */
+  sendState?: 'sending' | 'failed';
+}
+
+export interface DmFee {
+  required: boolean;
+  fee: number;
+  hasFreeAccess: boolean;
+}
+
+export interface DmConversation {
+  _id: string;
+  participants: Array<{ participant: DmSender; role: string }>;
+  lastMessageAt: string;
+  unreadCount: number;
+  messages: DmMessage[];
+  tips: unknown[];
+  dmFee?: DmFee;
+  otherUser?: DmSender;
+}
+
+export interface UserOnlineStatus {
+  address: string;
+  online: boolean;
+  lastSeen?: string;
+}
+
+// ─── Internal helpers ─────────────────────────────────────────────────────────
+
+function normalizeDmSender(raw: any): DeHubUser {
+  return {
+    _id: raw?._id || raw?.id || '',
+    address: raw?.address || '',
+    username: raw?.username,
+    displayName: raw?.displayName || raw?.display_name,
+    display_name: raw?.display_name || raw?.displayName,
+    avatarImageUrl: raw?.avatarImageUrl || raw?.avatarUrl,
+    avatarUrl: raw?.avatarUrl || raw?.avatarImageUrl,
+    isVerified: raw?.isVerified || raw?.is_verified,
+    is_verified: raw?.is_verified || raw?.isVerified,
+    badgeBalance:
+      raw?.badgeBalance ??
+      raw?.badge_balance ??
+      raw?.stakedDHB ??
+      raw?.staked,
+    badgeLock: raw?.badgeLock ?? raw?.badge_lock,
+  };
+}
+
+function mapDmMessageToLegacy(msg: any): DeHubDMMessage {
+  const msgType: DMMessageType =
+    msg.msgType === 'msg' ? 'text' :
+    msg.msgType === 'media' ? 'image' :
+    msg.msgType === 'voice' ? 'audio' :
+    (msg.msgType || msg.type || 'text') as DMMessageType;
+
+  return {
+    id: msg._id || msg.id || `msg-${Date.now()}`,
+    conversationId: msg.conversation || msg.conversationId || '',
+    sender: normalizeDmSender(msg.sender),
+    content: msg.content || '',
+    type: msgType,
+    mediaUrl: msg.mediaUrls?.[0]?.url || msg.mediaUrl,
+    createdAt: msg.createdAt || new Date().toISOString(),
+    readAt: msg.isRead ? (msg.updatedAt || msg.createdAt) : undefined,
+    tipAmount: msg.tipAmount || undefined,
+    duration: msg.voiceDuration || undefined,
+  };
+}
+
+/** Map a raw API conversation item to DeHubConversation for UI compatibility. */
+function mapApiConversationToDeHub(item: any, myAddress: string): DeHubConversation {
+  const id = item._id || item.id;
+
+  // Participants: handle both {participant, role}[] and flat DeHubUser[]
+  let participants: DeHubUser[] = [];
+  if (Array.isArray(item.participants)) {
+    if (item.participants[0]?.participant) {
+      participants = item.participants.map((p: any) => normalizeDmSender(p.participant));
+    } else {
+      participants = item.participants.map((p: any) => normalizeDmSender(p));
+    }
+  }
+
+  // otherUser: from field or derived from participants
+  let otherUser: DeHubUser | undefined = item.otherUser
+    ? normalizeDmSender(item.otherUser)
+    : participants.find(p => p.address?.toLowerCase() !== myAddress.toLowerCase());
+
+  // lastMessage: from field or derive from messages array
+  let lastMessage: DeHubDMMessage | undefined;
+  if (item.lastMessage) {
+    lastMessage = mapDmMessageToLegacy(item.lastMessage);
+  } else if (Array.isArray(item.messages) && item.messages.length > 0) {
+    // messages array is newest-first or oldest-first; take the most recent
+    const sorted = [...item.messages].sort(
+      (a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+    lastMessage = mapDmMessageToLegacy(sorted[0]);
+  }
+
+  // Enrich/derive otherUser from message sender data when participant data is incomplete
+  // The API contacts endpoint sometimes returns only 1 participant (the current user),
+  // leaving otherUser undefined — recover it from message senders.
+  if (Array.isArray(item.messages) && item.messages.length > 0) {
+    // Find any message whose sender is NOT the current user
+    const otherSenderMsg = item.messages.find(
+      (m: any) => m.sender?.address?.toLowerCase() !== myAddress.toLowerCase()
+    );
+    if (otherSenderMsg?.sender) {
+      const enriched = normalizeDmSender(otherSenderMsg.sender);
+      if (!otherUser) {
+        otherUser = enriched;
+      } else {
+        if (!otherUser.displayName && enriched.displayName) otherUser.displayName = enriched.displayName;
+        if (!otherUser.display_name && enriched.display_name) otherUser.display_name = enriched.display_name;
+        if (!otherUser.avatarImageUrl && enriched.avatarImageUrl) otherUser.avatarImageUrl = enriched.avatarImageUrl;
+        if (otherUser.badgeBalance == null && enriched.badgeBalance != null) otherUser.badgeBalance = enriched.badgeBalance;
+      }
+    }
+  }
+
+  return {
+    id,
+    participants,
+    otherUser,
+    lastMessage,
+    unreadCount: item.unreadCount || 0,
+    createdAt: item.createdAt || item.lastMessageAt || new Date().toISOString(),
+    updatedAt: item.updatedAt || item.lastMessageAt || new Date().toISOString(),
+    isGroup: item.isGroup || false,
+    isBlocked: item.isBlocked || false,
+    isRequest: item.isRequest === true,
+    groupInfo: item.groupInfo,
+    dmFee: item.dmFee,
+    pinnedMessages: Array.isArray(item.pinnedMessages) ? item.pinnedMessages : [],
+  };
+}
+
+type RawLock = Partial<DmLock> & { price?: number | string; priceUsd?: number | string; dhbPriceUsd?: number | string; unlockCount?: number | string };
+
+export function parseDmLock(input: unknown, mine: boolean): DmLock | null {
+  if (!input || typeof input !== 'object') return null;
+  const raw = input as RawLock;
+  if (!(Number(raw.price) > 0)) return null;
+  return {
+    price: Number(raw.price),
+    ...(Number(raw.priceUsd) > 0 && { priceUsd: Number(raw.priceUsd) }),
+    ...(Number(raw.dhbPriceUsd) > 0 && { dhbPriceUsd: Number(raw.dhbPriceUsd) }),
+    symbol: raw.symbol || 'DHB',
+    kind: raw.kind === 'video' ? 'video' : 'image',
+    previewUrl: raw.previewUrl ?? null,
+    unlocked: !!raw.unlocked || mine,
+    mine: raw.mine ?? mine,
+    ready: raw.ready ?? !!raw.previewUrl,
+    ...(raw.unlockCount != null && { unlockCount: Number(raw.unlockCount) }),
+    ...(raw.mediaUrl && { mediaUrl: raw.mediaUrl, mediaUrlExpiresAt: raw.mediaUrlExpiresAt }),
+  };
+}
+
+function parseDmMessage(raw: any, myAddress: string): DmMessage {
+  const msgType: DmMsgType =
+    raw.msgType === 'text' ? 'msg' :
+    raw.msgType === 'image' ? 'media' :
+    raw.msgType === 'audio' ? 'voice' :
+    (raw.msgType || 'msg') as DmMsgType;
+
+  const senderAddr = raw.sender?.address?.toLowerCase() || '';
+  const author: 'me' | 'other' = senderAddr === myAddress.toLowerCase() ? 'me' : 'other';
+
+  return {
+    _id: raw._id || raw.id || `msg-${Date.now()}`,
+    conversation: raw.conversation || raw.conversationId || '',
+    sender: {
+      _id: raw.sender?._id || raw.sender?.id || '',
+      username: raw.sender?.username || '',
+      address: raw.sender?.address || '',
+      displayName: raw.sender?.displayName || raw.sender?.display_name || '',
+      avatarImageUrl: raw.sender?.avatarImageUrl || raw.sender?.avatarUrl || '',
+    },
+    content: raw.content || '',
+    msgType,
+    mediaUrls: Array.isArray(raw.mediaUrls) ? raw.mediaUrls : [],
+    uploadStatus: raw.uploadStatus === 'failure' ? 'failed' : raw.uploadStatus ?? undefined,
+    voiceDuration: raw.voiceDuration ?? null,
+    isRead: raw.isRead ?? false,
+    isEdited: raw.isEdited ?? false,
+    editedAt: raw.editedAt ?? null,
+    isForwarded: raw.isForwarded ?? false,
+    reactions: raw.reactions && typeof raw.reactions === 'object' ? raw.reactions : {},
+    // Populated preview only — a bare id has nothing to render.
+    replyTo: raw.replyTo && typeof raw.replyTo === 'object' ? raw.replyTo : null,
+    mediaOptions: raw.mediaOptions && typeof raw.mediaOptions === 'object' ? raw.mediaOptions : null,
+    destruct: raw.destruct && typeof raw.destruct === 'object' && raw.destruct.mode ? raw.destruct : null,
+    paymentStatus: raw.paymentStatus ?? null,
+    paymentTxHash: raw.paymentTxHash ?? null,
+    ...(raw.whenOnline === true && { whenOnline: true }),
+    tipAmount: raw.tipAmount ?? null,
+    tipSymbol: raw.tipSymbol ?? null,
+    poll: raw.poll && typeof raw.poll.tokenId === 'number' ? { tokenId: raw.poll.tokenId, question: raw.poll.question || '' } : null,
+    lock: parseDmLock(raw.lock, author === 'me'),
+    isDeleted: raw.isDeleted ?? false,
+    author,
+    createdAt: raw.createdAt || new Date().toISOString(),
+    updatedAt: raw.updatedAt || raw.createdAt || new Date().toISOString(),
+  };
+}
+
+// ─── Contacts & Conversations ─────────────────────────────────────────────────
+
+
+/**
+ * Fetch DM contacts list for the given wallet address.
+ *
+ * Throws on API failure. Swallowing the error here (a leftover from a
+ * removed Supabase fallback) made a failed fetch indistinguishable from an
+ * account with zero conversations, so the page showed "No conversations yet"
+ * with no retry instead of the error state.
+ */
+export async function getContacts(
+  address: string,
+  page: number = 0,
+  limit: number = 50
+): Promise<DeHubConversation[]> {
+  if (!address) return [];
+  const myAddress = address.toLowerCase();
+
+  const response = await apiCall<unknown>(`/api/dm/contacts/${address}`, {
+    params: { page, limit },
+    requiresAuth: true,
+  });
+  console.log('[DM API] getContacts raw response:', response);
+
+  let items: unknown[] = [];
+  const r = response as Record<string, unknown>;
+  if (Array.isArray(response)) items = response;
+  else if (Array.isArray(r?.result)) items = r.result as unknown[];
+  else if (r?.result && Array.isArray((r.result as Record<string, unknown>)?.items)) items = ((r.result as Record<string, unknown>).items as unknown[]) || [];
+  else if (Array.isArray(r?.items)) items = r.items as unknown[];
+
+  let dehubItems: DeHubConversation[] = items.map(
+    (item: unknown) => mapApiConversationToDeHub(item as Record<string, unknown>, myAddress)
+  );
+
+
+  // New contacts responses already embed these fields. Older responses and
+  // partial records are repaired with one compact lookup, never one request per row.
+  const missing = dehubItems
+    .map(conv => conv.otherUser)
+    .filter((user): user is DeHubUser => !!user?.address && (!user.displayName || user.badgeBalance == null));
+  if (missing.length > 0) {
+    const profiles: AccountSummary[] = await getAccountSummaries(missing.map(user => user.address!)).catch(() => []);
+    const byAddress = new Map(profiles.map(profile => [profile.address.toLowerCase(), profile] as const));
+    for (const user of missing) {
+      const profile = byAddress.get(user.address!.toLowerCase());
+      if (!profile) continue;
+      user.displayName ||= profile.displayName || '';
+      user.display_name ||= user.displayName;
+      user.badgeBalance ??= profile.badgeBalance ?? undefined;
+      user.avatarImageUrl ||= profile.avatarImageUrl || '';
+    }
+  }
+
+  // Filter out permanently deleted conversations
+  const deletedIds = (() => {
+    try {
+      const raw = localStorage.getItem('dehub-deleted-conversations');
+      return raw ? new Set<string>(JSON.parse(raw)) : new Set<string>();
+    } catch { return new Set<string>(); }
+  })();
+  if (deletedIds.size > 0) {
+    dehubItems = dehubItems.filter(c => {
+      const id = c.id || '';
+      const peerAddr = (c.otherUser?.address || '').toLowerCase();
+      return !deletedIds.has(id) && !deletedIds.has(peerAddr) && !deletedIds.has(`new_${peerAddr}`);
+    });
+  }
+
+  // Sort by last activity (newest first)
+  dehubItems.sort((a, b) => {
+    const ta = new Date(a.updatedAt || a.lastMessage?.createdAt || 0).getTime();
+    const tb = new Date(b.updatedAt || b.lastMessage?.createdAt || 0).getTime();
+    return tb - ta;
+  });
+
+  console.log('[DM API] getContacts mapped:', dehubItems.length, 'conversations');
+  return dehubItems.slice(0, limit);
+}
+
+export async function getConversations(
+  page: number = 0,
+  limit: number = 20,
+  searchQuery?: string
+): Promise<{ items: DeHubConversation[]; totalCount: number; hasMore: boolean }> {
+  console.log('[DM API] getConversations called', { page, limit, searchQuery });
+
+  if (!searchQuery) {
+    const token = getAuthToken();
+    if (!token) return { items: [], totalCount: 0, hasMore: false };
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const userAddress = payload.address?.toLowerCase();
+      if (!userAddress) return { items: [], totalCount: 0, hasMore: false };
+      const items = await getContacts(userAddress, page, limit);
+      return { items, totalCount: items.length, hasMore: items.length >= limit };
+    } catch (error) {
+      console.error('[DM API] getConversations failed:', error);
+      throw error;
+    }
+  }
+
+  // Search path — server-side search
+  try {
+    const response = await apiCall<any>('/api/dm/search', {
+      params: { query: searchQuery, page, limit },
+      requiresAuth: true,
+    });
+    console.log('[DM API] Search response:', response);
+
+    if (response?.result?.items) return response.result;
+    if (response?.result && Array.isArray(response.result)) {
+      return { items: response.result, totalCount: response.result.length, hasMore: response.result.length >= limit };
+    }
+    if (Array.isArray(response)) {
+      return { items: response, totalCount: response.length, hasMore: response.length >= limit };
+    }
+    return { items: [], totalCount: 0, hasMore: false };
+  } catch (error) {
+    console.error('[DM API] Search failed:', error);
+    throw error;
+  }
+}
+
+export async function getConversation(conversationId: string, myAddress: string): Promise<DeHubConversation> {
+  if (conversationId.startsWith('new_')) {
+    const address = conversationId.replace('new_', '');
+    return {
+      id: conversationId,
+      participants: [{ address } as any],
+      otherUser: { address } as any,
+      unreadCount: 0,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+  }
+
+  const response = await apiCall<{ result: DeHubConversation }>(`/api/dm/${conversationId}`, {
+    requiresAuth: true,
+  });
+  return mapApiConversationToDeHub(response.result, myAddress);
+}
+
+export async function createConversation(
+  recipientAddress: string,
+  recipientUser?: Partial<DeHubUser>
+): Promise<DeHubConversation> {
+  const otherUser: DeHubUser = recipientUser ? {
+    _id: recipientUser._id || recipientAddress,
+    address: recipientAddress,
+    username: recipientUser.username,
+    displayName: recipientUser.displayName || recipientUser.display_name,
+    avatarImageUrl: recipientUser.avatarImageUrl || recipientUser.avatarUrl,
+    isVerified: recipientUser.isVerified || recipientUser.is_verified,
+    dmSettings: (recipientUser as any).dmSettings,
+  } : {
+    _id: recipientAddress,
+    address: recipientAddress,
+  };
+
+  // Prefer MongoDB _id if available (search results always have it)
+  const recipientId = recipientUser?._id;
+
+  try {
+    const response = await apiCall<{ status: boolean; data: { _id: string } }>(
+      '/api/dm/create',
+      {
+        method: 'POST',
+        body: recipientId
+          ? { recipientId }
+          : { recipientAddress: recipientAddress.toLowerCase() },
+        requiresAuth: true,
+      },
+    );
+
+    if (response?.status && response.data?._id) {
+      return {
+        id: response.data._id,
+        participants: [otherUser],
+        otherUser,
+        unreadCount: 0,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+    }
+  } catch (err) {
+    console.warn('[DM] createConversation REST failed, using local fallback:', err);
+  }
+
+  // Fallback: local virtual conversation (message won't reach recipient until socket is healthy)
+  return {
+    id: `new_${recipientAddress}`,
+    participants: [otherUser],
+    otherUser,
+    unreadCount: 0,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+}
+
+export async function deleteConversation(
+  dmId: string,
+  address?: string,
+  options: { forEveryone?: boolean } = {},
+): Promise<{ success: boolean }> {
+  const myAddress = address?.toLowerCase() || (() => {
+    try {
+      const token = getAuthToken();
+      if (token) {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        return payload.address?.toLowerCase() || '';
+      }
+    } catch {}
+    return '';
+  })();
+
+  // For virtual/wallet-based conversations, just return success (no more Supabase DMs)
+  if (dmId.startsWith('new_') || /^0x[0-9a-fA-F]{40}$/i.test(dmId)) {
+    return { success: true };
+  }
+
+  // Delete for both (1:1 only): every message and the chat go for both people.
+  if (options.forEveryone) {
+    await apiCall<any>(`/api/dm/conversation/${encodeURIComponent(dmId)}?forEveryone=1`, {
+      method: 'DELETE',
+      body: { forEveryone: true },
+      requiresAuth: true,
+    });
+    return { success: true };
+  }
+
+  // For real Riftn conversations, call the API AND clean up Supabase
+  try {
+    await apiCall<any>('/api/dm/delete-messages', {
+      method: 'POST',
+      body: { address: myAddress, dmId },
+      requiresAuth: true,
+    });
+  } catch (err) {
+    console.error('[DM API] deleteConversation Riftn API failed:', err);
+    throw err;
+  }
+
+  return { success: true };
+}
+
+// ─── Messages ─────────────────────────────────────────────────────────────────
+
+
+
+export async function getMessages(
+  conversationId: string,
+  page: number = 0,
+  limit: number = 30
+): Promise<{ items: DmMessage[]; totalCount: number; hasMore: boolean }> {
+  const myAddress = (localStorage.getItem('dehub_wallet') || '').toLowerCase();
+
+  // Virtual conversations no longer supported (legacy Supabase DMs removed)
+  if (conversationId.startsWith('new_') || /^0x[0-9a-fA-F]{40}$/i.test(conversationId)) {
+    return { items: [], totalCount: 0, hasMore: false };
+  }
+
+  try {
+    const response = await apiCall<any>(`/api/dm/messages/${conversationId}`, {
+      params: { skip: Math.max(0, Math.round(page * limit)), limit },
+      requiresAuth: true,
+    });
+    let rawItems: any[] = [];
+    let hasMore = false;
+    let totalCount = 0;
+
+    if (response?.result?.items && Array.isArray(response.result.items)) {
+      rawItems = response.result.items;
+      hasMore = response.result.hasMore ?? rawItems.length >= limit;
+      totalCount = response.result.totalCount || rawItems.length;
+    } else if (response?.result && Array.isArray(response.result)) {
+      rawItems = response.result;
+      hasMore = rawItems.length >= limit;
+      totalCount = rawItems.length;
+    } else if (response?.items && Array.isArray(response.items)) {
+      rawItems = response.items;
+      hasMore = response.hasMore ?? rawItems.length >= limit;
+      totalCount = response.totalCount || rawItems.length;
+    } else if (response?.messages && Array.isArray(response.messages)) {
+      rawItems = response.messages;
+      hasMore = response.hasMore ?? rawItems.length >= limit;
+      totalCount = response.totalCount || rawItems.length;
+    } else if (Array.isArray(response)) {
+      rawItems = response;
+      hasMore = rawItems.length >= limit;
+      totalCount = rawItems.length;
+    }
+
+    const items = rawItems
+      .map(raw => parseDmMessage(raw, myAddress))
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+    const isReadCount = items.filter(m => m.isRead).length;
+    const myMsgCount = items.filter(m => m.author === 'me').length;
+    console.log('[DM API] getMessages parsed', { total: items.length, isReadCount, myMsgCount });
+    return { items, totalCount, hasMore };
+  } catch (error) {
+    console.error('[DM API] getMessages failed:', error);
+    throw error;
+  }
+}
+
+/**
+ * Upload a media/voice file and create a DM message in one call.
+ * Uses POST /dm/upload (Riftn CDN).
+ */
+export async function uploadAndSendMedia(
+  file: File | File[],
+  conversationId: string,
+  senderId: string,
+  opts?: {
+    content?: string;
+    batchId?: string;
+    msgType?: 'media' | 'voice';
+    voiceDuration?: number;
+    replyTo?: string;
+    txHash?: string;
+    /**
+     * The file is end-to-end encrypted ciphertext of this kind. The server
+     * stores it untouched and requires `content` to be an encrypted envelope.
+     */
+    encryptedKind?: MediaKind;
+    /** Video trim/cover/mirror/rotate/hide, for an attachment sent in the clear. */
+    mediaOptions?: DmVideoOptions;
+    /** Self-destruct choice; works for encrypted files too (only the timer is in the clear). */
+    destruct?: DmDestructChoice;
+    /** Put the photo or video behind this price, in USD. Never combined with encryptedKind. */
+    lockPrice?: number;
+  }
+): Promise<DmMessage> {
+  const formData = new FormData();
+  const photos = Array.isArray(file);
+  if (photos) {
+    for (const photo of file) formData.append('files', photo, photo.name);
+    if (opts?.batchId) formData.append('batchId', opts.batchId);
+  } else {
+    formData.append('file', file, file.name);
+  }
+  formData.append('conversationId', conversationId);
+  formData.append('senderId', senderId);
+  if (opts?.content) formData.append('content', opts.content);
+  if (opts?.msgType) formData.append('msgType', opts.msgType);
+  if (opts?.voiceDuration != null) formData.append('voiceDuration', String(opts.voiceDuration));
+  if (opts?.replyTo) formData.append('replyTo', opts.replyTo);
+  if (opts?.txHash) formData.append('txHash', opts.txHash);
+  if (opts?.encryptedKind) formData.append('encryptedKind', opts.encryptedKind);
+  if (opts?.mediaOptions) formData.append('mediaOptions', JSON.stringify(opts.mediaOptions));
+  if (opts?.destruct) formData.append('destruct', String(opts.destruct));
+  if (opts?.lockPrice && opts.lockPrice > 0 && !opts.encryptedKind) {
+    formData.append('lockPriceUsd', String(opts.lockPrice));
+    // The DHB figure too, for a server that predates dollar prices.
+    formData.append('lockPrice', String(Math.max(1, Math.ceil(opts.lockPrice / DHB_PRELISTING_USD))));
+  }
+
+  const raw = await authedUpload<Record<string, unknown>>(photos ? '/api/dm/upload-photos' : '/api/dm/upload', formData, {
+    unwrapResult: true,
+  });
+  const myAddress = localStorage.getItem('dehub_wallet')?.toLowerCase() || '';
+  return parseDmMessage(raw, myAddress);
+}
+
+/** Price, who to pay, and (for the sender or a buyer) the real file. */
+export async function getLockedMedia(messageId: string): Promise<DmLockStatus> {
+  const res = await apiCall<DmLockStatus>(`/api/dm/locked/${messageId}`, { method: 'GET', requiresAuth: true });
+  return { ...res, lock: parseDmLock(res?.lock, !!res?.lock?.mine) as DmLock };
+}
+
+/**
+ * Hand in the tip that pays for a locked photo. `pending` means the payment
+ * has not been indexed yet; a `dmMediaUnlocked` socket event follows.
+ */
+export async function unlockLockedMedia(messageId: string, txHash: string): Promise<DmLockStatus & { status: 'unlocked' | 'pending' }> {
+  const res = await apiCall<DmLockStatus & { status: 'unlocked' | 'pending' }>(`/api/dm/locked/${messageId}/unlock`, { method: 'POST', body: { txHash }, requiresAuth: true });
+  return { ...res, lock: parseDmLock(res?.lock, false) as DmLock };
+}
+
+/**
+ * Forward an existing DM message over REST. `content` replaces the copied
+ * content and must be an encrypted envelope: an encrypted attachment is
+ * forwarded by resealing its descriptor for the target conversation, and the
+ * ciphertext already on the CDN is reused as it is.
+ */
+export async function forwardDmMessage(
+  messageId: string,
+  conversationId: string,
+  content?: string,
+): Promise<DmMessage> {
+  const res = await apiCall<{ status?: boolean; message?: string; result?: Record<string, unknown> }>('/api/dm/forward', {
+    method: 'POST',
+    body: { conversationId, messageId, ...(content ? { content } : {}) },
+    requiresAuth: true,
+  });
+  if (res?.status === false || !res?.result) throw new Error(res?.message || _translateCopy("copy.60761edbfeb6", { defaultValue: "Could not forward the message." }));
+  const myAddress = localStorage.getItem('dehub_wallet')?.toLowerCase() || '';
+  return parseDmMessage(res.result, myAddress);
+}
+
+/**
+ * Upload an image via the dm-upload-media Supabase edge function.
+ * Used for comment images and other non-DM media uploads.
+ * @deprecated For DM images, prefer uploadAndSendMedia instead.
+ */
+export async function uploadChatImage(file: File): Promise<{ url: string }> {
+  // Goes through a Supabase edge function rather than the Riftn API, so it
+  // cannot use authedUpload — but it still needs a live token rather than
+  // whatever happens to be in localStorage.
+  const token = await ensureFreshToken();
+
+  const walletAddress = localStorage.getItem('dehub_wallet');
+  if (!walletAddress) throw new Error('Wallet address not found');
+
+  const formData = new FormData();
+  formData.append('file', file, file.name);
+
+  const { data, error } = await supabase.functions.invoke('dm-upload-media', {
+    body: formData,
+    headers: {
+      'x-wallet-address': walletAddress.toLowerCase(),
+      'x-dehub-token': token,
+    },
+  });
+
+  if (error) throw error;
+  if (!data?.ok || !data?.url) throw new Error(data?.error || 'Upload failed — no URL returned');
+
+  return { url: data.url };
+}
+
+/**
+ * Mark conversation as read (companion to socket).
+ * Server expects: socket.emit('markAsRead', { dmId }); incoming updates use `readReceipt`.
+ * No REST for this path — emitReadReceipt in dm-socket emits `markAsRead`.
+ */
+export async function markConversationAsRead(conversationId: string): Promise<{ success: boolean }> {
+  if (conversationId.startsWith('new_') || /^0x[0-9a-fA-F]{40}$/i.test(conversationId)) {
+    return { success: true };
+  }
+  return { success: true };
+}
+
+// ─── User search ──────────────────────────────────────────────────────────────
+
+/**
+ * Handles are written `@name` everywhere in the product, so that is what people
+ * type into the recipient search — but `/api/dm/search` matches the stored
+ * username, which has no `@`. Sending the sigil through matched nothing and read
+ * as "that user doesn't exist". Stripped here rather than at the input so every
+ * caller (and the query key that caches the result) agrees on one form.
+ */
+export function normalizeUserSearchQuery(query: string | null | undefined): string {
+  return (query ?? '').trim().replace(/^@+/, '').trim();
+}
+
+export async function searchUsersForDM(
+  query: string,
+  page: number = 0,
+  limit: number = 10
+): Promise<{ items: DeHubUser[]; hasMore: boolean }> {
+  const trimmedQuery = normalizeUserSearchQuery(query);
+  if (trimmedQuery.length < 2) return { items: [], hasMore: false };
+
+  console.log('[DM API] searchUsersForDM called', { query: trimmedQuery });
+
+  try {
+    const response = await apiCall<any>('/api/dm/search', {
+      params: { q: trimmedQuery, page, limit },
+      requiresAuth: true,
+    });
+    console.log('[DM API] searchUsersForDM response:', response);
+
+    let accounts: any[] = [];
+    if (response?.users && Array.isArray(response.users)) accounts = response.users;
+    else if (response?.accounts?.items && Array.isArray(response.accounts.items)) accounts = response.accounts.items;
+    else if (response?.result?.accounts && Array.isArray(response.result.accounts)) accounts = response.result.accounts;
+    else if (response?.accounts && Array.isArray(response.accounts)) accounts = response.accounts;
+    else if (response?.result && Array.isArray(response.result)) accounts = response.result;
+    else if (Array.isArray(response)) accounts = response;
+
+    const items: DeHubUser[] = accounts.map((acc: any) => {
+      // dmSetting from search API comes as an array — extract first element
+      const rawDmSetting = acc.dmSettings || acc.dmSetting;
+      const dmSettings = Array.isArray(rawDmSetting) ? rawDmSetting[0] : rawDmSetting;
+      return {
+        _id: acc._id || acc.id,
+        id: acc.id || acc._id,
+        address: acc.address,
+        username: acc.username,
+        displayName: acc.displayName || acc.display_name,
+        display_name: acc.display_name || acc.displayName,
+        avatarImageUrl: acc.avatarImageUrl || acc.avatarUrl,
+        avatarUrl: acc.avatarUrl || acc.avatarImageUrl,
+        isVerified: acc.isVerified || acc.verified,
+        is_verified: acc.is_verified || acc.verified,
+        bio: acc.bio,
+        dmSettings: dmSettings || undefined,
+      };
+    });
+
+    return { items, hasMore: items.length >= limit };
+  } catch (error) {
+    console.error('[DM API] searchUsersForDM failed:', error);
+    return { items: [], hasMore: false };
+  }
+}
+
+// ─── Block / Unblock ──────────────────────────────────────────────────────────
+
+export async function blockConversation(conversationId: string): Promise<{ success: boolean }> {
+  try {
+    const response = await apiCall<any>('/api/dm/block', {
+      method: 'POST',
+      body: { conversationId },
+      requiresAuth: true,
+    });
+    return { success: response?.success !== false };
+  } catch (error) {
+    console.error('[DM API] blockConversation failed:', error);
+    throw error;
+  }
+}
+
+export async function unblockConversation(conversationId: string): Promise<{ success: boolean }> {
+  try {
+    const response = await apiCall<any>(`/api/dm/un-block/${conversationId}`, {
+      method: 'GET',
+      requiresAuth: true,
+    });
+    return { success: response?.success !== false };
+  } catch (error) {
+    console.error('[DM API] unblockConversation failed:', error);
+    throw error;
+  }
+}
+
+// ─── Group Chat ───────────────────────────────────────────────────────────────
+// Note: Riftn backend does not support group DMs (chat-system.md: "All DMs are 1:1 only").
+// These functions fail gracefully with a clear error.
+
+const groupNotSupported = () => _translateCopy("copy.6522198fff85", { defaultValue: "Group chat is not supported. Riftn DMs are 1:1 only." });
+
+export async function createGroup(
+  _name: string,
+  _memberAddresses: string[],
+  _description?: string
+): Promise<DeHubConversation> {
+  throw new Error(groupNotSupported());
+}
+
+export async function getGroupInfo(_groupId: string): Promise<GroupInfo> {
+  throw new Error(groupNotSupported());
+}
+
+export async function joinGroup(_groupId: string): Promise<{ success: boolean }> {
+  throw new Error(groupNotSupported());
+}
+
+export async function updateGroup(
+  _groupId: string,
+  _updates: { name?: string; description?: string; avatarUrl?: string }
+): Promise<GroupInfo> {
+  throw new Error(groupNotSupported());
+}
+
+export async function leaveGroup(_groupId: string): Promise<{ success: boolean }> {
+  throw new Error(groupNotSupported());
+}
+
+export async function blockUserInGroup(
+  _groupId: string,
+  _userAddress: string
+): Promise<{ success: boolean }> {
+  throw new Error(groupNotSupported());
+}
+
+// ─── User Status ──────────────────────────────────────────────────────────────
+
+export async function getDMContacts(
+  address: string,
+  page: number = 0,
+  limit: number = 10
+): Promise<{ items: DeHubUser[]; hasMore: boolean }> {
+  const response = await apiCall<{ result: { items: DeHubUser[]; hasMore: boolean } }>(`/api/dm/contacts/${address}`, {
+    params: { page, limit },
+    requiresAuth: true,
+  });
+  return response.result || { items: [], hasMore: false };
+}
+
+export async function getDMUserStatus(address: string): Promise<{ online: boolean; lastSeen?: string }> {
+  const response = await apiCall<{ result: { online: boolean; lastSeen?: string } }>(`/api/dm/user-status/${address}`, {
+    requiresAuth: true,
+  });
+  return response.result || { online: false };
+}
+
+export async function getUserOnlineStatus(address: string): Promise<UserOnlineStatus> {
+  try {
+    const response = await apiCall<any>(`/api/dm/user-status/${address}`, {
+      method: 'GET',
+      requiresAuth: true,
+    });
+    const result = response?.result || response;
+    return { address, online: result?.online ?? false, lastSeen: result?.lastSeen };
+  } catch (error) {
+    console.error('[DM API] getUserOnlineStatus failed:', error);
+    return { address, online: false };
+  }
+}
+
+// ─── Subscription-gated DMs ───────────────────────────────────────────────────
+
+export async function getDMPlanSettings(planId: string): Promise<{
+  enabled: boolean;
+  minTipDhb?: number;
+  allowedMessageTypes?: DMMessageType[];
+}> {
+  try {
+    const response = await apiCall<any>(`/api/dm/plan/${planId}`, {
+      method: 'GET',
+      requiresAuth: true,
+    });
+    const settings = response?.result ?? response;
+    if (!settings || typeof settings !== 'object') return { enabled: true };
+    const minTip = Number(settings.minTipDhb);
+    return {
+      enabled: settings.enabled !== false,
+      minTipDhb: Number.isFinite(minTip) && minTip > 0 ? minTip : undefined,
+      allowedMessageTypes: Array.isArray(settings.allowedMessageTypes)
+        ? settings.allowedMessageTypes
+        : undefined,
+    };
+  } catch (error) {
+    console.error('[DM API] getDMPlanSettings failed:', error);
+    return { enabled: true };
+  }
+}
+
+// ─── DM Videos ────────────────────────────────────────────────────────────────
+
+export async function getDMVideos(
+  page: number = 0,
+  limit: number = 20
+): Promise<{ items: DeHubNFT[]; hasMore: boolean }> {
+  try {
+    const response = await apiCall<any>('/api/dm/dm-videos', {
+      params: { page, limit },
+      requiresAuth: true,
+    });
+    if (response?.result?.items) return response.result;
+    if (response?.result && Array.isArray(response.result)) {
+      return { items: response.result, hasMore: response.result.length >= limit };
+    }
+    if (Array.isArray(response)) {
+      return { items: response, hasMore: response.length >= limit };
+    }
+    return { items: [], hasMore: false };
+  } catch (error) {
+    console.error('[DM API] getDMVideos failed:', error);
+    return { items: [], hasMore: false };
+  }
+}
+
+// ─── Free DM Access ───────────────────────────────────────────────────────────
+
+export interface FreeAccessUser {
+  address: string;
+  username?: string;
+  displayName?: string;
+  avatarImageUrl?: string;
+  grantedAt?: string;
+}
+
+/**
+ * None of the three calls below has ever reached the server.
+ *
+ * The routes are `POST` and `DELETE /dm/free-access` and `GET /dm/free-access`;
+ * `grant-free-access`, `revoke-free-access` and `free-access-list` exist
+ * nowhere in the backend and never did, so all three 404'd. The `try/catch`
+ * around each one turned that into a thrown error the UI reported as a failed
+ * grant, and into a silently empty list — which is why the free-DM-access
+ * feature has always looked like it does nothing.
+ *
+ * The body key is `userAddress`, not `address`: the server takes the list
+ * owner from the auth token and ignores any `address` the client sends, so a
+ * body keyed `address` would 400 on a missing `userAddress` even once the path
+ * was right.
+ */
+
+/**
+ * Grant free DM access to a specific user (they can message you without paying the fee).
+ */
+export async function grantFreeDmAccess(targetAddress: string): Promise<{ success: boolean }> {
+  try {
+    const response = await apiCall<any>('/api/dm/free-access', {
+      method: 'POST',
+      body: { userAddress: targetAddress },
+      requiresAuth: true,
+    });
+    return { success: response?.success !== false };
+  } catch (error) {
+    console.error('[DM API] grantFreeDmAccess failed:', error);
+    throw error;
+  }
+}
+
+/**
+ * Revoke free DM access from a specific user.
+ */
+export async function revokeFreeDmAccess(targetAddress: string): Promise<{ success: boolean }> {
+  try {
+    const response = await apiCall<any>('/api/dm/free-access', {
+      method: 'DELETE',
+      body: { userAddress: targetAddress },
+      requiresAuth: true,
+    });
+    return { success: response?.success !== false };
+  } catch (error) {
+    console.error('[DM API] revokeFreeDmAccess failed:', error);
+    throw error;
+  }
+}
+
+export async function pinDmMessage(dmId: string, messageId: string, address: string): Promise<void> {
+  await apiCall<any>(`/api/dm/${dmId}/pin`, {
+    method: 'POST',
+    body: { messageId, address: address.toLowerCase() },
+    requiresAuth: true,
+  });
+}
+
+export async function unpinDmMessage(dmId: string, messageId: string, address: string): Promise<void> {
+  await apiCall<any>(`/api/dm/${dmId}/pin`, {
+    method: 'DELETE',
+    body: { messageId, address: address.toLowerCase() },
+    requiresAuth: true,
+  });
+}
+
+/**
+ * Get list of users who have been granted free DM access.
+ */
+export async function getFreeDmAccessList(): Promise<FreeAccessUser[]> {
+  const response = await apiCall<{ success?: boolean; data?: FreeAccessUser[] }>('/api/dm/free-access', {
+    method: 'GET',
+    requiresAuth: true,
+  });
+  if (response?.success === false || !Array.isArray(response?.data)) {
+    throw new Error('Could not load free DM access');
+  }
+  return response.data.filter(user => Boolean(user?.address));
+}
+
+/**
+ * The recipient has watched a view-once attachment (the server removes it for
+ * both), or opened an on-open one (its countdown starts; `expiresAt` says when
+ * it goes).
+ */
+export async function markDmMessageViewed(messageId: string): Promise<{ status?: string; expiresAt?: string; replaysLeft?: number }> {
+  const res = await apiCall<{ status?: string; expiresAt?: string; replaysLeft?: number }>(`/api/dm/message/${encodeURIComponent(messageId)}/viewed`, { method: 'POST', requiresAuth: true });
+  return (res && typeof res === 'object') ? res : {};
+}

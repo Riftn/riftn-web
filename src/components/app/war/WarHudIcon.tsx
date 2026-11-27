@@ -1,0 +1,439 @@
+import type React from 'react';
+import { AudioLines, AtSign, Crosshair, Gem, Film, Layers, Mail, Rocket, Star, Wand2, Palette, Clapperboard, Flame, Lamp, Ticket, Tv, type LucideIcon, Zap, Anchor, Armchair, Bomb, Handshake, Hourglass, Shield, Siren, TrendingUp, Waves, Target } from "lucide-react";
+import BarChart3 from "@/components/ui/cut-icons/stats";
+import CalendarDays from "@/components/ui/cut-icons/events";
+import Coins from "@/components/ui/cut-icons/coins";
+import WalletGlyph from "@/components/ui/cut-icons/wallet";
+import ImageIcon from "@/components/ui/cut-icons/images";
+import Landmark from "@/components/ui/cut-icons/dao";
+import Link2 from "@/components/ui/cut-icons/link";
+import Radio from "@/components/ui/cut-icons/live";
+import Users from "@/components/ui/cut-icons/communities";
+import BookOpen from "@/components/ui/cut-icons/docs";
+import Briefcase from "@/components/ui/cut-icons/bounties";
+import Hammer from "@/components/ui/cut-icons/work";
+import Gamepad2 from "@/components/ui/cut-icons/arcade";
+import Lightbulb from "@/components/ui/cut-icons/feature-requests";
+import LayoutDashboard from "@/components/ui/cut-icons/command";
+import Lock from "@/components/ui/cut-icons/privacy";
+import Megaphone from "@/components/ui/cut-icons/advertising";
+import ShieldCheck from "@/components/ui/cut-icons/security";
+import Sparkles from "@/components/ui/cut-icons/assistant";
+import Store from "@/components/ui/cut-icons/store";
+import Trophy from "@/components/ui/cut-icons/leaderboard";
+import Vault from "@/components/ui/cut-icons/staking";
+
+import Bookmark from "@/components/ui/cut-icons/save";
+import Home from "@/components/ui/cut-icons/home";
+import MessageSquare from "@/components/ui/cut-icons/messages";
+import Bell from "@/components/ui/cut-icons/alerts";
+import MessageEnvelope from "@/components/ui/cut-icons/message-envelope";
+import Mic from "@/components/ui/cut-icons/mic";
+import Settings from "@/components/ui/cut-icons/settings";
+import User from "@/components/ui/cut-icons/profile";
+
+import { useAppTheme } from '@/contexts/ThemeContext';
+
+/**
+ * War theme replacement for the generated "shiny metal" page and tab artwork.
+ * ==========================================================================
+ * The app ships twelve bespoke raster icons (`*-3d-icon.png`) used as page
+ * titles and profile tab empty states. They are glossy 3D renders, which is
+ * the opposite of a flat tactical readout, so under War they are swapped for a
+ * stroked glyph inside a HUD bracket frame.
+ *
+ * WHY SVG AND NOT A WEBGL CANVAS
+ * ------------------------------
+ * A canvas per icon means a GPU context per icon. Browsers keep roughly 16
+ * live contexts on desktop and often only about 8 on mobile Safari, and when
+ * the cap is passed the oldest context is dropped: a profile tab with a few of
+ * these would knock out the tactical background or the logo hologram. War can
+ * already hold four contexts (background, logo, boot sequence, game). Icons are
+ * the one thing that must never take one, because there are many of them, they
+ * are small, and there is nothing a shader buys at 64px that a stroke does not.
+ *
+ * Stroked SVG is also the format the reference art actually is: thin lines with
+ * a glow. `drop-shadow` on a stroke traces the stroke, so the glow follows the
+ * glyph rather than boxing it, which is the mistake the first logo pass made.
+ *
+ * Glyphs come from lucide, already this project's icon family, rather than
+ * being hand drawn. The bracket frame around them is chrome, not an icon, and
+ * is drawn in CSS.
+ */
+
+/**
+ * Maps a bundled asset URL to its replacement glyph.
+ *
+ * Matching is on the filename stem because Vite fingerprints these imports
+ * (`home-3d-icon.png` becomes `/assets/home-3d-icon-a1b2c3.png`), so the call
+ * sites can keep passing the imported URL and need no changes at all.
+ */
+const GLYPHS: ReadonlyArray<readonly [string, LucideIcon]> = [
+  // Feed and profile tabs
+  ['home-3d-icon', Home],
+  ['image-frame-3d-icon', ImageIcon],
+  ['filmstrip-3d-icon', Film],
+  ['audio-3d-icon', AudioLines],
+  ['live-3d-icon', Radio],
+  ['fractions-3d-icon', Layers],
+  ['comment-3d-icon', MessageSquare],
+  ['star-3d-icon', Star],
+  ['subs-3d-icon', Users],
+  ['lock-3d', Lock],
+  ['padlock', Lock],
+
+  // Page titles
+  ['bookmark-3d-icon', Bookmark],
+  ['bookmark-icon', Bookmark],
+  ['messages-3d-icon', MessageEnvelope],
+  ['messages-icon', MessageEnvelope],
+  ['chat-bubble', MessageEnvelope],
+  ['notifications-icon', Bell],
+  ['settings-icon', Settings],
+  ['profile-icon', User],
+  ['communities-title-icon', Users],
+  ['glossary-icon', BookOpen],
+  ['governance-shield', ShieldCheck],
+  ['trophy-icon', Trophy],
+  ['stages-mic-icon', Mic],
+  ['careers-briefcase', Briefcase],
+  ['features-lightbulb', Lightbulb],
+  ['trending-fire-icon', Flame],
+  ['ppv-ticket-icon', Ticket],
+  ['lava-lamp-icon', Lamp],
+  ['dehub-originals', Clapperboard],
+  ['arcade.webp', Gamepad2],
+  ['stores.webp', Store],
+  ['bounties.webp', Hammer],
+  ['events.webp', CalendarDays],
+  ['stats.webp', BarChart3],
+  ['ads.webp', Megaphone],
+  ['command.webp', LayoutDashboard],
+
+  // Crosshair rather than a magnifier: on a tactical readout, search reads as
+  // acquiring a target. Both search assets map to it.
+  ['search-3d-icon', Crosshair],
+  ['search-icon', Crosshair],
+
+  // Assistant. Sparkles is the closest stroked equivalent to the glossy star.
+  ['ai-sparkle-icon', Sparkles],
+  ['ai-star-icon', Sparkles],
+
+  // The prompt landing's wand. Not a "-3d-icon" asset, but the same glossy
+  // treatment and the same problem under War.
+  ['wand', Wand2],
+];
+
+export type ThemeIconKey =
+  | 'home' | 'posts' | 'images' | 'videos' | 'subscriptions' | 'audio'
+  | 'live' | 'fractions' | 'pinned' | 'search' | 'messages' | 'bookmarks'
+  | 'wand' | 'paint' | 'communities' | 'careers' | 'features' | 'glossary'
+  | 'governance' | 'trophy' | 'notifications' | 'settings' | 'stages'
+  | 'assistant' | 'lock' | 'profile' | 'arcade' | 'stores' | 'bounties'
+  | 'events' | 'stats' | 'ads' | 'command' | 'email' | 'accounts'
+  | 'usernames' | 'tv' | 'superpowers' | 'boost' | 'dao' | 'staking' | 'bridge' | 'buy' | 'nfts' | 'wallet'
+  | 'second-wind' | 'comment-anchor' | 'trend-jacker' | 'timeline-bomber'
+  | 'signal-flare' | 'flak-jacket' | 'precision-strike' | 'harpoon'
+  | 'team-up' | 'front-row' | 'deep-current';
+
+/**
+ * Raster icon replacements shared by every non-War themed page.
+ *
+ * Like GLYPHS, matching uses the unhashed part of Vite's asset URL. Keeping
+ * this in BrandIcon means a page opts into every themed set once; page
+ * components never grow theme branches or import twenty-four variants.
+ */
+const THEME_ICON_KEYS: ReadonlyArray<readonly [string, ThemeIconKey]> = [
+  ['community-posts-3d-icon', 'posts'],
+  ['community-chat-3d-icon', 'messages'],
+  ['community-events-3d-icon', 'events'],
+  ['community-members-3d-icon', 'subscriptions'],
+  ['community-about-3d-icon', 'glossary'],
+  ['home-3d-icon', 'home'],
+  ['comment-3d-icon', 'posts'],
+  ['image-frame-3d-icon', 'images'],
+  ['filmstrip-3d-icon', 'videos'],
+  ['subs-3d-icon', 'subscriptions'],
+  ['audio-3d-icon', 'audio'],
+  ['live-3d-icon', 'live'],
+  ['fractions-3d-icon', 'fractions'],
+  ['star-3d-icon', 'pinned'],
+  ['search-3d-icon', 'search'],
+  ['search-icon', 'search'],
+  ['messages-3d-icon', 'messages'],
+  ['messages-icon', 'messages'],
+  ['chat-bubble', 'messages'],
+  ['bookmark-3d-icon', 'bookmarks'],
+  ['bookmark-icon', 'bookmarks'],
+  ['wand', 'wand'],
+  ['communities-title-icon', 'communities'],
+  ['careers-briefcase', 'careers'],
+  ['features-lightbulb', 'features'],
+  ['glossary-icon', 'glossary'],
+  ['governance-shield', 'governance'],
+  ['trophy-icon', 'trophy'],
+  ['notifications-icon', 'notifications'],
+  ['settings-icon', 'settings'],
+  ['stages-mic-icon', 'stages'],
+  ['ai-sparkle-icon', 'assistant'],
+  ['ai-star-icon', 'assistant'],
+  ['boost-3d-icon', 'boost'],
+  ['lock-3d', 'lock'],
+  ['padlock', 'lock'],
+  ['profile-icon', 'profile'],
+  ['dehub-originals', 'videos'],
+  ['arcade.webp', 'arcade'],
+  ['stores.webp', 'stores'],
+  ['bounties.webp', 'bounties'],
+  ['events.webp', 'events'],
+  ['stats.webp', 'stats'],
+  ['ads.webp', 'ads'],
+  ['command.webp', 'command'],
+];
+
+const FULL_RASTER_THEMES = new Set([
+  'cosmic', 'hazy', 'swarms', 'lavalamp', 'winter',
+  'osaka', 'jungle', 'light', 'minimal', 'war', 'hacker', 'island', 'horror',
+]);
+const SYSTEM_REFRESHED_KEYS = new Set<ThemeIconKey>([
+  'home', 'posts', 'images', 'videos', 'subscriptions', 'audio', 'live',
+  'fractions', 'pinned', 'search', 'messages', 'bookmarks',
+  'wand', 'paint', 'communities', 'careers', 'features', 'glossary', 'governance',
+  'trophy', 'notifications', 'settings', 'stages', 'assistant', 'lock', 'profile',
+  'arcade', 'stores', 'bounties', 'events', 'stats', 'ads', 'command',
+  'email', 'accounts', 'usernames', 'tv', 'superpowers', 'boost',
+  'dao', 'staking', 'bridge', 'buy', 'nfts', 'wallet',
+  'second-wind', 'comment-anchor', 'trend-jacker', 'timeline-bomber',
+  'signal-flare', 'flak-jacket', 'precision-strike', 'harpoon',
+  'team-up', 'front-row', 'deep-current',
+]);
+
+/** Bump when a file is redrawn in place, or browsers and the app keep the old art. */
+export const THEME_ICON_REVISION = '12';
+
+const TRANSPARENT_PNG_KEYS = new Set<ThemeIconKey>([
+  'boost', 'second-wind', 'comment-anchor', 'trend-jacker', 'timeline-bomber',
+  'signal-flare', 'flak-jacket', 'precision-strike', 'harpoon',
+  'team-up', 'front-row', 'deep-current',
+]);
+
+const THEME_KEY_GLYPHS: Record<ThemeIconKey, LucideIcon> = {
+  home: Home,
+  posts: MessageSquare,
+  images: ImageIcon,
+  videos: Film,
+  subscriptions: Users,
+  audio: AudioLines,
+  live: Radio,
+  fractions: Layers,
+  pinned: Star,
+  search: Crosshair,
+  messages: MessageEnvelope,
+  bookmarks: Bookmark,
+  wand: Wand2,
+  paint: Palette,
+  communities: Users,
+  careers: Briefcase,
+  features: Lightbulb,
+  glossary: BookOpen,
+  governance: ShieldCheck,
+  trophy: Trophy,
+  notifications: Bell,
+  settings: Settings,
+  stages: Mic,
+  assistant: Sparkles,
+  lock: Lock,
+  profile: User,
+  arcade: Gamepad2,
+  stores: Store,
+  bounties: Hammer,
+  events: CalendarDays,
+  stats: BarChart3,
+  ads: Megaphone,
+  command: LayoutDashboard,
+  email: Mail,
+  accounts: Users,
+  usernames: AtSign,
+  tv: Tv,
+  superpowers: Zap,
+  boost: Rocket,
+  'second-wind': Hourglass,
+  'comment-anchor': Anchor,
+  'trend-jacker': TrendingUp,
+  'timeline-bomber': Bomb,
+  'signal-flare': Siren,
+  'flak-jacket': Shield,
+  'precision-strike': Crosshair,
+  harpoon: Target,
+  'team-up': Handshake,
+  'front-row': Armchair,
+  'deep-current': Waves,
+  dao: Landmark,
+  staking: Vault,
+  bridge: Link2,
+  buy: Coins,
+  nfts: Gem,
+  wallet: WalletGlyph,
+};
+
+export function resolveThemeIconKey(src: string): ThemeIconKey | null {
+  // Semantic URLs must resolve every key, including page identities and PNG powers.
+  const semanticKey = src.match(/\/theme-icons\/[^/]+\/([^/?]+)\.(?:webp|png|svg)(?:\?|$)/)?.[1];
+  if (semanticKey && semanticKey in THEME_KEY_GLYPHS) return semanticKey as ThemeIconKey;
+  for (const [stem, key] of THEME_ICON_KEYS) {
+    if (src.includes(stem)) return key;
+  }
+  return null;
+}
+
+/** Return a public, cacheable WebP URL when this theme owns the icon. */
+export function resolveThemeIconAsset(src: string, requestedTheme: string): string | null {
+  const theme = requestedTheme;
+  const key = resolveThemeIconKey(src);
+  if (!key) return null;
+  if (theme === 'glass') return `/theme-icons/glass/${key}.svg`;
+  const extension = TRANSPARENT_PNG_KEYS.has(key) ? 'png' : 'webp';
+  if (FULL_RASTER_THEMES.has(theme)) return `/theme-icons/${theme}/${key}.${extension}`;
+  if ((theme === 'system' || theme === 'immersive') && SYSTEM_REFRESHED_KEYS.has(key)) {
+    return `/theme-icons/system/${key}.${extension}`;
+  }
+  return null;
+}
+
+/*
+ * DELIBERATELY NOT MAPPED, even though they are images of a similar size:
+ *
+ *   dehub-coin, and the token logos (eth, btc, usdc, usdt, bnb, base, solana)
+ *     Currency marks. A stroked glyph would misrepresent which asset is being
+ *     shown, and a glowing coin reads as a status light.
+ *   medal-1 through medal-10
+ *     Leaderboard ranks. The artwork encodes the placing; a single glyph would
+ *     erase the distinction between first and tenth.
+ *   ai-logos/*, logo-*, and the game category art
+ *     Third party brands and cover art. Substituting someone else's mark for a
+ *     generic glyph misrepresents them.
+ *   dehub-logo-compact / dehub-logo-white
+ *     The brand mark, handled by WarLogo as a hologram instead.
+ */
+
+/** Resolve the glyph for an asset URL, or null when it is not one of ours. */
+export function resolveWarGlyph(src: string): LucideIcon | null {
+  const key = resolveThemeIconKey(src);
+  if (key) return THEME_KEY_GLYPHS[key];
+  for (const [stem, Glyph] of GLYPHS) {
+    if (src.includes(stem)) return Glyph;
+  }
+  return null;
+}
+
+interface WarHudIconProps {
+  /** The original asset URL. Used only to pick the replacement glyph. */
+  src: string;
+  alt: string;
+  /** Sizing classes from the call site, applied to the frame. */
+  className?: string;
+}
+
+/**
+ * Renders the HUD glyph, or null when the source is not a mapped asset so the
+ * caller can fall back to its original image rather than showing a blank.
+ */
+export function WarHudIcon({ src, alt, className }: WarHudIconProps) {
+  const asset = resolveThemeIconAsset(src, 'war');
+  const Glyph = resolveWarGlyph(src);
+  if (!asset && !Glyph) return null;
+
+  return (
+    <span
+      data-war-hud-icon
+      data-theme-icon-family="war"
+      className={className}
+      role={alt ? 'img' : undefined}
+      aria-label={alt || undefined}
+      aria-hidden={alt ? undefined : true}
+    >
+      {asset ? <img src={`${asset}?v=${THEME_ICON_REVISION}`} alt="" aria-hidden="true" />
+        : Glyph ? <Glyph strokeWidth={1.5} aria-hidden="true" /> : null}
+    </span>
+  );
+}
+
+type BrandIconProps = React.ImgHTMLAttributes<HTMLImageElement> & {
+  src: string;
+};
+
+/**
+ * Drop-in replacement for the `<img>` tags that render the glossy page and tab
+ * artwork.
+ *
+ * Accepts and forwards every img attribute, so adopting it at a call site is a
+ * pure tag rename with the attributes untouched. That matters: there are around
+ * thirty of these, and a rename cannot silently change layout the way
+ * rewriting each one by hand could.
+ *
+ * Under War, mapped artwork renders inside the HUD frame and the
+ * img-only attributes (loading, fetchPriority, width) are simply not relevant.
+ * Everywhere else, and for any unmapped asset, it renders exactly the image the
+ * call site asked for.
+ *
+ * `object-contain` is dropped on the HUD path deliberately: it is meaningless
+ * for an inline-flex glyph and would not apply anyway.
+ */
+export function BrandIcon({ src, alt = '', className, ...imgProps }: BrandIconProps) {
+  const { theme } = useAppTheme();
+
+  if (theme === 'war' && resolveWarGlyph(src)) {
+    return (
+      <WarHudIcon
+        src={src}
+        alt={alt}
+        className={className?.replace(/\bobject-(contain|cover)\b/g, '').trim()}
+      />
+    );
+  }
+
+  const asset = resolveThemeIconAsset(src, theme);
+  const themedSrc = asset ? `${asset}?v=${THEME_ICON_REVISION}` : src;
+  return <img src={themedSrc} alt={alt} className={className} data-theme-icon-family={theme} {...imgProps} />;
+}
+
+type ThemedIconProps = Omit<React.ImgHTMLAttributes<HTMLImageElement>, 'src'> & {
+  icon: ThemeIconKey;
+};
+
+/**
+ * Semantic icon for empty, error and not-found states.
+ *
+ * Unlike BrandIcon, callers name the meaning instead of importing a legacy
+ * source asset. Every supported theme receives its own complete artwork pack;
+ * War keeps its tactical HUD frame around its custom holograms.
+ */
+export function ThemedIcon({ icon, alt = '', className, ...imgProps }: ThemedIconProps) {
+  const { theme } = useAppTheme();
+
+  if (theme === 'glass') return <img src={`/theme-icons/glass/${icon}.svg?v=${THEME_ICON_REVISION}`} alt={alt} className={className} data-theme-icon-family="glass" {...imgProps} />;
+
+  if (theme === 'war') {
+    return (
+      <WarHudIcon
+        src={`/theme-icons/war/${icon}.${TRANSPARENT_PNG_KEYS.has(icon) ? 'png' : 'webp'}`}
+        alt={alt}
+        className={className?.replace(/\bobject-(contain|cover)\b/g, '').trim()}
+      />
+    );
+  }
+
+  const rasterTheme = FULL_RASTER_THEMES.has(theme) ? theme : 'system';
+  const extension = TRANSPARENT_PNG_KEYS.has(icon) ? 'png' : 'webp';
+  return (
+    <img
+      src={`/theme-icons/${rasterTheme}/${icon}.${extension}?v=${THEME_ICON_REVISION}`}
+      alt={alt}
+      className={className}
+      data-theme-icon-family={theme}
+      {...imgProps}
+    />
+  );
+}
+
+export default WarHudIcon;

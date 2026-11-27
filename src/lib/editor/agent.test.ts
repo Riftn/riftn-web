@@ -1,0 +1,210 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { useEditorStore } from "@/store/editorStore";
+import { applyOps, askAgent, askSceneAgent, describeScene } from "./agent";
+import { useEditorUiStore } from "@/store/editorUiStore";
+
+describe("editor agent", () => {
+  beforeEach(() => useEditorStore.getState().newProject());
+
+  it('advertises installed generator controls to the shared planner and keeps a returned sound draft out of Undo history', async () => {
+    const fetch = vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response(JSON.stringify({ reply: '', ops: [{ op: 'generate', kind: 'sfx', prompt: 'A soft door closing.' }] }), { status: 200 }));
+    const before = useEditorStore.getState().toSnapshot(), past = useEditorStore.getState().past;
+    const scene = { selected: [], layers: [] };
+    try {
+      const result = await askSceneAgent([{ role: 'user', content: 'Could this have a soft door sound?' }], scene);
+      const body = JSON.parse(String(fetch.mock.calls[0][1]?.body));
+      expect(body).toEqual({ messages: [{ role: 'user', content: 'Could this have a soft door sound?' }], scene, generationKinds: ['image', 'video', 'voice', 'music', 'sfx'] });
+      expect(await applyOps(result.ops)).toMatchObject({ applied: 0, failed: 0, generate: { kind: 'sfx', prompt: 'A soft door closing.' } });
+      expect(useEditorStore.getState().clips).toEqual(before.clips); expect(useEditorStore.getState().past).toBe(past);
+    } finally { fetch.mockRestore(); }
+  });
+
+  it("performs the exact ten one-second cut request without a network planner", async () => {
+    useEditorStore.setState({ tracks: [{ id: "v", kind: "video", name: "Video", hidden: false, muted: false }], clips: [{ id: "v1", trackId: "v", kind: "video", mediaId: "m", start: 0, trimIn: 0, duration: 10 }] });
+    const fetch = vi.spyOn(globalThis, "fetch").mockRejectedValue(new Error("offline"));
+    try {
+      const result = await askAgent([{ role: "user", content: "break up the video into 10 1 second clips" }]);
+      expect(fetch).not.toHaveBeenCalled();
+      expect(await applyOps(result.ops)).toMatchObject({ applied: 1, failed: 0 });
+      expect(useEditorStore.getState().clips.map(c => c.trimIn)).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+    } finally { fetch.mockRestore(); }
+  });
+
+  it("prepares a voice draft offline without changing the project, undo history or active generator", async () => {
+    const snapshot = useEditorStore.getState().toSnapshot();
+    const past = useEditorStore.getState().past;
+    const other = { kind: "image" as const, prompt: "Existing draft" };
+    useEditorUiStore.getState().setGeneratePrefill(other);
+    const fetch = vi.spyOn(globalThis, "fetch").mockRejectedValue(new Error("offline"));
+    try {
+      const result = await askAgent([{ role: "user", content: 'Create a voiceover saying "Hello, Riftn."' }]);
+      const report = await applyOps(result.ops);
+      expect(report).toMatchObject({ applied: 0, failed: 0, generate: { kind: "voice", prompt: "Hello, Riftn." } });
+      expect(fetch).not.toHaveBeenCalled();
+      expect(useEditorStore.getState().toSnapshot()).toMatchObject({ ...snapshot, updatedAt: expect.any(Number) });
+      expect(useEditorStore.getState().past).toBe(past);
+      expect(useEditorUiStore.getState().generatePrefill).toBe(other);
+      expect(await applyOps([{ op: "generate", kind: "unsupported", prompt: "ambient" }])).toMatchObject({ applied: 0, failed: 1 });
+    } finally { fetch.mockRestore(); useEditorUiStore.getState().setGeneratePrefill(null); }
+  });
+
+  it("keeps each generation report independent while counting only real edits", async () => {
+    const first = await applyOps([{ op: "generate", kind: "image", prompt: "First image" }]);
+    const second = await applyOps([{ op: "generate", kind: "video", prompt: "Second video" }, { op: "add_text", text: "Title" }]);
+    expect(first).toMatchObject({ applied: 0, generate: { kind: "image", prompt: "First image", aspect: "16:9" } });
+    expect(second).toMatchObject({ applied: 1, failed: 0, generate: { kind: "video", prompt: "Second video" } });
+    useEditorStore.getState().undo();
+    expect(useEditorStore.getState().clips).toHaveLength(0);
+  });
+
+  it('prepares a soundtrack offline without changing clips or consuming Undo', async () => {
+    const snapshot = useEditorStore.getState().toSnapshot(), past = useEditorStore.getState().past;
+    const fetch = vi.spyOn(globalThis, 'fetch').mockRejectedValue(new Error('offline'));
+    try {
+      const request = await askAgent([{ role: 'user', content: 'Compose music of quiet piano and warm bass' }]);
+      expect(await applyOps(request.ops)).toMatchObject({ applied: 0, failed: 0, generate: { kind: 'music', prompt: 'quiet piano and warm bass' } });
+      expect(fetch).not.toHaveBeenCalled(); expect(useEditorStore.getState().clips).toEqual(snapshot.clips); expect(useEditorStore.getState().past).toBe(past);
+    } finally { fetch.mockRestore(); }
+  });
+
+  it("applies a multi-step request as one undo step", async () => {
+    const report = await applyOps([
+      { op: "set_canvas", aspect: "1:1", background: "#112233" },
+      { op: "add_text", text: "Summer sale", fontSize: 160, y: 0.2, color: "#ffffff" },
+      { op: "update", id: "new:0", italic: true, rotation: -5 },
+    ]);
+    expect(report).toMatchObject({ applied: 3, failed: 0 });
+
+    const s = useEditorStore.getState();
+    expect(s.settings).toMatchObject({ width: 1080, height: 1080, background: "#112233" });
+    const text = s.clips.find((c) => c.kind === "text");
+    expect(text).toMatchObject({ text: "Summer sale", fontSize: 160, y: 0.2, italic: true });
+    expect(text?.transform?.rotation).toBe(-5);
+
+    s.undo();
+    const after = useEditorStore.getState();
+    expect(after.clips).toHaveLength(0);
+    expect(after.settings.aspectPreset).toBe("16:9");
+  });
+
+  it("ignores unknown layers and ops instead of throwing", async () => {
+    const report = await applyOps([{ op: "place", id: "nope", x: 0.1 }, { op: "teleport" }]);
+    expect(report).toMatchObject({ applied: 0, failed: 2 });
+  });
+
+  it("segments video, addresses new segments, and undoes the whole request", async () => {
+    useEditorStore.setState({ tracks: [{ id: "v", kind: "video", name: "Video", muted: false, hidden: false }], clips: [{ id: "v1", trackId: "v", kind: "video", mediaId: "m1", start: 0, duration: 10, trimIn: 3, sourceDuration: 20 }] });
+    const report = await applyOps([{ op: "segment", id: "v1", count: 10, duration: 1 }, { op: "audio", id: "new:0", volume: 0 }]);
+    expect(report).toMatchObject({ applied: 2, failed: 0 });
+    expect(useEditorStore.getState().clips).toHaveLength(10);
+    expect(useEditorStore.getState().clips[1]).toMatchObject({ trimIn: 4, audio: { volume: 0 } });
+    useEditorStore.getState().undo();
+    expect(useEditorStore.getState().clips).toEqual([expect.objectContaining({ id: "v1", duration: 10, trimIn: 3 })]);
+  });
+
+  it("describes the scene compactly", async () => {
+    await applyOps([{ op: "add_text", text: "Hi" }]);
+    const scene = describeScene();
+    expect(scene.layers).toHaveLength(1);
+    expect(scene.layers[0]).toMatchObject({ kind: "text", text: "Hi" });
+    expect(JSON.stringify(scene).length).toBeLessThan(2000);
+  });
+});
+
+describe("editor agent shapes", () => {
+  beforeEach(() => useEditorStore.getState().newProject());
+
+  it("adds a styled shape behind a title and can hide and lock it", async () => {
+    const report = await applyOps([
+      { op: "add_shape", shape: "rect", w: 0.8, h: 0.2, fill: "#ff3366", radius: 24, y: 0.2 },
+      { op: "update", id: "new:0", blend: "multiply", locked: true },
+    ]);
+    expect(report).toMatchObject({ applied: 2, failed: 0 });
+    const shape = useEditorStore.getState().clips.find((c) => c.kind === "shape");
+    expect(shape).toMatchObject({ shape: "rect", w: 0.8, h: 0.2, fill: "#ff3366", radius: 24, blend: "multiply", locked: true });
+    expect(shape?.transform?.y).toBe(0.2);
+  });
+});
+
+describe("editor agent tolerance", () => {
+  beforeEach(() => useEditorStore.getState().newProject());
+
+  it("turns a size sent to set_canvas into the nearest aspect", async () => {
+    await applyOps([{ op: "set_canvas", x: 1080, y: 1080 }]);
+    expect(useEditorStore.getState().settings.aspectPreset).toBe("1:1");
+    await applyOps([{ op: "set_canvas", width: 1080, height: 1920 }]);
+    expect(useEditorStore.getState().settings.aspectPreset).toBe("9:16");
+  });
+});
+
+describe("templates", () => {
+  beforeEach(() => useEditorStore.getState().newProject());
+
+  it("builds every still template without stock photos and keeps layers the same length", async () => {
+    const { TEMPLATES, applyTemplate } = await import("./templates");
+    const t = ((k: string) => k) as unknown as import("i18next").TFunction;
+    for (const tpl of TEMPLATES.filter(template => template.kind !== "video")) {
+      // Stock search needs the network; the rest of the template must still build.
+      const ops = tpl.ops(t).filter((o) => o.op !== "add_stock");
+      await applyTemplate({ ...tpl, ops: () => ops }, t);
+      const s = useEditorStore.getState();
+      expect(s.settings.aspectPreset).toBe(tpl.aspect);
+      expect(s.clips.length).toBeGreaterThan(0);
+      const ends = new Set(s.clips.map((c) => c.start + c.duration));
+      expect(ends.size).toBe(1);
+    }
+  });
+});
+
+describe("agent layering", () => {
+  beforeEach(() => useEditorStore.getState().newProject());
+
+  it("stacks text at the same moment, above a shape added before it", async () => {
+    await applyOps([
+      { op: "add_shape", shape: "rect", fill: "#000000" },
+      { op: "add_text", text: "Title", y: 0.4 },
+      { op: "add_text", text: "Subtitle", y: 0.6 },
+    ]);
+    const s = useEditorStore.getState();
+    const z = (id: string) => s.tracks.findIndex((t) => t.id === s.clips.find((c) => c.id === id)?.trackId);
+    const [shape, title, subtitle] = s.clips;
+    expect(title.start).toBe(0);
+    expect(subtitle.start).toBe(0);
+    expect(z(title.id)).toBeGreaterThan(z(shape.id));
+    expect(z(subtitle.id)).toBeGreaterThan(z(title.id));
+  });
+});
+
+describe("pages", () => {
+  beforeEach(() => useEditorStore.getState().newProject());
+
+  it("builds a two-page carousel from agent ops, one undo", async () => {
+    await applyOps([
+      { op: "set_canvas", aspect: "1:1" },
+      { op: "add_text", text: "Slide one" },
+      { op: "add_page" },
+      { op: "add_text", text: "Slide two" },
+    ]);
+    const s = useEditorStore.getState();
+    expect(s.settings.pages).toEqual([0, 5]);
+    const [one, two] = s.clips;
+    expect(one.start).toBe(0);
+    expect(two.start).toBe(5);
+    s.undo();
+    expect(useEditorStore.getState().clips).toHaveLength(0);
+    expect(useEditorStore.getState().settings.pages).toBeUndefined();
+  });
+
+  it("duplicates the current page and deletes a middle page, closing the gap", async () => {
+    await applyOps([{ op: "add_shape", shape: "star" }]);
+    const st = useEditorStore.getState();
+    st.addPage({ duplicate: true });
+    st.addPage({ duplicate: true });
+    expect(useEditorStore.getState().settings.pages).toEqual([0, 5, 10]);
+    expect(useEditorStore.getState().clips.map((c) => c.start)).toEqual([0, 5, 10]);
+    useEditorStore.getState().deletePage(1);
+    const after = useEditorStore.getState();
+    expect(after.settings.pages).toEqual([0, 5]);
+    expect(after.clips.map((c) => c.start)).toEqual([0, 5]);
+  });
+});

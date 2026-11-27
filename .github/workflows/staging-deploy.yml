@@ -1,0 +1,72 @@
+name: Deploy staging
+
+on:
+  workflow_dispatch:
+    inputs:
+      revision:
+        description: Commit or branch to deploy to staging.dehub.io
+        default: main
+        required: true
+      validate_only:
+        description: Validate existing Cloudflare credentials without building or deploying
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: staging-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate Cloudflare staging credentials
+        run: node scripts/cloudflare-credentials.mjs
+        env:
+          CLOUDFLARE_APITOKEN: ${{ secrets.CLOUDFLARE_APITOKEN }}
+          CLOUDFLARE_ID: ${{ secrets.CLOUDFLARE_ID }}
+      - uses: actions/checkout@v4
+        if: ${{ !inputs.validate_only }}
+        with:
+          ref: ${{ inputs.revision }}
+      - uses: pnpm/action-setup@v4
+        if: ${{ !inputs.validate_only }}
+        with:
+          version: '9.15.9'
+      - uses: actions/setup-node@v4
+        if: ${{ !inputs.validate_only }}
+        with:
+          node-version: '22'
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+        if: ${{ !inputs.validate_only }}
+      - name: Build staging assets
+        if: ${{ !inputs.validate_only }}
+        run: pnpm build
+      - name: Deploy staging worker and assets
+        if: ${{ !inputs.validate_only }}
+        run: pnpm exec wrangler deploy --config wrangler.staging.jsonc
+      - name: Verify staging serves this commit
+        if: ${{ !inputs.validate_only }}
+        run: |
+          EXPECTED="$(git rev-parse HEAD)"
+          # Same rollout lag as production: poll for up to two minutes.
+          for attempt in $(seq 1 24); do
+            if curl --fail --silent --show-error "https://staging.dehub.io/version.json?commit=$EXPECTED&try=$attempt" --output /tmp/staging-version.json \
+              && EXPECTED="$EXPECTED" node -e 'const v=JSON.parse(require("fs").readFileSync("/tmp/staging-version.json","utf8")); process.exit(v.id===process.env.EXPECTED.slice(0,8)?0:1)'; then
+              echo "Staging serves $EXPECTED"
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "::error::Staging serves a different commit: $(cat /tmp/staging-version.json 2>/dev/null)"
+          exit 1

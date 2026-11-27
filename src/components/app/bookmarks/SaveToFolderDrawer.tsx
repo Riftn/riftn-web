@@ -1,0 +1,289 @@
+import { useTranslation as _useCopy } from 'react-i18next';
+import { useSurfaceDraft } from '@/hooks/use-surface-draft';
+/**
+ * Save to Folder Drawer
+ * =====================
+ * Folder picker shown right after a post is bookmarked — check existing folders
+ * to file it into, or create a new one and save straight into it.
+ *
+ * Mirrors mobile's components/Home/AddToFolderSheet.tsx (same trigger point: the
+ * save half of the bookmark toggle, never the un-save half) so the two clients
+ * behave the same way. The /api/bookmark-folders endpoints and the
+ * use-bookmark-folders hooks already existed on web with no UI attached; this is
+ * that missing surface.
+ */
+
+import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Folder, FolderPlus, CircleAlert, CircleCheck, Globe, Loader2 } from "lucide-react";
+import Check from "@/components/ui/cut-icons/check";
+
+import X from "@/components/ui/cut-icons/close";
+
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
+import { cn } from '@/lib/utils';
+import { useBookmarkFolders, useFolderContainment } from '@/hooks/use-bookmark-folders';
+import { AppState } from '@/components/app/AppState';
+
+interface SaveToFolderDrawerProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  tokenId: number | null;
+}
+
+interface DrawerNotice {
+  message: string;
+  tone: 'success' | 'error';
+}
+
+export function SaveToFolderDrawer({ open, onOpenChange, tokenId }: SaveToFolderDrawerProps) {
+  const { t: _copy } = _useCopy();
+  const { t } = useTranslation();
+  const {
+    folders,
+    isLoading,
+    createFolderAsync,
+    isCreating,
+    addToFolderAsync,
+    removeFromFolderAsync,
+  } = useBookmarkFolders();
+  const { data: containment, isLoading: isLoadingContainment } = useFolderContainment(tokenId, open);
+
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [newFolderName, setNewFolderName] = useSurfaceDraft("components/app/bookmarks/SaveToFolderDrawer.tsx:newFolderName", '', tokenId);
+  const [newFolderDesc, setNewFolderDesc] = useSurfaceDraft("components/app/bookmarks/SaveToFolderDrawer.tsx:newFolderDesc", '', tokenId);
+  // A public folder is a playlist on the owner's profile. Off by default: a
+  // folder made from the save button is private until the owner says otherwise.
+  const [newFolderPublic, setNewFolderPublic] = useState(false);
+  // Folder IDs whose checkbox has been flipped locally but whose request hasn't
+  // settled yet — the row reads from this first so the tick is instant.
+  const [pending, setPending] = useState<Record<string, boolean>>({});
+  const [notice, setNotice] = useState<DrawerNotice | null>(null);
+
+  useEffect(() => {
+    if (!notice) return;
+    const timer = window.setTimeout(() => setNotice(null), 2600);
+    return () => window.clearTimeout(timer);
+  }, [notice]);
+
+  // Reset the form each time the drawer opens so a half-typed folder name from
+  // last time doesn't reappear on the next post.
+  useEffect(() => {
+    if (open) {
+      setShowCreateForm(false);
+      setNewFolderName.initialize('');
+      setNewFolderDesc.initialize('');
+      setNewFolderPublic(false);
+      setPending({});
+      setNotice(null);
+    }
+  }, [open, setNewFolderDesc, setNewFolderName]);
+
+  const isChecked = (folderId: string) => pending[folderId] ?? containment?.[folderId] ?? false;
+
+  const handleToggleFolder = async (folderId: string, folderName: string) => {
+    if (tokenId == null) return;
+    const adding = !isChecked(folderId);
+    setPending((prev) => ({ ...prev, [folderId]: adding }));
+
+    try {
+      if (adding) {
+        await addToFolderAsync({ folderId, tokenId, suppressToast: true });
+        onOpenChange(false);
+      } else {
+        await removeFromFolderAsync({ folderId, tokenId, suppressToast: true });
+        setNotice({ message: _copy("copy.c95d6fb0cd5c", { defaultValue: "Removed from {{value1}}", value1: folderName }), tone: 'success' });
+      }
+    } catch {
+      setPending((prev) => ({ ...prev, [folderId]: !adding }));
+      setNotice({ message: _copy("copy.819e1b7af3c5", { defaultValue: "Failed to update folder" }), tone: 'error' });
+    }
+  };
+
+  const handleCreateFolder = async () => {
+    const name = newFolderName.trim();
+    if (!name || isCreating || tokenId == null) return;
+
+    try {
+      const res = await createFolderAsync({
+        name,
+        description: newFolderDesc.trim() || undefined,
+        isPublic: newFolderPublic,
+        suppressToast: true,
+      });
+      const created = res.result;
+      if (!created) return;
+
+      setNewFolderName.complete(newFolderName, '');
+      setNewFolderDesc.complete(newFolderDesc, '');
+      setNewFolderPublic(false);
+      setShowCreateForm(false);
+
+      // Creating a folder from this drawer implies filing the post into it —
+      // otherwise the user has to create it and then hunt for its row.
+      setPending((prev) => ({ ...prev, [created._id]: true }));
+      try {
+        await addToFolderAsync({ folderId: created._id, tokenId, suppressToast: true });
+        onOpenChange(false);
+      } catch {
+        setPending((prev) => ({ ...prev, [created._id]: false }));
+        setNotice({ message: _copy("copy.c5abcffd4c32", { defaultValue: "Folder created, but the post wasn't added" }), tone: 'error' });
+      }
+    } catch {
+      setNotice({ message: _copy("copy.6e99e5419d22", { defaultValue: "Failed to create folder" }), tone: 'error' });
+    }
+  };
+
+  const showSpinner = isLoading || isLoadingContainment;
+
+  return (
+    <Drawer open={open} onOpenChange={onOpenChange}>
+      <DrawerContent column className="h-[calc(100dvh_-_env(safe-area-inset-top)_-_0.75rem)] max-h-none overflow-hidden rounded-t-[24px] border-white/10 bg-black/80 backdrop-blur-[24px] md:h-[min(85dvh,640px)]">
+        <DrawerHeader className="relative shrink-0 border-b border-white/10 px-5 pb-4 pt-5 text-left">
+          <DrawerTitle className="text-white text-lg font-bold">{_copy("copy.fb96ba383ceb", { defaultValue: "Save to folder" })}</DrawerTitle>
+          <p className="mt-1 pr-12 text-xs leading-5 text-zinc-400">{_copy("copy.ce5481a058d1", { defaultValue: "Choose where you want to keep this post." })}</p>
+          <button
+            type="button"
+            onClick={() => onOpenChange(false)}
+            className="absolute right-4 top-4 flex size-10 items-center justify-center rounded-xl bg-white/[0.06] text-zinc-400 transition-colors hover:bg-white/10 hover:text-white active:scale-[0.98]"
+            aria-label={_copy("copy.2db6d3ccf0e7", { defaultValue: "Close folder picker" })}
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </DrawerHeader>
+
+        {notice && (
+          <div
+            role="status"
+            aria-live="polite"
+            className={cn(
+              'mx-4 mt-3 flex shrink-0 items-center gap-2 rounded-xl border bg-zinc-900 px-3 py-2.5 text-sm font-semibold text-zinc-100',
+              notice.tone === 'error' ? 'border-red-400/30' : 'border-white/15',
+            )}
+          >
+            {notice.tone === 'error' ? (
+              <CircleAlert className="size-4 shrink-0 text-red-300" />
+            ) : (
+              <CircleCheck className="size-4 shrink-0 text-zinc-200" />
+            )}
+            <span>{notice.message}</span>
+          </div>
+        )}
+
+        <div className="min-h-0 flex-1 overflow-y-auto px-4 py-3 overscroll-contain">
+          {showSpinner ? (
+            <div className="flex h-full min-h-40 items-center justify-center">
+              <Loader2 className="w-5 h-5 text-zinc-500 animate-spin" />
+            </div>
+          ) : folders.length > 0 ? (
+            <div className="space-y-2">
+              {folders.map((folder) => {
+                const checked = isChecked(folder._id);
+                return (
+                  <button
+                    key={folder._id}
+                    type="button"
+                    onClick={() => handleToggleFolder(folder._id, folder.name)}
+                    className="flex min-h-14 w-full items-center gap-3 rounded-[14px] border border-white/[0.07] bg-white/[0.045] px-3.5 py-2.5 text-left transition-colors hover:bg-white/[0.08] active:scale-[0.99]"
+                  >
+                    <Folder className="w-5 h-5 text-zinc-300 shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="flex items-center gap-1.5 text-white text-sm font-semibold">
+                        <span className="truncate">{folder.name}</span>
+                        {folder.isPublic && (
+                          <span className="inline-flex shrink-0" title={t('bookmarks.playlist.publicBadge')}>
+                            <Globe className="size-3.5 text-zinc-400" aria-label={t('bookmarks.playlist.publicBadge')} />
+                          </span>
+                        )}
+                      </p>
+                      {folder.description && (
+                        <p className="text-zinc-500 text-xs truncate">{folder.description}</p>
+                      )}
+                    </div>
+                    <span
+                      className={cn(
+                        'w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 transition-colors',
+                        checked ? 'border-zinc-100 bg-zinc-100' : 'border-zinc-600'
+                      )}
+                    >
+                      {checked && <Check className="w-3 h-3 text-black" strokeWidth={3} />}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          ) : (
+            <AppState icon="bookmarks" title={_copy("copy.8a66376ee6fc", { defaultValue: "No folders yet" })} description={_copy("copy.40952f27a655", { defaultValue: "Create one below to organize this post." })} size="drawer" />
+          )}
+        </div>
+
+        <div className="shrink-0 border-t border-white/10 px-4 pb-[max(1.25rem,calc(env(safe-area-inset-bottom)_+_0.5rem))] pt-3">
+          {showCreateForm ? (
+            <div className="space-y-2.5">
+              <label className="block space-y-1.5">
+                <span className="text-xs font-semibold text-zinc-300">{_copy("copy.14d34edf50ef", { defaultValue: "Folder name" })}</span>
+                <Input
+                  autoFocus
+                  value={newFolderName}
+                  onChange={(e) => setNewFolderName(e.target.value)}
+                  placeholder={_copy("copy.b4a1b6baab97", { defaultValue: "e.g. Cooking, Travel" })}
+                  maxLength={50}
+                  className="h-12 rounded-xl border-white/10 bg-white/[0.06] text-white placeholder:text-zinc-500 focus-visible:ring-white/30"
+                />
+              </label>
+              <label className="block space-y-1.5">
+                <span className="text-xs font-semibold text-zinc-300">{_copy("copy.2a2cc42f3f7e", { defaultValue: "Description " })}<span className="font-normal text-zinc-500">{_copy("copy.0059798b7f70", { defaultValue: "(optional)" })}</span>
+                </span>
+                <Input
+                  value={newFolderDesc}
+                  onChange={(e) => setNewFolderDesc(e.target.value)}
+                  placeholder={_copy("copy.5e1e78e77bc9", { defaultValue: "What belongs in this folder?" })}
+                  maxLength={200}
+                  className="h-12 rounded-xl border-white/10 bg-white/[0.06] text-white placeholder:text-zinc-500 focus-visible:ring-white/30"
+                />
+              </label>
+              <label className="flex cursor-pointer items-center justify-between gap-3 rounded-xl border border-white/10 bg-white/[0.04] px-3.5 py-2.5">
+                <span className="flex min-w-0 items-center gap-2.5">
+                  <Globe className="size-4 shrink-0 text-zinc-300" />
+                  <span className="min-w-0">
+                    <span className="block text-sm font-semibold text-white">{t('bookmarks.playlist.makePublic')}</span>
+                    <span className="block text-xs text-zinc-500">{t('bookmarks.playlist.makePublicHint')}</span>
+                  </span>
+                </span>
+                <Switch
+                  checked={newFolderPublic}
+                  onCheckedChange={setNewFolderPublic}
+                  aria-label={t('bookmarks.playlist.makePublic')}
+                  className="shrink-0 data-[state=checked]:bg-white"
+                />
+              </label>
+              <div className="flex gap-2">
+                <Button
+                  variant="ghost"
+                  onClick={() => setShowCreateForm(false)}
+                  className="h-12 flex-1 rounded-xl bg-white/[0.05] text-zinc-300 hover:bg-white/10 hover:text-white"
+                >{_copy("copy.19766ed6ccb2", { defaultValue: "Cancel" })}</Button>
+                <Button
+                  onClick={handleCreateFolder}
+                  disabled={!newFolderName.trim() || isCreating}
+                  className="h-12 flex-1 rounded-xl bg-zinc-100 font-semibold text-zinc-950 hover:bg-white active:scale-[0.98]"
+                >
+                  {isCreating ? <Loader2 className="w-4 h-4 animate-spin" /> : _copy("copy.d6510650eea7", { defaultValue: "Create & save" })}
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <Button
+              onClick={() => setShowCreateForm(true)}
+              className="h-12 w-full rounded-xl bg-zinc-100 font-semibold text-zinc-950 hover:bg-white active:scale-[0.98]"
+            >
+              <FolderPlus className="w-4 h-4" />{_copy("copy.f747344cdf17", { defaultValue: "Create new folder" })}</Button>
+          )}
+        </div>
+      </DrawerContent>
+    </Drawer>
+  );
+}

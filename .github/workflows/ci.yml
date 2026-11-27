@@ -1,0 +1,479 @@
+name: CI
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '20'
+  PNPM_VERSION: '9.15.9'
+
+jobs:
+  migration-versions:
+    name: Migration history and event admission
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: event-test
+        ports: ['5432:5432']
+        options: --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      PGHOST: localhost
+      PGUSER: postgres
+      PGPASSWORD: event-test
+    steps:
+      - uses: actions/checkout@v4
+      - run: node scripts/check-migration-versions.mjs
+      - uses: supabase/setup-cli@v1
+        with:
+          version: 3.2.0
+      - name: Apply the migration with the Supabase ledger
+        run: |
+          psql -X -v ON_ERROR_STOP=1 -f tests/sql/event-audit-bootstrap.sql
+          sed -n '/^CREATE OR REPLACE FUNCTION public.holder_gate_hex_to_numeric/,/^\$\$;/p' supabase/migrations/20261102020000_community_holder_gate.sql | psql -X -v ON_ERROR_STOP=1
+          fixture="$RUNNER_TEMP/event-ledger"
+          mkdir -p "$fixture/supabase/migrations"
+          for file in supabase/migrations/*.sql; do
+            echo 'SELECT 1;' > "$fixture/$file"
+          done
+          cp supabase/migrations/20261121120000_event_chat_and_receipts.sql "$fixture/supabase/migrations/"
+          supabase db push --workdir "$fixture" --db-url "postgres://postgres:event-test@localhost:5432/postgres" --yes
+          psql -X -v ON_ERROR_STOP=1 -f tests/sql/event-audit.sql
+      - name: Verify liked request completion preferences and delivery
+        run: psql -X -v ON_ERROR_STOP=1 -f tests/sql/liked-request-completion.sql
+      - name: Verify request reply and reaction alerts
+        run: psql -X -v ON_ERROR_STOP=1 -f tests/sql/request-reaction-notifications.sql
+
+  account-mcp:
+    name: Account MCP permissions and Creator jobs
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install only server schema dependencies
+        run: |
+          npm install --prefix "$RUNNER_TEMP/account-mcp" --no-package-lock --ignore-scripts "zod@$(node -p "require('./package.json').dependencies.zod")" zod-to-json-schema@3.25.2
+          ln -s "$RUNNER_TEMP/account-mcp/node_modules" node_modules
+      - run: node --experimental-strip-types --test server/account-mcp.test.mjs
+
+  dex-dehub-pool:
+    name: DeHub pool market scope
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: dex-test
+          POSTGRES_DB: dex_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready --health-interval 5s
+          --health-timeout 5s --health-retries 10
+    env:
+      PGHOST: localhost
+      PGUSER: postgres
+      PGPASSWORD: dex-test
+      PGDATABASE: dex_test
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          psql -v ON_ERROR_STOP=1 -f tests/sql/dex-dehub-pool-bootstrap.sql
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261011001000_dex_dehub_pool_market.sql
+          psql -v ON_ERROR_STOP=1 -f tests/sql/dex-dehub-pool.sql
+          psql -v ON_ERROR_STOP=1 -f tests/sql/dex-fallback-bootstrap.sql
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261027030000_dex_fallback_without_sleep.sql
+          psql -v ON_ERROR_STOP=1 -f tests/sql/dex-fallback.sql
+
+  dub-discovery:
+    name: Dubbing discovery claims
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: dub-test
+          POSTGRES_DB: dub_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready --health-interval 5s
+          --health-timeout 5s --health-retries 10
+    env:
+      PGHOST: localhost
+      PGUSER: postgres
+      PGPASSWORD: dub-test
+      PGDATABASE: dub_test
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify signed identity and durable claims
+        run: |
+          psql -v ON_ERROR_STOP=1 -f tests/sql/video-dub-tip-bootstrap.sql
+          sed '/CREATE OR REPLACE FUNCTION public.get_my_agents/,$d' supabase/migrations/20260929093849_7f219ea4-80f1-4f9f-8809-1e8e709b55a9.sql | psql -v ON_ERROR_STOP=1
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261010180000_video_dub_tip.sql
+          psql -v ON_ERROR_STOP=1 -f tests/sql/video-dub-tip.sql
+      - name: Verify concurrent clients have exactly one winner
+        run: |
+          for client in $(seq 1 12); do
+            psql -v ON_ERROR_STOP=1 -Atc "SET ROLE anon; SELECT public.test_dub_session('0x3333333333333333333333333333333333333333'); SELECT public.claim_video_dub_tip();" > "/tmp/dub-claim-$client" &
+          done
+          wait
+          test "$(cat /tmp/dub-claim-* | grep -c '^t$')" -eq 1
+  deployment-credentials:
+    name: Deployment credential parsing
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test scripts/cloudflare-credentials.test.mjs
+
+  wallet-storage:
+    name: Wallet archive storage
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: wallet-test
+          POSTGRES_DB: wallet_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready --health-interval 5s
+          --health-timeout 5s --health-retries 10
+    env:
+      PGHOST: localhost
+      PGUSER: postgres
+      PGPASSWORD: wallet-test
+      PGDATABASE: wallet_test
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate replacement, retries and archive isolation
+        run: |
+          psql -v ON_ERROR_STOP=1 -f tests/sql/wallet-replacement-bootstrap.sql
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20260721120000_user_wallets.sql
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20260728120000_wallet_passkeys.sql
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261007170000_wallet_replacement_archive.sql
+          psql -v ON_ERROR_STOP=1 -f tests/sql/wallet-replacement.sql
+
+  # A key added to en.json and nowhere else renders in English for every other
+  # language: fallbackLng swallows it, so nothing throws and nobody notices.
+  # orphan-baseline.json is the backlog being worked through — a key outside it
+  # is a feature that shipped English-only, and fails here.
+  #
+  # No install: the check only reads JSON, so it stays independent of the
+  # dependency installation used by the typecheck and test jobs.
+  i18n:
+    name: i18n coverage
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - run: node scripts/check-priority-locales.mjs
+      - run: node scripts/i18n-coverage.mjs --floor
+      # A t() key that resolves to a group of keys renders "key 'x (en)'
+      # returned an object instead of string."; one with no English renders the
+      # key itself. Also catches translations with broken {{placeholders}}.
+      - run: node scripts/i18n-key-check.mjs
+      - run: node scripts/i18n-fanout.mjs --check | tail -5
+      # A tool that reads UTF-8 as Latin-1 turns every dash, quote and emoji
+      # into two or three junk characters. The JSON still parses and the diff
+      # looks like ordinary copy, so nothing else here would catch it.
+      - run: node scripts/mojibake-check.mjs
+      - run: node scripts/check-badge-resource-names.mjs
+      # Every counter on screen reads short (1.2K, not 1200). Fails on a raw one.
+      - run: node scripts/check-counters.mjs
+      # The sibling failure: valid UTF-8, wrong alphabet. The translator
+      # answers `am` (Amharic) in Armenian, or splices `导入` into a Ge'ez
+      # sentence. Placeholders survive and the coverage count goes UP, so the
+      # existing gates read it as a success.
+      - run: node scripts/i18n-script-check.mjs
+      # The fill's answer guards: loops on short words and inside words, labels
+      # answered with a sentence, added markdown, and batches answered out of
+      # step. Also run over batches cut from the locale files above.
+      - run: node --test scripts/i18n-guards.test.mjs
+
+  # A request header missing from a function's Access-Control-Allow-Headers
+  # makes the BROWSER drop the request — no network row, no function log, and a
+  # failure that reads exactly like the server being down. supabase-js started
+  # sending x-supabase-client-platform and 62 of 115 functions did not list it,
+  # which took stage transcription, every ElevenLabs feature, checkout and ads
+  # off the air for browsers with nothing anywhere to show for it.
+  #
+  # No install, like the i18n job: it only reads source.
+  edge-cors:
+    name: Edge CORS
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - run: node scripts/edge-cors-check.mjs
+
+  typecheck:
+    name: Typecheck
+    env:
+      NODE_OPTIONS: --max-old-space-size=6144
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      # pnpm with the hoisted node_modules layout the repo's .npmrc pins, so
+      # CI resolves the same "phantom" transitive imports the deploy build does.
+      #
+      # The reviewed pnpm lockfile is shared with production; drift fails CI.
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Both projects are checked explicitly. `tsc --noEmit -p tsconfig.json`
+      # looks like it works and silently checks NOTHING: the root config is
+      # solution-style (`"files": []` plus `references`), so it compiles zero
+      # files and exits 0. `tsc -b` isn't an option either — it requires
+      # `composite: true`, which the referenced projects don't set.
+      - name: Typecheck app (src)
+        run: pnpm exec tsc --noEmit -p tsconfig.app.json
+
+      - name: Typecheck node (vite.config.ts)
+        run: pnpm exec tsc --noEmit -p tsconfig.node.json
+
+      # The edge functions are the one tree nothing else in CI reads. tsc is
+      # aimed at src, vitest never loads them, and the CORS check only reads
+      # the header lists they declare — so an import that cannot resolve ships
+      # green and fails at module load on every request. Runs here rather than
+      # in its own job because judging an `npm:` subpath needs the installed
+      # package's exports map, and this is the job that has node_modules.
+      - name: Edge function imports resolve
+        run: node scripts/edge-imports-check.mjs
+
+      - name: Bundle shared mobile badge renderer
+        run: node scripts/build-badge-runtime.mjs
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: badge-runtime
+          path: badge-runtime/index.html
+          retention-days: 7
+
+  tests:
+    name: Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: pnpm
+
+      # Use the same frozen dependency graph as typecheck and production.
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # vitest has been a devDependency for months with nothing running it and
+      # no `test` script to run — so 67 test files, including the ones covering
+      # auth, engagement counts and profile switching, had never executed in
+      # CI. A suite nobody runs is worse than no suite: it reads as coverage.
+      - name: Run tests
+        run: |
+          node --test scripts/security-dependencies.test.cjs
+          pnpm test
+
+      - name: Render text post share cards
+        run: |
+          node --test server/edge-maintenance.test.mjs
+          node --test server/post-share-card.test.mjs server/entity-share-card.test.mjs server/finance-stats.test.mjs
+          timeout 120s node tests/post-share-workerd.mjs
+          timeout 120s node tests/account-mcp-workerd.mjs
+
+      - name: Validate production Worker bundle
+        run: |
+          mkdir -p dist
+          printf '<!doctype html><title>Worker bundle check</title>' > dist/index.html
+          pnpm exec wrangler deploy --dry-run --outdir "$RUNNER_TEMP/share-worker"
+
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: post-card-checks
+          path: post-card-checks/
+          retention-days: 7
+
+      - name: Trenchstar wallet encryption and signing
+        run: |
+          node scripts/trenchstar-wallets.test.mjs
+          node scripts/trenchstar-navigation.test.mjs
+
+  editor-screen-browser:
+    name: Browser screen recording output
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'feat/editor-system-screen-recording-web-20261010'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Prepare the hosted capture browser
+        run: |
+          npm install --prefix "$RUNNER_TEMP/capture-browser" --no-save --no-package-lock --ignore-scripts playwright@1.64.0
+          "$RUNNER_TEMP/capture-browser/node_modules/.bin/playwright" install --with-deps chromium
+          sudo apt-get update
+          sudo apt-get install -y pulseaudio ffmpeg
+          pulseaudio --start --exit-idle-time=-1
+          pactl load-module module-null-sink sink_name=dehub_capture
+          pactl set-default-sink dehub_capture
+      - name: Capture real browser frames and both audio sources
+        env:
+          CAPTURE_BROWSER_ROOT: ${{ runner.temp }}/capture-browser
+        run: timeout 120s xvfb-run -a node tests/editor-screen-capture-browser.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: screen-capture-browser-output
+          path: screen-capture-browser-results/
+          if-no-files-found: ignore
+          retention-days: 14
+
+  stage-remux:
+    name: Stage remux
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      # Node 22 for --experimental-strip-types: the code under test is the
+      # Deno edge function's TypeScript, run here unmodified.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # No install step, like boot-path below: the test builds its own WebM and
+      # ADTS fixtures and imports the function's modules directly.
+      #
+      # Worth a job of its own because nothing else here can see this code:
+      # tsconfig.app.json covers `src` only, so supabase/functions is neither
+      # typechecked nor linted. It is also the kind of code that fails quietly
+      # — a wrong byte offset yields a file that uploads happily and simply
+      # will not seek, which is the bug the function exists to fix.
+      - name: Container surgery still lands its offsets
+        run: node --experimental-strip-types supabase/functions/finalize-stage-recording/remux.test.ts
+
+      - name: Apple private key formats import and sign
+        run: node --experimental-strip-types --test supabase/functions/account-erasure/private-key.test.ts
+
+      - name: Empty transcription fallback
+        run: node --experimental-strip-types --test supabase/functions/_shared/transcription-fallback.test.ts
+
+      - name: Whisper dispatch and results
+        run: node --experimental-strip-types --test supabase/functions/_shared/whisper.test.ts
+      - name: Bank cash-out partner
+        run: node --experimental-strip-types --test supabase/functions/_shared/transak.test.ts
+
+      - name: Bounded visual highlight requests
+        run: node --experimental-strip-types --test supabase/functions/editor-visual-highlights/handler.test.ts supabase/functions/editor-visual-highlights/completion.test.ts
+
+      - name: Complete editor scene descriptions
+        run: node --experimental-strip-types --test supabase/functions/editor-agent/scene.test.ts supabase/functions/editor-agent/answer.test.ts supabase/functions/editor-agent/generation.test.ts
+
+      - name: Brand autopost text fits every platform
+        run: node --experimental-strip-types --test supabase/functions/growth-autopost/posts.test.ts
+
+      - name: Request titles are tidy and only replace repeated ones
+        run: node --experimental-strip-types --test supabase/functions/feature-request-title/title.test.ts
+
+      - name: Stage clip picks and caption timing
+        run: node --experimental-strip-types --test supabase/functions/stage-clips/highlights.test.ts
+
+      - name: Live clip highlight detection
+        run: node --experimental-strip-types --test supabase/functions/live-clips/spikes.test.ts
+
+  boot-path:
+    name: Boot path
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      # No install step: the walker reads source with node builtins only. That
+      # keeps this a ~10s job, and avoids a dependency installation.
+      #
+      # This is the guard the dist-based check-entry-bundle.mjs cannot be —
+      # that one catches a heavy dependency arriving; this one catches fifty
+      # small modules arriving over a fortnight, which is what actually happens.
+      - name: Boot path has not grown
+        run: node scripts/boot-path-report.mjs
+
+  speed-staging:
+    name: Build startup assets
+    needs: [i18n, edge-cors, typecheck, tests, stage-remux, boot-path]
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && (github.head_ref == 'perf/staging-load-speed-20261004' || startsWith(github.head_ref, 'fix/safari-'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Build staging assets
+        run: pnpm build
+      - name: Record initial asset sizes
+        run: node scripts/staging-speed-report.mjs > staging-speed-report.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: staging-speed-assets
+          path: |
+            staging-speed-report.json
+            dist/version.json
+          retention-days: 30
+      # The dehub-staging Worker deploys this branch through Cloudflare's
+      # existing Git integration, using wrangler.staging.jsonc.

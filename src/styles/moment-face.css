@@ -1,0 +1,20 @@
+/* The Moment ring follows the avatar outline on every surface. */
+[data-moment-face] {
+  --moment-rim: #fff;
+}
+html:is([data-theme='light'], [data-system-tone='light']) [data-moment-face] { --moment-rim: #0a0a0a; }
+html:is([data-theme='cosmic'], [data-theme='hazy'], [data-theme='swarms'], [data-theme='lavalamp'], [data-theme='winter'],
+  [data-theme='war'], [data-theme='osaka'], [data-theme='jungle'], [data-theme='island'], [data-theme='hacker'], [data-theme='horror']) [data-moment-face] {
+  --moment-rim: var(--tint-accent);
+}
+
+[data-moment-outline] {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  border-radius: inherit;
+  box-shadow: 0 0 0 2px var(--moment-rim);
+  pointer-events: none;
+}
+[data-moment-face='unseen'] > [data-moment-outline][data-close-friends] { box-shadow: 0 0 0 2px #22c55e; }
+[data-moment-face='seen'] > [data-moment-outline] { box-shadow: 0 0 0 2px rgb(161 161 170 / 0.6); }

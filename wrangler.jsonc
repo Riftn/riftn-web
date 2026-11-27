@@ -1,0 +1,79 @@
+{
+  "name": "dehub-migration",
+  "main": "./CLOUDFLARE_WORKER_SEO.js",
+  "compatibility_date": "2026-07-18",
+  // Runs before every deploy, from GitHub Actions and from Cloudflare's own
+  // build on each merge alike: copies the code files the live site serves
+  // today back into dist so tabs opened before this deploy keep working
+  // (scripts/carry-retired-assets.mjs). Skipped outside CI (wrangler dev).
+  "build": { "command": "node scripts/carry-retired-assets.mjs https://riftn.com dist" },
+  "vars": { "CLOUDFLARE_BILLING_ACCOUNT_ID": "66a904429763c3c58f371813c79d6b44", "MAINTENANCE_MODE": "false", "MOBILE_MAINTENANCE_MODE": "false" },
+  // Per-address edge limits (CLOUDFLARE_WORKER_SEO.js edgeRateLimited):
+  // scripted HTTP clients, signed-out Mastodon API reads, federation reads.
+  "ratelimits": [
+    { "name": "RL_SCRIPTED_CLIENTS", "namespace_id": "1101", "simple": { "limit": 120, "period": 60 } },
+    { "name": "RL_MASTODON_ANON", "namespace_id": "1102", "simple": { "limit": 60, "period": 60 } },
+    { "name": "RL_FEDERATION_READS", "namespace_id": "1103", "simple": { "limit": 300, "period": 60 } }
+  ],
+  "durable_objects": { "bindings": [{ "name": "EDITOR_PRESENCE", "class_name": "EditorPresenceRoom" }, { "name": "ACCOUNT_MCP", "class_name": "AccountMcpAuth" }] },
+  "migrations": [{ "tag": "editor-presence-v1", "new_sqlite_classes": ["EditorPresenceRoom"] }, { "tag": "account-mcp-v1", "new_sqlite_classes": ["AccountMcpAuth"] }],
+  // Public dehub.io uses the direct HTTPS gateway (ops/production-routing.json).
+  // Only origin.dehub.io attaches the application Worker. Never add an apex
+  // route/custom domain or enable the apex DNS proxy: affected networks cannot
+  // reach its shared anycast addresses. Alias hosts retain their redirects.
+  // dehub.net (+ all subdomains) = SEO domain-move redirects, served here
+  // since the zone moved to Cloudflare (July 2026).
+  // staging.dehub.io is deployed separately with wrangler.staging.jsonc.
+  // legacy.dehub.io = the pre-2026 app, retired. Needs a proxied placeholder
+  // DNS record on the zone for this route to fire at all.
+  "routes": [
+    { "pattern": "origin.dehub.io", "custom_domain": true },
+    { "pattern": "www.dehub.io/*", "zone_name": "dehub.io" },
+    { "pattern": "legacy.dehub.io/*", "zone_name": "dehub.io" },
+    { "pattern": "dehub.net/*", "zone_name": "dehub.net" },
+    { "pattern": "*.dehub.net/*", "zone_name": "dehub.net" },
+    // riftn.com: the new address. Custom domains, so deploy creates the DNS
+    // records and certificates. Served as a noindex mirror until it becomes
+    // the canonical host.
+    { "pattern": "riftn.com", "custom_domain": true },
+    { "pattern": "www.riftn.com", "custom_domain": true }
+  ],
+  "assets": {
+    "binding": "ASSETS",
+    "directory": "./dist",
+    "not_found_handling": "single-page-application",
+    // The Worker runs first for everything EXCEPT the folders below. Those are
+    // plain files with no Worker logic behind them (no SSR, no redirects, no
+    // per-route headers beyond public/_headers), so they are served straight
+    // from assets and never bill an invocation. Negative patterns win over
+    // "/*", and order does not matter.
+    //
+    // Deliberately still Worker-first:
+    //   /assets/*          stale-deploy chunks must 404, not get the SPA shell
+    //                      at 200 cached immutable for a year (see the
+    //                      /assets/ branch in CLOUDFLARE_WORKER_SEO.js).
+    //   /gods-eye-game/*   index.html gets its Cache-Control pinned in code.
+    //   /arcade, /docs, /guides, /radio, /editor, /manual
+    //                      share their prefix with SPA / SSR routes.
+    // Trade-off on the excluded paths: mirror hosts (staging, www, dehub.net)
+    // serve them as-is, without the apex 301 or the noindex stamp.
+    "run_worker_first": [
+      "/*",
+      "!/media/*",
+      "!/og/*",
+      "!/sounds/*",
+      "!/brand/*",
+      "!/brand-kit/*",
+      "!/osaka/*",
+      "!/theme-icons/*",
+      "!/models/*",
+      "!/finance-history/*",
+      "!/war-game/*",
+      "!/chess-game/*",
+      "!/jungle-game/*",
+      "!/street-slayer-game/*",
+      "!/trenchstar-game/*",
+      "!/love-lock-bridge-game/*"
+    ]
+  }
+}

@@ -1,0 +1,66 @@
+/* Live chat composer (LivePostChat): the box grows and shrinks smoothly with
+   the message, and the send key is the theme's own colour. Over the picture
+   the key keeps the dark-surface look (data-keep-dark) in every theme. */
+.live-chat-box { transition: height 0.2s cubic-bezier(0.25, 0.8, 0.25, 1); }
+
+.live-send-key {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: #fff;
+  color: #0b0b0c;
+  transition: opacity 0.18s cubic-bezier(0.25, 0.8, 0.25, 1), transform 0.12s ease-out;
+}
+.live-send-key[data-state='off'] { opacity: 0.4; cursor: default; }
+.live-send-key:active:not(:disabled) { transform: scale(0.92); }
+.live-send-key[data-enter] { animation: live-send-key-in 0.2s cubic-bezier(0.25, 0.8, 0.25, 1) backwards; }
+.live-send-key[data-leaving] { animation: live-send-key-out 0.16s cubic-bezier(0.4, 0, 1, 1) forwards; pointer-events: none; }
+@keyframes live-send-key-in { from { opacity: 0; transform: scale(0.6); } }
+@keyframes live-send-key-out { to { opacity: 0; transform: scale(0.6); } }
+
+/* Canvas themes with a deep accent: the accent, white arrow. Bright or pale
+   accents (Hacker, Winter, Cosmic, Glass, War) keep the white key. */
+html:is([data-theme='hazy'], [data-theme='osaka'], [data-theme='swarms'], [data-theme='lavalamp'], [data-theme='island'], [data-theme='horror'], [data-theme='jungle']) .live-send-key {
+  background: var(--tint-accent);
+  color: #fff;
+}
+/* Light themes, beside the chat (not over the picture): an ink key. */
+html:is([data-theme='light'], [data-theme='system'][data-system-tone='light']) .live-send-key:not([data-keep-dark]) {
+  background: #111114;
+  color: #fff;
+}
+
+/* Your line on its way from the box into the chat (lib/live-chat-fly.ts). */
+.live-chat-fly-layer { position: absolute; inset: 0; pointer-events: none; overflow: visible; z-index: 40; }
+.live-chat-fly-layer > * { position: absolute; left: 0; top: 0; will-change: transform, opacity; }
+
+/* The viewer's buttons beside the box fold into it while you type: the
+   group narrows to nothing as each button slides into the box's end. */
+.live-row-actions {
+  overflow: hidden;
+  transition: max-width 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), margin-left 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+.live-row-actions > div {
+  /* Its own width, not the clip's: measured while folding it read 1px,
+     and the buttons came back 1px wide (gone) after you clicked off. */
+  width: max-content;
+  transform-origin: left center;
+  transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), opacity 0.22s ease-out;
+}
+.live-row-actions[data-folded] { margin-left: -8px; pointer-events: none; }
+.live-row-actions[data-folded] > div { transform: translateX(-28px) scale(0.6); opacity: 0; }
+
+/* The panel's mic folds away as the send key comes up. */
+.live-fold-in { animation: live-send-key-in 0.2s cubic-bezier(0.25, 0.8, 0.25, 1) backwards; }
+
+/* A reply sits inside the box, over what you type. */
+.live-reply-quote { animation: live-reply-in 0.24s cubic-bezier(0.25, 0.8, 0.25, 1) backwards; }
+@keyframes live-reply-in { from { opacity: 0; transform: translateY(6px); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .live-chat-box { transition: none; }
+  .live-send-key[data-enter], .live-send-key[data-leaving], .live-fold-in, .live-reply-quote { animation: none; }
+  .live-row-actions, .live-row-actions > div { transition: none; }
+}

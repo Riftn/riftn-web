@@ -1,0 +1,691 @@
+import { tokenLabel } from '@/lib/token-label';
+import { useTranslation as _useCopy } from 'react-i18next';
+import { useSurfaceDraft } from '@/hooks/use-surface-draft';
+/**
+ * Leaderboard Page
+ * ================
+ * Displays top DHB token holders and tippers from the Riftn API.
+ */
+
+import { BrandIcon } from '@/components/app/war/WarHudIcon';
+import { PageBody, PageEmpty, PageIsland, PageTabs, usePhonePill } from '@/components/app/page-kit/PageKit';
+import { AppState } from '@/components/app/AppState';
+import { useState, useMemo, useCallback, useRef, useLayoutEffect, useEffect } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { useQuery, useQueryClient, keepPreviousData } from '@tanstack/react-query';
+import { Loader2, ArrowUpRight, CreditCard, Heart, UserCheck, ArrowDown, ArrowUp, TrendingUp } from "lucide-react";
+import Wallet from "@/components/ui/cut-icons/wallet";
+import Users from "@/components/ui/cut-icons/communities";
+import RefreshCw from "@/components/ui/cut-icons/refresh";
+
+import Search from "@/components/ui/cut-icons/search";
+import Share2 from "@/components/ui/cut-icons/feedshare";
+
+import { toast } from 'sonner';
+import trophyIcon from '@/assets/trophy-icon.png';
+import medal1 from '@/assets/medal-1.png';
+import medal2 from '@/assets/medal-2.png';
+import medal3 from '@/assets/medal-3.png';
+import medal4 from '@/assets/medal-4.png';
+import medal5 from '@/assets/medal-5.png';
+import medal6 from '@/assets/medal-6.png';
+import medal7 from '@/assets/medal-7.png';
+import medal8 from '@/assets/medal-8.png';
+import medal9 from '@/assets/medal-9.png';
+import medal10 from '@/assets/medal-10.png';
+
+import { Input } from '@/components/ui/input';
+import { useAuth } from '@/contexts/AuthContext';
+import { useAppTheme } from '@/contexts/ThemeContext';
+import { cn } from '@/lib/utils';
+import { useAuthPrompt, AuthPrompt } from '@/components/app/AuthPrompt';
+import { LeaderboardUserAvatar } from '@/components/app/LeaderboardUserAvatar';
+import { getLeaderboard, type LeaderboardSortMode, type LeaderboardEntry, type LeaderboardPeriod } from '@/lib/api/dehub';
+import { dehubAuthHeaders } from '@/lib/ai-invoke';
+import { getAffiliateLeaderboard, type AffiliateLeaderboardEntry } from '@/lib/api/affiliate-leaderboard';
+import { getOgChallengeLeaderboard, type OgChallengeEntry } from '@/lib/api/og-challenge-leaderboard';
+import Trophy from "@/components/ui/cut-icons/leaderboard";
+import { buildAvatarUrl } from '@/lib/media-url';
+import { BadgeIcon } from '@/components/app/BadgeIcon';
+import { SEOHead } from '@/components/SEOHead';
+import { DeHubPageLoader } from '@/components/app/DeHubLoader';
+import {
+  applyLeaderboardRules,
+  formatLeaderboardNumber,
+  getEntryValue,
+  hasDelta,
+  isHidden,
+  type RankedEntry,
+} from '@/lib/leaderboard-rules';
+
+import { formatCount } from '@/lib/format-count';
+import { profilePath } from '@/lib/profile-path';
+// Same project URL and fallback as src/integrations/supabase/client.ts.
+const SUPABASE_URL =
+  import.meta.env.VITE_SUPABASE_URL || 'https://aigxuutjaqsywioxjefr.supabase.co';
+
+type CategoryType = 'holdings' | 'sentTips' | 'receivedTips' | 'followers' | 'likes' | 'subscribers' | 'affiliates' | 'ogChallenge';
+
+// `apiSort` is null for a category that is not served by /api/leaderboard.
+const categories: { id: CategoryType; labelKey: string; icon: typeof Wallet; apiSort: LeaderboardSortMode | null }[] = [
+  { id: 'holdings', labelKey: 'leaderboard.holdings', icon: Wallet, apiSort: 'holdings' },
+  { id: 'sentTips', labelKey: 'leaderboard.spent', icon: ArrowUpRight, apiSort: 'sentTips' },
+  { id: 'receivedTips', labelKey: 'leaderboard.earned', icon: CreditCard, apiSort: 'receivedTips' },
+  { id: 'followers', labelKey: 'leaderboard.followers', icon: Users, apiSort: 'followers' },
+  { id: 'likes', labelKey: 'leaderboard.likes', icon: Heart, apiSort: 'likes' },
+  { id: 'subscribers', labelKey: 'leaderboard.subscribers', icon: UserCheck, apiSort: 'subscribers' },
+  { id: 'affiliates', labelKey: 'leaderboard.affiliates', icon: Share2, apiSort: null },
+  // Invites that brought back original DHB holders (lib/api/og-challenge-leaderboard).
+  { id: 'ogChallenge', labelKey: 'leaderboard.ogChallenge', icon: Trophy, apiSort: null },
+];
+
+const timePeriods: { id: LeaderboardPeriod; labelKey: string }[] = [
+  { id: 'day', labelKey: 'leaderboard.day' },
+  { id: 'week', labelKey: 'leaderboard.week' },
+  { id: 'month', labelKey: 'leaderboard.month' },
+  { id: 'year', labelKey: 'leaderboard.year' },
+  { id: 'all', labelKey: 'leaderboard.allTime' },
+];
+
+const MEDALS = [medal1, medal2, medal3, medal4, medal5, medal6, medal7, medal8, medal9, medal10];
+
+/** Boards whose figure is a DHB amount rather than a count. */
+const DHB_CATEGORIES: readonly CategoryType[] = ['holdings', 'sentTips', 'receivedTips'];
+
+const PAGE_SIZE = 25;
+
+const getRankStyle = (rank: number) => {
+  switch (rank) {
+    case 1:
+      return 'bg-yellow-500 text-black';
+    case 2:
+      return 'bg-zinc-400 text-black';
+    case 3:
+      return 'bg-amber-600 text-white';
+    default:
+      return 'bg-zinc-700 text-white';
+  }
+};
+
+const FOCUS_RING = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white/50';
+
+export default function LeaderboardPage() {
+  const { t: _copy } = _useCopy();
+  const { t } = useTranslation();
+  useLayoutEffect(() => {
+    // Force scroll to top immediately and repeatedly to override any residual scroll position
+    window.scrollTo(0, 0);
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+
+    // Additional attempts after paint to beat any async scroll restoration
+    requestAnimationFrame(() => {
+      window.scrollTo(0, 0);
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    });
+
+    const t = setTimeout(() => {
+      window.scrollTo(0, 0);
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    }, 50);
+
+    return () => clearTimeout(t);
+  }, []);
+  const [searchQuery, setSearchQuery] = useSurfaceDraft("pages/app/LeaderboardPage.tsx:searchQuery", '');
+  // ?board=og opens straight on the OG holder challenge (shared links).
+  const [category, setCategory] = useState<CategoryType>(() =>
+    typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('board') === 'og' ? 'ogChallenge' : 'holdings');
+  const [timePeriod, setTimePeriod] = useState<LeaderboardPeriod>('all');
+  const [shimmerKey, setShimmerKey] = useState(0);
+  const [sortDirection, setSortDirection] = useState<'desc' | 'asc'>('desc');
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [refreshCooldown, setRefreshCooldown] = useState(false);
+  const sentinelRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const { isAuthenticated, walletAddress } = useAuth();
+  const { theme, themeChoice } = useAppTheme();
+  const isLightTheme = (theme === 'light' || themeChoice === 'system-light');
+  const { isOpen: isAuthOpen, requireAuth, close: closeAuth } = useAuthPrompt();
+
+  // Map category to API sort mode
+  const apiSortMode = categories.find(c => c.id === category)?.apiSort || 'holdings';
+
+  // Referrals aren't in the leaderboard API, so this one category is
+  // aggregated out of Supabase instead. Everything downstream — search, the
+  // sort toggle, the row markup — works off whichever list wins below.
+  const isOgChallenge = category === 'ogChallenge';
+  // Both referral boards are ranked here rather than by the API.
+  const isAffiliates = category === 'affiliates' || isOgChallenge;
+
+  const handleRefreshMe = useCallback(async () => {
+    if (refreshCooldown || isRefreshing) return;
+
+    requireAuth(async () => {
+      if (!walletAddress) {
+        toast.error(t('leaderboard.noWalletAddress'));
+        return;
+      }
+
+      setIsRefreshing(true);
+      try {
+        // The function takes the wallet off the verified token, not a query param.
+        const fnUrl = `${SUPABASE_URL}/functions/v1/refresh-leaderboard-user`;
+
+        const res = await fetch(fnUrl, { headers: dehubAuthHeaders() });
+        const result = await res.json();
+
+        if (!res.ok || !result.success) {
+          toast.error(result.error || t('leaderboard.refreshFailed'));
+          return;
+        }
+
+        if (result.added) {
+          toast.success(t('leaderboard.addedToLeaderboard', { balance: (result.balance as number).toLocaleString() }));
+        } else {
+          toast.info(result.reason || t('leaderboard.balanceTooLow', { balance: (result.balance as number).toLocaleString() }));
+        }
+
+        // Refetch leaderboard data
+        queryClient.invalidateQueries({ queryKey: ['leaderboard'] });
+
+        // Start cooldown
+        setRefreshCooldown(true);
+        setTimeout(() => setRefreshCooldown(false), 30_000);
+      } catch (err) {
+        console.error('Refresh failed:', err);
+        toast.error(t('leaderboard.refreshFailed'));
+      } finally {
+        setIsRefreshing(false);
+      }
+    });
+  }, [refreshCooldown, isRefreshing, requireAuth, walletAddress, queryClient]);
+
+  // This page lives in PersistentPageCache (never unmounts), so
+  // refetchOnMount only ever fires once — the route gate below is the only
+  // automatic refresh path after the first visit.
+  const { pathname } = useLocation();
+  const isLeaderboardRouteActive = pathname === '/app/leaderboard';
+
+  // The key is shared with the sidebar widget and the home-feed carousel, so
+  // whichever surface fetched first feeds the others.
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['leaderboard', apiSortMode, timePeriod],
+    queryFn: () => getLeaderboard(apiSortMode, timePeriod),
+    staleTime: apiSortMode === 'followers' ? 0 : 5 * 60_000,
+    gcTime: 2 * 60 * 60 * 1000,
+    refetchOnMount: true,
+    // Focus-refetch only while the leaderboard is actually on screen — an
+    // unconditional refetch refired while hidden behind other routes, and an
+    // unconditional false left the list frozen after the first visit.
+    refetchOnWindowFocus: isLeaderboardRouteActive,
+    // Route-gated background refresh so revisits see fresh ranks even
+    // without a focus change (restarts on return because the gate is
+    // reactive route state). The cache row is rebuilt on a schedule, so
+    // polling faster than this only re-reads the same row.
+    refetchInterval: isLeaderboardRouteActive ? (apiSortMode === 'followers' ? 60_000 : 15 * 60_000) : false,
+    // Switching period/category keeps the previous ranked list visible while
+    // the new one loads, instead of dropping the page to a spinner.
+    placeholderData: apiSortMode === 'followers' ? undefined : keepPreviousData,
+    enabled: !isAffiliates,
+  });
+
+  const {
+    data: affiliateData,
+    isLoading: affiliateLoading,
+    error: affiliateError,
+  } = useQuery({
+    queryKey: ['leaderboard', isOgChallenge ? 'ogChallenge' : 'affiliates', timePeriod],
+    queryFn: (): Promise<AffiliateLeaderboardEntry[]> =>
+      isOgChallenge ? getOgChallengeLeaderboard(timePeriod) : getAffiliateLeaderboard(timePeriod),
+    enabled: isAffiliates,
+    staleTime: 5 * 60_000,
+    gcTime: 2 * 60 * 60 * 1000,
+    refetchOnMount: true,
+    refetchOnWindowFocus: isLeaderboardRouteActive,
+    refetchInterval: isLeaderboardRouteActive ? 15 * 60_000 : false,
+    placeholderData: keepPreviousData,
+  });
+
+  // Check if we're viewing a time-based period (shows delta)
+  const isTimeDelta = timePeriod !== 'all';
+
+  // Ranked once, from the full list, before search or the direction toggle
+  // touch it — so a lone search hit keeps its real rank and "lowest first"
+  // does not crown the smallest holder.
+  const rankedEntries = useMemo<RankedEntry<LeaderboardEntry>[]>(() => {
+    const source: LeaderboardEntry[] = isAffiliates
+      ? (affiliateData ?? [])
+      : (data?.result?.byWalletBalance || []);
+    return applyLeaderboardRules(source, { sort: category, period: timePeriod });
+  }, [data, affiliateData, isAffiliates, category, timePeriod]);
+
+  const entries = useMemo(() => {
+    let list = rankedEntries;
+
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      list = list.filter((entry) =>
+        entry.username?.toLowerCase().includes(query) ||
+        entry.userDisplayName?.toLowerCase().includes(query) ||
+        entry.account.toLowerCase().includes(query)
+      );
+    }
+
+    return sortDirection === 'desc' ? list : [...list].reverse();
+  }, [rankedEntries, searchQuery, sortDirection]);
+
+  // Reset visible count when filters change
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE);
+  }, [category, timePeriod, searchQuery, sortDirection]);
+
+  const hasMore = visibleCount < entries.length;
+  const total = entries.length;
+
+  // Infinite scroll observer — the sentinel only exists while there is more
+  // to show, and the count never grows past the list.
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel || !hasMore) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisibleCount(prev => (prev < total ? Math.min(prev + PAGE_SIZE, total) : prev));
+        }
+      },
+      { rootMargin: '200px' }
+    );
+
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [hasMore, total]);
+
+  const visibleEntries = useMemo(() => entries.slice(0, visibleCount), [entries, visibleCount]);
+
+  const getAvatarUrl = (entry: LeaderboardEntry) => {
+    if (entry.avatarUrl && entry.account) {
+      return buildAvatarUrl(entry.account, entry.avatarUrl);
+    }
+    return null;
+  };
+
+  const shortAccount = (entry: LeaderboardEntry) => `${entry.account.slice(0, 6)}...${entry.account.slice(-4)}`;
+
+  const getDisplayName = (entry: LeaderboardEntry) => {
+    return entry.userDisplayName || entry.username || shortAccount(entry);
+  };
+
+  const getHandle = (entry: LeaderboardEntry) => {
+    if (entry.username) return `@${entry.username}`;
+    return shortAccount(entry);
+  };
+
+  const isDhbCategory = DHB_CATEGORIES.includes(category);
+
+  const ogValueParts = (entry: LeaderboardEntry): [string, string | null] => {
+    const og = entry as OgChallengeEntry;
+    const holders = String(t('leaderboard.ogHolders', { defaultValue: '{{count}} OG holders', count: og.directReferrals ?? 0 }));
+    return [holders, og.ogDhb ? formatLeaderboardNumber(og.ogDhb) + ` ${tokenLabel()}` : null];
+  };
+
+  const formatDisplayValue = (entry: LeaderboardEntry): string => {
+    if (category === 'ogChallenge') {
+      const [holders, dhb] = ogValueParts(entry);
+      return dhb ? holders + ' · ' + dhb : holders;
+    }
+    if (category === 'affiliates') {
+      const affiliate = entry as AffiliateLeaderboardEntry;
+      const direct = t('leaderboard.directReferrals', {
+        defaultValue: '{{count}} direct',
+        count: affiliate.directReferrals ?? 0,
+      });
+      // Tier 2 is only meaningful once someone has it, so it stays off the row
+      // rather than showing a column of zeroes.
+      if (!affiliate.secondaryReferrals) return String(direct);
+      const secondary = t('leaderboard.secondaryReferrals', {
+        defaultValue: '{{count}} secondary',
+        count: affiliate.secondaryReferrals,
+      });
+      return String(direct) + ' · ' + String(secondary);
+    }
+    // The balance itself is what a hidden account withheld; counts on the
+    // other boards are still public.
+    if (category === 'holdings' && isHidden(entry)) {
+      return t('leaderboard.hidden');
+    }
+    // A period row with no delta shows a dash — never the all-time figure,
+    // which would put two different quantities in the same column.
+    if (isTimeDelta && !hasDelta(entry, category, timePeriod)) {
+      return '—';
+    }
+    const value = getEntryValue(entry, category, timePeriod);
+    const prefix = isTimeDelta && value > 0 ? '+' : '';
+    const formatted = `${prefix}${formatLeaderboardNumber(value)}`;
+    return isDhbCategory ? t('leaderboard.amountTokens', { amount: formatted }) : formatted;
+  };
+
+  const valueTone = (entry: LeaderboardEntry): string => {
+    if (!isTimeDelta || !hasDelta(entry, category, timePeriod)) return 'text-white';
+    const value = getEntryValue(entry, category, timePeriod);
+    if (Math.abs(value) <= 0.01) return 'text-white';
+    return value > 0 ? 'text-green-400' : 'text-red-400';
+  };
+
+  const currentCategory = categories.find(c => c.id === category);
+  const valueHeading = currentCategory ? t(currentCategory.labelKey) : t('leaderboard.value');
+
+  // The two sources are mutually exclusive — one query is always disabled —
+  // so the page's states just follow whichever is live.
+  const listLoading = isAffiliates ? affiliateLoading : isLoading;
+  const listError = isAffiliates ? affiliateError : error;
+
+  const sortToggleLabel = sortDirection === 'desc' ? t('leaderboard.highestFirst') : t('leaderboard.lowestFirst');
+
+  // Phones get the app's layout: the categories as labelled chips under the
+  // pill (lit one first), the periods, a "Highest first" line, then flat rows.
+  const phone = usePhonePill();
+  const pickCategory = (key: CategoryType | 'assets') => {
+    if (key === 'assets') { navigate('/app/top-100'); return; }
+    setCategory(key);
+    setSortDirection('desc');
+  };
+  const categoryTabs = [
+    ...categories.map((cat) => ({ id: cat.id as CategoryType | 'assets', label: t(cat.labelKey), icon: <cat.icon className="h-4 w-4" /> })),
+    { id: 'assets' as const, label: _copy("copy.bd12731d7bc9", { defaultValue: "Assets" }), icon: <TrendingUp className="h-4 w-4" /> },
+  ];
+  const phoneCategoryTabs = [
+    ...categoryTabs.filter((tab) => tab.id === category),
+    ...categoryTabs.filter((tab) => tab.id !== category),
+  ];
+  const pickPeriod = (key: LeaderboardPeriod) => { setTimePeriod(key); setShimmerKey(k => k + 1); setSortDirection('desc'); };
+
+  return (
+    <div className="min-h-screen">
+      <SEOHead
+        title={_copy("copy.ae9fd67eae76", { defaultValue: "Leaderboard: Top Creators & Earners" })}
+        description={_copy("copy.476be3b6b085", { defaultValue: "See who's leading on Riftn. Track top holders, biggest tippers, most followed creators, and trending accounts across all time periods." })}
+        url="https://riftn.com/app/leaderboard"
+        image="https://riftn.com/og/leaderboard.jpg"
+        jsonLd={{ '@context': 'https://schema.org', '@type': 'WebPage', name: 'Riftn Leaderboard', url: 'https://riftn.com/app/leaderboard', description: _copy("copy.a9868171ff61", { defaultValue: "Track top token holders, tippers and creators on Riftn." }), isPartOf: { '@type': 'WebSite', name: 'Riftn', url: 'https://riftn.com' } }}
+      />
+      <h1 className="sr-only">{_copy("copy.f7a1332ec093", { defaultValue: "Riftn Leaderboard — Decentralised Social Media, Censorship Resistant & Freedom of Speech" })}</h1>
+      <PageIsland
+        icon={<BrandIcon src={trophyIcon} alt="" className="h-8 w-8 object-contain" />}
+        title={t('leaderboard.title')}
+        subtitle={t('leaderboard.subtitle')}
+        tabs={phone ? undefined : (
+          <PageTabs<CategoryType | 'assets'>
+            value={category}
+            onChange={pickCategory}
+            tabs={categoryTabs}
+          />
+        )}
+      >
+        {/* Time Period Tabs + Sort Toggle */}
+        {!phone && (
+        <div className="flex items-center gap-2">
+          <PageTabs
+            size="sm"
+            className="min-w-0 flex-1"
+            value={timePeriod}
+            onChange={(key) => { setTimePeriod(key); setShimmerKey(k => k + 1); setSortDirection('desc'); }}
+            tabs={timePeriods.map((p) => ({ id: p.id, label: t(p.labelKey) }))}
+          />
+          <button
+            type="button"
+            data-kit-square
+            onClick={() => setSortDirection(d => d === 'desc' ? 'asc' : 'desc')}
+            className={cn('shrink-0', FOCUS_RING)}
+            title={sortToggleLabel}
+            aria-label={sortToggleLabel}
+            aria-pressed={sortDirection === 'asc'}
+          >
+            {sortDirection === 'desc' ? <ArrowDown className="w-4 h-4" aria-hidden="true" /> : <ArrowUp className="w-4 h-4" aria-hidden="true" />}
+          </button>
+        </div>
+        )}
+
+        {/* Search + Refresh */}
+        <div className="flex gap-2">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" aria-hidden="true" />
+            <Input
+              type="search"
+              placeholder={t('leaderboard.searchUsers')}
+              aria-label={t('leaderboard.searchUsers')}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500 rounded-xl"
+            />
+          </div>
+          {category === 'holdings' && (
+            <button
+              type="button"
+              data-kit-square
+              onClick={handleRefreshMe}
+              disabled={isRefreshing || refreshCooldown}
+              className={cn('h-10 w-10 shrink-0 disabled:opacity-40 disabled:cursor-not-allowed', FOCUS_RING)}
+              title={refreshCooldown ? t('leaderboard.cooldownActive') : t('leaderboard.refreshPosition')}
+              aria-label={refreshCooldown ? t('leaderboard.cooldownActive') : t('leaderboard.refreshPosition')}
+            >
+              <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} aria-hidden="true" />
+            </button>
+          )}
+        </div>
+      </PageIsland>
+
+      {phone && (
+        <div data-leaderboard-phone-head className="space-y-2 px-3">
+          <PageTabs<CategoryType | 'assets'>
+            key={category}
+            value={category}
+            onChange={pickCategory}
+            tabs={phoneCategoryTabs}
+          />
+          <PageTabs<LeaderboardPeriod>
+            size="sm"
+            value={timePeriod}
+            onChange={pickPeriod}
+            tabs={timePeriods.map((p) => ({ id: p.id, label: t(p.labelKey) }))}
+          />
+          <button
+            type="button"
+            onClick={() => setSortDirection(d => d === 'desc' ? 'asc' : 'desc')}
+            className={cn('flex items-center gap-1 px-1 pt-1 text-xs text-zinc-400', FOCUS_RING)}
+            aria-pressed={sortDirection === 'asc'}
+          >
+            {sortDirection === 'desc' ? <ArrowDown className="h-3.5 w-3.5" aria-hidden="true" /> : <ArrowUp className="h-3.5 w-3.5" aria-hidden="true" />}
+            {sortToggleLabel}
+          </button>
+        </div>
+      )}
+
+      {/* Content */}
+      <PageBody className={phone ? 'pt-1' : undefined}>
+        {isOgChallenge && (
+          <div data-og-challenge-note className={cn('mb-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-zinc-300', phone && 'mx-3')}>
+            <p className="font-semibold text-white">{t('leaderboard.ogChallengeTitle', 'Bring back the OG holders')}</p>
+            <p className="mt-1">{t('leaderboard.ogChallengeBody', 'Invite people who still hold tokens. When they join with your invite link and keep their tokens in their Riftn wallet, they count for you here.')}</p>
+            <Link to="/app/affiliate" className={cn('mt-2 inline-block font-semibold text-white underline underline-offset-4', FOCUS_RING)}>
+              {t('leaderboard.ogChallengeCta', 'Get your invite link')}
+            </Link>
+          </div>
+        )}
+        <div data-page-bento={phone ? undefined : true} data-kit-section={phone ? undefined : true} className={phone ? undefined : 'bg-zinc-900 overflow-hidden'}>
+        {/* Loading State */}
+        {listLoading && (
+          <DeHubPageLoader minHeight="40vh" />
+        )}
+
+        {/* Error State */}
+        {listError && (
+          <div role="alert">
+            <PageEmpty icon="trophy" title={t('leaderboard.failedToLoad')} />
+          </div>
+        )}
+
+        {/* Empty State */}
+        {!listLoading && !listError && entries.length === 0 && (
+          <AppState
+            icon="trophy"
+            title={timePeriod !== 'all' && !searchQuery.trim()
+              ? t('leaderboard.noDataForPeriod')
+              : t('leaderboard.noUsersFound')}
+            size="page"
+          />
+        )}
+
+        {/* Table */}
+        {!listLoading && !listError && entries.length > 0 && (
+          <div role="table" aria-label={t('leaderboard.title')}>
+            <div role="rowgroup">
+              <div role="row" className="hidden sm:grid grid-cols-12 gap-4 px-4 sm:px-6 py-4 border-b border-zinc-800 text-zinc-500 text-sm font-medium">
+                <div role="columnheader" className="col-span-1 text-center -ml-[5.5px]">{t('leaderboard.rank')}</div>
+                <div role="columnheader" className="col-span-5">{t('leaderboard.user')}</div>
+                <div role="columnheader" className="col-span-6 text-right">{valueHeading}</div>
+              </div>
+            </div>
+            <div role="rowgroup">
+            {visibleEntries.map((entry) => {
+              const rank = entry.rank;
+              const hidden = isHidden(entry);
+              const profileHref = entry.username ? profilePath(entry.username) : null;
+              const displayName = getDisplayName(entry);
+              const rowClass = cn(
+                phone ? "flex items-center gap-2 px-1 py-3.5" : "grid grid-cols-12 gap-2 sm:gap-4 px-4 sm:px-6 py-4 transition-colors items-center",
+                profileHref && "cursor-pointer",
+                profileHref && (isLightTheme ? "hover:bg-zinc-100" : "hover:bg-zinc-800/50"),
+                FOCUS_RING,
+              );
+              const rowContent = phone ? (
+                <>
+                  <div role="cell" className="flex w-9 shrink-0 items-center justify-center">
+                    {rank <= 10 ? (
+                      <div className="medal-shine-container h-7 w-7" style={{ '--medal-mask': `url(${MEDALS[rank - 1]})` } as React.CSSProperties}>
+                        <img src={MEDALS[rank - 1]} alt={t('leaderboard.rankN', { rank })} className="relative h-7 w-7 object-contain" />
+                        <div key={shimmerKey} className="medal-shine-overlay" />
+                      </div>
+                    ) : (
+                      <span className="text-sm font-semibold tabular-nums text-zinc-400" aria-label={t('leaderboard.rankN', { rank })}>{rank}</span>
+                    )}
+                  </div>
+                  <div role="cell" className="flex min-w-0 flex-1 items-center gap-3">
+                    <LeaderboardUserAvatar avatarUrl={getAvatarUrl(entry)} fallbackSeed={entry.account} displayName={displayName} size="md" />
+                    <div className="min-w-0">
+                      <span className="flex min-w-0 items-baseline gap-1">
+                        <span className="min-w-0 truncate text-sm font-semibold text-white">{displayName}</span>
+                        {!hidden && (
+                          <BadgeIcon badgeBalance={entry.badgeBalance || entry.total} username={entry.username} className="h-[1em] w-[1em] shrink-0" />
+                        )}
+                      </span>
+                      <span className="block truncate text-xs text-zinc-500">{getHandle(entry)}</span>
+                    </div>
+                  </div>
+                  <div role="cell" className={`shrink-0 whitespace-nowrap text-right text-sm font-bold tabular-nums ${valueTone(entry)}`}>
+                    {category === 'ogChallenge' ? (() => {
+                      const [holders, dhb] = ogValueParts(entry);
+                      return (
+                        <>
+                          <span className="block">{formatCount(holders)}</span>
+                          {dhb && <span className="block text-xs font-semibold text-zinc-400">{dhb}</span>}
+                        </>
+                      );
+                    })() : formatDisplayValue(entry)}
+                  </div>
+                </>
+              ) : (
+                <>
+                  {/* Rank */}
+                  <div role="cell" className="col-span-2 sm:col-span-1 flex items-center justify-center -ml-[5.5px]">
+                    {rank <= 10 ? (
+                      <div
+                        className={`medal-shine-container ${rank <= 3 ? 'w-12 h-12' : 'w-8 h-8'}`}
+                        style={{ '--medal-mask': `url(${MEDALS[rank - 1]})` } as React.CSSProperties}
+                      >
+                        <img
+                          src={MEDALS[rank - 1]}
+                          alt={t('leaderboard.rankN', { rank })}
+                          className={`${rank <= 3 ? 'w-12 h-12' : 'w-8 h-8'} object-contain relative`}
+                        />
+                        <div
+                          key={shimmerKey}
+                          className="medal-shine-overlay"
+                        />
+                      </div>
+                    ) : (
+                      <div
+                        className={`w-7 h-7 rounded-lg flex items-center justify-center text-sm font-bold ${getRankStyle(rank)}`}
+                        aria-label={t('leaderboard.rankN', { rank })}
+                      >
+                        {rank}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* User */}
+                  <div role="cell" className="col-span-7 sm:col-span-5 flex items-center gap-3">
+                    <LeaderboardUserAvatar
+                      avatarUrl={getAvatarUrl(entry)}
+                      fallbackSeed={entry.account}
+                      displayName={displayName}
+                      size="md"
+                    />
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-1">
+                        <span className="inline-flex items-baseline gap-1 shrink min-w-0">
+                          <span className="font-semibold text-white truncate">{displayName}</span>
+                          {!hidden && (
+                            <BadgeIcon badgeBalance={entry.badgeBalance || entry.total} username={entry.username} className="w-[1em] h-[1em]" />
+                          )}
+                        </span>
+                      </div>
+                      <span className="text-zinc-500 text-sm">{getHandle(entry)}</span>
+                    </div>
+                  </div>
+
+                  {/* Value */}
+                  <div role="cell" className={`col-span-3 sm:col-span-6 text-right font-medium tabular-nums ${valueTone(entry)}`}>
+                    {formatDisplayValue(entry)}
+                  </div>
+                </>
+              );
+
+              return profileHref ? (
+                <Link
+                  key={entry.account}
+                  to={profileHref}
+                  role="row"
+                  aria-label={`${t('leaderboard.rankN', { rank })} · ${displayName}`}
+                  className={rowClass}
+                >
+                  {rowContent}
+                </Link>
+              ) : (
+                <div key={entry.account} role="row" className={rowClass}>
+                  {rowContent}
+                </div>
+              );
+            })}
+            </div>
+          </div>
+        )}
+
+        {/* Infinite scroll sentinel — only while there is more to load */}
+        {!listLoading && !listError && hasMore && (
+          <div ref={sentinelRef} className="py-4 flex justify-center" aria-hidden="true">
+            <Loader2 className="w-5 h-5 text-zinc-500 animate-spin" />
+          </div>
+        )}
+      </div>
+      </PageBody>
+
+      <AuthPrompt isOpen={isAuthOpen} onClose={closeAuth} />
+    </div>
+  );
+}

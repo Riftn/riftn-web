@@ -1,0 +1,492 @@
+/**
+ * Profile Content Toolbar
+ * =======================
+ * Sort, search and filter over one creator's own posts — the three things a
+ * channel page has always been missing. All of it runs server-side (`/api/feed`
+ * takes `sortBy`/`sortOrder`/`search` and the whole filter set next to
+ * `minter`), so "oldest first" really is the creator's first upload, a search
+ * covers everything they ever posted, and a category narrows their whole
+ * catalogue — not just the pages already scrolled into memory.
+ *
+ * The filter toggle sits next to search and opens the same panel the home feed
+ * uses (category / upload date / post type / content access). Active filters
+ * are also shown as dismissable chips under the toolbar, so a closed panel can
+ * never hide why a tab looks empty.
+ *
+ * Rendered above the tab panels rather than inside the sticky pill: the pill
+ * carries the swallow clip, and anything added to it changes where the feed
+ * below gets cut.
+ *
+ * @module components/app/profile/ProfileContentToolbar
+ */
+
+import Search from "@/components/ui/cut-icons/search";
+import SlidersHorizontal from "@/components/ui/cut-icons/settings";
+import X from "@/components/ui/cut-icons/close";
+import Check from "@/components/ui/cut-icons/check";
+import SortIcon from "@/components/ui/cut-icons/sort";
+import { ChevronDown, LayoutGrid, List } from "lucide-react";
+import { useProfileViewMode, useSetProfileViewMode } from '@/lib/profile-view-mode';
+
+import { AnimatePresence, motion } from 'framer-motion';
+import { useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
+import { useState } from 'react';
+import { ProfileFilterPanel } from '@/components/app/profile/ProfileFilterPanel';
+import { getCategories } from '@/lib/api/dehub';
+import { cn } from '@/lib/utils';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import './profile-quiet-row.css';
+import { useIsMobile } from '@/hooks/use-mobile';
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+} from '@/components/ui/drawer';
+import {
+  DATE_FILTER_OPTIONS,
+  POST_TYPE_FILTERS,
+  type ContentTypeFilterValue,
+} from '@/lib/feed-utils';
+import {
+  countActiveProfileFilters,
+  type ProfileContentFilters,
+  type ProfileSortMode,
+} from '@/hooks/use-dehub-profile';
+
+import { formatCount } from '@/lib/format-count';
+/** Multi-select access lanes, in the order the home feed's row shows them. */
+const ACCESS_CHIPS: { key: ContentTypeFilterValue; labelKey: string; fallback: string }[] = [
+  { key: 'ppv', labelKey: 'filters.ppv', fallback: 'PPV' },
+  { key: 'w2e', labelKey: 'filters.bounty', fallback: 'Bounty' },
+  { key: 'locked', labelKey: 'filters.locked', fallback: 'Gated' },
+];
+
+/** The glass treatment the home feed's active filter chips wear. */
+const CHIP_CLASS =
+  'inline-flex items-center gap-1.5 pl-2.5 pr-2 py-[5px] rounded-lg text-xs font-medium bg-gradient-to-br from-white/20 via-white/10 to-white/5 backdrop-blur-xl border border-white/30 text-white shadow-[0_2px_8px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.3)] transition-all hover:border-white/50';
+
+interface ProfileContentToolbarProps {
+  sort: ProfileSortMode;
+  onSortChange: (sort: ProfileSortMode) => void;
+  search: string;
+  onSearchChange: (search: string) => void;
+  filters: ProfileContentFilters;
+  onFiltersChange: (filters: ProfileContentFilters) => void;
+  onFiltersReset: () => void;
+  filtersOpen: boolean;
+  onFiltersOpenChange: (open: boolean) => void;
+  /** The post-type row only applies on the All tab — see useProfilePage. */
+  showPostType: boolean;
+  showViewToggle: boolean;
+  /** Items currently rendered under the toolbar — shown while a search runs. */
+  resultCount: number;
+  isLoading: boolean;
+  /** The creator saved their own order — adds it to the sort choices. */
+  hasCustomOrder?: boolean;
+  /** Own profile: opens the sheet where the creator arranges their posts. */
+  onArrange?: () => void;
+}
+
+/**
+ * Grid or list for this profile: two bare icons, the chosen one lit. Sits on
+ * the side of the row away from search and filters.
+ */
+function ProfileViewToggle() {
+  const { t } = useTranslation();
+  const mode = useProfileViewMode();
+  const setProfileViewMode = useSetProfileViewMode();
+  const items = [
+    { key: 'grid' as const, Icon: LayoutGrid, label: t('profile.viewGrid', 'Grid view') },
+    { key: 'list' as const, Icon: List, label: t('profile.viewList', 'List view') },
+  ];
+  return (
+    <div data-profile-view-toggle role="group" aria-label={t('profile.viewMode', 'View')} className="flex h-9 flex-shrink-0 items-center">
+      {items.map(({ key, Icon, label }) => (
+        <button
+          key={key}
+          type="button"
+          data-profile-quiet-icon
+          data-profile-view-option={key}
+          data-active={mode === key || undefined}
+          aria-pressed={mode === key}
+          aria-label={label}
+          title={label}
+          onClick={() => setProfileViewMode(key)}
+          className="flex h-9 w-8 items-center justify-center"
+        >
+          <Icon className="h-[17px] w-[17px]" strokeWidth={2} />
+        </button>
+      ))}
+    </div>
+  );
+}
+
+export function ProfileContentToolbar({
+  sort,
+  onSortChange,
+  search,
+  onSearchChange,
+  filters,
+  onFiltersChange,
+  onFiltersReset,
+  filtersOpen,
+  onFiltersOpenChange,
+  showPostType,
+  showViewToggle,
+  resultCount,
+  isLoading,
+  hasCustomOrder = false,
+  onArrange,
+}: ProfileContentToolbarProps) {
+  const { t } = useTranslation();
+  const isMobile = useIsMobile();
+  const [isSearchOpen, setIsSearchOpen] = useState(Boolean(search));
+  const [isSortOpen, setIsSortOpen] = useState(false);
+  const closeSearch = () => {
+    onSearchChange('');
+    setIsSearchOpen(false);
+  };
+
+  // Off the All tab the post-type row is neither shown nor sent, so it must not
+  // be badged or chipped either — a chip for a filter that isn't applied is a
+  // lie the visitor can't act on.
+  const postTypeActive = showPostType && filters.postType !== 'all';
+  const activeFilterCount = countActiveProfileFilters(
+    showPostType ? filters : { ...filters, postType: 'all' },
+  );
+
+  // Only to put a name on the category chip. Nothing to look up until one is
+  // picked, and by then the panel has usually warmed this cache entry already.
+  const { data: categories = [] } = useQuery({
+    queryKey: ['dehub-categories'],
+    queryFn: getCategories,
+    staleTime: 5 * 60 * 1000,
+    enabled: !!filters.category,
+  });
+
+  const sortItems: { key: ProfileSortMode; label: string }[] = [
+    ...(hasCustomOrder ? [{ key: 'custom' as const, label: t('profile.sortCustomShort', 'Custom') }] : []),
+    { key: 'newest', label: t('profile.sortNewest', 'Newest') },
+    { key: 'oldest', label: t('profile.sortOldest', 'Oldest') },
+    { key: 'views', label: isMobile ? t('profile.sortViews', 'Views') : t('profile.sortMostViewed', 'Most viewed') },
+    { key: 'likes', label: isMobile ? t('profile.sortLikes', 'Likes') : t('profile.sortMostLiked', 'Most liked') },
+  ];
+
+  // Phones: the Quiet Row — one "Newest ⌄" word that opens a glass menu,
+  // with bare search and filter icons after it. No boxes.
+  const fullSortItems: { key: ProfileSortMode; label: string }[] = [
+    ...(hasCustomOrder ? [{ key: 'custom' as const, label: t('profile.sortCustom', 'Custom order') }] : []),
+    { key: 'newest', label: t('profile.sortNewest', 'Newest') },
+    { key: 'oldest', label: t('profile.sortOldest', 'Oldest') },
+    { key: 'views', label: t('profile.sortMostViewed', 'Most viewed') },
+    { key: 'likes', label: t('profile.sortMostLiked', 'Most liked') },
+  ];
+  const sortLabel = fullSortItems.find((item) => item.key === sort)?.label ?? t('profile.sortNewest', 'Newest');
+
+  const categoryLabel = filters.category
+    ? categories.find((cat) => cat.id === filters.category)?.name ?? filters.category
+    : null;
+  const dateLabel = DATE_FILTER_OPTIONS.find((o) => o.value === filters.date)?.label ?? null;
+  const postTypeLabel = POST_TYPE_FILTERS.find((o) => o.value === filters.postType)?.label ?? null;
+
+  const accessChips = ACCESS_CHIPS.filter((chip) => filters[chip.key]);
+
+  return (
+    <div className="mb-3 space-y-2">
+      <AnimatePresence initial={false} mode="wait">
+        {isSearchOpen ? (
+          <motion.div
+            key="profile-search"
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+            transition={{ duration: 0.16, ease: 'easeOut' }}
+            className="relative min-w-0"
+            data-profile-search-quiet={isMobile || undefined}
+          >
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500 pointer-events-none" />
+            <input
+              autoFocus
+              type="search"
+              value={search}
+              onChange={(e) => onSearchChange(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Escape') closeSearch();
+              }}
+              placeholder={t('profile.searchThisChannel', 'Search this channel')}
+              aria-label={t('profile.searchThisChannel', 'Search this channel')}
+              className="w-full h-9 pl-9 pr-9 rounded-xl bg-zinc-800 border border-zinc-700 text-sm text-white placeholder-zinc-500 focus:border-zinc-500 focus:outline-none transition-colors [&::-webkit-search-cancel-button]:hidden"
+            />
+            <button
+              type="button"
+              onClick={closeSearch}
+              aria-label={search ? t('common.clear', 'Clear') : t('common.close', 'Close')}
+              className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-lg text-white hover:bg-zinc-700 transition-colors"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </motion.div>
+        ) : (
+          <motion.div
+            key="profile-controls"
+            initial={{ opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 4 }}
+            transition={{ duration: 0.16, ease: 'easeOut' }}
+          >
+            {isMobile ? (
+              <div data-profile-quiet-row className="flex h-9 items-center gap-1">
+                {showViewToggle && <ProfileViewToggle />}
+                <Popover open={isSortOpen} onOpenChange={setIsSortOpen}>
+                  <PopoverTrigger asChild>
+                    <button
+                      type="button"
+                      data-profile-sort-trigger
+                      aria-haspopup="menu"
+                      aria-expanded={isSortOpen}
+                      className="flex h-9 min-w-0 items-center gap-1 pl-1 pr-2 text-sm font-semibold"
+                    >
+                      <span className="truncate">{sortLabel}</span>
+                      <ChevronDown className={cn('h-4 w-4 shrink-0 transition-transform duration-200', isSortOpen && 'rotate-180')} aria-hidden />
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent data-glass-menu data-profile-sort-menu align="start" sideOffset={6} collisionPadding={12} className="w-48 rounded-2xl p-1.5">
+                    <div role="menu" aria-label={t('profile.sortBy', 'Sort by')}>
+                      {fullSortItems.map((item) => {
+                        const active = item.key === sort;
+                        return (
+                          <button
+                            key={item.key}
+                            type="button"
+                            role="menuitemradio"
+                            aria-checked={active}
+                            data-active={active || undefined}
+                            onClick={() => { onSortChange(item.key); setIsSortOpen(false); }}
+                            className={cn('flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-sm transition-colors', active ? 'font-semibold' : 'font-normal opacity-80')}
+                          >
+                            <span>{item.label}</span>
+                            {active && <Check className="h-4 w-4" aria-hidden />}
+                          </button>
+                        );
+                      })}
+                      {onArrange && (
+                        <button
+                          type="button"
+                          role="menuitem"
+                          data-profile-arrange-open
+                          onClick={() => { setIsSortOpen(false); onArrange(); }}
+                          className="mt-1 flex w-full items-center justify-between rounded-xl border-t border-current/10 px-3 py-2 text-left text-sm font-normal opacity-80 transition-colors"
+                        >
+                          <span>{t('profile.arrangeButton', 'Arrange posts')}</span>
+                          <SortIcon className="h-4 w-4" aria-hidden />
+                        </button>
+                      )}
+                    </div>
+                  </PopoverContent>
+                </Popover>
+                <span className="flex-1" />
+                <button
+                  type="button"
+                  data-profile-quiet-icon
+                  onClick={() => setIsSearchOpen(true)}
+                  aria-label={t('profile.searchThisChannel', 'Search this channel')}
+                  className="flex h-9 w-9 items-center justify-center"
+                >
+                  <Search className="h-[18px] w-[18px]" />
+                </button>
+                <button
+                  type="button"
+                  data-profile-quiet-icon
+                  onClick={() => onFiltersOpenChange(!filtersOpen)}
+                  aria-expanded={filtersOpen}
+                  aria-label={t('explorePage.filters', 'Filters')}
+                  className="relative flex h-9 w-9 items-center justify-center"
+                >
+                  <SlidersHorizontal className="h-[18px] w-[18px]" />
+                  {activeFilterCount > 0 && (
+                    <span data-profile-quiet-count className="absolute right-0.5 top-0.5 grid h-4 min-w-4 place-items-center rounded-full px-1 text-[10px] font-bold leading-none">
+                      {formatCount(activeFilterCount)}
+                    </span>
+                  )}
+                </button>
+              </div>
+            ) : (
+            <div data-profile-quiet-row data-profile-quiet-desktop className="-mx-1 flex h-9 min-w-0 items-center justify-start gap-1 overflow-x-auto scrollbar-hide whitespace-nowrap">
+<button
+type="button"
+data-profile-quiet-icon
+onClick={() => setIsSearchOpen(true)}
+aria-label={t('profile.searchThisChannel', 'Search this channel')}
+className="flex h-9 w-9 flex-shrink-0 items-center justify-center"
+>
+<Search className="h-[18px] w-[18px]" />
+</button>
+<button
+type="button"
+data-profile-quiet-icon
+onClick={() => onFiltersOpenChange(!filtersOpen)}
+aria-expanded={filtersOpen}
+aria-label={t('explorePage.filters', 'Filters')}
+className="relative flex h-9 w-9 flex-shrink-0 items-center justify-center"
+>
+<SlidersHorizontal className="h-[18px] w-[18px]" />
+{activeFilterCount > 0 && (
+<span data-profile-quiet-count className="absolute right-0.5 top-0.5 grid h-4 min-w-4 place-items-center rounded-full px-1 text-[10px] font-bold leading-none">
+{formatCount(activeFilterCount)}
+</span>
+)}
+</button>
+{sortItems.map((item) => {
+const active = item.key === sort;
+return (
+<button
+key={item.key}
+type="button"
+data-profile-sort-tab
+data-active={active || undefined}
+aria-pressed={active}
+onClick={() => onSortChange(item.key)}
+className={cn('relative h-9 flex-shrink-0 px-3 text-xs font-medium transition-colors', active ? 'text-white' : 'text-zinc-400 hover:text-white')}
+>
+{item.label}
+</button>
+);
+})}
+{onArrange && (
+<button
+type="button"
+data-profile-sort-tab
+data-profile-arrange-open
+onClick={onArrange}
+className="relative flex h-9 flex-shrink-0 items-center gap-1.5 px-3 text-xs font-medium text-zinc-400 transition-colors hover:text-white"
+>
+<SortIcon className="h-[15px] w-[15px]" aria-hidden />
+{t('profile.arrangeButton', 'Arrange posts')}
+</button>
+)}
+{showViewToggle && <><span className="min-w-2 flex-1" /><ProfileViewToggle /></>}
+</div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {!isMobile && (
+        <AnimatePresence initial={false}>
+          {filtersOpen && (
+          <motion.div
+            key="profile-filters"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.25, ease: 'easeOut' }}
+            className="overflow-y-clip overflow-x-visible"
+          >
+            <ProfileFilterPanel
+              filters={filters}
+              onChange={onFiltersChange}
+              onReset={onFiltersReset}
+              showPostType={showPostType}
+            />
+          </motion.div>
+          )}
+        </AnimatePresence>
+      )}
+
+      {isMobile && (
+        <Drawer open={filtersOpen} onOpenChange={onFiltersOpenChange}>
+          <DrawerContent glass hideHandle={false} className="max-h-[85dvh] px-3 pb-[calc(12px_+_env(safe-area-inset-bottom))]">
+            <DrawerHeader className="px-0 pb-3 pt-1 text-left">
+              <DrawerTitle className="text-white">{t('explorePage.filters', 'Filters')}</DrawerTitle>
+            </DrawerHeader>
+            <div className="min-h-0 overflow-y-auto overscroll-contain">
+              <ProfileFilterPanel
+                filters={filters}
+                onChange={onFiltersChange}
+                onReset={onFiltersReset}
+                showPostType={showPostType}
+                drawer
+              />
+            </div>
+          </DrawerContent>
+        </Drawer>
+      )}
+
+      {/* Active filters, always visible — a chip is the only thing that
+          explains an empty tab once the panel is closed again. */}
+      {activeFilterCount > 0 && (
+        <div className="flex items-center gap-1.5 flex-wrap">
+          {!!categoryLabel && (
+            <button
+              type="button"
+              data-filter-chip
+              data-active="true"
+              onClick={() => onFiltersChange({ ...filters, category: null })}
+              className={CHIP_CLASS}
+            >
+              <span className="leading-[1]">{categoryLabel}</span>
+              <span className="text-white/40 hover:text-white text-[10px] leading-[1] -mt-px">✕</span>
+            </button>
+          )}
+          {filters.date !== 'all' && !!dateLabel && (
+            <button
+              type="button"
+              data-filter-chip
+              data-active="true"
+              onClick={() => onFiltersChange({ ...filters, date: 'all' })}
+              className={CHIP_CLASS}
+            >
+              <span className="leading-[1]">{dateLabel}</span>
+              <span className="text-white/40 hover:text-white text-[10px] leading-[1] -mt-px">✕</span>
+            </button>
+          )}
+          {postTypeActive && !!postTypeLabel && (
+            <button
+              type="button"
+              data-filter-chip
+              data-active="true"
+              onClick={() => onFiltersChange({ ...filters, postType: 'all' })}
+              className={CHIP_CLASS}
+            >
+              <span className="leading-[1]">{postTypeLabel}</span>
+              <span className="text-white/40 hover:text-white text-[10px] leading-[1] -mt-px">✕</span>
+            </button>
+          )}
+          {accessChips.map((chip) => (
+            <button
+              key={chip.key}
+              type="button"
+              data-filter-chip
+              data-active="true"
+              onClick={() => onFiltersChange({ ...filters, [chip.key]: false })}
+              className={CHIP_CLASS}
+            >
+              <span className="leading-[1]">{t(chip.labelKey, chip.fallback)}</span>
+              <span className="text-white/40 hover:text-white text-[10px] leading-[1] -mt-px">✕</span>
+            </button>
+          ))}
+          <button
+            type="button"
+            onClick={onFiltersReset}
+            className="px-2 py-1 rounded-lg text-[10px] text-white transition-colors"
+          >
+            {t('explorePage.clearAll', 'Clear all')}
+          </button>
+        </div>
+      )}
+
+      {!!search.trim() && !isLoading && (
+        <p className="text-xs text-zinc-500">
+          {resultCount === 1
+            ? t('profile.searchResultCount', '1 result for "{{query}}"', { query: search.trim() })
+            : t('profile.searchResultCountPlural', '{{count}} results for "{{query}}"', {
+                count: resultCount,
+                query: search.trim(),
+              })}
+        </p>
+      )}
+    </div>
+  );
+}

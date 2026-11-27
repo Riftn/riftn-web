@@ -1,0 +1,393 @@
+/**
+ * Notifications Hooks
+ * ===================
+ * React Query hooks for managing user notifications.
+ */
+
+import { useQuery, useMutation, useQueryClient, useInfiniteQuery, type InfiniteData, type QueryClient } from '@tanstack/react-query';
+import { useAuth } from '@/contexts/AuthContext';
+import { useRef, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
+import {
+  getNotifications,
+  getUnreadNotificationCount,
+  markNotificationAsRead,
+  markAllNotificationsAsRead,
+  type DeHubNotification,
+  type NotificationCategory,
+  type UnreadNotificationCount,
+} from '@/lib/api/dehub';
+import { useBrowserNotifications, getLastSeenTimestamp, setLastSeenTimestamp } from '@/hooks/use-browser-notifications';
+import { buildDigest, type DigestItem } from '@/lib/notification-digest';
+
+// Query keys for cache management
+export const notificationKeys = {
+  all: ['notifications'] as const,
+  list: (category?: NotificationCategory, types?: string[]) =>
+    [...notificationKeys.all, 'list', category, types?.length ? [...types].sort().join(',') : null] as const,
+  unreadCount: () => [...notificationKeys.all, 'unreadCount'] as const,
+};
+
+/**
+ * Warm the unfiltered first page the bell opens on (same key and fetch as
+ * useNotifications with no filters), so the list is current the moment it
+ * mounts. Respects the list's staleTime, so a fresh cache costs nothing.
+ */
+export function prefetchNotificationsList(queryClient: QueryClient, types?: string[]): Promise<void> {
+  return queryClient.prefetchInfiniteQuery({
+    queryKey: notificationKeys.list(undefined, types),
+    queryFn: ({ pageParam = 1 }) => getNotifications(pageParam as number, PAGE_SIZE, undefined, false, types, false),
+    initialPageParam: 1,
+    staleTime: LIST_STALE_MS,
+  });
+}
+
+// 15 a page: the first paint is half the rows it was, and the next 15 load as
+// the reader nears the end (LoadMoreSentinel, 1.5 screens ahead).
+const PAGE_SIZE = 15;
+/** A list this fresh is shown as it is; older, it is shown and refreshed quietly behind. */
+const LIST_STALE_MS = 5 * 60 * 1000;
+/** Each tab's rows stay in memory this long after the page closes. */
+const LIST_KEEP_MS = 30 * 60 * 1000;
+
+type ListPage = Awaited<ReturnType<typeof getNotifications>>;
+
+/**
+ * The last "mark all as read": every row up to the newest one loaded at the
+ * tap. A list answer that left before the write landed (a live ping, the
+ * five-minute poll) still carries those rows unread, and without this they
+ * lit the tab counts straight back up and kept them lit until the next poll.
+ * The newest row's time, not the clock, so a fast clock never hides a
+ * notification that arrives after the tap.
+ */
+let markedAllRead: { cutoff: number; at: number } | null = null;
+const MARKED_ALL_KEEP_MS = 5 * 60 * 1000;
+
+const createdMs = (n: DeHubNotification) => {
+  const t = new Date(n.createdAt).getTime();
+  return Number.isFinite(t) ? t : 0;
+};
+
+export function applyMarkedAllRead(rows: DeHubNotification[]): DeHubNotification[] {
+  const mark = markedAllRead;
+  if (!mark || Date.now() - mark.at > MARKED_ALL_KEEP_MS) return rows;
+  if (!rows.some((n) => !n.read && createdMs(n) <= mark.cutoff)) return rows;
+  return rows.map((n) => (!n.read && createdMs(n) <= mark.cutoff ? { ...n, read: true } : n));
+}
+
+/**
+ * A tab's first sight before its own request lands: the rows of that type
+ * already loaded in the unfiltered feed, so a tab opens filled instead of on
+ * a skeleton.
+ */
+function tabPlaceholder(queryClient: QueryClient, category: NotificationCategory | undefined, types: string[]) {
+  const all = queryClient.getQueryData<InfiniteData<ListPage>>(notificationKeys.list(category, undefined));
+  if (!all?.pages?.length) return undefined;
+  const wanted = new Set(types);
+  const items = all.pages.flatMap((p) => p?.items ?? []).filter((n) => n && wanted.has(n.type));
+  if (!items.length) return undefined;
+  return { pages: [{ items, totalCount: items.length, hasMore: false }], pageParams: [1] } satisfies InfiniteData<ListPage>;
+}
+
+/**
+ * Hook to fetch notifications with infinite scroll
+ * @param category - Optional category filter (engagement, social, monetization, content, system)
+ * @param types - Optional exact-type filter backing the per-type tabs. Applied
+ *   server-side, so a tab no longer depends on its rows happening to fall inside
+ *   the first page of an unfiltered feed.
+ * @param options.notifyOnNew - Whether newly arrived unread rows raise a browser
+ *   notification. Defaults to true for an unfiltered feed. Set it false on a
+ *   second instance so a page that runs both a filtered and an unfiltered query
+ *   does not announce the same row twice.
+ */
+export function useNotifications(
+  category?: NotificationCategory,
+  types?: string[],
+  options?: {
+    notifyOnNew?: boolean;
+    /** List what the reader's notification filters held back. Fetched only while enabled. */
+    filtered?: boolean;
+    enabled?: boolean;
+  },
+) {
+  const { isAuthenticated } = useAuth();
+  const { t } = useTranslation();
+  const { showNotification } = useBrowserNotifications();
+  const prevIdsRef = useRef<Set<string>>(new Set());
+
+  const queryClient = useQueryClient();
+  const query = useInfiniteQuery({
+    queryKey: options?.filtered ? [...notificationKeys.list(category, types), 'filtered'] : notificationKeys.list(category, types),
+    queryFn: async ({ pageParam = 1 }) => {
+      return getNotifications(pageParam, PAGE_SIZE, category, false, types, !!options?.filtered);
+    },
+    placeholderData: types?.length && !options?.filtered ? () => tabPlaceholder(queryClient, category, types) : undefined,
+    getNextPageParam: (lastPage, allPages) => {
+      if (lastPage.hasMore) {
+        return allPages.length + 1;
+      }
+      return undefined;
+    },
+    initialPageParam: 1,
+    enabled: isAuthenticated && (options?.enabled ?? true),
+    staleTime: LIST_STALE_MS,
+    gcTime: LIST_KEEP_MS,
+    refetchInterval: 5 * 60 * 1000,
+  });
+
+  // Flatten pages into single array, filtering out any undefined items
+  // A row can slide onto the next page while the reader scrolls (a new one
+  // pushes everything down), so a row already listed is not listed twice.
+  const notifications = useMemo(() => {
+    const seen = new Set<string>();
+    return applyMarkedAllRead((query.data?.pages ?? [])
+      .flatMap((page) => page?.items || [])
+      .filter((item): item is DeHubNotification => {
+        if (!item?.id || seen.has(item.id)) return false;
+        seen.add(item.id);
+        return true;
+      }));
+  }, [query.data]);
+  const processedData = useRef<typeof query.data>();
+  const initialized = useRef(false);
+
+  // Never announce from a filtered feed: it returns a different slice of the
+  // same data, so with a tab active every row absent from the previously seen
+  // set looks "new" — switching to Tips would fire a desktop notification per
+  // tip already sitting in the list.
+  const notifyOnNew = (options?.notifyOnNew ?? true) && !types?.length && !options?.filtered;
+
+  // Trigger browser notifications for newly arrived unread items.
+  //
+  // Collected first, announced once. The feed is polled every five minutes, so
+  // a pile-up is the normal case rather than the exception: nine things
+  // happening between two polls used to raise nine cards, and the reader
+  // dismissed eight of them to read the ninth. One card describing the pile is
+  // what they were going to reconstruct anyway.
+  useEffect(() => {
+    if (!notifyOnNew) return;
+    if (!query.data || processedData.current === query.data) return;
+    processedData.current = query.data;
+    const lastSeen = getLastSeenTimestamp();
+    const isFirstLoad = !initialized.current;
+    initialized.current = true;
+
+    const arrived: { at: number; id: string; item: DigestItem }[] = [];
+
+    for (const n of notifications) {
+      if (prevIdsRef.current.has(n.id)) continue;
+      // On first load, just populate the set without showing notifications
+      if (!isFirstLoad && !n.read) {
+        const createdAt = new Date(n.createdAt || 0).getTime();
+        if (createdAt > lastSeen) {
+          arrived.push({
+            at: createdAt,
+            id: n.id,
+            item: {
+              from: n.actorUsername || undefined,
+              text: n.content || '',
+              avatar: n.actorAvatar || undefined,
+            },
+          });
+        }
+      }
+    }
+
+    // The API hands these back newest-first; a digest quotes the newest line,
+    // so it needs them the other way round.
+    arrived.sort((a, b) => a.at - b.at);
+    const newest = arrived[arrived.length - 1];
+
+    if (arrived.length === 1 && newest) {
+      showNotification(
+        newest.item.from || 'Riftn',
+        newest.item.text || '',
+        newest.item.avatar,
+        newest.id,
+      );
+    } else if (arrived.length > 1 && newest) {
+      const digest = buildDigest(arrived.map((a) => a.item));
+      const who = digest.otherNames > 0
+        ? t('digest.andOthers', { names: digest.names.join(', '), count: digest.otherNames })
+        : digest.names.join(', ') || t('digest.someone', 'Someone');
+      showNotification(
+        'Riftn',
+        t('notifications.burstBody', '{{count}} new notifications from {{who}}', {
+          count: arrived.length,
+          who,
+        }),
+        newest.item.avatar,
+        // Keyed on the newest row so a later burst replaces this card rather
+        // than stacking behind it, but a re-render of the same burst cannot
+        // raise it twice.
+        `dehub-burst-${newest.id}`,
+      );
+    }
+
+    // Update refs
+    prevIdsRef.current = new Set(notifications.map(n => n.id));
+    // Only fetched rows advance the watermark; rendering must not acknowledge
+    // notifications that the next fetch has not returned yet.
+    setLastSeenTimestamp(notifications.reduce((latest, n) =>
+      Math.max(latest, new Date(n.createdAt || 0).getTime() || 0), lastSeen));
+  }, [query.data, notifications, showNotification, notifyOnNew, t]);
+
+  return {
+    notifications,
+    isLoading: query.isLoading,
+    isError: query.isError,
+    error: query.error,
+    fetchNextPage: query.fetchNextPage,
+    hasNextPage: query.hasNextPage,
+    isFetchingNextPage: query.isFetchingNextPage,
+    /** Showing the All feed's rows of this type while the tab's own request runs. */
+    isPlaceholderData: query.isPlaceholderData,
+    refetch: query.refetch,
+  };
+}
+
+/**
+ * Hook to get unread notification count with category breakdown
+ */
+export function useUnreadNotificationCount() {
+  const { isAuthenticated } = useAuth();
+
+  return useQuery({
+    queryKey: notificationKeys.unreadCount(),
+    queryFn: getUnreadNotificationCount,
+    enabled: isAuthenticated,
+    staleTime: 2 * 60 * 1000,
+    refetchInterval: 5 * 60 * 1000, // Poll every 5 minutes
+  });
+}
+
+/**
+ * Hook for marking a single notification as read
+ */
+export function useMarkNotificationAsRead() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (notificationId: string) => markNotificationAsRead(notificationId),
+    onMutate: async (notificationId) => {
+      await queryClient.cancelQueries({ queryKey: notificationKeys.all });
+
+      const previousLists = queryClient.getQueriesData<{ pages: { items: DeHubNotification[] }[] }>(
+        { queryKey: [...notificationKeys.all, 'list'] },
+      );
+      const previousCount = queryClient.getQueryData<UnreadNotificationCount>(notificationKeys.unreadCount());
+
+      // Locate the row so we only decrement the count when it was actually unread
+      let target: DeHubNotification | undefined;
+      for (const [, data] of previousLists) {
+        target = data?.pages?.flatMap((page) => page?.items || []).find((n) => n?.id === notificationId);
+        if (target) break;
+      }
+
+      // Optimistically flag the row as read in every cached list (all category filters)
+      queryClient.setQueriesData<{ pages: { items: DeHubNotification[] }[] }>(
+        { queryKey: [...notificationKeys.all, 'list'] },
+        (old) => old ? {
+          ...old,
+          pages: old.pages.map((page) => page ? {
+            ...page,
+            items: (page.items || []).map((n) => n?.id === notificationId ? { ...n, read: true } : n),
+          } : page),
+        } : old,
+      );
+
+      // Optimistically decrement the unread count for that notification's category
+      if (target && !target.read && previousCount) {
+        queryClient.setQueryData<UnreadNotificationCount>(notificationKeys.unreadCount(), {
+          total: Math.max(0, previousCount.total - 1),
+          byCategory: {
+            ...previousCount.byCategory,
+            [target.category]: Math.max(0, (previousCount.byCategory[target.category] || 0) - 1),
+          },
+        });
+      }
+
+      return { previousLists, previousCount };
+    },
+    onError: (_err, _notificationId, context) => {
+      // Rollback on error
+      context?.previousLists?.forEach(([key, data]) => queryClient.setQueryData(key, data));
+      if (context?.previousCount !== undefined) {
+        queryClient.setQueryData(notificationKeys.unreadCount(), context.previousCount);
+      }
+    },
+    onSettled: () => {
+      // Lists are already patched optimistically — mark them stale without
+      // refetching. The unread count is refetched: the optimistic decrement only
+      // covers the one row, and a server-aggregated row stands for several
+      // notifications, so without this the nav badge kept its old number.
+      queryClient.invalidateQueries({ queryKey: notificationKeys.all, refetchType: 'none' });
+      queryClient.invalidateQueries({ queryKey: notificationKeys.unreadCount() });
+    },
+  });
+}
+
+/** Live refreshes hold off while this is writing; see useNotificationRealtime. */
+export const MARK_ALL_READ_KEY = [...notificationKeys.all, 'markAllRead'] as const;
+
+/**
+ * Hook for marking all notifications as read
+ * @param category - Optional: Only mark notifications in this category as read
+ */
+export function useMarkAllNotificationsAsRead() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationKey: MARK_ALL_READ_KEY,
+    mutationFn: (category?: NotificationCategory) => markAllNotificationsAsRead(category),
+    onMutate: async (category) => {
+      // Lists and count both go to read at once. The per-type tab counts are
+      // worked out from the loaded rows, so zeroing only the total left every
+      // tab showing its old number until the write and a full refetch landed.
+      await queryClient.cancelQueries({ queryKey: notificationKeys.all });
+      const previousCount = queryClient.getQueryData<UnreadNotificationCount>(notificationKeys.unreadCount());
+      const previousLists = queryClient.getQueriesData<{ pages: { items: DeHubNotification[] }[] }>(
+        { queryKey: [...notificationKeys.all, 'list'] },
+      );
+      if (!category) {
+        let cutoff = markedAllRead?.cutoff ?? 0;
+        for (const [, data] of previousLists) {
+          for (const page of data?.pages ?? []) for (const n of page?.items ?? []) if (n) cutoff = Math.max(cutoff, createdMs(n));
+        }
+        markedAllRead = { cutoff, at: Date.now() };
+      }
+      queryClient.setQueryData<UnreadNotificationCount>(notificationKeys.unreadCount(), category && previousCount ? {
+        total: Math.max(0, previousCount.total - (previousCount.byCategory[category] || 0)),
+        byCategory: { ...previousCount.byCategory, [category]: 0 },
+      } : {
+        total: 0,
+        byCategory: { engagement: 0, social: 0, monetization: 0, content: 0, messages: 0, system: 0 },
+      });
+      queryClient.setQueriesData<{ pages: { items: DeHubNotification[] }[] }>(
+        { queryKey: [...notificationKeys.all, 'list'] },
+        (old) => old ? {
+          ...old,
+          pages: old.pages.map((page) => page ? {
+            ...page,
+            items: (page.items || []).map((n) => n && !n.read && (!category || n.category === category) ? { ...n, read: true } : n),
+          } : page),
+        } : old,
+      );
+      return { previousCount, previousLists };
+    },
+    onError: (_err, _variables, context) => {
+      // Rollback on error
+      markedAllRead = null;
+      context?.previousLists?.forEach(([key, data]) => queryClient.setQueryData(key, data));
+      if (context?.previousCount !== undefined) {
+        queryClient.setQueryData(notificationKeys.unreadCount(), context.previousCount);
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: notificationKeys.all });
+    },
+  });
+}
+
+// Re-export types for convenience
+export type { DeHubNotification, NotificationCategory, UnreadNotificationCount };
