@@ -2180,10 +2180,12 @@ function PrivacySettings() {
           <SettingsRow
             icon={<Shield />}
             anchor="wallet-unlock"
+            wrapAction
             title={t('settings.walletUnlockInterval', 'Wallet unlock prompt')}
             description={t('settings.walletUnlockIntervalDesc', 'How long your wallet stays unlocked for posting, tipping and transfers before we ask for your password again. Survives refreshes; logging out always locks it.')}
             action={<SettingDrawerSelect
               value={walletUnlockInterval}
+              wrapLabel
               onValueChange={(value) => setWalletUnlockInterval(value as WalletUnlockIntervalOption)}
               title={t('settings.walletUnlockInterval', 'Wallet unlock prompt')}
               options={[
