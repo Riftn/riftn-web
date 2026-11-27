@@ -16,6 +16,7 @@ import { profileFieldLinks, verifiedGithubUrl } from './server/profile-fields.js
 import { apRelayTarget, handleApRelay } from './server/activitypub-relay.js';
 import { handleMastodonRelay, mastodonRelayTarget } from './server/mastodon-relay.js';
 import { embedRoute, handleEmbedPage, handleOembed, oembedLinkTag } from './server/post-embed.js';
+import { chatEmbedRoute, handleChatEmbed } from './server/chat-embed.js';
 export { AccountMcpAuth } from './server/account-mcp-auth.js';
 export { EditorPresenceRoom } from './server/editor-presence.ts';
 
@@ -7196,6 +7197,9 @@ async function handleRequest(request, env, ctx) {
       mediaUrl: (raw) => (/^https?:\/\//i.test(raw) ? raw : `${CDN_ORIGIN}/${String(raw).replace(/^\/+/, '')}`),
     });
   }
+
+  const chatEmbed = isCanonicalHost && chatEmbedRoute(pathname);
+  if (chatEmbed) return handleChatEmbed(request, chatEmbed, { lookup: supabaseLookup, rpc: supabaseRpc });
 
   // Embeddable posts (server/post-embed.js): the iframe page and oEmbed.
   const embedPostId = embedRoute(pathname);

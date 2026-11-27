@@ -66,7 +66,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Phone } from 'lucide-react';
+import { Code, Phone } from 'lucide-react';
 import Video from '@/components/ui/cut-icons/video';
 import { CallContext } from '@/contexts/CallContext';
 import Plus from '@/components/ui/cut-icons/add';
@@ -75,6 +75,7 @@ import { cn } from '@/lib/utils';
 import { formatCount } from '@/lib/format-count';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { dehubLinkFor } from '@/lib/dehub-links';
+import { copyChatEmbedCode } from '@/lib/chat-embed-code';
 
 /** A row in the phone + menu, same as the Messages list menu's rows. */
 const PC_ROW = 'flex cursor-pointer items-center gap-3 rounded-xl px-2.5 py-2 text-[14px] text-zinc-100 outline-none focus:bg-white/10 data-[highlighted]:bg-white/10 data-[disabled]:opacity-40 [&>svg]:h-[17px] [&>svg]:w-[17px] [&>svg]:text-zinc-400';
@@ -954,6 +955,9 @@ export function PublicChat({ onBack, embedded = false, phoneB = false }: PublicC
                 {isAllTranslated ? <RotateCcw /> : <Languages />}
                 {isAllTranslated ? _copy("copy.16194a69c43d", { defaultValue: "Show original" }) : _copy("copy.29a7e1c24c92", { defaultValue: "Translate all" })}
               </DropdownMenuItem>
+              <DropdownMenuItem className={PC_ROW} onSelect={() => void copyChatEmbedCode(t)}>
+                <Code />{t('postOptions.copyEmbedCode')}
+              </DropdownMenuItem>
               {ROOM_MANAGEMENT_ENABLED && isRoomModerator && (
                 <>
                   <DropdownMenuItem className={PC_ROW} onSelect={() => setCreateRoomOpen(true)}>
@@ -973,6 +977,15 @@ export function PublicChat({ onBack, embedded = false, phoneB = false }: PublicC
               buttons instead of being split from them by the number. */}
           {selectedRoomId && <LiveChatOnlineCount count={onlineCount} />}
           <ChatTextSizeButton />
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-400 hover:text-white"
+                aria-label={t('postOptions.copyEmbedCode')} onClick={() => void copyChatEmbedCode(t)}>
+                <Code className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>{t('postOptions.copyEmbedCode')}</TooltipContent>
+          </Tooltip>
           {recapWalletAddress && (
             <CatchUpMenu communityId="global" walletAddress={recapWalletAddress} iconOnly />
           )}

@@ -5,7 +5,7 @@ import { CommunityKindChip } from './CommunityKindChip';
 import { communityKindOf, isPublicChatCommunity, entryPriceOf } from '@/lib/community-kinds';
 import dehubCoin from '@/assets/dehub-coin.png';
 import { useRef, useState, useCallback } from 'react';
-import { LogIn, Crown, Pin, PinOff, TrendingUp, FileText, Clock, MessageSquarePlus, Bell, BellOff } from "lucide-react";
+import { LogIn, Crown, Pin, PinOff, TrendingUp, FileText, Clock, MessageSquarePlus, Bell, BellOff, Code } from "lucide-react";
 import Users from "@/components/ui/cut-icons/communities";
 import LogOut from "@/components/ui/cut-icons/sign-out";
 import Camera from "@/components/ui/cut-icons/camera";
@@ -39,6 +39,7 @@ import { DescriptionWithLinks } from './DescriptionWithLinks';
 import { storageImage, deviceWidth, isMdUp } from '@/lib/media-url';
 import { viewerShareUrl } from '@/lib/share-url';
 import { trackShare } from '@/lib/analytics';
+import { copyChatEmbedCode } from '@/lib/chat-embed-code';
 
 import { formatCount } from '@/lib/format-count';
 interface CommunityHeaderProps {
@@ -439,6 +440,13 @@ export function CommunityHeader({ community, isMember, isPendingMember, membersh
                 <Link2 className="w-4 h-4 text-zinc-400" />
                 {t('communities.copyLink')}
               </button>
+              {communityKindOf(community) !== 'community' && (
+                <button type="button" onClick={() => void copyChatEmbedCode(t, community.slug)}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm text-white hover:bg-white/10 transition-colors">
+                  <Code className="w-4 h-4 text-zinc-400" />
+                  {t('postOptions.copyEmbedCode')}
+                </button>
+              )}
               {typeof navigator !== 'undefined' && typeof navigator.share === 'function' && (
                 <button
                   onClick={() => {
