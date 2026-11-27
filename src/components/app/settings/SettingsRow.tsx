@@ -34,6 +34,8 @@ interface SettingsRowProps {
   title: ReactNode;
   description?: ReactNode;
   action?: ReactNode;
+  /** Let a wide control move below the description when the row is narrow. */
+  wrapAction?: boolean;
   /**
    * `label` wraps a switch so the whole row toggles it; `button` makes the
    * whole row the action (Support links, copy-address) and gets a hover wash
@@ -61,6 +63,7 @@ export function SettingsRow({
   title,
   description,
   action,
+  wrapAction = false,
   as: Component = 'div',
   onClick,
   className,
@@ -75,17 +78,23 @@ export function SettingsRow({
       onClick={onClick}
       disabled={interactive ? disabled : undefined}
       className={cn(
-        'grid w-full min-w-0 grid-cols-[1.25rem_minmax(0,1fr)_auto] items-start gap-x-3 text-left',
+        'w-full min-w-0 items-start gap-x-3 text-left',
+        wrapAction
+          ? 'relative flex flex-wrap gap-y-2 ps-8'
+          : 'grid grid-cols-[1.25rem_minmax(0,1fr)_auto]',
         interactive &&
           '-mx-2 w-[calc(100%+1rem)] rounded-xl px-2 py-2 transition-colors hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40',
         disabled ? 'cursor-default opacity-60' : undefined,
         className,
       )}
     >
-      <span className="flex size-5 shrink-0 items-center justify-center text-zinc-500 [&_img]:size-5 [&_img]:shrink-0 [&_svg]:size-5 [&_svg]:shrink-0">
+      <span className={cn(
+        'flex size-5 shrink-0 items-center justify-center text-zinc-500 [&_img]:size-5 [&_img]:shrink-0 [&_svg]:size-5 [&_svg]:shrink-0',
+        wrapAction && 'absolute start-0 top-0',
+      )}>
         {icon}
       </span>
-      <span className="min-w-0">
+      <span className={cn('min-w-0', wrapAction && 'flex-[1_1_12rem]')}>
         <span className="block break-words font-medium leading-5 text-white">{title}</span>
         {description ? (
           <span className="mt-0.5 block break-words text-sm leading-5 text-zinc-500">
@@ -94,7 +103,10 @@ export function SettingsRow({
         ) : null}
       </span>
       {action ? (
-        <span className="ml-2 flex min-h-5 shrink-0 items-center justify-end self-center">
+        <span className={cn(
+          'flex min-h-5 items-center justify-end self-center',
+          wrapAction ? 'ms-auto min-w-0 max-w-full' : 'ml-2 shrink-0',
+        )}>
           {action}
         </span>
       ) : null}

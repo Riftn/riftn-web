@@ -29,6 +29,7 @@ interface SettingDrawerSelectProps {
   disabled?: boolean;
   className?: string;
   searchable?: boolean;
+  wrapLabel?: boolean;
 }
 
 export function SettingDrawerSelect({
@@ -39,6 +40,7 @@ export function SettingDrawerSelect({
   disabled = false,
   className = '',
   searchable = false,
+  wrapLabel = false,
 }: SettingDrawerSelectProps) {
   const { t: _copy } = _useCopy();
   const [open, setOpen] = useState(false);
@@ -70,12 +72,17 @@ export function SettingDrawerSelect({
           aria-expanded={open}
           className={cn(
             SETTINGS_CONTROL_CLASS,
-            'flex min-w-[6.5rem] max-w-[10rem] items-center justify-between gap-2 sm:max-w-[14rem]',
+            'flex items-center justify-between gap-2',
+            wrapLabel
+              ? 'h-auto min-h-9 min-w-0 max-w-full py-1.5 text-start'
+              : 'min-w-[6.5rem] max-w-[10rem] sm:max-w-[14rem]',
             className,
           )}
           disabled={disabled}
         >
-          <span className="truncate">{displayLabel}</span>
+          <span className={wrapLabel ? 'min-w-0 whitespace-normal [overflow-wrap:anywhere]' : 'truncate'}>
+            {displayLabel}
+          </span>
           <ChevronDown className="size-4 shrink-0 text-zinc-500" aria-hidden="true" />
         </button>
       </DrawerTrigger>
