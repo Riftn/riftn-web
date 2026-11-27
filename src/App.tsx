@@ -49,6 +49,7 @@ import { HelmetProvider } from "react-helmet-async";
 import { SEOHead } from "@/components/SEOHead";
 import { ClientNavigateBridge } from "@/components/app/ClientNavigateBridge";
 import { HomeShellSkeleton, SeededProfileSkeleton } from "@/components/app/PageSkeletons";
+import { DocsLoadingSkeleton } from "@/components/DocsLoadingSkeleton";
 import { ThemePreviewProvider, ThemeProvider, useAppTheme } from "@/contexts/ThemeContext";
 import { UserPreferencesProvider } from "@/contexts/UserPreferencesContext";
 import { lazyWithRetry } from "@/lib/lazy-with-retry";
@@ -212,7 +213,8 @@ const NotFound = React.lazy(() => import("./pages/NotFound"));
 // /guides/<slug> blog posts — providers + sidebar mount ONCE and stay mounted
 // across the /docs ↔ /guides boundary (see DocsSurface + the shared parent
 // route below), so clicking on and off a blog post never remounts the panels.
-const DocsSurface = React.lazy(() => import("./pages/DocsSurface"));
+const DocsSurface = lazyWithRetry(() => import("./pages/DocsSurface"));
+export const preloadDocsSurface = () => DocsSurface.preload();
 const ProfilePage = React.lazy(() => import("./pages/app/ProfilePage"));
 const PostInfoPage = React.lazy(() => import("@/lib/preload-post-page").then(module => module.loadPostInfoPage()));
 const StoryPermalinkPage = React.lazy(() => import("./pages/app/StoryPermalinkPage"));
@@ -630,16 +632,15 @@ function AppContent() {
           {Object.entries(CONSOLIDATED_GUIDES).map(([from, to]) => (
             <Route key={from} path={`/guides/${from}`} element={<Navigate to={`/guides/${to}`} replace />} />
           ))}
-          <Route path="/guides/best-decentralized-streaming-apps" element={<Suspense fallback={<PageLoader />}><BestDecentralizedStreaming /></Suspense>} />
+          <Route path="/guides/best-decentralized-streaming-apps" element={<Suspense fallback={<DocsLoadingSkeleton pathname={loc.pathname} />}><BestDecentralizedStreaming /></Suspense>} />
 
           {/* Unified docs/blog surface. This pathless parent stays mounted for
               ALL of /docs, /docs/*, and /guides/<slug> (blog) — so crossing the
               /docs ↔ /guides boundary (e.g. blog list → post) swaps only the
               reading column, never the providers or the sidebar. DocsSurface
               self-routes internally; the children below are match anchors only.
-              Inner Suspense fallback={null} keeps SurfaceTransition mounted on a
-              cold docs-chunk load (the persistent background shows through). */}
-          <Route element={<ErrorBoundary compact label={_copy("copy.7af023c43013", { defaultValue: "Docs" })}><Suspense fallback={null}><DocsSurface /></Suspense></ErrorBoundary>}>
+              The skeleton keeps the Docs shell in place on a cold chunk load. */}
+          <Route element={<ErrorBoundary compact label={_copy("copy.7af023c43013", { defaultValue: "Docs" })}><Suspense fallback={<DocsLoadingSkeleton pathname={loc.pathname} />}><DocsSurface /></Suspense></ErrorBoundary>}>
             <Route path="/docs" element={null} />
             <Route path="/docs/*" element={null} />
             <Route path="/guides/*" element={null} />

@@ -42,7 +42,7 @@ import { useAppTheme } from "@/contexts/ThemeContext";
 import { getDocsForcedTheme } from "@/lib/docs-theme";
 import { badgeLightArtworkCss } from "@/lib/badge-light-artwork";
 import { setBackgroundPaused, scheduleBackgroundResume } from "@/lib/background-gate";
-import { DeHubPageLoader } from "@/components/app/DeHubLoader";
+import { DocsContentSkeleton } from "@/components/DocsLoadingSkeleton";
 
 const DocsHome = lazy(() => import("./docs/DocsHome"));
 const Overview = lazy(() => import("./docs/Overview"));
@@ -74,20 +74,15 @@ const FAQ = lazy(() => import("./docs/FAQ"));
 const Donate = lazy(() => import("./docs/Donate"));
 const DeveloperDoc = lazy(() => import("./docs/DeveloperDoc"));
 
-// The Riftn mark inverts to black under `html.light`, which next-themes pins
-// for the light/minimal app themes — so this reads on paper docs and on the
-// dark/glass ones without a per-theme branch here.
-const PageLoader = () => <DeHubPageLoader minHeight="400px" />;
-
-const wrap = (El: React.ComponentType) => (
-  <Suspense fallback={<PageLoader />}>
+const wrap = (El: React.ComponentType, article = false) => (
+  <Suspense fallback={<DocsContentSkeleton article={article} />}>
     <El />
   </Suspense>
 );
 
 /** One developer docs page from src/data/developer-docs.json. */
 const dev = (route: string) => (
-  <Suspense fallback={<PageLoader />}>
+  <Suspense fallback={<DocsContentSkeleton />}>
     <DeveloperDoc route={route} />
   </Suspense>
 );
@@ -196,8 +191,8 @@ export default function DocsSurface() {
                 links use the canonical /guides/<slug>; /docs/blog/<slug> stays
                 a valid in-app alias. Both sit under the same DocsLayout as the
                 /docs/blog list, so list ↔ post never remounts the sidebar. */}
-            <Route path="/docs/blog/:slug" element={wrap(BlogPost)} />
-            <Route path="/guides/:slug" element={wrap(BlogPost)} />
+            <Route path="/docs/blog/:slug" element={wrap(BlogPost, true)} />
+            <Route path="/guides/:slug" element={wrap(BlogPost, true)} />
             <Route path="/docs/faq" element={wrap(FAQ)} />
             <Route path="/docs/donate" element={wrap(Donate)} />
             <Route path="/docs/website" element={<ComingSoonPage title={_copy("copy.b048526ff7d1", { defaultValue: "Website Documentation" })} description={_copy("copy.88324d21e07e", { defaultValue: "Learn about our website features and capabilities." })} />} />

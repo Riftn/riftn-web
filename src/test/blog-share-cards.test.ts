@@ -19,6 +19,9 @@ import worker from '../../CLOUDFLARE_WORKER_SEO.js';
 import { MILESTONE_REDIRECTS, cleanBlogSlug } from '@/lib/blog-redirects.js';
 
 const ROOT = resolve(__dirname, '../..');
+const APP_SHELL = readFileSync(resolve(ROOT, 'index.html'), 'utf8')
+  .replace('/src/main.tsx', '/assets/app.js')
+  .replace('data-home-intro-slot></div>', 'data-home-intro-slot><!--home-intro-start--><img src="/feed-art.webp"><!--home-intro-end--></div>');
 type ManifestPost = {
   slug: string;
   title: string;
@@ -50,8 +53,8 @@ function makeEnv() {
             return new Response(readFileSync(file, 'utf8'), { status: 200, headers: { 'Content-Type': 'application/json' } });
           }
         }
-        if (u.pathname.startsWith('/guides/')) {
-          return new Response('<html lang="en"><head><title>Riftn</title><meta name="description" content="Riftn home"></head><body><div id="root"></div><script type="module" src="/assets/app.js"></script></body></html>', {
+        if (u.pathname.startsWith('/guides/') || u.pathname === '/docs/blog') {
+          return new Response(APP_SHELL, {
             headers: { 'Content-Type': 'text/html' },
           });
         }
@@ -145,18 +148,33 @@ describe('clean blog slugs', () => {
 });
 
 describe('blog post crawler markup', () => {
-  it('gives browser navigations the article and preserves the app entry', async () => {
+  it('gives browser navigations a Docs skeleton and keeps the article as a no-JavaScript fallback', async () => {
     const response = await worker.fetch(new Request('https://riftn.com/guides/' + NEW_SLUG, {
       headers: { Accept: 'text/html', 'User-Agent': 'Mozilla/5.0 Chrome/149.0.0.0 Safari/537.36' },
     }), makeEnv(), { waitUntil() {} });
     expect(response.status).toBe(200);
     expect(response.headers.get('Cache-Control')).toBe('no-store');
     const html = await response.text();
-    expect(html).toContain('edge-public-content');
-    expect(html).toContain('<article>');
+    const fallback = html.match(/<noscript><div class="edge-public-content">([\s\S]*?)<\/noscript>/)?.[1];
+    expect(fallback).toContain('<article>');
+    expect(html.replace(/<noscript>[\s\S]*?<\/noscript>/g, '')).not.toContain('<article>');
+    expect(html).toContain('class="bskel-docs docs-loading-shell"');
+    expect(html).toContain('class="docs-loading-cover"');
+    expect(html).not.toContain('/feed-art.webp');
     expect(html).toContain('href="https://riftn.com/guides/' + NEW_SLUG + '"');
     expect(html).toContain('src="/assets/app.js"');
-    expect(html).not.toContain('content="Riftn home"');
+    expect(meta(html, 'description')).toBeTruthy();
+  });
+
+  it('keeps the blog index links available without JavaScript too', async () => {
+    const res = await worker.fetch(new Request('https://riftn.com/docs/blog', {
+      headers: { Accept: 'text/html', 'User-Agent': 'Mozilla/5.0 Chrome/149.0.0.0 Safari/537.36' },
+    }), makeEnv(), { waitUntil() {} });
+    expect(res.status).toBe(200);
+    const html = await res.text();
+    const fallback = html.match(/<noscript><div class="edge-public-content">([\s\S]*?)<\/noscript>/)?.[1];
+    expect(fallback).toContain('/guides/' + NEW_SLUG);
+    expect(html).toContain('class="bskel-docs docs-loading-shell"');
   });
 
   it('has a short description, canonical, robots and BlogPosting data', async () => {
@@ -172,6 +190,8 @@ describe('blog post crawler markup', () => {
     expect(article).toBeTruthy();
     expect(article.image[0]).toMatchObject({ width: 1200, height: 630 });
     expect(article.wordCount).toBeGreaterThan(0);
+    expect(res.body).toContain('<article>');
+    expect(res.body).not.toContain('bskel-docs');
     expect(res.body).toMatch(/<h1>[^<]+<\/h1>/);
     expect(res.body).toMatch(/<img src="[^"]+" alt="[^"]+" width="\d+" height="\d+"/);
   });
