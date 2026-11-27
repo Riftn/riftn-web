@@ -112,19 +112,26 @@ describe('call media lifecycle', () => {
     expect(mocks.update).toHaveBeenCalledWith({ status: 'ended' }, 'id', session.id);
   });
 
-  it('closes a microphone that resolves after hangup and never publishes it', async () => {
+  it('previews the camera while ringing and closes both tracks when cancelled during microphone setup', async () => {
     const microphone = deferred<ReturnType<typeof track>>();
+    const camera = track();
     mocks.microphone.mockReturnValue(microphone.promise);
+    mocks.camera.mockResolvedValue(camera);
     const { result } = renderHook(useCall);
+    const preview = document.createElement('div');
+    act(() => result.current.attachLocalVideo(preview));
     let starting!: Promise<void>;
     await act(async () => { starting = result.current.startCall('bob', 'video'); for (let i = 0; i < 10; i++) await Promise.resolve(); });
     expect(mocks.microphone).toHaveBeenCalledTimes(1);
+    expect(mocks.camera.mock.invocationCallOrder[0]).toBeLessThan(mocks.join.mock.invocationCallOrder[0]);
+    expect(result.current.isRinging).toBe(true);
+    expect(camera.play).toHaveBeenCalledWith(preview);
     await act(async () => { await result.current.endCall(); });
     const lateTrack = track();
     await act(async () => { microphone.resolve(lateTrack); await starting; });
+    expect(camera.close).toHaveBeenCalledTimes(1);
     expect(lateTrack.close).toHaveBeenCalledTimes(1);
     expect(mocks.publish).not.toHaveBeenCalled();
-    expect(mocks.camera).not.toHaveBeenCalled();
     expect(mocks.leave).toHaveBeenCalled();
   });
 
