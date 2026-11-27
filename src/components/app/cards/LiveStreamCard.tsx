@@ -1,3 +1,4 @@
+import { rewindEndedVideo } from '@/lib/browser-playback-recovery';
 import { hasStreamEnded } from '@/lib/live-status';
 import { getStreamMomentTokenId } from '@/lib/moment-share';
 import Minimize from "@/components/ui/cut-icons/exit-fullscreen";
@@ -587,8 +588,10 @@ export function LiveStreamCard({ stream: streamProp, postPage, chatSlot, immersi
     if (!visualActivity.isFeedPlaybackAllowed()) return;
     const el = replayRef.current;
     if (!el) return;
-    if (el.paused) void el.play().catch(() => {});
-    else el.pause();
+    if (el.paused || el.ended) {
+      rewindEndedVideo(el);
+      void el.play().catch(() => setReplayBuffering(false));
+    } else el.pause();
   }, []);
   const syncReplayClock = useCallback((video: HTMLVideoElement) => {
     const { currentTime, duration } = video;
@@ -2118,6 +2121,7 @@ export function LiveStreamCard({ stream: streamProp, postPage, chatSlot, immersi
                 setReplayBuffering(e.currentTarget.readyState < 3);
               }}
               onPause={() => { setReplayPlaying(false); setReplayBuffering(false); }}
+              onEnded={() => { setReplayPlaying(false); setReplayBuffering(false); }}
               onWaiting={(e) => setReplayBuffering(!e.currentTarget.paused)}
               onSeeking={(e) => setReplayBuffering(!e.currentTarget.paused)}
               onPlaying={() => setReplayBuffering(false)}

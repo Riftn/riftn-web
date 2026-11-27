@@ -9,6 +9,19 @@ describe('video startup', () => {
     expect(player.load).not.toHaveBeenCalled();
   });
 
+  it('rewinds an ended video before play without reloading its source', async () => {
+    const player = {
+      ended: true,
+      currentTime: 12,
+      error: null,
+      load: vi.fn(),
+      play: vi.fn(async () => { expect(player.currentTime).toBe(0); }),
+    };
+    await requestVideoPlayback(player);
+    expect(player.play).toHaveBeenCalledOnce();
+    expect(player.load).not.toHaveBeenCalled();
+  });
+
   it('clears a failed media source before retrying play', async () => {
     const order: string[] = [];
     const player = {
