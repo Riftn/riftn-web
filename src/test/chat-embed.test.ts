@@ -7,6 +7,14 @@ const env = { ASSETS: { fetch: async () => new Response('not found', { status: 4
 const ctx = { waitUntil: () => {} };
 
 describe('chat embeds', () => {
+  it.each(['/chat/embed', '/chat/embed/board-games'])('redirects %s directly from the legacy domain inside an iframe', async (path) => {
+    const response = await worker.fetch(new Request(`https://dehub.io${path}`, {
+      headers: { 'Sec-Fetch-Mode': 'navigate', 'Sec-Fetch-Dest': 'iframe' },
+    }), env, ctx);
+    expect(response.status).toBe(301);
+    expect(response.headers.get('Location')).toBe(`https://riftn.com${path}`);
+  });
+
   it('serves an isolated iframe with an exact group chat link', async () => {
     const response = await worker.fetch(new Request(`${base}/board-games`), env, ctx);
     expect(response.status).toBe(200);

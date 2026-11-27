@@ -7033,6 +7033,11 @@ async function handleRequest(request, env, ctx) {
   // live twin too. Only /live/<objectid> has no successor.
   const LEGACY_IO_PREFIXES = [['/live', '/videos']];
   const aliasHost = url.hostname;
+  // Chat embeds are anonymous and may be loaded inside a third-party frame,
+  // where the login handoff document cannot run.
+  if (aliasHost === 'dehub.io' && (request.method === 'GET' || request.method === 'HEAD') && chatEmbedRoute(url.pathname)) {
+    return new Response(null, { status: 301, headers: { Location: `https://riftn.com${url.pathname}${url.search}`, 'Cache-Control': 'public, max-age=3600' } });
+  }
   if (aliasHost === 'legacy.dehub.io') {
     const cleanPath = url.pathname.replace(/\/+$/, '') || '/';
     const p = cleanPath.toLowerCase();
