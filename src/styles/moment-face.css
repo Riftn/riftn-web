@@ -1,10 +1,8 @@
-/* Corner badge for an active Moment. The rim is the theme colour (white on System, ink on System Light);
-   a thin outline in the page colour parts it from the face. Watched = grey. */
+/* The Moment ring follows the avatar outline on every surface. */
 [data-moment-face] {
   --moment-rim: #fff;
-  --moment-cut: #09090b;
 }
-html:is([data-theme='light'], [data-system-tone='light']) [data-moment-face] { --moment-rim: #0a0a0a; --moment-cut: #fff; }
+html:is([data-theme='light'], [data-system-tone='light']) [data-moment-face] { --moment-rim: #0a0a0a; }
 html:is([data-theme='cosmic'], [data-theme='hazy'], [data-theme='swarms'], [data-theme='lavalamp'], [data-theme='winter'],
   [data-theme='war'], [data-theme='osaka'], [data-theme='jungle'], [data-theme='island'], [data-theme='hacker'], [data-theme='horror']) [data-moment-face] {
   --moment-rim: var(--tint-accent);
@@ -15,59 +13,8 @@ html:is([data-theme='cosmic'], [data-theme='hazy'], [data-theme='swarms'], [data
   inset: 0;
   z-index: 3;
   border-radius: inherit;
-  box-shadow: 0 0 0 2px #fff;
+  box-shadow: 0 0 0 2px var(--moment-rim);
   pointer-events: none;
 }
-[data-moment-outline][data-close-friends] { box-shadow: 0 0 0 2px #22c55e; }
-
-[data-moment-peek] {
-  position: absolute;
-  z-index: 3;
-  overflow: hidden;
-  pointer-events: none;
-  background: linear-gradient(160deg, rgb(82 82 91), rgb(24 24 27));
-  box-shadow: 0 0 0 2px var(--moment-rim), 0 0 0 4px var(--moment-cut);
-  transition: box-shadow 500ms ease;
-  animation: moment-peek-in 420ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
-}
-[data-moment-face][data-big] > [data-moment-peek] {
-  box-shadow: 0 0 0 2.5px var(--moment-rim), 0 0 0 5px var(--moment-cut);
-}
-[data-moment-peek='seen'] {
-  box-shadow: 0 0 0 1.5px rgb(161 161 170 / 0.55), 0 0 0 3.5px var(--moment-cut);
-}
-[data-moment-face][data-big] > [data-moment-peek='seen'] {
-  box-shadow: 0 0 0 2px rgb(161 161 170 / 0.55), 0 0 0 4.5px var(--moment-cut);
-}
-/* Close Friends: the rim is green until it's watched. */
-[data-moment-peek='unseen'][data-close-friends] { box-shadow: 0 0 0 2px #22c55e, 0 0 0 4px var(--moment-cut); }
-[data-moment-face][data-big] > [data-moment-peek='unseen'][data-close-friends] { box-shadow: 0 0 0 2.5px #22c55e, 0 0 0 5px var(--moment-cut); }
-[data-moment-count] {
-  position: absolute;
-  z-index: 4;
-  min-width: 22px;
-  height: 22px;
-  padding: 0 5px;
-  border-radius: 7px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-  font-weight: 800;
-  line-height: 1;
-  color: #000;
-  background: var(--moment-rim);
-  box-shadow: 0 0 0 2px var(--moment-cut);
-  pointer-events: none;
-  animation: moment-peek-in 420ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
-}
-html:is([data-theme='light'], [data-system-tone='light']) [data-moment-count] { color: #fff; }
-[data-moment-face='seen'] > [data-moment-count] { background: rgb(161 161 170); color: #000; }
-
-@keyframes moment-peek-in {
-  from { opacity: 0; transform: scale(0.6) translateY(3px); }
-  to { opacity: 1; transform: none; }
-}
-@media (prefers-reduced-motion: reduce) {
-  [data-moment-peek], [data-moment-count] { animation: none; }
-}
+[data-moment-face='unseen'] > [data-moment-outline][data-close-friends] { box-shadow: 0 0 0 2px #22c55e; }
+[data-moment-face='seen'] > [data-moment-outline] { box-shadow: 0 0 0 2px rgb(161 161 170 / 0.6); }

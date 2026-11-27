@@ -200,7 +200,7 @@ export function CardHeader({
           {postPage ? face : (
             <LiveRipple ids={[creatorId, creatorUsername, handle]} orbit className="rounded-md">
               {/* The avatar ring opens Moments; co-authored posts keep their corner badge. */}
-              <MomentFace address={coAuthors.length ? null : creatorId} size={36} outline name={username} className="rounded-md">
+              <MomentFace address={coAuthors.length ? null : creatorId} name={username} className="rounded-md">
                 {face}
               </MomentFace>
             </LiveRipple>

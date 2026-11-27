@@ -1137,7 +1137,7 @@ const MessageBubble = memo(function MessageBubble({
       {!isOwnMessage && !cozyShowAvatar && <div aria-hidden className="w-8 flex-shrink-0" />}
       {!isOwnMessage && cozyShowAvatar && (() => {
         const avatar = (
-          <MomentFace address={message.sender?.address} size={32} outline name={displayName} className="rounded-lg">
+          <MomentFace address={message.sender?.address} name={displayName} className="rounded-lg">
             <Avatar className="w-8 h-8 flex-shrink-0">
               {avatarUrl && <AvatarImage src={avatarUrl} />}
               <AvatarFallback className="bg-zinc-700 text-white text-xs font-medium">
@@ -3627,7 +3627,7 @@ export function DirectMessageChat({ conversation, onBack, fullscreen = false, in
             </Button>
           </div>
           <Link to={profileLink} data-chat-header-who className="flex min-w-0 flex-1 flex-col items-center">
-            <MomentFace address={otherUser?.address} size={40} outline name={displayName} className="rounded-[9px]">
+            <MomentFace address={otherUser?.address} name={displayName} className="rounded-[9px]">
               <Avatar className="h-10 w-10 rounded-[9px]">
                 {avatarUrl && <AvatarImage src={avatarUrl} className="rounded-[9px]" />}
                 <AvatarFallback className="rounded-[9px] bg-zinc-700 text-white font-medium">
@@ -3680,7 +3680,7 @@ export function DirectMessageChat({ conversation, onBack, fullscreen = false, in
           )}
 
           <Link to={profileLink} className={`flex items-center min-w-0 ${dock ? 'gap-2' : 'gap-3'}`}>
-            <MomentFace address={otherUser?.address} size={dock ? 32 : 40} outline name={displayName} className="rounded-lg">
+            <MomentFace address={otherUser?.address} name={displayName} className="rounded-lg">
               <Avatar className={dock ? 'w-8 h-8 shrink-0' : 'w-10 h-10'}>
                 {avatarUrl && <AvatarImage src={avatarUrl} />}
                 <AvatarFallback className="bg-zinc-700 text-white font-medium">

@@ -248,7 +248,7 @@ export function ConversationItem({
         </span>
       )}
       <span data-chat-row-avatar className="relative shrink-0 rounded-lg">
-        <MomentFace address={selecting ? null : otherUser?.address} size={48} outline name={displayName || fallbackName} className="rounded-[inherit]">
+        <MomentFace address={selecting ? null : otherUser?.address} name={displayName || fallbackName} className="rounded-[inherit]">
           <LiveRipple ids={selecting ? [] : [otherUser?.address, otherUser?.username]} className="relative rounded-[inherit]">
             <Avatar className="w-12 h-12 rounded-[inherit]">
               {avatarUrl && <AvatarImage src={avatarUrl} className="rounded-[inherit]" />}

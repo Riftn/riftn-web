@@ -310,7 +310,7 @@ export function ProfileHeader({
               <svg data-profile-pull-ring aria-hidden viewBox="0 0 100 100" preserveAspectRatio="none">
                 <rect x="2" y="2" width="96" height="96" rx="33.3333%" pathLength="100" />
               </svg>
-              <MomentFace address={apiProfile?.walletAddress ?? profile.walletAddress} size={96} outline name={profile.name} className="rounded-[var(--profile-avatar-radius)]">
+              <MomentFace address={apiProfile?.walletAddress ?? profile.walletAddress} name={profile.name} className="rounded-[var(--profile-avatar-radius)]">
                 <LiveRipple ids={[apiProfile?.walletAddress ?? profile.walletAddress, profile.handle]} size="lg" orbit className="rounded-[var(--profile-avatar-radius)]">
                 <button 
                   data-keep-dark
