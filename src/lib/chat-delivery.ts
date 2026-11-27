@@ -8,22 +8,33 @@ export function confirmChatDelivery(options: {
   errorEvent: string;
   matches: (message: any) => boolean;
   timeoutMs?: number;
+  recover?: (sentAt: number) => Promise<boolean>;
 }): Promise<boolean> {
   return new Promise(resolve => {
     let done = false;
     const off: Array<() => void> = [];
-    const finish = (sent: boolean) => {
+    const finish = (result: boolean | Promise<boolean>) => {
       if (done) return;
       done = true;
       clearTimeout(timer);
       off.forEach(remove => remove());
-      resolve(sent);
+      resolve(result);
     };
-    const timer = setTimeout(() => finish(false), options.timeoutMs ?? 15_000);
+    let sentAt: number | undefined;
+    const recover = () => {
+      if (done) return;
+      const read = options.recover;
+      const startedAt = sentAt;
+      finish(read && startedAt != null
+        ? Promise.resolve().then(() => read(startedAt)).catch(() => false)
+        : false);
+    };
+    const timer = setTimeout(recover, options.timeoutMs ?? 15_000);
     try {
       off.push(options.listen(options.messageEvent, message => { if (options.matches(message)) finish(true); }));
       off.push(options.listen(options.errorEvent, () => finish(false)));
-      off.push(options.listen('disconnect', () => finish(false)));
+      off.push(options.listen('disconnect', recover));
+      sentAt = Date.now();
       options.emit();
     } catch { finish(false); }
   });
@@ -43,6 +54,37 @@ export function roomMessageMatches(message: any, expected: {
   if (expected.attachment && value.audioUrl !== expected.attachment && value.gif?.url !== expected.attachment &&
       !value.media?.some((item: { url?: string }) => item.url === expected.attachment)) return false;
   return true;
+}
+
+const confirmedBySocket = new WeakMap<Socket, Set<string>>();
+
+/** Use a server row only once, even if two identical sends are in flight. */
+export function liveTextConfirmation(socket: Socket, expected: {
+  account: string; content: string; room: string; replyTo?: string;
+}) {
+  let claimed = confirmedBySocket.get(socket);
+  if (!claimed) {
+    claimed = new Set();
+    confirmedBySocket.set(socket, claimed);
+  }
+  const confirmed = claimed;
+  return (raw: any, sentAt?: number): boolean => {
+    const message = raw?.message ?? raw;
+    if (!roomMessageMatches(message, expected)) return false;
+    if (sentAt != null) {
+      const replyTo = message.replyTo?.id ?? message.replyTo?._id ?? message.replyTo ?? undefined;
+      if ((message.roomId ?? message.room_id) !== expected.room || message.messageType !== 'text' ||
+          replyTo !== expected.replyTo || !(Date.parse(message.createdAt) >= sentAt)) return false;
+    }
+    const id = String(message._id ?? message.id);
+    if (confirmed.has(id)) return false;
+    confirmed.add(id);
+    if (confirmed.size > 100) {
+      const first = confirmed.values().next().value;
+      if (first !== undefined) confirmed.delete(first);
+    }
+    return true;
+  };
 }
 
 /** Wait for the room to be usable before allowing an outgoing message. */

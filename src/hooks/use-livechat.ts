@@ -1,5 +1,5 @@
 import { useTranslation as _useCopy } from 'react-i18next';
-import { confirmChatDelivery, roomMessageMatches } from '@/lib/chat-delivery';
+import { confirmChatDelivery, liveTextConfirmation, roomMessageMatches } from '@/lib/chat-delivery';
 import { useState, useEffect, useLayoutEffect, useCallback, useRef } from 'react';
 import { toast } from 'sonner';
 import {
@@ -301,7 +301,7 @@ export function mergeIncoming(
   // An optimistic row is confirmed by content and sender, not by id: the
   // gateway assigns the real id and never sees ours. The confirmed copy takes
   // over the pending row's client key, so React keeps the same element.
-  const fresh = batch.filter((m) => !prev.some((p) => p.id === m.id));
+  const fresh = batch.filter((m) => !m.client_key && !prev.some((p) => p.id === m.id));
   const { rows, claimed } = claimPending(prev, fresh);
   const keyed = new Map(rows.map((m) => [m.id, m]));
   const incoming = batch.map((m) => keyed.get(m.id) ?? m);
@@ -932,6 +932,7 @@ export function useLiveChatMessages(roomId: string | null, options: LiveChatPagi
         }
       }
 
+      const scope = historyScope.current;
       const optimisticId = retryKey ?? `temp-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
       pendingSendsRef.current.set(optimisticId, [content, type, imageUrl, replyToId, audioUrl, audioDuration]);
       const optimisticMsg: SupabaseLiveChatMessage = {
@@ -974,6 +975,9 @@ export function useLiveChatMessages(roomId: string | null, options: LiveChatPagi
         // it is a live one first.
         await ensureFreshToken().catch(() => undefined);
         const socket = getSocket(roomId);
+        const matchesText = roomId.startsWith('stream:') && type === 'text'
+          ? liveTextConfirmation(socket, { account: walletAddress, content, room: roomId, replyTo: replyToId })
+          : undefined;
         const deliver = async () => {
           if (!(await waitForLiveChatSend(socket, roomId)) || !socket.connected) {
             throw new Error(_translateCopy("copy.7fbd7933cfe0", { defaultValue: "Socket connection timeout" }));
@@ -999,7 +1003,29 @@ export function useLiveChatMessages(roomId: string | null, options: LiveChatPagi
               });
             },
             messageEvent: 'message', errorEvent: 'error',
-            matches: message => roomMessageMatches(message, { account: walletAddress, content, room: roomId, attachment: imageUrl || audioUrl }),
+            matches: matchesText ?? (message => roomMessageMatches(message, { account: walletAddress, content, room: roomId, attachment: imageUrl || audioUrl })),
+            recover: matchesText && (async sentAt => {
+              const { messages: recent } = await getLiveChatMessagePage(roomId, { limit: 50, signedIn: true });
+              if (historyScope.current !== scope || walletRef.current !== walletAddress) return false;
+              const confirmed = recent.find(message => matchesText(message, sentAt));
+              if (!confirmed) return false;
+              const row = apiMsgToLocal(confirmed, roomId);
+              setMessages(prev => {
+                if (prev.some(message => message.id === row.id)) {
+                  const next = prev.filter(message => message.id !== optimisticId);
+                  cacheRoomMessages(roomId, next);
+                  return next;
+                }
+                const next = mergeIncoming(
+                  prev.filter(message => message.id !== optimisticId),
+                  [{ ...row, client_key: optimisticId }],
+                  capFor(),
+                );
+                cacheRoomMessages(roomId, next);
+                return next;
+              });
+              return true;
+            }),
           });
         };
         let confirmed = await deliver();
