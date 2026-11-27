@@ -52,6 +52,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 import { buildAvatarUrl, storageImage } from '@/lib/media-url';
 import { dehubLinkFor } from '@/lib/dehub-links';
+import { useWalletProfiles } from '@/hooks/use-wallet-profiles';
 import { useProfileAvatar } from '@/hooks/use-profile-avatar-cache';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { supabase } from '@/integrations/supabase/client';
@@ -257,6 +258,7 @@ function formatTimeAgo(dateStr: string): string {
 // ──────────────────────────────────────────────────
 function FeatureCard({
   feature,
+  authorDisplayName,
   currentVote,
   onVote,
   voteDisabled,
@@ -264,6 +266,7 @@ function FeatureCard({
   focusCommentId = null,
 }: {
   feature: FeatureRequest;
+  authorDisplayName?: string | null;
   currentVote: number | undefined;
   onVote: (featureId: string, voteType: 1 | -1, currentVote: number | undefined) => void;
   voteDisabled: boolean;
@@ -334,7 +337,7 @@ function FeatureCard({
   );
   const avatarUrl = walletAvatarUrl ?? usernameAvatarUrl ?? dbAvatarUrl ?? null;
 
-  const displayName = feature.author_username || feature.author_wallet_address.slice(0, 6);
+  const displayName = authorDisplayName?.trim();
   const handle = feature.author_username ? `@${feature.author_username}` : `${feature.author_wallet_address.slice(0, 6)}...${feature.author_wallet_address.slice(-4)}`;
 
   // Determine like/dislike state from currentVote
@@ -424,8 +427,8 @@ function FeatureCard({
       {/* Header with three-dot menu */}
       <div className="flex items-start">
         <CardHeader
-          username={displayName}
-          handle={handle}
+          username={displayName || handle}
+          handle={displayName && feature.author_username ? handle : undefined}
           avatarSeed={avatarUrl || ''}
           verified={false}
           contentType="post"
@@ -1166,6 +1169,12 @@ export default function FeaturesPage() {
   const [shippedLimit, setShippedLimit] = useState(SHIPPED_PAGE_SIZE);
   useEffect(() => setShippedLimit(SHIPPED_PAGE_SIZE), [category, search, authorWallet]);
   const renderedShipped = useMemo(() => visibleShipped.slice(0, shippedLimit), [visibleShipped, shippedLimit]);
+  const visibleRequests = showNotFeasible ? visibleNotFeasible
+    : activeTab === 'shipped' ? renderedShipped
+      : activeTab === 'shipping' ? visibleInProgress : features;
+  const authorWallets = visibleRequests.map((feature) => feature.author_wallet_address);
+  if (focusedId && focusedRequest) authorWallets.push(focusedRequest.author_wallet_address);
+  const authorProfiles = useWalletProfiles(authorWallets);
   const showMoreShipped = useCallback(() => setShippedLimit((limit) => limit + SHIPPED_PAGE_SIZE), []);
 
   // Bring the pinned card into view once it has actually rendered. Scrolling on
@@ -1419,6 +1428,7 @@ export default function FeaturesPage() {
           <SharedTranslationProvider key={focusedRequest.id}>
             <FeatureCard
               feature={focusedRequest}
+              authorDisplayName={authorProfiles[focusedRequest.author_wallet_address]?.displayName}
               currentVote={userVotes?.[focusedRequest.id]}
               onVote={handleVote}
               voteDisabled={voteMutation.isPending}
@@ -1442,6 +1452,7 @@ export default function FeaturesPage() {
                 <SharedTranslationProvider key={feature.id}>
                   <FeatureCard
                     feature={feature}
+                    authorDisplayName={authorProfiles[feature.author_wallet_address]?.displayName}
                     currentVote={userVotes?.[feature.id]}
                     onVote={handleVote}
                     voteDisabled={voteMutation.isPending}
@@ -1475,6 +1486,7 @@ export default function FeaturesPage() {
                 <SharedTranslationProvider key={feature.id}>
                   <FeatureCard
                     feature={feature}
+                    authorDisplayName={authorProfiles[feature.author_wallet_address]?.displayName}
                     currentVote={userVotes?.[feature.id]}
                     onVote={handleVote}
                     voteDisabled={voteMutation.isPending}
@@ -1521,6 +1533,7 @@ export default function FeaturesPage() {
                 <SharedTranslationProvider key={feature.id}>
                   <FeatureCard
                     feature={feature}
+                    authorDisplayName={authorProfiles[feature.author_wallet_address]?.displayName}
                     currentVote={userVotes?.[feature.id]}
                     onVote={handleVote}
                     voteDisabled={voteMutation.isPending}
@@ -1556,6 +1569,7 @@ export default function FeaturesPage() {
                 <SharedTranslationProvider key={feature.id}>
                   <FeatureCard
                     feature={feature}
+                    authorDisplayName={authorProfiles[feature.author_wallet_address]?.displayName}
                     currentVote={userVotes?.[feature.id]}
                     onVote={handleVote}
                     voteDisabled={voteMutation.isPending}
