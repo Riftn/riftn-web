@@ -67,6 +67,7 @@ import { getMediaUrl, getAuthToken, uploadLiveChatVoice } from '@/lib/api/dehub'
 import { addStreamModerator, banFromStreams, pinLiveChatMessage, timeOutInStream, unpinLiveChatMessage, streamChatRoomId } from '@/lib/api/dehub/livechat';
 import { VoiceRecorder } from '@/components/app/chat/VoiceRecorder';
 import { VoiceWaveformPlayer } from '@/components/app/chat/VoiceWaveformPlayer';
+import { EmojiPicker } from '@/components/app/chat/EmojiPicker';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import type { SupabaseLiveChatMessage } from '@/hooks/use-livechat';
@@ -308,18 +309,19 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
   }, [boxFocused]);
   // The send key stays mounted while it folds away.
   const [keyLeaving, setKeyLeaving] = useState(false);
-  const wasTypingRef = useRef(typing);
+  const showSend = typing || !!newMessage.trim();
+  const wasShowingSendRef = useRef(showSend);
   useEffect(() => {
-    if (wasTypingRef.current && !typing) {
+    if (wasShowingSendRef.current && !showSend) {
       setKeyLeaving(true);
       const id = window.setTimeout(() => setKeyLeaving(false), 180);
-      wasTypingRef.current = typing;
+      wasShowingSendRef.current = showSend;
       return () => window.clearTimeout(id);
     }
-    wasTypingRef.current = typing;
+    wasShowingSendRef.current = showSend;
     setKeyLeaving(false);
     return undefined;
-  }, [typing]);
+  }, [showSend]);
   // The viewer's buttons' own width, so folding them eases from exactly there.
   const actionsRef = useRef<HTMLDivElement>(null);
   const [actionsWidth, setActionsWidth] = useState<number | null>(null);
@@ -415,7 +417,8 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
     const a = (address || '').toLowerCase();
     return !!giving && !isHost && !!a && a !== (walletAddress || '').toLowerCase() && a !== givingCreator;
   };
-  const showInlinePoints = overlay && !isHost && !isOffline && isAuthenticated && !!liveStreamId && !typing;
+  const canPickEmoji = isAuthenticated && !isOffline && !bannedHere && !muted;
+  const showInlinePoints = overlay && !isHost && !isOffline && isAuthenticated && !!liveStreamId && !showSend;
   // Lines already in the chat when it loaded sit still; anything after glides
   // in, and your own line or gift lands with its text softly glowing (no ring).
   const settledIdsRef = useRef<Set<string> | null>(null);
@@ -1203,7 +1206,9 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
             data-live-chat-box
             className={cn(
               'live-chat-box chat-text-input max-h-32 resize-none text-white text-sm scrollbar-hide placeholder:whitespace-nowrap placeholder:overflow-hidden placeholder:text-ellipsis',
-              overlay ? (typing ? 'pr-14' : showInlinePoints ? 'pr-20' : 'pr-4') : 'pr-14',
+              canPickEmoji
+                ? (showInlinePoints ? 'pr-28' : showSend || !overlay ? 'pr-24' : 'pr-14')
+                : (showInlinePoints ? 'pr-20' : showSend || !overlay ? 'pr-14' : 'pr-4'),
               replyTo && '!pt-9',
               overlay
                 ? 'min-h-[46px] rounded-xl border-white/15 bg-black/40 py-3 pl-4 backdrop-blur-md placeholder:text-white/50'
@@ -1221,13 +1226,23 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
             onSelect={mention.handleSelect}
             onClose={mention.handleClose}
           />
-          <div className={cn('absolute right-2 flex items-center gap-1', overlay ? 'bottom-[7px]' : 'bottom-[7px]')}>
+          <div className="absolute bottom-[7px] right-2 flex items-center gap-1">
+            {canPickEmoji && (
+              <EmojiPicker
+                label={t('emojiPicker.tabEmoji', { defaultValue: 'Emoji' })}
+                overVideo={overlay}
+                onEmojiSelect={(emoji) => {
+                  setNewMessage((draft) => draft + emoji);
+                  mention.handleClose();
+                }}
+              />
+            )}
             {/* No voice notes over a broadcast. The row is the stream's and
                 it is already three buttons and a message box wide; holding
                 a mic down to talk over someone else talking is not what
                 anyone is doing here. The panel keeps it, until you start
                 typing: then it folds into the send key. */}
-            {!overlay && !typing && (
+            {!overlay && !showSend && (
               <div className="live-fold-in">
                 <VoiceRecorder
                   onRecordingComplete={handleVoiceRecordingComplete}
@@ -1238,17 +1253,17 @@ export function LivePostChat({ tokenId, streamId: liveStreamId, isOffline = fals
             {/* Channel points, at the end of the empty box: the viewer's
                 balance with this creator, and the rewards behind it. */}
             {showInlinePoints && <PointsButton streamId={liveStreamId} variant="inline" />}
-            {(typing || keyLeaving) && (
+            {(showSend || keyLeaving) && (
               <button
                 type="button"
                 onPointerDown={(e) => e.preventDefault()}
                 onClick={handleSend}
-                disabled={!typing || !newMessage.trim() || isOffline}
+                disabled={!newMessage.trim() || !canPickEmoji}
                 aria-label={t('tip.send', { defaultValue: 'Send' })}
                 data-keep-dark={overlay ? '' : undefined}
                 data-state={newMessage.trim() ? 'on' : 'off'}
                 data-enter=""
-                data-leaving={typing ? undefined : ''}
+                data-leaving={showSend ? undefined : ''}
                 className="live-send-key"
               >
                 <ArrowUp className="h-[18px] w-[18px]" strokeWidth={2.2} />
