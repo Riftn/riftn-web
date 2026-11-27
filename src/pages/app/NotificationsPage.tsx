@@ -1328,8 +1328,6 @@ export const NotificationItem = memo(function NotificationItem({
     
   const isMomentRow = ['story_like', 'story_mention', 'story_comment'].includes(notification.type as string);
   const momentLink = isMomentRow ? getNavigationLink(notification) : null;
-  const momentPosterRaw = isMomentRow ? notification.metadata?.storyPoster : undefined;
-  const momentPoster = typeof momentPosterRaw === 'string' && momentPosterRaw.startsWith('https://') ? momentPosterRaw : null;
   const profileLink = notification.actorAddress 
     ? profilePath(notification.actorAddress) 
     : notification.actorUsername 
@@ -1379,8 +1377,9 @@ export const NotificationItem = memo(function NotificationItem({
   const { walletAddress } = useAuth();
   const postId = notification.tokenId ?? notification.comment?.tokenId;
   const hasSinglePost = postId != null && bundle.bundleType !== 'same-actor';
-  const isPostEngagement = notification.type === 'like' || COMMENT_NOTIFICATION_TYPES.has(notification.type);
-  const rawThumbnail = notification.tokenThumbnail?.trim();
+  const isPostEngagement = !isMomentRow &&
+    (notification.type === 'like' || COMMENT_NOTIFICATION_TYPES.has(notification.type));
+  const rawThumbnail = isMomentRow ? undefined : notification.tokenThumbnail?.trim();
   const directThumbnail = rawThumbnail
     ? (/^https?:\/\//i.test(rawThumbnail) ? rawThumbnail : `${DEHUB_CDN_BASE}${rawThumbnail.replace(/^\/+/, '')}`)
     : undefined;
@@ -1901,10 +1900,13 @@ export const NotificationItem = memo(function NotificationItem({
         )}
       </div>
 
-      {/* The moment a like or mention is about: a small upright frame. */}
-      {momentLink && momentPoster && (
-        <Link to={momentLink} onClick={(e) => { e.stopPropagation(); markEngaged(); }} className="flex-shrink-0">
-          <img src={momentPoster} alt="" className="h-12 w-9 rounded-[8px] object-cover" loading="lazy" />
+      {momentLink && (
+        <Link
+          to={momentLink}
+          onClick={(e) => { e.stopPropagation(); markEngaged(); }}
+          className="shrink-0 self-center rounded-md px-2 py-1 text-sm font-medium text-foreground hover:bg-muted focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring"
+        >
+          {t('stories.watchOriginal', { defaultValue: 'Watch original moment' })}
         </Link>
       )}
 
