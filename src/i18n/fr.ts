@@ -2277,6 +2277,14 @@ export const fr = {
     "disclaimerText": "Les jetons Riftn sont strictement à des fins utilitaires de la même manière que les jetons ou devises numériques dans le jeu ou dans l'application et ne constituent strictement pas un investissement. Comme notre jeton vit sur la chaîne, nous pouvons offrir une utilité supplémentaire ainsi que des niveaux sans précédent de transparence vérifiable. Les données ci-dessus sont uniquement compilées à des fins de transparence, d'éducation et d'information.Riftn et toutes les sociétés affiliées n'assument aucune responsabilité pour les pertes financières encourues lors de l'achat de jetons ou de NFT que nous libérons. Les marchés sont très volatils. Vous pourriez également perdre tout votre argent en raison d'erreurs imprévues telles que des défaillances de compétences, des erreurs techniques, des piratages, etc. Par conséquent, vous ne devriez jamais dépenser que ce que vous pouvez vous permettre de perdre."
   },
   termsOfService: {
+    appTokenRevisionDate: '27 novembre 2026',
+    walletUseText: 'Vous pouvez parcourir et découvrir des contenus sans connecter de portefeuille externe. Un compte Riftn est nécessaire pour utiliser les jetons de l’application. Certaines fonctionnalités liées à la blockchain nécessitent un portefeuille compatible.',
+    walletResponsibilityText: 'Lorsque vous utilisez un portefeuille de cryptomonnaies, vous êtes responsable des éléments suivants.',
+    appTokensTitle: 'Jetons de l’application',
+    appTokensBalanceText: 'Riftn comptabilise actuellement les jetons de l’application dans les soldes des comptes Riftn. Lorsque la fonctionnalité est disponible, vous pouvez transférer des jetons vers un autre compte Riftn ou les utiliser pour verser un pourboire. Ces opérations se déroulent dans Riftn, sans transaction sur la blockchain ni frais de réseau. Les fonctionnalités disponibles peuvent varier selon la plateforme.',
+    appTokensLaunchText: 'Le jeton $RIFT sur la blockchain n’a pas encore été lancé. Le solde de l’application ne permet actuellement ni retrait ni conversion vers la blockchain. Les éventuelles conditions de lancement ou de conversion seront publiées séparément.',
+    blockchainTokenPurchases: 'Achats de jetons sur la blockchain',
+    blockchainPurchaseScope: 'Cette section s’applique aux achats de jetons sur la blockchain lorsqu’ils sont disponibles. Les soldes de jetons de l’application sont décrits dans la section précédente.',
     title: 'Conditions d\'utilisation',
     lastUpdated: 'Dernière mise à jour :',
     lastUpdatedDate: '25 octobre 2026',
