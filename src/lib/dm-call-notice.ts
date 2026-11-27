@@ -21,6 +21,10 @@ function parseEndedCallNote(content: string): CallNote | null {
   return { kind: 'ended', video: match[1].toLowerCase() === 'video', duration: match[2] ?? null };
 }
 
+export function callTypeLabel(note: CallNote, t: TFunction): string {
+  return note.video ? t('copy.7b79b4f67293', { defaultValue: 'Video call' }) : t('copy.8b968cce31a0', { defaultValue: 'Voice call' });
+}
+
 export function localizeDmCallPreview(
   message: { content?: string | null; msgType?: string; type?: string; undecryptable?: boolean } | null | undefined,
   t: TFunction,
@@ -33,7 +37,7 @@ export function localizeDmCallPreview(
   if (!note) return undefined;
   const icon = note.video ? '📹' : '📞';
   const label = t('calls.ended', 'Call ended');
-  const preview = icon + ' ' + label;
+  const preview = icon + ' ' + callTypeLabel(note, t) + ' · ' + label;
   return note.duration ? preview + ' · ' + note.duration : preview;
 }
 

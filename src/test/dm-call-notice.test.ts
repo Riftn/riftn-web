@@ -42,22 +42,22 @@ describe('localized ended-call previews', () => {
     const i18n = createInstance();
     await i18n.init({
       lng: 'es',
-      resources: { en: { translation: { calls: en.calls } }, es: { translation: { calls: es.calls } } },
+      resources: { en: { translation: { calls: en.calls, copy: en.copy } }, es: { translation: { calls: es.calls, copy: es.copy } } },
     });
     const notice = { content: '📞 Voice call ended · 00:07' };
-    expect(localizeDmCallPreview(notice, i18n.t)).toBe('📞 Llamada terminada · 00:07');
+    expect(localizeDmCallPreview(notice, i18n.t)).toBe('📞 Llamada de voz · Llamada terminada · 00:07');
     await i18n.changeLanguage('en');
-    expect(localizeDmCallPreview(notice, i18n.t)).toBe('📞 Call ended · 00:07');
+    expect(localizeDmCallPreview(notice, i18n.t)).toBe('📞 Voice call · Call ended · 00:07');
   });
 
   it('handles legacy notices without a call emoji or duration', async () => {
     const i18n = createInstance();
-    await i18n.init({ lng: 'es', resources: { es: { translation: { calls: es.calls } } } });
+    await i18n.init({ lng: 'es', resources: { es: { translation: { calls: es.calls, copy: es.copy } } } });
     expect(isDmCallNotice('Voice call ended')).toBe(true);
     expect(describeCallNote('Voice call ended')).toEqual({ kind: 'ended', video: false, duration: null });
-    expect(localizeDmCallPreview({ content: 'Voice call ended' }, i18n.t)).toBe('📞 Llamada terminada');
+    expect(localizeDmCallPreview({ content: 'Voice call ended' }, i18n.t)).toBe('📞 Llamada de voz · Llamada terminada');
     expect(localizeDmCallPreview({ content: '📞 Video call ended · 1:02:03' }, i18n.t))
-      .toBe('📹 Llamada terminada · 1:02:03');
+      .toBe('📹 Videollamada · Llamada terminada · 1:02:03');
   });
 
   it('leaves ordinary, non-text and unreadable messages to the caller', () => {
