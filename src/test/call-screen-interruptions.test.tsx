@@ -19,7 +19,11 @@ vi.mock('@/integrations/supabase/client', () => ({ supabase: {
   functions: { invoke: mocks.token },
   from: () => ({
     insert: () => ({ select: () => ({ single: mocks.insert }) }),
-    update: (data: unknown) => ({ eq: (field: string, id: string) => mocks.update(data, field, id) }),
+    update: (data: unknown) => ({ eq: (field: string, id: string) => Object.assign(mocks.update(data, field, id), {
+        eq: (column: string, status: string) => ({
+          select: () => ({ maybeSingle: () => mocks.update(data, field, id, column, status) }),
+        }),
+      }) }),
     select: () => ({ eq: () => ({ single: () => Promise.resolve({ data: { status: 'connected' } }) }) }),
   }),
   channel: () => { const channel = {
@@ -188,4 +192,33 @@ it('suspends immediately and resumes only after focus settles, keeping feed paus
   vi.advanceTimersByTime(1);
   expect(activity.isFeedPlaybackAllowed()).toBe(true);
   activity.dispose();
+});
+
+async function renderIncomingDirectCall() {
+  const incoming = { ...session, caller_address: 'bob', recipient_address: 'alice', created_at: new Date().toISOString() };
+  mocks.check.mockResolvedValueOnce(incoming);
+  const view = renderHook(useCall);
+  await act(async () => { await Promise.resolve(); });
+  expect(view.result.current.isIncoming).toBe(true);
+  return view;
+}
+
+it('does not join or end a ring that is already closed or answered elsewhere', async () => {
+  const { result } = await renderIncomingDirectCall();
+  mocks.update.mockResolvedValue({ data: null, error: null });
+  await act(async () => { await result.current.acceptCall(); });
+  expect(mocks.update).toHaveBeenCalledWith({ status: 'connected' }, 'id', session.id, 'status', 'ringing');
+  expect(mocks.update).not.toHaveBeenCalledWith({ status: 'ended' }, 'id', session.id);
+  expect(mocks.token).not.toHaveBeenCalled();
+  expect(result.current.currentCall).toBeNull();
+});
+
+it('cleans up an answered direct call when the peer never joins', async () => {
+  const { result } = await renderIncomingDirectCall();
+  mocks.update.mockResolvedValue({ data: { id: session.id }, error: null });
+  await act(async () => { await result.current.acceptCall(); });
+  expect(result.current.isConnecting).toBe(true);
+  await act(async () => { vi.advanceTimersByTime(30_000); await Promise.resolve(); });
+  expect(result.current.currentCall).toBeNull();
+  expect(mocks.leave).toHaveBeenCalled();
 });
