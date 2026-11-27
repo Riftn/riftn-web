@@ -11,7 +11,8 @@ const PRISM_BANNER = '/media/riftn-fansite-prism-banner.png';
 const FIT_CLASSES = {
   cover: 'object-cover',
   contain: 'object-contain',
-  fill: 'object-fill',
+  // Keep the full wordmark and prism split in the crop of the 3:1 artwork.
+  prism: 'object-cover object-[36%_center]',
 };
 
 interface BlogBannerProps {
@@ -38,7 +39,7 @@ export const BlogBanner: React.FC<BlogBannerProps> = ({
   imgClassName = '',
 }) => {
   const [automaticFit, setAutomaticFit] = useState<'cover' | 'contain'>('cover');
-  const fit = src === PRISM_BANNER ? 'fill' : automaticFit;
+  const fit = src === PRISM_BANNER ? 'prism' : automaticFit;
   const url = mediaImage(src, { width });
   const srcSet = mediaImageSrcSet(src, widths);
 
@@ -69,7 +70,7 @@ export const BlogBanner: React.FC<BlogBannerProps> = ({
         loading={loading}
         decoding="async"
         fetchPriority={fetchPriority}
-        onLoad={fit === 'fill' ? undefined : handleLoad}
+        onLoad={fit === 'prism' ? undefined : handleLoad}
         className={`absolute inset-0 h-full w-full ${FIT_CLASSES[fit]} ${imgClassName}`}
       />
     </div>
