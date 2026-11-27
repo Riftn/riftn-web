@@ -4009,6 +4009,7 @@ export function DirectMessageChat({ conversation, onBack, fullscreen = false, in
         feeAmount={feeRequired ? activeFee : undefined}
         confirmBeforeSend={feeRequired ? confirmFeeSend : undefined}
         phoneB={phoneB}
+        voiceAsPrimaryAction
       />}
 
       {/* Delete the whole chat: for me, for both (1:1), or cancel */}
