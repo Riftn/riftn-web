@@ -26,11 +26,13 @@ export function PackCover({ pack, className }: { pack: Pick<CreatorPack, 'cover_
 }
 
 export function PackStrip({
+  kind,
   packs,
   active,
   onChange,
   leading,
 }: {
+  kind: PackKind;
   packs: CreatorPack[];
   active: string | null;
   onChange: (id: string | null) => void;
@@ -68,7 +70,7 @@ export function PackStrip({
         </button>
       ))}
       <Link
-        to="/packs"
+        to={`/packs?kind=${kind}`}
         title={t('creatorPacks.manage')}
         aria-label={t('creatorPacks.manage')}
         className="w-8 h-8 rounded-md flex-shrink-0 flex items-center justify-center text-zinc-400 hover:bg-white/10 hover:text-white"
@@ -111,7 +113,7 @@ function EmptyPacks({ kind }: { kind: PackKind }) {
   return (
     <div className="flex flex-col items-center gap-2 px-4 py-8 text-center">
       <p className="text-xs text-zinc-400">{t(kind === 'gif' ? 'creatorPacks.emptyGifs' : 'creatorPacks.emptyStickers')}</p>
-      <Link to="/packs" className="h-8 px-3 rounded-md bg-white text-black text-xs font-medium flex items-center">
+      <Link to={`/packs?kind=${kind}`} className="h-8 px-3 rounded-md bg-white text-black text-xs font-medium flex items-center">
         {t('creatorPacks.browseCreate')}
       </Link>
     </div>
@@ -135,7 +137,7 @@ export function StickerPanel({ onSelect }: { onSelect: (url: string) => void }) 
   if (!packs.length) return <EmptyPacks kind="sticker" />;
   return (
     <>
-      <PackStrip packs={packs} active={current} onChange={setActive} />
+      <PackStrip kind="sticker" packs={packs} active={current} onChange={setActive} />
       <div className="max-h-72 overflow-y-auto">
         <PackGrid kind="sticker" items={(current && items[current]) || []} onSelect={onSelect} />
       </div>
