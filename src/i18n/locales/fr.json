@@ -997,6 +997,8 @@
     },
     "reorderHint": "Maintenez et faites glisser n'importe quelle icône pour réorganiser",
     "moveGroupHint": "Déposez-la sur un autre onglet pour l’y déplacer",
+    "moveShortcut": "Déplacer un raccourci",
+    "moveShortcutTo": "Déplacer {{name}} vers",
     "reorderHintGroups": "Maintenez et faites glisser une icône pour la réorganiser, ou vers un autre onglet pour l’y déplacer",
     "reorderReset": "Réinitialiser",
     "reorderResetLong": "Réinitialiser l'ordre du menu",

@@ -997,6 +997,8 @@
     },
     "reorderHint": "أمسك واسحب أي أيكونة لإعادة ترتيبها",
     "moveGroupHint": "أفلتها على تبويب آخر لنقلها إليه",
+    "moveShortcut": "نقل اختصار",
+    "moveShortcutTo": "نقل {{name}} إلى",
     "reorderHintGroups": "اضغط مطولاً واسحب أي أيقونة لإعادة ترتيبها، أو إلى تبويب آخر لنقلها",
     "reorderReset": "إعادة تعيين",
     "reorderResetLong": "إعادة تعيين طلب القائمة",

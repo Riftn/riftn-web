@@ -21,7 +21,7 @@ import { useDragReorder } from '@/hooks/use-drag-reorder';
 import { navItemId } from './nav-item-id';
 import { defaultMenuGroupOf } from './menu-groups';
 import { useUserPreferences } from '@/contexts/UserPreferencesContext';
-import { MENU_GROUP_MOVES_PREF_KEY, isMenuGroupId, readMenuGroupMoves, useMenuGroupMoves, writeMenuGroupMoves } from '@/lib/menu-group-moves';
+import { MENU_GROUP_MOVES_PREF_KEY, isMenuGroupId, moveMenuTile, useMenuGroupMoves, writeMenuGroupMoves } from '@/lib/menu-group-moves';
 
 const DEFAULT_MENU_IDS = NAV_ITEMS.map(navItemId);
 
@@ -172,14 +172,9 @@ export function MobileMenuGrid({ items, searching = false, currentPath, notifica
     if (groupId && isMenuGroupId(groupId)) {
       const item = byId.get(id);
       if (!item || !items.some((i) => navItemId(i) === id)) return false;
-      const moves = { ...readMenuGroupMoves() };
-      const home = defaultMenuGroupOf(item);
-      const current = moves[id] ?? home;
-      if (current === groupId) return false;
-      if (home === groupId) delete moves[id];
-      else moves[id] = groupId;
-      writeMenuGroupMoves(moves);
-      prefs?.setPref(MENU_GROUP_MOVES_PREF_KEY, readMenuGroupMoves());
+      const moves = moveMenuTile(id, groupId, defaultMenuGroupOf(item) ?? 'riftn');
+      if (!moves) return false;
+      prefs?.setPref(MENU_GROUP_MOVES_PREF_KEY, moves);
       return true;
     }
     const rect = homeTarget.current?.getBoundingClientRect();
