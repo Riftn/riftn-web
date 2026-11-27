@@ -20,7 +20,7 @@ import { notificationHasComment } from '@/lib/notification-comment';
 import { NotificationRequestCard } from '@/components/app/notifications/NotificationRequestCard';
 import { notificationHasRequestCard } from '@/lib/notification-request';
 import { useFollow } from '@/hooks/use-follow';
-import { AtSign, Heart, Loader2, AlertTriangle, Zap, Star, ShoppingBag, Scale, Siren, Award, ChevronDown, Filter as FilterIcon } from "lucide-react";
+import { AtSign, Heart, Loader2, AlertTriangle, Zap, Star, ShoppingBag, Scale, Siren, Award, ChevronDown, Sparkles, Filter as FilterIcon } from "lucide-react";
 import MessageSquareText from "@/components/ui/cut-icons/messages";
 import Users from "@/components/ui/cut-icons/communities";
 import Check from "@/components/ui/cut-icons/check";
@@ -2082,6 +2082,7 @@ export default function NotificationsPage({ inDrawer = false }: { inDrawer?: boo
   }, []);
   const isDesktopViewport = useIsDesktopViewport();
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [catchUpOpen, setCatchUpOpen] = useState(false);
   const settingsSheetRef = useRef<HTMLDivElement>(null);
   const closeSettings = useCallback(() => setSettingsOpen(false), []);
   useDrawerPullClose(settingsSheetRef, null, settingsOpen && !isDesktopViewport, closeSettings, { snap: false });
@@ -2571,6 +2572,23 @@ export default function NotificationsPage({ inDrawer = false }: { inDrawer?: boo
       {/* Actions Section */}
       <div className="space-y-3 mb-6">
         <p className="text-xs text-white/50 uppercase tracking-wider font-medium">{t('notifications.actions')}</p>
+        {isAuthenticated && pageWalletAddress && (
+          <button
+            type="button"
+            onClick={() => {
+              setSettingsOpen(false);
+              setCatchUpOpen(true);
+            }}
+            className="w-full flex items-center gap-3 p-4 rounded-xl bg-white/10 hover:bg-white/15 transition-colors"
+          >
+            <span className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center">
+              <Sparkles className="w-5 h-5 text-white" aria-hidden="true" />
+            </span>
+            <span className="text-white font-medium">
+              {t('notifications.catchUp.title', { defaultValue: 'Catch me up' })}
+            </span>
+          </button>
+        )}
         <button
           onClick={handleMarkAllAsRead}
           disabled={markAllAsRead.isPending || totalUnread === 0}
@@ -2733,7 +2751,7 @@ export default function NotificationsPage({ inDrawer = false }: { inDrawer?: boo
     </>
   );
   const settingsControl = isDesktopViewport ? (
-    <Sheet>
+    <Sheet open={settingsOpen} onOpenChange={setSettingsOpen}>
       <SheetTrigger asChild>
         {settingsTrigger}
       </SheetTrigger>
@@ -2888,7 +2906,7 @@ export default function NotificationsPage({ inDrawer = false }: { inDrawer?: boo
       {/* Notifications List */}
       <PageBody frameClip={inDrawer} className={inDrawer ? 'pt-0' : undefined}>
         {!selection && isAuthenticated && pageWalletAddress && (
-          <NotificationCatchUp key={pageWalletAddress} wallet={pageWalletAddress} isVisible={isVisibleNotification}
+          <NotificationCatchUp key={pageWalletAddress} wallet={pageWalletAddress} open={catchUpOpen} onOpenChange={setCatchUpOpen} isVisible={isVisibleNotification}
             onOpenNotification={notification => {
               const announcement = announcementTarget(notification);
               if (announcement?.kind === 'external') {
