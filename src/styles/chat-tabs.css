@@ -98,10 +98,3 @@ html[data-theme]:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_)
   border-color: transparent !important;
   box-shadow: none !important;
 }
-@media (hover: hover) {
-  html[data-theme]:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_)
-    [data-fullscreen-chat] [data-chat-header]:has([data-public-chat-wide-tools])
-    button:not([data-chat-search-open], [data-group-call-join]):hover:not(:disabled) {
-    background: var(--control-fill, rgb(127 127 127 / 0.08)) !important;
-  }
-}
