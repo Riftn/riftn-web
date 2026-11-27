@@ -103,6 +103,7 @@ describe('call media lifecycle', () => {
     mocks.check.mockResolvedValueOnce({
       ...session, call_type: 'audio', caller_address: 'bob', recipient_address: 'alice', created_at: new Date().toISOString(),
     });
+    mocks.update.mockResolvedValue({ data: { id: session.id }, error: null });
     const microphone = track();
     mocks.microphone.mockResolvedValue(microphone);
     const { result } = renderHook(useCall);
