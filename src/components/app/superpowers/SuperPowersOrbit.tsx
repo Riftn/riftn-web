@@ -95,7 +95,7 @@ export function SuperPowersOrbit({ powers, selectedKey, onSelect, core }: SuperP
             aria-label={power.label}
             style={{ left: `${x}%`, top: `${y}%` }}
             className={cn(
-              'group absolute flex -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border bg-[#0b0b0d] transition-[width,height,box-shadow,border-color] duration-200',
+              'group absolute flex -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border bg-[#0b0b0d] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring motion-safe:active:scale-95 transition-[width,height,box-shadow,border-color] duration-200',
               selected
                 ? 'h-[15.5%] w-[15.5%] border-white shadow-[0_0_0_5px_rgba(255,255,255,0.07),0_0_32px_rgba(255,255,255,0.18)]'
                 : 'h-[12.5%] w-[12.5%] hover:border-white/40',
