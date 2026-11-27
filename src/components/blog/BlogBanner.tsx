@@ -7,6 +7,12 @@ import { mediaImage, mediaImageSrcSet } from '@/lib/media-url';
 // blurred copy of themselves so their text is never cropped off.
 const FRAME_RATIO = 40 / 21;
 const FILL_TOLERANCE = 0.2;
+const PRISM_BANNER = '/media/riftn-fansite-prism-banner.png';
+const FIT_CLASSES = {
+  cover: 'object-cover',
+  contain: 'object-contain',
+  fill: 'object-fill',
+};
 
 interface BlogBannerProps {
   src: string;
@@ -31,7 +37,8 @@ export const BlogBanner: React.FC<BlogBannerProps> = ({
   className = '',
   imgClassName = '',
 }) => {
-  const [fit, setFit] = useState<'cover' | 'contain'>('cover');
+  const [automaticFit, setAutomaticFit] = useState<'cover' | 'contain'>('cover');
+  const fit = src === PRISM_BANNER ? 'fill' : automaticFit;
   const url = mediaImage(src, { width });
   const srcSet = mediaImageSrcSet(src, widths);
 
@@ -39,7 +46,7 @@ export const BlogBanner: React.FC<BlogBannerProps> = ({
     const { naturalWidth, naturalHeight } = e.currentTarget;
     if (!naturalWidth || !naturalHeight) return;
     const off = Math.abs(naturalWidth / naturalHeight / FRAME_RATIO - 1);
-    setFit(off > FILL_TOLERANCE ? 'contain' : 'cover');
+    setAutomaticFit(off > FILL_TOLERANCE ? 'contain' : 'cover');
   };
 
   return (
@@ -62,8 +69,8 @@ export const BlogBanner: React.FC<BlogBannerProps> = ({
         loading={loading}
         decoding="async"
         fetchPriority={fetchPriority}
-        onLoad={handleLoad}
-        className={`absolute inset-0 h-full w-full ${fit === 'contain' ? 'object-contain' : 'object-cover'} ${imgClassName}`}
+        onLoad={fit === 'fill' ? undefined : handleLoad}
+        className={`absolute inset-0 h-full w-full ${FIT_CLASSES[fit]} ${imgClassName}`}
       />
     </div>
   );
