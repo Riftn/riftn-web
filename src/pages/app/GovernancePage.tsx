@@ -138,7 +138,7 @@ function GovernanceCard({
   // that gets recorded.
   const { weight: userWeight, badgeName: userBadge } = useSelfVoteWeight();
   const badgeImageUrl = getBadgeUrl(userBadgeBalance, username);
-  const timeLeft = votingTimeLeft(proposal, t);
+  const timeLeft = votingTimeLeft(proposal, (key, defaultValue, opts) => t(key, { defaultValue, ...opts }));
   // The window can run out before the cron pass flips the row, so the buttons
   // read the clock rather than only the status.
   const votingClosed = isVotingClosed(proposal);

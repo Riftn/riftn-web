@@ -41,7 +41,7 @@ export function ProposalLinkEmbed({ proposalId, path, fallback = null }: Proposa
   const forPct = total > 0 ? Math.round((forW / total) * 100) : 50;
   const againstPct = 100 - forPct;
   const verdict = verdictOf(proposal);
-  const timeLeft = votingTimeLeft(proposal, t);
+  const timeLeft = votingTimeLeft(proposal, (key, defaultValue, opts) => t(key, { defaultValue, ...opts }));
   const author = proposal.author_username
     ? `@${proposal.author_username}`
     : `${proposal.author_wallet_address.slice(0, 6)}...${proposal.author_wallet_address.slice(-4)}`;

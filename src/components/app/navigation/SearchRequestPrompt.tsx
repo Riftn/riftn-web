@@ -38,7 +38,7 @@ export function SearchRequestPrompt({ query, source, compact = false, onNavigate
   const { t } = useTranslation();
   const { isAuthenticated, openLoginModal } = useAuth();
   const submit = useSubmitFeatureRequest();
-  const draft = searchRequestDraft(query, source, t);
+  const draft = searchRequestDraft(query, source, (key, fallback, options) => t(key, { defaultValue: fallback, ...options }));
   const [text, setText] = useState(draft);
   const [sent, setSent] = useState(false);
   const editedRef = useRef(false);

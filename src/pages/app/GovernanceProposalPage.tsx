@@ -174,7 +174,7 @@ export default function GovernanceProposalPage() {
   const againstPct = 100 - forPct;
 
   const verdict = verdictOf(proposal);
-  const timeLeft = votingTimeLeft(proposal, t);
+  const timeLeft = votingTimeLeft(proposal, (key, defaultValue, opts) => t(key, { defaultValue, ...opts }));
   const multiple = isMultipleChoice(proposal);
 
   return (
