@@ -6828,14 +6828,14 @@ async function withInitialPublicContent(shell, page, pageStatus, useDocsSkeleton
     : '');
   const body = page.match(/<body[^>]*>([\s\S]*?)<\/body>/i)?.[1] || '';
   const language = page.match(/<html\b[^>]*\blang="([^"]+)"/i)?.[1];
-  const style = '<style>#root .edge-public-content{box-sizing:border-box;max-width:74ch;margin:0 auto;padding:2rem 1rem;color:var(--boot-fg,CanvasText);background:var(--boot-bg,Canvas);line-height:1.55;overflow-wrap:anywhere}#root .edge-public-content img{max-width:100%;height:auto}#root .edge-public-content .dh-cta{display:none}' +
-    (useDocsSkeleton ? '#root>noscript~.bskel,#root+noscript{display:none}' : '') + '</style>';
+  const style = '<style>#root .edge-public-content{box-sizing:border-box;max-width:74ch;margin:0 auto;padding:2rem 1rem;color:var(--boot-fg,CanvasText);background:var(--boot-bg,Canvas);line-height:1.55;overflow-wrap:anywhere}#root .edge-public-content img{max-width:100%;height:auto}#root .edge-public-content .dh-cta{display:none}</style>';
+  const fallbackStyle = useDocsSkeleton ? '<noscript><style>#root>.bskel,#root+noscript{display:none}</style></noscript>' : '';
   const snapshot = '<div class="edge-public-content">' + body + '</div>';
   // Docs has its own first paint. Keep the readable page as the fallback for
   // browsers without JavaScript and keep its metadata in the initial head.
   const initialBody = useDocsSkeleton ? '<noscript>' + snapshot + '</noscript>' : snapshot;
   const result = html.replace(PAGE_META_TAGS, '')
-    .replace('<head>', () => '<head>' + meta + style)
+    .replace('<head>', () => '<head>' + meta + style + fallbackStyle)
     .replace(/<html\b[^>]*>/i, tag => language ? tag.replace(/\blang="[^"]*"/i, 'lang="' + language + '"') : tag)
     .replace(root, () => root + initialBody);
   const response = new Response(result, { status: pageStatus, headers: shell.headers });
@@ -7422,8 +7422,8 @@ async function handleRequest(request, env, ctx) {
       // The SPA shell names this deployment's chunks. Reusing an older shell
       // after a deploy can leave the editor importing files that no longer exist.
       // Hidden images still load during HTML parsing. Strip the homepage
-      // welcome panel from chat before the browser sees its high-priority art.
-      const stripHomeIntro = initialPath === '/chat' && resp.ok && resp.body;
+      // welcome panel from chat and Docs before the browser sees its art.
+      const stripHomeIntro = (initialPath === '/chat' || isDocsDocument) && resp.ok && resp.body;
       const fresh = new Response(stripHomeIntro
         ? (await resp.text()).replace(/<!--home-intro-start-->[\s\S]*?<!--home-intro-end-->/, '')
         : resp.body, resp);

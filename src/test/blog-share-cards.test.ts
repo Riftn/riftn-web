@@ -19,7 +19,9 @@ import worker from '../../CLOUDFLARE_WORKER_SEO.js';
 import { MILESTONE_REDIRECTS, cleanBlogSlug } from '@/lib/blog-redirects.js';
 
 const ROOT = resolve(__dirname, '../..');
-const APP_SHELL = readFileSync(resolve(ROOT, 'index.html'), 'utf8').replace('/src/main.tsx', '/assets/app.js');
+const APP_SHELL = readFileSync(resolve(ROOT, 'index.html'), 'utf8')
+  .replace('/src/main.tsx', '/assets/app.js')
+  .replace('data-home-intro-slot></div>', 'data-home-intro-slot><!--home-intro-start--><img src="/feed-art.webp"><!--home-intro-end--></div>');
 type ManifestPost = {
   slug: string;
   title: string;
@@ -158,6 +160,7 @@ describe('blog post crawler markup', () => {
     expect(html.replace(/<noscript>[\s\S]*?<\/noscript>/g, '')).not.toContain('<article>');
     expect(html).toContain('class="bskel-docs docs-loading-shell"');
     expect(html).toContain('class="docs-loading-cover"');
+    expect(html).not.toContain('/feed-art.webp');
     expect(html).toContain('href="https://riftn.com/guides/' + NEW_SLUG + '"');
     expect(html).toContain('src="/assets/app.js"');
     expect(meta(html, 'description')).toBeTruthy();
