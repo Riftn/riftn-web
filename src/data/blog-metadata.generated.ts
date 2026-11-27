@@ -2991,8 +2991,8 @@ export const newPostsMetadata: BlogPost[] = [
   {
     "id": "riftn-acquires-fansite",
     "slug": "riftn-acquires-fansite",
-    "title": "Riftn Has Acquired Fan.site. Here’s What Happens to BJ",
-    "excerpt": "Eligible BJ investors can claim 100 $RIFT per BJ at launch. Presale and open-market buyers who register before 7 December also qualify for a bonus.",
+    "title": "Riftn.com has acquired the Fansite ecosystem",
+    "excerpt": "Riftn.com has acquired the Fansite ecosystem, including any of its assets and all associated intellectual property.",
     "content": "",
     "bannerImage": "/media/riftn-fansite-prism-banner.png",
     "bannerImageAlt": "Riftn wordmark beside a beam of light splitting into a rainbow",
@@ -3008,9 +3008,7 @@ export const newPostsMetadata: BlogPost[] = [
     ],
     "readingTime": 2,
     "featured": false,
-    "status": "published",
-    "seoTitle": "Riftn Acquires Fan.site: BJ Claims and the $RIFT Launch | Riftn",
-    "seoDescription": "Riftn has acquired Fan.site. See the 100 $RIFT per BJ claim rate, planned listing terms and the registration deadline for the presale and open-market buyer bonus."
+    "status": "published"
   },
   {
     "id": "fastest-blockchains-2026",
@@ -4179,8 +4177,8 @@ export const newPostsMetadata: BlogPost[] = [
 export const latestPostMetadata: BlogPost | undefined = {
   "id": "riftn-acquires-fansite",
   "slug": "riftn-acquires-fansite",
-  "title": "Riftn Has Acquired Fan.site. Here’s What Happens to BJ",
-  "excerpt": "Eligible BJ investors can claim 100 $RIFT per BJ at launch. Presale and open-market buyers who register before 7 December also qualify for a bonus.",
+  "title": "Riftn.com has acquired the Fansite ecosystem",
+  "excerpt": "Riftn.com has acquired the Fansite ecosystem, including any of its assets and all associated intellectual property.",
   "content": "",
   "bannerImage": "/media/riftn-fansite-prism-banner.png",
   "bannerImageAlt": "Riftn wordmark beside a beam of light splitting into a rainbow",
@@ -4196,9 +4194,7 @@ export const latestPostMetadata: BlogPost | undefined = {
   ],
   "readingTime": 2,
   "featured": false,
-  "status": "published",
-  "seoTitle": "Riftn Acquires Fan.site: BJ Claims and the $RIFT Launch | Riftn",
-  "seoDescription": "Riftn has acquired Fan.site. See the 100 $RIFT per BJ claim rate, planned listing terms and the registration deadline for the presale and open-market buyer bonus."
+  "status": "published"
 };
 
 export const excludedTitles: string[] = [
