@@ -3,7 +3,7 @@ import { Phone, PhoneMissed, PhoneOff } from 'lucide-react';
 import Video from '@/components/ui/cut-icons/video';
 import { useTranslation } from 'react-i18next';
 import { useCall } from '@/contexts/CallContext';
-import { describeCallNote } from '@/lib/dm-call-notice';
+import { callTypeLabel, describeCallNote } from '@/lib/dm-call-notice';
 import '@/styles/call-stage.css';
 
 /**
@@ -21,7 +21,7 @@ export function CallNoteCard({ content, time, isOwn, peerAddress }: {
   const { t } = useTranslation();
   const { startCall, currentCall } = useCall();
   const note = describeCallNote(content);
-  const kind = note.video ? t('copy.7b79b4f67293', { defaultValue: 'Video call' }) : t('copy.8b968cce31a0', { defaultValue: 'Voice call' });
+  const kind = callTypeLabel(note, t);
 
   if (note.kind === 'started') {
     return (
@@ -37,7 +37,7 @@ export function CallNoteCard({ content, time, isOwn, peerAddress }: {
     : note.kind === 'declined'
       ? t('calls.declined', 'Call declined')
       : isOwn ? t('calls.noAnswer', 'No answer') : t('calls.missed', 'Missed call');
-  const sub = note.kind === 'ended' ? [note.duration, time].filter(Boolean).join(' · ') : `${kind} · ${time}`;
+  const sub = note.kind === 'ended' ? [kind, note.duration, time].filter(Boolean).join(' · ') : `${kind} · ${time}`;
   const Icon = note.kind === 'ended' ? (note.video ? Video : Phone) : note.kind === 'declined' ? PhoneOff : PhoneMissed;
 
   return (
