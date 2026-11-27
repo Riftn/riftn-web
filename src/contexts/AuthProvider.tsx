@@ -73,6 +73,7 @@ import { advanceAuthTrace, beginAuthTrace, clearAuthTrace, readAuthTrace } from 
 import { clearEngagementCaches } from '@/lib/clear-engagement-caches';
 import { clearPersistedQueryCache } from '@/lib/query-persist';
 import { supabase } from '@/integrations/supabase/client';
+import { oauthSessionCallbackAtLoad, SOCIAL_OAUTH_PENDING_KEY } from '@/lib/oauth-return';
 import {
   activateWalletKey,
   addressFromProvider,
@@ -439,16 +440,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   );
   const [isLoading, setIsLoading] = useState(true);
   const [isConnecting, setIsConnecting] = useState(false);
+  const [returningFromSocialOAuth] = useState(() => {
+    try { return sessionStorage.getItem(SOCIAL_OAUTH_PENDING_KEY) === '1'; }
+    catch { return false; }
+  });
   // Initialised from the pending-login freshness window rather than left
   // false: a browser coming back from an OAuth redirect or magic link must
   // spend its first frame showing the login sheet ("Signing you in…"), not
   // the bare feed it is about to leave again. The SIGNED_IN listener below
   // drives this flag through the actual resume; the watchdog effect releases
   // it if no session ever lands.
-  const [isProcessingRedirect, setIsProcessingRedirect] = useState(isSocialLoginResumeExpected);
+  const [isProcessingRedirect, setIsProcessingRedirect] = useState(
+    () => returningFromSocialOAuth ? oauthSessionCallbackAtLoad : isSocialLoginResumeExpected(),
+  );
   const [requiresUsername, setRequiresUsername] = useState(false);
   const [needsSignature] = useState(false);
-  const [isLoginModalOpen, setIsLoginModalOpen] = useState(isSocialLoginResumeExpected);
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(() => returningFromSocialOAuth || isProcessingRedirect);
   // Why the sheet is open — plain sign-in, or adding/switching a profile from
   // Settings while already signed in. Only changes the sheet's title.
   const [loginIntent, setLoginIntent] = useState<'login' | 'signup' | 'add-profile'>('login');
@@ -559,7 +566,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // was expected at first paint. Only that case needs the watchdog below —
   // a resume started later in the page's life already has a session on its
   // way and an audience that tapped something recently.
-  const resumeOpenedAtBootRef = useRef(isSocialLoginResumeExpected());
+  const resumeOpenedAtBootRef = useRef(isProcessingRedirect);
   const wagmiAuthIntentRef = useRef(false);
   /**
    * Which wallet the live intent is for — the button that was actually tapped.
@@ -1038,6 +1045,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // setters and refs; including it would rebuild this callback every render.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [openLoginModal]);
+
+  useEffect(() => {
+    if (returningFromSocialOAuth) {
+      sessionStorage.removeItem(SOCIAL_OAUTH_PENDING_KEY);
+      if (oauthSessionCallbackAtLoad) {
+        localStorage.setItem(SUPA_LOGIN_PENDING_KEY, '1');
+        localStorage.setItem(SUPA_LOGIN_PENDING_AT_KEY, String(Date.now()));
+      }
+    }
+
+    // A browser can restore the outgoing page from its back/forward cache.
+    const handlePageShow = (event: PageTransitionEvent) => {
+      if (!event.persisted || sessionStorage.getItem(SOCIAL_OAUTH_PENDING_KEY) !== '1') return;
+      sessionStorage.removeItem(SOCIAL_OAUTH_PENDING_KEY);
+      setIsConnecting(false);
+    };
+    window.addEventListener('pageshow', handlePageShow);
+    return () => window.removeEventListener('pageshow', handlePageShow);
+  }, [returningFromSocialOAuth]);
 
   // Check for existing Riftn session on mount
   useEffect(() => {
@@ -2808,23 +2834,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    // What the browser was tagged as before this attempt. Restored if the
-    // attempt fails: someone already signed in who tries a second login method
-    // and gives up must not lose the session they still have.
-    const previousSource = readConnectionSource();
-
     setIsConnecting(true);
-    setConnectionSource('web3auth');
-    writeConnectionSource('web3auth');
-    localStorage.setItem(SUPA_LOGIN_PENDING_KEY, '1');
-    localStorage.setItem(SUPA_LOGIN_PENDING_AT_KEY, String(Date.now()));
 
     try {
-      // Avoid wagmi competing for browser wallet state during the flow.
-      try {
-        await wagmiDisconnect();
-        clearWagmiStorage();
-      } catch { /* ignore */ }
+      sessionStorage.setItem(SOCIAL_OAUTH_PENDING_KEY, '1');
 
       const { error } = await supabase.auth.signInWithOAuth({
         provider: supaProvider as any,
@@ -2842,11 +2855,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.error(`${provider} login error:`, error);
       authLogger.trace?.('identity-error', { reason: error?.message, code: error?.code });
       toast.error(_translateCopy("copy.25f00c6b6d7b", { defaultValue: "Failed to connect with {{value1}}. Please try again.", value1: provider }));
-      localStorage.removeItem(SUPA_LOGIN_PENDING_KEY);
-      localStorage.removeItem(SUPA_LOGIN_PENDING_AT_KEY);
-      setConnectionSource(previousSource);
-      restoreConnectionSource(previousSource);
       setIsConnecting(false);
+      try { sessionStorage.removeItem(SOCIAL_OAUTH_PENDING_KEY); } catch { /* storage unavailable */ }
       throw error;
     }
   };

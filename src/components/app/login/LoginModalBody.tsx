@@ -185,6 +185,11 @@ function LoginModalBodyInner({ open, step, setStep, layout = 'default', signingU
   const [phoneCode, setPhoneCode] = useState('');
   const [phoneError, setPhoneError] = useState('');
   const [activeProvider, setActiveProvider] = useState<string | null>(null);
+  useEffect(() => {
+    if (!isConnecting) {
+      setActiveProvider((provider) => provider === 'google' || provider === 'apple' ? null : provider);
+    }
+  }, [isConnecting]);
   // Set to the app's name ('' when unnamed) after Google was tapped inside a
   // social app's built-in browser, where Google refuses to sign anyone in.
   const [googleBlockedIn, setGoogleBlockedIn] = useState<string | null>(null);
