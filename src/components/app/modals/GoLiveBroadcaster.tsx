@@ -89,6 +89,8 @@ import { DhbAmount } from '@/components/app/DhbAmount';
 import { EndStreamConfirmDialog } from '@/components/app/modals/EndStreamConfirmDialog';
 import { getLiveStream, updateStreamThumbnail } from '@/lib/api/dehub/livestream';
 import { useQuery } from '@tanstack/react-query';
+import { getNFTInfo } from '@/lib/api/dehub/feed';
+import { resolveLikeCount } from '@/lib/engagement';
 import { useStreamAudience } from '@/hooks/use-stream-audience';
 import { BroadcasterViewersSheet } from '@/components/app/live/BroadcasterViewersSheet';
 import { LiveReactionFlow } from '@/components/app/live/LiveReactionFlow';
@@ -671,6 +673,13 @@ export function GoLiveBroadcaster({
     queryKey: ['broadcast-console', streamId],
     queryFn: () => getLiveStream(streamId as string),
     enabled: !!streamId && (phase === 'live' || phase === 'reconnecting'),
+    refetchInterval: CONSOLE_POLL_MS,
+    staleTime: CONSOLE_POLL_MS,
+  });
+  const { data: postLikes } = useQuery({
+    queryKey: ['live-broadcast-post-likes', tokenId],
+    queryFn: async () => resolveLikeCount(await getNFTInfo(tokenId!)),
+    enabled: !!tokenId && (phase === 'live' || phase === 'reconnecting'),
     refetchInterval: CONSOLE_POLL_MS,
     staleTime: CONSOLE_POLL_MS,
   });
@@ -2652,7 +2661,7 @@ export function GoLiveBroadcaster({
           )}
           <span className="flex items-center gap-1.5 leading-none">
             <Heart className="h-3.5 w-3.5 shrink-0" />
-            <span className="tabular-nums">{formatCount(room?.likes ?? 0)}</span>
+            <span className="tabular-nums">{formatCount(postLikes ?? room?.likes ?? 0)}</span>
           </span>
           {/* No gift icon: the DHB coin already says what this number is, and
               two glyphs around one figure read as two separate stats. */}
