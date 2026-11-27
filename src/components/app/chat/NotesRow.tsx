@@ -790,7 +790,7 @@ function cloudText(note: Note | null): string {
   if (note.text) return note.text;
   if (note.song) return `🎧 ${note.song.title}`;
   if (note.location) return `📍 ${note.location}`;
-  return note.gifUrl ? 'GIF' : '';
+  return '';
 }
 
 function StatusTile({ author, note, own, label, onClick, onMenu }: {
@@ -800,8 +800,9 @@ function StatusTile({ author, note, own, label, onClick, onMenu }: {
   const { t } = useTranslation();
   const avatar = buildAvatarUrl(author.address, author.avatarImageUrl, 120);
   const said = useNoteWords(note?.text, own).shown;
-  const words = (note?.text ? said : cloudText(note)) || (own ? t('notes.whatsUp', { defaultValue: 'What\u2019s up?' }) : '');
   const gif = note?.gifUrl || null;
+  const left = useNoteLeft(note);
+  const words = gif ? '' : (note?.text ? said : cloudText(note)) || (own ? t('notes.whatsUp', { defaultValue: 'What\u2019s up?' }) : '');
   return (
     <button type="button" onClick={onClick} {...activityMenuEvents(onMenu)} data-status-tile={own ? 'own' : ''} className="flex w-[88px] shrink-0 flex-col items-center text-center">
       <span className="flex min-h-[62px] w-full flex-col items-center justify-end pt-1">
@@ -817,22 +818,23 @@ function StatusTile({ author, note, own, label, onClick, onMenu }: {
           </>
         )}
       </span>
-      <span className="relative mt-0.5 block">
+      <span className="relative mt-0.5 grid h-[68px] w-[68px] place-items-center">
         {gif ? (
-          <img src={gif} alt="" loading="lazy" style={{ borderRadius: 17 }} className="h-[60px] w-[60px] object-cover" />
+          <img data-note-gif-face src={gif} alt="" loading="lazy" style={{ borderRadius: 17 }} className="h-[60px] w-[60px] object-cover" />
         ) : (
           <Avatar style={{ borderRadius: 17 }} className="h-[60px] w-[60px]">
             {avatar && <AvatarImage src={avatar} style={{ borderRadius: 17 }} className="object-cover" />}
             <AvatarFallback style={{ borderRadius: 17 }} className="bg-zinc-700 text-white">{nameOf(author).charAt(0).toUpperCase()}</AvatarFallback>
           </Avatar>
         )}
-        {own && (
+        {note && <NoteRing left={left} size={68} radius={19} />}
+        {own && !gif && (
           <span aria-hidden data-keep-dark className="absolute -bottom-1 -right-1 grid h-[22px] w-[22px] place-items-center" style={{ borderRadius: 8, background: '#fff', color: '#0b0b0c', boxShadow: '0 0 0 3px hsl(var(--background)), 0 0 0 1px var(--kit-hairline)' }}>
             <Plus className="h-3.5 w-3.5" strokeWidth={3} style={{ color: '#0b0b0c', stroke: '#0b0b0c' }} />
           </span>
         )}
       </span>
-      <span className="mt-1.5 w-full truncate text-[11.5px] font-semibold text-foreground" style={own ? { opacity: 0.6 } : undefined}>{label}</span>
+      <span className="mt-1.5 w-full truncate text-[11.5px] font-semibold text-foreground" style={own ? { opacity: 0.6 } : undefined}>{gif ? author.username || nameOf(author) : label}</span>
     </button>
   );
 }
