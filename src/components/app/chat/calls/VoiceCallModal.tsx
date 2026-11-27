@@ -60,13 +60,11 @@ const VoiceCallModal: React.FC = () => {
     return null;
   }
 
-  const statusText = isIncoming
-    ? t('calls.incoming')
-    : isRinging
-      ? t('calls.calling')
-      : isConnecting
-        ? t('calls.connecting')
-        : <CallDuration fallback="00:00" />;
+  const statusText = isRinging
+    ? t('calls.calling')
+    : isConnecting
+      ? t('calls.connecting')
+      : <CallDuration fallback="00:00" />;
 
   const openMessages = () => {
     if (isRinging) endCall();
@@ -95,9 +93,9 @@ const VoiceCallModal: React.FC = () => {
       <div onClick={handleUserInteraction}>
         <CallIdentity
           kindIcon={Phone}
-          kindLabel={t('calls.voiceCall')}
+          kindLabel={t(isIncoming ? 'calls.incoming' : 'calls.voiceCall')}
           peer={peer}
-          status={statusText}
+          status={isIncoming ? undefined : statusText}
           ringing={isIncoming || isRinging}
           announceStatus={!isCallActive}
         >

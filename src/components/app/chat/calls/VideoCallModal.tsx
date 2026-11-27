@@ -64,13 +64,11 @@ const VideoCallModal: React.FC = () => {
     return null;
   }
 
-  const statusText = isIncoming
-    ? t('calls.incoming')
-    : isRinging
-      ? t('calls.calling')
-      : isConnecting
-        ? t('calls.connecting')
-        : <CallDuration fallback="00:00" />;
+  const statusText = isRinging
+    ? t('calls.calling')
+    : isConnecting
+      ? t('calls.connecting')
+      : <CallDuration fallback="00:00" />;
 
   const openMessages = () => {
     if (isRinging) endCall();
@@ -108,9 +106,9 @@ const VideoCallModal: React.FC = () => {
       ) : (
         <CallIdentity
           kindIcon={Video}
-          kindLabel={t('calls.videoCall')}
+          kindLabel={t(isIncoming ? 'calls.incoming' : 'calls.videoCall')}
           peer={peer}
-          status={statusText}
+          status={isIncoming ? undefined : statusText}
           ringing={isIncoming || isRinging}
           announceStatus={!isCallActive}
         />
