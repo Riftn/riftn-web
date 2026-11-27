@@ -71,7 +71,6 @@ interface CommentRow {
   wallet_address: string;
   username: string | null;
   content: string;
-  parent_id: string | null;
   created_at: string;
 }
 
@@ -127,7 +126,7 @@ serve(async (req) => {
 
     const { data: mentionRow, error: mentionError } = await sb
       .from("feature_request_comments")
-      .select("id, feature_request_id, wallet_address, username, content, parent_id, created_at")
+      .select("id, feature_request_id, wallet_address, username, content, created_at")
       .eq("id", commentId)
       .maybeSingle();
     if (mentionError) throw mentionError;
@@ -143,18 +142,17 @@ serve(async (req) => {
       return jsonResponse({ skipped: "assistant mentioned itself" });
     }
 
-    // The board shows one visible level of replies, so a reply to a reply hangs
-    // off the same root the UI is already rendering.
-    const rootId = mention.parent_id ?? mention.id;
-
-    const { data: existing } = await sb
+    // Both clients group descendants under the visible root. Keep the exact
+    // parent so the reply trigger notifies the person who tagged the assistant.
+    const { data: existing, error: existingError } = await sb
       .from("feature_request_comments")
       .select("id")
       .eq("feature_request_id", mention.feature_request_id)
-      .eq("parent_id", rootId)
+      .eq("parent_id", mention.id)
       .eq("wallet_address", ASSISTANT_WALLET)
       .gte("created_at", mention.created_at)
       .limit(1);
+    if (existingError) throw existingError;
     if (existing && existing.length > 0) {
       return jsonResponse({ skipped: "already answered", commentId: existing[0].id });
     }
@@ -245,7 +243,7 @@ serve(async (req) => {
         // Threads on this platform carry the "@name " prefix, which is also
         // what tells the person who tagged us that this is aimed at them.
         content: mention.username ? `@${mention.username} ${reply}` : reply,
-        parent_id: rootId,
+        parent_id: mention.id,
       })
       .select("id")
       .single();
