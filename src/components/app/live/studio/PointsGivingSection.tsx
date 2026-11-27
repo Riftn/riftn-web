@@ -37,10 +37,10 @@ export function PointsGivingSection() {
   }, [saved.data, draft]);
 
   const save = useMutation({
-    mutationFn: (next: PointsGiving) => saveMyGiving(next),
-    onSuccess: (giving) => {
+    mutationFn: ({ giving }: { giving: PointsGiving; keepCapDraft?: boolean }) => saveMyGiving(giving),
+    onSuccess: (giving, { keepCapDraft }) => {
       qc.setQueryData(['my-points-giving'], giving);
-      setDraft(giving);
+      setDraft((current) => keepCapDraft && current ? { ...giving, dailyCap: current.dailyCap } : giving);
       toast.success(t('livePoints.give.studio.saved'));
     },
     onError: (err) => toast.error((err as Error)?.message || t('livePoints.studio.saveFailed')),
@@ -53,9 +53,10 @@ export function PointsGivingSection() {
     refetchInterval: 15_000,
   });
 
-  if (saved.isLoading || !draft) return <Loader2 className="mt-5 h-4 w-4 animate-spin text-zinc-400" />;
+  if (saved.isLoading || !saved.data || !draft) return <Loader2 className="mt-5 h-4 w-4 animate-spin text-zinc-400" />;
   const capValid = draft.dailyCap >= 1 && draft.dailyCap <= GIVING_CAP_MAX;
-  const capDirty = !!saved.data && saved.data.dailyCap !== draft.dailyCap;
+  const capDirty = saved.data.dailyCap !== draft.dailyCap;
+  const savedCap = saved.data.dailyCap;
 
   return (
     <div className="mt-5" data-points-giving>
@@ -67,7 +68,7 @@ export function PointsGivingSection() {
           <Switch
             checked={draft.enabled}
             disabled={save.isPending}
-            onCheckedChange={(enabled) => save.mutate({ ...draft, enabled })}
+            onCheckedChange={(enabled) => save.mutate({ giving: { enabled, dailyCap: savedCap }, keepCapDraft: capDirty })}
           />
         </label>
         <div className="flex flex-wrap items-center gap-2 text-xs text-zinc-400">
@@ -77,6 +78,7 @@ export function PointsGivingSection() {
             <Input
               type="number"
               inputMode="numeric"
+              disabled={save.isPending}
               min={1}
               max={GIVING_CAP_MAX}
               value={draft.dailyCap || ''}
@@ -85,7 +87,7 @@ export function PointsGivingSection() {
               className={`${SETTINGS_FIELD_CLASS} pl-8 tabular-nums`}
             />
           </div>
-          <Button size="sm" disabled={!capDirty || !capValid || save.isPending} onClick={() => save.mutate(draft)}>
+          <Button size="sm" disabled={!capDirty || !capValid || save.isPending} onClick={() => save.mutate({ giving: draft })}>
             {t('livePoints.studio.save')}
           </Button>
         </div>
