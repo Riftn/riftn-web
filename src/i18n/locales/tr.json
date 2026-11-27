@@ -8223,7 +8223,8 @@
       },
       "gateHint": "Konuşmaların arasında mikrofonunu susturur; klavye ve fan sesi yayına girmez.",
       "hearShared": "Paylaşılan sekmeyi bu bilgisayarda duy",
-      "hearSharedHint": "Kapatınca sekmenin sesi izleyicilere gitmeye devam eder ama sende sessiz olur, böylece başka bir şey dinleyebilirsin. Chrome, Edge veya Brave'de paylaşılan bir sekmede çalışır."
+      "hearSharedHint": "İzleyiciler sesi duymaya devam ederken bu bilgisayarda sekmenin sesini kapatmak için bu seçeneği kapat. Zaten paylaşım yapıyorsan sekme sesi açıkken aynı sekmeyi tekrar seç.",
+      "hearSharedFailed": "Yerel oynatmayı değiştirmek için sekme sesi açık olan bir tarayıcı sekmesi seç."
     }
   },
   "liveStudio": {

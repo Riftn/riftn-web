@@ -8224,7 +8224,8 @@
       },
       "gateHint": "Coupe votre micro entre les mots pour que le clavier et les ventilateurs restent hors du live.",
       "hearShared": "Entendre l'onglet partagé sur cet ordinateur",
-      "hearSharedHint": "Désactivez pour que le son de l'onglet continue d'arriver aux spectateurs sans que vous l'entendiez, pour écouter autre chose. Fonctionne avec un onglet partagé dans Chrome, Edge ou Brave."
+      "hearSharedHint": "Désactivez cette option pour couper le son de l’onglet sur cet ordinateur tout en le laissant audible pour les spectateurs. Si le partage est en cours, sélectionnez à nouveau le même onglet en activant le partage de son.",
+      "hearSharedFailed": "Sélectionnez un onglet du navigateur avec le partage de son activé pour modifier la lecture locale."
     }
   },
   "liveStudio": {

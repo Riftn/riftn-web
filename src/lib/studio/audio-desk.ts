@@ -223,10 +223,10 @@ export async function createAudioDesk(): Promise<AudioDesk> {
     track,
     setInput: (channel, input) => {
       if (strips[channel].track === input) return;
+      const node = input ? ctx.createMediaStreamSource(new MediaStream([input])) : null;
+      node?.connect(channel === 'mic' ? micInput : strips[channel].gain);
+      // Keep the working input if creating or connecting its replacement fails.
       detach(channel);
-      if (!input) return;
-      const node = ctx.createMediaStreamSource(new MediaStream([input]));
-      node.connect(channel === 'mic' ? micInput : strips[channel].gain);
       strips[channel].source = node;
       strips[channel].track = input;
     },
