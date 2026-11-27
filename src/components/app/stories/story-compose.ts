@@ -41,7 +41,7 @@ function boxColor(color: string): string {
 }
 
 /** Where a text layer's lines sit, in output pixels. Shared by drawing and mention tap targets. */
-export function measureText(ctx: CanvasRenderingContext2D, layer: TextLayer) {
+export function measureText(ctx: CanvasRenderingContext2D, layer: TextLayer, height = OUT_H) {
   const px = Math.round(layer.size * OUT_W);
   const { fontFamily, fontStyle, fontWeight } = captionFontStyle(layer.font);
   ctx.font = `${fontStyle} ${fontWeight} ${px}px ${fontFamily}`;
@@ -51,13 +51,13 @@ export function measureText(ctx: CanvasRenderingContext2D, layer: TextLayer) {
   const widths = lines.map(l => ctx.measureText(l || ' ').width);
   const w = Math.max(...widths) + padX * 2;
   const h = lines.length * lineH + px * 0.2;
-  return { px, lines, lineH, padX, widths, w, h, cx: layer.x * OUT_W, cy: layer.y * OUT_H };
+  return { px, lines, lineH, padX, widths, w, h, cx: layer.x * OUT_W, cy: layer.y * height };
 }
 
-export function drawTextLayer(ctx: CanvasRenderingContext2D, layer: TextLayer) {
+export function drawTextLayer(ctx: CanvasRenderingContext2D, layer: TextLayer, height = OUT_H) {
   if (!layer.text.trim()) return;
   ctx.save();
-  const m = measureText(ctx, layer);
+  const m = measureText(ctx, layer, height);
   ctx.translate(m.cx, m.cy);
   ctx.rotate((layer.rotation ?? 0) * Math.PI / 180);
   ctx.textBaseline = 'middle';
@@ -92,7 +92,7 @@ function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: numbe
 }
 
 /** The tap target of each @mention, in 0..1 of the frame. */
-export function mentionBoxes(layers: TextLayer[]): { address: string; x: number; y: number; w: number; h: number; hidden?: boolean }[] {
+export function mentionBoxes(layers: TextLayer[], height = OUT_H): { address: string; x: number; y: number; w: number; h: number; hidden?: boolean }[] {
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
   if (!ctx) return [];
@@ -101,13 +101,13 @@ export function mentionBoxes(layers: TextLayer[]): { address: string; x: number;
     .map(l => {
       // Off the picture: no tap target, but the person still hears about it.
       if (l.hidden) return { address: l.address!, x: 0, y: 0, w: 0, h: 0, hidden: true };
-      const m = measureText(ctx, l);
+      const m = measureText(ctx, l, height);
       return {
         address: l.address!,
         x: Math.max(0, (m.cx - m.w / 2) / OUT_W),
-        y: Math.max(0, (m.cy - m.h / 2) / OUT_H),
+        y: Math.max(0, (m.cy - m.h / 2) / height),
         w: Math.min(1, m.w / OUT_W),
-        h: Math.min(1, m.h / OUT_H),
+        h: Math.min(1, m.h / height),
       };
     });
 }
@@ -142,17 +142,16 @@ export function backdropCss(backdrop: PhotoBackdrop): string | null {
   return stops ? `linear-gradient(160deg, ${stops[0]}, ${stops[1]})` : null;
 }
 
-function drawMedia(ctx: CanvasRenderingContext2D, source: CanvasImageSource, sw: number, sh: number, look: PhotoLook = 'none', backdrop: PhotoBackdrop = 'blur') {
-  const frame = OUT_W / OUT_H;
+function drawMedia(ctx: CanvasRenderingContext2D, source: CanvasImageSource, sw: number, sh: number, look: PhotoLook = 'none', backdrop: PhotoBackdrop = 'blur', height = OUT_H) {
   const ratio = sw / sh;
   const cover = () => {
-    const scale = Math.max(OUT_W / sw, OUT_H / sh);
+    const scale = Math.max(OUT_W / sw, height / sh);
     const w = sw * scale;
     const h = sh * scale;
-    ctx.drawImage(source, (OUT_W - w) / 2, (OUT_H - h) / 2, w, h);
+    ctx.drawImage(source, (OUT_W - w) / 2, (height - h) / 2, w, h);
   };
   const lookFilter = PHOTO_LOOKS[look] ?? 'none';
-  if (ratio <= 0.75) {
+  if (height === OUT_H && ratio <= 0.75) {
     ctx.save();
     ctx.filter = lookFilter;
     cover();
@@ -162,11 +161,11 @@ function drawMedia(ctx: CanvasRenderingContext2D, source: CanvasImageSource, sw:
   }
   const stops = PHOTO_BACKDROPS[backdrop];
   if (stops) {
-    const g = ctx.createLinearGradient(0, 0, OUT_W * 0.35, OUT_H);
+    const g = ctx.createLinearGradient(0, 0, OUT_W * 0.35, height);
     g.addColorStop(0, stops[0]);
     g.addColorStop(1, stops[1]);
     ctx.fillStyle = g;
-    ctx.fillRect(0, 0, OUT_W, OUT_H);
+    ctx.fillRect(0, 0, OUT_W, height);
   } else {
     ctx.save();
     ctx.filter = 'blur(40px) brightness(0.6)';
@@ -174,14 +173,14 @@ function drawMedia(ctx: CanvasRenderingContext2D, source: CanvasImageSource, sw:
     ctx.restore();
     ctx.filter = 'none';
   }
-  const w = OUT_W;
-  const h = OUT_W / ratio;
+  const scale = Math.min(OUT_W / sw, height / sh);
+  const w = sw * scale;
+  const h = sh * scale;
   ctx.save();
   ctx.filter = lookFilter;
-  ctx.drawImage(source, 0, (OUT_H - h) / 2, w, h);
+  ctx.drawImage(source, (OUT_W - w) / 2, (height - h) / 2, w, h);
   ctx.restore();
   ctx.filter = 'none';
-  void frame;
 }
 
 function toBlob(canvas: HTMLCanvasElement, type: string, quality?: number): Promise<Blob> {
@@ -191,16 +190,16 @@ function toBlob(canvas: HTMLCanvasElement, type: string, quality?: number): Prom
 }
 
 /** A photo moment: the photo, the drawing and the words, flattened into one JPEG. */
-export async function composePhoto(image: HTMLImageElement, drawing: HTMLCanvasElement | null, layers: TextLayer[], look: PhotoLook = 'none', backdrop: PhotoBackdrop = 'blur'): Promise<Blob> {
+export async function composePhoto(image: HTMLImageElement, drawing: HTMLCanvasElement | null, layers: TextLayer[], look: PhotoLook = 'none', backdrop: PhotoBackdrop = 'blur', height = OUT_H): Promise<Blob> {
   const canvas = document.createElement('canvas');
   canvas.width = OUT_W;
-  canvas.height = OUT_H;
+  canvas.height = height;
   const ctx = canvas.getContext('2d')!;
   ctx.fillStyle = '#000';
-  ctx.fillRect(0, 0, OUT_W, OUT_H);
-  drawMedia(ctx, image, image.naturalWidth, image.naturalHeight, look, backdrop);
-  if (drawing) ctx.drawImage(drawing, 0, 0, OUT_W, OUT_H);
-  layers.forEach(l => drawTextLayer(ctx, l));
+  ctx.fillRect(0, 0, OUT_W, height);
+  drawMedia(ctx, image, image.naturalWidth, image.naturalHeight, look, backdrop, height);
+  if (drawing) ctx.drawImage(drawing, 0, 0, OUT_W, height);
+  layers.forEach(l => drawTextLayer(ctx, l, height));
   return toBlob(canvas, 'image/jpeg', 0.9);
 }
 
