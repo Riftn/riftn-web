@@ -14,6 +14,7 @@ import Video from "@/components/ui/cut-icons/video";
 import X from "@/components/ui/cut-icons/close";
 
 import { EndStreamConfirmDialog } from '@/components/app/modals/EndStreamConfirmDialog';
+import { BroadcasterViewersSheet } from '@/components/app/live/BroadcasterViewersSheet';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from '@/components/ui/drawer';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -210,6 +211,7 @@ export function GoLiveModal({ isOpen, onClose, initialSource, initialStream }: G
   const navigate = useNavigate();
   const [step, setStep] = useState<Step>('setup');
   const [confirmEnd, setConfirmEnd] = useState(false);
+  const [viewersOpen, setViewersOpen] = useState(false);
   const [source, setSource] = useState<StreamSource>(initialSource ?? 'camera');
   // Phone browsers have no screen capture at all; the tile explains and points to the app.
   const [screenInApp, setScreenInApp] = useState(false);
@@ -1645,6 +1647,18 @@ export function GoLiveModal({ isOpen, onClose, initialSource, initialStream }: G
                       <li>{t('goLive.obsStep4')}</li>
                     </ol>
                   </div>
+                  <button
+                    type="button"
+                    aria-haspopup="dialog"
+                    onClick={() => setViewersOpen(true)}
+                    className="w-full rounded-xl border border-white/10 bg-white/5 p-3 text-sm font-medium text-white hover:bg-white/10"
+                  >
+                    {t('liveAudience.viewers', 'Viewers')}
+                  </button>
+                  {streamData.streamId && (
+                    <BroadcasterViewersSheet streamId={streamData.streamId} open={viewersOpen}
+                      onOpenChange={setViewersOpen} live />
+                  )}
                 </>
               )}
             </div>

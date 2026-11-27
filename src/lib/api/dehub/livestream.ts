@@ -499,6 +499,25 @@ export interface LiveAudience {
   mostActive: (LiveAudienceAccount & { messages: number })[];
 }
 
+export type ViewerPeriod = 'now' | 'past';
+
+export interface BroadcasterViewers {
+  viewers: Array<{
+    id: string;
+    username?: string;
+    displayName?: string;
+    avatarImageUrl?: string;
+  }>;
+  nextOffset: number | null;
+}
+
+export function getBroadcasterViewers(streamId: string, period: ViewerPeriod, offset: number) {
+  return apiCall<BroadcasterViewers>(`/api/live/${encodeURIComponent(streamId)}/viewers`, {
+    requiresAuth: true,
+    params: { period, offset },
+  });
+}
+
 export async function getStreamAudience(streamId: string): Promise<LiveAudience> {
   const res = await apiCall<LiveAudience | { result: LiveAudience }>(`/api/live/${streamId}/audience`);
   const body = (res && 'result' in res ? res.result : res) as Partial<LiveAudience> | undefined;

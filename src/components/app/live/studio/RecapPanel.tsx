@@ -6,7 +6,7 @@ import { tokenLabel } from '@/lib/token-label';
  * Every figure is a trusted one from the stream API: gifts only once the chain
  * paid them, followers who followed during the broadcast.
  */
-import { useEffect, useRef, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { Loader2, Share2 } from 'lucide-react';
@@ -17,6 +17,7 @@ import { buildAvatarUrl } from '@/lib/media-url';
 import { formatDuration, getLastEndedStreamId, getStreamRecap, type StreamRecap } from '@/lib/api/dehub/stream-recap';
 
 import { formatCount } from '@/lib/format-count';
+import { BroadcasterViewersSheet } from '../BroadcasterViewersSheet';
 interface Props {
   /** The creator's address, to find their last finished stream. */
   address: string | null | undefined;
@@ -38,6 +39,7 @@ const whole = (n: number) => Math.round(n).toLocaleString();
 export function RecapPanel({ address, streamId }: Props) {
   const { t } = useTranslation();
   const sectionRef = useRef<HTMLDivElement>(null);
+  const [viewersOpen, setViewersOpen] = useState(false);
 
   const target = useQuery({
     queryKey: ['stream-recap-target', address, streamId ?? null],
@@ -122,6 +124,12 @@ export function RecapPanel({ address, streamId }: Props) {
               {r.shares != null && <Stat label={t('liveRecap.shares')} value={formatCount(r.shares)} />}
             </div>
 
+            {id && (
+              <Button type="button" size="sm" variant="outline" aria-haspopup="dialog" onClick={() => setViewersOpen(true)}>
+                {t('liveAudience.pastViewers', 'Past viewers')}
+              </Button>
+            )}
+
             {r.topTippers.length > 0 && (
               <div>
                 <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-zinc-400">{t('liveRecap.topSupporters')}</h3>
@@ -161,6 +169,7 @@ export function RecapPanel({ address, streamId }: Props) {
           </div>
         )}
       </PageSection>
+      {id && <BroadcasterViewersSheet streamId={id} open={viewersOpen} onOpenChange={setViewersOpen} />}
     </div>
   );
 }
