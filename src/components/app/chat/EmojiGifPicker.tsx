@@ -184,7 +184,7 @@ export function EmojiGifPicker({ onEmojiSelect, onGifSelect, triggerClassName, t
           <StickerPanel onSelect={handleGifClick} />
         ) : (
           <>
-            {!kids && <PackStrip packs={gifPacks.packs} active={gifPacks.active} onChange={gifPacks.setActive} leading="GIPHY" />}
+            {!kids && <PackStrip kind="gif" packs={gifPacks.packs} active={gifPacks.active} onChange={gifPacks.setActive} leading="GIPHY" />}
             {!kids && gifPacks.items ? (
               <div className="max-h-72 overflow-y-auto">
                 <PackGrid kind="gif" items={gifPacks.items} onSelect={handleGifClick} />

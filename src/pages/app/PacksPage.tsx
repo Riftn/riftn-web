@@ -8,7 +8,7 @@ import { useSurfaceDraft } from '@/hooks/use-surface-draft';
  */
 
 import { useState, type ReactNode } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -127,7 +127,15 @@ export default function PacksPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { walletAddress, isAuthenticated, openLoginModal } = useAuth();
-  const [kind, setKind] = useState<PackKind>('emoji');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const requestedKind = searchParams.get('kind');
+  const kind = PACK_KINDS.find((entry) => entry === requestedKind) ?? 'emoji';
+  const setKind = (nextKind: PackKind) => {
+    const params = new URLSearchParams(searchParams);
+    if (nextKind === 'emoji') params.delete('kind');
+    else params.set('kind', nextKind);
+    setSearchParams(params, { replace: true });
+  };
   const [name, setName] = useSurfaceDraft("pages/app/PacksPage.tsx:name", '');
   const [busy, setBusy] = useState(false);
   const status = usePackStatus(walletAddress);
