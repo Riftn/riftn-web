@@ -450,6 +450,7 @@ export interface ChestardState {
   me: { best: number; bestLines: number; games: number } | null;
   run: ChestardRun | null;
   leaderboard: ChestardBoardRow[];
+  daily?: { endsAt: string; leaderboard: ChestardBoardRow[] };
 }
 
 export const chestardState = (signedIn: boolean) => apiCall<ChestardState>('/api/games/chestard', { requiresAuth: signedIn });
