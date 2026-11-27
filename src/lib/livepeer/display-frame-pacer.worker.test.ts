@@ -68,6 +68,19 @@ it('fills a quiet interval, clears the hold when muted, and resumes with fresh v
   expect(resumed.label).toBe('resumed');
   expect(resumed.timestamp).toBe(2_401_000);
 
+  // A capture restart can reset timestamps while the WHIP sender stays live.
+  await vi.advanceTimersByTimeAsync(400);
+  const beforeRestart = sent[sent.length - 1].timestamp;
+  source.enqueue(new TestFrame({ label: 'next track' }, { timestamp: 10_000 }));
+  await vi.advanceTimersByTimeAsync(0);
+  const firstNewFrame = sent[sent.length - 1];
+  expect(firstNewFrame.label).toBe('next track');
+  expect(firstNewFrame.timestamp).toBeGreaterThan(beforeRestart);
+
+  source.enqueue(new TestFrame({ label: 'next track' }, { timestamp: 43_000 }));
+  await vi.advanceTimersByTimeAsync(0);
+  expect(sent[sent.length - 1].timestamp).toBe(firstNewFrame.timestamp + 33_000);
+
   source.close();
   await vi.advanceTimersByTimeAsync(0);
   expect(worker.postMessage).toHaveBeenCalledWith('closed');
