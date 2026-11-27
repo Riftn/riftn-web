@@ -11,11 +11,7 @@ import { Camera, Film, Image as ImageIcon, MonitorPlay, Pause, Play, RotateCcw, 
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { Switch } from '@/components/ui/switch';
-import {
-  canSilenceSharedAudioLocally,
-  hearSharedAudioLocally,
-  setHearSharedAudioLocally,
-} from '@/lib/livepeer/display-capture';
+import { canSilenceSharedAudioLocally } from '@/lib/livepeer/display-capture';
 import {
   SCENE_BACKGROUNDS,
   SCENE_IDS,
@@ -505,9 +501,12 @@ function Meter({ desk, channel }: { desk: AudioDesk; channel: DeskChannel }) {
 }
 
 /** Keep sending a shared tab's sound to viewers while it stays quiet here. */
-function HearSharedToggle() {
+function HearSharedToggle({ hear, changing, onChange }: {
+  hear: boolean;
+  changing: boolean;
+  onChange: (hear: boolean) => void;
+}) {
   const { t } = useTranslation();
-  const [hear, setHear] = useState(hearSharedAudioLocally);
   if (!canSilenceSharedAudioLocally()) return null;
   return (
     <div className="space-y-1">
@@ -515,10 +514,8 @@ function HearSharedToggle() {
         <span>{t('studioDeck.audio.hearShared')}</span>
         <Switch
           checked={hear}
-          onCheckedChange={(on) => {
-            setHear(on);
-            void setHearSharedAudioLocally(on);
-          }}
+          disabled={changing}
+          onCheckedChange={onChange}
         />
       </label>
       <p className="text-[11px] text-white/50">{t('studioDeck.audio.hearSharedHint')}</p>
@@ -538,12 +535,18 @@ export function AudioPanel({
   onVolume,
   onMute,
   onGate,
+  hearSharedTab,
+  changingSharedTabMonitor,
+  onHearSharedTab,
 }: {
   desk: AudioDesk | null;
   state: DeskState;
   onVolume: (channel: DeskChannel, volume: number) => void;
   onMute: (channel: DeskChannel, muted: boolean) => void;
   onGate: (gate: GateStrength) => void;
+  hearSharedTab: boolean;
+  changingSharedTabMonitor: boolean;
+  onHearSharedTab: (hear: boolean) => void;
 }) {
   const { t } = useTranslation();
   if (!desk) return <p className="text-sm text-white/60">{t('studioDeck.audio.unavailable')}</p>;
@@ -585,7 +588,7 @@ export function AudioPanel({
           })}
         </div>
       </Section>
-      <HearSharedToggle />
+      <HearSharedToggle hear={hearSharedTab} changing={changingSharedTabMonitor} onChange={onHearSharedTab} />
       {desk.gateSupported() && (
         <Section title={t('studioDeck.audio.gate')}>
           <div className="flex gap-1.5">

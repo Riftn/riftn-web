@@ -42,7 +42,16 @@ import {
   type VideoEncoding,
 } from '@/lib/livepeer/whip';
 import { openCaptureCard, encodingForTrack } from '@/lib/livepeer/capture-card';
-import { displaySurfaceOf, requestDisplayCapture, tuneDisplayTrack } from '@/lib/livepeer/display-capture';
+import {
+  displaySurfaceOf,
+  hearSharedAudioLocally,
+  isSharedTabAudioSuppressed,
+  liveSharedTabAudio,
+  requestDisplayCapture,
+  requestSharedTabCapture,
+  setHearSharedAudioLocally,
+  tuneDisplayTrack,
+} from '@/lib/livepeer/display-capture';
 import {
   composeCameraBubble,
   BUBBLE_CORNERS,
@@ -539,6 +548,8 @@ export function GoLiveBroadcaster({
   const deskRef = useRef<AudioDesk | null>(null);
   const [desk, setDesk] = useState<AudioDesk | null>(null);
   const [deskState, setDeskState] = useState<DeskState>(loadDeskState);
+  const [hearSharedTab, setHearSharedTab] = useState(hearSharedAudioLocally);
+  const [changingSharedTabMonitor, setChangingSharedTabMonitor] = useState(false);
   const [activeScene, setActiveScene] = useState<SceneId | null>(null);
   const [sceneBusy, setSceneBusy] = useState(false);
   const [sceneCustoms, setSceneCustoms] = useState<Partial<Record<SceneId, SceneCustom>>>(loadSceneCustoms);
@@ -1216,6 +1227,7 @@ export function GoLiveBroadcaster({
   const releaseScreenCapture = useCallback(() => {
     screenStreamRef.current?.getTracks().forEach((t) => t.stop());
     screenStreamRef.current = null;
+    setHearSharedTab(hearSharedAudioLocally());
   }, []);
 
   /**
@@ -1287,6 +1299,7 @@ export function GoLiveBroadcaster({
   const watchForShareStop = useCallback(
     (track: MediaStreamTrack) => {
       track.addEventListener('ended', () => {
+        if (screenStreamRef.current?.getVideoTracks()[0] !== track) return;
         logger.info('Screen share ended from the browser bar');
         void stopScreenShare();
       });
@@ -1324,6 +1337,8 @@ export function GoLiveBroadcaster({
       screenStreamRef.current = display;
       watchForShareStop(track);
       await applySystemAudio(display.getAudioTracks()[0] ?? null);
+      const tabAudio = liveSharedTabAudio(display);
+      if (tabAudio) setHearSharedTab(!isSharedTabAudioSuppressed(tabAudio));
 
       setMirror(false);
       setVideoOn(true);
@@ -1338,6 +1353,74 @@ export function GoLiveBroadcaster({
       videoSwapRef.current = false;
     }
   }, [swapVideoTrack, applySystemAudio, watchForShareStop, releaseLook]);
+
+  const changeSharedTabMonitor = async (hear: boolean) => {
+    if (videoSwapRef.current) return;
+    const previous = screenStreamRef.current;
+    if (!previous || !liveSharedTabAudio(previous)) {
+      setHearSharedAudioLocally(hear);
+      setHearSharedTab(hear);
+      return;
+    }
+
+    videoSwapRef.current = true;
+    setChangingSharedTabMonitor(true);
+
+    let replacement: MediaStream | null = null;
+    let bubble: CameraBubble | null = null;
+    try {
+      replacement = await requestSharedTabCapture(SCREEN_CONSTRAINTS, hear);
+      const track = replacement.getVideoTracks()[0];
+      const audio = replacement.getAudioTracks()[0];
+      const previousBubble = bubbleRef.current;
+      const camera = bubbleCameraRef.current;
+      const previousVideo = previousBubble?.track ?? previous.getVideoTracks()[0];
+      if (previousBubble && camera) {
+        bubble = await composeCameraBubble({ screen: track, camera, corner: bubbleCorner });
+      }
+      const currentDesk = deskRef.current;
+      if (screenStreamRef.current !== previous || !currentDesk) return;
+      if (!liveSharedTabAudio(replacement)) throw new Error('The replacement tab share ended');
+      if (!(await swapVideoTrack(bubble?.track ?? track, false))) return;
+
+      // Keep the original capture live until the new game input is connected
+      // to the same published mixer output.
+      if (screenStreamRef.current !== previous) return;
+      try {
+        if (!liveSharedTabAudio(replacement)) throw new Error('The replacement tab share ended');
+        currentDesk.setInput('game', audio);
+      } catch (error) {
+        await swapVideoTrack(previousVideo, false);
+        throw error;
+      }
+      systemAudioRef.current = audio;
+      screenStreamRef.current = replacement;
+      watchForShareStop(track);
+      if (bubble) {
+        previousBubble?.stop();
+        bubbleRef.current = bubble;
+        bubble = null;
+      }
+      replacement = null;
+      previous.getTracks().forEach((oldTrack) => oldTrack.stop());
+      setHearSharedAudioLocally(hear);
+      setHearSharedTab(hear);
+    } catch (error) {
+      if ((error as DOMException | null)?.name !== 'NotAllowedError') {
+        logger.warn('Could not change shared tab monitoring', error);
+        toast.error(t('studioDeck.audio.hearSharedFailed'));
+      }
+    } finally {
+      bubble?.stop();
+      replacement?.getTracks().forEach((track) => track.stop());
+      videoSwapRef.current = false;
+      setChangingSharedTabMonitor(false);
+      // The creator can stop the old share from the browser while the picker is open.
+      if (screenStreamRef.current?.getVideoTracks()[0]?.readyState === 'ended') {
+        void stopScreenShare();
+      }
+    }
+  };
 
   /**
    * The camera bubble: your face in the corner of the share, which is the
@@ -1450,6 +1533,8 @@ export function GoLiveBroadcaster({
           // capture card, not the camera default, to stay smooth for viewers.
           videoEncodingRef.current = encodingForTrack(screenTrack);
           systemAudio = handed?.getAudioTracks()[0] ?? null;
+          const tabAudio = liveSharedTabAudio(handed);
+          if (tabAudio) setHearSharedTab(!isSharedTabAudioSuppressed(tabAudio));
           // A denied mic must not sink a screen share — the tab's own audio is
           // often the whole point. The camera path has no such fallback.
           micTrack = await acquireMic();
@@ -2809,7 +2894,16 @@ export function GoLiveBroadcaster({
             fullBleed && 'absolute inset-x-3 bottom-24 z-20 max-h-[60vh] overflow-y-auto bg-black/80 backdrop-blur-xl'
           )}
         >
-          <AudioPanel desk={desk} state={deskState} onVolume={setChannelVolume} onMute={setChannelMuted} onGate={setGate} />
+          <AudioPanel
+            desk={desk}
+            state={deskState}
+            onVolume={setChannelVolume}
+            onMute={setChannelMuted}
+            onGate={setGate}
+            hearSharedTab={hearSharedTab}
+            changingSharedTabMonitor={changingSharedTabMonitor}
+            onHearSharedTab={changeSharedTabMonitor}
+          />
         </div>
       )}
 

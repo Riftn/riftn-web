@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { displaySurfaceOf, requestDisplayCapture, tuneDisplayTrack } from './display-capture';
+import { displaySurfaceOf, requestDisplayCapture, requestSharedTabCapture, tuneDisplayTrack } from './display-capture';
 
 function track(displaySurface?: string) {
   return { getSettings: () => ({ displaySurface }), contentHint: '' } as unknown as MediaStreamTrack;
@@ -72,5 +72,49 @@ describe('display capture', () => {
     vi.stubGlobal('navigator', { mediaDevices: { getDisplayMedia } });
     await requestDisplayCapture({});
     expect(getDisplayMedia.mock.calls[0][0].controller).toBeUndefined();
+  });
+
+  it.each([true, false])('reselects a tab with local playback set to %s', async (hear) => {
+    const video = { ...track('browser'), readyState: 'live', stop: vi.fn() };
+    const audio = {
+      readyState: 'live',
+      getSettings: () => ({ suppressLocalAudioPlayback: !hear }),
+      stop: vi.fn(),
+      applyConstraints: vi.fn(),
+    };
+    const stream = { getVideoTracks: () => [video], getAudioTracks: () => [audio] };
+    const getDisplayMedia = vi.fn().mockResolvedValue(stream);
+    vi.stubGlobal('navigator', {
+      mediaDevices: { getDisplayMedia, getSupportedConstraints: () => ({ suppressLocalAudioPlayback: true }) },
+    });
+
+    await expect(requestSharedTabCapture({}, hear)).resolves.toBe(stream);
+    expect(getDisplayMedia).toHaveBeenCalledWith(expect.objectContaining({
+      video: { displaySurface: 'browser' },
+      audio: expect.objectContaining({ suppressLocalAudioPlayback: !hear }),
+      systemAudio: 'exclude',
+    }));
+    expect(audio.applyConstraints).not.toHaveBeenCalled();
+    expect(audio.stop).not.toHaveBeenCalled();
+  });
+
+  it.each(['window', 'silent tab', 'audible tab'])('releases an unsuitable replacement: %s', async (selection) => {
+    const video = { ...track(selection === 'window' ? 'window' : 'browser'), readyState: 'live', stop: vi.fn() };
+    const audio = {
+      readyState: 'live',
+      getSettings: () => ({ suppressLocalAudioPlayback: selection !== 'audible tab' }),
+      stop: vi.fn(),
+    };
+    const audioTracks = selection === 'silent tab' ? [] : [audio];
+    const stream = {
+      getVideoTracks: () => [video],
+      getAudioTracks: () => audioTracks,
+      getTracks: () => [video, ...audioTracks],
+    };
+    vi.stubGlobal('navigator', { mediaDevices: { getDisplayMedia: vi.fn().mockResolvedValue(stream) } });
+
+    await expect(requestSharedTabCapture({}, false)).rejects.toThrow();
+    expect(video.stop).toHaveBeenCalledOnce();
+    expect(audio.stop).toHaveBeenCalledTimes(audioTracks.length);
   });
 });
