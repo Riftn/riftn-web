@@ -26,8 +26,8 @@ You can manage access to mature content through your account settings on the web
 
 Thank you to everyone who backed Fan.site, helped build the community and gave us time to get here. We’re looking forward to welcoming you to Riftn.
   `,
-  bannerImage: '/media/riftn-wordmark-banner.png',
-  bannerImageAlt: 'Riftn wordmark',
+  bannerImage: '/media/riftn-fansite-prism-banner.png',
+  bannerImageAlt: 'Riftn wordmark beside a beam of light splitting into a rainbow',
   author: { name: 'Riftn Team' },
   publishedAt: '2026-11-27T00:00:00.000Z',
   tags: ['Fan.site', 'BJ', 'RIFT', 'Airdrop'],

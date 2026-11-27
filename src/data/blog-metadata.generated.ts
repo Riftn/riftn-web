@@ -2994,8 +2994,8 @@ export const newPostsMetadata: BlogPost[] = [
     "title": "Riftn Has Acquired Fan.site. Here’s What Happens to BJ",
     "excerpt": "Eligible BJ investors can claim 100 $RIFT per BJ at launch. Presale and open-market buyers who register before 7 December also qualify for a bonus.",
     "content": "",
-    "bannerImage": "/media/riftn-wordmark-banner.png",
-    "bannerImageAlt": "Riftn wordmark",
+    "bannerImage": "/media/riftn-fansite-prism-banner.png",
+    "bannerImageAlt": "Riftn wordmark beside a beam of light splitting into a rainbow",
     "author": {
       "name": "Mal Jan"
     },
@@ -4182,8 +4182,8 @@ export const latestPostMetadata: BlogPost | undefined = {
   "title": "Riftn Has Acquired Fan.site. Here’s What Happens to BJ",
   "excerpt": "Eligible BJ investors can claim 100 $RIFT per BJ at launch. Presale and open-market buyers who register before 7 December also qualify for a bonus.",
   "content": "",
-  "bannerImage": "/media/riftn-wordmark-banner.png",
-  "bannerImageAlt": "Riftn wordmark",
+  "bannerImage": "/media/riftn-fansite-prism-banner.png",
+  "bannerImageAlt": "Riftn wordmark beside a beam of light splitting into a rainbow",
   "author": {
     "name": "Mal Jan"
   },
