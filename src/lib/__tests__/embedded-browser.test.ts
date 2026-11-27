@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { embeddedBrowserApp, systemBrowserUrl } from '../embedded-browser';
+import { embeddedBrowserApp, shouldSkipInlineAutoplay, systemBrowserUrl } from '../embedded-browser';
 
 const UA = {
   instagramAndroid: 'Mozilla/5.0 (Linux; Android 12; SM-A515F Build/SP1A; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/108.0.5359.128 Mobile Safari/537.36 Instagram 262.0.0.20.109 Android',
@@ -25,6 +25,20 @@ describe('embedded browser detection', () => {
   it('leaves real browsers alone', () => {
     for (const ua of [UA.chromeAndroid, UA.samsung, UA.safariIos, UA.desktop]) {
       expect(embeddedBrowserApp(ua)).toBeNull();
+    }
+  });
+});
+
+describe('inline autoplay policy', () => {
+  it('skips autoplay for SafePal and unbranded mobile WebViews', () => {
+    expect(shouldSkipInlineAutoplay(`${UA.safariIos} SafePal/4.0`)).toBe(true);
+    expect(shouldSkipInlineAutoplay(UA.plainWebView)).toBe(true);
+    expect(shouldSkipInlineAutoplay(UA.safariIos.replace(/Version.*Safari.*$/, 'Mobile/15E148'))).toBe(true);
+  });
+
+  it('preserves autoplay in standalone browsers', () => {
+    for (const ua of [UA.safariIos, UA.chromeAndroid, UA.samsung, UA.desktop]) {
+      expect(shouldSkipInlineAutoplay(ua)).toBe(false);
     }
   });
 });

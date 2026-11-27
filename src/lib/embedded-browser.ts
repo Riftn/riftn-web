@@ -31,6 +31,12 @@ export function embeddedBrowserApp(ua: string = typeof navigator === 'undefined'
   return null;
 }
 
+/** Embedded media engines can promote autoplay to native fullscreen, ignoring playsInline. */
+export function shouldSkipInlineAutoplay(ua = typeof navigator === 'undefined' ? '' : navigator.userAgent): boolean {
+  return /safepal/i.test(ua) || embeddedBrowserApp(ua) !== null ||
+    (/iPhone|iPad|iPod/.test(ua) && /AppleWebKit/.test(ua) && !/Safari\//.test(ua));
+}
+
 /**
  * A link that opens `href` in the phone's own browser from inside a WebView,
  * or null where no such link exists (desktop, or an unknown platform).

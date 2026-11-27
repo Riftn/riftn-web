@@ -4,6 +4,7 @@
  */
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { shouldSkipInlineAutoplay } from '@/lib/embedded-browser';
 import { loginClipLanes } from '@/lib/login-clip-lanes';
 import { LOGIN_CLIP_IDS } from './login-clip-assets';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -21,7 +22,7 @@ type ClipName = typeof LOGIN_CLIP_IDS[number];
  * opening frame were most of the delay between tap and sheet. Until its first
  * frame is ready the tile stays plain; the clip then fades in over it. Once built, a clip stays so drifting back does not refetch.
  *
- * Clips play for everyone. Reduced motion only stops the lanes drifting
+ * In browsers that support inline autoplay, reduced motion only stops the lanes drifting
  * (login-stack.css): it used to swap every clip for its still frame, which is
  * what people with Reduce Motion or Windows' "Animation effects" off saw.
  * The wall is decoration behind the sign-in form, never a player: a clip only
@@ -75,7 +76,7 @@ function stillSettled() {
   if (stillsPending === 0) stillsListeners.forEach((fn) => fn());
 }
 
-function Clip({ name, blur }: { name: ClipName; blur?: string }) {
+function Clip({ name, blur, postersOnly }: { name: ClipName; blur?: string; postersOnly: boolean }) {
   const tileRef = useRef<HTMLDivElement>(null);
   const ref = useRef<HTMLVideoElement>(null);
   const [loaded, setLoaded] = useState(false);
@@ -90,6 +91,7 @@ function Clip({ name, blur }: { name: ClipName; blur?: string }) {
     stillSettled();
   };
   useEffect(() => {
+    if (postersOnly) return;
     let live = true;
     void whenLogoReady().then(() => { if (live) setLogoIn(true); });
     stillCounted.current = true;
@@ -99,11 +101,11 @@ function Clip({ name, blur }: { name: ClipName; blur?: string }) {
     // A still that never arrives must not hold the clips back for good.
     const t = setTimeout(allIn, 5000);
     return () => { live = false; clearTimeout(t); stillsListeners.delete(allIn); settleStill(); };
-  }, []);
-  const mountVideo = loaded && stillIn && logoIn;
+  }, [postersOnly]);
+  const mountVideo = !postersOnly && loaded && stillIn && logoIn;
   useEffect(() => {
     const tile = tileRef.current;
-    if (!tile) return;
+    if (postersOnly || !tile) return;
     // Older engines (and jsdom) have no observer: treat every tile as visible.
     if (typeof IntersectionObserver === 'undefined') { setLoaded(true); setVisible(true); return; }
     const io = new IntersectionObserver(([entry]) => {
@@ -112,7 +114,7 @@ function Clip({ name, blur }: { name: ClipName; blur?: string }) {
     });
     io.observe(tile);
     return () => io.disconnect();
-  }, []);
+  }, [postersOnly]);
   useEffect(() => {
     const video = ref.current as (HTMLVideoElement & { webkitExitFullscreen?: () => void }) | null;
     if (!video || !mountVideo) return;
@@ -176,10 +178,10 @@ function Clip({ name, blur }: { name: ClipName; blur?: string }) {
   );
 }
 
-function Lane({ clips, reverse, blurs }: { clips: ClipName[]; reverse?: boolean; blurs: Record<string, string> | null }) {
+function Lane({ clips, reverse, blurs, postersOnly }: { clips: ClipName[]; reverse?: boolean; blurs: Record<string, string> | null; postersOnly: boolean }) {
   return (
     <div className={reverse ? 'login-stack__lane login-stack__lane--down' : 'login-stack__lane'}>
-      {[...clips, ...clips].map((name, i) => <Clip key={i} name={name} blur={blurs?.[name]} />)}
+      {[...clips, ...clips].map((name, i) => <Clip key={i} name={name} blur={blurs?.[name]} postersOnly={postersOnly} />)}
     </div>
   );
 }
@@ -233,6 +235,7 @@ export function LoginSign({ headline, look: forced, className }: { headline?: Lo
 
 export function LoginShortsStack({ headline }: { headline?: LoginStackHeadline } = {}) {
   const isMobile = useIsMobile();
+  const postersOnly = shouldSkipInlineAutoplay();
   const count = DESKTOP_LANES;
   const [lanes] = useState(() => loginClipLanes(LOGIN_CLIP_IDS, Math.random, 12));
   // The blurred frames (about 15 KB) and the wordmark load with the sheet, not with every page.
@@ -251,7 +254,7 @@ export function LoginShortsStack({ headline }: { headline?: LoginStackHeadline }
   return (
     <div className="login-stack" data-login-stack>
       <div className="login-stack__lanes" aria-hidden="true">
-        {columns.map((clips, index) => <Lane key={index} clips={clips} reverse={index % 2 === 1} blurs={blurs} />)}
+        {columns.map((clips, index) => <Lane key={index} clips={clips} reverse={index % 2 === 1} blurs={blurs} postersOnly={postersOnly} />)}
       </div>
       <LoginSign headline={headline} />
     </div>

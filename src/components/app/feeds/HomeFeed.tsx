@@ -1,4 +1,5 @@
 import { BoostedPostContext } from '@/components/app/cards/boosted-post';
+import { shouldSkipInlineAutoplay } from '@/lib/embedded-browser';
 import { renamedCategory } from '@/lib/category-names';
 import { WindowedFeedItem } from '@/components/app/feeds/WindowedFeedItem';
 import { RetainedPostSurface } from '@/components/app/feeds/RetainedPostSurface';
@@ -1871,7 +1872,7 @@ export function HomeFeed({ active = true, shuffleKey, isRefreshing, showFilters 
         case 'post':
           return <PostCard key={`post-${item.data.id}`} post={item.data} />;
         case 'video':
-          return <VideoCard key={`video-${item.data.id}`} video={item.data} aboveFold={index < 3} deferMediaOnBoot firstFeedPost={firstFeedPost} />;
+          return <VideoCard key={`video-${item.data.id}`} video={item.data} aboveFold={index < 3} deferMediaOnBoot firstFeedPost={firstFeedPost} disableAutoplay={shouldSkipInlineAutoplay()} />;
         case 'image':
           return <ImageCard key={`image-${item.data.id}`} post={item.data} aboveFold={index < 3} />;
         case 'shorts':
