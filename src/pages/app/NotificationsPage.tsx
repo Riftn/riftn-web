@@ -1,3 +1,4 @@
+import { publicChatMentionPath } from '@/lib/chat-message-link-core';
 import { deleteNotificationIds } from '@/lib/delete-notifications';
 import { formatCount } from '@/lib/format-count';
 import { useTranslation as _useCopy } from 'react-i18next';
@@ -1059,7 +1060,8 @@ function getNavigationLink(notification: DeHubNotification): string | null {
     if (where === 'live_chat' && notification.tokenId) {
       return `/app/post/${notification.tokenId}${query ? `?${query}` : ''}`;
     }
-    if (where === 'public_chat') return `/app/messages?chat=public${query ? `&${query}` : ''}`;
+    const publicChatPath = publicChatMentionPath(notification.metadata);
+    if (publicChatPath) return publicChatPath;
     // A bio tag opens the profile whose bio names the reader ("Remove me" is in its menu).
     if (where === 'bio') {
       return notification.actorAddress

@@ -890,7 +890,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
   // email can carry: a mention in the public chat opens the room itself.
   useEffect(() => {
     const params = new URLSearchParams(location.search);
-    if (params.get('chat') === 'public') setShowPublicChat(true);
+    if (params.get('chat') === 'public' || (fullscreen && params.has('chatMessage'))) setShowPublicChat(true);
     // `?with=<address>` opens that chat: what "Open in new window" links to.
     const peer = params.get('with');
     if (peer && /^0x[0-9a-fA-F]{40}$/.test(peer)) {
@@ -898,7 +898,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
       pendingUserPromiseRef.current = getAccountInfo(peer).catch(() => null);
       setPendingDmTrigger(prev => prev + 1);
     }
-  }, [location.search]);
+  }, [fullscreen, location.key, location.search]);
 
   useEffect(() => {
     const state = location.state as { openDmWith?: string; username?: string; autoSendBody?: string; draftBody?: string; openPublicChat?: boolean } | null;

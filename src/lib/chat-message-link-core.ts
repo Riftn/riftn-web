@@ -23,17 +23,35 @@ export function chatLinkKey(target: ChatLinkTarget): string {
   }
 }
 
+export function publicChatMentionPath(metadata?: {
+  mentionContext?: string;
+  deepLink?: string;
+  chatMessageId?: string;
+  roomId?: string;
+} | null): string | null {
+  const legacy = metadata?.deepLink?.match(/^\/chat\?chatMessage=([A-Za-z0-9_-]{1,80})$/)?.[1];
+  if (metadata?.mentionContext !== 'public_chat' && (metadata?.mentionContext || !legacy)) return null;
+
+  const room = metadata?.roomId;
+  const params = new URLSearchParams({ chat: 'public', room: room && ID_RE.test(room) ? room : 'global' });
+  const messageId = metadata?.chatMessageId || legacy;
+  if (messageId && ID_RE.test(messageId)) params.set(MESSAGE_LINK_PARAM, messageId);
+  return `/app/messages?${params}`;
+}
+
 /** Reads a link's chat and message out of a path and query; null for any other URL. */
 export function parseChatMessageLink(pathname: string, search: string): { key: string; target: ChatLinkTarget; messageId: string } | null {
   const params = new URLSearchParams(search);
-  const messageId = params.get(MESSAGE_LINK_PARAM);
-  if (!messageId || !ID_RE.test(messageId)) return null;
   const path = pathname.replace(/\/+$/, '');
+  const legacyPublic = (path === '/chat' && !params.has('chat'))
+    || (path === '/app/messages' && params.get('chat') === 'public');
+  const messageId = params.get(MESSAGE_LINK_PARAM) ?? (legacyPublic ? params.get('chatMessage') : null);
+  if (!messageId || !ID_RE.test(messageId)) return null;
   let target: ChatLinkTarget | null = null;
   if (/^\/(?:app\/messages|chat)$/.test(path)) {
     const conversation = params.get('conversation');
     if (conversation && ID_RE.test(conversation)) target = { kind: 'dm', conversationId: conversation };
-    else if (params.get('chat') === 'public') {
+    else if (params.get('chat') === 'public' || legacyPublic) {
       const room = params.get('room');
       target = { kind: 'public', roomId: room && ID_RE.test(room) ? room : null };
     }
