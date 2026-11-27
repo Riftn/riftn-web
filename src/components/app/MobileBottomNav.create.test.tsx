@@ -55,6 +55,7 @@ vi.mock('@/components/app/cards/ActionBar', () => ({ ActionBar: () => null }));
 vi.mock('@/components/app/cards/CardHeader', () => ({ CardHeader: () => null }));
 vi.mock('@/components/app/features/FeatureRequestComments', () => ({ FeatureRequestComments: () => null }));
 vi.mock('@/components/app/feeds/FeedSwallowMotion', () => ({ FeedSwallowMotion: ({ children }: { children: React.ReactNode }) => children }));
+vi.mock('@/hooks/use-wallet-profiles', () => ({ useWalletProfiles: () => ({}) }));
 vi.mock('@/hooks/use-feature-requests', () => ({
   useFeatureRequests: () => ({}), useShippedFeatures: () => ({}), useInProgressFeatures: () => ({}),
   useNotFeasibleFeatures: () => ({}), useFeatureRequest: () => ({}), useUserVotes: () => ({}),
