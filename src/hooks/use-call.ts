@@ -541,15 +541,19 @@ export const useCall = (): UseCallReturn => {
           } else if (mediaType === 'audio') {
             const track = remoteUser.audioTrack;
             ownedMedia.remoteAudio = track;
-            track?.play();
             const deviceId = playbackDeviceRef.current;
-            if (deviceId) {
-              void track?.setPlaybackDevice(deviceId).catch(() => {
-                if (!current() || ownedMedia.closed || playbackDeviceRef.current !== deviceId) return;
-                playbackDeviceRef.current = '';
-                setPlaybackDeviceState('');
-              });
+            if (track && deviceId) {
+              try {
+                await track.setPlaybackDevice(deviceId);
+              } catch {
+                if (current() && !ownedMedia.closed && playbackDeviceRef.current === deviceId) {
+                  playbackDeviceRef.current = '';
+                  setPlaybackDeviceState('');
+                }
+              }
             }
+            if (!current() || ownedMedia.closed) return;
+            track?.play();
           } else {
             ownedMedia.remoteVideo = remoteUser.videoTrack;
             setMediaRevision(revision => revision + 1);

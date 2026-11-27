@@ -122,6 +122,7 @@ describe('call media lifecycle', () => {
     const remote = { audioTrack: { ...track(), setPlaybackDevice: vi.fn().mockResolvedValue(undefined) } };
     await act(async () => { await mocks.handlers['user-published'](remote, 'audio'); });
     expect(remote.audioTrack.setPlaybackDevice).toHaveBeenCalledWith('speaker-device');
+    expect(remote.audioTrack.setPlaybackDevice.mock.invocationCallOrder[0]).toBeLessThan(remote.audioTrack.play.mock.invocationCallOrder[0]);
 
     await act(async () => { await result.current.endCall(); });
     expect(result.current.isMuted).toBe(false);
