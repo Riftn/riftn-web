@@ -99,7 +99,7 @@ import { clearPasskeyCache } from '@/lib/wallet-core/passkey-store';
 
 import type { WalletBackup } from '@/lib/wallet-core/export';
 
-import { isMobileDevice, isWalletInAppBrowser } from '@/lib/web3auth';
+import { getWalletBrowserName, isMobileDevice, isWalletInAppBrowser } from '@/lib/web3auth';
 import { isUserRejection, isRequestAlreadyPending, isRequestTimeout, describeWalletError, WalletRequestTimeoutError } from '@/lib/wallet-errors';
 import { connectorMatchesWallet } from '@/lib/wallet-connectors';
 import { resolveSigningAccount, requestAccountPicker, isWrongAccountError } from '@/lib/wallet-accounts';
@@ -588,6 +588,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const wagmiIntentMismatchLoggedRef = useRef<string | null>(null);
   const [wagmiAuthIntentState, setWagmiAuthIntentState] = useState(false);
   const wagmiAuthInProgressRef = useRef(false);
+  const wagmiConnectAttemptRef = useRef<AbortController | null>(null);
   // When the last wagmi connect approval landed. The signature request must not
   // go out while the wallet's connect popup is still closing — see the gap wait
   // in completeDeHubAuthWagmi.
@@ -716,6 +717,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const closeLoginModal = useCallback(() => {
+    wagmiConnectAttemptRef.current?.abort();
     finishWalletUnlock(false);
     // Closing "Secure your wallet" cancels the action that raised it; the offer
     // comes back at the next one.
@@ -1509,7 +1511,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Wagmi Auto-connect logic (external wallets — unchanged)
   useEffect(() => {
     const handleWagmiConnect = async () => {
-      if (isProcessingRedirect) {
+      if (isProcessingRedirect || wagmiConnectAttemptRef.current) {
         return;
       }
 
@@ -1656,6 +1658,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             const settle = wagmiAuthSettleRef.current;
             const WAGMI_SETTLE_MS = 8_000;
             if (
+              !wagmiAuthIntentRef.current &&
               settle &&
               settle.address === walletAddress.toLowerCase() &&
               Date.now() - settle.at < WAGMI_SETTLE_MS
@@ -3201,22 +3204,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Once, on mount: everything it touches is a ref or a setter.
   }, []);
 
-  // External wallet connect (wagmi) — unchanged.
-  const connectWithWallet = async (wallet: WalletProvider): Promise<boolean> => {
+  const connectWithWallet = async (wallet: WalletProvider): Promise<boolean | 'same-account'> => {
+    if (wagmiConnectAttemptRef.current) return false;
+    const attempt = new AbortController();
+    wagmiConnectAttemptRef.current = attempt;
     beginAuthTrace(`wallet-${wallet}`);
     authLogger.trace?.('identity-start');
-    // Tagged optimistically, before the connector has agreed to anything. This
-    // is the path that stranded people: a signed-in smart-wallet user who
-    // opened the modal, tapped MetaMask and dismissed its prompt had their
-    // 'web3auth' tag overwritten here and then deleted in the catch below,
-    // which left them signed in but unable to post, tip or stream.
-    const previousSource = readConnectionSource();
-
     setIsConnecting(true);
-    // Named, so handleWagmiConnect waits for THIS wallet rather than signing
-    // with whatever another extension has already reattached.
-    setWagmiAuthIntent(true, wallet);
-    writeConnectionSource('wagmi');
 
     try {
       // The curated connectors (MetaMask SDK, Phantom, Trust, WalletConnect)
@@ -3236,6 +3230,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // falls back to an exact id match for those.
       let connector = liveConnectors.find(c => connectorMatchesWallet(c, wallet));
 
+      if (wallet === 'metamask' && isWalletInAppBrowser() && getWalletBrowserName() === 'MetaMask') {
+        connector = liveConnectors.find(c => c.id === 'injected') ?? connector;
+      }
+
       if (!connector && isWalletInAppBrowser()) {
         connector = liveConnectors.find(c => c.id === 'injected');
       }
@@ -3248,38 +3246,55 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // connection and hand the sheet its address back, so the signature would
       // go to the wallet the user is trying to leave — which is what made
       // switching impossible. Drop it before opening the new one.
-      if (isWagmiConnected && wagmiConnector && wagmiConnector.uid !== connector.uid) {
+      if (isWagmiConnected && wagmiConnector) {
         clearWagmiStorage();
         try {
           await wagmiDisconnectAsync();
         } catch { /* already gone */ }
         await new Promise(r => setTimeout(r, 100));
+      } else {
+        try {
+          await connector.disconnect();
+        } catch { /* ignore if not connected */ }
       }
 
+      if (attempt.signal.aborted) {
+        setIsConnecting(false);
+        return false;
+      }
+      let connection;
       try {
-        await connector.disconnect();
-      } catch { /* ignore if not connected */ }
-      await new Promise(r => setTimeout(r, 100));
-
-      try {
-        await connectAsync({ connector });
+        connection = await connectAsync({ connector });
       } catch (retryErr: any) {
         if (retryErr?.name === 'ConnectorAlreadyConnectedError') {
-          wagmiDisconnect();
+          await wagmiDisconnectAsync();
           clearWagmiStorage();
-          await new Promise(r => setTimeout(r, 200));
-          await connectAsync({ connector });
+          connection = await connectAsync({ connector });
         } else {
           throw retryErr;
         }
       }
+      if (attempt.signal.aborted) {
+        await wagmiDisconnectAsync().catch(() => {});
+        setIsConnecting(false);
+        return false;
+      }
       lastWagmiConnectAtRef.current = Date.now();
+      // MetaMask can grant several addresses while keeping the current one
+      // first. Closing Add a profile here would give the appearance of a
+      // completed switch even though the user is still on the same profile.
+      if (loginIntent === 'add-profile' && walletAddress &&
+          connection.accounts[0]?.toLowerCase() === walletAddress.toLowerCase()) {
+        setIsConnecting(false);
+        return 'same-account';
+      }
+      setWagmiAuthIntent(true, wallet);
       return true;
     } catch (err: any) {
       setIsConnecting(false);
       setWagmiAuthIntent(false);
-      restoreConnectionSource(previousSource);
 
+      if (attempt.signal.aborted) return false;
       const rejected = isUserRejection(err);
       authLogger.error('Wallet connection failed', {
         wallet,
@@ -3296,6 +3311,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         toast.error(_translateCopy("copy.374b35677d82", { defaultValue: "Failed to connect to {{value1}}. Please try again.", value1: names[wallet] || discovered || wallet }));
       }
       return false;
+    } finally {
+      wagmiConnectAttemptRef.current = null;
     }
   };
 
@@ -3306,6 +3323,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // sheet goes back to the sign-in options. A signature that still arrives
   // later simply finishes signing in.
   const cancelWalletLogin = async () => {
+    wagmiConnectAttemptRef.current?.abort();
     setWagmiAuthIntent(false);
     wagmiAuthInProgressRef.current = false;
     setIsConnecting(false);

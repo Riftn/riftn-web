@@ -185,6 +185,7 @@ function LoginModalBodyInner({ open, step, setStep, layout = 'default', signingU
   const [phoneCode, setPhoneCode] = useState('');
   const [phoneError, setPhoneError] = useState('');
   const [activeProvider, setActiveProvider] = useState<string | null>(null);
+  const [walletAccountUnchanged, setWalletAccountUnchanged] = useState(false);
   useEffect(() => {
     if (!isConnecting) {
       setActiveProvider((provider) => provider === 'google' || provider === 'apple' ? null : provider);
@@ -220,6 +221,7 @@ function LoginModalBodyInner({ open, step, setStep, layout = 'default', signingU
   // a closed sheet means nothing flashes on the way out.
   useEffect(() => {
     if (open) return;
+    setWalletAccountUnchanged(false);
     setEmail('');
     setEmailCode('');
     setEmailError('');
@@ -513,16 +515,7 @@ function LoginModalBodyInner({ open, step, setStep, layout = 'default', signingU
 
   const handleWalletConnect = async (wallet: WalletId, _connect: () => void) => {
     setActiveProvider(wallet);
-
-    // Tapping a wallet always starts clean: whatever wallet is attached from
-    // an earlier visit is dropped first, then the tapped one is connected and
-    // asked to sign. There is no "continue with 0x…" step — the wallet's own
-    // prompt is where the account gets picked.
-    if (isWagmiAlreadyConnected) {
-      await handleUseDifferentWallet();
-      setActiveProvider(wallet);
-    }
-    setWagmiAuthIntent(true, wallet);
+    setWalletAccountUnchanged(false);
 
     // Mobile: Use deep link to open wallet app and load dapp in its in-app browser.
     if (isMobileDevice() && !isWalletInAppBrowser()) {
@@ -541,7 +534,8 @@ function LoginModalBodyInner({ open, step, setStep, layout = 'default', signingU
     // until the next click, since nothing else in this component learns the
     // attempt failed.
     connectWithWallet(wallet as any).then((success) => {
-      if (!success) setActiveProvider(null);
+      if (success !== true) setActiveProvider(null);
+      if (success === 'same-account') setWalletAccountUnchanged(true);
     });
   };
 
@@ -818,6 +812,17 @@ function LoginModalBodyInner({ open, step, setStep, layout = 'default', signingU
   );
 
   const renderWalletsStep = () => (
+      <div className="space-y-3">
+        {walletAccountUnchanged && (
+          <p role="alert" className="rounded-xl border border-white/15 bg-white/10 p-3 text-sm text-white">
+            {t('loginModal.sameWalletAccount', 'That wallet is already open in Riftn. In your wallet, switch to the account you want to add. If asked which accounts to connect, select only that account.')}
+          </p>
+        )}
+        {isAuthenticated && !walletAccountUnchanged && (
+          <p className="text-sm text-white/70">
+            {t('loginModal.chooseWalletAccount', 'In your wallet, select only the account you want to add.')}
+          </p>
+        )}
         <React.Suspense fallback={<DeHubPageLoader size={56} minHeight="180px" />}>
           <LoginWalletsStep
             isConnecting={isConnecting}
@@ -829,6 +834,7 @@ function LoginModalBodyInner({ open, step, setStep, layout = 'default', signingU
             onImportWallet={layout === 'stack' ? () => setStep('import-wallet') : undefined}
           />
         </React.Suspense>
+      </div>
   );
 
   const renderStackMainStep = () => (

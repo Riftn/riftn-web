@@ -10,7 +10,13 @@ vi.mock('wagmi', () => ({
   useConnect: () => ({ connectAsync: vi.fn() }), useDisconnect: () => ({ disconnectAsync: vi.fn() }),
 }));
 vi.mock('@/components/app/WagmiScope', () => ({ WagmiScope: ({ children }: any) => children }));
-const auth = vi.hoisted(() => ({ isConnecting: false, isAuthenticated: false, cancelEmailMagicLink: vi.fn(), supabaseUserId: null as string | null }));
+const auth = vi.hoisted(() => ({
+  isConnecting: false,
+  isAuthenticated: false,
+  cancelEmailMagicLink: vi.fn(),
+  connectWithWallet: vi.fn(),
+  supabaseUserId: null as string | null,
+}));
 vi.mock('@/contexts/AuthContext', () => ({ useAuth: () => auth }));
 vi.mock('@/hooks/use-surface-draft', () => ({ useSurfaceDraft: (_key: string, value: string) => useState(value) }));
 vi.mock('@/lib/web3auth', () => ({ getWalletDeepLink: vi.fn(), isMobileDevice: () => false, isWalletInAppBrowser: () => false }));
@@ -18,6 +24,11 @@ vi.mock('@/lib/wagmi', () => ({ clearWagmiStorage: vi.fn() }));
 vi.mock('@/lib/passkey-login', () => ({ PasskeyCancelledError: class extends Error {}, PasskeyLoginError: class extends Error {}, PasskeyUnsupportedError: class extends Error {} }));
 vi.mock('@/lib/login-probes', () => ({ loginProbesSnapshot: () => ({ passkey: true, telegram: false }), resolveLoginProbes: vi.fn() }));
 vi.mock('./LoginSavedProfiles', () => ({ LoginSavedProfiles: () => null }));
+vi.mock('./LoginWalletsStep', () => ({
+  LoginWalletsStep: ({ onWalletConnect }: { onWalletConnect: (wallet: 'metamask', connect: () => void) => void }) => (
+    <button onClick={() => onWalletConnect('metamask', () => {})}>MetaMask</button>
+  ),
+}));
 
 function SheetBody({ layout = 'default', initialStep = 'main' }: { layout?: 'default' | 'stack'; initialStep?: LoginStep }) {
   const [step, setStep] = useState<LoginStep>(initialStep);
@@ -26,6 +37,19 @@ function SheetBody({ layout = 'default', initialStep = 'main' }: { layout?: 'def
 afterEach(() => {
   cleanup();
   auth.supabaseUserId = null;
+  auth.isAuthenticated = false;
+  auth.connectWithWallet.mockReset();
+});
+
+it('keeps the wallet picker open and explains how to switch when MetaMask returns the current account', async () => {
+  auth.isAuthenticated = true;
+  auth.connectWithWallet.mockResolvedValue('same-account');
+  render(<SheetBody initialStep="wallets" />);
+
+  fireEvent.click(await screen.findByRole('button', { name: 'MetaMask' }));
+
+  expect(await screen.findByRole('alert')).toHaveTextContent('loginModal.sameWalletAccount');
+  expect(screen.getByRole('button', { name: 'MetaMask' })).toBeEnabled();
 });
 
 it.each(['default', 'stack'] as const)('keeps Telegram before Wallet when availability probing fails in %s layout', (layout) => {
