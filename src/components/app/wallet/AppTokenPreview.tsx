@@ -43,10 +43,6 @@ export function AppTokenPreview() {
                 <dt>{t('appTokens.previewBalance', 'Available in-app balance')}</dt>
                 <dd className="font-medium tabular-nums text-white">{format(data.balance)}</dd>
               </div>
-              <div className="flex flex-wrap justify-between gap-x-3">
-                <dt>{t('appTokens.previewFanSiteCredit', 'Fan.site merger credit')}</dt>
-                <dd className="tabular-nums">{data.fanSiteCredit ? format(data.fanSiteCredit) : t('appTokens.previewNoFanSiteCredit', 'No recorded credit')}</dd>
-              </div>
             </dl>
             <div className="border-t border-white/10 pt-3">
               <h3 className="font-medium text-white">{t('appTokens.previewCredits', 'Recent transfers received and account credits')}</h3>
