@@ -6,9 +6,11 @@ import { EmojiPanel } from '@/components/app/emoji/EmojiPanel';
 
 interface EmojiPickerProps {
   onEmojiSelect: (emoji: string) => void;
+  label: string;
+  overVideo?: boolean;
 }
 
-export function EmojiPicker({ onEmojiSelect }: EmojiPickerProps) {
+export function EmojiPicker({ onEmojiSelect, label, overVideo }: EmojiPickerProps) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -18,13 +20,15 @@ export function EmojiPicker({ onEmojiSelect }: EmojiPickerProps) {
           type="button"
           variant="ghost"
           size="icon"
-          className="h-8 w-8 text-zinc-400 hover:text-white hover:bg-zinc-700"
+          aria-label={label}
+          data-keep-dark={overVideo ? '' : undefined}
+          className="h-8 w-8 shrink-0 text-current hover:text-current hover:bg-current/10"
         >
           <Smile className="w-5 h-5" />
         </Button>
       </PopoverTrigger>
       <PopoverContent collisionPadding={8}
-        className="w-[calc(100vw-1rem)] sm:w-[22rem] p-0 overflow-hidden" align="start" side="top">
+        className="w-[calc(100vw-1rem)] sm:w-[22rem] p-0 overflow-hidden" align="end" side="top">
         <EmojiPanel
           onSelect={(emoji, { keepOpen }) => {
             onEmojiSelect(emoji);
