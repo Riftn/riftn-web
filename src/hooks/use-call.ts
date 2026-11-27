@@ -251,7 +251,7 @@ export const useCall = (): UseCallReturn => {
     // Retry leaving if a pending join completed after the first teardown.
     try { await media.client?.leave(); } catch {}
   }, []);
-  const finishCall = useCallback(async (reason?: Exclude<CallOutcome, 'ended'>) => {
+  const finishCall = useCallback(async (reason?: Exclude<CallOutcome, 'ended'>, notifyPeer = true) => {
     const call = currentCallRef.current;
     const startedAt = startedAtRef.current;
     generationRef.current += 1;
@@ -288,7 +288,7 @@ export const useCall = (): UseCallReturn => {
       });
       summaryTimerRef.current = setTimeout(() => { summaryTimerRef.current = null; setCallSummary(null); }, 6000);
     }
-    await Promise.all([disposeMedia(media), markEnded(call, startedAt != null)]);
+    await Promise.all([disposeMedia(media), notifyPeer ? markEnded(call, startedAt != null) : undefined]);
   }, [publishCall, clearTimers, disposeMedia, markEnded, userAddress]);
   const endCall = useCallback(() => finishCall(), [finishCall]);
   /** The far side closed the call. Before anyone answered, that is a decline (ours) or a missed call (theirs). */
@@ -803,10 +803,17 @@ export const useCall = (): UseCallReturn => {
     const generation = generationRef.current;
     joiningRef.current = true;
     setIsIncoming(false); setIsConnecting(true); clearTimers();
+    if (!call.group_id) {
+      callTimeoutRef.current = setTimeout(() => {
+        if (generationRef.current === generation && startedAtRef.current == null) void endCall();
+      }, 30_000);
+    }
     try {
-      const { error } = await callClient.from('call_sessions').update({ status: 'connected' }).eq('id', call.id);
-      if (generationRef.current !== generation) { await markEnded(call); return; }
+      const { data, error } = await callClient.from('call_sessions').update({ status: 'connected' })
+        .eq('id', call.id).eq('status', 'ringing').select('id').maybeSingle();
+      if (generationRef.current !== generation) return;
       if (error) throw error;
+      if (!data) { await finishCall(undefined, false); return; }
       publishCall({ ...call, status: 'connected' });
       const joined = await joinAgoraChannel(call, generation);
       if (generationRef.current === generation && !joined) await endCall();
@@ -815,7 +822,7 @@ export const useCall = (): UseCallReturn => {
     } catch (error) {
       if (generationRef.current === generation) { setCallFailureReason('technical_error'); await endCall(); }
     } finally { if (generationRef.current === generation) joiningRef.current = false; }
-  }, [callClient, clearTimers, publishCall, joinAgoraChannel, endCall, markEnded, armGroupTimeout]);
+  }, [callClient, clearTimers, publishCall, joinAgoraChannel, endCall, finishCall, armGroupTimeout]);
   const checkForCalls = useCallback(async (recover = false): Promise<void> => {
     if (!userAddress || currentCallRef.current || !callChecksVisible()) return;
     const generation = generationRef.current;
