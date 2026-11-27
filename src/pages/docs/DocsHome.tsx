@@ -8,7 +8,7 @@ import ExternalLink from "@/components/ui/cut-icons/open-externally";
 import { toast } from 'sonner';
 import { usePerformance } from '@/hooks/usePerformance';
 import { getLatestPost } from '@/utils/blogUtils';
-import { mediaImage, mediaImageSrcSet } from '@/lib/media-url';
+import { BlogBanner } from '@/components/blog/BlogBanner';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { usePublicPageLocale } from '@/hooks/usePublicPageLocale';
 import { localizedPageUrl } from '@/lib/seo/public-locales';
@@ -159,11 +159,16 @@ const DocsHome = () => {
                 <span className="inline-block bg-primary text-primary-foreground px-3 py-1 rounded-full text-sm font-semibold">{t('home.latestFromBlog')}</span>
               </div>
               <Link to={latestPath} className="w-full block">
-                {/* 40/21 is the banner art's own ratio (1200x630). aspect-video is 16:9, and
-                    object-cover on the wider art cropped ~3% off each side — enough to slice
-                    through the badges that sit in the banner's corners. Blog cards crop the
-                    same art vertically, which is why they look right and this did not. */}
-                <img src={bannerImage && mediaImage(bannerImage, { width: 1100 })} srcSet={mediaImageSrcSet(bannerImage, [480, 736, 1100, 1440])} sizes="(min-width: 1024px) 900px, 100vw" alt={latestPage.data?.h1 || bannerImageAlt} width={1200} height={630} loading="lazy" decoding="async" className="w-full aspect-[40/21] object-cover rounded-xl hover:opacity-95 transition-opacity cursor-pointer" />
+                {bannerImage && (
+                  <BlogBanner
+                    src={bannerImage}
+                    width={1100}
+                    widths={[480, 736, 1100, 1440]}
+                    sizes="(min-width: 1024px) 900px, 100vw"
+                    alt={latestPage.data?.h1 || bannerImageAlt || ''}
+                    className="rounded-xl hover:opacity-95 transition-opacity cursor-pointer"
+                  />
+                )}
               </Link>
               <div className="text-center">
                 <div className="mb-4">
