@@ -136,7 +136,7 @@ export function CallIdentity({
   kindIcon: React.ComponentType<{ className?: string }>;
   kindLabel: string;
   peer: PeerIdentity;
-  status: React.ReactNode;
+  status?: React.ReactNode;
   ringing?: boolean;
   announceStatus?: boolean;
   children?: React.ReactNode;
@@ -148,7 +148,9 @@ export function CallIdentity({
         <span>{kindLabel}</span>
       </div>
       <p className="call-stage__name">{peer.name}</p>
-      <p className="call-stage__status" aria-live={announceStatus ? 'polite' : 'off'}>{status}</p>
+      {status != null ? (
+        <p className="call-stage__status" aria-live={announceStatus ? 'polite' : 'off'}>{status}</p>
+      ) : null}
       <div className={`call-stage__avatar${ringing ? ' call-rings' : ''}`} aria-hidden="true">
         <Avatar className="call-stage__portrait">
           {peer.avatarUrl ? <AvatarImage src={peer.avatarUrl} loading="eager" /> : null}
