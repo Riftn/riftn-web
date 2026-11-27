@@ -18,6 +18,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { getLiveStream } from '@/lib/api/dehub/livestream';
 import {
   acceptInvite,
+  cancelRequest,
   declineInvite,
   getCoStream,
   requestToJoin,
@@ -137,10 +138,16 @@ export default function CoStreamJoinPage() {
               {t('costream.goOnScreen', { defaultValue: "You're in — go on screen" })}
             </button>
           ) : seat?.status === 'requested' ? (
-            <p className="flex items-center gap-2 text-sm text-zinc-300">
-              <Loader2 className="h-4 w-4 animate-spin" />
-              {t('costream.waitingForHost', { defaultValue: 'Asked to join. Waiting for the host…' })}
-            </p>
+            <div className="space-y-2">
+              <p className="flex items-center gap-2 text-sm text-zinc-300">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                {t('costream.waitingForHost', { defaultValue: 'Asked to join. Waiting for the host…' })}
+              </p>
+              <button type="button" className={BTN} disabled={busy}
+                onClick={() => void act(() => cancelRequest(me, seat.id))}>
+                {t('costream.cancelRequest', { defaultValue: 'Cancel request' })}
+              </button>
+            </div>
           ) : seat?.status === 'removed' ? (
             <p className="text-sm text-zinc-400">{t('costream.removedBody', { defaultValue: 'The host took you off screen.' })}</p>
           ) : room.accepting_requests ? (
