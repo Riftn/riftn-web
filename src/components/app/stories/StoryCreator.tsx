@@ -32,7 +32,8 @@ import type { StoryRemixSource } from '@/store/storiesStore';
 import { backdropCss, composeOverlay, composePhoto, grabFrame, mentionBoxes, OUT_H, OUT_W, PHOTO_BACKDROPS, PHOTO_LOOKS, TEXT_COLORS, type PhotoBackdrop, type PhotoLook, type TextLayer } from './story-compose';
 import { CAPTION_FONTS, captionFonts, captionFontStyle, type CaptionFont } from "./caption-fonts";
 import { shareMoment } from './story-upload';
-import { loadPostMoment, PostMomentError } from './post-moment';
+import { loadPostMoment, PostMomentError, type PostMomentDetails } from './post-moment';
+import { SharedMomentCard, SHARED_MOMENT_CARD_FRACTION } from './SharedMomentCard';
 import '@/styles/stories.css';
 
 const MAX_VIDEO_S = 60;
@@ -47,7 +48,7 @@ function readCloseFriends(): DeHubUser[] {
 }
 
 /** `blob` is missing only for a video shared from a post: the server cuts it from the post's file. */
-type Media = { kind: 'photo' | 'video'; url: string; blob?: Blob; duration?: number; postTokenId?: number; caption?: string };
+type Media = { kind: 'photo' | 'video'; url: string; blob?: Blob; duration?: number; postTokenId?: number; details?: PostMomentDetails };
 type Tool = null | 'text' | 'draw' | 'mention' | 'trim' | 'timer' | 'lifetime' | 'audience' | 'sticker' | 'effects';
 
 /** Stickers are big glyph layers: emoji keep their own colours, the shapes take the text colour. */
@@ -322,6 +323,11 @@ function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel, c
   const { t } = useTranslation();
   const areaRef = useRef<HTMLDivElement>(null);
   const box = useStageBox(areaRef);
+  const sharedPhoto = !!media.details && media.kind === 'photo';
+  const cardSide = box.w * SHARED_MOMENT_CARD_FRACTION;
+  const canvasWidth = sharedPhoto ? cardSide : box.w;
+  const outputHeight = sharedPhoto ? OUT_W : OUT_H;
+  const [detailsOpen, setDetailsOpen] = useState(false);
 
   const imgRef = useRef<HTMLImageElement>(null);
   const drawRef = useRef<HTMLCanvasElement>(null);
@@ -394,18 +400,18 @@ function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel, c
     const c = drawRef.current;
     if (!c) return;
     c.width = OUT_W;
-    c.height = OUT_H;
-  }, []);
+    c.height = outputHeight;
+  }, [outputHeight]);
 
   const drawing = useRef<{ x: number; y: number } | null>(null);
   const toCanvas = (e: React.PointerEvent) => {
     const r = drawRef.current!.getBoundingClientRect();
-    return { x: ((e.clientX - r.left) / r.width) * OUT_W, y: ((e.clientY - r.top) / r.height) * OUT_H };
+    return { x: ((e.clientX - r.left) / r.width) * OUT_W, y: ((e.clientY - r.top) / r.height) * outputHeight };
   };
   const onDrawDown = (e: React.PointerEvent) => {
     if (tool !== 'draw') return;
     const ctx = drawRef.current!.getContext('2d')!;
-    historyRef.current.push(ctx.getImageData(0, 0, OUT_W, OUT_H));
+    historyRef.current.push(ctx.getImageData(0, 0, OUT_W, outputHeight));
     if (historyRef.current.length > 20) historyRef.current.shift();
     (e.target as HTMLElement).setPointerCapture(e.pointerId);
     drawing.current = toCanvas(e);
@@ -547,7 +553,7 @@ function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel, c
       try { if (!restrictPeople) localStorage.setItem(AUDIENCE_KEY, audience); } catch { /* private mode */ }
       const written = layers.filter(l => l.text.trim());
       const visible = written.filter(l => !l.hidden);
-      const mentions = mentionBoxes(written);
+      const mentions = mentionBoxes(written, outputHeight);
       let songField: StorySong | null = null;
       if (song) {
         const raw = song.url.split('#')[0];
@@ -563,11 +569,11 @@ function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel, c
           };
         }
       }
-      const fields = { audience, allowReplies, audienceAddresses: restrictPeople ? audiencePeople.map(user => user.address!) : undefined, expiresInHours: customLifetime ? lifetime : undefined, mentions, song: songField, muted: media.kind === 'video' ? muted : false, caption: media.caption, remixSourceId, postTokenId: media.postTokenId };
+      const fields = { audience, allowReplies, audienceAddresses: restrictPeople ? audiencePeople.map(user => user.address!) : undefined, expiresInHours: customLifetime ? lifetime : undefined, mentions, song: songField, muted: media.kind === 'video' ? muted : false, remixSourceId, postTokenId: media.postTokenId };
       if (media.kind === 'photo') {
         const img = imgRef.current!;
         if (!img.complete) await new Promise(r => { img.onload = r; });
-        const blob = await composePhoto(img, drew ? drawRef.current : null, visible, look, backdrop);
+        const blob = await composePhoto(img, drew ? drawRef.current : null, visible, look, backdrop, outputHeight);
         shareMoment({ kind: 'photo', file: blob, preview: URL.createObjectURL(blob), fields: { ...fields, photoDurationSeconds: customPhotoDuration ? photoSeconds : undefined } }, onShared);
       } else {
         const overlay = await composeOverlay(drawRef.current, drew, visible);
@@ -585,11 +591,16 @@ function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel, c
       toast.error(t('stories.couldNotPrepare', { defaultValue: "Couldn't get your moment ready. Try again." }));
       setBusy(false);
     }
-  }, [busy, audience, allowReplies, audiencePeople, restrictPeople, audienceBlocked, customLifetime, lifetime, layers, song, media, muted, drew, trim, photoSeconds, customPhotoDuration, remixSourceId, onShared, onClose, t]);
+  }, [busy, audience, allowReplies, audiencePeople, restrictPeople, audienceBlocked, customLifetime, lifetime, layers, song, media, muted, drew, trim, photoSeconds, customPhotoDuration, remixSourceId, onShared, onClose, look, backdrop, outputHeight, t]);
 
   const isVideo = media.kind === 'video';
   const duration = media.duration || MAX_VIDEO_S;
-  const fontPx = (l: TextLayer) => l.size * box.w;
+  const fontPx = (l: TextLayer) => l.size * canvasWidth;
+  const preview = isVideo ? (
+    <video ref={videoRef} src={media.url} autoPlay loop playsInline muted={muted || !!song} className="absolute inset-0 w-full h-full object-cover" />
+  ) : (
+    <PhotoPreview imgRef={imgRef} url={media.url} look={look} backdrop={backdrop} square={sharedPhoto} />
+  );
 
   return (
     <>
@@ -597,14 +608,14 @@ function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel, c
         <div
           data-sc-canvas
           className="relative overflow-hidden rounded-[20px] bg-black"
-          style={{ width: box.w, height: box.h }}
+          style={{ width: canvasWidth, height: sharedPhoto ? cardSide : box.h, containerType: 'size', borderRadius: sharedPhoto ? 16 : undefined }}
           onPointerMove={onLayerMove}
         >
-          {isVideo ? (
-            <video ref={videoRef} src={media.url} autoPlay loop playsInline muted={muted || !!song} className="absolute inset-0 w-full h-full object-cover" />
-          ) : (
-            <PhotoPreview imgRef={imgRef} url={media.url} look={look} backdrop={backdrop} />
-          )}
+          {media.details ? (
+            <SharedMomentCard details={media.details} expanded={detailsOpen} inline={sharedPhoto} onToggle={() => setDetailsOpen(open => !open)}>
+              {preview}
+            </SharedMomentCard>
+          ) : preview}
           <canvas
             ref={drawRef}
             data-sc-draw
@@ -967,12 +978,13 @@ function Editor({ media, onBack, onClose, onShared, remixSourceId, remixLabel, c
   );
 }
 
-function PhotoPreview({ imgRef, url, look = 'none', backdrop = 'blur' }: { imgRef: React.RefObject<HTMLImageElement>; url: string; look?: PhotoLook; backdrop?: PhotoBackdrop }) {
+function PhotoPreview({ imgRef, url, look = 'none', backdrop = 'blur', square = false }: { imgRef: React.RefObject<HTMLImageElement>; url: string; look?: PhotoLook; backdrop?: PhotoBackdrop; square?: boolean }) {
   const [wide, setWide] = useState(false);
   const fill = backdropCss(backdrop);
+  const letterbox = square || wide;
   return (
     <>
-      {wide && (fill
+      {letterbox && (fill
         ? <div className="absolute inset-0" style={{ background: fill }} />
         : <img src={url} alt="" className="absolute inset-0 w-full h-full object-cover" style={{ filter: 'blur(40px) brightness(0.6)', transform: 'scale(1.2)' }} />)}
       <img
@@ -982,7 +994,7 @@ function PhotoPreview({ imgRef, url, look = 'none', backdrop = 'blur' }: { imgRe
         alt=""
         draggable={false}
         className="absolute inset-0 w-full h-full"
-        style={{ objectFit: wide ? 'contain' : 'cover', filter: PHOTO_LOOKS[look] === 'none' ? undefined : PHOTO_LOOKS[look] }}
+        style={{ objectFit: letterbox ? 'contain' : 'cover', filter: PHOTO_LOOKS[look] === 'none' ? undefined : PHOTO_LOOKS[look] }}
         onLoad={e => setWide(e.currentTarget.naturalWidth / e.currentTarget.naturalHeight > 0.75)}
       />
     </>

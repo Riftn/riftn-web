@@ -25,6 +25,8 @@ import MoreVertical from '@/components/ui/cut-icons/morevertical';
 import Plus from '@/components/ui/cut-icons/add';
 import Send from '@/components/ui/cut-icons/send';
 import ShareIcon from '@/components/ui/cut-icons/feedshare';
+import { SharedMomentCard } from './SharedMomentCard';
+import { getPostMomentDetails } from './post-moment';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import Music from '@/components/ui/cut-icons/music';
@@ -192,6 +194,14 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, openComm
   });
   const viewCount = audience.data?.pages[0]?.viewCount ?? item?.viewCount ?? 0;
   const viewsLabel = t('stories.viewsCount', { defaultValue: '{{formatted}} views', formatted: formatCount(viewCount) });
+  const linkedPostId = item?.postTokenId;
+  const linkedPost = useQuery({
+    queryKey: ['story-source-post', linkedPostId, me],
+    queryFn: () => getPostMomentDetails(linkedPostId!),
+    enabled: linkedPostId != null,
+    staleTime: 60_000,
+    retry: false,
+  });
   const postPeek = item?.postTokenId != null && postPeekId === item.id;
   const paused = held || postPeek || typing || sending || sheet !== null || openingOriginal || !loaded;
   const room = useMomentComments(item?.id, isAuthenticated, !!item && (item.commentCount ?? 1) > 0);
@@ -372,13 +382,15 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, openComm
   }, []);
 
   // ── Touch: tap, hold, swipe ───────────────────────────────────────
-  const press = useRef<{ x: number; y: number; t: number; timer: number; onViewers: boolean } | null>(null);
+  const press = useRef<{ x: number; y: number; t: number; timer: number; onViewers: boolean; onCard: boolean } | null>(null);
   const onPointerDown = (e: React.PointerEvent) => {
+    const target = e.target as Element;
     if (sheet || openingOriginal || typing || !e.isPrimary || e.button !== 0
-      || (e.target as Element).closest('button:not([data-sv-viewers-trigger]), input, a')) return;
+      || target.closest('button:not([data-sv-viewers-trigger], [data-sm-toggle]), input, a, [data-sm-details]')) return;
     const timer = window.setTimeout(() => setHeld(true), HOLD_MS);
     press.current = { x: e.clientX, y: e.clientY, t: performance.now(), timer,
-      onViewers: !!(e.target as Element).closest('[data-sv-viewers-trigger]') };
+      onViewers: !!target.closest('[data-sv-viewers-trigger]'),
+      onCard: !!target.closest('[data-sm-toggle]') };
   };
   const onPointerMove = (e: React.PointerEvent) => {
     const p = press.current;
@@ -413,14 +425,14 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, openComm
     }
     if (Math.abs(dx) > 70 && Math.abs(dx) > Math.abs(dy)) return goAuthor(dx < 0 ? 1 : -1);
     if (p.onViewers || wasHold || performance.now() - p.t > HOLD_MS || Math.abs(dx) > 10 || Math.abs(dy) > 10) return;
+    if (p.onCard && item) {
+      const id = item.id;
+      setPostPeekId(previous => previous === id ? null : id);
+      return;
+    }
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
     const page = (e.currentTarget as HTMLElement).querySelector('[data-sv-page]')?.getBoundingClientRect() ?? rect;
     const rel = (e.clientX - page.left) / page.width;
-    if (item?.postTokenId != null && rel >= 0.33 && rel <= 0.67) {
-      const id = item.id;
-      setPostPeekId(prev => (prev === id ? null : id));
-      return;
-    }
     goItem(rel < 0.33 ? -1 : 1);
   };
 
@@ -602,6 +614,56 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, openComm
   const face = a.avatarImageUrl ? buildAvatarUrl(a.address, a.avatarImageUrl) : buildAvatarCdnFallbackUrl(a.address, undefined);
   const nextEntry = entries[authorIdx + 1];
   const fit = fitFor(item.width, item.height, frameSize);
+  const boxedPhoto = linkedPostId != null && item.type === 'photo';
+  const photoRatio = item.width && item.height ? item.width / item.height : 9 / 16;
+  const mentionTargets = item.mentions.length > 0 && (
+    <div data-sv-mention-frame style={{ '--linked-photo-ratio': photoRatio } as React.CSSProperties}>
+      {item.mentions.map(m => (
+        <button
+          key={m.address}
+          type="button"
+          data-sv-mention
+          aria-label={t('stories.openProfile', { defaultValue: 'Open profile' })}
+          style={{
+            left: `${(m.x + m.w / 2) * 100}%`,
+            top: `${(m.y + m.h / 2) * 100}%`,
+            width: `${Math.max(m.w, 0.1) * 100}%`,
+            height: `${Math.max(m.h, 0.04) * 100}%`,
+          }}
+          onClick={() => openProfile(m.address)}
+        />
+      ))}
+    </div>
+  );
+  const media = item.type === 'video' ? (
+    <video
+      key={item.id}
+      ref={videoRef}
+      data-sv-media
+      src={item.mediaUrl ?? undefined}
+      poster={item.posterUrl ?? undefined}
+      playsInline
+      autoPlay={!sheet}
+      muted={muted || item.muted}
+      onLoadedData={() => setLoaded()}
+      onTimeUpdate={e => {
+        const v = e.currentTarget;
+        if (v.duration) setProgress(v.currentTime / v.duration);
+      }}
+      onEnded={() => { if (!paused) goItem(1); }}
+      onError={() => setLoaded()}
+    />
+  ) : (
+    <img
+      key={item.id}
+      data-sv-media
+      src={item.mediaUrl ?? item.posterUrl ?? undefined}
+      alt={item.caption ?? ''}
+      onLoad={() => setLoaded()}
+      onError={() => setLoaded()}
+      draggable={false}
+    />
+  );
 
   const body = (
     <div
@@ -623,35 +685,23 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, openComm
         style={drag ? { transform: `${window.innerWidth >= 768 ? 'translate(-50%, -50%) ' : ''}translate(${drag.x * 0.4}px, ${drag.y}px) scale(${1 - Math.min(0.15, drag.y / 1600)})`, transition: 'none' } : undefined}
       >
         <div data-sv-media-frame ref={frameRef} data-fit={fit}>
-          {item.type === 'video' ? (
-            <video
-              key={item.id}
-              ref={videoRef}
-              data-sv-media
-              src={item.mediaUrl ?? undefined}
-              poster={item.posterUrl ?? undefined}
-              playsInline
-              autoPlay={!sheet}
-              muted={muted || item.muted}
-              onLoadedData={() => setLoaded()}
-              onTimeUpdate={e => {
-                const v = e.currentTarget;
-                if (v.duration) setProgress(v.currentTime / v.duration);
+          {linkedPostId != null ? (
+            <SharedMomentCard
+              details={linkedPost.data}
+              fallback={{
+                authorName: item.postAuthorName || nameOf(a),
+                avatarUrl: item.postAuthorName ? undefined : face ?? undefined,
               }}
-              onEnded={() => { if (!paused) goItem(1); }}
-              onError={() => setLoaded()}
-            />
-          ) : (
-            <img
-              key={item.id}
-              data-sv-media
-              src={item.mediaUrl ?? item.posterUrl ?? undefined}
-              alt={item.caption ?? ''}
-              onLoad={() => setLoaded()}
-              onError={() => setLoaded()}
-              draggable={false}
-            />
-          )}
+              pending={linkedPost.isPending}
+              expanded={postPeek}
+              onToggle={event => {
+                if (event.detail === 0) setPostPeekId(previous => previous === item.id ? null : item.id);
+              }}
+            >
+              {media}
+              {boxedPhoto && mentionTargets}
+            </SharedMomentCard>
+          ) : media}
           {item.overlayUrl && <img data-sv-media src={item.overlayUrl} alt="" draggable={false} style={{ pointerEvents: 'none' }} />}
           {item.song && (
             <audio
@@ -670,25 +720,7 @@ export function StoryViewer({ entries: initial, startAuthor, startItem, openComm
             </div>
           )}
 
-          {item.mentions.length > 0 && (
-            <div data-sv-mention-frame>
-              {item.mentions.map(m => (
-                <button
-                  key={m.address}
-                  type="button"
-                  data-sv-mention
-                  aria-label={t('stories.openProfile', { defaultValue: 'Open profile' })}
-                  style={{
-                    left: `${(m.x + m.w / 2) * 100}%`,
-                    top: `${(m.y + m.h / 2) * 100}%`,
-                    width: `${Math.max(m.w, 0.1) * 100}%`,
-                    height: `${Math.max(m.h, 0.04) * 100}%`,
-                  }}
-                  onClick={() => openProfile(m.address)}
-                />
-              ))}
-            </div>
-          )}
+          {!boxedPhoto && mentionTargets}
         </div>
 
         <div data-sv-timing aria-hidden="true">

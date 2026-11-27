@@ -4,7 +4,7 @@
  */
 import { getNFTInfo } from '@/lib/api/dehub/feed';
 import { getMediaUrl } from '@/lib/api/dehub/core';
-import { buildFeedImageUrls, buildImageUrl, cdnImageSource } from '@/lib/media-url';
+import { buildAvatarCdnFallbackUrl, buildAvatarUrl, buildFeedImageUrls, buildImageUrl, cdnImageSource } from '@/lib/media-url';
 import { hasStreamEnded, isStreamLive } from '@/lib/live-status';
 
 export interface PostMomentMedia {
@@ -12,8 +12,41 @@ export interface PostMomentMedia {
   url: string;
   blob?: Blob;
   duration?: number;
-  caption?: string;
+  details: PostMomentDetails;
   postTokenId: number;
+}
+
+export interface PostMomentDetails {
+  authorName?: string;
+  avatarUrl?: string;
+  title?: string;
+  description?: string;
+}
+
+function firstText(...values: unknown[]): string | undefined {
+  return values.find((value): value is string => typeof value === 'string' && !!value.trim())?.trim();
+}
+
+function postDetails(post: Record<string, any>): PostMomentDetails {
+  const user = post.minterUser;
+  const address = firstText(post.minter, user?.address);
+  const avatar = firstText(user?.avatarImageUrl, post.minterAvatarUrl);
+  const stream = post.postType === 'live' ? post.stream : undefined;
+  const title = firstText(stream?.title, post.title, post.name);
+  const description = firstText(stream?.description, post.description);
+  return {
+    authorName: firstText(user?.displayName, post.minterDisplayName, post.minterUsername, user?.username, post.mintername),
+    avatarUrl: address ? buildAvatarUrl(address, avatar) ?? buildAvatarCdnFallbackUrl(address, avatar) : undefined,
+    title,
+    description: description === title ? undefined : description,
+  };
+}
+
+export async function getPostMomentDetails(tokenId: number): Promise<PostMomentDetails | null> {
+  const post: Record<string, any> = await getNFTInfo(String(tokenId));
+  if (!post || isGatedPost(post) || post.isHidden || post.isDeleted || post.justMe || post.mediaPrivate
+    || (post.postType === 'live' && post.stream && isGatedPost(post.stream))) return null;
+  return postDetails(post);
 }
 
 export class PostMomentError extends Error {
@@ -40,6 +73,7 @@ export async function loadPostMoment(tokenId: number): Promise<PostMomentMedia> 
   if (!post) throw new PostMomentError('load');
   if (isGatedPost(post)) throw new PostMomentError('gated');
   const type = String(post.postType || '');
+  const details = postDetails(post);
   if (type === 'live') {
     const stream = post.stream;
     if (post.isHidden || post.justMe || post.mediaPrivate || (stream && isGatedPost(stream))) throw new PostMomentError('gated');
@@ -47,14 +81,13 @@ export async function loadPostMoment(tokenId: number): Promise<PostMomentMedia> 
     // A broadcast can start before its first cover is ready, and live covers
     // can be replaced between fetching the post and downloading its image.
     const cover = getMediaUrl(stream?.thumbnail || post.imageUrl);
-    const title = [stream?.title, post.title, post.name].find(value => typeof value === 'string' && value.trim());
     for (const source of [cover, '/og/live-studio.jpg']) {
       if (!source) continue;
       const res = await fetch(cdnImageSource(source), { mode: 'cors', cache: 'no-store' }).catch(() => null);
       if (!res?.ok) continue;
       const blob = await res.blob();
       if (blob.size && blob.type.startsWith('image/')) {
-        return { kind: 'photo', url: URL.createObjectURL(blob), blob, postTokenId: tokenId, caption: title?.trim().slice(0, 300) };
+        return { kind: 'photo', url: URL.createObjectURL(blob), blob, postTokenId: tokenId, details };
       }
     }
     throw new PostMomentError('load');
@@ -63,7 +96,7 @@ export async function loadPostMoment(tokenId: number): Promise<PostMomentMedia> 
     const url = getMediaUrl(post.videoUrl);
     if (!url) throw new PostMomentError('load');
     const duration = Number(post.videoDuration);
-    return { kind: 'video', url, duration: Number.isFinite(duration) && duration > 0 ? duration : undefined, postTokenId: tokenId };
+    return { kind: 'video', url, duration: Number.isFinite(duration) && duration > 0 ? duration : undefined, postTokenId: tokenId, details };
   }
   // Photo posts' files live under feed-images/{filename}; the API's nfts/images/... path 403s.
   const listed = Array.isArray(post.imageUrls) && post.imageUrls[0] ? buildFeedImageUrls([post.imageUrls[0]])?.[0] : undefined;
@@ -75,7 +108,7 @@ export async function loadPostMoment(tokenId: number): Promise<PostMomentMedia> 
     const res = await fetch(src, { mode: 'cors', cache: 'no-store' }).catch(() => null);
     if (!res?.ok) throw new PostMomentError('load');
     const blob = await res.blob();
-    return { kind: 'photo', url: URL.createObjectURL(blob), blob, postTokenId: tokenId };
+    return { kind: 'photo', url: URL.createObjectURL(blob), blob, postTokenId: tokenId, details };
   }
   throw new PostMomentError('kind');
 }

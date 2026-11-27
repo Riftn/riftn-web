@@ -1196,3 +1196,69 @@ html:is([data-theme='light'], [data-system-tone='light']) :is([data-create-ask],
 @media (prefers-reduced-motion: reduce) {
   [data-ask-scrim], [data-ask-menu], [data-ask-key] svg { animation: none !important; transition: none !important; }
 }
+
+[data-sm-card] {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(78cqw, 78cqh);
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  border-radius: 16px;
+  overflow: hidden;
+  background: #161616;
+  container-type: size;
+}
+[data-sm-card][data-inline] {
+  inset: 0;
+  width: 100%;
+  transform: none;
+  border-radius: inherit;
+}
+[data-sv-page] [data-sm-card] [data-sv-media] { object-fit: contain; }
+[data-sm-card] video { object-fit: contain; }
+[data-sm-toggle] {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  align-items: flex-start;
+  width: 100%;
+  border: 1px solid rgb(255 255 255 / 0.23);
+  border-radius: inherit;
+  color: white;
+}
+[data-sm-toggle]:focus-visible { outline: 2px solid white; outline-offset: -3px; }
+[data-sm-credit] {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 10px;
+  background: rgb(0 0 0 / 0.8);
+  font-size: 13px;
+  font-weight: 600;
+  text-align: start;
+}
+[data-sm-toggle][aria-expanded='true'] [data-sm-chevron] { transform: rotate(180deg); }
+[data-sm-details] {
+  position: absolute;
+  z-index: 3;
+  inset: auto 0 0;
+  max-height: calc(100% - 46px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+  display: grid;
+  gap: 4px;
+  padding: 10px 12px;
+  background: rgb(0 0 0 / 0.88);
+  color: white;
+  font-size: 13px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+[data-sv-media-frame] [data-sm-card] [data-sv-mention-frame] {
+  width: min(100cqw, calc(100cqh * var(--linked-photo-ratio)));
+  height: min(100cqh, calc(100cqw / var(--linked-photo-ratio)));
+}
