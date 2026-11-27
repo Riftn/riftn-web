@@ -5,7 +5,7 @@
  * from the custom_notifications table and exposes them as DeHubNotification-shaped objects.
  */
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { withWalletHeader } from '@/lib/supabase-wallet-client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -18,6 +18,8 @@ export const customNotificationKeys = {
   all: ['custom-notifications'] as const,
   list: (walletAddress?: string | null) =>
     [...customNotificationKeys.all, 'list', walletAddress?.toLowerCase() ?? null] as const,
+  requestHistory: (walletAddress?: string | null) =>
+    [...customNotificationKeys.all, 'request-history', walletAddress?.toLowerCase() ?? null] as const,
   unreadCount: (walletAddress?: string | null) =>
     [...customNotificationKeys.all, 'unread', walletAddress?.toLowerCase() ?? null] as const,
   /** Unread community rows, grouped by the community they belong to. */
@@ -126,6 +128,44 @@ export function useCustomNotifications() {
   };
 }
 
+const REQUEST_HISTORY_PAGE_SIZE = 30;
+type RequestHistoryCursor = Pick<CustomNotificationRow, 'created_at' | 'id'>;
+
+export function useRequestNotificationHistory(enabled: boolean, types: string[]) {
+  const { isAuthenticated, walletAddress } = useAuth();
+
+  return useInfiniteQuery({
+    queryKey: customNotificationKeys.requestHistory(walletAddress),
+    enabled: enabled && isAuthenticated && !!walletAddress,
+    initialPageParam: null as RequestHistoryCursor | null,
+    queryFn: async ({ pageParam }) => {
+      const query = supabase
+        .from('custom_notifications')
+        .select('*')
+        .eq('recipient_address', walletAddress!.toLowerCase())
+        .in('type', types)
+        .order('created_at', { ascending: false })
+        .order('id', { ascending: false })
+        .limit(REQUEST_HISTORY_PAGE_SIZE + 1);
+      if (pageParam) {
+        const { created_at, id } = pageParam;
+        query.or(`created_at.lt."${created_at}",and(created_at.eq."${created_at}",id.lt.${id})`);
+      }
+      const { data, error } = await withWalletHeader(query, walletAddress!);
+      if (error) throw error;
+
+      const rows = (data as CustomNotificationRow[]).slice(0, REQUEST_HISTORY_PAGE_SIZE);
+      const last = rows.at(-1);
+      return {
+        rows: rows.map(toDeHubNotification),
+        next: last && data.length > rows.length ? { created_at: last.created_at, id: last.id } : null,
+      };
+    },
+    getNextPageParam: (lastPage) => lastPage.next ?? undefined,
+    staleTime: 2 * 60 * 1000,
+  });
+}
+
 export function useCustomUnreadCount() {
   const { isAuthenticated, walletAddress } = useAuth();
 
@@ -209,6 +249,7 @@ export function useMarkCustomNotificationAsRead() {
       // The Communities page's count is a query of its own, so it does refetch:
       // a row read here is a row off that badge too.
       queryClient.invalidateQueries({ queryKey: customNotificationKeys.all, refetchType: 'none' });
+      queryClient.invalidateQueries({ queryKey: customNotificationKeys.requestHistory(walletAddress) });
       queryClient.invalidateQueries({ queryKey: customNotificationKeys.communityUnread(walletAddress) });
     },
   });
@@ -259,6 +300,7 @@ export function useMarkAllCustomNotificationsAsRead() {
       // The Communities page's count is a query of its own, so it does refetch:
       // a row read here is a row off that badge too.
       queryClient.invalidateQueries({ queryKey: customNotificationKeys.all, refetchType: 'none' });
+      queryClient.invalidateQueries({ queryKey: customNotificationKeys.requestHistory(walletAddress) });
       queryClient.invalidateQueries({ queryKey: customNotificationKeys.communityUnread(walletAddress) });
     },
   });
