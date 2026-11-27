@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { Socket } from 'socket.io-client';
-import { confirmChatDelivery, roomMessageMatches, waitForChatRoom } from '../chat-delivery';
+import { confirmChatDelivery, liveTextConfirmation, roomMessageMatches, waitForChatRoom } from '../chat-delivery';
 
 afterEach(() => vi.useRealTimers());
 function channel() {
@@ -110,5 +110,44 @@ describe('confirmed chat submission', () => {
     expect(roomMessageMatches(accepted, { ...expected, messageId: 'other' })).toBe(false);
     expect(roomMessageMatches(accepted, { ...expected, attachment: 'photo' })).toBe(false);
     expect(roomMessageMatches({ ...accepted, media: [{ url: 'photo' }] }, { ...expected, attachment: 'photo' })).toBe(true);
+  });
+});
+
+describe('live text delivery from room history', () => {
+  it('checks history once when an emitted send misses its echo', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-11-27T12:00:00Z'));
+    const socket = channel();
+    const recover = vi.fn(async () => true);
+    const emit = vi.fn();
+    const sent = confirmChatDelivery({ ...socket, emit, messageEvent: 'message', errorEvent: 'error',
+      matches: () => false, recover, timeoutMs: 50 });
+    vi.advanceTimersByTime(50);
+    expect(await sent).toBe(true);
+    expect(recover).toHaveBeenCalledWith(Date.parse('2026-11-27T12:00:00Z'));
+    expect(emit).toHaveBeenCalledTimes(1);
+    expect(socket.count()).toBe(0);
+  });
+
+  it('honours an explicit refusal without reading history', async () => {
+    const socket = channel();
+    const recover = vi.fn(async () => true);
+    const sent = confirmChatDelivery({ ...socket, emit: () => socket.receive('error'),
+      messageEvent: 'message', errorEvent: 'error', matches: () => true, recover });
+    expect(await sent).toBe(false);
+    expect(recover).not.toHaveBeenCalled();
+  });
+
+  it('rejects a stale or different row and uses a stored message only once', () => {
+    const { socket } = roomSocket();
+    const first = liveTextConfirmation(socket, expected);
+    const second = liveTextConfirmation(socket, expected);
+    const stored = { ...accepted, messageType: 'text', createdAt: '2026-11-27T12:00:01Z' };
+    const sentAt = Date.parse('2026-11-27T12:00:00Z');
+    expect(first({ ...stored, createdAt: '2026-11-27T11:59:59Z' }, sentAt)).toBe(false);
+    expect(first({ ...stored, roomId: 'two' }, sentAt)).toBe(false);
+    expect(first({ ...stored, replyTo: { id: 'other' } }, sentAt)).toBe(false);
+    expect(first(stored, sentAt)).toBe(true);
+    expect(second(stored, sentAt)).toBe(false);
   });
 });
