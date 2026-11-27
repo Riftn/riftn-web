@@ -99,6 +99,37 @@ describe('incoming call query recovery', () => {
 });
 
 describe('call media lifecycle', () => {
+  it('keeps audio selections made before answering and connects to a silent peer', async () => {
+    mocks.check.mockResolvedValueOnce({
+      ...session, call_type: 'audio', caller_address: 'bob', recipient_address: 'alice', created_at: new Date().toISOString(),
+    });
+    mocks.update.mockResolvedValue({ data: { id: session.id }, error: null });
+    const microphone = track();
+    mocks.microphone.mockResolvedValue(microphone);
+    const { result } = renderHook(useCall);
+    await act(async () => { await Promise.resolve(); });
+    expect(result.current.isIncoming).toBe(true);
+    await act(async () => {
+      result.current.toggleMute();
+      expect(await result.current.setPlaybackDevice('speaker-device')).toBe(true);
+    });
+    expect(mocks.microphone).not.toHaveBeenCalled();
+
+    await act(async () => { await result.current.acceptCall(); });
+    expect(microphone.setMuted).toHaveBeenCalledWith(true);
+    expect(microphone.setMuted.mock.invocationCallOrder[0]).toBeLessThan(mocks.publish.mock.invocationCallOrder[0]);
+    act(() => { mocks.handlers['user-joined']({ uid: 2 }); });
+    expect(result.current.isCallActive).toBe(true);
+    const remote = { audioTrack: { ...track(), setPlaybackDevice: vi.fn().mockResolvedValue(undefined) } };
+    await act(async () => { await mocks.handlers['user-published'](remote, 'audio'); });
+    expect(remote.audioTrack.setPlaybackDevice).toHaveBeenCalledWith('speaker-device');
+    expect(remote.audioTrack.setPlaybackDevice.mock.invocationCallOrder[0]).toBeLessThan(remote.audioTrack.play.mock.invocationCallOrder[0]);
+
+    await act(async () => { await result.current.endCall(); });
+    expect(result.current.isMuted).toBe(false);
+    expect(result.current.playbackDevice).toBe('');
+  });
+
   it('ends a session created after the user hangs up, without starting media', async () => {
     const insertion = deferred<{ data: typeof session; error: null }>();
     mocks.insert.mockReturnValue(insertion.promise);

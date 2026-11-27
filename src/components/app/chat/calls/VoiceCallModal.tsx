@@ -17,6 +17,7 @@ import {
   CallWave,
   usePeerIdentity,
 } from './CallChrome';
+import { CallPlaybackControl } from './CallPlaybackControl';
 import { CallCaptionsControl, CallCaptionsOverlay } from './CallCaptions';
 
 const VoiceCallModal: React.FC = () => {
@@ -111,6 +112,20 @@ const VoiceCallModal: React.FC = () => {
             <span>{t('calls.tapToEnableAudio')}</span>
           </button>
         )}
+        {isRinging ? <CallPill icon={ChatIcon} label={t('messages.message')} onClick={openMessages} quiet /> : null}
+        <CallDock>
+          <CallPlaybackControl />
+          <CallControl
+            icon={isMuted ? MicOff : Mic}
+            label={isMuted ? t('calls.unmute') : t('calls.mute')}
+            onClick={() => {
+              toggleMute();
+              handleUserInteraction();
+            }}
+            active={isMuted}
+          />
+          {isCallActive ? <CallCaptionsControl /> : null}
+        </CallDock>
         {isIncoming ? (
           <div className="call-row call-row--ringing">
             <CallControl icon={PhoneOff} label={t('calls.decline')} onClick={rejectCall} />
@@ -125,22 +140,7 @@ const VoiceCallModal: React.FC = () => {
             />
           </div>
         ) : (
-          <>
-            {isRinging ? <CallPill icon={ChatIcon} label={t('messages.message')} onClick={openMessages} quiet /> : null}
-            {isCallActive ? <CallDock>
-              <CallControl
-                icon={isMuted ? MicOff : Mic}
-                label={isMuted ? t('calls.unmute') : t('calls.mute')}
-                onClick={() => {
-                  toggleMute();
-                  handleUserInteraction();
-                }}
-                active={isMuted}
-              />
-              <CallCaptionsControl />
-            </CallDock> : null}
-            <CallControl icon={PhoneOff} label={isCallActive ? t('calls.end') : t('common.cancel', 'Cancel')} onClick={endCall} primary />
-          </>
+          <CallControl icon={PhoneOff} label={isCallActive ? t('calls.end') : t('common.cancel', 'Cancel')} onClick={endCall} primary />
         )}
       </div>
     </CallStage>

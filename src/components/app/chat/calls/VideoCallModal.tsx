@@ -18,6 +18,7 @@ import {
   CallPill,
   usePeerIdentity,
 } from './CallChrome';
+import { CallPlaybackControl } from './CallPlaybackControl';
 import { CallCaptionsControl, CallCaptionsOverlay } from './CallCaptions';
 import { CallBackgroundPanel, CallFxButton, useCallBackgroundAvailable } from './CallBackgroundPicker';
 
@@ -125,21 +126,17 @@ const VideoCallModal: React.FC = () => {
         {fxOpen && !isIncoming && fxAvailable ? (
           <CallBackgroundPanel value={callBackground} busy={callBackgroundBusy} onPick={setCallBackground} onClose={() => setFxOpen(false)} faceFilter={callFaceFilter} onPickFace={setCallFaceFilter} />
         ) : null}
-        {isIncoming ? (
-          <div className="call-row call-row--ringing">
-            <CallControl icon={PhoneOff} label={t('calls.decline')} onClick={rejectCall} />
-            <CallControl icon={Video} label={t('calls.accept')} onClick={acceptCall} primary />
-          </div>
-        ) : (
-          <>
-            {isRinging ? <CallPill icon={ChatIcon} label={t('messages.message')} onClick={openMessages} quiet /> : null}
-            <CallDock crowded>
-              <CallControl
-                icon={isMuted ? MicOff : Mic}
-                label={isMuted ? t('calls.unmute') : t('calls.mute')}
-                onClick={toggleMute}
-                active={isMuted}
-              />
+        {isRinging ? <CallPill icon={ChatIcon} label={t('messages.message')} onClick={openMessages} quiet /> : null}
+        <CallDock crowded={!isIncoming}>
+          <CallPlaybackControl />
+          <CallControl
+            icon={isMuted ? MicOff : Mic}
+            label={isMuted ? t('calls.unmute') : t('calls.mute')}
+            onClick={toggleMute}
+            active={isMuted}
+          />
+          {!isIncoming ? (
+            <>
               <CallControl
                 icon={isCameraOff ? VideoOff : Video}
                 label={t('calls.camera')}
@@ -147,10 +144,17 @@ const VideoCallModal: React.FC = () => {
                 active={isCameraOff}
               />
               <CallControl icon={RotateCcw} label={t('calls.flip')} onClick={switchCamera} />
-              {isCallActive ? <CallCaptionsControl /> : null}
-            </CallDock>
-            <CallControl icon={PhoneOff} label={isCallActive ? t('calls.end') : t('common.cancel', 'Cancel')} onClick={endCall} primary />
-          </>
+            </>
+          ) : null}
+          {isCallActive ? <CallCaptionsControl /> : null}
+        </CallDock>
+        {isIncoming ? (
+          <div className="call-row call-row--ringing">
+            <CallControl icon={PhoneOff} label={t('calls.decline')} onClick={rejectCall} />
+            <CallControl icon={Video} label={t('calls.accept')} onClick={acceptCall} primary />
+          </div>
+        ) : (
+          <CallControl icon={PhoneOff} label={isCallActive ? t('calls.end') : t('common.cancel', 'Cancel')} onClick={endCall} primary />
         )}
       </div>
     </CallStage>
