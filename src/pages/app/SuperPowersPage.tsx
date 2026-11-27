@@ -113,11 +113,12 @@ export default function SuperPowersPage() {
     unlocked: power.key === 'team_up' || !!power.unlocked,
   }));
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
-  // Until a power is tapped, open on the first one this account can spend now,
-  // so the panel under the ring starts on an action rather than a lock.
+  const bookedPowers = new Set(status?.bookings.map(booking => booking.power));
+  // Keep existing bookings within reach when the account no longer has a tier.
   const selected =
     orbitPowers.find(entry => entry.power.key === selectedKey) ??
     orbitPowers.find(entry => entry.unlocked && entry.power.available && entry.power.key !== 'team_up') ??
+    orbitPowers.find(entry => bookedPowers.has(entry.power.key)) ??
     orbitPowers[0] ??
     null;
 
@@ -217,6 +218,7 @@ export default function SuperPowersPage() {
             const { power, unlocked } = selected;
             const isTeamUp = power.key === 'team_up';
             const usable = unlocked && power.available;
+            const canViewHistory = !isTeamUp && (!!status?.tier || bookedPowers.has(power.key));
             const unlockBadge = badgeImage(power.tier);
             const unlockTier = power.tier ? badgeLabel(power.tier) : '';
             const allowance =
@@ -257,7 +259,7 @@ export default function SuperPowersPage() {
                   )}
                 </div>
                 <div className="flex w-full sm:w-auto shrink-0 items-center gap-2">
-                  {!isTeamUp && status?.tier && (
+                  {canViewHistory && (
                     <Button size="lg"
                       type="button"
                       onClick={() => {
