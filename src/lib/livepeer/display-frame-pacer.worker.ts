@@ -26,6 +26,8 @@ async function forwardFrames(readable: ReadableStream<VideoFrame>, writable: Wri
   let lastTimestamp = -Infinity;
   let lastCaptureAt = 0;
   let lastCaptureTimestamp = 0;
+  let previousSourceTimestamp: number | undefined;
+  let timestampOffset = 0;
   let writing = false;
   let failed = false;
 
@@ -51,11 +53,25 @@ async function forwardFrames(readable: ReadableStream<VideoFrame>, writable: Wri
 
   try {
     while (true) {
-      const { done, value: frame } = await reader.read();
+      const { done, value } = await reader.read();
       if (done) break;
+      let frame = value;
       if (!enabled || writing) {
         frame.close();
         continue;
+      }
+      const sourceTimestamp = frame.timestamp;
+      if (previousSourceTimestamp !== undefined && sourceTimestamp < previousSourceTimestamp) {
+        // A restarted capture clock may be far behind the repeats already sent.
+        // Rebase it once so the new frames can resume at their original cadence.
+        const elapsed = Math.max(1, Math.round((performance.now() - lastSentAt) * 1000));
+        timestampOffset = Math.max(timestampOffset, lastTimestamp + elapsed - sourceTimestamp);
+      }
+      previousSourceTimestamp = sourceTimestamp;
+      if (timestampOffset !== 0) {
+        const adjusted = new VideoFrame(frame, { timestamp: sourceTimestamp + timestampOffset });
+        frame.close();
+        frame = adjusted;
       }
       clearFrame();
       lastFrame = frame.clone();
