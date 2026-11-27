@@ -543,6 +543,9 @@ export default function ExplorePage() {
     
     // Check if this is a brand-related search
     const queryLower = effectiveQuery.trim().toLowerCase();
+    const preferredAddress = queryLower.replace(/^@+/, '') === 'mal'
+      ? '0xec4e2c7417f781b35d830671f013b3b91f29ba64'
+      : null;
     const isBrandQueryLocal = BRAND_QUERIES.includes(queryLower);
     
     // For brand queries, ensure the real @d (from brandUser lookup) is in the map
@@ -571,6 +574,8 @@ export default function ExplorePage() {
     } else {
       // Normal sorting: exact username match first
       peopleResults.sort((a, b) => {
+        const preferred = Number(b.id.toLowerCase() === preferredAddress) - Number(a.id.toLowerCase() === preferredAddress);
+        if (preferred) return preferred;
         const aHandle = a.handle.replace('@', '').toLowerCase();
         const bHandle = b.handle.replace('@', '').toLowerCase();
         // Exact match goes first
