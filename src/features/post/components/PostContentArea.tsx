@@ -40,7 +40,7 @@ import { useAssetSearch } from '@/hooks/use-asset-ref';
 import { useAuth } from '@/contexts/AuthContext';
 import { buildAvatarUrl } from '@/lib/media-url';
 import { getEditorCaret, setEditorCaret, serializeEditor, editorTextNodes, replaceEditorSuggestion, restoreFormattedEditor, serializeFormattedEditor } from '@/lib/editor-text';
-import { PostFormatButtons, postStyleShortcut } from './PostFormatButtons';
+import { PostTextContextMenu, postStyleShortcut } from './PostTextContextMenu';
 import type { PostTextStyle } from '@/lib/post-text-format';
 import { paintCashtags, clearCashtags } from '@/lib/cashtag-highlight';
 
@@ -386,6 +386,12 @@ export function PostContentArea({
     handleInput();
   };
 
+  const pasteText = useCallback((text: string) => {
+    document.execCommand('insertText', false, text);
+    if (hasLinks(text)) processLinks(true);
+    handleInput();
+  }, [handleInput, processLinks]);
+
   // Handle paste - process links immediately
   const handlePaste = useCallback((e: React.ClipboardEvent) => {
     e.preventDefault();
@@ -405,13 +411,8 @@ export function PostContentArea({
 
     if (!pastedText) return;
     
-    // insertText fires the editor's own input event, which records the text.
-    document.execCommand('insertText', false, pastedText);
-    // Chip pasted links straight away rather than after the typing pause.
-    if (hasLinks(pastedText)) processLinks(true);
-    // Some browsers refuse insertText without firing input; record either way.
-    handleInput();
-  }, [handleInput, onFileDrop, processLinks]);
+    pasteText(pastedText);
+  }, [onFileDrop, pasteText]);
 
   // Handle drag and drop
   const handleDragEnter = useCallback((e: React.DragEvent) => {
@@ -653,12 +654,14 @@ export function PostContentArea({
                 className="w-full bg-transparent text-white text-lg sm:text-xl font-medium resize-none outline-none mb-1 placeholder:text-white/50 sm:placeholder:text-white/70 caret-white"
               />
             )}
+            <PostTextContextMenu fieldRef={editorRef} onFormat={formatSelection} onPasteText={pasteText}>
             <div
               ref={editorRef}
               contentEditable
               onInput={handleInput}
               onPaste={handlePaste}
-              onBlur={() => {
+              onBlur={event => {
+                if (event.relatedTarget instanceof Element && event.relatedTarget.closest('[data-post-text-menu]')) return;
                 // Process links immediately when user leaves the editor
                 if (linkDebounceRef.current) clearTimeout(linkDebounceRef.current);
                 processLinks(true);
@@ -726,7 +729,7 @@ export function PostContentArea({
               className="w-full bg-transparent text-white text-base sm:text-lg resize-none outline-none min-h-[72px] sm:min-h-[72px] empty:before:content-[attr(data-placeholder)] empty:before:text-white/50 sm:empty:before:text-white/70 empty:before:pointer-events-none empty:before:cursor-text focus:empty:before:content-['\200b'] caret-white block"
               style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', caretColor: 'white' }}
             />
-            <PostFormatButtons onFormat={formatSelection} />
+            </PostTextContextMenu>
         </div>
 
         {/* Media preview follows the same full-width column as the editor. */}
