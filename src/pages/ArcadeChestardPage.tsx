@@ -328,7 +328,20 @@ function ChestardGame({ wallet, data, onSignIn, snapshotRef }: { wallet: string 
     return () => window.removeEventListener('keydown', onKey);
   }, [roll]);
 
-  const leaderboard = data?.leaderboard ?? [];
+  const boards: { key: string; title: string; description: string | null; rows: ChestardState['leaderboard'] }[] = [{
+    key: 'all-time',
+    title: t('games.chestard.boardTitle', { defaultValue: 'Top 10' }),
+    description: null,
+    rows: data?.leaderboard ?? [],
+  }];
+  if (data?.daily) {
+    boards.unshift({
+      key: 'daily',
+      title: t('games.chestard.dailyTitle', { defaultValue: 'Daily challenge' }),
+      description: t('games.chestard.dailyRules', { defaultValue: 'Sign in to compete. Your best score from runs started today counts. Resets at midnight UTC.' }),
+      rows: data.daily.leaderboard,
+    });
+  }
   const rollLabel = board.over
     ? t('games.chestard.playAgain', { defaultValue: 'PLAY AGAIN' })
     : started ? t('games.chestard.roll', { defaultValue: 'ROLL' }) : t('games.chestard.start', { defaultValue: 'START' });
@@ -433,34 +446,37 @@ function ChestardGame({ wallet, data, onSignIn, snapshotRef }: { wallet: string 
         </div>
       ) : null}
 
-      <section className="rounded-2xl bg-zinc-900 p-4 ring-1 ring-white/[0.06]">
-        <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-white">
-          <ThemedIcon icon="trophy" alt="" className="h-5 w-5 object-contain" />
-          {t('games.chestard.boardTitle', { defaultValue: 'Top 10' })}
-        </h2>
-        {leaderboard.length ? (
-          <ol className="flex flex-col gap-1.5">
-            {leaderboard.map((row) => (
-              <li key={row.player.address} className={`flex items-center gap-2.5 rounded-lg px-2 py-1.5 ${row.player.address === wallet ? 'bg-fuchsia-400/10 ring-1 ring-fuchsia-400/40' : ''}`}>
-                <span className="w-5 shrink-0 text-center text-xs font-bold tabular-nums text-zinc-500">{row.rank}</span>
-                <Avatar className="h-7 w-7 shrink-0">
-                  {row.player.avatarImageUrl ? <AvatarImage src={row.player.avatarImageUrl} alt="" /> : null}
-                  <AvatarFallback className="bg-zinc-800 text-[11px] text-zinc-300">{nameOf(row.player).replace('@', '').slice(0, 1).toUpperCase()}</AvatarFallback>
-                </Avatar>
-                {row.player.username ? (
-                  <Link to={`/${row.player.username}`} className="min-w-0 flex-1 truncate text-sm text-white hover:underline">{nameOf(row.player)}</Link>
-                ) : (
-                  <span className="min-w-0 flex-1 truncate text-sm text-white">{nameOf(row.player)}</span>
-                )}
-                <span className="shrink-0 text-xs text-zinc-500">{t('games.chestard.linesShort', { defaultValue: '{{count}} lines', count: row.lines })}</span>
-                <span className="w-12 shrink-0 text-right text-xs font-semibold tabular-nums" style={{ color: MAGENTA }}>{formatCount(row.best)}</span>
-              </li>
-            ))}
-          </ol>
-        ) : (
-          <p className="text-xs text-zinc-500">{t('games.chestard.boardEmpty', { defaultValue: 'No scores yet. Be the first.' })}</p>
-        )}
-      </section>
+      {boards.map(({ key, title, description, rows }) => (
+        <section key={key} className="rounded-2xl bg-zinc-900 p-4 ring-1 ring-white/[0.06]">
+          <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-white">
+            <ThemedIcon icon="trophy" alt="" className="h-5 w-5 object-contain" />
+            {title}
+          </h2>
+          {description ? <p className="mb-3 text-sm text-zinc-300">{description}</p> : null}
+          {rows.length ? (
+            <ol className="flex flex-col gap-1.5">
+              {rows.map((row) => (
+                <li key={row.player.address} className={`flex items-center gap-2.5 rounded-lg px-2 py-1.5 ${row.player.address === wallet ? 'bg-fuchsia-400/10 ring-1 ring-fuchsia-400/40' : ''}`}>
+                  <span className="w-5 shrink-0 text-center text-xs font-bold tabular-nums text-zinc-500">{row.rank}</span>
+                  <Avatar className="h-7 w-7 shrink-0">
+                    {row.player.avatarImageUrl ? <AvatarImage src={row.player.avatarImageUrl} alt="" /> : null}
+                    <AvatarFallback className="bg-zinc-800 text-[11px] text-zinc-300">{nameOf(row.player).replace('@', '').slice(0, 1).toUpperCase()}</AvatarFallback>
+                  </Avatar>
+                  {row.player.username ? (
+                    <Link to={`/${row.player.username}`} className="min-w-0 flex-1 truncate text-sm text-white hover:underline">{nameOf(row.player)}</Link>
+                  ) : (
+                    <span className="min-w-0 flex-1 truncate text-sm text-white">{nameOf(row.player)}</span>
+                  )}
+                  <span className="shrink-0 text-xs text-zinc-500">{t('games.chestard.linesShort', { defaultValue: '{{count}} lines', count: row.lines })}</span>
+                  <span className="w-12 shrink-0 text-right text-xs font-semibold tabular-nums" style={{ color: MAGENTA }}>{formatCount(row.best)}</span>
+                </li>
+              ))}
+            </ol>
+          ) : (
+            <p className="text-xs text-zinc-500">{t('games.chestard.boardEmpty', { defaultValue: 'No scores yet. Be the first.' })}</p>
+          )}
+        </section>
+      ))}
 
       <section className="rounded-2xl bg-zinc-900 p-4 text-sm leading-relaxed text-zinc-300 ring-1 ring-white/[0.06]">
         <h2 className="mb-2 text-sm font-semibold text-white">{t('games.chestard.howTitle', { defaultValue: 'How to play' })}</h2>
@@ -474,12 +490,17 @@ export default function ArcadeChestardPage() {
   const { t } = useTranslation();
   const { walletAddress, connect } = useAuth();
   const wallet = walletAddress?.toLowerCase() ?? null;
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, refetch } = useQuery({
     queryKey: ['chestard', wallet],
     queryFn: () => chestardState(!!wallet),
     staleTime: 15_000,
-    refetchOnWindowFocus: false,
   });
+  const dailyEndsAt = data?.daily?.endsAt;
+  useEffect(() => {
+    if (!dailyEndsAt) return;
+    const timer = setTimeout(() => void refetch(), Math.max(0, Date.parse(dailyEndsAt) - Date.now() + 1000));
+    return () => clearTimeout(timer);
+  }, [dailyEndsAt, refetch]);
   const title = t('games.chestard.title', { defaultValue: 'Chestard' });
   const snapshotRef: SnapshotRef = useRef(null);
 
