@@ -3204,7 +3204,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Once, on mount: everything it touches is a ref or a setter.
   }, []);
 
-  const connectWithWallet: AuthContextType['connectWithWallet'] = async (wallet) => {
+  const connectWithWallet = async (wallet: WalletProvider): Promise<boolean | 'same-account'> => {
     if (wagmiConnectAttemptRef.current) return false;
     const attempt = new AbortController();
     wagmiConnectAttemptRef.current = attempt;
