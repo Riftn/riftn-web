@@ -11,6 +11,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import History from '@/components/ui/cut-icons/history';
+import Help from '@/components/ui/cut-icons/help';
 import * as Drop from '@/components/ui/dropdown-menu';
 import { CHAT_MENU_CONTENT } from '@/components/app/chat/ChatOptionsMenu';
 import { requestCatchUp, type CatchUpPeriod } from '@/lib/community-recap';
@@ -91,18 +92,25 @@ function CatchUpPeriods({ communityId, walletAddress }: CatchUpMenuProps) {
   );
 }
 
-export function CatchUpMenu(props: CatchUpMenuProps) {
+export function CatchUpMenu({ iconOnly = false, ...props }: CatchUpMenuProps & { iconOnly?: boolean }) {
   const { t } = useTranslation();
+  const label = t('communities.catchUp.button', 'Catch me up');
   return (
     <Drop.DropdownMenu>
       <Drop.DropdownMenuTrigger asChild>
         <button
           type="button"
           data-community-catch-up
+          aria-label={iconOnly ? label : undefined}
+          title={iconOnly ? label : undefined}
           className="ml-auto flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] text-zinc-500 hover:text-white hover:bg-white/[0.04] transition-colors"
         >
-          <History className="w-3.5 h-3.5" />
-          {t('communities.catchUp.button', 'Catch me up')}
+          {iconOnly ? <Help aria-hidden="true" /> : (
+            <>
+              <History className="w-3.5 h-3.5" />
+              {label}
+            </>
+          )}
         </button>
       </Drop.DropdownMenuTrigger>
       <Drop.DropdownMenuContent align="end" data-chat-options-menu data-catch-up-menu className={CHAT_MENU_CONTENT}>
@@ -117,7 +125,7 @@ export function CatchUpSubmenu({ className, ...props }: CatchUpMenuProps & { cla
   return (
     <Drop.DropdownMenuSub>
       <Drop.DropdownMenuSubTrigger className={className}>
-        <History />{t('communities.catchUp.button', 'Catch me up')}
+        <Help aria-hidden="true" />{t('communities.catchUp.button', 'Catch me up')}
       </Drop.DropdownMenuSubTrigger>
       <Drop.DropdownMenuPortal>
         <Drop.DropdownMenuSubContent sideOffset={4} data-chat-options-menu data-catch-up-menu className={CHAT_MENU_CONTENT}>

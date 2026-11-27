@@ -974,7 +974,7 @@ export function PublicChat({ onBack, embedded = false, phoneB = false }: PublicC
           {selectedRoomId && <LiveChatOnlineCount count={onlineCount} />}
           <ChatTextSizeButton />
           {recapWalletAddress && (
-            <CatchUpMenu communityId="global" walletAddress={recapWalletAddress} />
+            <CatchUpMenu communityId="global" walletAddress={recapWalletAddress} iconOnly />
           )}
           {/* Translate all toggle */}
           <Tooltip>

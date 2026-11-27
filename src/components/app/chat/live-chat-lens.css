@@ -42,8 +42,8 @@
 
 /* A shared visual scale for the full group chat header toolbar. */
 [data-public-chat-wide-tools] {
-  --chat-header-action-size: 2.25rem;
-  --chat-header-icon-size: 1.5rem;
+  --chat-header-action-size: 1.5625rem;
+  --chat-header-icon-size: 1.0625rem;
 }
 [data-public-chat-wide-tools] > :is(button, [data-live-chat-online]),
 [data-public-chat-wide-tools] > [data-group-call-buttons] > button {
