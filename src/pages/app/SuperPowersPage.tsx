@@ -158,6 +158,14 @@ export default function SuperPowersPage() {
                 'Badge holders get fresh boosts every fortnight. Team up is open to everyone: combine wallet power with up to seven others and every member gets the badge your total unlocks.',
             })}
           </p>
+          <Button
+            size="lg"
+            type="button"
+            onClick={() => setTeamUpOpen(true)}
+            className={cn(POWER_ACTION, 'w-fit self-start')}
+          >
+            {t('superpowers.orbit.openTeamUp', { defaultValue: 'Open Team up' })}
+          </Button>
         </header>
 
         {/* ── The orbit ──────────────────────────────────────────────── */}
