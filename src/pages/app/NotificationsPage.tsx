@@ -74,7 +74,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import dehubMarkWhite from '@/assets/dehub-mark-white.png';
 import { useQueries, useQuery, useMutation, useQueryClient, type InfiniteData } from '@tanstack/react-query';
 
-import { buildAvatarUrl, extractAvatarPath } from '@/lib/media-url';
+import { buildAvatarUrl, buildFeedImageUrls, buildImageUrl, cdnImage, deviceWidth, extractAvatarPath } from '@/lib/media-url';
 import { stageLiveSentence, stageReminderSentence, stageNotificationPath } from '@/lib/stage-notifications';
 import { ClearNotificationsControl } from '@/components/app/notifications/ClearNotificationsControl';
 import { seedProfileCache } from '@/lib/profile-cache-seed';
@@ -1328,10 +1328,6 @@ export const NotificationItem = memo(function NotificationItem({
   const momentLink = isMomentRow ? getNavigationLink(notification) : null;
   const momentPosterRaw = isMomentRow ? notification.metadata?.storyPoster : undefined;
   const momentPoster = typeof momentPosterRaw === 'string' && momentPosterRaw.startsWith('https://') ? momentPosterRaw : null;
-  const postThumbnail = notification.tokenThumbnail 
-    ? (notification.tokenThumbnail.startsWith('http') ? notification.tokenThumbnail : `${DEHUB_CDN_BASE}${notification.tokenThumbnail}`)
-    : null;
-  
   const profileLink = notification.actorAddress 
     ? profilePath(notification.actorAddress) 
     : notification.actorUsername 
@@ -1379,6 +1375,34 @@ export const NotificationItem = memo(function NotificationItem({
       })
     : !notification.read;
   const { walletAddress } = useAuth();
+  const postId = notification.tokenId ?? notification.comment?.tokenId;
+  const hasSinglePost = postId != null && bundle.bundleType !== 'same-actor';
+  const isPostEngagement = notification.type === 'like' || COMMENT_NOTIFICATION_TYPES.has(notification.type);
+  const rawThumbnail = notification.tokenThumbnail?.trim();
+  const directThumbnail = rawThumbnail
+    ? (/^https?:\/\//i.test(rawThumbnail) ? rawThumbnail : `${DEHUB_CDN_BASE}${rawThumbnail.replace(/^\/+/, '')}`)
+    : undefined;
+  const thumbnailWidth = deviceWidth(44);
+  // Image-post notifications can omit tokenThumbnail. Scope the fallback to
+  // the signed-in account and share it across rows for the same post.
+  const { data: imagePostThumbnail } = useQuery({
+    queryKey: ['notification-post-thumbnail', walletAddress?.toLowerCase(), postId],
+    enabled: !!walletAddress && hasSinglePost && !directThumbnail && isPostEngagement &&
+      notification.postType === 'feed-images',
+    queryFn: async () => {
+      if (postId == null) return null;
+      const post = await getNFTInfo(String(postId));
+      const locked = post.is_locked || post.streamInfo?.isLockContent;
+      if (locked && !post.isUnlocked && !post.isOwner) return null;
+      return buildFeedImageUrls(post.imageUrls, thumbnailWidth, post.imageSizes)?.[0] ||
+        buildImageUrl(postId, post.imageUrl || post.thumbnail_url, thumbnailWidth) || null;
+    },
+    staleTime: 5 * 60_000,
+    retry: false,
+  });
+  const postThumbnail = directThumbnail || (isPostEngagement ? imagePostThumbnail : undefined);
+  const compactThumbnail = directThumbnail ? cdnImage(directThumbnail, { width: thumbnailWidth }) : postThumbnail;
+  const [failedThumbnail, setFailedThumbnail] = useState<string>();
 
   // Follow back, right on the row. A follow row names one person; the shared
   // override keeps this pill in step with every other Follow button.
@@ -1396,11 +1420,7 @@ export const NotificationItem = memo(function NotificationItem({
   const watchLink = (notification.type as string) === 'livestream_start' && notification.tokenId
     ? `/app/post/${notification.tokenId}`
     : null;
-  // Likes and reposts are about your own post: show it big enough to tell
-  // which one, not as a 44px chip.
-  const bigPostPicture = !!postThumbnail &&
-    bundle.bundleType !== 'same-actor' &&
-    ['like', 'repost'].includes(notification.type as string);
+  const bigPostPicture = !!postThumbnail && hasSinglePost && notification.type === 'repost';
   const markEngaged = () => { if (hasUnread) bundle.allIds.forEach(id => onMarkAsRead(id)); };
 
   // Seed profile cache before navigating to a profile so the header renders instantly
@@ -1764,7 +1784,7 @@ export const NotificationItem = memo(function NotificationItem({
         
         {bigPostPicture && (
           <Link
-            to={`/app/post/${notification.tokenId}`}
+            to={`/app/post/${postId}`}
             onClick={(e) => { e.stopPropagation(); markEngaged(); }}
             className="mt-2 block w-fit"
           >
@@ -1886,17 +1906,19 @@ export const NotificationItem = memo(function NotificationItem({
         </Link>
       )}
 
-      {/* Post thumbnail if applicable */}
-      {postThumbnail && bundle.bundleType !== 'same-actor' && !bigPostPicture && (
-        <Link 
-          to={`/app/post/${notification.tokenId}`}
-          onClick={(e) => e.stopPropagation()}
-          className="flex-shrink-0"
+      {hasSinglePost && compactThumbnail && !bigPostPicture && failedThumbnail !== compactThumbnail && (
+        <Link
+          to={getNavigationLink(notification) || `/app/post/${postId}`}
+          onClick={(e) => { e.stopPropagation(); markEngaged(); }}
+          className="shrink-0 rounded-[10px]"
         >
-          <img 
-            src={postThumbnail} 
-            alt={notification.tokenTitle || _copy("copy.a5554622c655", { defaultValue: "Post" })} 
-            className="w-11 h-11 rounded-[10px] object-cover"
+          <img
+            src={compactThumbnail}
+            alt={notification.tokenTitle || _copy("copy.a5554622c655", { defaultValue: "Post" })}
+            className="size-11 rounded-[10px] object-cover"
+            loading="lazy"
+            decoding="async"
+            onError={() => setFailedThumbnail(compactThumbnail)}
           />
         </Link>
       )}
