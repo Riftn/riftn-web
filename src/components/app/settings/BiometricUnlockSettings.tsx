@@ -233,7 +233,7 @@ function AddPasswordBackupDialog({
 
 export function BiometricUnlockSettings() {
   const { t: _copy } = _useCopy();
-  const { supabaseUserId } = useAuth();
+  const { supabaseUserId, connectionSource } = useAuth();
   const [protection, setProtection] = useState<WalletProtection | null>(null);
   const [loading, setLoading] = useState(true);
   const [enrollOpen, setEnrollOpen] = useState(false);
@@ -270,8 +270,15 @@ export function BiometricUnlockSettings() {
     }
   };
 
-  // Sessions signed in with an external wallet (wagmi) have no DeHub-managed
-  // seed, so there is nothing here to protect.
+  if ((!supabaseUserId && connectionSource === 'wagmi') || protection?.noWalletOnServer) {
+    return (
+      <SettingsRow
+        icon={<Fingerprint />}
+        title={_copy("copy.18e709a14cb1", { defaultValue: "Biometric unlock" })}
+        description={_copy('settings.externalWalletUnlock', { defaultValue: 'Unlock and approve requests in your connected wallet app. Manage its fingerprint, face or screen lock settings there.' })}
+      />
+    );
+  }
   if (!supabaseUserId) return null;
 
   if (loading) {
@@ -312,7 +319,9 @@ export function BiometricUnlockSettings() {
         <SettingsRow
           icon={<Fingerprint />}
           title={_copy("copy.18e709a14cb1", { defaultValue: "Biometric unlock" })}
-          description={wraps.length === 0
+          description={!biometricAvailable && wraps.length === 0
+            ? _copy('settings.walletPasskeyUnavailable', { defaultValue: 'This browser can’t use a passkey for wallet unlock. Open Riftn in a browser that supports passkeys for wallet unlock, or use your wallet password if you’ve set one.' })
+            : wraps.length === 0
             ? _copy("copy.0d355ddcbf67", { defaultValue: "Unlock your wallet with your fingerprint or face instead of a password" })
             : _copy("copy.b833d24ae4f5", { defaultValue: "Devices with biometric access to this wallet: {{value1}}", value1: wraps.length, value2: wraps.length === 1 ? '' : 's' })}
           action={thisDeviceCouldEnroll ? (
@@ -325,7 +334,7 @@ export function BiometricUnlockSettings() {
           ) : undefined}
         />
 
-        <p className="pl-8 text-xs text-zinc-500">{_copy("copy.c7b827c10392", { defaultValue: "Web biometric unlock uses a browser passkey. The Android app uses that phone's fingerprint or device lock separately, after the wallet is unlocked there once with its password or recovery phrase." })}</p>
+        <p className="pl-8 text-xs text-zinc-500">{_copy('settings.walletNativeDeviceUnlock', { defaultValue: 'Web biometric unlock uses a browser passkey. On iOS and Android, the Riftn app uses the phone’s biometrics or screen lock for wallets stored in the app.' })}</p>
 
         {wraps.length > 0 && (
           <ul className="space-y-2 pl-8">
@@ -370,8 +379,12 @@ export function BiometricUnlockSettings() {
           </ul>
         )}
 
-        {!biometricAvailable && wraps.length === 0 && (
-          <p className="text-zinc-500 text-xs pl-8">{_copy("copy.de53684b6cf8", { defaultValue: "This device can’t do biometric unlock. Try it on a phone with Face ID, Touch ID, or an Android fingerprint." })}</p>
+        {!biometricAvailable && wraps.length > 0 && (
+          <p className="text-zinc-500 text-xs pl-8">
+            {canUseBiometrics
+              ? _copy('settings.walletPasskeyEnrollmentUnavailable', { defaultValue: 'This browser can try a saved wallet passkey. To add a passkey on this device, open Riftn in a browser that supports wallet passkey setup.' })
+              : _copy('settings.walletPasskeyUnavailable', { defaultValue: 'This browser can’t use a passkey for wallet unlock. Open Riftn in a browser that supports passkeys for wallet unlock, or use your wallet password if you’ve set one.' })}
+          </p>
         )}
 
         {/* The safety net: a biometrics-only wallet has exactly one route in. */}
