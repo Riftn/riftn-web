@@ -59,7 +59,7 @@ import {
   type DeHubNotification,
   type NotificationCategory,
 } from '@/hooks/use-notifications';
-import { customNotificationKeys, useCustomNotifications, useCustomUnreadCount, useMarkCustomNotificationAsRead, useMarkAllCustomNotificationsAsRead } from '@/hooks/use-custom-notifications';
+import { customNotificationKeys, useCustomNotifications, useCustomUnreadCount, useMarkCustomNotificationAsRead, useMarkAllCustomNotificationsAsRead, useRequestNotificationHistory } from '@/hooks/use-custom-notifications';
 import {
   communityNotificationIcon,
   communityNotificationPath,
@@ -2163,14 +2163,17 @@ export default function NotificationsPage({ inDrawer = false }: { inDrawer?: boo
   // filter below still runs, because it also covers the Supabase-backed types
   // and it keeps the list correct against an API that predates `types`.
   const activeApiTypes = useMemo(() => apiTypesForTab(activeTab), [activeTab]);
+  const isRequestsTab = activeTab === 'features';
   const { notifications: dehubNotifications, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage, isPlaceholderData } =
-    useNotifications(undefined, activeApiTypes, { enabled: isNotificationListActive, notifyOnNew: false });
+    useNotifications(undefined, activeApiTypes, { enabled: isNotificationListActive && !isRequestsTab, notifyOnNew: false });
   const { data: unreadCount } = useUnreadNotificationCount();
   const markAllAsRead = useMarkAllNotificationsAsRead();
   const markAsRead = useMarkNotificationAsRead();
   
   // Fetch custom notifications (feature request likes, etc.)
   const { customNotifications, isLoading: customLoading } = useCustomNotifications();
+  const requestHistory = useRequestNotificationHistory(isNotificationListActive && isRequestsTab, filterTypeMap.features!);
+  const requestPages = requestHistory.data?.pages;
   const { data: customUnreadCount } = useCustomUnreadCount();
   const markCustomAsRead = useMarkCustomNotificationAsRead();
   const markAllCustomAsRead = useMarkAllCustomNotificationsAsRead();
@@ -2198,10 +2201,16 @@ export default function NotificationsPage({ inDrawer = false }: { inDrawer?: boo
     new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
 
   // Merge Riftn + custom notifications, sorted by date (memoized to prevent re-triggering enrichment)
-  const allNotifications = useMemo(
-    () => [...dehubNotifications, ...customNotifications].filter(isVisibleNotification).sort(byNewestFirst),
-    [dehubNotifications, customNotifications, isVisibleNotification]
-  );
+  const allNotifications = useMemo(() => {
+    const rows = isRequestsTab
+      ? requestPages?.flatMap((page) => page.rows) ?? customNotifications.filter((row) => filterTypeMap.features!.includes(row.type))
+      : [...dehubNotifications, ...customNotifications];
+    return rows.filter(isVisibleNotification).sort(byNewestFirst);
+  }, [isRequestsTab, requestPages, dehubNotifications, customNotifications, isVisibleNotification]);
+  const loadNextPage = isRequestsTab ? requestHistory.fetchNextPage : fetchNextPage;
+  const showLoadMore = isRequestsTab ? requestHistory.hasNextPage : hasNextPage && !isPlaceholderData;
+  const loadingNextPage = isRequestsTab ? requestHistory.isFetching : isFetchingNextPage;
+  const loadingRows = isRequestsTab ? requestHistory.isLoading && !allNotifications.length : isLoading;
 
   // Same merge over the unfiltered feed, used only for the tab badges so they
   // keep counting every type while the list itself is narrowed to one tab.
@@ -2921,7 +2930,7 @@ export default function NotificationsPage({ inDrawer = false }: { inDrawer?: boo
             }} />
         )}
         <div data-page-bento data-kit-section data-notification-list className="overflow-hidden">
-          {isLoading || (notifications.length === 0 && (customLoading || isPlaceholderData)) ? (
+          {loadingRows || (notifications.length === 0 && !isRequestsTab && (customLoading || isPlaceholderData)) ? (
             // Row skeletons that mirror the real list layout — a lone spinner
             // reads as "empty page" instead of "content on the way".
             <div className="pt-3">
@@ -2975,25 +2984,23 @@ export default function NotificationsPage({ inDrawer = false }: { inDrawer?: boo
                   </div>
                 );
               })}
-              
-              {/* More loads on its own a screen and a half before the end; the
-                  button stays as a fallback. */}
-              {hasNextPage && !isPlaceholderData && (
-                <LoadMoreSentinel onReach={fetchNextPage} busy={isFetchingNextPage}>
-                  <Button
-                    variant="ghost"
-                    onClick={() => fetchNextPage()}
-                    disabled={isFetchingNextPage}
-                    className="text-zinc-400 hover:text-white"
-                  >
-                    {isFetchingNextPage ? (
-                      <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                    ) : null}
-                    {t('notifications.loadMore')}
-                  </Button>
-                </LoadMoreSentinel>
-              )}
             </div>
+          )}
+          {showLoadMore && (notifications.length > 0 || isRequestsTab) && (
+            <LoadMoreSentinel
+              onReach={() => loadNextPage()}
+              busy={loadingNextPage || (isRequestsTab && (requestHistory.isFetchNextPageError || !!searchQuery))}
+            >
+              <Button
+                variant="ghost"
+                onClick={() => loadNextPage()}
+                disabled={loadingNextPage}
+                className="text-zinc-400 hover:text-white"
+              >
+                {loadingNextPage && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
+                {t('notifications.loadMore')}
+              </Button>
+            </LoadMoreSentinel>
           )}
         </div>
       </PageBody>
