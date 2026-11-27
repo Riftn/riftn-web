@@ -40,7 +40,7 @@ const TermsOfService = () => {
       <div className="space-y-4">
         <h1 className="text-4xl font-bold text-foreground font-exo">{t('termsOfService.title')}</h1>
         <div className="text-muted-foreground space-y-1 font-exo">
-          <p><strong>{t('termsOfService.lastUpdated')}</strong> {t('termsOfService.lastUpdatedDate')}</p>
+          <p><strong>{t('termsOfService.lastUpdated')}</strong> {t('termsOfService.appTokenRevisionDate')}</p>
           <p><strong>{t('termsOfService.effective')}</strong> {t('termsOfService.effectiveDate')}</p>
         </div>
       </div>
@@ -74,12 +74,18 @@ const TermsOfService = () => {
       </Section>
 
       <Section title={t('termsOfService.walletConnections')}>
-        <p>{t('termsOfService.walletText1')}</p>
-        <p>{t('termsOfService.walletText2')}</p>
+        <p>{t('termsOfService.walletUseText')}</p>
+        <p>{t('termsOfService.walletResponsibilityText')}</p>
         <ItemList items={[t('termsOfService.walletItem1'), t('termsOfService.walletItem2'), t('termsOfService.walletItem3')]} />
       </Section>
 
-      <Section title={t('termsOfService.tokenPurchases')} icon={<CreditCard className="w-5 h-5" />}>
+      <Section title={t('termsOfService.appTokensTitle')} icon={<CreditCard className="w-5 h-5" />}>
+        <p>{t('termsOfService.appTokensBalanceText')}</p>
+        <p>{t('termsOfService.appTokensLaunchText')}</p>
+      </Section>
+
+      <Section title={t('termsOfService.blockchainTokenPurchases')} icon={<CreditCard className="w-5 h-5" />}>
+        <p>{t('termsOfService.blockchainPurchaseScope')}</p>
         <SubSection title={t('termsOfService.tokenUsage')}>
           <p>{t('termsOfService.tokenUsageText')}</p>
           <ItemList items={[t('termsOfService.tokenUsageItem1'), t('termsOfService.tokenUsageItem2'), t('termsOfService.tokenUsageItem3'), t('termsOfService.tokenUsageItem4')]} />
