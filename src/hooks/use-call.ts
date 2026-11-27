@@ -82,6 +82,8 @@ export interface UseCallReturn {
   remoteAudioRef: React.RefObject<HTMLAudioElement>;
   startCall: (recipientAddress: string, callType?: 'audio' | 'video') => Promise<void>;
   endCall: () => void; acceptCall: () => void; rejectCall: () => void;
+  playbackDevice: string;
+  setPlaybackDevice: (deviceId: string) => Promise<boolean>;
   toggleMute: () => void; toggleCamera: () => void; switchCamera: () => void;
   localVideoTrack: React.MutableRefObject<any>; debugCallState: () => void;
   checkForCalls: () => Promise<void>;
@@ -106,7 +108,7 @@ export interface UseCallReturn {
 }
 type GroupRemote = { audio: any; video: any; silenced?: boolean };
 type CallMedia = {
-  client: any; audio: any; video: any; remoteVideo: any; remoteAudio: any; closed: boolean;
+  client: any; audio: any; audioReady?: boolean; video: any; remoteVideo: any; remoteAudio: any; closed: boolean;
   remotes: Map<number, GroupRemote>; presence: ChannelLease | null;
   /** Your camera is being sent (on and unmuted). Group calls announce it so others can count cameras. */
   camOn?: boolean;
@@ -134,7 +136,14 @@ export const useCall = (): UseCallReturn => {
   const [isIncoming, setIsIncoming] = useState(false);
   const [currentCall, setCurrentCall] = useState<CallSession | null>(null);
   const [isConnecting, setIsConnecting] = useState(false);
-  const [isMuted, setIsMuted] = useState(false);
+  const [isMuted, setMutedState] = useState(false);
+  const mutedRef = useRef(false);
+  const setIsMuted = useCallback((muted: boolean) => {
+    mutedRef.current = muted;
+    setMutedState(muted);
+  }, []);
+  const [playbackDevice, setPlaybackDeviceState] = useState('');
+  const playbackDeviceRef = useRef('');
   const [isCameraOff, setIsCameraOff] = useState(false);
   const [isUserOffline, setIsUserOffline] = useState(false);
   const [callFailureReason, setCallFailureReason] = useState<'user_offline' | 'technical_error' | null>(null);
@@ -193,9 +202,14 @@ export const useCall = (): UseCallReturn => {
   const callClient = useMemo(() => userAddress ? walletScopedClient(userAddress) : supabase, [userAddress]);
 
   const publishCall = useCallback((call: CallSession | null) => {
+    if (!call) {
+      setIsMuted(false);
+      playbackDeviceRef.current = '';
+      setPlaybackDeviceState('');
+    }
     currentCallRef.current = call;
     setCurrentCall(call);
-  }, []);
+  }, [setIsMuted]);
   const setCallMessageHandler = useCallback((handler: ((content: string) => void) | null) => {
     callMessageHandlerRef.current = handler;
   }, []);
@@ -264,7 +278,7 @@ export const useCall = (): UseCallReturn => {
     localVideoTrack.current = null;
     setCallStartedAt(null);
     setIsCallActive(false); setIsIncoming(false); setIsConnecting(false);
-    setIsMuted(false); setIsCameraOff(false); setIsMinimized(false);
+    setIsCameraOff(false); setIsMinimized(false);
     setGroupParticipants([]); setSelfSpeaking(false); setGroupCamerasFull(false);
     camerasFullRef.current = false; startCameraOffRef.current = false;
     rosterRef.current = new Map(); speakingRef.current = new Set();
@@ -447,7 +461,7 @@ export const useCall = (): UseCallReturn => {
       }
     }
     syncGroup(media);
-  }, [userAddress, _copy, finishCall, syncGroup]);
+  }, [userAddress, _copy, finishCall, syncGroup, setIsMuted]);
   const refreshModeration = useCallback((media: CallMedia, groupId: string) => {
     readCallModeration(groupId).then(next => applyModeration(media, next)).catch(error => console.warn('Call moderation read failed', error));
   }, [applyModeration]);
@@ -500,6 +514,12 @@ export const useCall = (): UseCallReturn => {
           setCallStartedAt(startedAtRef.current);
         }
       };
+      if (!groupId) {
+        // A peer can join with their microphone muted and have nothing to publish.
+        client.on('user-joined', () => {
+          if (current() && !ownedMedia.closed) markLive();
+        });
+      }
       client.on('user-published', async (remoteUser: any, mediaType: 'audio' | 'video') => {
         if (!current() || ownedMedia.closed) return;
         try {
@@ -519,8 +539,17 @@ export const useCall = (): UseCallReturn => {
             syncGroup(ownedMedia);
             setMediaRevision(revision => revision + 1);
           } else if (mediaType === 'audio') {
-            ownedMedia.remoteAudio = remoteUser.audioTrack;
-            remoteUser.audioTrack?.play();
+            const track = remoteUser.audioTrack;
+            ownedMedia.remoteAudio = track;
+            track?.play();
+            const deviceId = playbackDeviceRef.current;
+            if (deviceId) {
+              void track?.setPlaybackDevice(deviceId).catch(() => {
+                if (!current() || ownedMedia.closed || playbackDeviceRef.current !== deviceId) return;
+                playbackDeviceRef.current = '';
+                setPlaybackDeviceState('');
+              });
+            }
           } else {
             ownedMedia.remoteVideo = remoteUser.videoTrack;
             setMediaRevision(revision => revision + 1);
@@ -631,7 +660,7 @@ export const useCall = (): UseCallReturn => {
       media.audio = audio;
       if (groupId && userAddress && moderationRef.current.muted.includes(userAddress.toLowerCase())) {
         modMutedRef.current = true; setModMuted(true);
-        await audio.setMuted(true); setIsMuted(true);
+        setIsMuted(true);
       }
       if (groupId && call.call_type === 'video') {
         const video = await AgoraRTC.createCameraVideoTrack();
@@ -647,6 +676,14 @@ export const useCall = (): UseCallReturn => {
         media.announce?.();
         setMediaRevision(revision => revision + 1);
       }
+      // Apply the latest selection before publishing, including changes during camera setup.
+      let appliedMute = false;
+      while (appliedMute !== mutedRef.current) {
+        appliedMute = mutedRef.current;
+        await audio.setMuted(appliedMute);
+        if (!current() || media.closed) { await disposeMedia(media); return false; }
+      }
+      media.audioReady = true;
       await client.publish([media.audio, ...(media.video ? [media.video] : [])]);
       if (!current() || media.closed) { await disposeMedia(media); return false; }
       // The background picked on an earlier call comes back on its own.
@@ -661,7 +698,7 @@ export const useCall = (): UseCallReturn => {
       }
       return false;
     }
-  }, [userAddress, disposeMedia, publishCall, endCall, _copy, syncGroup, applyEffects, refreshModeration]);
+  }, [userAddress, disposeMedia, publishCall, endCall, _copy, syncGroup, applyEffects, refreshModeration, setIsMuted]);
 
   /** Nobody answered the ring: a group room you are alone in closes after the ring window. */
   const armGroupTimeout = useCallback((generation: number, outcome: 'no_answer' | 'missed') => {
@@ -892,7 +929,7 @@ export const useCall = (): UseCallReturn => {
     startedAtRef.current = null;
     joiningRef.current = false;
     setCallStartedAt(null); setIsCallActive(false); setIsIncoming(false); setIsConnecting(false);
-    setIsMuted(false); setIsCameraOff(false); setIsMinimized(false);
+    setIsCameraOff(false); setIsMinimized(false);
     return () => {
     generationRef.current += 1;
     clearTimers();
@@ -965,7 +1002,7 @@ export const useCall = (): UseCallReturn => {
     if (media && !media.closed && media.video) void applyEffects(media);
   }, [applyEffects]);
   const toggleMute = useCallback(() => {
-    const audio = mediaRef.current?.audio;
+    const media = mediaRef.current;
     // Muted by a moderator: the mic stays off until one of them unmutes you.
     if (modMutedRef.current) {
       toast(_copy('calls.mutedByMod', { defaultValue: 'A moderator muted you' }), {
@@ -973,8 +1010,31 @@ export const useCall = (): UseCallReturn => {
       });
       return;
     }
-    if (audio) setIsMuted(previous => { void audio.setMuted(!previous); return !previous; });
-  }, [_copy]);
+    if (!currentCallRef.current) return;
+    const muted = !mutedRef.current;
+    setIsMuted(muted);
+    if (media?.audioReady) {
+      void media.audio.setMuted(muted).catch((error: unknown) => {
+        if (mediaRef.current !== media || mutedRef.current !== muted || modMutedRef.current) return;
+        setIsMuted(!muted);
+        console.warn('Could not change call microphone state', error);
+      });
+    }
+  }, [_copy, setIsMuted]);
+  const setPlaybackDevice = useCallback(async (deviceId: string) => {
+    const generation = generationRef.current;
+    if (!currentCallRef.current || currentCallRef.current.group_id) return false;
+    const track = mediaRef.current?.remoteAudio;
+    try {
+      if (track) await track.setPlaybackDevice(deviceId || 'default');
+    } catch {
+      return false;
+    }
+    if (generation !== generationRef.current) return false;
+    playbackDeviceRef.current = deviceId;
+    setPlaybackDeviceState(deviceId);
+    return true;
+  }, []);
   /** A moderator mutes, unmutes or removes someone in this group call. */
   const moderateGroupMember = useCallback(async (wallet: string, action: CallModAction) => {
     const media = mediaRef.current;
@@ -1079,12 +1139,12 @@ export const useCall = (): UseCallReturn => {
     isRinging, callSummary, dismissCallSummary,
     isCallActive, isIncoming, currentCall, isConnecting, isMuted, isCameraOff, isUserOffline, callFailureReason,
     clearCallFailure, isMinimized, minimizeCall, maximizeCall, callStartedAt, mediaRevision, peerAddress, localVideoRef, remoteVideoRef,
-    attachLocalVideo, attachRemoteVideo, remoteAudioRef, startCall, endCall, acceptCall, rejectCall: endCall, toggleMute, toggleCamera, switchCamera,
+    attachLocalVideo, attachRemoteVideo, remoteAudioRef, playbackDevice, setPlaybackDevice, startCall, endCall, acceptCall, rejectCall: endCall, toggleMute, toggleCamera, switchCamera,
     localVideoTrack, debugCallState, checkForCalls, setCallMessageHandler,
     callBackground, callBackgroundBusy, setCallBackground, callFaceFilter, setCallFaceFilter,
   }), [callBackground, callBackgroundBusy, setCallBackground, callFaceFilter, setCallFaceFilter, captionRoom, captionSpeakers, getMicStream, setCallVolume, isGroupCall, groupParticipants, selfSpeaking, groupCamerasFull, attachGroupVideo, readGroupLevels, startGroupCall, joinGroupCall,
     groupModeration, modMuted, moderateGroupMember,
     isRinging, callSummary, dismissCallSummary, isCallActive, isIncoming, currentCall, isConnecting, isMuted, isCameraOff, isUserOffline, callFailureReason,
     clearCallFailure, isMinimized, minimizeCall, maximizeCall, callStartedAt, mediaRevision, peerAddress, startCall, endCall, acceptCall,
-    attachLocalVideo, attachRemoteVideo, toggleMute, toggleCamera, switchCamera, debugCallState, checkForCalls, setCallMessageHandler]);
+    attachLocalVideo, attachRemoteVideo, playbackDevice, setPlaybackDevice, toggleMute, toggleCamera, switchCamera, debugCallState, checkForCalls, setCallMessageHandler]);
 };
