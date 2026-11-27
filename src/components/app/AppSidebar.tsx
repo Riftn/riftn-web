@@ -75,7 +75,8 @@ export function AppSidebar({ isOpen, onOpenChange }: AppSidebarProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const { isAuthenticated, user, walletAddress } = useAuth();
-  const legacyBalance = useSelfBadge().balance ?? 0;
+  const liveLegacyBalance = useSelfBadge().balance;
+  const legacyBalance = liveLegacyBalance ?? user?.legacyDhbBalance ?? 0;
   const { data: appTokensConfig } = useAppTokensConfig(isOpen);
   const { data: appTokens } = useAppTokens(isOpen && appTokensConfig?.enabled === true);
   const walletBalance = appTokensConfig?.enabled ? Number(appTokens?.balance) : appTokensConfig ? legacyBalance : NaN;
