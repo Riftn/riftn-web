@@ -584,6 +584,15 @@ export const useCall = (): UseCallReturn => {
       } else {
         client.on('user-left', () => { if (current()) void endCall(); });
       }
+      // Start direct-call self-view before joining Agora or waiting for microphone access.
+      if (!groupId && call.call_type === 'video') {
+        const video = await AgoraRTC.createCameraVideoTrack();
+        if (!current() || media.closed) { video.close(); await disposeMedia(media); return false; }
+        media.video = video;
+        localVideoTrack.current = video;
+        media.camOn = true;
+        setMediaRevision(revision => revision + 1);
+      }
       await client.join(data.appId, channelName, data.token, groupId ? ownUid : (data.uid ?? 0));
       if (!current() || media.closed) { await disposeMedia(media); return false; }
       if (groupId && userAddress) {
@@ -624,7 +633,7 @@ export const useCall = (): UseCallReturn => {
         modMutedRef.current = true; setModMuted(true);
         await audio.setMuted(true); setIsMuted(true);
       }
-      if (call.call_type === 'video') {
+      if (groupId && call.call_type === 'video') {
         const video = await AgoraRTC.createCameraVideoTrack();
         if (!current() || media.closed) { video.close(); await disposeMedia(media); return false; }
         media.video = video;
