@@ -28,7 +28,8 @@ vi.mock('@/lib/wallet-core/protection', () => ({
   loadWalletOrCached: async () => ({ ethAddress: mocks.expected, payload: {} }),
   getWalletProtection: async () => ({
     wallet: { ethAddress: mocks.expected, payload: {} }, wraps: mocks.biometric ? [{}] : [],
-    biometricAvailable: mocks.biometric, noWalletOnServer: false, stateUnknown: mocks.unknown,
+    biometricAvailable: mocks.biometric, canUseBiometrics: mocks.biometric,
+    biometricEnrolledElsewhere: false, noWalletOnServer: false, stateUnknown: mocks.unknown,
     seedIsPasskeyWrapped: false,
   }),
 }));
@@ -74,6 +75,13 @@ it('offers password-only users a new wallet without decrypting their old wallet'
   await waitFor(() => expect(mocks.replaceLostWallet).toHaveBeenCalledWith('a-new-wallet-password'));
   expect(mocks.decrypt).not.toHaveBeenCalled();
   expect(mocks.saveWallet).not.toHaveBeenCalled();
+});
+
+it('explains unavailable browser biometrics while keeping password unlock available', async () => {
+  render(<WalletUnlockStep userId="test-user" onComplete={mocks.complete} />);
+  await screen.findByText(/Biometric wallet unlock is unavailable in this browser/);
+  expect(screen.getByPlaceholderText('Wallet password')).toBeTruthy();
+  expect(screen.queryByRole('button', { name: 'Unlock with biometrics' })).toBeNull();
 });
 
 it('does not offer replacement when the existing wallet could not be loaded', async () => {

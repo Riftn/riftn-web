@@ -104,6 +104,8 @@ export function WalletUnlockStep({ userId, onComplete, onLogout }: WalletUnlockS
   const [wallet, setWallet] = useState<StoredWallet | null>(null);
   const [wraps, setWraps] = useState<PasskeyWrap[]>([]);
   const [biometricAvailable, setBiometricAvailable] = useState<boolean | null>(null);
+  const [canUseBiometrics, setCanUseBiometrics] = useState(false);
+  const [biometricEnrolledElsewhere, setBiometricEnrolledElsewhere] = useState(false);
   const [noWalletOnServer, setNoWalletOnServer] = useState(false);
   const [stateUnknown, setStateUnknown] = useState(false);
   const [seedIsPasskeyWrapped, setSeedIsPasskeyWrapped] = useState(false);
@@ -124,6 +126,8 @@ export function WalletUnlockStep({ userId, onComplete, onLogout }: WalletUnlockS
       setWallet(p.wallet);
       setBiometricAvailable(p.biometricAvailable);
       setWraps(p.wraps);
+      setCanUseBiometrics(p.canUseBiometrics);
+      setBiometricEnrolledElsewhere(p.biometricEnrolledElsewhere);
       setNoWalletOnServer(p.noWalletOnServer);
       setStateUnknown(p.stateUnknown);
       setSeedIsPasskeyWrapped(p.seedIsPasskeyWrapped);
@@ -145,10 +149,6 @@ export function WalletUnlockStep({ userId, onComplete, onLogout }: WalletUnlockS
   // biometric wallets write an hkdf wrap into the password column, and a
   // password box in front of one of those is a dead end.
   const hasPasswordWrap = !!wallet?.payload && !seedIsPasskeyWrapped;
-  const canUseBiometrics = biometricAvailable === true && wraps.length > 0;
-  // Enrolled elsewhere but unusable here — the user needs the device they set
-  // it up on, or a password backup added from that device.
-  const biometricEnrolledElsewhere = biometricAvailable === false && wraps.length > 0;
   // What the wraps' recorded metadata says about using them from THIS device:
   // a synced passkey (or one with the "hybrid" transport) can answer here —
   // the browser hands off to the phone that holds it via QR — while a
@@ -913,6 +913,12 @@ export function WalletUnlockStep({ userId, onComplete, onLogout }: WalletUnlockS
             : allWrapsDeviceBound
               ? _copy("copy.5f94fde59ced", { defaultValue: "That credential only works on the device it was made on — open Riftn there, or add a wallet password from its Settings → Account Security to unlock anywhere." })
               : _copy("copy.ab55b7d985f8", { defaultValue: "On a different device, choose that device if your browser offers it — or open Settings → Account Security there to add a wallet password." })}
+        </p>
+      )}
+
+      {showPasswordForm && !canUseBiometrics && biometricAvailable === false && (
+        <p className="text-white/60 text-xs">
+          {_copy('settings.walletPasskeyPasswordFallback', { defaultValue: 'Biometric wallet unlock is unavailable in this browser. Use your wallet password here, or open Riftn in a browser that supports wallet passkeys.' })}
         </p>
       )}
 
