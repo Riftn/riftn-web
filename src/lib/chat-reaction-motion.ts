@@ -111,7 +111,7 @@ async function fetchEmojiClip(src: string): Promise<EmojiClip | null> {
   } catch {
     poster = null;
   }
-  return { src, ms: read.ms, loop, once: new Blob([read.once], { type: 'image/webp' }), poster };
+  return { src, ms: read.ms, loop, once: new Blob([read.once as BlobPart], { type: 'image/webp' }), poster };
 }
 
 /** The clip for an animated emoji file, downloaded once per visit. */

@@ -32,7 +32,7 @@ export function isVotingClosed(proposal: GovernanceProposal): boolean {
 /** "3 days left" / "5 hours left", or null when there is no window to show. */
 export function votingTimeLeft(
   proposal: GovernanceProposal,
-  t: (key: string, defaultValue: string, opts?: Record<string, unknown>) => string,
+  t: (key: string, defaultValue: string, opts: Record<string, unknown>) => string,
 ): string | null {
   if (!proposal.voting_ends_at || isVotingClosed(proposal)) return null;
   const ms = Date.parse(proposal.voting_ends_at) - Date.now();

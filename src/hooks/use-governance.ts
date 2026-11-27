@@ -265,7 +265,7 @@ export function useGovernanceProposals(sort: GovernanceSort, search: string) {
       query = query.range(pageParam, pageParam + PAGE_SIZE - 1);
       const { data, error } = await query;
       if (error) throw error;
-      return (data || []) as GovernanceProposal[];
+      return (data || []) as unknown as GovernanceProposal[];
     },
     initialPageParam: 0,
     getNextPageParam: (lastPage, allPages) => {
@@ -287,7 +287,7 @@ export function useCompletedProposals() {
         .in('status', ['completed', 'passed', 'rejected'])
         .order('updated_at', { ascending: false });
       if (error) throw error;
-      return (data || []) as GovernanceProposal[];
+      return (data || []) as unknown as GovernanceProposal[];
     },
     staleTime: 60_000,
   });
