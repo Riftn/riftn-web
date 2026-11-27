@@ -140,7 +140,6 @@ export const BADGE_USD_TARGETS: Record<string, number> = Object.fromEntries(
 /** Username-based badge overrides (always get this badge regardless of balance) */
 const USERNAME_BADGE_OVERRIDES: Record<string, string> = {
   "maldoteth": "Megalodon",
-  "mal": "Megalodon",
   "aaron": "Megalodon",
   "ma255": "Ghost Lobster",
   "dehubprime": "King Cobra",

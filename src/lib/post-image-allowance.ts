@@ -60,7 +60,7 @@ export function getPostMediaAllowanceForAccount(
   user: Pick<DeHubUser, 'badgeBalance' | 'ownBadgeBalance' | 'badgeLock' | 'username'> | null | undefined,
 ) {
   const name = user?.username?.trim().replace(/^@/, '').toLowerCase();
-  const grant = name === 'maldoteth' || name === 'mal' ? name : undefined;
+  const grant = name === 'maldoteth' ? name : undefined;
   return mediaAllowanceForBadge(user?.ownBadgeBalance ?? user?.badgeBalance, grant, user?.badgeLock);
 }
 

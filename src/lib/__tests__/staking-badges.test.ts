@@ -121,7 +121,7 @@ describe('getBadgeName', () => {
 
   it('still honours the username override table', () => {
     expect(getBadgeName(0, 'maldoteth')).toBe('Megalodon');
-    expect(getBadgeName(undefined, '@Mal')).toBe('Megalodon');
+    expect(getBadgeName(undefined, '@Mal')).toBeNull();
   });
 
   it('reads the active scale when a caller passes none', () => {

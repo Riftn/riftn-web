@@ -28,7 +28,7 @@ describe('media allowance before the quota read arrives', () => {
   });
 
   it('recognizes a full-rights grant and a valid earned lock', () => {
-    expect(getPostMediaAllowanceForAccount({ username: '@Mal', badgeBalance: 0 }).tier).toBe('Megalodon');
+    expect(getPostMediaAllowanceForAccount({ username: '@Mal', badgeBalance: 0 }).tier).toBeNull();
     expect(getPostMediaAllowanceForAccount({
       badgeBalance: 10_000, badgeLock: { tier: 'King Cobra', requirement: 10_000 },
     }).bytes).toBe(1.5 * 1024 ** 3);

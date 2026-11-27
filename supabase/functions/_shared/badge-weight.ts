@@ -38,7 +38,6 @@ const BADGE_ORDER = BADGE_LEVELS.map((b) => b.name);
 
 const USERNAME_BADGE_OVERRIDES: Record<string, string> = {
   maldoteth: "Megalodon",
-  mal: "Megalodon",
   aaron: "Megalodon",
   ma255: "Ghost Lobster",
   dehubprime: "King Cobra",
