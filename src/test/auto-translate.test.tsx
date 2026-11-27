@@ -71,6 +71,21 @@ beforeEach(() => {
 afterEach(cleanup);
 
 describe('auto-translate', () => {
+  it('keeps the original when a cached and fresh translation use the wrong script', async () => {
+    const text = 'Display current and past viewers everywhere';
+    const wrong = '显示当前和过去的所有观看者，到处显示。';
+    localStorage.setItem('dehub-translation-cache-v4', JSON.stringify([
+      [`${text}-es`, { translated: wrong, sourceLang: 'en' }],
+    ]));
+    invoke.mockResolvedValueOnce({ data: { translatedText: wrong }, error: null });
+    const { useTranslation } = await import('@/components/app/TranslatableText');
+    const { result } = renderHook(() => useTranslation(text, false, undefined, true));
+
+    await act(async () => { await result.current.handleTranslate(); });
+    expect(result.current.isTranslated).toBe(false);
+    expect(invoke).toHaveBeenCalledTimes(1);
+  });
+
   it('recognizes an unlabelled echo of a chat line already in the reader language', async () => {
     localStorage.setItem('user-preferred-language', 'en');
     const text = 'Yes, I should have a bitter coffee.';
