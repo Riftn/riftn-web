@@ -44,6 +44,8 @@
 [data-public-chat-wide-tools] {
   --chat-header-action-size: 1.5625rem;
   --chat-header-icon-size: 1.0625rem;
+  --chat-header-action-gap: clamp(0.25rem, 1vw, 0.5rem);
+  gap: var(--chat-header-action-gap);
 }
 [data-public-chat-wide-tools] > :is(button, [data-live-chat-online]),
 [data-public-chat-wide-tools] > [data-group-call-buttons] > button {
@@ -57,7 +59,7 @@
   padding-inline: 0;
 }
 [data-public-chat-wide-tools] > [data-group-call-buttons] {
-  gap: 0.25rem;
+  gap: var(--chat-header-action-gap);
 }
 [data-public-chat-wide-tools] button > svg {
   width: var(--chat-header-icon-size);
