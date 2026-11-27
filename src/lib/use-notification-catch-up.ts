@@ -17,7 +17,6 @@ type Actions<T extends Source> = {
 };
 
 export function useNotificationCatchUp<T extends Source>(actions: Actions<T>) {
-  const [open, setOpen] = useState(false);
   const [question, setQuestion] = useState('');
   const [items, setItems] = useState<CatchUpItem<T>[]>([]);
   const [result, setResult] = useState<CatchUpResult | null>(null);
@@ -178,7 +177,7 @@ export function useNotificationCatchUp<T extends Source>(actions: Actions<T>) {
   }
 
   return {
-    open, setOpen, question, setQuestion, items, result, checked, drafts, status, busy, pending, preview, setPreview,
+    question, setQuestion, items, result, checked, drafts, status, busy, pending, preview, setPreview,
     ask, toggle, clear, undo, editDraft, removeDraft, sendDrafts,
   };
 }

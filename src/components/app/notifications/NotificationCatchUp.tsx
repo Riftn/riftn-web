@@ -1,7 +1,7 @@
-import { Sparkles, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
-import { Drawer, DrawerContent, DrawerDescription, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer';
+import { Drawer, DrawerContent, DrawerDescription, DrawerTitle } from '@/components/ui/drawer';
 import { supabase } from '@/integrations/supabase/client';
 import { ownKeyHeaders } from '@/lib/api/dehub/own-key-headers';
 import { postComment } from '@/lib/api/dehub/comments';
@@ -18,11 +18,13 @@ const fieldClass = 'notification-drawer-field min-w-0 rounded-xl border bg-trans
 
 type Props = {
   wallet: string;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
   isVisible: (item: DeHubNotification) => boolean;
   onOpenNotification: (item: DeHubNotification) => void;
 };
 
-export function NotificationCatchUp({ wallet, isVisible, onOpenNotification }: Props) {
+export function NotificationCatchUp({ wallet, open, onOpenChange, isVisible, onOpenNotification }: Props) {
   const { t, i18n } = useTranslation();
   const queryClient = useQueryClient();
   const state = useNotificationCatchUp({
@@ -83,17 +85,9 @@ export function NotificationCatchUp({ wallet, isVisible, onOpenNotification }: P
       });
 
   return (
-    <Drawer open={state.open} onOpenChange={state.setOpen} dismissible={!state.pending} direction="bottom">
-      <div data-notification-catch-up className="px-3 pb-3 sm:px-4">
-        <DrawerTrigger asChild>
-          <button type="button" className={actionClass}>
-            <Sparkles aria-hidden />
-            {t('notifications.catchUp.title', { defaultValue: 'Catch me up' })}
-          </button>
-        </DrawerTrigger>
-      </div>
+    <Drawer open={open} onOpenChange={onOpenChange} dismissible={!state.pending} direction="bottom">
       <DrawerContent glass column hideClose data-notification-catch-up data-notification-catch-up-sheet className="max-h-[85dvh]">
-        <button type="button" data-drawer-close disabled={!!state.pending} onClick={() => state.setOpen(false)}
+        <button type="button" data-drawer-close disabled={!!state.pending} onClick={() => onOpenChange(false)}
           aria-label={t('notifications.catchUp.close', { defaultValue: 'Close' })}
           className={cn(actionClass, 'absolute right-3 top-3 z-10 w-11 p-0 sm:right-4')}>
           <X aria-hidden />
@@ -148,7 +142,7 @@ export function NotificationCatchUp({ wallet, isVisible, onOpenNotification }: P
                     {state.result[group].map(({ index, reason }) => {
                       const item = state.items[index];
                       return (
-                        <button key={index} type="button" disabled={disabled} onClick={() => { state.setOpen(false); onOpenNotification(item.source); }}
+                        <button key={index} type="button" disabled={disabled} onClick={() => { onOpenChange(false); onOpenNotification(item.source); }}
                           className="block w-full notification-drawer-field rounded-xl border p-3 text-left text-sm leading-6">
                           {item.sender && <span className="block font-semibold">{item.sender}</span>}
                           <span className="block break-words">{item.preview}</span>
