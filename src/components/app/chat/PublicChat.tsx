@@ -52,7 +52,7 @@ import { useAssistantReplies, useAssistantReplyEngine } from '@/hooks/use-assist
 import { dismissKeyboard } from '@/hooks/use-keyboard-open';
 import { AppState } from '@/components/app/AppState';
 import { translateCopy as _translateCopy } from '@/i18n/copy';
-import { useFocusChatMessage, chatMessageDomId } from '@/hooks/use-focus-chat-message';
+import { chatMessageDomId } from '@/hooks/use-focus-chat-message';
 import { bringIntoViewAndFlash } from '@/lib/focus-scroll';
 import { canLinkMessage, copyChatMessageLink, peekPendingChatLink, useLinkedMessage } from '@/lib/chat-message-link';
 import { useStickToBottom } from '@/hooks/use-stick-to-bottom';
@@ -163,8 +163,6 @@ const LOAD_OLDER_AT = 240;
 const MAX_READ_SPOT_PAGES = 10;
 
 export function PublicChat({ onBack, embedded = false, phoneB = false }: PublicChatProps) {
-  // A mention notification names the line that tagged the reader.
-  useFocusChatMessage();
   const { t: _copy } = _useCopy();
   const { t, i18n } = useTranslation();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -244,10 +242,10 @@ export function PublicChat({ onBack, embedded = false, phoneB = false }: PublicC
       return;
     }
     const linked = peekPendingChatLink('public')?.target;
-    const linkedRoom = linked?.kind === 'public' && linked.roomId && rooms.some((r) => r.id === linked.roomId) ? linked.roomId : null;
-    if (linkedRoom && linkedRoom !== selectedRoomId) setSelectedRoomId(linkedRoom);
-    else if (!selectedRoomId) setSelectedRoomId(rooms[0].id);
-  }, [rooms, selectedRoomId, pendingShareId]);
+    const roomId = linked?.kind === 'public' ? linked.roomId : new URLSearchParams(location.search).get('room');
+    const linkedRoom = roomId && rooms.some((r) => r.id === roomId) ? roomId : null;
+    setSelectedRoomId((current) => linkedRoom || current || rooms[0].id);
+  }, [rooms, location.key, location.search, pendingShareId]);
 
   const {
     messages: apiMessages, isLoading: messagesLoading, historyError, isBanned,
@@ -449,8 +447,8 @@ export function PublicChat({ onBack, embedded = false, phoneB = false }: PublicC
   const linkedRoomId = linkedTarget?.kind === 'public' ? linkedTarget.roomId : null;
   const linkRoomReady = !!selectedRoomId && (!linkedRoomId || linkedRoomId === selectedRoomId || !rooms.some((r) => r.id === linkedRoomId));
   useLinkedMessage(
-    'public',
-    linkRoomReady && !messagesLoading && messages.length > 0,
+    embedded ? null : 'public',
+    linkRoomReady && !messagesLoading,
     async (id) => {
       followLatest.current = false;
       if (selectedRoomId) readDecidedRoom.current = selectedRoomId;

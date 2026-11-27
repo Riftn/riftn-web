@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { chatMessageLink, parseChatMessageLink, canLinkMessage } from '@/lib/chat-message-link';
+import { chatMessageLink, parseChatMessageLink, canLinkMessage, publicChatMentionPath } from '@/lib/chat-message-link';
 import { buildChatMessageLinkHtml, chatMessageLinkOf } from '../../CLOUDFLARE_WORKER_SEO.js';
 
 const split = (url: string) => {
@@ -13,6 +13,16 @@ describe('chat message links', () => {
     expect(split(chatMessageLink({ kind: 'stream', tokenId: 42 }, 'm1'))).toMatchObject({ key: 'stream:42', messageId: 'm1' });
     expect(split(chatMessageLink({ kind: 'community', slug: 'Riftn' }, 'u-1'))).toMatchObject({ key: 'community:riftn', messageId: 'u-1' });
     expect(split(chatMessageLink({ kind: 'dm', conversationId: '6b00695d11fe8f64d793ad29' }, 'x'))).toMatchObject({ key: 'dm:6b00695d11fe8f64d793ad29' });
+  });
+
+  it('opens public chat mentions through the history-aware message link', () => {
+    const path = publicChatMentionPath({ mentionContext: 'public_chat', roomId: 'topic-a', chatMessageId: 'm1' });
+    expect(path).toBe('/app/messages?chat=public&room=topic-a&msg=m1');
+    expect(split(`https://dehub.io${path}`)).toMatchObject({ target: { kind: 'public', roomId: 'topic-a' }, messageId: 'm1' });
+    expect(publicChatMentionPath({ deepLink: '/chat?chatMessage=m2' })).toBe('/app/messages?chat=public&room=global&msg=m2');
+    expect(publicChatMentionPath({ mentionContext: 'public_chat' })).toBe('/app/messages?chat=public&room=global');
+    expect(publicChatMentionPath({ mentionContext: 'comment' })).toBeNull();
+    expect(split('https://dehub.io/chat?chatMessage=m2')).toMatchObject({ key: 'public', messageId: 'm2' });
   });
 
   it('opens on riftn.com', () => {

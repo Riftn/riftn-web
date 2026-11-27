@@ -75,7 +75,7 @@ export function NotificationsDrawer() {
     window.addEventListener('open-notifications-drawer', show);
     return () => window.removeEventListener('open-notifications-drawer', show);
   }, []);
-  useEffect(() => { setOpen(false); }, [location.pathname, location.search]);
+  useEffect(() => { setOpen(false); }, [location.key]);
   const sheetRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const close = useCallback(() => setOpen(false), []);
