@@ -669,8 +669,35 @@
          empty chat, the shape of FullScreenChatShell. The script before #root
          picks it. */
       .bskel-chat { display: none; position: fixed; inset: 0; }
-      html[data-boot-chat] .bskel { display: none; }
+      html:is([data-boot-chat],[data-boot-docs]) .bskel { display: none; }
       html[data-boot-chat] .bskel-chat { display: flex; }
+      .bskel-docs { display: none; }
+      html[data-boot-docs] .bskel-docs { display: block; }
+      .docs-loading-shell { min-height: 100dvh; }
+      .docs-loading-header, .docs-loading-sidebar, .docs-loading-frame { box-sizing: border-box; }
+      .docs-loading-header { display: flex; align-items: center; gap: .75rem; height: 3.5rem; padding: 0 .75rem; border-bottom: 1px solid var(--bskel-b); }
+      .docs-loading-header span:first-child { width: 2rem; height: 2rem; }
+      .docs-loading-header span:nth-child(2) { width: 5.5rem; height: 1.25rem; }
+      .docs-loading-header span:last-child { width: 2rem; height: 2rem; margin-inline-start: auto; }
+      .docs-loading-row { display: flex; }
+      .docs-loading-sidebar { display: none; }
+      .docs-loading-column { flex: 1; min-width: 0; }
+      .docs-loading-frame { max-width: 56rem; margin-inline: auto; padding: 2rem 1.5rem; }
+      .docs-loading-shell span, .docs-loading-content span { display: block; border-radius: .5rem; background: color-mix(in srgb, currentColor 9%, transparent); }
+      .docs-loading-crumb { width: 8rem; max-width: 100%; height: 1rem; margin-bottom: 1.5rem; }
+      .docs-loading-title { width: 84%; height: clamp(2.25rem, 5vw, 3.25rem); margin-bottom: 1rem; }
+      .docs-loading-meta { width: min(15rem, 68%); height: 1.125rem; margin-bottom: 2rem; }
+      .docs-loading-content .docs-loading-cover { display: none; aspect-ratio: 40 / 21; border-radius: 1rem; margin-bottom: 2rem; }
+      :is([data-boot-docs="article"], [data-docs-loading-article]) .docs-loading-cover { display: block; }
+      .docs-loading-line { width: 100%; height: 1rem; margin-bottom: .75rem; }
+      .docs-loading-line:last-child { width: 72%; }
+      @media (min-width: 1024px) {
+        .docs-loading-header { display: none; }
+        .docs-loading-sidebar { display: block; flex: 0 0 16rem; min-height: 100dvh; padding: 1.375rem .75rem; border-inline-end: 1px solid var(--bskel-b); }
+        .docs-loading-sidebar span { width: 78%; height: 1.25rem; margin: 1.25rem .5rem; }
+        .docs-loading-sidebar span:first-child { width: 6rem; margin-top: 0; }
+        .docs-loading-sidebar span:nth-child(2) { width: auto; height: 2.25rem; margin-inline: 0; }
+      }
       .bskel-chat-list { width: 100%; padding-top: 12px; }
       .bskel-chat-top { height: 48px; margin: 0 12px 12px; border-radius: 16px; background: var(--bskel, rgba(255,255,255,.07)); }
       .bskel-chat-row { height: 80px; padding: 16px; display: flex; align-items: center; gap: 12px; }
@@ -809,8 +836,27 @@
          render, so React replaces this in the same commit that paints the app.
          aria-hidden because it is decorative scaffolding; the no-JS fallback
          below is what non-rendering fetchers get. -->
-    <script>try{if(location.pathname.replace(/\/+$/,'')==='/chat')document.documentElement.setAttribute('data-boot-chat','')}catch(e){}</script>
-    <div id="root"><div class="bskel-chat" aria-hidden="true"><div class="bskel-chat-list"><div class="bskel-chat-top"></div><div class="bskel-chat-row"></div><div class="bskel-chat-row"></div><div class="bskel-chat-row"></div><div class="bskel-chat-row"></div><div class="bskel-chat-row"></div><div class="bskel-chat-row"></div><div class="bskel-chat-row"></div></div></div><div class="bskel" aria-hidden="true">
+    <script>
+      try {
+        var bootPath = location.pathname.replace(/\/+$/, '');
+        if (bootPath === '/chat') document.documentElement.setAttribute('data-boot-chat', '');
+        if (/^\/(?:docs|guides)(?:\/|$)/.test(bootPath)) {
+          document.documentElement.setAttribute('data-boot-docs', /^\/(?:guides|docs\/blog)\/[^/]+$/.test(bootPath) ? 'article' : 'page');
+        }
+      } catch(e) {}
+    </script>
+    <div id="root"><div class="bskel-docs docs-loading-shell" aria-hidden="true">
+      <div class="docs-loading-header"><span></span><span></span><span></span></div>
+      <div class="docs-loading-row">
+        <div class="docs-loading-sidebar"><span></span><span></span><span></span><span></span><span></span><span></span></div>
+        <div class="docs-loading-column"><div class="docs-loading-frame">
+          <div class="docs-loading-content">
+            <span class="docs-loading-crumb"></span><span class="docs-loading-title"></span><span class="docs-loading-meta"></span>
+            <span class="docs-loading-cover"></span><span class="docs-loading-line"></span><span class="docs-loading-line"></span>
+          </div>
+        </div></div>
+      </div>
+    </div><div class="bskel-chat" aria-hidden="true"><div class="bskel-chat-list"><div class="bskel-chat-top"></div><div class="bskel-chat-row"></div><div class="bskel-chat-row"></div><div class="bskel-chat-row"></div><div class="bskel-chat-row"></div><div class="bskel-chat-row"></div><div class="bskel-chat-row"></div><div class="bskel-chat-row"></div></div></div><div class="bskel" aria-hidden="true">
       <div class="bskel-rail">
         <div class="bskel-logo"><div class="bskel-wash" style="width:28px;height:28px"></div><div class="bskel-wash" style="width:135px;height:28px"></div></div>
         <div class="bskel-sidebar" data-desktop-sidebar-bento>

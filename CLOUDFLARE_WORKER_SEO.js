@@ -6811,7 +6811,7 @@ const INITIAL_PUBLIC_ROUTES = new Set([
 
 const PAGE_META_TAGS = /<title>[^<]*<\/title>|<meta\b[^>]*(?:name|property)="(?:description|robots|og:[^"]+|twitter:[^"]+)"[^>]*>|<link\b[^>]*(?:rel="canonical"|hreflang="[^"]+")[^>]*>/gi;
 
-async function withInitialPublicContent(shell, page, pageStatus) {
+async function withInitialPublicContent(shell, page, pageStatus, useDocsSkeleton) {
   if (!shell.ok || !shell.headers.get('Content-Type')?.includes('text/html')) return shell;
   const html = await shell.text();
   const root = '<div id="root">';
@@ -6828,12 +6828,16 @@ async function withInitialPublicContent(shell, page, pageStatus) {
     : '');
   const body = page.match(/<body[^>]*>([\s\S]*?)<\/body>/i)?.[1] || '';
   const language = page.match(/<html\b[^>]*\blang="([^"]+)"/i)?.[1];
-  const style = '<style>#root .edge-public-content{box-sizing:border-box;max-width:74ch;margin:0 auto;padding:2rem 1rem;color:var(--boot-fg,CanvasText);background:var(--boot-bg,Canvas);line-height:1.55;overflow-wrap:anywhere}#root .edge-public-content img{max-width:100%;height:auto}#root .edge-public-content .dh-cta{display:none}</style>';
+  const style = '<style>#root .edge-public-content{box-sizing:border-box;max-width:74ch;margin:0 auto;padding:2rem 1rem;color:var(--boot-fg,CanvasText);background:var(--boot-bg,Canvas);line-height:1.55;overflow-wrap:anywhere}#root .edge-public-content img{max-width:100%;height:auto}#root .edge-public-content .dh-cta{display:none}' +
+    (useDocsSkeleton ? '#root>noscript~.bskel,#root+noscript{display:none}' : '') + '</style>';
   const snapshot = '<div class="edge-public-content">' + body + '</div>';
+  // Docs has its own first paint. Keep the readable page as the fallback for
+  // browsers without JavaScript and keep its metadata in the initial head.
+  const initialBody = useDocsSkeleton ? '<noscript>' + snapshot + '</noscript>' : snapshot;
   const result = html.replace(PAGE_META_TAGS, '')
     .replace('<head>', () => '<head>' + meta + style)
     .replace(/<html\b[^>]*>/i, tag => language ? tag.replace(/\blang="[^"]*"/i, 'lang="' + language + '"') : tag)
-    .replace(root, () => root + snapshot);
+    .replace(root, () => root + initialBody);
   const response = new Response(result, { status: pageStatus, headers: shell.headers });
   for (const name of ['Content-Length', 'Content-Encoding', 'ETag']) response.headers.delete(name);
   response.headers.append('Vary', 'User-Agent');
@@ -6881,10 +6885,10 @@ async function handleRequest(request, env, ctx) {
   // must not index as duplicates of dehub.io.
   const isCanonicalHost = url.hostname === 'riftn.com';
   const initialPath = canonicalizePath(pathname).replace(/\/+$/, '') || '/';
+  const isDocsDocument = initialPath === '/docs' || /^\/(?:docs|guides)\//.test(initialPath);
   const browserPublicDocument = request.method === 'GET' && request.headers.get('Accept')?.includes('text/html') &&
     !isCrawlerUa(request.headers.get('User-Agent') || '') && url.searchParams.get(APP_ESCAPE_PARAM) !== '1' &&
-    !url.searchParams.has('q') && (INITIAL_PUBLIC_ROUTES.has(initialPath) ||
-      /^\/(?:docs|guides)\//.test(initialPath));
+    !url.searchParams.has('q') && (INITIAL_PUBLIC_ROUTES.has(initialPath) || isDocsDocument);
   // Every prerendered response passes through here, which makes it the one
   // place that can put the site's own look on all of them — the pages built
   // in this file and the ones proxied from the ssr-seo function alike.
@@ -6914,7 +6918,7 @@ async function handleRequest(request, env, ctx) {
       html = html.replace('</main>', comparisonHighlights() + '</main>');
     }
     if (browserPublicDocument && (resp.status === 200 || resp.status === 404)) {
-      return withInitialPublicContent(await guardNext(), html, resp.status);
+      return withInitialPublicContent(await guardNext(), html, resp.status, isDocsDocument);
     }
     return new Response(html, {
       status: resp.status,

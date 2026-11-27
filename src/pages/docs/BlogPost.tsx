@@ -16,7 +16,6 @@ import { BlogPostBody } from '@/components/blog/BlogPostBody';
 import { BlogPostFooter } from '@/components/blog/BlogPostFooter';
 import { RelatedPosts } from '@/components/blog/RelatedPosts';
 import { BreadcrumbNavigation } from '@/components/blog/BreadcrumbNavigation';
-import { BlogBanner } from '@/components/blog/BlogBanner';
 import { useBlogData } from '@/hooks/useBlogData';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { getBlogShareImageUrl } from '@/lib/blogShareImage';
@@ -25,7 +24,7 @@ import { scrollDocumentTo } from '@/lib/document-scroll';
 // Subtle loading placeholder while the article markdown streams in — the docs
 // light background is textured, so translucent bg-muted bars (no flat paint).
 const BodyShimmer = () => (
-  <div className="mb-12 space-y-8" aria-hidden="true">
+  <div className="space-y-8" aria-hidden="true">
     {[0, 1, 2].map(block => (
       <div key={block} className="space-y-3">
         <div className="h-4 w-11/12 rounded-full bg-muted/50 animate-pulse" />
@@ -166,38 +165,24 @@ const BlogPost = () => {
             shareUrl={shareUrl} 
             imageUrl={fullImageUrl || undefined}
           />
-          {content !== undefined ? (
-            <BlogPostBody bannerImage={bannerImage} bannerImageAlt={post.bannerImageAlt} content={content} />
-          ) : (
-            <>
-              {/* Banner still renders instantly from bundled metadata */}
-              <BlogBanner
-                src={bannerImage}
-                width={1100}
-                widths={[480, 736, 1100, 1440]}
-                sizes="(min-width: 896px) 896px, 100vw"
-                alt={post.bannerImageAlt}
-                loading="eager"
-                fetchPriority="high"
-                className="mb-8 rounded-2xl"
-              />
-              {bodyFailed ? (
-                <div className="mb-12 rounded-2xl border border-border bg-muted/30 px-6 py-10 text-center">
-                  <p className="mb-4 text-royal-blue/70 font-exo">{t('blog.loadFailed')}</p>
-                  <button
-                type="button"
-                onClick={() => refetchBody()}
-                className="inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-royal-blue to-middle-blue text-plain-white font-semibold rounded-lg hover:from-royal-blue/90 hover:to-middle-blue/90 transition-all duration-200 font-exo"
-                  >
-                <RotateCw className="w-4 h-4 mr-2" />
-                {t('blog.retry')}
-                  </button>
-                </div>
-              ) : (
-                <BodyShimmer />
-              )}
-            </>
-          )}
+          <BlogPostBody
+            bannerImage={bannerImage}
+            bannerImageAlt={post.bannerImageAlt}
+            content={content}
+            fallback={bodyFailed ? (
+              <div className="rounded-2xl border border-border bg-muted/30 px-6 py-10 text-center">
+                <p className="mb-4 text-royal-blue/70 font-exo">{t('blog.loadFailed')}</p>
+                <button
+                  type="button"
+                  onClick={() => refetchBody()}
+                  className="inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-royal-blue to-middle-blue text-plain-white font-semibold rounded-lg hover:from-royal-blue/90 hover:to-middle-blue/90 transition-all duration-200 font-exo"
+                >
+                  <RotateCw className="w-4 h-4 mr-2" />
+                  {t('blog.retry')}
+                </button>
+              </div>
+            ) : <BodyShimmer />}
+          />
           <BlogPostFooter 
             shareUrl={shareUrl} 
             postTitle={post.title} 
