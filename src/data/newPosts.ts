@@ -1,4 +1,5 @@
 import { BlogPost as BlogPostType } from '@/types/blog';
+import { fansiteAcquisitionPost } from './posts/fansiteAcquisitionPost';
 import { riftnRelaunchPost } from './posts/riftnRelaunchPost';
 import { isRiftnDehubPost } from './posts/isRiftnDehubPost';
 import { decentralizationSpectrumPost } from './posts/decentralizationSpectrumPost';
@@ -1435,6 +1436,7 @@ const bnbPoolUpdatePost: BlogPostType = {
 };
 
 export const newPosts: BlogPostType[] = [
+  fansiteAcquisitionPost,
   fastestBlockchainsPost,
   katanaVsGenjutsuPost,
   filmsHurenPost,
