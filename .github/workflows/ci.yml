@@ -51,6 +51,8 @@ jobs:
           psql -X -v ON_ERROR_STOP=1 -f tests/sql/event-audit.sql
       - name: Verify liked request completion preferences and delivery
         run: psql -X -v ON_ERROR_STOP=1 -f tests/sql/liked-request-completion.sql
+      - name: Verify request reply and reaction alerts
+        run: psql -X -v ON_ERROR_STOP=1 -f tests/sql/request-reaction-notifications.sql
 
   account-mcp:
     name: Account MCP permissions and Creator jobs
