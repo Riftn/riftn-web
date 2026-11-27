@@ -10,7 +10,7 @@ import { useSurfaceDraft } from '@/hooks/use-surface-draft';
  */
 
 import { useState, useEffect, useMemo, useRef } from 'react';
-import { PostFormatButtons, postStyleShortcut } from '@/features/post/components/PostFormatButtons';
+import { PostTextContextMenu, postStyleShortcut } from '@/features/post/components/PostTextContextMenu';
 import { postTextRuns, togglePostTextStyle, type PostTextStyle } from '@/lib/post-text-format';
 import { renderTextWithLinks } from '@/components/app/TranslatableText';
 import { Loader2, ShoppingBag } from "lucide-react";
@@ -450,6 +450,7 @@ export function EditPostModal({
           </div>}
           <div className="space-y-2">
             <Label htmlFor="edit-description" className="text-sm font-medium text-zinc-300">{_copy("copy.526e0087cc3f", { defaultValue: "Description" })}</Label>
+            <PostTextContextMenu fieldRef={descriptionRef} onFormat={formatDescription}>
             <Textarea
               ref={descriptionRef}
               id="edit-description"
@@ -465,7 +466,7 @@ export function EditPostModal({
               maxLength={descriptionMax}
               placeholder={_copy("copy.7881e4a3da46", { defaultValue: "Post description" })}
             />
-            <PostFormatButtons onFormat={formatDescription} />
+            </PostTextContextMenu>
             {postTextRuns(description).some(run => run.styles.length > 0) && (
               <div className="whitespace-pre-wrap break-words text-sm text-white">{renderTextWithLinks(description)}</div>
             )}
