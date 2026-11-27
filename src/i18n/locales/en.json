@@ -997,6 +997,8 @@
     },
     "reorderHint": "Hold and drag any icon to rearrange",
     "moveGroupHint": "Drop on another tab to move it there",
+    "moveShortcut": "Move a shortcut",
+    "moveShortcutTo": "Move {{name}} to",
     "reorderHintGroups": "Hold and drag any icon to rearrange, or onto another tab to move it",
     "reorderReset": "Reset",
     "reorderResetLong": "Reset menu order",

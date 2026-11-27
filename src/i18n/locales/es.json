@@ -997,6 +997,8 @@
     },
     "reorderHint": "Mantén y arrastra cualquier icono para reorganizar",
     "moveGroupHint": "Suéltalo en otra pestaña para moverlo allí",
+    "moveShortcut": "Mover un acceso directo",
+    "moveShortcutTo": "Mover {{name}} a",
     "reorderHintGroups": "Mantén pulsado y arrastra un icono para reordenarlo, o a otra pestaña para moverlo",
     "reorderReset": "Restablecer",
     "reorderResetLong": "Restablecer el orden del menú",

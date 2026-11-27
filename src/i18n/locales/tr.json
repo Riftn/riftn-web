@@ -997,6 +997,8 @@
     },
     "reorderHint": "Yeniden düzenlemek için herhangi bir simgeyi basılı tutun ve sürükleyin",
     "moveGroupHint": "Oraya taşımak için başka bir sekmeye bırak",
+    "moveShortcut": "Bir kısayolu taşı",
+    "moveShortcutTo": "{{name}} şuraya taşınsın",
     "reorderHintGroups": "Yeniden sıralamak için bir simgeye basılı tutup sürükle ya da taşımak için başka bir sekmeye bırak",
     "reorderReset": "Sıfırla",
     "reorderResetLong": "Menü sırasını sıfırla",

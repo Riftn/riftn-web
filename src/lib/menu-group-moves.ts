@@ -66,6 +66,15 @@ export function writeMenuGroupMoves(moves: MenuGroupMoves) {
   window.dispatchEvent(new CustomEvent(CHANGE_EVENT));
 }
 
+export function moveMenuTile(id: string, target: MenuGroupMoveTarget, home: MenuGroupMoveTarget | null): MenuGroupMoves | null {
+  const moves = { ...readMenuGroupMoves() };
+  if ((moves[id] ?? home) === target) return null;
+  if (home === target) delete moves[id];
+  else moves[id] = target;
+  writeMenuGroupMoves(moves);
+  return readMenuGroupMoves();
+}
+
 function subscribe(onChange: () => void) {
   window.addEventListener(CHANGE_EVENT, onChange);
   window.addEventListener('storage', onChange);

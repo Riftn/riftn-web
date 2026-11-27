@@ -1,6 +1,12 @@
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, useReducedMotion } from 'framer-motion';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { useUserPreferences } from '@/contexts/UserPreferencesContext';
+import { MENU_GROUP_MOVES_PREF_KEY, moveMenuTile } from '@/lib/menu-group-moves';
+import { navItemId } from './nav-item-id';
+import { NAV_LABEL_KEYS } from './SidebarNavItem';
 import { cn } from '@/lib/utils';
 import { GlassIndicator, glideOnTabClick } from '@/components/app/feeds/GlassIndicator';
 import { ThemedIcon } from '@/components/app/war/WarHudIcon';
@@ -8,7 +14,7 @@ import { useKidsModeLock } from '@/hooks/use-kids-mode';
 import type { MenuLayout } from '@/lib/menu-layout';
 import type { NavItem } from '@/types/app.types';
 import { MenuReorderHint, MobileMenuGrid, menuIconKey } from './MobileMenuGrid';
-import type { MenuGroup } from './menu-groups';
+import { defaultMenuGroupOf, MENU_GROUPS, type MenuGroup } from './menu-groups';
 
 /**
  * The phone menu's body, in the layout picked in Settings (lib/menu-layout):
@@ -57,6 +63,8 @@ export function MobileMenuLayout({
     return <MobileMenuGrid {...gridProps} items={flatItems} searching={searching} columns={layout === 'sections' ? 4 : 3} />;
   }
 
+  const movePicker = <MenuShortcutPicker groups={groups} />;
+
   if (layout === 'sections') {
     return (
       <div data-menu-layout="sections">
@@ -70,6 +78,7 @@ export function MobileMenuLayout({
           </section>
         ))}
         <MenuReorderHint />
+        {movePicker}
       </div>
     );
   }
@@ -127,6 +136,7 @@ export function MobileMenuLayout({
           </motion.div>
         )}
         <MenuReorderHint />
+        {movePicker}
       </div>
     );
   }
@@ -134,15 +144,64 @@ export function MobileMenuLayout({
   // Tabs: the groups sit side by side; a sideways drag moves the row under
   // the finger and the lit tab's glass slides with it.
   return (
-    <TabsPager
-      groups={groups}
-      activeTab={activeTab}
-      onTabChange={onTabChange}
-      reduceMotion={!!reduceMotion}
-      renderPage={(group) => (
-        <MobileMenuGrid {...gridProps} items={group.items} columns={3} showHint={false} moveHint />
-      )}
-    />
+    <>
+      <TabsPager
+        groups={groups}
+        activeTab={activeTab}
+        onTabChange={onTabChange}
+        reduceMotion={!!reduceMotion}
+        renderPage={(group) => (
+          <MobileMenuGrid {...gridProps} items={group.items} columns={3} showHint={false} moveHint />
+        )}
+      />
+      {movePicker}
+    </>
+  );
+}
+
+function MenuShortcutPicker({ groups }: { groups: MenuGroup[] }) {
+  const { t } = useTranslation();
+  const prefs = useUserPreferences();
+  const [open, setOpen] = useState(false);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const source = groups.find((group) => group.items.some((item) => navItemId(item) === selectedId));
+  const selected = source?.items.find((item) => navItemId(item) === selectedId);
+  const label = (item: NavItem) => t(NAV_LABEL_KEYS[item.label] || item.label, item.label);
+
+  const move = (target: MenuGroup['id']) => {
+    if (!selected || !selectedId) return;
+    const moves = moveMenuTile(selectedId, target, defaultMenuGroupOf(selected) ?? 'riftn');
+    if (moves) prefs?.setPref(MENU_GROUP_MOVES_PREF_KEY, moves);
+    setOpen(false);
+    setSelectedId(null);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={(next) => { setOpen(next); if (!next) setSelectedId(null); }}>
+      <DialogTrigger asChild>
+        <Button variant="ghost" size="sm" className="mx-auto mt-2 flex">{t('nav.moveShortcut')}</Button>
+      </DialogTrigger>
+      <DialogContent aria-describedby={undefined} className="z-[112]" overlayClassName="z-[111]">
+        <DialogTitle>{selected ? t('nav.moveShortcutTo', { name: label(selected) }) : t('nav.moveShortcut')}</DialogTitle>
+        <div key={selectedId} className="grid max-h-[60dvh] gap-2 overflow-y-auto">
+          {selected
+            ? MENU_GROUPS.filter((group) => group.id !== source?.id).map((group) => (
+                <Button key={group.id} variant="outline" onClick={() => move(group.id)}>{t(group.labelKey, group.fallback)}</Button>
+              ))
+            : groups.map((group) => (
+                <div key={group.id} className="grid gap-1">
+                  <h3 className="text-sm font-semibold text-muted-foreground">{t(group.labelKey, group.fallback)}</h3>
+                  {group.items.map((item) => (
+                    <Button key={navItemId(item)} variant="ghost" className="justify-start" onClick={() => setSelectedId(navItemId(item))}>
+                      {label(item)}
+                    </Button>
+                  ))}
+                </div>
+              ))}
+          {selected && <Button variant="ghost" onClick={() => setSelectedId(null)}>{t('common.back')}</Button>}
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 
