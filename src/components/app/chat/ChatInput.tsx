@@ -80,6 +80,7 @@ export interface ChatInputSendArgs {
 interface ChatInputProps {
   /** Phones on /app/messages: the + bar, with every other button in the drawer + opens. */
   phoneB?: boolean;
+  voiceAsPrimaryAction?: boolean;
   /** Put the caret in the box on mount (a chat just opened from New message, keyboard already up). */
   autoFocus?: boolean;
   groupPhotos?: boolean;
@@ -164,7 +165,7 @@ interface ChatInputProps {
   allowLock?: boolean;
 }
 
-export function ChatInput({ onSendMessage, onTypingActivity, groupPhotos = false, onTipClick, onScheduleClick, scheduledCount = 0, onPollClick, onNoteClick, sendDisabled, sendDisabledReason, isSendingFee, feeAmount, confirmBeforeSend, canSend, replyTo, onCancelReply, incomingFile, initialText, incomingLink, onIncomingLinkApplied, thread, peerName, draftKey, allowDocuments = true, voiceMaxDuration = 59, allowLock = false, autoFocus = false, phoneB = false }: ChatInputProps) {
+export function ChatInput({ onSendMessage, onTypingActivity, groupPhotos = false, onTipClick, onScheduleClick, scheduledCount = 0, onPollClick, onNoteClick, sendDisabled, sendDisabledReason, isSendingFee, feeAmount, confirmBeforeSend, canSend, replyTo, onCancelReply, incomingFile, initialText, incomingLink, onIncomingLinkApplied, thread, peerName, draftKey, allowDocuments = true, voiceMaxDuration = 59, allowLock = false, autoFocus = false, phoneB = false, voiceAsPrimaryAction = phoneB }: ChatInputProps) {
   const { t: _copy } = _useCopy();
   const { t } = useTranslation();
   const [message, setMessage] = useDraft(draftKey, initialText ?? '');
@@ -814,6 +815,7 @@ export function ChatInput({ onSendMessage, onTypingActivity, groupPhotos = false
     clear: () => { setMessage.complete(message, ''); resetComposerHeight(); },
   });
   const hasSomethingToSend = !!(message.trim() || imageFile || docFile || audioPreview || studioItems.length);
+  const showVoiceAction = voiceAsPrimaryAction && !hasSomethingToSend && !isSendingFee;
   return (
     <>
     {/* Wide layouts: the rail is a band of its own above the composer, where
@@ -1067,23 +1069,33 @@ export function ChatInput({ onSendMessage, onTypingActivity, groupPhotos = false
                 onSelect={mention.handleSelect}
                 onClose={mention.handleClose}
               />
-              <button
-                type="button"
-                data-chat-send
-                aria-label={_copy('dm.sendMessage', { defaultValue: 'Send message' })}
-                onMouseDown={(e) => e.preventDefault()}
-                onClick={handleSend}
-                disabled={sendDisabled || isSendingFee || !hasSomethingToSend}
-                title={sendDisabled ? sendDisabledReason : feeAmount ? t('messages.feePerMessage', { amount: feeAmount.toLocaleString() }) : undefined}
-                className={cn('mb-[3px] ml-1.5 flex h-[30px] shrink-0 items-center justify-center gap-1 rounded-lg bg-[var(--pb-accent)] text-[var(--pb-accent-ink)] transition-opacity disabled:opacity-35 [&>svg]:h-[17px] [&>svg]:w-[17px]', feeAmount ? 'px-2.5' : 'w-[30px]')}
-              >
-                {isSendingFee ? <Loader2 className="animate-spin" /> : (
-                  <>
-                    {!!feeAmount && <span className="text-[11px] font-bold leading-none">{feeAmount.toLocaleString()}</span>}
-                    <ArrowUp strokeWidth={2.6} />
-                  </>
-                )}
-              </button>
+              <VoiceRecorder
+                maxDuration={voiceMaxDuration}
+                onRecordingComplete={handleVoiceRecordingComplete}
+                disabled={sendDisabled || isSendingFee}
+                hideTrigger={!showVoiceAction}
+                triggerLabel={_copy('dm.trayVoice', { defaultValue: 'Voice note' })}
+                triggerClassName="mb-[3px] ml-1.5 h-[30px] w-[30px] shrink-0 rounded-lg bg-[var(--pb-accent)] text-[var(--pb-accent-ink)] hover:bg-[var(--pb-accent)] hover:text-[var(--pb-accent-ink)] [&>svg]:h-[17px] [&>svg]:w-[17px]"
+              />
+              {!showVoiceAction && (
+                <button
+                  type="button"
+                  data-chat-send
+                  aria-label={_copy('dm.sendMessage', { defaultValue: 'Send message' })}
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={handleSend}
+                  disabled={sendDisabled || isSendingFee || !hasSomethingToSend}
+                  title={sendDisabled ? sendDisabledReason : feeAmount ? t('messages.feePerMessage', { amount: feeAmount.toLocaleString() }) : undefined}
+                  className={cn('mb-[3px] ml-1.5 flex h-[30px] shrink-0 items-center justify-center gap-1 rounded-lg bg-[var(--pb-accent)] text-[var(--pb-accent-ink)] transition-opacity disabled:opacity-35 [&>svg]:h-[17px] [&>svg]:w-[17px]', feeAmount ? 'px-2.5' : 'w-[30px]')}
+                >
+                  {isSendingFee ? <Loader2 className="animate-spin" /> : (
+                    <>
+                      {!!feeAmount && <span className="text-[11px] font-bold leading-none">{feeAmount.toLocaleString()}</span>}
+                      <ArrowUp strokeWidth={2.6} />
+                    </>
+                  )}
+                </button>
+              )}
             </div>
           </div>
           {trayOpen && (
@@ -1093,9 +1105,6 @@ export function ChatInput({ onSendMessage, onTypingActivity, groupPhotos = false
               </TrayCell>
               <TrayCell label={_copy('dm.trayGif', { defaultValue: 'GIF & emoji' })}>
                 <EmojiGifPicker onEmojiSelect={handleEmojiSelect} onGifSelect={handleGifSelect} />
-              </TrayCell>
-              <TrayCell label={_copy('dm.trayVoice', { defaultValue: 'Voice note' })} wide>
-                <VoiceRecorder maxDuration={voiceMaxDuration} onRecordingComplete={handleVoiceRecordingComplete} disabled={sendDisabled} />
               </TrayCell>
               {onTipClick && (
                 <TrayCell label={_copy('dm.trayTip', { defaultValue: 'Tip' })}>
@@ -1311,11 +1320,13 @@ export function ChatInput({ onSendMessage, onTypingActivity, groupPhotos = false
               : _copy("copy.21298c62c8e5", { defaultValue: "Attach a file" })}</TooltipContent>
           </Tooltip>
 
-          <VoiceRecorder
-            maxDuration={voiceMaxDuration}
-            onRecordingComplete={handleVoiceRecordingComplete}
-            disabled={sendDisabled}
-          />
+          {!voiceAsPrimaryAction && (
+            <VoiceRecorder
+              maxDuration={voiceMaxDuration}
+              onRecordingComplete={handleVoiceRecordingComplete}
+              disabled={sendDisabled}
+            />
+          )}
 
 
           <Popover>
@@ -1401,31 +1412,43 @@ export function ChatInput({ onSendMessage, onTypingActivity, groupPhotos = false
             </PopoverContent>
           </Popover>
 
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className={`h-8 ${feeAmount ? 'w-auto px-2 gap-1' : 'w-8'} ${sendDisabled ? 'text-zinc-600 cursor-not-allowed' : 'text-zinc-400 hover:text-white hover:bg-zinc-700'}`}
-            // Don't steal focus from the textarea — keeps the on-screen
-            // keyboard open across sends instead of collapsing every tap.
-            onMouseDown={(e) => e.preventDefault()}
-            onClick={handleSend}
-            disabled={sendDisabled || isSendingFee || (!message.trim() && !imageFile && !docFile && !audioPreview && !studioItems.length)}
-            title={sendDisabled ? sendDisabledReason : feeAmount ? t('messages.feePerMessage', { amount: feeAmount.toLocaleString() }) : undefined}
-          >
-            {isSendingFee ? (
-              <Loader2 className="w-5 h-5 animate-spin" />
-            ) : (
-              <>
-                {!!feeAmount && (
-                  <span className={`text-[11px] font-semibold leading-none ${sendDisabled ? 'text-zinc-600' : 'text-white'}`}>
-                    {feeAmount.toLocaleString()}
-                  </span>
-                )}
-                <Send className="w-5 h-5" />
-              </>
-            )}
-          </Button>
+          {voiceAsPrimaryAction && (
+            <VoiceRecorder
+              maxDuration={voiceMaxDuration}
+              onRecordingComplete={handleVoiceRecordingComplete}
+              disabled={sendDisabled || isSendingFee}
+              hideTrigger={!showVoiceAction}
+              triggerLabel={_copy('dm.trayVoice', { defaultValue: 'Voice note' })}
+            />
+          )}
+          {!showVoiceAction && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className={`h-8 ${feeAmount ? 'w-auto px-2 gap-1' : 'w-8'} ${sendDisabled ? 'text-zinc-600 cursor-not-allowed' : 'text-zinc-400 hover:text-white hover:bg-zinc-700'}`}
+              // Don't steal focus from the textarea — keeps the on-screen
+              // keyboard open across sends instead of collapsing every tap.
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={handleSend}
+              disabled={sendDisabled || isSendingFee || !hasSomethingToSend}
+              aria-label={_copy('dm.sendMessage', { defaultValue: 'Send message' })}
+              title={sendDisabled ? sendDisabledReason : feeAmount ? t('messages.feePerMessage', { amount: feeAmount.toLocaleString() }) : undefined}
+            >
+              {isSendingFee ? (
+                <Loader2 className="w-5 h-5 animate-spin" />
+              ) : (
+                <>
+                  {!!feeAmount && (
+                    <span className={`text-[11px] font-semibold leading-none ${sendDisabled ? 'text-zinc-600' : 'text-white'}`}>
+                      {feeAmount.toLocaleString()}
+                    </span>
+                  )}
+                  <Send className="w-5 h-5" />
+                </>
+              )}
+            </Button>
+          )}
         </div>
       </div>
       )}
@@ -1447,14 +1470,13 @@ export function ChatInput({ onSendMessage, onTypingActivity, groupPhotos = false
 }
 
 /** One tile in the phone composer's + drawer: the icon with its name under it. */
-function TrayCell({ label, wide, children }: { label: string; wide?: boolean; children: ReactNode }) {
+function TrayCell({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div
       data-tray-cell
       className={cn(
         'flex min-w-0 flex-col items-center gap-1.5 text-center',
         '[&>button]:grid [&>button]:h-[54px] [&>button]:w-[54px] [&>button]:place-items-center [&>button]:rounded-[13px] [&>button]:text-white [&>button]:transition-opacity [&>button:disabled]:opacity-40 [&>button_svg]:!h-6 [&>button_svg]:!w-6',
-        wide && 'has-[[data-voice-recording]]:col-span-4 [&:has([data-voice-recording])>span]:hidden',
       )}
     >
       {children}
