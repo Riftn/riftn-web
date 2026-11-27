@@ -67,7 +67,7 @@ export interface AuthContextType {
    * UNKNOWN_CREDENTIAL means the chosen passkey has no account yet.
    */
   connectWithPasskey: (mode: 'signin' | 'signup') => Promise<boolean>;
-  connectWithWallet: (wallet: WalletProvider) => Promise<boolean>;
+  connectWithWallet: (wallet: WalletProvider) => Promise<boolean | 'same-account'>;
   /** Give up on a wallet sign-in that is still waiting on the wallet, and let the wallet go. */
   cancelWalletLogin: () => Promise<void>;
   /**
