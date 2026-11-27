@@ -4,6 +4,10 @@ import { reloadVideoSource, videoSourceOf } from './hls-vod';
 const recoveries = new WeakMap<object, ReturnType<typeof createPlaybackRecovery>>();
 export const recoveryForVideo = (video: object) => recoveries.get(video);
 
+export function rewindEndedVideo(video: Partial<Pick<HTMLVideoElement, 'ended' | 'currentTime'>>): void {
+  if (video.ended) video.currentTime = 0;
+}
+
 export function attachPlaybackRecovery(video: HTMLVideoElement, options: {
   allowed: () => boolean;
   changed: (phase: PlaybackPhase) => void;
@@ -25,6 +29,7 @@ export function attachPlaybackRecovery(video: HTMLVideoElement, options: {
         if (position > 0 && Number.isFinite(duration) && position < duration) video.currentTime = position;
       }
       if (allowed()) {
+        if (!reload && !video.error) rewindEndedVideo(video);
         try {
           await video.play();
         } catch (error) {
