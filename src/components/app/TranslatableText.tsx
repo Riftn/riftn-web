@@ -1,3 +1,4 @@
+import { hasUnexpectedHan } from '../../../supabase/functions/_shared/translation-target-script';
 import { reportPostEvent } from '@/lib/api/dehub/post-stats';
 import { useTranslation as _useCopy } from 'react-i18next';
 import { TranslationCooldown } from '@/lib/translation-cooldown';
@@ -1052,7 +1053,7 @@ export function useTranslation(
       // Poison from before the garbage guard existed must not outlive this
       // session: drop it here and the next persist writes it out of
       // localStorage too, then fall through to ask the server afresh.
-      if (looksLikeTranslationGarbage(cached.translated)) {
+      if (looksLikeTranslationGarbage(cached.translated) || hasUnexpectedHan(text, cached.translated, targetLang)) {
         translationCache.delete(cacheKey);
         schedulePersist();
       } else if (isNoOpTranslation(cached.translated, text)) {
@@ -1094,8 +1095,8 @@ export function useTranslation(
 
       // An error message is not a translation of anything. Refuse it without
       // caching — the next attempt may reach a provider that answers honestly.
-      if (looksLikeTranslationGarbage(translated)) {
-        console.error('[Translate] Provider returned an error message, discarding');
+      if (looksLikeTranslationGarbage(translated) || hasUnexpectedHan(text, translated, targetLang)) {
+        console.error('[Translate] Provider returned unusable text, discarding');
         if (!current()) return;
         setError(_copy("copy.81cb3cf414b1", { defaultValue: "Translation unavailable" }));
         setTimeout(() => { if (current()) setError(null); }, 3000);

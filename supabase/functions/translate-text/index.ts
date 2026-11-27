@@ -28,6 +28,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { rateLimitByIp } from "../_shared/auth.ts";
 import { languageNameFor } from "../_shared/language-names.ts";
 import { tryFree } from "../_shared/free-models.ts";
+import { hasUnexpectedHan } from '../_shared/translation-target-script.ts';
 import { canUseMyMemory, comparableLanguage, preservesProtectedText, translationProse } from './quality.ts';
 import { createTranslationUsage, type TranslationUsage } from './usage.ts';
 import { controlRpc, controlledProviderFetch, ProviderControlError } from '../_shared/provider-control.ts';
@@ -855,7 +856,8 @@ serve(async (req) => {
     if (sourceLang === comparableTarget) return json({ translatedText: text, sameLanguage: true });
 
     const useMyMemory = canUseMyMemory(isPublicText, text, sourceLang, targetLang);
-    const accepts = (output: unknown) => isUsableTranslation(text, output, sourceLang);
+    const accepts = (output: unknown) => isUsableTranslation(text, output, sourceLang)
+      && !hasUnexpectedHan(text, output, targetLang);
     const acceptsCached = (output: string, provider: string, source: string | null) => {
       if (provider === 'same-language' || provider === 'mymemory-segments' || provider.includes('verbatim')) return false;
       if (provider === 'mymemory' && (!useMyMemory || !source || comparableLanguage(source) !== sourceLang)) return false;
@@ -916,7 +918,7 @@ serve(async (req) => {
 
     if (useMyMemory) {
       const result = await translateWithMyMemory(text, comparableTarget, sourceLang);
-      if (result) return respond(result, 'mymemory');
+      if (result && accepts(result.translatedText)) return respond(result, 'mymemory');
     }
 
     // Models see full context for long, ambiguous, dialect and mixed-language

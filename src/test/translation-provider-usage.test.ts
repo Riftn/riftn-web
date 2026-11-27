@@ -324,3 +324,19 @@ it('does not cache an unconfirmed echo as a same-language translation', async ()
   expect(result.sameLanguage).toBeUndefined();
   expect(hooks.cache.size).toBe(0);
 });
+
+it('falls back when the provider returns Han text for a Spanish target', async () => {
+  env.OPENAI_API_KEY = 'fixture-openai-key';
+  provider = url => url === lunaUrl ? luna('数据显示情况正好相反。') : native();
+  await import('../../supabase/functions/translate-text/index');
+  expect(await (await hooks.handler!(request())).json()).toMatchObject({ translatedText: translated });
+  expect(await (await hooks.handler!(request())).json()).toMatchObject({ translatedText: translated, cached: true });
+});
+
+it.each(['zh', 'zh_tw', 'yue', 'ja'])('accepts Han text for the %s target', async targetLang => {
+  const han = '数据显示情况正好相反。';
+  env.OPENAI_API_KEY = 'fixture-openai-key';
+  provider = () => luna(han);
+  await import('../../supabase/functions/translate-text/index');
+  expect(await (await hooks.handler!(request(source, { targetLang }))).json()).toMatchObject({ translatedText: han });
+});
