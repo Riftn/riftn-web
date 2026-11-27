@@ -1710,7 +1710,7 @@ export default function MessagesPage({ fullscreen = false }: { fullscreen?: bool
             </div>
             <div ref={chatPullRef} data-chat-list-body>
             {/* Statuses from people you follow, Instagram style, above the chat cards. */}
-            {!guest && walletAddress && !inRequests && !showArchived && (!tabsOn || activeTab === 'all') && (
+            {!guest && walletAddress && !inRequests && !showArchived && (
               <StatusRow me={statusMe} />
             )}
             <ChatPinStrip

@@ -42,6 +42,18 @@ describe('StatusRow', () => {
     expect(within(status).getByText('hello')).toBeTruthy();
   });
 
+  it('shows the GIF in the face slot with a countdown and username', async () => {
+    const gifUrl = 'https://media.giphy.com/media/example/giphy.gif';
+    getNotes.mockResolvedValue({ mine: null, notes: [{ author, note: { ...note, gifUrl } }] });
+    const { StatusRow } = await import('@/components/app/chat/NotesRow');
+    render(<StatusRow me={{ ...author, address: '0xdef' }} />);
+
+    const status = await screen.findByRole('button', { name: 'araf' });
+    expect(status.querySelector('[data-note-gif-face]')?.getAttribute('src')).toBe(gifUrl);
+    expect(status.querySelector('[data-note-ring]')).not.toBeNull();
+    expect(within(status).queryByText('hello')).toBeNull();
+  });
+
   it('hides one status or collapses and restores the Messages row independently', async () => {
     const other = { ...author, address: '0x123', displayName: 'Sam' };
     getNotes.mockResolvedValue({ mine: null, notes: [{ author, note }, { author: other, note: { ...note, id: 'n2' } }] });
