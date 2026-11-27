@@ -276,3 +276,9 @@ html[data-theme='light']:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_)
   [data-inplace-edit]:not(:where([data-keep-dark] *, [data-on-media] *, [data-media-full] *)) {
   color: #2e2e2e !important;
 }
+
+/* Sticky picker labels need an opaque light surface so scrolling emoji stay clear underneath. */
+html:is([data-theme='light'], [data-system-tone='light'])
+  [data-emoji-section-heading]:not(:where([data-keep-dark], [data-keep-dark] *)) {
+  background-color: var(--sl-card, #f4f4f6) !important;
+}

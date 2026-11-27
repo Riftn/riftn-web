@@ -473,7 +473,7 @@ export function EmojiPanel({ onSelect, selected, className, autoFocus = true }: 
                 containIntrinsicSize: `auto ${Math.ceil((s.key === 'custom' ? custom.length + 1 : s.items.length) / COLS) * ROW_PX + 28}px`,
               }}
             >
-              <div className="sticky top-0 z-[1] px-2.5 py-1 text-[11px] font-medium text-zinc-400 bg-zinc-900/90 backdrop-blur-sm">
+              <div data-emoji-section-heading className="sticky top-0 z-[1] px-2.5 py-1 text-[11px] font-medium text-zinc-400 bg-zinc-900/90 backdrop-blur-sm">
                 {t(`emojiPicker.group.${s.key}`)}
               </div>
               {s.key === 'custom' ? renderCustomGrid(custom, true) : renderGrid(s.items, s.key)}
