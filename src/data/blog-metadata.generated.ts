@@ -2989,6 +2989,30 @@ export const blogPostsMetadata: BlogPost[] = [
 // arrays at runtime in blogUtils.ts — metadata-only logic, no third copy here.
 export const newPostsMetadata: BlogPost[] = [
   {
+    "id": "riftn-acquires-fansite",
+    "slug": "riftn-acquires-fansite",
+    "title": "Riftn Has Acquired Fan.site. Here’s What Happens to BJ",
+    "excerpt": "Eligible BJ investors can claim 100 $RIFT per BJ at launch. Presale and open-market buyers who register before 7 December also qualify for a bonus.",
+    "content": "",
+    "bannerImage": "/media/riftn-wordmark-banner.png",
+    "bannerImageAlt": "Riftn wordmark",
+    "author": {
+      "name": "Mal Jan"
+    },
+    "publishedAt": "2026-11-27T00:00:00.000Z",
+    "tags": [
+      "Fan.site",
+      "BJ",
+      "RIFT",
+      "Airdrop"
+    ],
+    "readingTime": 2,
+    "featured": false,
+    "status": "published",
+    "seoTitle": "Riftn Acquires Fan.site: BJ Claims and the $RIFT Launch | Riftn",
+    "seoDescription": "Riftn has acquired Fan.site. See the 100 $RIFT per BJ claim rate, planned listing terms and the registration deadline for the presale and open-market buyer bonus."
+  },
+  {
     "id": "fastest-blockchains-2026",
     "slug": "fastest-blockchains-2026",
     "title": "Fastest Blockchains in 2026: Real TPS, Block Time and Finality Compared",
@@ -4153,31 +4177,28 @@ export const newPostsMetadata: BlogPost[] = [
 
 // getLatestPost() result — docs home hero.
 export const latestPostMetadata: BlogPost | undefined = {
-  "id": "fastest-blockchains-2026",
-  "slug": "fastest-blockchains-2026",
-  "title": "Fastest Blockchains in 2026: Real TPS, Block Time and Finality Compared",
-  "excerpt": "Which blockchain is fastest in 2026? Live transactions per second, peak TPS, block time and finality for 12 major chains, and why the advertised numbers mislead.",
+  "id": "riftn-acquires-fansite",
+  "slug": "riftn-acquires-fansite",
+  "title": "Riftn Has Acquired Fan.site. Here’s What Happens to BJ",
+  "excerpt": "Eligible BJ investors can claim 100 $RIFT per BJ at launch. Presale and open-market buyers who register before 7 December also qualify for a bonus.",
   "content": "",
-  "bannerImage": "/media/fastest-blockchains-2026-banner-r2.jpg",
-  "bannerImageAlt": "Fastest blockchains in 2026: real TPS, block time and finality for 12 chains compared",
+  "bannerImage": "/media/riftn-wordmark-banner.png",
+  "bannerImageAlt": "Riftn wordmark",
   "author": {
     "name": "Mal Jan"
   },
-  "publishedAt": "2026-11-25T00:00:00.000Z",
-  "updatedAt": "2026-11-25T00:00:00.000Z",
+  "publishedAt": "2026-11-27T00:00:00.000Z",
   "tags": [
-    "Blockchain",
-    "TPS",
-    "Solana",
-    "Ethereum",
-    "Crypto",
-    "Riftn"
+    "Fan.site",
+    "BJ",
+    "RIFT",
+    "Airdrop"
   ],
-  "readingTime": 6,
+  "readingTime": 2,
   "featured": false,
   "status": "published",
-  "seoTitle": "Fastest Blockchains in 2026: Real TPS and Finality Compared",
-  "seoDescription": "Fastest blockchains in 2026 ranked by real transactions per second, peak TPS, block time and finality: ICP, Solana, BNB Chain, Sui, Aptos, Base, Ethereum and more."
+  "seoTitle": "Riftn Acquires Fan.site: BJ Claims and the $RIFT Launch | Riftn",
+  "seoDescription": "Riftn has acquired Fan.site. See the 100 $RIFT per BJ claim rate, planned listing terms and the registration deadline for the presale and open-market buyer bonus."
 };
 
 export const excludedTitles: string[] = [
