@@ -11,6 +11,8 @@ describe('chat embeds', () => {
     const response = await worker.fetch(new Request(`${base}/board-games`), env, ctx);
     expect(response.status).toBe(200);
     expect(response.headers.get('Content-Security-Policy')).toContain('frame-ancestors *');
+    expect(response.headers.get('Content-Security-Policy')).toContain('sandbox allow-scripts allow-popups allow-popups-to-escape-sandbox');
+    expect(response.headers.get('Content-Security-Policy')).not.toContain('allow-same-origin');
     expect(response.headers.get('X-Frame-Options')).toBeNull();
     expect(await response.text()).toContain('https://riftn.com/app/communities/board-games?tab=chat');
     expect(chatEmbedRoute('/chat/embed/board-games/extra')).toBeNull();
@@ -25,6 +27,8 @@ describe('chat embeds', () => {
       lookup: vi.fn(), rpc: vi.fn(), readPublic,
     });
     expect(response.headers.get('Cache-Control')).toBe('no-store');
+    expect(response.headers.get('Access-Control-Allow-Origin')).toBe('*');
+    expect(response.headers.get('Access-Control-Allow-Credentials')).toBeNull();
     expect(await response.json()).toEqual({
       title: 'Riftn Chat',
       messages: [{ author: 'reader', text: 'First' }, { author: 'Riftn', text: '<img onerror=x>' }],

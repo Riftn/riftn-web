@@ -1,5 +1,5 @@
 const MAX_MESSAGES = 20;
-const FRAME_POLICY = "default-src 'none'; script-src 'self'; style-src 'unsafe-inline'; connect-src 'self'; frame-ancestors *; base-uri 'none'; form-action 'none'; object-src 'none'";
+const FRAME_POLICY = "default-src 'none'; script-src https://riftn.com/chat-embed.js; style-src 'unsafe-inline'; connect-src https://riftn.com; frame-ancestors *; base-uri 'none'; form-action 'none'; object-src 'none'; sandbox allow-scripts allow-popups allow-popups-to-escape-sandbox";
 
 export function chatEmbedRoute(pathname) {
   const match = /^\/chat\/embed(?:\/([a-zA-Z0-9_-]{1,120}))?\/?$/.exec(pathname);
@@ -63,6 +63,9 @@ export async function handleChatEmbed(request, { slug }, { lookup, rpc, readPubl
   };
   if (new URL(request.url).searchParams.get('format') === 'json') {
     headers['Content-Type'] = 'application/json; charset=utf-8';
+    // The sandbox gives the document an opaque origin. This endpoint serves
+    // anonymous data only, so it can answer its credential-free request.
+    headers['Access-Control-Allow-Origin'] = '*';
     if (head) return new Response(null, { headers });
     try {
       return new Response(JSON.stringify(await loadPreview(slug, { lookup, rpc, readPublic: publicReader })), { headers });
