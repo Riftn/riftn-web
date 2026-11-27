@@ -1,7 +1,7 @@
 /**
- * Live badge balance for the signed-in wallet
+ * Live legacy badge balance for the signed-in wallet
  * ===========================================
- * `badgeBalance` is a denormalised number on the API's account row — DHB held
+ * In legacy mode, `badgeBalance` is a denormalised number on the API's account row — DHB held
  * plus DHB staked, summed across BSC and Base — and it only moves when the
  * backend's chain webhook gets around to refreshing it. Everything downstream
  * inherits that lag: the auth user is written once at sign-in and cached in
@@ -23,12 +23,13 @@
  * One owner does the fetching — `<SelfBadgeSync/>`, mounted once in the app
  * shell. Everywhere else reads the cached answer through `useSelfBadge`, whose
  * observer never fetches, so a feed of a hundred cards costs no extra
- * requests.
+ * requests. With in-app RIFT enabled, the API is the source for every badge.
  */
 
 import { useContext, useMemo } from 'react';
 import { useQuery, type QueryClient } from '@tanstack/react-query';
 import { AuthContext } from '@/contexts/AuthContext';
+import { useAppTokensConfig } from '@/hooks/use-app-tokens';
 import { CHAIN_CONFIGS, BASE_CHAIN_ID, BNB_CHAIN_ID, initChainRpcUrls } from '@/lib/contracts/dhb-token';
 import { parseBadgeLock, type BadgeLock } from '@/lib/staking-badges';
 import type { DeHubUser } from '@/lib/api/dehub';
@@ -138,6 +139,7 @@ export function useSelfBadge(): SelfBadge {
   const user = auth?.user ?? null;
   const address = normaliseId(auth?.walletAddress ?? user?.address);
   const username = normaliseId(user?.username);
+  const legacyBadge = useAppTokensConfig(false).data?.enabled === false;
 
   const { data } = useQuery({
     queryKey: [SELF_BADGE_QUERY_KEY, address],
@@ -149,7 +151,7 @@ export function useSelfBadge(): SelfBadge {
   });
 
   const staked = useMemo(() => stakedFromUser(user), [user]);
-  const balance = typeof data === 'number' && Number.isFinite(data) ? data + staked : undefined;
+  const balance = legacyBadge && typeof data === 'number' && Number.isFinite(data) ? data + staked : undefined;
   const lock = useMemo(() => parseBadgeLock(user?.badgeLock), [user?.badgeLock]);
 
   return {
@@ -176,11 +178,12 @@ export function useSelfBadgeBalance(): number | undefined {
   const auth = useContext(AuthContext);
   const user = auth?.user ?? null;
   const address = normaliseId(auth?.walletAddress ?? user?.address);
+  const legacyBadge = useAppTokensConfig(!!auth?.isAuthenticated).data?.enabled === false;
 
   const { data } = useQuery({
     queryKey: [SELF_BADGE_QUERY_KEY, address],
     queryFn: () => readWalletDhb(address),
-    enabled: !!address && !!auth?.isAuthenticated,
+    enabled: !!address && !!auth?.isAuthenticated && legacyBadge,
     staleTime: 30_000,
     gcTime: 10 * 60_000,
     refetchOnWindowFocus: true,
@@ -193,7 +196,7 @@ export function useSelfBadgeBalance(): number | undefined {
   });
 
   const staked = useMemo(() => stakedFromUser(user), [user]);
-  return typeof data === 'number' && Number.isFinite(data) ? data + staked : undefined;
+  return legacyBadge && typeof data === 'number' && Number.isFinite(data) ? data + staked : undefined;
 }
 
 /**

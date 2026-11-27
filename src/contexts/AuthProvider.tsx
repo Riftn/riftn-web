@@ -270,7 +270,7 @@ function normalizeUser(userData: Partial<DeHubUser> | null | undefined, fallback
   const rawBadgeBalance = safe.badgeBalance;
   const numericRaw = typeof rawBadgeBalance === 'string' ? parseFloat(rawBadgeBalance) : (typeof rawBadgeBalance === 'number' ? rawBadgeBalance : NaN);
   const computedFromBalanceData = safe.balanceData?.reduce((sum, b) => sum + (b.walletBalance || 0) + (b.staked || 0), 0) ?? 0;
-  const badgeBalance = (Number.isFinite(numericRaw) && numericRaw > 0) ? numericRaw : computedFromBalanceData;
+  const badgeBalance = Number.isFinite(numericRaw) ? numericRaw : computedFromBalanceData;
   return {
     _id: safe._id || safe.id || undefined,
     id: safe.id || safe._id || undefined,
@@ -296,6 +296,7 @@ function normalizeUser(userData: Partial<DeHubUser> | null | undefined, fallback
     hideBadgeAndBalance: safe.hideBadgeAndBalance,
     // Governance votes count only this, so a lent badge can be told apart.
     ownBadgeBalance: typeof safe.ownBadgeBalance === 'number' ? safe.ownBadgeBalance : undefined,
+    legacyDhbBalance: typeof safe.legacyDhbBalance === 'number' ? safe.legacyDhbBalance : undefined,
     balanceData: safe.balanceData,
     // This builder is an allowlist — anything not named here is dropped, which
     // is why it has to be listed explicitly rather than spread in. Settings
