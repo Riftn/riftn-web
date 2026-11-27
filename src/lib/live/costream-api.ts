@@ -242,7 +242,11 @@ export const acceptInvite = (guest: string, seatId: string, streamId?: string | 
 export const declineInvite = (guest: string, seatId: string) => setSeat(guest, seatId, { status: 'declined' });
 export const leaveSeat = (guest: string, seatId: string) => setSeat(guest, seatId, { status: 'left' });
 /** Viewer: take back an ask the host has not answered yet. */
-export const cancelRequest = (guest: string, seatId: string) => setSeat(guest, seatId, { status: 'left' });
+export async function cancelRequest(guest: string, seatId: string): Promise<void> {
+  const { error } = await table(writer(guest), 'live_costream_guests')
+    .update({ status: 'left' }).eq('id', seatId).eq('wallet', guest.toLowerCase()).eq('status', 'requested');
+  if (error) fail(error, 'Could not cancel the request');
+}
 
 /** Open invites for this wallet, newest first, in rooms that are still running. */
 export async function getMyInvites(wallet: string): Promise<Array<CoStreamSeat & { room: CoStreamRoom }>> {
