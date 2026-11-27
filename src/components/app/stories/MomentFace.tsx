@@ -5,7 +5,6 @@ import { AuthContext } from '@/contexts/AuthContext';
 import { useMomentPeek, refreshMomentPeeks } from '@/hooks/use-moment-peek';
 import { useStoriesEnabled } from '@/hooks/use-stories-enabled';
 import { getUserStories, type MomentPeek } from '@/lib/api/dehub/stories';
-import { formatCount } from '@/lib/format-count';
 import { cn } from '@/lib/utils';
 import { useStoriesStore } from '@/store/storiesStore';
 import { playable } from './story-utils';
@@ -57,27 +56,19 @@ export function useFaceMoment(address: string | null | undefined): MomentPeek | 
 interface MomentFaceProps {
   /** Wallet address of the person in the avatar. */
   address: string | null | undefined;
-  /** The face's drawn size in px: the Moment badge is sized from it. */
-  size: number;
   children: ReactNode;
   className?: string;
-  /** Profile-sized face: a bigger badge and a count when there are several. */
-  big?: boolean;
   /** Name for the button label. */
   name?: string;
-  /** Outline the avatar itself on profile and chat surfaces. */
-  outline?: boolean;
 }
 
 /**
- * A tap on the avatar opens the person's active Moments. Profiles and chats
- * outline the avatar, while feed avatars can show a corner badge.
+ * A tap on the outlined avatar opens the person's active Moments.
  */
-export function MomentFace({ address, size, children, className, big, name, outline }: MomentFaceProps) {
+export function MomentFace({ address, children, className, name }: MomentFaceProps) {
   const { t } = useTranslation();
   const peek = useFaceMoment(address);
   const open = useOpenMoments(address);
-  const thumbRef = useRef<HTMLSpanElement>(null);
   const faceRef = useRef<HTMLSpanElement>(null);
   const downAt = useRef(0);
   const held = useRef(false);
@@ -87,16 +78,13 @@ export function MomentFace({ address, size, children, className, big, name, outl
     if (held.current) { held.current = false; return; }
     event.preventDefault();
     event.stopPropagation();
-    void open(thumbRef.current ?? faceRef.current);
+    void open(faceRef.current);
   };
 
-  const w = Math.max(12, Math.round(size * (big ? 0.34 : 0.42)));
-  const h = Math.round(w * 1.25);
   return (
     <span
       ref={faceRef}
       data-moment-face={peek ? peek.state : undefined}
-      data-big={big ? '' : undefined}
       onPointerDown={peek ? () => { downAt.current = Date.now(); held.current = false; } : undefined}
       onPointerUp={peek ? () => { held.current = Date.now() - downAt.current > HOLD_MS; } : undefined}
       onClickCapture={peek ? onClickCapture : undefined}
@@ -104,21 +92,7 @@ export function MomentFace({ address, size, children, className, big, name, outl
       className={cn('relative inline-flex shrink-0 align-top', peek && 'cursor-pointer', className)}
     >
       {children}
-      {peek && outline && <span aria-hidden data-moment-outline data-close-friends={peek.closeFriends ? '' : undefined} />}
-      {peek && !outline && (
-        <span
-          ref={thumbRef}
-          aria-hidden
-          data-moment-peek={peek.state}
-          data-close-friends={peek.closeFriends ? '' : undefined}
-          style={{ width: w, height: h, borderRadius: Math.max(4, Math.round(w * 0.26)), right: big ? -6 : -4, bottom: big ? -6 : -4 }}
-        />
-      )}
-      {peek && !outline && big && peek.count > 1 && (
-        <span aria-hidden data-moment-count style={{ right: (big ? -6 : -4) - 9, bottom: (big ? -6 : -4) + h - 12 }}>
-          {formatCount(peek.count)}
-        </span>
-      )}
+      {peek && <span aria-hidden data-moment-outline data-close-friends={peek.closeFriends ? '' : undefined} />}
     </span>
   );
 }

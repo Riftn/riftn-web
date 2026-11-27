@@ -31,10 +31,10 @@ it('marks the avatar without showing Moment art and opens the viewer on tap', as
   const onRow = vi.fn();
   const { container } = render(
     <button type="button" onClick={onRow}>
-      <MomentFace address={ELLA} size={48} name="Ella"><span>face</span></MomentFace>
+      <MomentFace address={ELLA} name="Ella"><span>face</span></MomentFace>
     </button>,
   );
-  await waitFor(() => expect(container.querySelector('[data-moment-peek="unseen"]')).not.toBeNull());
+  await waitFor(() => expect(container.querySelector('[data-moment-face="unseen"] > [data-moment-outline]')).not.toBeNull());
   expect(container.querySelector('img[src="/cover.jpg"]')).toBeNull();
   fireEvent.click(container.querySelector('[data-moment-face]')!);
   await waitFor(() => expect(useStoriesStore.getState().viewer?.entries[0].items).toHaveLength(2));
@@ -47,8 +47,8 @@ it('leaves faces with nothing up alone, in one request for the whole list', asyn
   const onRow = vi.fn();
   const { container } = render(
     <>
-      <button type="button" onClick={onRow}><MomentFace address={NOBODY} size={48} outline><span>face</span></MomentFace></button>
-      <MomentFace address="0x6666666666666666666666666666666666666665" size={48}><span>face</span></MomentFace>
+      <button type="button" onClick={onRow}><MomentFace address={NOBODY}><span>face</span></MomentFace></button>
+      <MomentFace address="0x6666666666666666666666666666666666666665"><span>face</span></MomentFace>
     </>,
   );
   await waitFor(() => expect(getStoryRings).toHaveBeenCalledTimes(1));
@@ -63,7 +63,7 @@ it('outlines the avatar and opens Moments without triggering the conversation ro
   const onRow = vi.fn();
   const { container, getByText } = render(
     <button type="button" onClick={onRow}>
-      <MomentFace address={ELLA} size={48} outline name="Ella"><span>face</span></MomentFace>
+      <MomentFace address={ELLA} name="Ella"><span>face</span></MomentFace>
       <span>conversation</span>
     </button>,
   );
