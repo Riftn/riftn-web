@@ -143,11 +143,8 @@ export default function FullWalletPage() {
   const appTokensOn = useAppTokensEnabled();
   const { data: appTokens } = useAppTokens(appTokensOn);
   const appDhb = Number(appTokens?.balance ?? 0) + Number(appTokens?.staked ?? 0);
-  const legacyDhb = holdings.wallet + holdings.staked;
-  const legacyLabel = t('wallet.legacyDhb', 'Legacy DHB');
   const assetSearch = searchQuery.trim().toLowerCase();
   const showAppTokens = appTokensOn && `dhb dehub $rift riftn tokens ${tokenLabel()}`.toLowerCase().includes(assetSearch);
-  const showLegacyDhb = appTokensOn && legacyDhb > 0 && `dhb ${legacyLabel}`.toLowerCase().includes(assetSearch);
   const [appSendOpen, setAppSendOpen] = useState(false);
 
   // Twitter World Cup giveaway credit — folded into the DHB balance for winners
@@ -497,20 +494,10 @@ export default function FullWalletPage() {
         ) : (
           <>
             {showAppTokens && <AppTokensRow onSend={() => setAppSendOpen(true)} />}
-            {showLegacyDhb && (
-              <div className="flex items-center gap-3 p-3">
-                <img src={dehubCoin} alt="" className="size-9 shrink-0 rounded-full" />
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-white">{legacyLabel}</p>
-                  <p className="text-xs text-zinc-500">{t('wallet.legacyDhbHoldings', 'On-chain holdings')}</p>
-                </div>
-                <span className="text-sm font-medium text-white">{legacyDhb.toLocaleString(undefined, { maximumFractionDigits: 6 })}</span>
-              </div>
-            )}
             {withBalance.map(grouped => (
               <GroupedTokenRow key={grouped.symbol} grouped={grouped} onClick={() => handleGroupedTokenClick(grouped)} price={prices[grouped.symbol]} />
             ))}
-            {!isLoading && !withBalance.length && !failedChains.length && !showAppTokens && !showLegacyDhb && (
+            {!isLoading && !withBalance.length && !failedChains.length && !showAppTokens && (
               <p className="py-8 text-center text-sm text-zinc-400">{t(searchQuery.trim() ? 'common.noResults' : 'wallet.zeroBalance')}</p>
             )}
             <SubscriptionTokensRow />
